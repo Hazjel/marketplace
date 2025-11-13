@@ -18,6 +18,7 @@ class StoreBalanceResource extends JsonResource
             'id' => $this->id,
             'store' => new StoreResource($this->store),
             'balance' => (float) (string) $this->balance,
+            'store_balance_histories' => StoreBalanceHistoryResource::collection($this->whenLoaded('storeBalanceHistories'))
         ];
     }
 }

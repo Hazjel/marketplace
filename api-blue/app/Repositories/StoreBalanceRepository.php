@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Repositories;
 
@@ -18,7 +18,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
             if ($search) {
                 $query->search($search);
             }
-        });
+        })->with(['storeBalanceHistories']);
 
         if ($limit) {
             $query->take($limit);
@@ -40,7 +40,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = StoreBalance::where('id', $id);
+        $query = StoreBalance::where('id', $id)->with(['storeBalanceHistories']);
 
         return $query->first();
     }
@@ -50,14 +50,14 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         string $amount
     ) {
         DB::beginTransaction();
-        
+
         try {
             $storeBalance = StoreBalance::find($id);
             $storeBalance->balance = bcadd($storeBalance->balance, $amount, 2);
             $storeBalance->save();
 
             DB::commit();
-            
+
             return $storeBalance;
         } catch (\exception $e) {
             DB::rollBack();
@@ -70,7 +70,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         string $amount
     ) {
         DB::beginTransaction();
-        
+
         try {
             $storeBalance = StoreBalance::find($id);
 
@@ -82,7 +82,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
             $storeBalance->save();
 
             DB::commit();
-            
+
             return $storeBalance;
         } catch (\exception $e) {
             DB::rollBack();
