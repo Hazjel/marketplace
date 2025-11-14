@@ -9,8 +9,10 @@ use App\Repositories\StoreRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\ServiceProvider;
 use App\Interfaces\StoreBalanceRepositoryInterface;
+use App\Interfaces\WithdrawalRepositoryInterface;
 use App\Repositories\StoreBalanceHistoryRepository;
 use App\Repositories\StoreBalanceRepository;
+use App\Repositories\WithdrawalRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(StoreRepositoryInterface::class, StoreRepository::class);
         $this->app->bind(StoreBalanceRepositoryInterface::class, StoreBalanceRepository::class);
         $this->app->bind(StoreBalanceHistoryRepositoryInterface::class, StoreBalanceHistoryRepository::class);
+        $this->app->bind(WithdrawalRepositoryInterface::class, WithdrawalRepository::class);
     }
 
     /**
