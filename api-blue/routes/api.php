@@ -5,6 +5,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StoreBalanceController;
 use App\Http\Controllers\StoreBalanceHistoryController;
 use App\Http\Controllers\WithdrawalController;
+use App\Http\Controllers\BuyerController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::apiResource('user', UserController::class);
@@ -23,3 +25,6 @@ Route::get('store-balance-history/all/paginated', [StoreBalanceHistoryController
 Route::apiResource('withdrawal', WithdrawalController::class)->except('update', 'delete');
 Route::get('withdrawal/all/paginated', [WithdrawalController::class, 'getAllPaginated']);
 Route::post('withdrawal/{id}/approve', [WithdrawalController::class, 'approve']);
+
+Route::apiResource('buyer', BuyerController::class);
+Route::get('buyer/all/paginated', [BuyerController::class, 'getAllPaginated']);

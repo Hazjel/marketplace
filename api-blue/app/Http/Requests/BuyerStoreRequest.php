@@ -4,8 +4,9 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserStoreRequest extends FormRequest
+class BuyerStoreRequest extends FormRequest
 {
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -14,18 +15,18 @@ class UserStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8'
+            'user_id' => 'required|exists:users,id',
+            'profile_picture' => 'required|image|mimes:png,jpg',
+            'phone_number' => 'required|string',
         ];
     }
 
     public function attributes()
     {
         return [
-            'name' => 'Nama',
-            'email' => 'Email',
-            'password' => 'Kata Sandi'
+            'user_id' => 'User',
+            'profile_picture' => 'Avatar',
+            'phone_number' => 'Nomor HP',
         ];
     }
 }

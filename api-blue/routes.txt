@@ -1,0 +1,41 @@
+
+  GET|HEAD        / .................................................................................................. 
+  GET|HEAD        api/buyer ...................................................... buyer.index › BuyerController@index
+  POST            api/buyer ...................................................... buyer.store › BuyerController@store
+  GET|HEAD        api/buyer/all/paginated ............................................ BuyerController@getAllPaginated
+  GET|HEAD        api/buyer/{buyer} ................................................ buyer.show › BuyerController@show
+  PUT|PATCH       api/buyer/{buyer} ............................................ buyer.update › BuyerController@update
+  DELETE          api/buyer/{buyer} .......................................... buyer.destroy › BuyerController@destroy
+  GET|HEAD        api/store ...................................................... store.index › StoreController@index
+  POST            api/store ...................................................... store.store › StoreController@store
+  GET|HEAD        api/store-balance ............................... store-balance.index › StoreBalanceController@index
+  GET|HEAD        api/store-balance-history ........ store-balance-history.index › StoreBalanceHistoryController@index
+  GET|HEAD        api/store-balance-history/all/paginated .............. StoreBalanceHistoryController@getAllPaginated
+  GET|HEAD        api/store-balance-history/{store_balance_history} store-balance-history.show › StoreBalanceHistoryC…
+  DELETE          api/store-balance-history/{store_balance_history} store-balance-history.destroy › StoreBalanceHisto…
+  GET|HEAD        api/store-balance/all/paginated ............................. StoreBalanceController@getAllPaginated
+  GET|HEAD        api/store-balance/{store_balance} ................. store-balance.show › StoreBalanceController@show
+  DELETE          api/store-balance/{store_balance} ........... store-balance.destroy › StoreBalanceController@destroy
+  GET|HEAD        api/store/all/paginated ............................................ StoreController@getAllPaginated
+  POST            api/store/{id}/verified ....................................... StoreController@updateVerifiedStatus
+  GET|HEAD        api/store/{store} ................................................ store.show › StoreController@show
+  PUT|PATCH       api/store/{store} ............................................ store.update › StoreController@update
+  DELETE          api/store/{store} .......................................... store.destroy › StoreController@destroy
+  GET|HEAD        api/user ......................................................... user.index › UserController@index
+  POST            api/user ......................................................... user.store › UserController@store
+  GET|HEAD        api/user/all/paginated .............................................. UserController@getAllPaginated
+  GET|HEAD        api/user/{user} .................................................... user.show › UserController@show
+  PUT|PATCH       api/user/{user} ................................................ user.update › UserController@update
+  DELETE          api/user/{user} .............................................. user.destroy › UserController@destroy
+  GET|HEAD        api/withdrawal ....................................... withdrawal.index › WithdrawalController@index
+  POST            api/withdrawal ....................................... withdrawal.store › WithdrawalController@store
+  GET|HEAD        api/withdrawal/all/paginated .................................. WithdrawalController@getAllPaginated
+  POST            api/withdrawal/{id}/approve ........................................... WithdrawalController@approve
+  GET|HEAD        api/withdrawal/{withdrawal} ............................ withdrawal.show › WithdrawalController@show
+  DELETE          api/withdrawal/{withdrawal} ...................... withdrawal.destroy › WithdrawalController@destroy
+  GET|HEAD        sanctum/csrf-cookie .............. sanctum.csrf-cookie › Laravel\Sanctum › CsrfCookieController@show
+  GET|HEAD        storage/{path} ....................................................................... storage.local
+  GET|HEAD        up ................................................................................................. 
+
+                                                                                                   Showing [37] routes
+

@@ -13,6 +13,8 @@ use App\Interfaces\WithdrawalRepositoryInterface;
 use App\Repositories\StoreBalanceHistoryRepository;
 use App\Repositories\StoreBalanceRepository;
 use App\Repositories\WithdrawalRepository;
+use App\Interfaces\BuyerRepositoryInterface;
+use App\Repositories\BuyerRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(StoreBalanceRepositoryInterface::class, StoreBalanceRepository::class);
         $this->app->bind(StoreBalanceHistoryRepositoryInterface::class, StoreBalanceHistoryRepository::class);
         $this->app->bind(WithdrawalRepositoryInterface::class, WithdrawalRepository::class);
+        $this->app->bind(BuyerRepositoryInterface::class, BuyerRepository::class);
     }
 
     /**
