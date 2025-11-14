@@ -21,7 +21,7 @@ class BuyerFactory extends Factory
      */
     public function definition(): array
     {
-    $imageHelper = new ImageHelper; 
+        $imageHelper = new ImageHelper;
 
         return [
             'user_id' => User::factory(),
@@ -30,7 +30,7 @@ class BuyerFactory extends Factory
                 'buyer',
                 250,
                 250
-            ), 
+            ),
             'phone_number' => $this->faker->phoneNumber(),
         ];
     }
