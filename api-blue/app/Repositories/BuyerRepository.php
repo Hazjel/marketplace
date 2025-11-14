@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\BuyerRepositoryInterface;
 use App\Models\Buyer;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 
@@ -59,6 +60,48 @@ class BuyerRepository implements BuyerRepositoryInterface
             return $buyer;
         } catch (\Exception $e) {
             DB::rollBack();
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function update(string $id, array $data)
+    {
+        DB::beginTransaction();
+
+        try {
+            $buyer = Buyer::find($id);
+
+            if (isset($data['profile_picture'])) {
+                $buyer->profile_picture = $data['profile_picture']->store('assets/buyer', 'public');
+            }
+
+            $buyer->phone_number = $data['phone_number'];
+            $buyer->save();
+
+            DB::commit();
+
+            return $buyer;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function delete(string $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $buyer = Buyer::find($id);
+
+            $buyer->delete();
+
+            DB::commit();
+
+            return $buyer;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
             throw new Exception($e->getMessage());
         }
     }
