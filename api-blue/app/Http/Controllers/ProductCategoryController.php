@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Http\Requests\ProductCategoryStoreRequest;
 use App\Http\Resources\PaginateResource;
 use App\Http\Resources\ProductCategoryResource;
 use App\Interfaces\ProductCategoryRepositoryInterface;
@@ -22,7 +23,7 @@ class ProductCategoryController extends Controller
     public function index(Request $request)
     {
         try {
-            $productCategories = $this->productCategoryRepository->getAll($request->search, $request->limit, true);
+            $productCategories = $this->productCategoryRepository->getAll($request->search, $request->is_parent, $request->limit, true);
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', ProductCategoryResource::collection($productCategories), 200);
         } catch (\Exception $e) {
@@ -34,11 +35,12 @@ class ProductCategoryController extends Controller
     {
         $request = $request->validate([
             'search' => 'nullable|string',
+            'is_parent' => 'nullable|boolean',
             'row_per_page' => 'required|integer'
         ]);
 
         try {
-            $productCategories = $this->productCategoryRepository->getAllPaginated($request['search'] ?? null, $request['row_per_page']);
+            $productCategories = $this->productCategoryRepository->getAllPaginated($request['search'] ?? null, $request['is_parent'] ?? null, $request['row_per_page']);
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', PaginateResource::make($productCategories, ProductCategoryResource::class), 200);
         } catch (\Exception $e) {
@@ -49,9 +51,17 @@ class ProductCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ProductCategoryStoreRequest $request)
     {
-        //
+        $request = $request->validated();
+
+        try {
+            $productCategory = $this->productCategoryRepository->create($request);
+
+            return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Ditambahkan', new ProductCategoryResource($productCategory), 201);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
     }
 
     /**
@@ -59,7 +69,32 @@ class ProductCategoryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try {
+            $productCategory = $this->productCategoryRepository->getById($id);
+
+            if (!$productCategory) {
+                return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Tidak Ditemukan', null, 404);
+            }
+
+            return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', new ProductCategoryResource($productCategory), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    public function showBySlug(string $slug)
+    {
+        try {
+            $productCategory = $this->productCategoryRepository->getBySlug($slug);
+
+            if (!$productCategory) {
+                return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Tidak Ditemukan', null, 404);
+            }
+
+            return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', new ProductCategoryResource($productCategory), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
     }
 
     /**

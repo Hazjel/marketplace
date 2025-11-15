@@ -4,14 +4,21 @@ namespace App\Repositories;
 
 use App\Interfaces\ProductCategoryRepositoryInterface;
 use App\Models\ProductCategory;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ProductCategoryRepository implements ProductCategoryRepositoryInterface
 {
-    public function getAll(?string $search, ?int $limit, bool $execute)
+    public function getAll(?string $search, ?bool $isParent = null, ?int $limit, bool $execute)
     {
-        $query = ProductCategory::where(function ($query) use ($search) {
+        $query = ProductCategory::where(function ($query) use ($search, $isParent) {
             if ($search) {
                 $query->search($search);
+            }
+
+            if ($isParent === true) {
+                $query->whereNull('parent_id');
             }
         });
 
@@ -26,17 +33,58 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
         return $query;
     }
 
-    public function getAllPaginated(?string $search, ?int $rowPerPage)
+    public function getAllPaginated(?string $search, ?bool $isParent = null, ?int $rowPerPage)
     {
-        $query = $this->getAll($search, null, false);
+        $query = $this->getAll($search, $isParent, null, false);
 
         return $query->paginate($rowPerPage);
     }
 
     public function getById(string $id)
     {
-        $query = ProductCategory::where('id', $id);
+        $query = ProductCategory::where('id', $id)->with('childrens');
 
         return $query->first();
+    }
+
+    public function getBySlug(string $slug)
+    {
+        $query = ProductCategory::where('slug', $slug)->with('childrens');
+
+        return $query->first();
+    }
+
+    public function create(array $data)
+    {
+        DB::beginTransaction();
+
+        try {
+            $productCategory = new ProductCategory;
+
+            if (isset($data['parent_id'])) {
+                $productCategory->parent_id = $data['parent_id'];
+            }
+
+            if (isset($data['image'])) {
+                $productCategory->image = $data['image']->store('assets/product-category', 'public');
+            }
+
+            $productCategory->name = $data['name'];
+            $productCategory->slug = Str::slug($data['name']);
+
+            if (isset($data['tagline'])) {
+                $productCategory->tagline = $data['tagline'];
+            }
+
+            $productCategory->description = $data['description'];
+            $productCategory->save();
+
+            DB::commit();
+
+            return $productCategory;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage());
+        }
     }
 }
