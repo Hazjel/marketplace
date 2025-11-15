@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Testing\Fluent\Concerns\Has;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductCategory extends Model
 {
-    use UUID;
+    use UUID, HasFactory;
     protected $fillable = [
         'parent_id',
         'image',

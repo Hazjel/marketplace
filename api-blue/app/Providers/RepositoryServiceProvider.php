@@ -17,6 +17,8 @@ use App\Interfaces\BuyerRepositoryInterface;
 use App\Interfaces\ProductCategoryRepositoryInterface;
 use App\Repositories\BuyerRepository;
 use App\Repositories\ProductCategoryRepository;
+use App\Interfaces\ProductRepositoryInterface;
+use App\Repositories\ProductRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(WithdrawalRepositoryInterface::class, WithdrawalRepository::class);
         $this->app->bind(BuyerRepositoryInterface::class, BuyerRepository::class);
         $this->app->bind(ProductCategoryRepositoryInterface::class, ProductCategoryRepository::class);
+        $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
     }
 
     /**

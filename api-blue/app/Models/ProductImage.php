@@ -3,16 +3,22 @@
 namespace App\Models;
 
 use App\Traits\UUID;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Testing\Fluent\Concerns\Has;
 
 class ProductImage extends Model
 {
-    use UUID;
+    use UUID, HasFactory;
 
     protected $fillable = [
         'product_id',
         'image',
-        'thumbnail'
+        'is_thumbnail'
+    ];
+
+    protected $casts = [
+        'is_thumbnail' => 'boolean'
     ];
 
     public function product()
