@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,13 +16,13 @@ class ProductCategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'parent_id' => new ProductCategory($this->parent),
+            'parent_id' => new ProductCategoryResource($this->parent),
             'image' => asset('storage/' . $this->image),
             'name' => $this->name,
             'slug' => $this->slug,
             'tagline' => $this->tagline,
             'description' => $this->description,
-            'children' => ProductCategoryResource::collection($this->children)
+            'childrens' => ProductCategoryResource::collection($this->whenLoaded('childrens'))
         ];
     }
 }
