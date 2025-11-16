@@ -14,7 +14,7 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        Product::factory()->count(100)->create()->each(function ($product) {
+        Product::factory()->count(10)->create()->each(function ($product) {
             // Create 1-5 images for each product
             $imageCount = rand(1, 5);
 

@@ -8,6 +8,8 @@ use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TransactionController;
+use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Route;
 
@@ -38,3 +40,7 @@ Route::get('product-category/slug/{slug}', [ProductCategoryController::class, 's
 Route::apiResource('product', ProductController::class);
 Route::get('product/all/paginated', [ProductController::class, 'getAllPaginated']);
 Route::get('product/slug/{slug}', [ProductController::class, 'showBySlug']);
+
+Route::apiResource('transaction', TransactionController::class);
+Route::get('transaction/all/paginated', [TransactionController::class, 'getAllPaginated']);
+Route::get('transaction/code/{code}', [TransactionController::class, 'showByCode']);
