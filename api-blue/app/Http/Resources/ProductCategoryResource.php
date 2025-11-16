@@ -16,12 +16,14 @@ class ProductCategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'parent_id' => new ProductCategoryResource($this->parent),
-            'image' => asset('storage/' . $this->image),
+            'parent_id' => $this->parent_id,
+            'image' => $this->image ? asset('storage/' . $this->image) : null,
             'name' => $this->name,
             'slug' => $this->slug,
             'tagline' => $this->tagline,
             'description' => $this->description,
+            'product_count' => $this->products_count ?? 0,
+            'children_count' => $this->childrens_count ?? 0,
             'childrens' => ProductCategoryResource::collection($this->whenLoaded('childrens'))
         ];
     }
