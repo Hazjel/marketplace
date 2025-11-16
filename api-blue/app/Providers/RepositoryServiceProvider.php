@@ -18,8 +18,10 @@ use App\Interfaces\ProductCategoryRepositoryInterface;
 use App\Repositories\BuyerRepository;
 use App\Repositories\ProductCategoryRepository;
 use App\Interfaces\ProductRepositoryInterface;
+use App\Interfaces\TransactionDetailRepositoryInterface;
 use App\Repositories\ProductRepository;
 use App\Interfaces\TransactionRepositoryInterface;
+use App\Repositories\TransactionDetailRepository;
 use App\Repositories\TransactionRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -38,6 +40,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ProductCategoryRepositoryInterface::class, ProductCategoryRepository::class);
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
         $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
+        $this->app->bind(TransactionDetailRepositoryInterface::class, TransactionDetailRepository::class);
     }
 
     /**

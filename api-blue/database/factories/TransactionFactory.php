@@ -47,8 +47,6 @@ class TransactionFactory extends Factory
             'tax' => 0,
             'grand_total' => 0,
             'payment_status' => $this->faker->randomElement(['unpaid', 'paid']),
-
-
         ];
     }
 
