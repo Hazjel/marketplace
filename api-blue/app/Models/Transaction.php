@@ -21,6 +21,9 @@ class Transaction extends Model
         'shipping',
         'shipping_type',
         'shipping_cost',
+        'tracking_number',
+        'delivery_proof',
+        'delivery_status',
         'tax',
         'grand_total',
         'payment_status'
