@@ -19,6 +19,17 @@ class ProductCategory extends Model
         'description'
     ];
 
+    protected $appends = [];
+
+    // ✅ TAMBAHKAN INI - Cast withCount sebagai integer
+    protected function casts(): array
+    {
+        return [
+            'product_count' => 'integer',
+            'children_count' => 'integer',
+        ];
+    }
+
     public function scopeSearch($query, $search)
     {
         return $query->where('name', 'like', '%' . $search . '%');
