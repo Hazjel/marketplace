@@ -76,14 +76,14 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             $transactionDetails = [];
 
-            foreach ($data['products'] as $transactionDetail) {
-                $transactionDetail = $transactionDetailRepository->create([
+            foreach ($data['products'] as $productData) {
+                $detail = $transactionDetailRepository->create([
                     'transaction_id' => $transaction->id,
-                    'product_id' => $transactionDetail['product_id'],
-                    'qty' => $transactionDetail['qty']
+                    'product_id' => $productData['product_id'],
+                    'qty' => $productData['qty']
                 ]);
 
-                $transactionDetail[] = $transactionDetail;
+                $transactionDetails[] = $detail;
             }
 
             $subtotal = array_reduce($transactionDetails, function($carry, $item) {
@@ -104,7 +104,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             // Set your Merchant Server Key
             \Midtrans\Config::$serverKey = config('midtrans.serverKey');
             // Set to Development/Sandbox Environtment (default). Set to true for Production Environtment (accept real transaction).
-            \Midtrans\Config::$isProduction = config('midtrans.isProducstion');
+            \Midtrans\Config::$isProduction = config('midtrans.isProduction');
             // Set sanitization on (default)
             \Midtrans\Config::$isSanitized = config('midtrans.isSanitized');
             // Set 3DS transaction for credit card to true
@@ -126,6 +126,56 @@ class TransactionRepository implements TransactionRepositoryInterface
             $transaction->snap_token = $snapToken;
 
             return $transaction;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function delete(string $id){
+        DB::beginTransaction();
+
+        try {
+            $transaction = Transaction::find($id);
+            $transaction->delete();
+
+            DB::commit();
+
+            return $transaction;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function updateStatus(string $id, array $data)
+    {
+        DB::beginTransaction();
+
+        try {
+            $transaction = Transaction::find($id);
+
+
+            if (isset($data['tracking_number'])) {
+                $transaction->tracking_number = $data['tracking_number'];
+            }
+
+            if (isset($data['delivery_proof'])) {
+                $transaction->delivery_proof = $data['delivery_proof']->store('assets/transaction', 'public');
+            }
+
+            $transaction->delivery_status = $data['delivery_status'];
+            $transaction->save();
+
+            DB::commit();
+
+            return $transaction->fresh([
+                'buyer.user',
+                'store.user',
+                'transactionDetails.product'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
