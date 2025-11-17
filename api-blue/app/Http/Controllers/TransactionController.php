@@ -12,13 +12,26 @@ use App\Http\Requests\TransactionUpdateRequest;
 use App\Http\Resources\TransactionResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\PaginateResource;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class TransactionController extends Controller
+class TransactionController extends Controller implements HasMiddleware
 {
     private TransactionRepositoryInterface $transactionRepository;
 
     public function __construct(TransactionRepositoryInterface $transactionRepository) {
         $this->transactionRepository = $transactionRepository;
+    }
+
+    public static function middleware()
+    {
+        return [
+            new Middleware(PermissionMiddleware::using(['transaction-list|transaction-create|transaction-edit|transaction-delete']), only: ['index', 'getAllPaginated', 'show']),
+            new Middleware(PermissionMiddleware::using(['transaction-create']), only: ['store']),
+            new Middleware(PermissionMiddleware::using(['transaction-edit']), only: ['update']),
+            new Middleware(PermissionMiddleware::using(['transaction-delete']), only: ['destroy']),
+        ];
     }
 
     /**
