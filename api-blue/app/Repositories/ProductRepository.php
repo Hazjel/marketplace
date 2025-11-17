@@ -44,14 +44,14 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = Product::where('id', $id)->with('productImages');
+        $query = Product::where('id', $id)->with('productImages', 'productReviews');
 
         return $query->first();
     }
 
     public function getBySlug(string $slug)
     {
-        $query = Product::where('slug', $slug)->with('productImages');
+        $query = Product::where('slug', $slug)->with('productImages', 'productReviews');
 
         return $query->first();
     }
@@ -87,7 +87,7 @@ class ProductRepository implements ProductRepositoryInterface
 
             return $product;
 
-            
+
         } catch (\Throwable $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
@@ -117,7 +117,7 @@ class ProductRepository implements ProductRepositoryInterface
                foreach ($data['deleted_product_images'] as $productImage) {
                    $productImageRepository->delete($productImage);
                }
-           }                        
+           }
 
            if (isset($data['product_images']))  {
                foreach ($data['product_images'] as $productImage) {
@@ -135,13 +135,13 @@ class ProductRepository implements ProductRepositoryInterface
 
             return $product;
 
-            
+
         } catch (\Throwable $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
     }
-    
+
     public function delete(string $id)
     {
         DB::beginTransaction();
