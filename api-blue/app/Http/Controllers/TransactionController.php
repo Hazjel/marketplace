@@ -8,6 +8,7 @@ use App\Repositories\TransactionRepository;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\TransactionStoreRequest;
+use App\Http\Requests\TransactionUpdateRequest;
 use App\Http\Resources\TransactionResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\PaginateResource;
@@ -103,9 +104,23 @@ class TransactionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(TransactionUpdateRequest $request, string $id)
     {
-        //
+        $request = $request->validated();
+
+        try {
+            $transactions = $this->transactionRepository->getByid($id);
+
+            if (!$transactions) {
+                return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            $transaction = $this->transactionRepository->updateStatus($id, $request);
+
+            return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diupdate', new TransactionResource($transactions), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
     }
 
     /**
@@ -113,6 +128,18 @@ class TransactionController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $transactions = $this->transactionRepository->getByid($id);
+
+            if (!$transactions) {
+                return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            $transaction = $this->transactionRepository->delete($id);
+
+            return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Dihapus', new TransactionResource($transactions), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
     }
 }
