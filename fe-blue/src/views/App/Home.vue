@@ -17,22 +17,22 @@ onMounted(() => {
     });
 
     new Swiper('.storeSwiper', {
-            // Optional parameters
-            loop: true,
-            slidesPerView: 'auto',
-            spaceBetween: 24,
-            pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-                renderBullet: function (index, className) {
-                    return '<span class="flex shrink-0 !w-[42px] !h-1 !rounded-full has-[&.swiper-pagination-bullet-active]:!bg-custom-blue ' + className + '"></span>';
-                },
+        // Optional parameters
+        loop: true,
+        slidesPerView: 'auto',
+        spaceBetween: 24,
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+            renderBullet: function (index, className) {
+                return '<span class="flex shrink-0 !w-[42px] !h-1 !rounded-full has-[&.swiper-pagination-bullet-active]:!bg-custom-blue ' + className + '"></span>';
             },
-            navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
-            },
-        });
+        },
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+    });
 })
 </script>
 
