@@ -8,6 +8,7 @@ use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 
@@ -44,3 +45,5 @@ Route::get('product/slug/{slug}', [ProductController::class, 'showBySlug']);
 Route::apiResource('transaction', TransactionController::class);
 Route::get('transaction/all/paginated', [TransactionController::class, 'getAllPaginated']);
 Route::get('transaction/code/{code}', [TransactionController::class, 'showByCode']);
+
+Route::post('product-review', [ProductReviewController::class, 'store']);
