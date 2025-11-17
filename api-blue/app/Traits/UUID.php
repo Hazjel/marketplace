@@ -2,27 +2,19 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 trait UUID
 {
-    protected static function boot()
-    {
-        parent::boot();
+    use HasUuids;
 
-        static::creating(function ($model) {
-            if ($model->getKey() === null) {
-                $model->setAttribute($model->getKeyName(), Str::uuid()->toString());
-            }
-        });
+    public function getKeyType()
+    {
+        return 'string';
     }
 
     public function getIncrementing()
     {
         return false;
-    }
-
-    public function getKeyType() {
-        return 'string';
     }
 }

@@ -12,6 +12,8 @@ class BuyerSeeder extends Seeder
      */
     public function run(): void
     {
-        Buyer::factory()->count(10)->create();
+        Buyer::factory()->count(10)->create(
+            
+        );
     }
 }
