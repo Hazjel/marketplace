@@ -5,11 +5,11 @@ import { onMounted } from 'vue';
 
 const productCategoryStore = useProductCategoryStore();
 const { productCategories, loading } = storeToRefs(productCategoryStore);
-const { fetchProductCategories } = productCategoryStore;
+const { fetchProductCategories } =  productCategoryStore ;
 
-onMounted(async () => {
+onMounted( () => {
     fetchProductCategories({
-        limit: 6,
+        limit: 5,
     });
 });
 </script>
@@ -23,61 +23,17 @@ onMounted(async () => {
                         <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-6 shrink-0" alt="icon">
                     </a>
                 </div>
-                <div class="grid grid-cols-6 gap-6">
-                    <a href="browse-category.html" class="group card">
+                <div class="grid grid-cols-5 gap-6">
+                    <a href="browse-category.html" class="group card" v-for="category in productCategories">
                         <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-8 px-6 items-center gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300">
-                            <img src="@/assets/images/icons/mobile-blue-transparent.svg" class="size-9" alt="icon">
+                            <img :src="category.image" class="size-9" alt="icon">
                             <div class="flex flex-col items-center gap-1">
-                                <p class="font-bold text-xl capitalize">Gadget</p>
-                                <p class="font-medium text-custom-grey leading-none">1,294 items</p>
+                                <p class="font-bold text-xs capitalize">{{ category.name }}</p>
+                                <p class="font-medium text-custom-grey leading-none">{{ category.product_count }}</p>
                             </div>
                         </div>
                     </a>
-                    <a href="browse-category.html" class="group card">
-                        <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-8 px-6 items-center gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300">
-                            <img src="@/assets/images/icons/weight-blue-transparent.svg" class="size-9" alt="icon">
-                            <div class="flex flex-col items-center gap-1">
-                                <p class="font-bold text-xl capitalize">Fitness</p>
-                                <p class="font-medium text-custom-grey leading-none">1,294 items</p>
-                            </div>
-                        </div>
-                    </a>
-                    <a href="browse-category.html" class="group card">
-                        <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-8 px-6 items-center gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300">
-                            <img src="@/assets/images/icons/devices-blue-transparent.svg" class="size-9" alt="icon">
-                            <div class="flex flex-col items-center gap-1">
-                                <p class="font-bold text-xl capitalize">Hardware</p>
-                                <p class="font-medium text-custom-grey leading-none">1,294 items</p>
-                            </div>
-                        </div>
-                    </a>
-                    <a href="browse-category.html" class="group card">
-                        <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-8 px-6 items-center gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300">
-                            <img src="@/assets/images/icons/tree-blue-transparent.svg" class="size-9" alt="icon">
-                            <div class="flex flex-col items-center gap-1">
-                                <p class="font-bold text-xl capitalize">Furniture</p>
-                                <p class="font-medium text-custom-grey leading-none">1,294 items</p>
-                            </div>
-                        </div>
-                    </a>
-                    <a href="browse-category.html" class="group card">
-                        <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-8 px-6 items-center gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300">
-                            <img src="@/assets/images/icons/lamp-blue-transparent.svg" class="size-9" alt="icon">
-                            <div class="flex flex-col items-center gap-1">
-                                <p class="font-bold text-xl capitalize">electronic</p>
-                                <p class="font-medium text-custom-grey leading-none">1,294 items</p>
-                            </div>
-                        </div>
-                    </a>
-                    <a href="browse-category.html" class="group card">
-                        <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-8 px-6 items-center gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300">
-                            <img src="@/assets/images/icons/coffee-blue-transparent.svg" class="size-9" alt="icon">
-                            <div class="flex flex-col items-center gap-1">
-                                <p class="font-bold text-xl capitalize">Kitchen</p>
-                                <p class="font-medium text-custom-grey leading-none">1,294 items</p>
-                            </div>
-                        </div>
-                    </a>
+                    
                 </div>
             </section>
 </template>

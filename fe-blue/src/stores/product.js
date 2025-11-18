@@ -2,9 +2,9 @@ import { defineStore } from "pinia";
 import { axiosInstance } from "@/plugins/axios";
 import { handleError } from "@/helpers/errorHelper";
 
-export const useProductCategoryStore = defineStore("productCategory", {
+export const useProductStore = defineStore("product", {
     state: () => ({
-        productCategories: [],
+        products: [],
         meta: {
             current_page: 1,
             last_page: 1,
@@ -16,19 +16,21 @@ export const useProductCategoryStore = defineStore("productCategory", {
         success: null,
     }),
     actions: {
-        async fetchProductCategories(params) {
+        async fetchProducts(params) {
             this.loading = true;
 
             try {
                 // use proxied relative path so Vite dev server forwards to backend and avoids CORS
-                const response = await axiosInstance.get('product-category', { params });
+                const response = await axiosInstance.get('product', { params });
 
-                this.productCategories = response.data.data;
+                this.products = response.data.data;
             } catch (error) {
                 this.error = handleError(error);
             } finally {
                 this.loading = false;
             }
         },
+
+        
     },
 });
