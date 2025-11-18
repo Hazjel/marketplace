@@ -20,7 +20,8 @@ export const useProductCategoryStore = defineStore("productCategory", {
             this.loading = true;
 
             try {
-                const response = await axiosInstance.get(`/product-category`, { params });
+                // use proxied relative path so Vite dev server forwards to backend and avoids CORS
+                const response = await axiosInstance.get('product-category', { params });
 
                 this.productCategories = response.data.data;
             } catch (error) {
