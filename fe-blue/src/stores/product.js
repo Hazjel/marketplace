@@ -23,12 +23,14 @@ export const useProductStore = defineStore("product", {
                 // use proxied relative path so Vite dev server forwards to backend and avoids CORS
                 const response = await axiosInstance.get('product', { params });
 
-                this.product = response.data.data;
+                this.products = response.data.data;
             } catch (error) {
                 this.error = handleError(error);
             } finally {
                 this.loading = false;
             }
         },
+
+        
     },
 });
