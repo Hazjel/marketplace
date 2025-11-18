@@ -2,6 +2,8 @@
 import { useProductStore } from '@/stores/product';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
+import _ from 'lodash';
+import { formatRupiah } from '@/helpers/format';
 
 const productStore = useProductStore();
 const { products, loading } = storeToRefs(productStore);
@@ -35,15 +37,15 @@ onMounted( () => {
                             <div class="flex flex-col gap-3">
                                 <div class="flex items-center gap-3">
                                     <div class="rounded-[4px] p-2 bg-custom-blue/10 flex items-center justify-center">
-                                        <span class="font-bold text-custom-blue">Gadget</span>
+                                        <span class="font-bold text-custom-blue">{{_.truncate( product?.product_category?.name, { length: 12 }) }}</span>
                                     </div>
                                     <p class="font-semibold text-custom-red">120 Sold</p>
                                 </div>
                                 <div class="flex flex-col gap-1 w-full min-w-0 overflow-hidden">
                                     <a href="product-details.html">
-                                        <p class="font-bold text-xl w-full truncate">SonicWhirl Wireless Headphone</p>
+                                        <p class="font-bold text-xl w-full truncate">{{ product?.name }}</p>
                                     </a>
-                                    <p class="font-bold text-xl text-custom-blue">Rp 3.500.500</p>
+                                    <p class="font-bold text-xl text-custom-blue">{{ formatRupiah(product?.price) }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 w-full">
