@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import App from '@/layouts/App.vue'
 import Home from '@/views/App/Home.vue'
+import BrowseCategory from '@/views/App/BrowseCategory.vue'
+import ProductDetail from '@/views/App/ProductDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,12 +13,26 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'Home',
+          name: 'app.home',
           component: Home
+        },
+        {
+          path: 'browse-category/:slug',
+          name: 'app.browse-category',
+          component: BrowseCategory
+        },
+        {
+          path: 'product/:slug',
+          name: 'app.product-detail',
+          component: ProductDetail
         }
       ]
     },
   ],
+})
+
+router.afterEach((to, from) => {
+  window.scrollTo(0, 0)
 })
 
 export default router

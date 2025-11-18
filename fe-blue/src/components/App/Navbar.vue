@@ -3,9 +3,9 @@
             <div class="fixed top-0 w-full bg-white min-h-[168px] border-b border-custom-stroke py-8 z-30">
                 <div class="w-full max-w-[1920px] flex flex-col gap-6 px-7 mx-auto">
                     <div class="flex items-center gap-6 w-full">
-                        <a href="main.html" class="flex shrink-0">
+                        <RouterLink :to="{ name: 'app.home' }" class="flex shrink-0">
                             <img src="@/assets/images/logos/logo.svg" class="h-8" alt="logo">
-                        </a>
+                        </RouterLink>
                         <button type="button" class="flex items-center gap-2 shrink-0">
                             <img src="@/assets/images/icons/menu-grey.svg" class="size-6 flex shrink-0" alt="icon">
                             <p class="flex items-center gap-1 font-semibold text-custom-grey">

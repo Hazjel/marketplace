@@ -2,6 +2,7 @@
 import { useProductCategoryStore } from '@/stores/productCategory';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
+import { RouterLink } from 'vue-router';
 
 const productCategoryStore = useProductCategoryStore();
 const { productCategories, loading } = storeToRefs(productCategoryStore);
@@ -24,7 +25,7 @@ onMounted( () => {
                     </a>
                 </div>
                 <div class="grid grid-cols-5 gap-6">
-                    <a href="browse-category.html" class="group card" v-for="category in productCategories">
+                    <RouterLink :to="{name: 'app.browse-category', params: {slug: category.slug}}" class="group card" v-for="category in productCategories">
                         <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-8 px-6 items-center gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300">
                             <img :src="category.image" class="size-9" alt="icon">
                             <div class="flex flex-col items-center gap-1">
@@ -32,8 +33,7 @@ onMounted( () => {
                                 <p class="font-medium text-custom-grey leading-none">{{ category.product_count }}</p>
                             </div>
                         </div>
-                    </a>
-                    
+                    </RouterLink>
                 </div>
             </section>
 </template>
