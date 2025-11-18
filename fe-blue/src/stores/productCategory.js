@@ -30,5 +30,19 @@ export const useProductCategoryStore = defineStore("productCategory", {
                 this.loading = false;
             }
         },
+
+        async fetchProductCategoryBySlug(slug) {
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.get(`product-category/slug/${slug}`)
+
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        }
     },
 });

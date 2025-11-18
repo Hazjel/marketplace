@@ -31,6 +31,18 @@ export const useProductStore = defineStore("product", {
             }
         },
 
-        
+        async fetchProductBySlug(slug) {
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.get(`product/slug/${slug}`)
+
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        }
     },
 });
