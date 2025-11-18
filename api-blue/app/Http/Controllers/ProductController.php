@@ -14,6 +14,7 @@ use App\Http\Resources\PaginateResource;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller implements HasMiddleware
 {
@@ -27,12 +28,14 @@ class ProductController extends Controller implements HasMiddleware
 
     public static function middleware()
     {
-        return [
+        if (auth::check()) {
+            return [
             new Middleware(PermissionMiddleware::using(['product-list|product-create|product-edit|product-delete']), only: ['index', 'getAllPaginated', 'show', 'showBySlug']),
             new Middleware(PermissionMiddleware::using(['product-create']), only: ['store']),
             new Middleware(PermissionMiddleware::using(['product-edit']), only: ['update']),
             new Middleware(PermissionMiddleware::using(['product-delete']), only: ['destroy']),
         ];
+        }
     }
     
     /**
@@ -41,7 +44,7 @@ class ProductController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         try {
-            $products = $this->productRepository->getAll($request->search, $request->product_category_id, $request->limit, true);
+            $products = $this->productRepository->getAll($request->search, $request->product_category_id, $request->limit, $request->random,true);
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', ProductResource::collection($products), 200);
         } catch (\Exception $e) {
