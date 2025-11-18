@@ -12,7 +12,7 @@ use Exception;
 
 class ProductRepository implements ProductRepositoryInterface
 {
-     public function getAll(?string $search, ?string $ProductCategoryId, ?int $limit, bool $execute)
+     public function getAll(?string $search, ?string $ProductCategoryId, ?int $limit, ?bool $random, bool $execute)
     {
         $query = Product::where(function ($query) use ($search, $ProductCategoryId) {
             if ($search) {
@@ -28,6 +28,10 @@ class ProductRepository implements ProductRepositoryInterface
             $query->take($limit);
         }
 
+        if ($random) {
+            $query->inRandomOrder();
+        }
+
         if ($execute) {
             return $query->get();
         }
@@ -37,7 +41,7 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getAllPaginated(?string $search, ?string $ProductCategoryId = null, ?int $rowPerPage)
     {
-        $query = $this->getAll($search, $ProductCategoryId, null, false);
+        $query = $this->getAll($search, $ProductCategoryId, null, false,false);
 
         return $query->paginate($rowPerPage);
     }

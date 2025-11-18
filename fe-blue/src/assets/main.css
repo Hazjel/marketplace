@@ -2897,3 +2897,7 @@ body {
 .search-result li:hover {
   background-color: #f0f0f0;
 }
+
+.grid-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
