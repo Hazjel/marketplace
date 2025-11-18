@@ -11,6 +11,7 @@ use App\Interfaces\ProductCategoryRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class ProductCategoryController extends Controller implements HasMiddleware
@@ -24,12 +25,14 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
     public static function middleware()
     {
-        return [
-            new Middleware(PermissionMiddleware::using(['product-category-list|product-category-create|product-category-edit|product-category-delete']), only: ['index', 'getAllPaginated', 'show', 'showBySlug']),
-            new Middleware(PermissionMiddleware::using(['product-category-create']), only: ['store']),
-            new Middleware(PermissionMiddleware::using(['product-category-edit']), only: ['update']),
-            new Middleware(PermissionMiddleware::using(['product-category-delete']), only: ['destroy']),
-        ];
+        if (Auth::check()) {
+            return [
+                new Middleware(PermissionMiddleware::using(['product-category-list|product-category-create|product-category-edit|product-category-delete']), only: ['index', 'getAllPaginated', 'show', 'showBySlug']),
+                new Middleware(PermissionMiddleware::using(['product-category-create']), only: ['store']),
+                new Middleware(PermissionMiddleware::using(['product-category-edit']), only: ['update']),
+                new Middleware(PermissionMiddleware::using(['product-category-delete']), only: ['destroy']),
+            ];
+        }
     }
 
     /**
