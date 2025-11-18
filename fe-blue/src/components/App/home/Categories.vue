@@ -5,9 +5,9 @@ import { onMounted } from 'vue';
 
 const productCategoryStore = useProductCategoryStore();
 const { productCategories, loading } = storeToRefs(productCategoryStore);
-const { fetchProductCategories } = productCategoryStore;
+const { fetchProductCategories } =  productCategoryStore ;
 
-onMounted(async () => {
+onMounted( () => {
     fetchProductCategories({
         limit: 6,
     });
