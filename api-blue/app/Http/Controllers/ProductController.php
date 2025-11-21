@@ -30,21 +30,21 @@ class ProductController extends Controller implements HasMiddleware
     {
         if (auth::check()) {
             return [
-            new Middleware(PermissionMiddleware::using(['product-list|product-create|product-edit|product-delete']), only: ['index', 'getAllPaginated', 'show', 'showBySlug']),
-            new Middleware(PermissionMiddleware::using(['product-create']), only: ['store']),
-            new Middleware(PermissionMiddleware::using(['product-edit']), only: ['update']),
-            new Middleware(PermissionMiddleware::using(['product-delete']), only: ['destroy']),
-        ];
+                new Middleware(PermissionMiddleware::using(['product-list|product-create|product-edit|product-delete']), only: ['index', 'getAllPaginated', 'show', 'showBySlug']),
+                new Middleware(PermissionMiddleware::using(['product-create']), only: ['store']),
+                new Middleware(PermissionMiddleware::using(['product-edit']), only: ['update']),
+                new Middleware(PermissionMiddleware::using(['product-delete']), only: ['destroy']),
+            ];
         }
     }
-    
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         try {
-            $products = $this->productRepository->getAll($request->search, $request->product_category_id, $request->limit, $request->random,true);
+            $products = $this->productRepository->getAll($request->search, $request->store_id, $request->product_category_id, $request->limit, $request->random,true);
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', ProductResource::collection($products), 200);
         } catch (\Exception $e) {
@@ -56,12 +56,13 @@ class ProductController extends Controller implements HasMiddleware
     {
         $request = $request->validate([
             'search' => 'nullable|string',
+            'store_id' => 'nullable|exists:stores,id',
             'product_category_id' => 'nullable|exists:product_categories,id',
             'row_per_page' => 'required|integer'
         ]);
 
         try {
-            $products = $this->productRepository->getAllPaginated($request['search'] ?? null, $request['product_category_id'] ?? null, $request['row_per_page']);
+            $products = $this->productRepository->getAllPaginated($request['search'] ?? null, $request['store_id'] ?? null, $request['product_category_id'] ?? null, $request['row_per_page']);
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', PaginateResource::make($products, ProductResource::class), 200);
         } catch (\Exception $e) {

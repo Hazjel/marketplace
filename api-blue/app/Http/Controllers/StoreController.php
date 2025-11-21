@@ -11,6 +11,7 @@ use App\Interfaces\StoreRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class StoreController extends Controller implements HasMiddleware
@@ -23,12 +24,14 @@ class StoreController extends Controller implements HasMiddleware
 
     public static function middleware()
     {
-        return [
-            new Middleware(PermissionMiddleware::using(['store-list|store-create|store-edit|store-delete']), only: ['index', 'getAllPaginated', 'show', 'updateVerifiedStatus']),
-            new Middleware(PermissionMiddleware::using(['store-create']), only: ['store']),
-            new Middleware(PermissionMiddleware::using(['store-edit']), only: ['update', 'updateVerifiedStatus']),
-            new Middleware(PermissionMiddleware::using(['store-delete']), only: ['destroy']),
-        ];
+        if (Auth::check()) {
+            return [
+                new Middleware(PermissionMiddleware::using(['product-list|product-create|product-edit|product-delete']), only: ['index', 'getAllPaginated', 'show', 'showBySlug']),
+                new Middleware(PermissionMiddleware::using(['product-create']), only: ['store']),
+                new Middleware(PermissionMiddleware::using(['product-edit']), only: ['update']),
+                new Middleware(PermissionMiddleware::using(['product-delete']), only: ['destroy']),
+            ];
+        }
     }
 
     /**
@@ -85,6 +88,21 @@ class StoreController extends Controller implements HasMiddleware
     {
         try {
             $store = $this->storeRepository->getById($id);
+
+            if (!$store) {
+                return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
+            }
+
+            return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', new StoreResource($store), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    public function showByUsername(string $username)
+    {
+        try {
+            $store = $this->storeRepository->getByUsername($username);
 
             if (!$store) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);

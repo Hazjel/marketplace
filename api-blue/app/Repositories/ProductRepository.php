@@ -12,11 +12,15 @@ use Exception;
 
 class ProductRepository implements ProductRepositoryInterface
 {
-     public function getAll(?string $search, ?string $ProductCategoryId, ?int $limit, ?bool $random, bool $execute)
+     public function getAll(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $limit, ?bool $random, bool $execute)
     {
-        $query = Product::where(function ($query) use ($search, $ProductCategoryId) {
+        $query = Product::where(function ($query) use ($search, $storeId, $ProductCategoryId) {
             if ($search) {
                 $query->search($search);
+            }
+
+            if ($storeId) {
+                $query->where('store_id', $$storeId);
             }
 
             if ($ProductCategoryId !== null) {
@@ -39,9 +43,9 @@ class ProductRepository implements ProductRepositoryInterface
         return $query;
     }
 
-    public function getAllPaginated(?string $search, ?string $ProductCategoryId = null, ?int $rowPerPage)
+    public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId = null, ?int $rowPerPage)
     {
-        $query = $this->getAll($search, $ProductCategoryId, null, false,false);
+        $query = $this->getAll($search, $storeId, $ProductCategoryId, null, false,false);
 
         return $query->paginate($rowPerPage);
     }

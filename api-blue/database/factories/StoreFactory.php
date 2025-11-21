@@ -6,6 +6,7 @@ use App\Helpers\ImageHelper\ImageHelper;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Store>
@@ -22,6 +23,7 @@ class StoreFactory extends Factory
     public function definition(): array
     {
         $imageHelper = new ImageHelper;
+        $name = $this->faker->company();
 
         return [
             'user_id' => User::factory()->hasAttached(
@@ -29,7 +31,8 @@ class StoreFactory extends Factory
                 [],
                 'roles'
             ),
-            'name' => $this->faker->company(),
+            'name' => $name,
+            'username' => Str::slug($name) . '-s' . rand(100000, 999999),
             'logo' => $imageHelper->storeAndResizeImage(
                 $imageHelper->createDummyImageWithTextSizeAndPosition(250, 250, 'center', 'center', 'random', 'medium'),
                 'store',
