@@ -103,7 +103,7 @@ watch(
                                 </p>
                             </div>
                         </div>
-                        <a href="store-details.html" class="font-semibold text-lg text-custom-blue text-nowrap hover:underline">Visit Store</a>
+                        <RouterLink :to="{ name: 'app.store-detail', params: { username: product?.store?.username }}" class="font-semibold text-lg text-custom-blue text-nowrap hover:underline">Visit Store</RouterLink>
                     </div>
                 </div>
                 <div id="Descriptions" class="group flex flex-col">

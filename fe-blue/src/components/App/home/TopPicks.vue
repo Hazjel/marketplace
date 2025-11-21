@@ -4,9 +4,9 @@ import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import ProductCard from '@/components/card/ProductCard.vue';
 
-const productStore = useProductStore();
-const { products, loading } = storeToRefs(productStore);
-const { fetchProducts } =  productStore ;
+const productStore = useProductStore()
+const { products, loading } = storeToRefs(productStore)
+const { fetchProducts } =  productStore
 
 onMounted( () => {
     fetchProducts({
