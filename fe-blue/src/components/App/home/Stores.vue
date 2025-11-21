@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { nextTick } from 'vue';
 import { chunk } from 'lodash';
+import { random } from 'lodash';
 
 const storeStore = useStoreStore()
 const { stores, loading } = storeToRefs(storeStore)
@@ -20,7 +21,8 @@ const storeChunks = computed(() => {
 
 onMounted(async () => {
     await fetchStores({
-        limit: 9
+        limit: 9,
+        random: true
     })
 
     nextTick(() => {

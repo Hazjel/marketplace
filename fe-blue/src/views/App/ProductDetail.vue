@@ -2,7 +2,6 @@
 import ProductCard from '@/components/card/ProductCard.vue';
 import { formatRupiah } from '@/helpers/format';
 import { useProductStore } from '@/stores/product';
-import { random } from 'lodash';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
