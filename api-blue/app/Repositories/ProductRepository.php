@@ -20,7 +20,7 @@ class ProductRepository implements ProductRepositoryInterface
             }
 
             if ($storeId) {
-                $query->where('store_id', $$storeId);
+                $query->where('store_id', $storeId);
             }
 
             if ($ProductCategoryId !== null) {

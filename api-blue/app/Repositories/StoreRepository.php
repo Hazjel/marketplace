@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class StoreRepository implements StoreRepositoryInterface
 {
-    public function getAll(?string $search, ?bool $isVerified, ?int $limit, bool $execute)
+    public function getAll(?string $search, ?bool $isVerified, ?int $limit, ?bool $random, bool $execute)
     {
         $query = Store::where(function ($query) use ($search, $isVerified) {
             if ($search) {
@@ -26,6 +26,10 @@ class StoreRepository implements StoreRepositoryInterface
             $query->take($limit);
         }
 
+        if ($random) {
+            $query->inRandomOrder();
+        }
+
         if ($execute) {
             return $query->get();
         }
@@ -35,7 +39,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getAllPaginated(?string $search, ?bool $isVerified, ?int $rowPerPage)
     {
-        $query = $this->getAll($search, $isVerified, null, false);
+        $query = $this->getAll($search, $isVerified, null, false, false);
 
         return $query->paginate($rowPerPage);
     }
