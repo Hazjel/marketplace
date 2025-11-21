@@ -6,6 +6,7 @@ use App\Interfaces\StoreRepositoryInterface;
 use App\Models\Store;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class StoreRepository implements StoreRepositoryInterface
 {
@@ -46,6 +47,13 @@ class StoreRepository implements StoreRepositoryInterface
         return $query->first();
     }
 
+    public function getByUsername(string $username)
+    {
+        $query = Store::where('username', $username);
+
+        return $query->first();
+    }
+
     public function create(array $data)
     {
         DB::beginTransaction();
@@ -55,6 +63,7 @@ class StoreRepository implements StoreRepositoryInterface
 
             $store->user_id = $data['user_id'];
             $store->name = $data['name'];
+            $store->username = Str::slug($data['name']) . '-s' . rand(100000, 999999);
             $store->logo = $data['logo']->store('assets/store', 'public');
             $store->about = $data['about'];
             $store->phone = $data['phone'];
@@ -103,6 +112,11 @@ class StoreRepository implements StoreRepositoryInterface
             $store = Store::find($id);
 
             $store->name = $data['name'];
+
+            if ($data['name'] != $store->name) {
+                $store->username = Str::slug($data['name']) . '-s' . rand(100000, 999999);
+            }
+
 
             if (isset($data['logo'])) {
                 $store->logo = $data['logo']->store('assets/store', 'public');

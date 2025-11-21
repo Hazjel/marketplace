@@ -61,7 +61,7 @@ Route::get('product/all/paginated', [ProductController::class, 'getAllPaginated'
 Route::get('product/slug/{slug}', [ProductController::class, 'showBySlug']);
 
 Route::get('store', [StoreController::class, 'index']);
-Route::get('store/{store}', [StoreController::class, 'show']);
+Route::get('store/username/{store}', [StoreController::class, 'showByUsername']);
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);

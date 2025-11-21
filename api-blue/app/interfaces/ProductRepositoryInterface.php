@@ -3,8 +3,8 @@
 namespace App\Interfaces;
 
 interface ProductRepositoryInterface{
-    public function getAll(?string $search, ?string $ProductCategoryId, ?int $limit,?bool $random, bool $execute);
-    public function getAllPaginated(?string $search, ?string $ProductCategoryId = null, ?int $rowPerPage);
+    public function getAll(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $limit,?bool $random, bool $execute);
+    public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId = null, ?int $rowPerPage);
     public function getById(
         string $id
     );
