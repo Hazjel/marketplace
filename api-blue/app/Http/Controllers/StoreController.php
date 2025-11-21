@@ -40,7 +40,7 @@ class StoreController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         try {
-            $stores = $this->storeRepository->getAll($request->search,$request->is_verified,  $request->limit, true);
+            $stores = $this->storeRepository->getAll($request->search,$request->is_verified,  $request->limit, $request->random, true);
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', StoreResource::collection($stores), 200);
         } catch (\Exception $e) {

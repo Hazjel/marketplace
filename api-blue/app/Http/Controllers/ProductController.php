@@ -44,7 +44,7 @@ class ProductController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         try {
-            $products = $this->productRepository->getAll($request->search, $request->store_id, $request->product_category_id, $request->limit, $request->random,true);
+            $products = $this->productRepository->getAll($request->search, $request->store_id, $request->product_category_id, $request->limit, $request->random, true);
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', ProductResource::collection($products), 200);
         } catch (\Exception $e) {
