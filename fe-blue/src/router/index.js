@@ -4,10 +4,23 @@ import Home from '@/views/App/Home.vue'
 import BrowseCategory from '@/views/App/BrowseCategory.vue'
 import ProductDetail from '@/views/App/ProductDetail.vue'
 import StoreDetail from '@/views/App/StoreDetail.vue'
+import Auth from '@/layouts/Auth.vue'
+import Login from '@/views/auth/Login.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/auth',
+      component: Auth,
+      children: [
+        {
+          path: 'login',
+          name: 'auth.login',
+          component: Login
+        }
+      ]
+    },
     {
       path: '/',
       component: App,

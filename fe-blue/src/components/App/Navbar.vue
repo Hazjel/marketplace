@@ -30,9 +30,9 @@
                                     <img src="@/assets/images/icons/shopping-cart-black.svg" class="size-6" alt="icon">
                                 </div>
                             </a>
-                            <a href="signin.html" class="flex shrink-0 h-14 rounded-[18px] py-4 px-8 bg-custom-blue">
+                            <RouterLink :to="{ name: 'auth.login' }" class="flex shrink-0 h-14 rounded-[18px] py-4 px-8 bg-custom-blue">
                                 <p class="font-medium text-white">Sign In/Register</p>
-                            </a>
+                            </RouterLink>
                         </div>
                     </div>
                     <div class="flex items-center gap-8 flex-wrap">
