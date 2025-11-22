@@ -39,7 +39,7 @@ class AuthController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Login Berhasil', new UserResource($user), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, $e->getCode());
         }
     }
 
