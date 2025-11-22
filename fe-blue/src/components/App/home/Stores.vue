@@ -1,15 +1,11 @@
 <script setup>
 import Swiper from 'swiper/bundle';
 import 'swiper/swiper-bundle.css'
-import { onMounted } from 'vue';
+import { onMounted, computed, nextTick } from 'vue';
 import StoreCard from '@/components/card/StoreCard.vue';
-
 import { useStoreStore } from '@/stores/store';
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
-import { nextTick } from 'vue';
 import { chunk } from 'lodash';
-import { random } from 'lodash';
 
 const storeStore = useStoreStore()
 const { stores, loading } = storeToRefs(storeStore)
@@ -28,20 +24,19 @@ onMounted(async () => {
     nextTick(() => {
         if (stores.value.length > 0) {
             new Swiper('.storeSwiper', {
-                // Optional parameters
                 loop: true,
-                slidesPerView: 'auto',
+                slidesPerView: 1,
                 spaceBetween: 24,
                 pagination: {
-                    el: ".swiper-pagination",
+                    el: ".store-pagination",
                     clickable: true,
                     renderBullet: function (index, className) {
-                        return '<span class="flex shrink-0 !w-[42px] !h-1 !rounded-full has-[&.swiper-pagination-bullet-active]:!bg-custom-blue ' + className + '"></span>';
+                        return '<span class="flex shrink-0 w-[42px] h-1 rounded-full bg-custom-stroke ' + className + '"></span>';
                     },
                 },
                 navigation: {
-                    nextEl: ".swiper-button-next",
-                    prevEl: ".swiper-button-prev",
+                    nextEl: ".store-next",
+                    prevEl: ".store-prev",
                 },
             });
         }
@@ -58,23 +53,32 @@ onMounted(async () => {
                 <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-6 shrink-0" alt="icon">
             </a>
         </div>
+        
         <div class="flex flex-col gap-6 relative">
             <div class="storeSwiper w-full overflow-hidden">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide w-full !grid !grid-cols-3 !gap-6" v-for="(chunk, index) in storeChunks" :key="index">
-                        <StoreCard v-for="store in chunk" :item="store" :key="store.id" />
+                    <div class="swiper-slide w-full !grid !grid-cols-3 !gap-6" v-for="(storeChunk, index) in storeChunks" :key="index">
+                        <StoreCard v-for="store in storeChunk" :item="store" :key="store.id" />
                     </div>
                 </div>
             </div>
+            
+            <!-- Navigation -->
             <div class="relative flex items-center justify-center gap-6 h-14 w-fit mx-auto">
-                <button class="swiper-button-prev !relative after:!content-[''] !mt-0 !top-0 !flex !shrink-0 !items-center !justify-center !size-14 !rounded-full !border !border-custom-stroke">
+                <button type="button" class="store-prev flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke cursor-pointer">
                     <img src="@/assets/images/icons/arrow-right-black.svg" class="size-6 rotate-180" alt="icon">
                 </button>
-                <div class="swiper-pagination !relative !flex !items-center !gap-2 !top-0 !bottom-0"></div>
-                <button class="swiper-button-next !relative after:!content-[''] !mt-0 !top-0 !flex !shrink-0 !items-center !justify-center !size-14 !rounded-full !border !border-custom-stroke">
+                <div class="store-pagination flex items-center gap-2"></div>
+                <button type="button" class="store-next flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke cursor-pointer">
                     <img src="@/assets/images/icons/arrow-right-black.svg" class="size-6" alt="icon">
                 </button>
             </div>
         </div>
     </section>
 </template>
+
+<style scoped>
+.store-pagination :deep(.swiper-pagination-bullet-active) {
+    background-color: #3b82f6;
+}
+</style>

@@ -102,7 +102,7 @@ watch(
                                 </p>
                             </div>
                         </div>
-                        <RouterLink :to="{ name: 'app.store-detail', params: { username: product?.store?.username }}" class="font-semibold text-lg text-custom-blue text-nowrap hover:underline">Visit Store</RouterLink>
+                        <RouterLink v-if="product?.store?.username" :to="{ name: 'app.store-detail', params: { username: product?.store?.username }}" class="font-semibold text-lg text-custom-blue text-nowrap hover:underline">Visit Store</RouterLink>
                     </div>
                 </div>
                 <div id="Descriptions" class="group flex flex-col">
