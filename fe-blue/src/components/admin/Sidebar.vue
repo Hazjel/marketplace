@@ -1,0 +1,165 @@
+<script setup>
+import SidebarItem from '@/components/admin/sidebar/SidebarItem.vue'
+import HomeBlackIcon from '@/assets/images/icons/home-black.svg'
+import HomeBlueFillIcon from '@/assets/images/icons/home-blue-fill.svg'
+import BoxBlackIcon from '@/assets/images/icons/box-black.svg'
+import BagGreyIcon from '@/assets/images/icons/bag-grey.svg'
+import BagBlueFillIcon from '@/assets/images/icons/bag-blue-fill.svg'
+import Bag2BlackIcon from '@/assets/images/icons/bag-2-black.svg'
+import ShopGreyIcon from '@/assets/images/icons/shop-grey.svg'
+import ShopBlueFillIcon from '@/assets/images/icons/shop-blue-fill.svg'
+import StickyNoteGreyIcon from '@/assets/images/icons/stickynote-grey.svg'
+import StickyNoteBlueFillIcon from '@/assets/images/icons/stickynote-blue-fill.svg'
+import Wallet2BlackIcon from '@/assets/images/icons/wallet-2-black.svg'
+import EmpyWalletGreyIcon from '@/assets/images/icons/empty-wallet-grey.svg'
+import Wallet3BlueFillIcon from '@/assets/images/icons/wallet-3-blue-fill.svg'
+import User2BlackIcon from '@/assets/images/icons/profile-2user-black.svg'
+import User2BlueIcon from '@/assets/images/icons/profile-2user-blue-fill.svg'
+import router from '@/router'
+
+const items = [
+    {
+        label: 'Overview',
+        path: '/admin/dashboard',
+        iconDefault: HomeBlackIcon,
+        iconActive: HomeBlueFillIcon,
+        permission: 'dashboard-menu'
+    },
+    {
+        label: 'My Transacions',
+        path: '/admin/my-transaction',
+        iconDefault: StickyNoteGreyIcon,
+        iconActive: StickyNoteBlueFillIcon,
+        permission: 'transaction-menu',
+        role: 'buyer'
+    },
+    {
+        label: 'Manage Product',
+        iconDefault: BoxBlackIcon,
+        children: [
+            {
+                label: 'Categories',
+                path: '/admin/category',
+                iconDefault: BagGreyIcon,
+                iconActive: BagBlueFillIcon,
+                permission: 'product-category-menu'
+            },
+            {
+                label: 'Products',
+                path: '/admin/product',
+                iconDefault: BagGreyIcon,
+                iconActive: BagBlueFillIcon,
+                permission: 'product-menu'
+            }
+        ]
+    },
+    {
+        label: 'Manage Store',
+        iconDefault: Bag2BlackIcon,
+        children: [
+            {
+                label: 'List Store',
+                path: '/admin/store',
+                iconDefault: ShopGreyIcon,
+                iconActive: ShopBlueFillIcon,
+                permission: 'store-menu',
+                role: 'admin'
+            },
+            {
+                label: 'My Store',
+                path: '/admin/my-store',
+                iconDefault: ShopGreyIcon,
+                iconActive: ShopBlueFillIcon,
+                permission: 'store-menu',
+                role: 'store'
+            },
+            {
+                label: 'List Transaction',
+                path: '/admin/transaction',
+                iconDefault: StickyNoteGreyIcon,
+                iconActive: StickyNoteBlueFillIcon,
+                permission: 'transaction-menu',
+                role: 'admin'
+            },
+            {
+                label: 'List Transaction',
+                path: '/admin/transaction',
+                iconDefault: StickyNoteGreyIcon,
+                iconActive: StickyNoteBlueFillIcon,
+                permission: 'transaction-menu',
+                role: 'store'
+            }
+        ]
+    },
+    {
+        label: 'Manage Wallet',
+        iconDefault: Wallet2BlackIcon,
+        children: [
+            {
+                label: 'Store Wallet',
+                path: '/admin/store-balance',
+                iconDefault: EmpyWalletGreyIcon,
+                iconActive: Wallet3BlueFillIcon,
+                permission: 'store-balance-menu',
+                role: 'admin'
+            },
+            {
+                label: 'My Wallet',
+                path: '/admin/my-store-balance',
+                iconDefault: EmpyWalletGreyIcon,
+                iconActive: Wallet3BlueFillIcon,
+                permission: 'store-balance-menu',
+                role: 'store'
+            },
+            {
+                label: 'Withdrawal',
+                path: '/admin/withdrawal',
+                iconDefault: EmpyWalletGreyIcon,
+                iconActive: Wallet3BlueFillIcon,
+                permission: 'withdrawal-menu'
+            },
+        ]
+    },
+    {
+        label: 'Manage Users',
+        path: '/admin/user',
+        iconDefault: User2BlackIcon,
+        iconActive: User2BlueIcon,
+        permission: 'user-menu'
+    },
+]
+</script>
+
+<template>
+    <aside class="relative flex h-auto w-[280px] shrink-0 bg-white">
+        <div class="flex flex-col fixed top-0 w-[280px] shrink-0 h-screen pt-[30px] px-4 gap-[30px] bg-white">
+            <img src="@/assets/images/logos/logo.svg" class="h-8 w-fit" alt="logo"
+                @click="router.push({ name: 'app.home' })">
+            <div class="flex flex-col gap-5 overflow-y-scroll hide-scrollbar h-full overscroll-contain">
+                <nav class="flex flex-col gap-4">
+                    <p class="font-medium text-custom-grey">Main Menu</p>
+                    <ul class="flex flex-col gap-2">
+                        <SidebarItem v-for="item in items" :item="item" />
+                    </ul>
+                </nav>
+                <div class="flex flex-col gap-4 rounded-2xl p-4 bg-custom-blue mt-auto mb-5">
+                    <div class="flex items-center gap-[10px]">
+                        <div
+                            class="flex items-center justify-center size-[56px] shrink-0 rounded-full overflow-hidden bg-custom-orange">
+                            <img src="@/assets/images/icons/crown-white-fill.svg" class="flex size-6 shrink-0"
+                                alt="icon">
+                        </div>
+                        <p class="font-bold capitalize text-white">Unlock Free Pro Access</p>
+                    </div>
+                    <hr class="border-white/20">
+                    </hr>
+                    <a href="#" class="flex items-center justify-between">
+                        <span class="font-semibold text-white">Claim Your Free Pro</span>
+                        <img src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-5 shrink-0"
+                            alt="icon">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </aside>
+</template>
