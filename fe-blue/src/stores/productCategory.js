@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { axiosInstance } from "@/plugins/axios";
 import { handleError } from "@/helpers/errorHelper";
+import router from "@/router";
 
 export const useProductCategoryStore = defineStore("productCategory", {
     state: () => ({
@@ -21,9 +22,24 @@ export const useProductCategoryStore = defineStore("productCategory", {
 
             try {
                 // use proxied relative path so Vite dev server forwards to backend and avoids CORS
-                const response = await axiosInstance.get('product-category', { params });
+                const response = await axiosInstance.get(`product-category`, { params });
 
                 this.productCategories = response.data.data;
+            } catch (error) {
+                this.error = handleError(error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async fetchProductCategoriesPaginated(params) {
+            this.loading = true;
+
+            try {
+                const response = await axiosInstance.get(`product-category/all/paginated`, { params });
+
+                this.productCategories = response.data.data.data
+                this.meta = response.data.data.meta
             } catch (error) {
                 this.error = handleError(error);
             } finally {
@@ -38,6 +54,23 @@ export const useProductCategoryStore = defineStore("productCategory", {
                 const response = await axiosInstance.get(`product-category/slug/${slug}`)
 
                 return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async createProductCategory(payload) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await axiosInstance.post('product-category', payload)
+
+                this.success = response.data.message
+
+                router.push({ name: 'admin.category' })
             } catch (error) {
                 this.error = handleError(error)
             } finally {

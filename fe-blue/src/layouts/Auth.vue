@@ -1,10 +1,18 @@
 <script setup>
-import { RouterView } from 'vue-router';
+import { RouterView, useRouter } from 'vue-router';
 import Swiper from 'swiper/bundle';
 import 'swiper/swiper-bundle.css'
 import { onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore()
+const router = useRouter()
 
 onMounted(() => {
+    if (authStore.token) {
+        router.replace({ name: 'admin.dashboard' })
+    }
+
     new Swiper('.swiper', {
         direction: 'horizontal',
         loop: true,

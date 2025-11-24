@@ -1,5 +1,6 @@
 import { handleError } from "@/helpers/errorHelper";
 import { axiosInstance } from "@/plugins/axios";
+import router from "@/router";
 import Cookies from "js-cookie";
 import { defineStore } from "pinia";
 
@@ -28,13 +29,32 @@ export const useAuthStore = defineStore("auth", {
 
                 this.success = response.data.message
 
-                console.log(this.success)
-                // router.push({ name: 'admin.dashboard' })
+                router.push({ name: 'admin.dashboard' })
             } catch (error) {
                 this.error = handleError(error)
             } finally {
                 this.loading = false
             }
         },
+
+        async checkAuth() {
+            this.loading = true
+
+            try {
+                const response = await axiosInstance.get('/me')
+
+                this.user = response.data.data
+
+                return this.user
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    Cookies.remove('token')
+                    router.push({ name: 'auth.login' })
+                }
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        }
     }
 })
