@@ -23,7 +23,7 @@ class ProductCategoryResource extends JsonResource
             'tagline' => $this->tagline,
             'description' => $this->description,
             'product_count' => $this->products->count() ?? 0,
-            'children_count' => $this->childrens_count ?? 0,
+            'children_count' => $this->childrens->count() ?? 0,
             'childrens' => ProductCategoryResource::collection($this->whenLoaded('childrens')),
 
         ];
