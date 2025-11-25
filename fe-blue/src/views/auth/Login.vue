@@ -1,4 +1,5 @@
 <script setup>
+import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
@@ -20,6 +21,8 @@ const handleSubmit = async () => {
             email: ['Email atau password salah']
         }
     }
+
+    router.push ({ name: 'admin.dashboard' })
 }
 </script>
 

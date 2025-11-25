@@ -61,12 +61,45 @@ export const useProductCategoryStore = defineStore("productCategory", {
             }
         },
 
+        async fetchProductCategoryById(id) {
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.get(`product-category/${id}`)
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
         async createProductCategory(payload) {
             this.loading = true
             this.error = null
 
             try {
                 const response = await axiosInstance.post('product-category', payload)
+
+                this.success = response.data.message
+
+                router.push({ name: 'admin.category' })
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async updateProductCategory(payload) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await axiosInstance.post(`product-category/${payload.id}`, {
+                    ...payload,
+                    _method: 'PUT',
+                })
 
                 this.success = response.data.message
 

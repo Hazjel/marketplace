@@ -12,6 +12,7 @@ import Dashboard from '@/views/admin/Dashboard.vue'
 import CategoryList from '@/views/admin/category/CategoryList.vue'
 import Forbidden from '@/views/App/Forbidden.vue'
 import CategoryCreate from '@/views/admin/category/CategoryCreate.vue'
+import CategoryEdit from '@/views/admin/category/CategoryEdit.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -90,6 +91,16 @@ const router = createRouter({
             title: 'Category Create',
             requiresAuth: true,
             permission: 'product-category-create'
+          }
+        },
+        {
+          path: 'category/edit/:id',
+          name: 'admin.category.edit',
+          component: CategoryEdit,
+          meta: {
+            title: 'Category Edit',
+            requiresAuth: true,
+            permission: 'product-category-edit'
           }
         }
       ]

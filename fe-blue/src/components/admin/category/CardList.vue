@@ -48,10 +48,11 @@ const emit = defineEmits(['delete'])
                     alt="icon">
                 <span class="font-semibold text-custom-red">Delete</span>
             </button>
-            <a href="edit-categories.html" class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black">
+            <RouterLink :to="{ name: 'admin.category.edit', params: { id: item.id } }" 
+            class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black">
                 <img src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0" alt="icon">
                 <span class="font-semibold text-white">Edit</span>
-            </a>
+            </RouterLink>
             <a href="category-details.html" class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                 <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon">
                 <span class="font-semibold text-white">Details</span>
