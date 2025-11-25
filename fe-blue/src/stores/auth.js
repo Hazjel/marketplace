@@ -55,6 +55,23 @@ export const useAuthStore = defineStore("auth", {
             } finally {
                 this.loading = false
             }
+        },
+
+        async logout() {
+            this.loading = true
+            try {
+                await axiosInstance.post('/logout')
+
+                Cookies.remove('token')
+                this.user = null
+                this.error = null
+
+                router.push({ name: 'auth.login' })
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
         }
     }
-})
+});

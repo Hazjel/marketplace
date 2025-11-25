@@ -1,7 +1,13 @@
 <script setup>
 import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+import { storeToRefs } from 'pinia';
 
-const route = useRoute()
+const route = useRoute();
+
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+const {logout} = authStore;
 </script>
 
 <template>
@@ -37,13 +43,13 @@ const route = useRoute()
                 <img src="@/assets/images/photos/photo-1.png" class="size-full object-cover" alt="photo">
             </div>
             <div class="flex flex-col gap-[6px] min-w-[155px] w-fit">
-                <p class="font-semibold text-lg leading-tight">Bimore W</p>
+                <p class="font-semibold text-lg leading-tight">{{ user?.name }}</p>
                 <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
                     <img src="@/assets/images/icons/user-grey.svg" class="size-[18px]" alt="icon"> 
-                    Manager
+                    {{ user?.role }}
                 </p>
             </div>
-            <a href="../index.html" class="flex w-6">
+            <a @click="logout" class="flex w-6">
                 <img src="@/assets/images/icons/logout.svg" class="flex size-6 shrink-0" alt="icon">
             </a>
         </div>

@@ -5,6 +5,8 @@ defineProps({
         required: true
     }
 })
+
+const emit = defineEmits(['delete'])
 </script>
 
 <template>
@@ -40,7 +42,7 @@ defineProps({
         </div>
         <hr class="border-custom-stroke">
         <div class="flex items-center justify-end gap-[14px]">
-            <button
+            <button @click="emit('delete', item.id)"
                 class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-red/10">
                 <img src="@/assets/images/icons/trash-red.svg" class="flex size-6 shrink-0"
                     alt="icon">
