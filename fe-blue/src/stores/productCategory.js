@@ -76,6 +76,21 @@ export const useProductCategoryStore = defineStore("productCategory", {
             } finally {
                 this.loading = false
             }
+        },
+
+        async deleteProductCategory(id){
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.delete(`product-category/${id}`)
+
+                this.success = response.data.message
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
         }
+
     },
 });

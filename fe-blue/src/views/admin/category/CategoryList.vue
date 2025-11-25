@@ -10,7 +10,7 @@ import { RouterLink } from 'vue-router';
 
 const productCategoryStore = useProductCategoryStore()
 const { productCategories, meta, loading, success, error } = storeToRefs(productCategoryStore)
-const { fetchProductCategoriesPaginated } = productCategoryStore
+const { fetchProductCategoriesPaginated, deleteProductCategory } = productCategoryStore
 
 const serverOptions = ref({
     page: 1,
@@ -27,6 +27,12 @@ const fetchData = async () => {
         ...serverOptions.value,
         ...filters.value
     })
+}
+
+async function handleDelete(id){
+    await deleteProductCategory(id)
+
+    fetchData()
 }
 
 const debounceFetchData = debounce(fetchData, 500)
@@ -95,7 +101,7 @@ watch(filters, () => {
         </div>
         <div id="List-Categories" class="flex flex-col gap-6">
             <div id="List" class="flex flex-col gap-5">
-                <CardList v-for="category in productCategories" :key="category.id" :item="category" v-if="!loading && productCategories" />
+                <CardList v-for="category in productCategories" :key="category.id" :item="category" @delete="handleDelete" v-if="!loading && productCategories" />
             </div>
             <Pagination :meta="meta" :server-options="serverOptions"/>
         </div>
