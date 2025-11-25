@@ -28,8 +28,6 @@ export const useAuthStore = defineStore("auth", {
                 Cookies.set('token', token)
 
                 this.success = response.data.message
-
-                router.push({ name: 'admin.dashboard' })
             } catch (error) {
                 this.error = handleError(error)
             } finally {
@@ -49,7 +47,7 @@ export const useAuthStore = defineStore("auth", {
             } catch (error) {
                 if (error.response?.status === 401) {
                     Cookies.remove('token')
-                    router.push({ name: 'auth.login' })
+                    throw new Error('Unauthorized');
                 }
                 this.error = handleError(error)
             } finally {
