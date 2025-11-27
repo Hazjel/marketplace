@@ -39,7 +39,7 @@ const debounceFetchData = debounce(fetchData, 500)
 
 const closeAlert = () => {
     productCategoryStore.success = null
-   productCategoryStore.error = null
+    productCategoryStore.error = null
 }
 
 onMounted(fetchData)

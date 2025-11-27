@@ -83,7 +83,12 @@ export const useProductCategoryStore = defineStore("productCategory", {
 
                 this.success = response.data.message
 
-                router.push({ name: 'admin.category' })
+                if (router.currentRoute.value.query.parent_id) {
+                    router.push({ name: 'admin.category.detail', params: { id: router.currentRoute.value.query.parent_id }})
+                } else {
+                    router.push({ name: 'admin.category' })
+                }
+                
             } catch (error) {
                 this.error = handleError(error)
             } finally {
@@ -103,7 +108,11 @@ export const useProductCategoryStore = defineStore("productCategory", {
 
                 this.success = response.data.message
 
-                router.push({ name: 'admin.category' })
+                if (router.currentRoute.value.query.parent_id) {
+                    router.push({ name: 'admin.category.detail', params: { id: router.currentRoute.value.query.parent_id }})
+                } else {
+                    router.push({ name: 'admin.category' })
+                }
             } catch (error) {
                 this.error = handleError(error)
             } finally {
