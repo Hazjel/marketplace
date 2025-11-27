@@ -15,6 +15,8 @@ const { loading, error } = storeToRefs(productCategoryStore)
 const { fetchProductCategoryById, updateProductCategory } = productCategoryStore
 
 const productCategory = ref({
+    parent_id: null,
+    parent_name: null,
     image: null,
     image_url: PlaceHolder,
     name: null,
@@ -41,7 +43,16 @@ const handleImageChange = (e) => {
     productCategory.value.image_url = URL.createObjectURL(file)
 }
 
-onMounted(fetchData)
+onMounted(async () => {
+    fetchData()
+
+    if (route.query.parent_id) {
+        const response = await fetchProductCategoryById(route.query.parent_id)
+
+        productCategory.value.parent_id = response.id
+        productCategory.value.parent_name = response.name
+    }
+})
 </script>
 
 <template>
@@ -57,6 +68,21 @@ onMounted(fetchData)
                 <button type="button" id="Add-Photo" class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
                     Add Photo
                 </button>
+            </div>
+        </div>
+        <div class="flex items-center justify-between" v-if="productCategory.parent_id">
+            <p class="font-semibold text-custom-grey">Category Parent</p>
+            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.parent_id }">
+                <label class="group relative">
+                    <div class="input-icon">
+                        <img src="@/assets/images/icons/note-grey.svg" class="flex size-6 shrink-0" alt="icon">
+                    </div>
+                    <p class="input-placeholder">
+                        Enter Category Parent
+                    </p>
+                    <input type="text" class="custom-input" placeholder="" v-model="productCategory.parent_name" readonly>
+                </label>
+                <span class="input-error" v-if="error?.parent_id">{{ error?.parent_id?.join(', ') }}</span>
             </div>
         </div>
         <div class="flex items-center justify-between">
@@ -107,7 +133,10 @@ onMounted(fetchData)
             </div>
         </div>
         <div class="flex items-center justify-end gap-4">
-            <RouterLink :to="{ name: 'admin.category'}" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg">
+            <RouterLink :to="{ name: 'admin.category.detail', params: { id: productCategory?.parent_id }}" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg" v-if="productCategory?.parent_id">
+                Cancel
+            </RouterLink>
+            <RouterLink :to="{ name: 'admin.category' }" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg" v-if="!productCategory.parent_id">
                 Cancel
             </RouterLink>
             <button type="submit" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg">
