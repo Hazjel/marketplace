@@ -31,6 +31,35 @@ export const useProductStore = defineStore("product", {
             }
         },
 
+        async fetchProductsPaginated(params) {
+            this.loading = true;
+
+            try {
+                const response = await axiosInstance.get(`product/all/paginated`, { params });
+
+                this.products = response.data.data.data
+                this.meta = response.data.data.meta
+            } catch (error) {
+                this.error = handleError(error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async fetchProductById(id) {
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.get(`product/${id}`)
+
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
         async fetchProductBySlug(slug) {
             this.loading = true
             
