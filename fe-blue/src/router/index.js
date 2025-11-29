@@ -4,7 +4,7 @@ import App from '@/layouts/App.vue'
 import Home from '@/views/App/Home.vue'
 import BrowseCategory from '@/views/App/BrowseCategory.vue'
 import AppProductDetail from '@/views/App/ProductDetail.vue'
-import StoreDetail from '@/views/App/StoreDetail.vue'
+import AppStoreDetail from '@/views/App/StoreDetail.vue'
 import Auth from '@/layouts/Auth.vue'
 import Login from '@/views/auth/Login.vue'
 import Admin from '@/layouts/Admin.vue'
@@ -16,6 +16,8 @@ import CategoryEdit from '@/views/admin/category/CategoryEdit.vue'
 import CategoryDetail from '@/views/admin/category/CategoryDetail.vue'
 import ProductList from '@/views/admin/product/ProductList.vue'
 import ProductDetail from '@/views/admin/product/ProductDetail.vue'
+import StoreList from '@/views/admin/store/StoreList.vue'
+import StoreDetail from '@/views/admin/store/StoreDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,7 +60,7 @@ const router = createRouter({
         {
           path: 'store/:username',
           name: 'app.store-detail',
-          component: StoreDetail
+          component: AppStoreDetail
         }
       ]
     },
@@ -134,6 +136,26 @@ const router = createRouter({
             title: 'Product Detail',
             requiresAuth: true,
             permission: 'product-list'
+          }
+        },
+        {
+          path: 'store',
+          name: 'admin.store',
+          component: StoreList,
+          meta: {
+            title: 'Store Detail',
+            requiresAuth: true,
+            permission: 'store-list'
+          }
+        },
+        {
+          path: 'store/:id',
+          name: 'admin.store.detail',
+          component: StoreDetail,
+          meta: {
+            title: 'Store Detail',
+            requiresAuth: true,
+            permission: 'store-list'
           }
         },
       ]

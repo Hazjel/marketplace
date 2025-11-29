@@ -30,6 +30,21 @@ export const useStoreStore = defineStore("store", {
             }
         },
 
+        async fetchStoresPaginated(params) {
+            this.loading = true;
+
+            try {
+                const response = await axiosInstance.get(`store/all/paginated`, { params });
+
+                this.stores = response.data.data.data
+                this.meta = response.data.data.meta
+            } catch (error) {
+                this.error = handleError(error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
         async fetchStoresByUsername(username) {
             this.loading = true
             
@@ -43,5 +58,47 @@ export const useStoreStore = defineStore("store", {
                 this.loading = false
             }
         },
+
+        async fetchStoreById(id) {
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.get(`store/${id}`)
+
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async approveStore(id) {
+            this.loading = true
+
+            try {
+                const response = await axiosInstance.post(`/store/${id}/verified`)
+
+                this.success = response.data.message
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async deleteStore(id){
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.delete(`store/${id}`)
+
+                this.success = response.data.message
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        }
     }
 });

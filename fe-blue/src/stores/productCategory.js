@@ -133,6 +133,5 @@ export const useProductCategoryStore = defineStore("productCategory", {
                 this.loading = false
             }
         }
-
     },
 });
