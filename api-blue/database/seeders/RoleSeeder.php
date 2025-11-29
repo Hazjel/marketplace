@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -14,10 +13,18 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
+        $permissions = Permission::all()->filter(function ($permission) {
+            return !in_array($permission->name, [
+                'product-create',
+                'product-edit',
+                'product-delete'
+            ]);
+        });
+
         Role::firstOrCreate([
             'name' => 'admin',
             'guard_name' => 'sanctum'
-        ])->givePermissionTo(Permission::all());
+        ])->givePermissionTo($permissions);
 
         Role::firstOrCreate([
             'name' => 'buyer',
