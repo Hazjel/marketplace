@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 import App from '@/layouts/App.vue'
 import Home from '@/views/App/Home.vue'
 import BrowseCategory from '@/views/App/BrowseCategory.vue'
-import ProductDetail from '@/views/App/ProductDetail.vue'
+import AppProductDetail from '@/views/App/ProductDetail.vue'
 import StoreDetail from '@/views/App/StoreDetail.vue'
 import Auth from '@/layouts/Auth.vue'
 import Login from '@/views/auth/Login.vue'
@@ -14,6 +14,8 @@ import Forbidden from '@/views/App/Forbidden.vue'
 import CategoryCreate from '@/views/admin/category/CategoryCreate.vue'
 import CategoryEdit from '@/views/admin/category/CategoryEdit.vue'
 import CategoryDetail from '@/views/admin/category/CategoryDetail.vue'
+import ProductList from '@/views/admin/product/ProductList.vue'
+import ProductDetail from '@/views/admin/product/ProductDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,7 +53,7 @@ const router = createRouter({
         {
           path: 'product/:slug',
           name: 'app.product-detail',
-          component: ProductDetail
+          component: AppProductDetail
         },
         {
           path: 'store/:username',
@@ -113,7 +115,27 @@ const router = createRouter({
             requiresAuth: true,
             permission: 'product-category-list'
           }
-        }
+        },
+        {
+          path: 'product',
+          name: 'admin.product',
+          component: ProductList,
+          meta: {
+            title: 'Product Detail',
+            requiresAuth: true,
+            permission: 'product-list'
+          }
+        },
+        {
+          path: 'product/:id',
+          name: 'admin.product.detail',
+          component: ProductDetail,
+          meta: {
+            title: 'Product Detail',
+            requiresAuth: true,
+            permission: 'product-list'
+          }
+        },
       ]
     }
   ],
