@@ -34,6 +34,7 @@ class TransactionResource extends JsonResource
             'payment_status' => $this->payment_status,
             'snap_token' => $this->snap_token,
             'transaction_details' => TransactionDetailResource::collection($this->transactionDetails),
+            'created_at' => $this->created_at
         ];
     }
 }

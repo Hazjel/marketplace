@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
@@ -39,7 +40,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = Transaction::where('id', $id);
+        $query = Transaction::where('id', $id)->with('transactionDetails.product.productImages');
 
         return $query->first();
     }
@@ -113,7 +114,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             $params = array(
                 'transaction_details' => array(
                     'order_id' => $transaction->code,
-                    'gross_amount' => $transaction->grand_total
+                    'gross_amount' => round($transaction->grand_total)
                 ),
                 'customer_details' => array(
                     'first_name' => $transaction->buyer->name,
@@ -201,40 +202,51 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $totalWeight;
     }
 
-    private function calculateShippingAndTax(array $data, float $subtotal, int $weight)
-    {
-        $origin = Store::find($data['store_id'])->address_id;
+    private function calculateShippingAndTax(array $data, float $subtotal, int $weight): array
+{
+    try {
+        $origin = Store::findOrFail($data['store_id'])->address_id;
         $destination = $data['address_id'];
 
+        // Komerce RajaOngkir API
         $response = Http::withHeaders([
-            'key' => env('KEY_RAJA_ONGKIR'),
-            'Content-Type' => 'application/x-www-form-urlencoded'
-        ])->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', [
-            'origin' => $origin,
-            'destination' => $destination,
-            'weight' => $weight,
-            'courier' => 'jne:sicepat:ide:sap:jnt:ninja:tiki:lion:anteraja:pos:ncs:rex:rpx:sentral:star:wahana:dse',
-            'price' => 'lowest'
+            'x-api-key' => env('KEY_RAJA_ONGKIR'),
+        ])->get('https://api-sandbox.collaborator.komerce.id/tariff/api/v1/calculate', [
+            'shipper_destination_id' => $origin,
+            'receiver_destination_id' => $destination,
+            'item_value' => round($subtotal),
+            'weight' => $weight
         ]);
 
         $result = $response->json();
 
+        Log::info($response);
+
         $shippingCost = 0;
 
-        foreach ($result['data'] as $courier) {
+        // Find matching courier and service
+        foreach ($result['data']['calculate_reguler'] as $courier) {
             if (
-                strtolower($courier['code']) === strtolower($data['shipping']) &&
-                strtoupper($courier['service']) === strtoupper($data['shipping_type'])
+                strtolower($courier['shipping_name']) === strtolower($data['shipping']) &&
+                strtoupper($courier['service_name']) === strtoupper($data['shipping_type'])
             ) {
-                $shippingCost = $courier['cost'];
+                $shippingCost = $courier['shipping_cost_net'];
                 break;
             }
         }
 
+        $tax = round($subtotal * 0.11, 2);
+        $grandTotal = round($subtotal + $tax + $shippingCost, 2);
+
         return [
             'shipping_cost' => $shippingCost,
-            'tax' => $subtotal * 0.11,
-            'grand_total' => $subtotal * 1.11 + $shippingCost
+            'tax' => $tax,
+            'grand_total' => $grandTotal
         ];
+
+    } catch (\Exception $e) {
+        Log::error('Shipping calculation error: ' . $e->getMessage());
+        throw $e;
     }
+}
 }
