@@ -68,7 +68,7 @@ watch(filters, () => {
                 <p class="font-bold text-xl">All Stores</p>
                 <div class="flex items-center gap-1">
                     <img src="@/assets/images/icons/shop-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    <p class="font-semibold text-custom-grey">4 Total Stores</p>
+                    <p class="font-semibold text-custom-grey">{{ meta.total }} Total Stores</p>
                 </div>
             </div>
             <div id="TabButtons" class="flex items-center gap-0.5 h-14 w-[460px] rounded-xl bg-custom-icon-background">
@@ -91,17 +91,16 @@ watch(filters, () => {
             <form action="#">
                 <label class="flex items-center w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
                     <img src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    <input type="text" class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none" placeholder="Search store">
+                    <input type="text" class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none" placeholder="Search store" v-model="filters.search">
                 </label>
             </form>
             <div class="flex items-center gap-4">
                 <p class="font-medium text-custom-grey">Show</p>
                 <label class="flex items-center h-14 rounded-2xl border border-custom-stroke py-4 px-5 pl-3 bg-white focus-within:border-custom-black transition-300">
-                    <select name="" id="" class="text-custom-black font-medium appearance-none focus:outline-none p-2">
-                        <option value="" class="font-medium" selected>4 Entries</option>
-                        <option value="" class="font-medium">10 Entries</option>
-                        <option value="" class="font-medium">20 Entries</option>
-                        <option value="" class="font-medium">40 Entries</option>
+                    <select name="" id="" class="text-custom-black font-medium appearance-none focus:outline-none p-2" v-model="serverOptions.row_per_page">
+                        <option value="10" class="font-medium">10 Entries</option>
+                        <option value="20" class="font-medium">20 Entries</option>
+                        <option value="40" class="font-medium">40 Entries</option>
                     </select>
                     <img src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1" alt="icon">
                 </label>

@@ -18,6 +18,8 @@ import ProductList from '@/views/admin/product/ProductList.vue'
 import ProductDetail from '@/views/admin/product/ProductDetail.vue'
 import StoreList from '@/views/admin/store/StoreList.vue'
 import StoreDetail from '@/views/admin/store/StoreDetail.vue'
+import TransactionList from '@/views/admin/transaction/TransactionList.vue'
+import TransactionDetail from '@/views/admin/transaction/TransactionDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -156,6 +158,26 @@ const router = createRouter({
             title: 'Store Detail',
             requiresAuth: true,
             permission: 'store-list'
+          }
+        },
+        {
+          path: 'transaction',
+          name: 'admin.transaction',
+          component: TransactionList,
+          meta: {
+            title: 'Transaction List',
+            requiresAuth: true,
+            permission: 'transaction-list'
+          }
+        },
+        {
+          path: 'transaction/:id',
+          name: 'admin.transaction.detail',
+          component: TransactionDetail,
+          meta: {
+            title: 'Transaction Detail',
+            requiresAuth: true,
+            permission: 'transaction-list'
           }
         },
       ]
