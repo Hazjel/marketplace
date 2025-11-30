@@ -26,7 +26,7 @@ export function formatDateTime(dateTime) {
 export function formatToClientTimeZone(date){
     const originalDate = DateTime.fromISO(date, { zone: 'utc' });
 
-    const timezone = intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     return originalDate
         .setZone(timezone)
