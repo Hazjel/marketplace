@@ -6,7 +6,6 @@ use App\Interfaces\StoreBalanceRepositoryInterface;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\StoreBalanceResource;
-use App\Http\Resources\UserResource;
 use App\Http\Resources\PaginateResource;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
