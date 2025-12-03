@@ -5,6 +5,8 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Helpers\ImageHelper\ImageHelper;
+use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -23,7 +25,15 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $imageHelper = new ImageHelper;
+
         return [
+            'profile_picture' => $imageHelper->storeAndResizeImage(
+                $imageHelper->createDummyImageWithTextSizeAndPosition(250, 250, 'center', 'center', 'random', 'medium'),
+                'buyer',
+                250,
+                250
+            ),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),

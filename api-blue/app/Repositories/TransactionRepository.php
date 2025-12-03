@@ -19,6 +19,10 @@ class TransactionRepository implements TransactionRepositoryInterface
                 $query->search($search);
             }
         });
+        
+        if (auth()->user()->hasRole('store')) {
+            $query->where('store_id', auth()->user()->store->id ?? null);
+        }
 
         if ($limit) {
             $query->take($limit);

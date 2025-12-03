@@ -2,6 +2,7 @@ import { handleError } from "@/helpers/errorHelper";
 import { axiosInstance } from "@/plugins/axios";
 import router from "@/router";
 import Cookies from "js-cookie";
+import { register } from "numeral";
 import { defineStore } from "pinia";
 
 export const useAuthStore = defineStore("auth", {
@@ -22,6 +23,25 @@ export const useAuthStore = defineStore("auth", {
 
             try {
                 const response = await axiosInstance.post('/login', credentials)
+
+                const token = response.data.data.token
+
+                Cookies.set('token', token)
+
+                this.success = response.data.message
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async register(payload) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await axiosInstance.post('/register', payload)
 
                 const token = response.data.data.token
 

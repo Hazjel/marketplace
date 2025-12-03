@@ -16,7 +16,7 @@ const emit = defineEmits(['delete'])
     <div class="card flex items-center rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-6 bg-white">
         <div class="flex items-center gap-[14px] w-full min-w-0">
             <div class="flex size-[92px] shrink-0 rounded-full bg-custom-background overflow-hidden">
-                <img src="@/assets/images/photos/photo-3.png" class="size-full object-cover" alt="photo">
+                <img :src="item.profile_picture" class="size-full object-cover" alt="photo">
             </div>
             <div class="flex flex-col gap-[6px] w-full overflow-hidden">
                 <p class="font-bold text-[22px] leading-tight w-full truncate">

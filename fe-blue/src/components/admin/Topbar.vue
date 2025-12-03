@@ -40,7 +40,7 @@ const {logout} = authStore;
         </div>
         <div class="flex items-center gap-3 h-[102px] bg-white w-fit rounded-3xl p-[18px]">
             <div class="flex rounded-full overflow-hidden size-14">
-                <img src="@/assets/images/photos/photo-1.png" class="size-full object-cover" alt="photo">
+                <img :src="user?.profile_picture" class="size-full object-cover" alt="photo">
             </div>
             <div class="flex flex-col gap-[6px] min-w-[155px] w-fit">
                 <p class="font-semibold text-lg leading-tight">{{ user?.name }}</p>

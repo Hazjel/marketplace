@@ -51,7 +51,6 @@ class BuyerRepository implements BuyerRepositoryInterface
             $buyer = new Buyer;
 
             $buyer->user_id = $data['user_id'];
-            $buyer->profile_picture = $data['profile_picture']->store('assets/buyer', 'public');
             $buyer->phone_number = $data['phone_number'];
             $buyer->save();
 
@@ -70,10 +69,7 @@ class BuyerRepository implements BuyerRepositoryInterface
 
         try {
             $buyer = Buyer::find($id);
-
-            if (isset($data['profile_picture'])) {
-                $buyer->profile_picture = $data['profile_picture']->store('assets/buyer', 'public');
-            }
+   
 
             $buyer->phone_number = $data['phone_number'];
             $buyer->save();

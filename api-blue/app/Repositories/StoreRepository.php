@@ -58,6 +58,13 @@ class StoreRepository implements StoreRepositoryInterface
         return $query->first();
     }
 
+    public function getByUserId(string $userId)
+    {
+        $query = Store::where('user_id', $userId);
+
+        return $query->first();
+    }
+
     public function create(array $data)
     {
         DB::beginTransaction();

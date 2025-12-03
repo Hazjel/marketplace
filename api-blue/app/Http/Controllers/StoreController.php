@@ -114,6 +114,21 @@ class StoreController extends Controller implements HasMiddleware
         }
     }
 
+    public function showByUserId(string $userId)
+    {
+        try {
+            $store = $this->storeRepository->getByUserId($userId);
+
+            if (!$store) {
+                return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
+            }
+
+            return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', new StoreResource($store), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
     public function updateVerifiedStatus(string $id)
     {
         try {

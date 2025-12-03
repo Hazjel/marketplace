@@ -59,6 +59,19 @@ export const useStoreStore = defineStore("store", {
             }
         },
 
+        async fetchStoresByUserId(userId) {
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.get(`store/user/${userId}`)
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
         async fetchStoreById(id) {
             this.loading = true
             

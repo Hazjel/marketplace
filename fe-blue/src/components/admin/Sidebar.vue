@@ -68,8 +68,8 @@ const items = [
             {
                 label: 'My Store',
                 path: '/admin/my-store',
-                iconDefault: ShopGreyIcon,
-                iconActive: ShopBlueFillIcon,
+                iconDefault: EmpyWalletGreyIcon,
+                iconActive: Wallet3BlueFillIcon,
                 permission: 'store-menu',
                 role: 'store'
             },
@@ -79,15 +79,6 @@ const items = [
                 iconDefault: StickyNoteGreyIcon,
                 iconActive: StickyNoteBlueFillIcon,
                 permission: 'transaction-menu',
-                role: 'admin'
-            },
-            {
-                label: 'List Transaction',
-                path: '/admin/transaction',
-                iconDefault: StickyNoteGreyIcon,
-                iconActive: StickyNoteBlueFillIcon,
-                permission: 'transaction-menu',
-                role: 'store'
             }
         ]
     },
@@ -102,14 +93,6 @@ const items = [
                 iconActive: Wallet3BlueFillIcon,
                 permission: 'store-balance-menu',
                 role: 'admin'
-            },
-            {
-                label: 'My Wallet',
-                path: '/admin/my-store-balance',
-                iconDefault: EmpyWalletGreyIcon,
-                iconActive: Wallet3BlueFillIcon,
-                permission: 'store-balance-menu',
-                role: 'store'
             },
             {
                 label: 'Withdrawal',

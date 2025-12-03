@@ -7,6 +7,7 @@ import AppProductDetail from '@/views/App/ProductDetail.vue'
 import AppStoreDetail from '@/views/App/StoreDetail.vue'
 import Auth from '@/layouts/Auth.vue'
 import Login from '@/views/auth/Login.vue'
+import Register from '@/views/auth/Register.vue'
 import Admin from '@/layouts/Admin.vue'
 import Dashboard from '@/views/admin/Dashboard.vue'
 import CategoryList from '@/views/admin/category/CategoryList.vue'
@@ -25,6 +26,7 @@ import StoreBalanceDetail from '@/views/admin/store-balance/StoreBalanceDetail.v
 import WithdrawalList from '@/views/admin/withdrawal/WithdrawalList.vue'
 import WithdrawalDetail from '@/views/admin/withdrawal/WithdrawalDetail.vue'
 import UserList from '@/views/admin/user/UserList.vue'
+import MyStore from '@/views/admin/store/MyStore.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +39,11 @@ const router = createRouter({
           path: 'login',
           name: 'auth.login',
           component: Login
+        },
+        {
+          path: 'register',
+          name: 'auth.register',
+          component: Register
         }
       ]
     },
@@ -151,6 +158,16 @@ const router = createRouter({
           component: StoreList,
           meta: {
             title: 'Store Detail',
+            requiresAuth: true,
+            permission: 'store-list'
+          }
+        },
+         {
+          path: 'my-store',
+          name: 'admin.my-store',
+          component: MyStore,
+          meta: {
+            title: 'My Store',
             requiresAuth: true,
             permission: 'store-list'
           }
