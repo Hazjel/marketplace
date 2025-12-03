@@ -20,6 +20,11 @@ import StoreList from '@/views/admin/store/StoreList.vue'
 import StoreDetail from '@/views/admin/store/StoreDetail.vue'
 import TransactionList from '@/views/admin/transaction/TransactionList.vue'
 import TransactionDetail from '@/views/admin/transaction/TransactionDetail.vue'
+import StoreBalanceList from '@/views/admin/store-balance/StoreBalanceList.vue'
+import StoreBalanceDetail from '@/views/admin/store-balance/StoreBalanceDetail.vue'
+import WithdrawalList from '@/views/admin/withdrawal/WithdrawalList.vue'
+import WithdrawalDetail from '@/views/admin/withdrawal/WithdrawalDetail.vue'
+import UserList from '@/views/admin/user/UserList.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -178,6 +183,56 @@ const router = createRouter({
             title: 'Transaction Detail',
             requiresAuth: true,
             permission: 'transaction-list'
+          }
+        },
+        {
+          path: 'store-balance',
+          name: 'admin.store-balance',
+          component: StoreBalanceList,
+          meta: {
+            title: 'Store Wallet',
+            requiresAuth: true,
+            permission: 'store-balance-list'
+          }
+        },
+        {
+          path: 'store-balance/:id',
+          name: 'admin.store-balance.detail',
+          component: StoreBalanceDetail,
+          meta: {
+            title: 'Store Wallet Detail',
+            requiresAuth: true,
+            permission: 'store-balance-list'
+          }
+        },
+        {
+          path: 'withdrawal',
+          name: 'admin.withdrawal',
+          component: WithdrawalList,
+          meta: {
+            title: 'Withdrawal List',
+            requiresAuth: true,
+            permission: 'withdrawal-list'
+          }
+        },
+        {
+          path: 'withdrawal/:id',
+          name: 'admin.withdrawal.detail',
+          component: WithdrawalDetail,
+          meta: {
+            title: 'Withdrawal Detail',
+            requiresAuth: true,
+            permission: 'withdrawal-list'
+          }
+        },
+        {
+          path: 'user',
+          name: 'admin.user',
+          component: UserList,
+          meta: {
+            title: 'User List',
+            requiresAuth: true,
+            permission: 'user-list'
           }
         },
       ]

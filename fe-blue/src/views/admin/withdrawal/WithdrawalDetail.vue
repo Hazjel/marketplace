@@ -1,0 +1,199 @@
+<script setup>
+import Alert from '@/components/admin/Alert.vue';
+import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
+import { formatRupiah, formatToClientTimeZone } from '@/helpers/format';
+import { useWithdrawalStore } from '@/stores/withdrawal';
+import { storeToRefs } from 'pinia';
+import { onMounted, ref} from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
+
+const route = useRoute()
+
+const withdrawal = ref({})
+
+const withdrawalStore = useWithdrawalStore()
+const { loading, success, error } = storeToRefs(withdrawalStore)
+const { fetchWithdrawalById } = withdrawalStore
+
+const fetchData = async () => {
+    const response = await fetchWithdrawalById(route.params.id)
+
+    withdrawal.value = response
+}
+
+const closeAlert = () => {
+    withdrawalStore.success = null
+    withdrawalStore.error = null
+}
+
+onMounted(fetchData)
+</script>
+
+<template>
+    <div class="flex w-full gap-5">
+        <div class="flex flex-col w-full gap-5">
+            <div class="relative w-full rounded-[20px] bg-custom-orange overflow-hidden" v-if="withdrawal?.status === 'pending'">
+                <img src="@/assets/images/backgrounds/round-ornament.svg"
+                    class="size-full object-contain object-right opacity-55 absolute" alt="icon">
+                <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
+                    <img src="@/assets/images/icons/timer-white-fill.svg" class="flex size-9 shrink-0" alt="icon">
+                    <p class="font-bold text-lg text-white">The withdrawal status is still pending</p>
+                </div>
+            </div>
+            <div class="relative w-full rounded-[20px] bg-custom-green overflow-hidden" v-if="withdrawal?.status === 'approved'">
+                <img src="@/assets/images/backgrounds/round-ornament.svg"
+                    class="size-full object-contain object-right opacity-55 absolute" alt="icon">
+                <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
+                    <img src="@/assets/images/icons/tick-circle-white-fill.svg" class="flex size-9 shrink-0"
+                        alt="icon">
+                    <p class="font-bold text-lg text-white">The withdrawal status is complete</p>
+                </div>
+            </div>
+            <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
+                <p class="font-bold text-xl">Store Details</p>
+                <div class="flex items-center gap-[14px] w-full min-w-0">
+                    <div class="flex size-[92px] shrink-0 rounded-full bg-custom-background overflow-hidden">
+                        <img :src="withdrawal?.store_balance?.store?.logo" class="size-full object-cover" alt="photo">
+                    </div>
+                    <div class="flex flex-col gap-[6px] w-full overflow-hidden">
+                        <p class="font-bold text-[22px] leading-tight w-full truncate">
+                            {{ withdrawal?.store_balance?.store?.name }}
+                        </p>
+                        <p class="flex items-center gap-1 font-semibold text-lg text-custom-grey leading-none">
+                            <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
+                            {{ withdrawal?.store_balance?.store?.user?.name }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-col rounded-[20px] border border-custom-stroke p-4 gap-5">
+                    <div class="flex items-center gap-[10px] w-[260px]">
+                        <div
+                            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                            <img src="@/assets/images/icons/stickynote-black.svg" class="flex size-6 shrink-0"
+                                alt="icon">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <p class="font-bold text-lg leading-none">{{ withdrawal?.store_balance?.store?.transaction_count }}</p>
+                            <p class="font-semibold text-custom-grey">Total Transactions</p>
+                        </div>
+                    </div>
+                    <hr class="border-custom-stroke last:hidden">
+                    <div class="flex items-center gap-[10px] w-[260px]">
+                        <div
+                            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                            <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0" alt="icon">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <p class="font-bold text-lg leading-none">{{ withdrawal?.store_balance?.store?.product_count }}</p>
+                            <p class="font-semibold text-custom-grey">Total Products</p>
+                        </div>
+                    </div>
+                    <hr class="border-custom-stroke last:hidden">
+                </div>
+            </section>
+            <form action="manage-withdrawals.html" class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
+                <p class="font-bold text-xl">Proof of Payment</p>
+                <div class="flex items-center justify-between w-full">
+                    <div
+                        class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
+                        <img id="Thumbnail" src="@/assets/images/icons/gallery-default.svg"
+                            data-default="@/assets/images/icons/gallery-default.svg" class="size-full object-cover"
+                            alt="icon" />
+                        <input type="file" id="File-Input" accept="image/*" required
+                            class="absolute inset-0 opacity-0 cursor-pointer" />
+                    </div>
+                    <button type="button" id="Add-Photo"
+                        class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
+                        Add Photo
+                    </button>
+                </div>
+                <label class="group flex items-center gap-[7px] relative">
+                    <input type="checkbox" name="" id="Mark-Complete" required
+                        class="size-[18px] appearance-none rounded-md checked:border-[3px] checked:border-solid checked:border-white checked:bg-custom-blue ring-2 ring-custom-grey checked:ring-custom-blue transition-300">
+                    <span
+                        class="font-bold text-custom-grey leading-none group-has-[:checked]:text-custom-blue transition-300">Mark
+                        this withdrawal as complete</span>
+                </label>
+                <button type="submit" disabled id="Process-Withdrawals"
+                    class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300">
+                    <span class="font-semibold text-lg text-white">Process Withdrawals</span>
+                </button>
+            </form>
+            <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
+                <p class="font-bold text-xl">Proof of Payment</p>
+                <div class="relative h-[256px] w-full rounded-2xl overflow-hidden bg-custom-background">
+                    <img src="@/assets/images/thumbnails/proof.png" class="relative size-full object-cover"
+                        alt="proof">
+                    <div
+                        class="absolute bottom-0 w-full h-[95px] bg-[linear-gradient(180deg,rgba(41,45,50,0)_0%,rgba(41,45,50,0.6)_100%)]">
+                        <button type="button" data-modal="Preview-Modal"
+                            class="relative flex items-center w-fit h-10 rounded-full py-[10px] px-3 gap-[6px] bg-white mx-auto mt-[30px] mb-auto">
+                            <img src="@/assets/images/icons/maximize-3-black.svg" class="flex size-5 shrink-0"
+                                alt="icon">
+                            <span class="font-extrabold text-sm leading-none">PREVIEW</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="flex flex-col w-full gap-5">
+            <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
+                <div class="flex flex-col items-center justify-center h-[142px] w-full py-8 [6px]">
+                    <p class="font-bold text-[32px] text-custom-blue">Rp {{ formatRupiah(withdrawal?.amount) }}</p>
+                    <div class="flex items-center gap-[6px]">
+                        <img src="@/assets/images/icons/card-send-grey.svg" class="flex size-6 shrink-0" alt="icon">
+                        <p class="font-semibold text-custom-grey leading-none">Total Withdrawal</p>
+                    </div>
+                </div>
+                <div class="flex flex-col rounded-[20px] border border-custom-stroke p-4 gap-5">
+                    <div class="flex items-center gap-[10px] w-[260px]">
+                        <div
+                            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                            <img src="@/assets/images/icons/calendar-2-black.svg" class="flex size-6 shrink-0"
+                                alt="icon">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <p class="font-bold text-lg leading-none">{{ formatToClientTimeZone(withdrawal.created_at) }}</p>
+                            <p class="font-semibold text-custom-grey">Request Date</p>
+                        </div>
+                    </div>
+                    <hr class="border-custom-stroke last:hidden">
+                    <div class="flex items-center gap-[10px] w-[260px]">
+                        <div
+                            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                            <img src="@/assets/images/icons/profile-black.svg" class="flex size-6 shrink-0" alt="icon">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <p class="font-bold text-lg leading-none">{{ withdrawal.bank_account_name }}</p>
+                            <p class="font-semibold text-custom-grey">Bank Account Name</p>
+                        </div>
+                    </div>
+                    <hr class="border-custom-stroke last:hidden">
+                    <div class="flex items-center gap-[10px] w-[260px]">
+                        <div
+                            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                            <img src="@/assets/images/icons/bank-black.svg" class="flex size-6 shrink-0" alt="icon">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <p class="font-bold text-lg leading-none">{{ withdrawal.bank_name }}</p>
+                            <p class="font-semibold text-custom-grey">Bank Name</p>
+                        </div>
+                    </div>
+                    <hr class="border-custom-stroke last:hidden">
+                    <div class="flex items-center gap-[10px] w-[260px]">
+                        <div
+                            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                            <img src="@/assets/images/icons/card-tick-black.svg" class="flex size-6 shrink-0"
+                                alt="icon">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <p class="font-bold text-lg leading-none">{{ withdrawal.bank_account_number }}</p>
+                            <p class="font-semibold text-custom-grey">Bank Account Number</p>
+                        </div>
+                    </div>
+                    <hr class="border-custom-stroke last:hidden">
+                </div>
+            </section>
+        </div>
+    </div>
+</template>
