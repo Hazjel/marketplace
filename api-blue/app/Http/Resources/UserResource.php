@@ -14,13 +14,17 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $role = $this->roles->first()->name ?? '-';
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'role' => $this->roles->first()->name,
+            'role' => $role,
             'permissions' => $this->permissions,
-            'token' => $this->token
+            'token' => $this->token,
+            'store' => $role === 'store' ? $this->store : null,
+            'buyer' => $role === 'buyer' ? $this->buyer : null
         ];
     }
 }
