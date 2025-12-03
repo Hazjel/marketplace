@@ -95,9 +95,9 @@ const handleSubmit = async () => {
             </button>
             <p class="font-medium text-custom-grey text-center">
                 Don't have account?
-                <a href="signup.html" class="font-semibold text-custom-blue hover:underline transition-300">
+                <RouterLink :to="{ name: 'auth.register' }" class="font-semibold text-custom-blue hover:underline transition-300">
                     Create Account
-                </a>
+                </RouterLink>
             </p>
         </div>
     </form>

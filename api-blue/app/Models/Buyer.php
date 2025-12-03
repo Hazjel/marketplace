@@ -13,7 +13,6 @@ class Buyer extends Model
 
     protected $fillable = [
         'user_id',
-        'profile_picture',
         'phone_number'
     ];
 

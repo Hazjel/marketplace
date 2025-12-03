@@ -7,6 +7,9 @@ use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 class AuthRepository implements AuthRepositoryInterface
 {
@@ -16,6 +19,7 @@ class AuthRepository implements AuthRepositoryInterface
 
         try {
             $user = new User;
+            $user->profile_picture = $data['profile_picture']->store('assets/user', 'public');
             $user->name = $data['name'];
             $user->email = $data['email'];
             $user->password = bcrypt($data['password']);
@@ -25,10 +29,10 @@ class AuthRepository implements AuthRepositoryInterface
 
             if ($data['role'] == 'buyer') {
                 $user->buyer()->create([
-                    'profile_picture' => null,
                     'phone_number' => null
                 ]);
             }
+
 
             $user->token = $user->createToken('auth_token')->plainTextToken;
 

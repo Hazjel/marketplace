@@ -29,12 +29,7 @@ class BuyerFactory extends Factory
                 [],
                 'roles'
             ),
-            'profile_picture' => $imageHelper->storeAndResizeImage(
-                $imageHelper->createDummyImageWithTextSizeAndPosition(250, 250, 'center', 'center', 'random', 'medium'),
-                'buyer',
-                250,
-                250
-            ),
+            
             'phone_number' => $this->faker->phoneNumber(),
         ];
     }

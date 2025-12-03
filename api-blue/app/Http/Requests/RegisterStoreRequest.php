@@ -14,6 +14,7 @@ class RegisterStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'profile_picture' => 'required|image|',
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required',
@@ -24,6 +25,7 @@ class RegisterStoreRequest extends FormRequest
     public function attributes(): array
     {
         return [
+            'profile_picture' => 'Foto Profil',
             'name' => 'Nama',
             'email' => 'Email',
             'password' => 'Kata Sandi',
