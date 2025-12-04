@@ -120,7 +120,7 @@ class StoreController extends Controller implements HasMiddleware
             $store = $this->storeRepository->getByUserId($userId);
 
             if (!$store) {
-                return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
+                return ResponseHelper::jsonResponse(true, 'Toko Belum Dibuat', null, 200);
             }
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', new StoreResource($store), 200);

@@ -22,6 +22,8 @@ class StoreRepository implements StoreRepositoryInterface
             }
         });
 
+        $query->orderBy('created_at', 'desc');
+
         if ($limit) {
             $query->take($limit);
         }
