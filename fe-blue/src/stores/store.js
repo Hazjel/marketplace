@@ -86,6 +86,24 @@ export const useStoreStore = defineStore("store", {
             }
         },
 
+        async createStore(payload) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await axiosInstance.post('store', payload)
+
+                this.success = response.data.message
+
+                router.push({ name: 'admin.my-store' })
+                
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
         async approveStore(id) {
             this.loading = true
 

@@ -19,7 +19,12 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8000', // Laravel backend
         changeOrigin: true,
-      }
+      },
+      '/tariff/api': {
+        target: 'https://api-sandbox.collaborator.komerce.id', 
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tariff\/api/, '/tariff/api'),
+      },
     }
   }
 })

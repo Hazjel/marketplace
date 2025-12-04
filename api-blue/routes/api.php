@@ -20,11 +20,11 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::apiResource('user', UserController::class);
     Route::get('user/all/paginated', [UserController::class, 'getAllPaginated']);
 
-    Route::apiResource('store', StoreController::class);
     Route::get('store/all/paginated', [StoreController::class, 'getAllPaginated']);
-    Route::post('store/{id}/verified', [StoreController::class, 'updateVerifiedStatus']);
     Route::get('store/username/{store}', [StoreController::class, 'showByUsername']);
     Route::get('store/user/{user}', [StoreController::class, 'showByUserId']);
+    Route::post('store/{id}/verified', [StoreController::class, 'updateVerifiedStatus']);
+    Route::apiResource('store', StoreController::class);
 
     Route::apiResource('store-balance', StoreBalanceController::class)->except(['store', 'update', 'delete']);
     Route::get('store-balance/all/paginated', [StoreBalanceController::class, 'getAllPaginated']);
@@ -39,17 +39,17 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::apiResource('buyer', BuyerController::class);
     Route::get('buyer/all/paginated', [BuyerController::class, 'getAllPaginated']);
 
-    Route::apiResource('product-category', ProductCategoryController::class);
     Route::get('product-category/all/paginated', [ProductCategoryController::class, 'getAllPaginated']);
     Route::get('product-category/slug/{slug}', [ProductCategoryController::class, 'showBySlug']);
+    Route::apiResource('product-category', ProductCategoryController::class);
 
-    Route::apiResource('product', ProductController::class);
     Route::get('product/all/paginated', [ProductController::class, 'getAllPaginated']);
     Route::get('product/slug/{slug}', [ProductController::class, 'showBySlug']);
+    Route::apiResource('product', ProductController::class);
 
-    Route::apiResource('transaction', TransactionController::class);
     Route::get('transaction/all/paginated', [TransactionController::class, 'getAllPaginated']);
     Route::get('transaction/code/{code}', [TransactionController::class, 'showByCode']);
+    Route::apiResource('transaction', TransactionController::class);
 
     Route::post('product-review', [ProductReviewController::class, 'store']);
 });

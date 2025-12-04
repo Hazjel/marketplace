@@ -27,6 +27,7 @@ import WithdrawalList from '@/views/admin/withdrawal/WithdrawalList.vue'
 import WithdrawalDetail from '@/views/admin/withdrawal/WithdrawalDetail.vue'
 import UserList from '@/views/admin/user/UserList.vue'
 import MyStore from '@/views/admin/store/MyStore.vue'
+import StoreCreate from '@/views/admin/store/StoreCreate.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -170,6 +171,16 @@ const router = createRouter({
             title: 'My Store',
             requiresAuth: true,
             permission: 'store-list'
+          }
+        },
+        {
+          path: 'create-store',
+          name: 'admin.create-store',
+          component: StoreCreate,
+          meta: {
+            title: 'Create Store',
+            requiresAuth: true,
+            permission: 'store-create'
           }
         },
         {
