@@ -93,5 +93,19 @@ export const useProductStore = defineStore("product", {
                 this.loading = false
             }
         },
+
+        async deleteProduct(id){
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.delete(`product/${id}`)
+
+                this.success = response.data.message
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        }
     },
 });

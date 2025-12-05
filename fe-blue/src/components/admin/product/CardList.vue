@@ -52,7 +52,7 @@ const emit = defineEmits(['delete'])
                 Created on 19/02/2020
             </p>
             <div class="flex items-center justify-end gap-[14px]">
-                <button class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-red/10" v-if="can('product-delete')">
+                <button class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-red/10" v-if="can('product-delete')" @click="emit('delete', item.id)">
                     <img src="@/assets/images/icons/trash-red.svg" class="flex size-6 shrink-0" alt="icon" >
                     <span class="font-semibold text-custom-red">Delete</span>
                 </button>

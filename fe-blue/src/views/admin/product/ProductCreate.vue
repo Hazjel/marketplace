@@ -139,7 +139,7 @@ onMounted(async () => {
                                         <p class="input-placeholder">
                                             Enter Product Weight
                                         </p>
-                                        <input type="number" class="custom-input !pr-24" placeholder="" v-model="product.weight">
+                                        <input type="text" class="custom-input !pr-24" placeholder="" v-model="product.weight">
                                     </label>
                                     <div class="absolute transform -translate-y-1/2 top-1/2 right-5 w-fit h-fit">
                                         <select name="" id="" class="rounded-lg py-[10px] px-4 bg-custom-blue/10 text-custom-blue font-extrabold text-sm h-[38px] w-[71px] appearance-none leading-none">

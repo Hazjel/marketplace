@@ -102,6 +102,7 @@ watch(filters, () => {
                 <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0" alt="icon">
             </RouterLink>
         </div>
+        <alert :success="success" :error="error" @closeAlert="() => { success = null; error = null; }"></alert>
         <div id="Filter" class="flex items-center justify-between">
             <form action="#">
                 <label class="flex items-center w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
