@@ -30,8 +30,7 @@ onMounted(async () => {
 
     fetchProducts({
         product_category_id: productCategory.value.id,
-        limit: 8, 
-        random: true,
+        per_page: 8,
     })
 })
 </script>

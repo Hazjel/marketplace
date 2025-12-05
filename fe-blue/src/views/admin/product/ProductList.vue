@@ -97,10 +97,10 @@ watch(filters, () => {
                     <p class="font-semibold text-custom-grey">{{ meta.total }} Total Products</p>
                 </div>
             </div>
-            <a href="add-new-product.html" class="flex h-14 items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]" v-if="can('product-create')">
+            <RouterLink :to="{ name: 'admin.product.create' }" class="flex h-14 items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]" v-if="can('product-create')">
                 <span class="font-semibold text-lg text-white leading-none">Add New</span>
                 <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0" alt="icon">
-            </a>
+            </RouterLink>
         </div>
         <div id="Filter" class="flex items-center justify-between">
             <form action="#">
