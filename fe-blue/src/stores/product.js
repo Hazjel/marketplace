@@ -94,6 +94,25 @@ export const useProductStore = defineStore("product", {
             }
         },
 
+        async updateProduct(payload) {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await axiosInstance.post(`product/${payload.id}`, {
+                    ...payload,
+                    _method: 'PUT'
+                })
+
+                this.success = response.data.message
+                
+                router.push({ name: 'admin.product' })
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
         async deleteProduct(id){
             this.loading = true
             

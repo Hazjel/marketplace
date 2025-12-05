@@ -6,8 +6,6 @@ import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { RouterLink } from 'vue-router';
 import { useRoute } from 'vue-router';
 
-
-
 const route = useRoute()
 
 const productCategoryStore = useProductCategoryStore()

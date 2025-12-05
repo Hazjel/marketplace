@@ -18,6 +18,7 @@ import CategoryDetail from '@/views/admin/category/CategoryDetail.vue'
 import ProductList from '@/views/admin/product/ProductList.vue'
 import ProductDetail from '@/views/admin/product/ProductDetail.vue'
 import ProductCreate from '@/views/admin/product/ProductCreate.vue'
+import ProductEdit from '@/views/admin/product/ProductEdit.vue'
 import StoreList from '@/views/admin/store/StoreList.vue'
 import StoreDetail from '@/views/admin/store/StoreDetail.vue'
 import TransactionList from '@/views/admin/transaction/TransactionList.vue'
@@ -162,6 +163,16 @@ const router = createRouter({
             title: 'Product Detail',
             requiresAuth: true,
             permission: 'product-list'
+          }
+        },
+        {
+          path: 'product/edit/:id',
+          name: 'admin.product.edit',
+          component: ProductEdit,
+          meta: {
+            title: 'Product Edit',
+            requiresAuth: true,
+            permission: 'product-edit'
           }
         },
         {
