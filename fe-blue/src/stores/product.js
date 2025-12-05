@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { axiosInstance } from "@/plugins/axios";
 import { handleError } from "@/helpers/errorHelper";
+import router from "@/router";
 
 export const useProductStore = defineStore("product", {
     state: () => ({
@@ -72,6 +73,25 @@ export const useProductStore = defineStore("product", {
             } finally {
                 this.loading = false
             }
-        }
+        },
+
+        async createProduct(payload) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await axiosInstance.post('product', payload)
+
+                this.success = response.data.message
+                
+                router.push({ name: 'admin.product' })
+                
+                
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
     },
 });
