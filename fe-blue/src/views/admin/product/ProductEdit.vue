@@ -5,13 +5,15 @@ import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
-import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
 import { formatRupiah, parseRupiah } from '@/helpers/format';
 
+const route = useRoute()
 
 const productStore = useProductStore()
 const { loading, error } = storeToRefs(productStore)
-const { createProduct } = productStore
+const { createProduct, fetchProductById, updateProduct } = productStore
+    
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
@@ -57,12 +59,34 @@ const product = ref({
 
 })
 
+const fetchData = async () => {
+    const response = await fetchProductById(route.params.id)
+
+    product.value = response
+
+    // ensure store_id stays set (response may not include it)
+    if (!product.value.store_id && user.value?.store?.id) {
+        product.value.store_id = user.value.store.id    
+    }
+
+    product.value.product_images.forEach((image) => {
+        image.id = image.id
+        image.url = image.image
+        image.image = null
+
+    })
+
+    product.value.parent_product_category_id = product.value.product_category.parent_id
+    product.value.product_category_id = product.value.product_category.id
+}
+
 const handleSubmit = async () => {
-    await createProduct({
+    await updateProduct({
         ...product.value,
         price: parseRupiah(product.value.price),
         product_images: product.value.product_images.filter(image => image.image).map(image => {
             return {
+                id: image.id,
                 image: image.image,
                 is_thumbnail: image.is_thumbnail ? 1 : 0
             }
@@ -77,12 +101,10 @@ const handleImageChange = (event, index) => {
     product.value.product_images[index].url = URL.createObjectURL(file)
 }
 
-watch(() => product.value.parent_product_category_id, async (newValue) => {
-    product.value.product_category_id = null
-
+watch( () => product.value.parent_product_category_id, async (newValue) => {
     const category = productCategories.value.find(category => category.id === newValue).childrens
 
-    subCategories.value = category 
+    subCategories.value = category
 })
 
 
@@ -95,6 +117,8 @@ onMounted(async () => {
     await fetchProductCategories({
         is_parent: true,
     })
+
+    await fetchData()
 })
 
 </script>

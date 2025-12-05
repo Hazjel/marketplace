@@ -56,10 +56,10 @@ const emit = defineEmits(['delete'])
                     <img src="@/assets/images/icons/trash-red.svg" class="flex size-6 shrink-0" alt="icon" >
                     <span class="font-semibold text-custom-red">Delete</span>
                 </button>
-                <a href="edit-product.html" class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black" v-if="can('product-edit')">
+                <RouterLink :to="{ name: 'admin.product.edit', params: {id: item.id}}" class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black" v-if="can('product-edit')">
                     <img src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0" alt="icon" >
                     <span class="font-semibold text-white">Edit</span>
-                </a>
+                </RouterLink>
                 <RouterLink :to="{ name: 'admin.product.detail', params: {id: item.id}}" class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                     <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon">
                     <span class="font-semibold text-white">Details</span>
