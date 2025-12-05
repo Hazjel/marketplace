@@ -95,6 +95,14 @@ const items = [
                 role: 'admin'
             },
             {
+                label: 'My Wallet',
+                path: '/admin/my-store-balance',
+                iconDefault: EmpyWalletGreyIcon,
+                iconActive: Wallet3BlueFillIcon,
+                permission: 'store-balance-menu',
+                role: 'store'
+            },
+            {
                 label: 'Withdrawal',
                 path: '/admin/withdrawal',
                 iconDefault: EmpyWalletGreyIcon,

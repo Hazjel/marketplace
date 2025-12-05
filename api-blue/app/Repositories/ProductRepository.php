@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 use App\Interfaces\ProductImageRepositoryInterface;
 use App\Repositories\ProductImageRepository;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProductRepository implements ProductRepositoryInterface
 {
@@ -28,8 +30,8 @@ class ProductRepository implements ProductRepositoryInterface
             }
         })->with('productImages');
 
-        if (auth()->user() && auth()->user()->hasRole('store') && auth()->user()->store) {
-            $query->where('store_id', auth()->user()->store->id);
+        if (Auth::user() && Auth::user()->role === 'store' && Auth::user()->store) {
+            $query->where('store_id', Auth::user()->store->id);
         }
 
         if ($limit) {

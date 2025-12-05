@@ -72,11 +72,11 @@ export const useStoreStore = defineStore("store", {
             }
         },
 
-        async fetchStoreById(id) {
+        async fetchStoreByUser() {
             this.loading = true
             
             try {
-                const response = await axiosInstance.get(`store/${id}`)
+                const response = await axiosInstance.get(`my-store`)
 
                 return response.data.data
             } catch (error) {

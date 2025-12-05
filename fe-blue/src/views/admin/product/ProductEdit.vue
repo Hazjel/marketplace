@@ -73,7 +73,6 @@ const fetchData = async () => {
         image.id = image.id
         image.url = image.image
         image.image = null
-
     })
 
     product.value.parent_product_category_id = product.value.product_category.parent_id

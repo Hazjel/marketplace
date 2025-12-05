@@ -75,5 +75,19 @@ class StoreBalanceController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
+    public function showByStore()
+    {
+        try {
+            $store = $this->storeBalanceRepository->getByStore();
+
+            if (!$store) {
+                return ResponseHelper::jsonResponse(true, 'Dompet Tidak Ditemukan', null, 200);
+            }
+
+            return ResponseHelper::jsonResponse(true, 'Data Dompet Berhasil Diambil', new StoreBalanceResource($store), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
 
 }
