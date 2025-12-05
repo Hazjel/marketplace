@@ -1,6 +1,5 @@
 <script setup>
 import { useStoreStore } from '@/stores/store';
-import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { ref } from 'vue';
@@ -8,15 +7,12 @@ import { RouterLink } from 'vue-router';
 
 const store = ref({})
 
-const authStore = useAuthStore();
-const { user } = storeToRefs(authStore);
-
 const storeStore = useStoreStore()
 const { loading } = storeToRefs(storeStore)
-const { fetchStoresByUserId } = storeStore
+const { fetchStoreByUser } = storeStore
 
 const fetchStore = async () => {
-    const response = await fetchStoresByUserId(user.value.id)
+    const response = await fetchStoreByUser()
 
     store.value = response
 }

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\ProductCategory;
+use Illuminate\Support\Facades\Auth;
 
 class ProductUpdateRequest extends FormRequest
 {
@@ -55,5 +56,14 @@ class ProductUpdateRequest extends FormRequest
             'product_images.*.image' => 'Gambar',
             'product_images.*.is_thumbnail' => 'Gambar Utama',
         ];
+    }
+
+    public function prepareForValidation()
+    {
+        $user = Auth::user();
+
+        if ($user && $user->role === 'store'){
+            $this->merge(['store_id' => $user->store->id]);
+        }
     }
 }

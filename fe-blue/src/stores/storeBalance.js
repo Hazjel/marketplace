@@ -44,5 +44,19 @@ export const useStoreBalanceStore = defineStore("storeBalance", {
                 this.loading = false
             }
         },
+
+        async fetchStoreBalanceByStore() {
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.get(`my-store-balance`)
+
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
     }
 })

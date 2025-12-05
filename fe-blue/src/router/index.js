@@ -25,6 +25,7 @@ import TransactionList from '@/views/admin/transaction/TransactionList.vue'
 import TransactionDetail from '@/views/admin/transaction/TransactionDetail.vue'
 import StoreBalanceList from '@/views/admin/store-balance/StoreBalanceList.vue'
 import StoreBalanceDetail from '@/views/admin/store-balance/StoreBalanceDetail.vue'
+import MyStoreBalance from '@/views/admin/store-balance/MyStoreBalance.vue'
 import WithdrawalList from '@/views/admin/withdrawal/WithdrawalList.vue'
 import WithdrawalDetail from '@/views/admin/withdrawal/WithdrawalDetail.vue'
 import UserList from '@/views/admin/user/UserList.vue'
@@ -251,6 +252,16 @@ const router = createRouter({
           component: StoreBalanceDetail,
           meta: {
             title: 'Store Wallet Detail',
+            requiresAuth: true,
+            permission: 'store-balance-list'
+          }
+        },
+        {
+          path: 'my-store-balance',
+          name: 'admin.my-store-balance',
+          component: MyStoreBalance,
+          meta: {
+            title: 'Manage My Wallet',
             requiresAuth: true,
             permission: 'store-balance-list'
           }

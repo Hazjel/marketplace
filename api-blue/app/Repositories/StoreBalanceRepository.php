@@ -7,8 +7,7 @@ use App\Interfaces\StoreBalanceRepositoryInterface;
 use App\Models\StoreBalance;
 use Exception;
 use Illuminate\Support\Facades\DB;
-
-
+use Illuminate\Support\Facades\Auth;
 
 class StoreBalanceRepository implements StoreBalanceRepositoryInterface
 {
@@ -44,6 +43,15 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
 
         return $query->first();
     }
+
+    public function getByStore()
+    {
+        $user = Auth::user();
+        $query = StoreBalance::where('store_id', $user->store->id)->with(['storeBalanceHistories']);
+
+        return $query->first();
+    }
+
 
     public function credit(
         string $id,
