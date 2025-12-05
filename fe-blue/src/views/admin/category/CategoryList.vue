@@ -71,7 +71,7 @@ watch(filters, () => {
             </RouterLink>
         </div>
 
-        <alert :success="success" :error="error" @closeAlert="closeAlert"/>
+        <alert :success="success" :error="error" @closeAlert="() => { success = null; error = null; }"></alert>
 
         <div id="Filter" class="flex items-center justify-between">
             <form action="#">
