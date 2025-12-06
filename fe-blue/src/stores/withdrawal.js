@@ -22,8 +22,8 @@ export const useWithdrawalStore = defineStore("withdrawal", {
             try {
                 const response = await axiosInstance.get(`withdrawal/all/paginated`, { params });
 
-                this.withdrawals = response.data.data.data
-                this.meta = response.data.data.meta
+                this.withdrawals = response.data.data
+                this.meta = response.data.meta
             } catch (error) {
                 this.error = handleError(error);
             } finally {
