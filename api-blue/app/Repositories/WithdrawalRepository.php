@@ -7,6 +7,9 @@ use App\Models\Withdrawal;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use App\Repositories\StoreBalanceRepository;
+use App\Repositories\StoreBalanceHistoryRepository;
+use Illuminate\Support\Facades\Auth;
 
 class WithdrawalRepository implements WithdrawalRepositoryInterface
 {
@@ -17,6 +20,14 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
                 $query->search($search);
             }
         });
+
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $query->whereHas('storeBalance', function($query){
+                $query->whereHas('store', function($query){
+                    $query->where('id', auth()->user()->store->id ?? null);
+                });
+            });
+        }
 
         if ($limit) {
             $query->take($limit);

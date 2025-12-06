@@ -30,8 +30,8 @@ class ProductRepository implements ProductRepositoryInterface
             }
         })->with('productImages');
 
-        if (Auth::user() && Auth::user()->role === 'store' && Auth::user()->store) {
-            $query->where('store_id', Auth::user()->store->id);
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $query->where('store_id', auth()->user()->store->id ?? null);
         }
 
         if ($limit) {
