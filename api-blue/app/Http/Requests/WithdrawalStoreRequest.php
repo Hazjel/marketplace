@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\StoreBalance;
 
 class WithdrawalStoreRequest extends FormRequest
 {
@@ -15,10 +16,21 @@ class WithdrawalStoreRequest extends FormRequest
     {
         return [
             'store_balance_id' => 'required|exists:store_balances,id',
-            'amount' => 'required|min:0|integer',
+            'amount' => [
+                'required',
+                'numeric',
+                'min:50000',
+                function ($attribute, $value, $fail) {
+                    $storeBalance = StoreBalance::find($this->store_balance_id);
+
+                    if ($storeBalance->balance < $value) {
+                        $fail('Saldo tidak mencukupi');
+                    }
+                }   
+            ],
             'bank_account_name' => 'required|string',
             'bank_account_number' => 'required|string',
-            'bank_name' => 'required|string|in:bca, mandiri, bni, bri'
+            'bank_name' => 'required|string|in:bca,mandiri,bni,bri'
         ];
     }
 

@@ -6,8 +6,12 @@ import { useWithdrawalStore } from '@/stores/withdrawal';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref} from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute()
+
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
 const withdrawal = ref({})
 
@@ -91,8 +95,8 @@ onMounted(fetchData)
                     <hr class="border-custom-stroke last:hidden">
                 </div>
             </section>
-            <form action="manage-withdrawals.html" class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
-                <p class="font-bold text-xl">Proof of Payment</p>
+            <form action="manage-withdrawals.html" class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="user.role === 'admin' ">
+                <p class="fld text-xl">Proof of Payment</p>
                 <div class="flex items-center justify-between w-full">
                     <div
                         class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
@@ -119,7 +123,7 @@ onMounted(fetchData)
                     <span class="font-semibold text-lg text-white">Process Withdrawals</span>
                 </button>
             </form>
-            <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
+            <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="withdrawal.proof">
                 <p class="font-bold text-xl">Proof of Payment</p>
                 <div class="relative h-[256px] w-full rounded-2xl overflow-hidden bg-custom-background">
                     <img src="@/assets/images/thumbnails/proof.png" class="relative size-full object-cover"
