@@ -1,6 +1,7 @@
 import { handleError } from "@/helpers/errorHelper";
 import { axiosInstance } from "@/plugins/axios";
 import { defineStore } from "pinia";
+import router from "@/router";
 
 export const useWithdrawalStore = defineStore("withdrawal", {
     state: () => ({
@@ -22,8 +23,10 @@ export const useWithdrawalStore = defineStore("withdrawal", {
             try {
                 const response = await axiosInstance.get(`withdrawal/all/paginated`, { params });
 
-                this.withdrawals = response.data.data
-                this.meta = response.data.meta
+                // API response shape: { success, message, data: { data: [...], meta: {...} } }
+                const payload = response.data?.data || {}
+                this.withdrawals = payload.data || []
+                this.meta = payload.meta || this.meta
             } catch (error) {
                 this.error = handleError(error);
             } finally {
@@ -38,6 +41,24 @@ export const useWithdrawalStore = defineStore("withdrawal", {
                 const response = await axiosInstance.get(`withdrawal/${id}`)
 
                 return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async createWithdrawal(payload) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await axiosInstance.post('withdrawal', payload)
+
+                this.success = response.data.message
+
+                router.push({ name: 'admin.my-store-balance' })
+                
             } catch (error) {
                 this.error = handleError(error)
             } finally {

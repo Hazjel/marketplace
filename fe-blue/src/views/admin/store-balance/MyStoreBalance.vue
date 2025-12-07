@@ -6,6 +6,8 @@ import { onMounted, computed } from 'vue';
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { formatRupiah } from '@/helpers/format';
+import iconTickGreen from '@/assets/images/icons/card-tick-green-fill.svg';
+import iconSendOrange from '@/assets/images/icons/card-send-orange-fill.svg';
 import Pagination from '@/components/admin/Pagination.vue';
 
 
@@ -59,6 +61,7 @@ const fetchStoreBalance = async () => {
     storeBalance.value = response
 
     await fetchWithdrawalsPaginated(serverOptions.value)
+    console.log('withdrawals fetched', withdrawals.value)
 }
 
 onMounted(fetchStoreBalance)
@@ -126,7 +129,7 @@ onMounted(fetchStoreBalance)
                     class="flex flex-col items-center justify-center gap-2 text-center min-w-0 w-full px-4 absolute transform -translate-x-1/2 left-1/2 top-[51px]">
                     <p class="font-medium text-[#BFC6E9] leading-none">Seller Balance:</p>
                     <p class="w-full font-extrabold text-[40px] text-white leading-none">
-                        Rp <span id="balanceText">{{ storeBalance.balance }}</span>
+                        Rp <span id="balanceText">{{ formatRupiah(storeBalance.balance) }}</span>
                     </p>
                 </div>
                 <button id="toggleBalance"
@@ -148,12 +151,12 @@ onMounted(fetchStoreBalance)
                     <p class="font-semibold text-custom-grey">{{ totalWithdrawals }} Total Withdrawal</p>
                 </div>
             </div>
-            <a href="create-withdrawals.html"
+            <RouterLink :to="{ name: 'admin.withdrawal.create' }"
                 class="flex h-14 items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]">
                 <span class="font-semibold text-lg text-white leading-none">Request Withdraw</span>
                 <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0"
                     alt="icon">
-            </a>
+        </RouterLink>
         </div>
         
         <!-- Tampilkan list jika ada data -->
@@ -171,11 +174,9 @@ onMounted(fetchStoreBalance)
                             ]">
                             <img 
                                 :src="withdrawal.status === 'completed' 
-                                    ? require('@/assets/images/icons/card-tick-green-fill.svg') 
-                                    : require('@/assets/images/icons/card-send-orange-fill.svg')"
+                                    ? iconTickGreen 
+                                    : iconSendOrange"
                                 class="size-full object-contain"
-                                alt="icon">
-                                class="size-full object-contain" 
                                 alt="icon">
                         </div>
                         <div class="flex flex-col gap-[6px]">
@@ -194,12 +195,12 @@ onMounted(fetchStoreBalance)
                             {{ withdrawal.status }}
                         </p>
                     </div>
-                    <a href="withdrawal-details.html"
+                    <RouterLink :to="{ name: 'admin.withdrawal.detail', params: { id: withdrawal.id } }"
                         class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                         <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0"
                             alt="icon">
                         <span class="font-semibold text-white">Details</span>
-                    </a>
+                    </RouterLink>
                 </div>
             </div>
             <Pagination :meta="meta" :server-options="serverOptions"/>

@@ -28,6 +28,7 @@ import StoreBalanceDetail from '@/views/admin/store-balance/StoreBalanceDetail.v
 import MyStoreBalance from '@/views/admin/store-balance/MyStoreBalance.vue'
 import WithdrawalList from '@/views/admin/withdrawal/WithdrawalList.vue'
 import WithdrawalDetail from '@/views/admin/withdrawal/WithdrawalDetail.vue'
+import WithdrawalCreate from '@/views/admin/withdrawal/WithdrawalCreate.vue'
 import UserList from '@/views/admin/user/UserList.vue'
 import MyStore from '@/views/admin/store/MyStore.vue'
 import StoreCreate from '@/views/admin/store/StoreCreate.vue'
@@ -284,6 +285,16 @@ const router = createRouter({
             title: 'Withdrawal Detail',
             requiresAuth: true,
             permission: 'withdrawal-list'
+          }
+        },
+        {
+          path: 'withdrawal/create',
+          name: 'admin.withdrawal.create',
+          component: WithdrawalCreate,
+          meta: {
+            title: ' Request Withdrawal Create',
+            requiresAuth: true,
+            permission: 'withdrawal-create'
           }
         },
         {
