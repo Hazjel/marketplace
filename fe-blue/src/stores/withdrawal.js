@@ -65,5 +65,20 @@ export const useWithdrawalStore = defineStore("withdrawal", {
                 this.loading = false
             }
         },
+
+        async approveWithdrawal(payload) {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await axiosInstance.post(`withdrawal/${payload.id}/approve`, payload)
+
+                this.success = response.data.message
+                
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        }
     }
 })
