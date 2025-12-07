@@ -14,20 +14,30 @@ const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
 const withdrawal = ref({})
+const isConfirmed = ref(false)
 
 const withdrawalStore = useWithdrawalStore()
 const { loading, success, error } = storeToRefs(withdrawalStore)
-const { fetchWithdrawalById } = withdrawalStore
+const { fetchWithdrawalById, approveWithdrawal } = withdrawalStore
 
 const fetchData = async () => {
     const response = await fetchWithdrawalById(route.params.id)
 
     withdrawal.value = response
+    withdrawal.value.proof_url = PlaceHolder
 }
 
-const closeAlert = () => {
-    withdrawalStore.success = null
-    withdrawalStore.error = null
+const handleAprroveWithdrawal = async () => {
+    await approveWithdrawal(withdrawal.value)
+
+    fetchData()
+}
+
+const handleImageChange = (e) => {
+    const file = e.target.files[0]
+
+    withdrawal.value.proof = file
+    withdrawal.value.proof_url = URL.createObjectURL(file)
 }
 
 onMounted(fetchData)
@@ -95,16 +105,16 @@ onMounted(fetchData)
                     <hr class="border-custom-stroke last:hidden">
                 </div>
             </section>
-            <form action="manage-withdrawals.html" class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="user.role === 'admin' ">
+            <form @submit.prevent="handleAprroveWithdrawal" class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="user.role === 'admin' && withdrawal.status === 'pending'">
                 <p class="fld text-xl">Proof of Payment</p>
                 <div class="flex items-center justify-between w-full">
                     <div
                         class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
-                        <img id="Thumbnail" src="@/assets/images/icons/gallery-default.svg"
+                        <img id="Thumbnail" :src="withdrawal.proof_url"
                             data-default="@/assets/images/icons/gallery-default.svg" class="size-full object-cover"
                             alt="icon" />
                         <input type="file" id="File-Input" accept="image/*" required
-                            class="absolute inset-0 opacity-0 cursor-pointer" />
+                            class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange" />
                     </div>
                     <button type="button" id="Add-Photo"
                         class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
@@ -113,20 +123,20 @@ onMounted(fetchData)
                 </div>
                 <label class="group flex items-center gap-[7px] relative">
                     <input type="checkbox" name="" id="Mark-Complete" required
-                        class="size-[18px] appearance-none rounded-md checked:border-[3px] checked:border-solid checked:border-white checked:bg-custom-blue ring-2 ring-custom-grey checked:ring-custom-blue transition-300">
+                        class="size-[18px] appearance-none rounded-md checked:border-[3px] checked:border-solid checked:border-white checked:bg-custom-blue ring-2 ring-custom-grey checked:ring-custom-blue transition-300" v-model="isConfirmed">
                     <span
                         class="font-bold text-custom-grey leading-none group-has-[:checked]:text-custom-blue transition-300">Mark
                         this withdrawal as complete</span>
                 </label>
-                <button type="submit" disabled id="Process-Withdrawals"
-                    class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300">
+                <button type="submit" id="Process-Withdrawals"
+                    class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300" :disabled="!isConfirmed">
                     <span class="font-semibold text-lg text-white">Process Withdrawals</span>
                 </button>
             </form>
-            <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="withdrawal.proof">
+            <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="withdrawal.status === 'approved'">
                 <p class="font-bold text-xl">Proof of Payment</p>
                 <div class="relative h-[256px] w-full rounded-2xl overflow-hidden bg-custom-background">
-                    <img src="@/assets/images/thumbnails/proof.png" class="relative size-full object-cover"
+                    <img :src="withdrawal.proof" class="relative size-full object-cover"
                         alt="proof">
                     <div
                         class="absolute bottom-0 w-full h-[95px] bg-[linear-gradient(180deg,rgba(41,45,50,0)_0%,rgba(41,45,50,0.6)_100%)]">
