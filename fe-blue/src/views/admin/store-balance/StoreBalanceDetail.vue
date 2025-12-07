@@ -3,9 +3,8 @@ import Alert from '@/components/admin/Alert.vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { formatRupiah, formatToClientTimeZone } from '@/helpers/format';
 import { useStoreBalanceStore } from '@/stores/storeBalance';
-import { useWithdrawalStore } from '@/stores/withdrawal';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref} from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Pagination from '@/components/admin/Pagination.vue';
 
@@ -18,19 +17,14 @@ const storeBalanceStore = useStoreBalanceStore()
 const { loading, success, error } = storeToRefs(storeBalanceStore)
 const { fetchStoreBalanceById } = storeBalanceStore
 
-const withdrawalStore = useWithdrawalStore()
-const { withdrawals, meta, loading:loadingWithdrawal } = storeToRefs(withdrawalStore)
-const { fetchWithdrawalsPaginated } = withdrawalStore
+const histories = computed(() => storeBalance.value?.store_balance_histories || [])
+const hasHistories = computed(() => Array.isArray(histories.value) && histories.value.length > 0)
 
 const fetchData = async () => {
     const response = await fetchStoreBalanceById(route.params.id)
 
     storeBalance.value = response
-
-    fetchWithdrawalsPaginated({
-        page: 1,
-        row_per_page: 10
-    })
+    console.log('Store balance histories:', histories.value)
 }
 
 const closeAlert = () => {
@@ -122,16 +116,12 @@ onMounted(fetchData)
     <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
         <div class="header flex items-center justify-between">
             <div class="flex flex-col gap-2">
-                <p class="font-bold text-xl">Wallet Withdrawal Transaction</p>
-                <div class="flex items-center gap-1">
-                    <img src="@/assets/images/icons/wallet-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    <p class="font-semibold text-custom-grey">{{ withdrawals.length }} Total Withdrawal</p>
-                </div>
+                <p class="font-bold text-xl">Wallet History Transaction</p>
             </div>
         </div>
-        <section id="List-Withdrawal" class="flex flex-col flex-1 gap-6 w-full">
+        <section v-if="hasHistories" id="List-Withdrawal" class="flex flex-col flex-1 gap-6 w-full">
             <div class="list flex flex-col gap-5">
-                <div class="card flex rounded-[20px] border border-custom-stroke p-4 gap-5 justify-between bg-white" v-for="withdrawal in withdrawals">
+                <div class="card flex rounded-[20px] border border-custom-stroke p-4 gap-5 justify-between bg-white" v-for="history in histories" :key="history.id">
                     <div class="flex items-center gap-[14px] flex-1">
                         <div
                             class="flex size-[72px] rounded-2xl overflow-hidden items-center justify-center p-5 bg-custom-orange/10">
@@ -139,26 +129,20 @@ onMounted(fetchData)
                                 alt="icon">
                         </div>
                         <div class="flex flex-col gap-[6px]">
-                            <p class="font-bold text-[22px] text-custom-orange">Rp {{ formatRupiah(withdrawal.amount) }}</p>
-                            <p class="font-semibold text-custom-grey leading-none">Withdrawal</p>
+                            <p class="font-bold text-[22px] text-custom-orange">Rp {{ formatRupiah(history.amount) }}</p>
+                            <p class="font-semibold text-custom-grey leading-none">{{ history.type }}</p>
                         </div>
                     </div>
                     <div class="flex flex-1 items-center">
                         <p
                             class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-orange/10 text-custom-orange">
-                            {{ withdrawal.status }}
+                            {{ history.remarks }}
                         </p>
                     </div>
-                    <a href="wallet-details.html"
-                        class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
-                        <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-semibold text-white">Details</span>
-                    </a>
                 </div>
             </div>
         </section>
-        <Pagination :meta="meta" :server-options="serverOptions"/>
-        <div id="Empty-State" class="hidden flex flex-col flex-1 items-center justify-center gap-4" v-if="withdrawals?.length === 0">
+        <div v-else id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4">
             <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon">
             <div class="flex flex-col gap-1 items-center text-center">
                 <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>

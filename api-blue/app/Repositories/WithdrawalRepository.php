@@ -29,6 +29,8 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             });
         }
 
+        $query->orderBy('created_at', 'desc');
+
         if ($limit) {
             $query->take($limit);
         }
