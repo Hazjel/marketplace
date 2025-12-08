@@ -1,3 +1,17 @@
+<script setup>
+    import { useAuthStore } from '@/stores/auth';
+    import { storeToRefs } from 'pinia';
+    import { onMounted, ref } from 'vue';
+
+    const showDropdownProfile = ref(false);
+
+    const authStore = useAuthStore()
+    const { user } = storeToRefs(authStore)
+    const { checkAuth } = authStore
+
+    onMounted(checkAuth)
+</script>
+
 <template>
     <section id="Navbar-Wrapper" class="flex h-[168px] w-full mx-auto relative">
             <div class="fixed top-0 w-full bg-white min-h-[168px] border-b border-custom-stroke py-8 z-30">
@@ -25,14 +39,48 @@
                                     <img src="@/assets/images/icons/notification-black.svg" class="size-6" alt="icon">
                                 </div>
                             </a>
-                            <a href="shopping-cart.html">
+                            <RouterLink :to="{ name: 'app.cart' }">
                                 <div class="flex size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
                                     <img src="@/assets/images/icons/shopping-cart-black.svg" class="size-6" alt="icon">
                                 </div>
-                            </a>
-                            <RouterLink :to="{ name: 'auth.login' }" class="flex shrink-0 h-14 rounded-[18px] py-4 px-8 bg-custom-blue">
+                            </RouterLink>
+                            <RouterLink :to="{ name: 'auth.login' }" class="flex shrink-0 h-14 rounded-[18px] py-4 px-8 bg-custom-blue" v-if="!user">
                                 <p class="font-medium text-white">Sign In/Register</p>
                             </RouterLink>
+                            <div class="relative" v-if="user">
+                            <button @click="showDropdownProfile = !showDropdownProfile"
+                                class="flex size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
+                                <img :src="user.profile_picture" class="size-full" alt="icon">
+                            </button>
+                            <div id="Profile-Dropdown"
+                                class="absolute transform top-[calc(100%+12px)] right-0 z-30" v-if="showDropdownProfile">
+                                <nav
+                                    class="flex flex-col w-[201px] rounded-[20px] rounded-tr-none py-6 px-4 gap-[18px] bg-white shadow-[0px_6px_30px_0px_#00000017]">
+                                    <a href="buyer/overview.html" class="flex w-full items-center justify-between">
+                                        <span class="font-medium text-custom-grey">My Profile</span>
+                                        <img src="@/assets/images/icons/profile-circle-grey.svg"
+                                            class="flex size-6 shrink-0" alt="icon">
+                                    </a>
+                                    <RouterLink :to="{ name: 'buyer.my-transactions' }"
+                                        class="flex w-full items-center justify-between">
+                                        <span class="font-medium text-custom-grey">My Transactions</span>
+                                        <img src="@/assets/images/icons/stickynote-grey.svg" class="flex size-6 shrink-0"
+                                            alt="icon">
+                                    </RouterLink>
+                                    <a href="#" class="flex w-full items-center justify-between">
+                                        <span class="font-medium text-custom-grey">Settings</span>
+                                        <img src="@/assets/images/icons/setting-2-grey.svg" class="flex size-6 shrink-0"
+                                            alt="icon">
+                                    </a>
+                                    <hr class="border-custom-stroke">
+                                    <a href="index.html" class="flex w-full items-center justify-between">
+                                        <span class="font-medium text-custom-grey text-custom-red">Log Out</span>
+                                        <img src="@/assets/images/icons/logout.svg" class="flex size-6 shrink-0"
+                                            alt="icon">
+                                    </a>
+                                </nav>
+                            </div>
+                        </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-8 flex-wrap">

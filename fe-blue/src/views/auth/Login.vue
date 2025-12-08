@@ -14,7 +14,7 @@ const form = ref({
 })
 
 const handleSubmit = async () => {
-    await login(form.value)
+    const response = await login(form.value)
 
     if (error.value === 'Unauthorized') {
         error.value = {
@@ -22,7 +22,11 @@ const handleSubmit = async () => {
         }
     }
 
-    router.push ({ name: 'admin.dashboard' })
+    if(response.role === 'buyer') {
+        router.push({ name: 'app.home' })
+    } else {
+        router.push({ name: 'admin.dashboard' })
+    }
 }
 </script>
 

@@ -157,11 +157,12 @@ const handleAddressSelect = (selected) => {
                                     </p>
                                     <input type="text" class="custom-input" placeholder="" v-model="addressSearch" @input="handleAddressInput(addressSearch)">
                                 </label>
-                                <ul class="search-results" v-if="showAddressOptions">
-                                    <li v-for="option in addressOptions" :key="option.id" @click="handleAddressSelect(option)">
-                                        {{ option.label }}
-                                    </li>
-                                </ul>
+                                <ul class="search-result" v-if="showAddressOptions">
+                                <li v-for="option in addressOptions" :key="option.id"
+                                    @click="handleAddressSelect(option)">
+                                    {{ option.label }}
+                                </li>
+                            </ul>
                             </div>
                         </div>
                         <div class="flex justify-between">

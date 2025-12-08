@@ -29,6 +29,8 @@ export const useAuthStore = defineStore("auth", {
                 Cookies.set('token', token)
 
                 this.success = response.data.message
+
+                return response.data.data
             } catch (error) {
                 this.error = handleError(error)
             } finally {

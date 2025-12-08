@@ -32,6 +32,8 @@ import WithdrawalCreate from '@/views/admin/withdrawal/WithdrawalCreate.vue'
 import UserList from '@/views/admin/user/UserList.vue'
 import MyStore from '@/views/admin/store/MyStore.vue'
 import StoreCreate from '@/views/admin/store/StoreCreate.vue'
+import Cart from '@/views/App/Cart.vue'
+import Checkout from '@/views/App/Checkout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -80,7 +82,20 @@ const router = createRouter({
           path: 'store/:username',
           name: 'app.store-detail',
           component: AppStoreDetail
-        }
+        },
+        {
+          path: '/cart',
+          name: 'app.cart',
+          component: Cart
+        },
+        {
+          path: '/checkout',
+          name: 'app.checkout',
+          component: Checkout,
+          meta: {
+            requiresAuth: true
+          }
+        },
       ]
     },
     {
