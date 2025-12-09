@@ -134,26 +134,39 @@ const handleSubmit = async () => {
         return;
     }
 
-    const response = await createTransaction(transaction.value);
-
-
-
-    window.snap.pay(response.snap_token, {
-        onSuccess: function (result) {
-            showSuccessModal.value = true
-        },
-        onPending: function (result) {
-            /* You may add your own implementation here */
-            console.log(result);
-        },
-        onError: function (result) {
-            /* You may add your own implementation here */
-            console.log(result);
-        },
-        onClose: function () {
-            /* You may add your own implementation here */
+    try {
+        const response = await createTransaction(transaction.value);
+        
+        // ✅ Validasi response sebelum mengakses snap_token
+        if (!response || !response.snap_token) {
+            alert('Failed to create transaction. Please try again.');
+            console.error('Invalid response:', response);
+            return;
         }
-    })
+
+        window.snap.pay(response.snap_token, {
+            onSuccess: function (result) {
+                console.log('Payment success:', result);
+                // Show modal first before any other operations
+                showSuccessModal.value = true;
+                // Clear the selected stores from cart
+                cart.clearSelectedStores();
+            },
+            onPending: function (result) {
+                console.log('Payment pending:', result);
+            },
+            onError: function (result) {
+                console.error('Payment error:', result);
+                alert('Payment failed. Please try again.');
+            },
+            onClose: function () {
+                console.log('Payment popup closed');
+            }
+        })
+    } catch (error) {
+        console.error('Transaction error:', error);
+        alert('Failed to process transaction. Please try again.');
+    }
 };
 
 // Close modal functionality
@@ -510,38 +523,10 @@ onMounted(() => {
                     </div>
                 </div>
                 <div class="flex flex-col gap-3">
-                    <RouterLink :to="{ name: 'admin.my-transaction' }"
+                    <RouterLink :to="{ name: 'app.my-transactions' }"
                         class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
                         <span class="font-bold text-white">View Transaction</span>
                     </RouterLink>
-                    <RouterLink :to="{ name: 'app.home' }"
-                        class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue/10">
-                        <span class="font-bold text-custom-blue">Back to Homepage</span>
-                    </RouterLink>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="Success-Modal" class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50" v-if="showSuccessModal"> 
-        <div class="backdrop absolute w-full h-full bg-[#292D32B2]"></div>
-        <div id="Select-Courier" class="relative flex flex-col w-[400px] shrink-0 h-fit rounded-2xl overflow-hidden">
-            <div class="header flex h-[63px] items-center p-5 gap-3 justify-center bg-custom-black">
-                <p class="font-semibold text-lg text-white">Payment Successful</p>
-            </div>
-            <div class="flex flex-col p-5 gap-3 bg-white">
-                <div class="flex flex-col items-center justify-center w-full h-[207px]">
-                    <img src="@/assets/images/icons/bag-tick-blue-transparent.svg" class="size-[72px]" alt="icon">
-                    <div class="text-center">
-                        <p class="font-bold text-xl">Thank You!</p>
-                        <p class="font-semibold text-custom-grey">Your order has been placed successfully.</p>
-                    </div>
-                </div>
-                <div class="flex flex-col gap-3">
-                    <a href="buyer/transaction-details.html"
-                        class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
-                        <span class="font-bold text-white">View Transaction</span>
-                    </a>
                     <RouterLink :to="{ name: 'app.home' }"
                         class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue/10">
                         <span class="font-bold text-custom-blue">Back to Homepage</span>
