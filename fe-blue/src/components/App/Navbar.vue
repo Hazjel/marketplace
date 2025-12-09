@@ -61,7 +61,7 @@
                                         <img src="@/assets/images/icons/profile-circle-grey.svg"
                                             class="flex size-6 shrink-0" alt="icon">
                                     </a>
-                                    <RouterLink :to="{ name: 'buyer.my-transactions' }"
+                                    <RouterLink :to="{ name: 'admin.my-transaction' }"
                                         class="flex w-full items-center justify-between">
                                         <span class="font-medium text-custom-grey">My Transactions</span>
                                         <img src="@/assets/images/icons/stickynote-grey.svg" class="flex size-6 shrink-0"

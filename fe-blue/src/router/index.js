@@ -23,6 +23,7 @@ import StoreList from '@/views/admin/store/StoreList.vue'
 import StoreDetail from '@/views/admin/store/StoreDetail.vue'
 import TransactionList from '@/views/admin/transaction/TransactionList.vue'
 import TransactionDetail from '@/views/admin/transaction/TransactionDetail.vue'
+import MyTransaction from '@/views/admin/transaction/MyTransaction.vue'
 import StoreBalanceList from '@/views/admin/store-balance/StoreBalanceList.vue'
 import StoreBalanceDetail from '@/views/admin/store-balance/StoreBalanceDetail.vue'
 import MyStoreBalance from '@/views/admin/store-balance/MyStoreBalance.vue'
@@ -94,6 +95,15 @@ const router = createRouter({
           component: Checkout,
           meta: {
             requiresAuth: true
+          }
+        },
+        {
+          path: '/my-transactions',
+          name: 'app.my-transactions',
+          component: TransactionList,
+          meta: {
+            requiresAuth: true,
+            title: 'My Transactions'
           }
         },
       ]
@@ -238,6 +248,16 @@ const router = createRouter({
           component: TransactionList,
           meta: {
             title: 'Transaction List',
+            requiresAuth: true,
+            permission: 'transaction-list'
+          }
+        },
+        {
+          path: 'my-transactions',
+          name: 'admin.my-transaction',
+          component: MyTransaction,
+          meta: {
+            title: 'MyTransaction List',
             requiresAuth: true,
             permission: 'transaction-list'
           }

@@ -26,8 +26,8 @@ const items = [
         permission: 'dashboard-menu'
     },
     {
-        label: 'My Transacions',
-        path: '/admin/my-transaction',
+        label: 'My Transactions',
+        path: '/admin/my-transactions',
         iconDefault: StickyNoteGreyIcon,
         iconActive: StickyNoteBlueFillIcon,
         permission: 'transaction-menu',
@@ -79,6 +79,15 @@ const items = [
                 iconDefault: StickyNoteGreyIcon,
                 iconActive: StickyNoteBlueFillIcon,
                 permission: 'transaction-menu',
+                role: 'admin'
+            },
+            {
+                label: 'List Transaction',
+                path: '/admin/transaction',
+                iconDefault: StickyNoteGreyIcon,
+                iconActive: StickyNoteBlueFillIcon,
+                permission: 'transaction-menu',
+                role: 'store'
             }
         ]
     },
