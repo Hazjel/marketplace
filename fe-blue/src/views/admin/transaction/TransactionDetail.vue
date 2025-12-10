@@ -275,6 +275,15 @@ onMounted(fetchData)
                         <p class="font-bold text-lg leading-none text-custom-blue">Rp {{ formatRupiah(transaction?.grand_total) }}</p>
                     </div>
                     <hr class="border-custom-stroke last:hidden">
+                    <hr class="border-custom-stroke last:hidden">
+                    <div class="flex items-center justify-between">
+                        <p class="flex items-center gap-1 font-semibold text-lg text-custom-grey leading-none">
+                            <img src="@/assets/images/icons/money-grey.svg" class="size-6" alt="icon">
+                            Payment Status
+                        </p>
+                        <p class="font-bold text-lg leading-none text-custom-blue"> {{ transaction?.payment_status }}</p>
+                    </div>
+                    <hr class="border-custom-stroke last:hidden">
                 </div>
             </section>
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="transaction?.delivery_status === 'pending'">
