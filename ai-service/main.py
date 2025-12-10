@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 # 1. Load Environment Variables
-load_dotenv()
+load_dotenv(override=True)
 
 # 2. Konfigurasi Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
