@@ -7,6 +7,7 @@ use App\Http\Controllers\StoreBalanceController;
 use App\Http\Controllers\StoreBalanceHistoryController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\BuyerController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductReviewController;
@@ -67,3 +68,5 @@ Route::get('store/username/{store}', [StoreController::class, 'showByUsername'])
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+
+Route::post('/midtrans-callback', [MidtransController::class, 'callback']);

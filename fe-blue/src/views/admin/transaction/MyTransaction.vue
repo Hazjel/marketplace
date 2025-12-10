@@ -4,7 +4,8 @@ import Pagination from '@/components/admin/Pagination.vue';
 import { useTransactionStore } from '@/stores/transaction';
 import { debounce } from 'lodash';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, computed, toRaw } from 'vue';
+import { axiosInstance } from '@/plugins/axios';
 import { RouterLink } from 'vue-router';
 import { can } from '@/helpers/permissionHelper';
 import { formatToClientTimeZone } from '@/helpers/format';
@@ -13,6 +14,55 @@ import { formatRupiah } from '@/helpers/format';
 const transactionStore = useTransactionStore()
 const { transactions, meta, loading, success, error } = storeToRefs(transactionStore)
 const { fetchTransactionsPaginated } = transactionStore
+
+import { useAuthStore } from '@/stores/auth';
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
+
+const filteredTransactions = computed(() => {
+    const items = transactions.value || []
+    if (!user.value) return []
+
+    const userBuyerId = user.value?.buyer?.id || user.value?.buyer_id || user.value?.id
+
+    return items
+        .filter(t => {
+            const txBuyerId = t?.buyer?.id || t?.buyer_id
+            return txBuyerId && userBuyerId && String(txBuyerId) === String(userBuyerId)
+        })
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+})
+
+const clientFiltered = ref([])
+
+const displayTransactions = computed(() => {
+    return (clientFiltered.value && clientFiltered.value.length) ? clientFiltered.value : filteredTransactions.value
+})
+
+const perPage = computed(() => {
+    return serverOptions.value?.row_per_page || meta.value?.per_page || 10
+})
+
+const paginatedTransactions = computed(() => {
+    const page = serverOptions.value?.page || meta.value?.current_page || 1
+    if (clientFiltered.value && clientFiltered.value.length) {
+        const start = (page - 1) * perPage.value
+        return clientFiltered.value.slice(start, start + perPage.value)
+    }
+    // server already returns the current page in `transactions`
+    return displayTransactions.value
+})
+
+const clientTotalPages = computed(() => {
+    return Math.max(1, Math.ceil((clientFiltered.value?.length || 0) / perPage.value))
+})
+
+const showPagination = computed(() => {
+    if (clientFiltered.value && clientFiltered.value.length) {
+        return clientFiltered.value.length > perPage.value
+    }
+    return (meta.value?.last_page || 1) > 1
+})
 
 const serverOptions = ref({
     page: 1,
@@ -24,10 +74,49 @@ const filters = ref({
 })
 
 const fetchData = async () => {
-    await fetchTransactionsPaginated({
+    const params = {
         ...serverOptions.value,
         ...filters.value,
-    })
+    }
+
+    if (user.value?.buyer?.id) {
+        params.buyer_id = user.value.buyer.id
+    }
+
+    console.log('[MyTransaction] fetchData params:', params)
+
+    await fetchTransactionsPaginated(params)
+
+    console.log('[MyTransaction] after fetch, transactions count:', (transactions.value || []).length)
+    if (transactionStore.error) console.log('[MyTransaction] fetch error:', transactionStore.error)
+
+    // If server returned transactions but none matched the current user,
+    // try fetching all pages and filtering client-side as a fallback.
+    try {
+        if ((transactions.value || []).length > 0 && filteredTransactions.value.length === 0) {
+            console.log('[MyTransaction] No filtered results on current page — attempting full fetch fallback')
+            const all = []
+            const lastPage = meta.value?.last_page || 1
+            for (let p = 1; p <= lastPage; p++) {
+                const resp = await axiosInstance.get('transaction/all/paginated', { params: { ...serverOptions.value, ...filters.value, page: p } })
+                const pageItems = resp.data.data.data || []
+                all.push(...pageItems)
+            }
+
+            console.log('[MyTransaction] full fetch total items:', all.length)
+
+            const userBuyerId = user.value?.buyer?.id || user.value?.buyer_id || user.value?.id
+            const matched = all.filter(t => {
+                const txBuyerId = t?.buyer?.id || t?.buyer_id
+                return txBuyerId && userBuyerId && String(txBuyerId) === String(userBuyerId)
+            }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
+            clientFiltered.value = matched
+            console.log('[MyTransaction] clientFiltered count:', clientFiltered.value.length)
+        }
+    } catch (err) {
+        console.log('[MyTransaction] full fetch fallback error:', err)
+    }
 }
 
 const debounceFetchData = debounce(fetchData, 500)
@@ -37,7 +126,21 @@ const closeAlert = () => {
     transactionStore.error = null
 }
 
-onMounted(fetchData)
+onMounted(async () => {
+    await fetchData()
+    const rawUser = toRaw(user.value)
+    const rawTxs = toRaw(transactions.value) || []
+
+    console.log('[MyTransaction] user (raw):', rawUser)
+    console.log('[MyTransaction] user.id:', rawUser?.id)
+    console.log('[MyTransaction] user.buyer:', rawUser?.buyer)
+    console.log('[MyTransaction] user.buyer.id:', rawUser?.buyer?.id)
+
+    console.log('[MyTransaction] total transactions fetched:', rawTxs.length)
+    console.log('[MyTransaction] transactions buyer ids:', rawTxs.map(t => t?.buyer?.id || t?.buyer_id))
+    console.log('[MyTransaction] sample transaction (raw):', rawTxs[0])
+    console.log('[MyTransaction] filtered count:', filteredTransactions.value.length)
+})
 
 watch(serverOptions, () => {
     fetchData()
@@ -52,11 +155,11 @@ watch(filters, () => {
     <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
                     <div class="header flex items-center justify-between">
                         <div class="flex flex-col gap-2">
-                            <p class="font-bold text-xl">All Transactions</p>
+                            <p class="font-bold text-xl">My Transactions</p>
                             <div class="flex items-center gap-1">
                                 <img src="@/assets/images/icons/stickynote-grey.svg" class="flex size-6 shrink-0"
                                     alt="icon">
-                                <p class="font-semibold text-custom-grey">4 Total Transactions</p>
+                                    <p class="font-semibold text-custom-grey">{{ displayTransactions.length }} Total Transactions</p>
                             </div>
                         </div>
                     </div>
@@ -88,9 +191,10 @@ watch(filters, () => {
                         </div>
                     </div>
                     <section id="List-Transactions" class="flex flex-col flex-1 gap-6 w-full">
-                        <div class="list flex flex-col gap-5">
-                            <div
-                                class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white" v-for="transaction in transactions">
+                        <template v-if="displayTransactions.length">
+                            <div class="list flex flex-col gap-5">
+                                <div
+                                    class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white" v-for="transaction in paginatedTransactions">
                                 <div class="flex items-center justify-between">
                                     <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
                                         <img src="@/assets/images/icons/calendar-2-grey.svg"
@@ -171,7 +275,7 @@ watch(filters, () => {
                                 </div>
                             </div>
                         </div>
-                        <nav id="Pagination">
+                            <nav id="Pagination" v-if="showPagination">
                             <ul class="flex items-center gap-3">
                                 <li class="group">
                                     <button
@@ -181,34 +285,10 @@ watch(filters, () => {
                                             class="size-6 group-has-[:disabled]:opacity-20 rotate-180" alt="icon">
                                     </button>
                                 </li>
-                                <li class="group active">
-                                    <button
+                                <li v-for="p in (clientFiltered.length ? clientTotalPages : meta.last_page || 1)" :key="p" class="group" :class="{ 'active': p === serverOptions.page }">
+                                    <button @click="serverOptions.page = p"
                                         class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
-                                        1
-                                    </button>
-                                </li>
-                                <li class="group">
-                                    <button
-                                        class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
-                                        2
-                                    </button>
-                                </li>
-                                <li class="group">
-                                    <button
-                                        class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
-                                        3
-                                    </button>
-                                </li>
-                                <li class="group">
-                                    <button
-                                        class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
-                                        4
-                                    </button>
-                                </li>
-                                <li class="group">
-                                    <button
-                                        class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
-                                        5
+                                        {{ p }}
                                     </button>
                                 </li>
                                 <li class="group">
@@ -219,13 +299,14 @@ watch(filters, () => {
                                     </button>
                                 </li>
                             </ul>
-                        </nav>
-                    </section>
-                    <div id="Empty-State" class="hidden flex flex-col flex-1 items-center justify-center gap-4">
-                        <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon">
-                        <div class="flex flex-col gap-1 items-center text-center">
-                            <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>
+                            </nav>
+                        </template>
+                        <div id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4" v-else>
+                            <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon">
+                            <div class="flex flex-col gap-1 items-center text-center">
+                                <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>
+                            </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
 </template>
