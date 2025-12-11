@@ -22,10 +22,28 @@ const fetchData = async () => {
     transaction.value.delivery_proof_url = PlaceHolder
 }
 
-const handleUpdateData = async() =>{
-    await updateTransaction(transaction.value)
 
-    fetchData()
+
+const handleUpdateData = async() => {
+    try {
+        const payload = {
+            id: transaction.value.id,
+            delivery_status: transaction.value.delivery_status,
+        }
+        
+        if (transaction.value.tracking_number) {
+            payload.tracking_number = transaction.value.tracking_number
+        }
+        
+        if (transaction.value.delivery_proof instanceof File) {
+            payload.delivery_proof = transaction.value.delivery_proof
+        }
+        
+        await updateTransaction(payload)
+        await fetchData()
+    } catch (err) {
+        console.error('Update failed:', err)
+    }
 }
 
 const handleAcceptOrder=() =>{
@@ -51,6 +69,15 @@ const handleImageChange = (e) => {
 const closeAlert = () => {
     transactionStore.success = null
     transactionStore.error = null
+}
+
+// Di bagian <script setup>, tambahkan:
+const getImageUrl = (path) => {
+    if (!path) return PlaceHolder
+    
+    // Ganti dengan base URL Laravel Anda
+    const laravelBaseUrl = 'http://localhost:8000' // atau gunakan env variable
+    return `${laravelBaseUrl}/storage/${path}`
 }
 
 onMounted(fetchData)
@@ -435,7 +462,7 @@ onMounted(fetchData)
                             </div>
                             <button type="submit" id="Update-Status"
                                 class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300"
-                                @click="handleUpdateData">
+                                @click="handleDeliverySubmit">
                                 <span class="font-semibold text-lg text-white">Update Status</span>
                             </button>
             </section>
@@ -469,8 +496,10 @@ onMounted(fetchData)
                     </div>
                 </div>
                 <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
-                    <img :src="transaction?.delivery_proof" class="size-full object-cover"
-                        alt="thumbnail">
+                    <img :src="getImageUrl(transaction?.delivery_proof)" 
+                    class="size-full object-cover"
+                    alt="thumbnail"
+                    @error="(e) => e.target.src = PlaceHolder">
                 </div>
                 <div class="flex items-center justify-between">
                     <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
@@ -487,7 +516,7 @@ onMounted(fetchData)
                         <img src="@/assets/images/icons/routing-grey.svg" class="size-6" alt="icon">
                         Tracking Number
                     </p>
-                    <p class="font-semibold text-lg leading-none">{{ transaction?.tracking_number ?? '-' }}</p>
+                    <p class="font-semibold text-lg leading-none">{{ transaction?.tracking_number }}({{ transaction?.shipping }})</p>
                 </div>
             </section>
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="transaction?.delivery_status === 'completed'">
@@ -538,7 +567,7 @@ onMounted(fetchData)
                         <img src="@/assets/images/icons/routing-grey.svg" class="size-6" alt="icon">
                         Tracking Number
                     </p>
-                    <p class="font-semibold text-lg leading-none">{{ transaction?.tracking_number ?? '-' }}</p>
+                    <p class="font-semibold text-lg leading-none">{{ transaction?.tracking_number}} </p>
                 </div>
             </section>
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
