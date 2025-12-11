@@ -6,15 +6,33 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\Store;
 use App\Repositories\StoreBalanceRepository;
+use Illuminate\Support\Facades\Log;
 
 class MidtransController extends Controller
 {
     public function callback(Request $request)
     {
-        $serverKey = config('midtrans.server_key');
-        $hashedKey = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+        // load server key from config (matches config/midtrans.php)
+        $serverKey = config('midtrans.serverKey');
 
-        if ($hashedKey != $request->signature_key) {
+        // compute signature using Midtrans formula: order_id + status_code + gross_amount + server_key
+        $hashedKey = hash('sha512', ($request->order_id ?? '') . ($request->status_code ?? '') . ($request->gross_amount ?? '') . ($serverKey ?? ''));
+
+        // log incoming callback for debugging
+        Log::info('Midtrans callback received', [
+            'order_id' => $request->order_id ?? null,
+            'status_code' => $request->status_code ?? null,
+            'gross_amount' => $request->gross_amount ?? null,
+            'signature_key' => $request->signature_key ?? null,
+            'computed_signature' => $hashedKey,
+        ]);
+
+        if ($hashedKey !== ($request->signature_key ?? '')) {
+            Log::warning('Midtrans signature mismatch', [
+                'computed' => $hashedKey,
+                'received' => $request->signature_key ?? null,
+            ]);
+
             return response()->json(['message' => 'Invalid signature key'], 403);
         }
 
@@ -39,8 +57,8 @@ class MidtransController extends Controller
                         $storeBalanceRepository = new StoreBalanceRepository;
                         $storeBalanceRepository->credit($store->storeBalance->id, $transaction->grand_total -  $transaction->shipping_cost);
 
-                        $storeBalanceHistoryRepository = new StoreBalanceRepository;
-                        $storeBalanceHistoryRepository->create([
+                        $storeBalance = $store->storeBalance;
+                        $storeBalance->storeBalanceHistories()->create([
                             'type' => 'income',
                             'reference_id' => $transaction->id,
                             'reference_type' => Transaction::class,
@@ -59,8 +77,8 @@ class MidtransController extends Controller
                 $storeBalanceRepository = new StoreBalanceRepository;
                 $storeBalanceRepository->credit($store->storeBalance->id, $transaction->grand_total -  $transaction->shipping_cost);
                 
-                $storeBalanceHistoryRepository = new StoreBalanceRepository;
-                $storeBalanceHistoryRepository->create([
+                $storeBalance = $store->storeBalance;
+                $storeBalance->storeBalanceHistories()->create([
                     'type' => 'income',
                     'reference_id' => $transaction->id,
                     'reference_type' => Transaction::class,
@@ -83,10 +101,12 @@ class MidtransController extends Controller
             default:
                 $transaction->update(['payment_status' => 'failed']);
                 break;
+        }
 
-                return response()->json(['message' => 'Payment Status updated successfully'], 200);
-            
+        // always return 200 after processing so Midtrans considers callback successful
+        return response()->json(['message' => 'Payment Status updated successfully'], 200);
+        
         }
 
     }
-}
+
