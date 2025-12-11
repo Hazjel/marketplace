@@ -1,0 +1,5 @@
+# Ignore file env asli (RAHASIA)
+ai-service/.env
+
+# TAPI jangan ignore contohnya (agar bisa di-push)
+!ai-service/.env.example
