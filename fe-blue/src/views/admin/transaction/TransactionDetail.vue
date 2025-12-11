@@ -13,13 +13,40 @@ const transaction = ref({})
 
 const transactionStore = useTransactionStore()
 const { loading, success, error } = storeToRefs(transactionStore)
-const { fetchTransactionById } = transactionStore
+const { fetchTransactionById, updateTransaction } = transactionStore
 
 const fetchData = async () => {
     const response = await fetchTransactionById(route.params.id)
 
     transaction.value = response
+    transaction.value.delivery_proof_url = PlaceHolder
 }
+
+const handleUpdateData = async() =>{
+    await updateTransaction(transaction.value)
+
+    fetchData()
+}
+
+const handleAcceptOrder=() =>{
+    transaction.value.delivery_proof = null
+    transaction.value.delivery_status = 'processing'
+    handleUpdateData()
+}
+
+const handleDeliverySubmit = () => {
+    transaction.value.delivery_status = 'delivering'
+
+    handleUpdateData()
+}
+
+const handleImageChange = (e) => {
+    const file = e.target.files[0]
+
+    transaction.value.delivery_proof = file
+    transaction.value.delivery_proof_url = URL.createObjectURL(file)
+}
+
 
 const closeAlert = () => {
     transactionStore.success = null
@@ -325,6 +352,17 @@ onMounted(fetchData)
                         pending
                     </p>
                 </div>
+                <div class="flex flex-col text-center gap-4" v-if="transaction?.payment_status === 'paid'">
+                                <button @click="handleAcceptOrder"
+                                    class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300">
+                                    <span class="font-semibold text-lg text-white">Accept Order</span>
+                                </button>
+                                <div class="flex items-center justify-center gap-[6px]">
+                                    <p class="font-semibold text-custom-grey">Why can't I decline the order?</p>
+                                    <img src="@/assets/images/icons/info-circle-grey.svg" class="size-[18px]"
+                                        alt="icon">
+                                </div>
+                            </div>
             </section>
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="transaction?.delivery_status === 'processing'">
                 <p class="font-bold text-xl">Order Status</p>
@@ -365,6 +403,41 @@ onMounted(fetchData)
                         processing
                     </p>
                 </div>
+                <div class="flex items-center justify-between w-full">
+                                <div
+                                    class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
+                                    <img id="Thumbnail" :src="transaction.delivery_proof_url"
+                                        data-default="@/assets/images/icons/gallery-default.svg"
+                                        class="size-full object-contain" alt="icon" />
+                                    <input type="file" id="File-Input" accept="image/*"
+                                        class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange"/>
+                                </div>
+                                <button type="button" id="Add-Photo"
+                                    class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
+                                    Add Photo
+                                </button>
+                            </div>
+                            <div class="flex flex-col gap-3">
+                                <p class="font-semibold text-custom-grey">Tracking Number</p>
+                                <div class="group/errorState flex flex-col gap-2">
+                                    <label class="group relative">
+                                        <div class="input-icon">
+                                            <img src="@/assets/images/icons/barcode-grey.svg"
+                                                class="flex size-6 shrink-0" alt="icon">
+                                        </div>
+                                        <p class="input-placeholder">
+                                            Enter Tracking Number
+                                        </p>
+                                        <input type="string" id="Tracking" class="custom-input" placeholder="" v-model="transaction.tracking_number">
+                                    </label>
+                                    <span class="input-error">Lorem dolor error message here</span>
+                                </div>
+                            </div>
+                            <button type="submit" id="Update-Status"
+                                class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300"
+                                @click="handleUpdateData">
+                                <span class="font-semibold text-lg text-white">Update Status</span>
+                            </button>
             </section>
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="transaction?.delivery_status === 'delivering'">
                 <p class="font-bold text-xl">Order Status</p>
@@ -396,7 +469,7 @@ onMounted(fetchData)
                     </div>
                 </div>
                 <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
-                    <img src="@/assets/images/thumbnails/delivering.svg" class="size-full object-cover"
+                    <img :src="transaction?.delivery_proof" class="size-full object-cover"
                         alt="thumbnail">
                 </div>
                 <div class="flex items-center justify-between">
