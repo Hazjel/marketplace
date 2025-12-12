@@ -50,7 +50,7 @@ const handleAddressInput = debounce(async (search) => {
     try {
         const response = await fetch(`/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`, {
             headers: {
-                'x-api-key': 'ghaq3Ykmfb0f3a8acd7918867n6uDpAa'
+                'X-API-KEY': import.meta.env.X_API_KEY
             }
         });
 
