@@ -137,6 +137,13 @@ const handleSubmit = async () => {
     }
 
     try {
+        // Sertakan biaya pengiriman dan perhitungan akhir ke payload transaksi
+        transaction.value.shipping_cost = Math.round(deliveryFee.value);
+        transaction.value.subtotal = Math.round(subtotalSelected.value);
+        transaction.value.tax = Math.round(finalPpn.value);
+        transaction.value.discount = Math.round(discountSelected.value);
+        transaction.value.grand_total = Math.round(finalGrandTotal.value);
+
         const response = await createTransaction(transaction.value);
         
         // ✅ Validasi response sebelum mengakses snap_token
