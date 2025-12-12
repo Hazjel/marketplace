@@ -257,7 +257,7 @@ const router = createRouter({
           name: 'admin.my-transaction',
           component: MyTransaction,
           meta: {
-            title: 'MyTransaction List',
+            title: 'My Transaction List',
             requiresAuth: true,
             permission: 'transaction-list'
           }

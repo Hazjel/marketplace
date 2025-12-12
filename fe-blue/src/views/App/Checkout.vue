@@ -28,6 +28,7 @@ const transaction = ref({
     postal_code: null,
     shipping: null,
     shipping_type: null,
+    shipping_cost: 0,
     products: []
 })
 
@@ -123,6 +124,7 @@ const handleCourierSubmit = () => {
 
     transaction.value.shipping = selectedCourier.value.shipping_name;
     transaction.value.shipping_type = selectedCourier.value.service_name;
+    transaction.value.shipping_cost = selectedCourier.value.shipping_cost_net;
     deliveryFee.value = selectedCourier.value.shipping_cost_net;
     showDeliveryModal.value = false;
 };
