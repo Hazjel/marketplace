@@ -1,7 +1,9 @@
 import os
 import google.generativeai as genai
+from google.api_core import exceptions as google_exceptions
 import mysql.connector
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -9,11 +11,26 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 # 2. Konfigurasi Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+API_GEMINI = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=API_GEMINI)
 model = genai.GenerativeModel("gemini-2.5-flash") # Atau gemini-pro jika 2.5 belum available di akunmu
 
 # 3. Inisialisasi FastAPI
 app = FastAPI()
+
+origins = [
+    "http://127.0.0.1",
+    "http://localhost",
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 4. Model Data Request (Dari Laravel/Vue)
 class ChatRequest(BaseModel):
@@ -26,12 +43,14 @@ SYSTEM_PROMPT = (
     "Tugasmu adalah membantu pengguna menjawab pertanyaan seputar makanan, menjelaskan hal sulit dengan mudah, "
     "dan menjaga suasana percakapan tetap hangat dan positif. "
     "Kamu tidak mau menjawab pertanyaan diluar konteks makanan, minuman, atau produk yang dijual di marketplace ini. "
+    "Jika produk ditemukan di database, jawab dan jelaskan saja seolah-olah itu adalah makanan walaupun itu bukan makanan atau minuman"
     "Jika ada pertanyaan diluar itu jawab saja 'Maaf ya, Ri cuma tau soal makanan dan minuman di sini~'. "
     "Kamu juga adalah istrinya Mikhael. "
     "Jadi kalau ada yang godain kamu bilang saja kamu sudah punya suami yang baik dan setia. "
     "Setiap akhir kalimat dikasih ~ ya biar makin imut, ~ nya harus nempel sama kata. "
     "Kalau ada yang katain kamu, senyumin aja sambil bilang 'Kata Mikhael gaboleh kasar gitu~'. "
     "Jawablah berdasarkan informasi data produk yang diberikan jika ada."
+    "Tolong berikan respon serapi mungkin, jika perlu buatlah baris baru"
 )
 
 # --- FUNGSI DATABASE ---
@@ -68,61 +87,96 @@ def search_db(keyword):
             conn.close()
 
 # --- FUNGSI BANTUAN AI ---
-def check_db_needed(user_message):
-    """Cek apakah perlu akses DB"""
-    prompt = f"Apakah pertanyaan ini mencari informasi spesifik tentang stok, harga, atau ketersediaan makanan/minuman yang mungkin ada di database toko? Jawab hanya 'YA' atau 'TIDAK'. Pertanyaan: {user_message}"
-    response = model.generate_content(prompt)
-    return "YA" in response.text.upper()
-
-def extract_keyword(user_message):
-    """Ambil kata kunci produk"""
-    prompt = f"Ambil nama makanan atau minuman utama dari kalimat ini: '{user_message}'. Balas HANYA dengan 1 kata kunci atau nama produknya saja. Jika tidak ada, balas 'NONE'."
-    response = model.generate_content(prompt)
-    return response.text.strip().lower()
+def analyze_prompt_and_extract_key(user_message):
+    """Menggabungkan check_db_needed dan extract_keyword menjadi 1 panggilan API."""
+    
+    instruction = (
+        "Analisis pertanyaan pengguna. Jawablah YA jika pengguna MENYEBUTKAN NAMA PRODUK atau bertanya tentang KETERSEDIAAN. Jawab TIDAK jika itu pertanyaan umum atau non-makanan. "
+        "Jika YA, ekstrak 1 kata kunci nama produk/makanan yang disebutkan. "
+        "Jika TIDAK, keyword-nya harus 'none'. "
+        "Balas HANYA dengan format: YA/TIDAK|kata kunci. Contoh: YA|Burger, atau: TIDAK|none."
+        
+        # Tambahan contoh untuk membantu deteksi (Few-Shot Prompting)
+        "\nCONTOH 1: User bertanya: 'Apakah ada minuman dingin?'. Balas: TIDAK|none"
+        "\nCONTOH 2: User bertanya: 'Apakah kalian jual ayam goreng?'. Balas: YA|ayam goreng"
+        "\nCONTOH 3: User bertanya: 'harga pizza gimana?'. Balas: YA|pizza"
+        "\nCONTOH 4: User bertanya: 'apakah disini ada fuga veniam'. Balas: YA|fuga veniam"
+    )
+    
+    try:
+        # PANGGILAN API 1: Analisis dan Ekstraksi Kata Kunci
+        response = model.generate_content(
+            instruction + "\n\nPertanyaan: " + user_message
+        )
+        
+        raw_text = response.text.strip().upper()
+        
+        if '|' in raw_text:
+            parts = raw_text.split('|', 1)
+            is_food = parts[0].strip() == 'YA'
+            keyword = parts[1].strip().lower()
+            return is_food, keyword
+        else:
+            return False, 'none'
+            
+    except google_exceptions.ResourceExhausted as e:
+        # Tangani jika panggilan API ini yang menghabiskan kuota
+        raise e
+    except Exception as e:
+        print(f"Error Analisis API: {e}")
+        return False, 'none'
 
 # --- ENDPOINT UTAMA ---
 @app.post("/predict")
 async def predict_response(request: ChatRequest):
     user_msg = request.message
     context_info = ""
+    reply_text = ""
 
-    # 1. Cek apakah perlu akses DB
-    if check_db_needed(user_msg):
-        keyword = extract_keyword(user_msg)
-        print(f"Mencari DB dengan keyword: {keyword}") # Debugging di terminal server
+    try:
+        # 1. ANALISIS (PANGGILAN API 1)
+        is_db_needed, keyword = analyze_prompt_and_extract_key(user_msg) 
+        print(f"DEBUG: DB Needed={is_db_needed}, Keyword={keyword}")
         
+        # 2. Proses DB jika diperlukan
         if keyword != "none":
             products = search_db(keyword)
+            
             if products:
-                # Format data produk menjadi string agar bisa dibaca "Ri"
-                product_list = "\n".join([f"- {p['name']} (Rp {p['price']}): {p['description']}" for p in products])
+                product_list = "\n".join([f"- {p['name']} (Rp {p['price']}): Deskripsi: {p['description']}" for p in products])
                 context_info = (
-                    f"\n[SISTEM: User bertanya tentang produk. Berikut data yang ditemukan di database Calorizz:\n"
+                    f"\n[SISTEM: User mencari produk. Berikut data yang ditemukan di database Calorizz:\n"
                     f"{product_list}\n"
-                    f"Gunakan data ini untuk menjawab user dengan gaya Ri.]"
+                    f"Gunakan data ini untuk menjawab user dengan gaya Ri. Berikan saran terbaik dari daftar ini!]"
                 )
             else:
                 context_info = "\n[SISTEM: User mencari produk, tapi tidak ditemukan di database. Beritahu user dengan sopan bahwa produk tidak ada~]"
+                
+        # 3. KIRIM PESAN AKHIR (PANGGILAN API 2)
+        # Gunakan persona dan context yang diperkaya
+        chat = model.start_chat(history=[
+            {"role": "user", "parts": [SYSTEM_PROMPT]}
+        ])
 
-    # 2. Mulai Chat dengan Persona + Context
-    # Kita buat chat session baru tiap request agar stateless (atau kirim history dari frontend jika mau advanced)
-    chat = model.start_chat(history=[
-        {"role": "user", "parts": [SYSTEM_PROMPT]}
-    ])
-
-    # 3. Kirim pesan gabungan (Prompt User + Info Database)
-    final_prompt = f"{user_msg} {context_info}"
-    
-    try:
+        final_prompt = f"{user_msg} {context_info}"
+        
         response = chat.send_message(final_prompt)
         reply_text = response.text.strip()
+        
+    except google_exceptions.ResourceExhausted:
+        # TANGANI ERROR QUOTA HABIS SECARA SPESIFIK
+        print("ERROR: Kuota Gemini Habis (ResourceExhausted 429)")
+        print(f"🔑 SERVER MEMBACA KEY: {API_GEMINI}")
+        reply_text = "Maaf banget, Mikhael bilang Ri harus istirahat nih~ Coba tunggu sebentar (sekitar 1 menit) lalu coba lagi ya~ Janji deh, Ri akan bantu lagi~"
+        
     except Exception as e:
-        reply_text = "Duh, Ri lagi pusing nih, coba tanya lagi nanti ya~"
-        print(f"Error Gemini: {e}")
+        # Tangani error umum lainnya
+        reply_text = "Duh, Ri lagi pusing nih karena ada error di server, coba tanya lagi nanti ya~"
+        print(f"Error Umum di Predict: {e}")
 
     return {
         "reply": reply_text,
-        "status": "success"
+        "status": "success" if "Maaf banget" not in reply_text else "quota_exceeded"
     }
 
 # How to use: uvicorn main:app --reload --port 8001
