@@ -171,6 +171,109 @@ class TransactionRepository implements TransactionRepositoryInterface
     }
 }
 
+    /**
+     * Return normalized shipping options list for frontend to present.
+     * Each option includes shipping_name, service_name, raw, normalized, etd, is_cod
+     */
+    public function getShippingOptions(array $data, float $subtotal, float $weight): array
+    {
+        try {
+            if (!isset($data['store_id'])) {
+                throw new \Exception('store_id is missing from data');
+            }
+
+            $store = Store::find($data['store_id']);
+            if (!$store) {
+                throw new \Exception('Store not found with id: ' . $data['store_id']);
+            }
+
+            if (!$store->address_id) {
+                throw new \Exception('Store address_id is null for store: ' . $store->id);
+            }
+
+            if (!isset($data['address_id'])) {
+                throw new \Exception('address_id is missing from data');
+            }
+
+            $origin = $store->address_id;
+            $destination = $data['address_id'];
+
+            $weightInGrams = max(1, round($weight * 1000));
+
+            Log::info('Calling RajaOngkir API for options with:', ['origin' => $origin, 'destination' => $destination, 'subtotal' => round($subtotal), 'weight' => $weightInGrams]);
+
+            $response = Http::withHeaders([
+                'x-api-key' => env('KEY_RAJA_ONGKIR'),
+            ])->get('https://api-sandbox.collaborator.komerce.id/tariff/api/v1/calculate', [
+                'shipper_destination_id' => $origin,
+                'receiver_destination_id' => $destination,
+                'item_value' => round($subtotal),
+                'weight' => $weightInGrams
+            ]);
+
+            $result = $response->json();
+            Log::info('RajaOngkir API Response (options):', ['result' => $result]);
+
+            if (!isset($result['data']) || $result['data'] === null) {
+                Log::error('API returned error for options:', ['response' => $result]);
+                return [];
+            }
+
+            $options = [];
+
+            foreach (['calculate_reguler', 'calculate_cargo', 'calculate_instant'] as $k) {
+                if (isset($result['data'][$k]) && is_array($result['data'][$k])) {
+                    foreach ($result['data'][$k] as $entry) {
+                        $raw = null;
+                        if (isset($entry['shipping_cost_net']) && is_numeric($entry['shipping_cost_net'])) {
+                            $raw = (float) $entry['shipping_cost_net'];
+                        } elseif (isset($entry['shipping_cost']) && is_numeric($entry['shipping_cost'])) {
+                            $raw = (float) $entry['shipping_cost'];
+                        } elseif (isset($entry['grandtotal']) && is_numeric($entry['grandtotal'])) {
+                            $raw = (float) $entry['grandtotal'] - $subtotal;
+                        }
+
+                        if ($raw === null) continue;
+
+                        $normalized = $raw;
+
+                        if ($subtotal > 0 && $normalized > $subtotal * 2) {
+                            Log::info('Option raw cost unusually large, attempting normalization', ['raw' => $raw, 'subtotal' => $subtotal, 'entry' => $entry]);
+                            $attempts = 0;
+                            while ($attempts < 4 && $normalized > $subtotal * 2) {
+                                if (fmod($normalized, 100.0) === 0.0) {
+                                    $normalized = $normalized / 100.0;
+                                } else {
+                                    $normalized = $normalized / 1000.0;
+                                }
+                                $attempts++;
+                                Log::info('Option normalization attempt', ['attempt' => $attempts, 'value' => $normalized]);
+                            }
+                        }
+
+                        $options[] = [
+                            'shipping_name' => $entry['shipping_name'] ?? null,
+                            'service_name' => $entry['service_name'] ?? null,
+                            'raw' => $raw,
+                            'shipping_cost' => round($normalized, 2),
+                            'etd' => $entry['etd'] ?? null,
+                            'is_cod' => $entry['is_cod'] ?? false,
+                            'original' => $entry
+                        ];
+                    }
+                }
+            }
+
+            // sort by shipping_cost ascending
+            usort($options, fn($a, $b) => $a['shipping_cost'] <=> $b['shipping_cost']);
+
+            return $options;
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching shipping options:', ['message' => $e->getMessage()]);
+            return [];
+        }
+    }
     public function delete(string $id){
         DB::beginTransaction();
 
@@ -341,6 +444,52 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'shipping' => $data['shipping'],
                 'shipping_type' => $data['shipping_type']
             ]);
+
+            // Fallback: choose the cheapest available option from any calculate_* arrays
+            $candidates = [];
+            foreach (['calculate_reguler', 'calculate_cargo', 'calculate_instant'] as $k) {
+                if (isset($result['data'][$k]) && is_array($result['data'][$k])) {
+                    foreach ($result['data'][$k] as $entry) {
+                        $cost = null;
+                        if (isset($entry['shipping_cost_net']) && is_numeric($entry['shipping_cost_net'])) {
+                            $cost = $entry['shipping_cost_net'];
+                        } elseif (isset($entry['shipping_cost']) && is_numeric($entry['shipping_cost'])) {
+                            $cost = $entry['shipping_cost'];
+                        } elseif (isset($entry['grandtotal']) && is_numeric($entry['grandtotal'])) {
+                            $cost = $entry['grandtotal'] - $subtotal;
+                        }
+
+                        if ($cost !== null) {
+                            $candidates[] = ['entry' => $entry, 'raw' => (float) $cost];
+                        }
+                    }
+                }
+            }
+
+            if (!empty($candidates)) {
+                usort($candidates, fn($a, $b) => $a['raw'] <=> $b['raw']);
+                $chosen = $candidates[0];
+                $shippingCost = $chosen['raw'];
+
+                // Normalize heuristic for overly large values (e.g., API returns cents/scaled values)
+                if ($subtotal > 0 && $shippingCost > $subtotal * 2) {
+                    Log::info('Fallback shipping cost unusually large, attempting normalization', ['raw' => $shippingCost, 'subtotal' => $subtotal]);
+                    $attempts = 0;
+                    while ($attempts < 3 && $shippingCost > $subtotal * 2) {
+                        if (fmod($shippingCost, 100.0) === 0.0) {
+                            $shippingCost = $shippingCost / 100.0;
+                        } else {
+                            $shippingCost = $shippingCost / 1000.0;
+                        }
+                        $attempts++;
+                        Log::info('Fallback normalization attempt', ['attempt' => $attempts, 'value' => $shippingCost]);
+                    }
+                }
+
+                Log::info('Fallback selected cheapest courier', ['chosen' => $chosen, 'normalized' => $shippingCost]);
+            } else {
+                Log::warning('No shipping candidates available in API response; leaving shipping_cost as 0');
+            }
         }
 
         $tax = round($subtotal * 0.11, 2);
