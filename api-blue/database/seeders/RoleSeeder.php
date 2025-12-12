@@ -41,6 +41,7 @@ class RoleSeeder extends Seeder
             'transaction-menu',
             'transaction-list',
             'transaction-create',
+            'transaction-edit',
 
             'product-review-list',
             'product-review-create'

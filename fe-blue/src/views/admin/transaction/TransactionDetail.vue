@@ -3,6 +3,7 @@ import Alert from '@/components/admin/Alert.vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { formatRupiah, formatToClientTimeZone } from '@/helpers/format';
 import { useTransactionStore } from '@/stores/transaction';
+import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref} from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
@@ -14,6 +15,9 @@ const transaction = ref({})
 const transactionStore = useTransactionStore()
 const { loading, success, error } = storeToRefs(transactionStore)
 const { fetchTransactionById, updateTransaction } = transactionStore
+
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
 const fetchData = async () => {
     const response = await fetchTransactionById(route.params.id)
@@ -54,6 +58,12 @@ const handleAcceptOrder=() =>{
 
 const handleDeliverySubmit = () => {
     transaction.value.delivery_status = 'delivering'
+
+    handleUpdateData()
+}
+
+const handleCompletedOrder = () => {
+    transaction.value.delivery_status = 'completed'
 
     handleUpdateData()
 }
@@ -225,7 +235,7 @@ onMounted(fetchData)
                 <p class="font-bold text-xl">Customer Details</p>
                 <div class="flex items-center gap-[10px] w-full min-w-0">
                     <div class="flex size-[92px] shrink-0 rounded-full bg-custom-background overflow-hidden">
-                        <img src="@/assets/images/photos/photo-2.png" class="size-full object-cover" alt="photo">
+                        <img :src="transaction?.buyer?.user?.profile_picture" class="size-full object-cover" alt="photo">
                     </div>
                     <div class="flex flex-col gap-[6px] w-full overflow-hidden">
                         <p class="font-bold text-[22px] leading-tight w-full truncate">
@@ -518,6 +528,11 @@ onMounted(fetchData)
                     </p>
                     <p class="font-semibold text-lg leading-none">{{ transaction?.tracking_number }}({{ transaction?.shipping }})</p>
                 </div>
+                <hr class="border-custom-stroke">
+                            <button type="button" data-modal="Confirmation-Modal"
+                                class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300" v-if="user?.role === 'buyer'" @click="handleCompletedOrder">
+                                <span class="font-semibold text-lg text-white">Mark This Transaction Completed</span>
+                            </button>
             </section>
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white" v-if="transaction?.delivery_status === 'completed'">
                 <p class="font-bold text-xl">Order Status</p>
@@ -548,10 +563,12 @@ onMounted(fetchData)
                         <p class="font-bold text-center">Completed</p>
                     </div>
                 </div>
+                <!-- Gambar Completed -->
+                <!--
                 <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
                     <img src="@/assets/images/thumbnails/delivering.svg" class="size-full object-cover"
                         alt="thumbnail">
-                </div>
+                </div> -->
                 <div class="flex items-center justify-between">
                     <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
                         <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6" alt="icon">
@@ -567,10 +584,11 @@ onMounted(fetchData)
                         <img src="@/assets/images/icons/routing-grey.svg" class="size-6" alt="icon">
                         Tracking Number
                     </p>
-                    <p class="font-semibold text-lg leading-none">{{ transaction?.tracking_number}} </p>
+                    <p class="font-semibold text-lg leading-none">{{ transaction?.tracking_number}}({{ transaction?.shipping }}) </p>
                 </div>
             </section>
-            <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
+            <!-- CUSTOMER REVIEWS -->
+            <!-- <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
                 <p class="font-bold text-xl">Customer Reviews</p>
                 <div class="flex flex-col rounded-2xl border border-custom-stroke p-4 gap-4">
                     <div class="flex items-center justify-between">
@@ -595,7 +613,7 @@ onMounted(fetchData)
                         is perfect for work, and the AirPods sound crystal clear. Plus, the store's service
                         was amazing—fast delivery and great support!”</p>
                 </div>
-            </section>
+            </section> -->
         </div>
     </div>
 </template>

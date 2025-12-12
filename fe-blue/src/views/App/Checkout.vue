@@ -532,7 +532,7 @@ onMounted(() => {
                     </div>
                 </div>
                 <div class="flex flex-col gap-3">
-                    <RouterLink :to="{ name: 'app.my-transactions' }"
+                    <RouterLink :to="{ name: 'admin.my-transaction' }"
                         class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
                         <span class="font-bold text-white">View Transaction</span>
                     </RouterLink>
