@@ -18,25 +18,26 @@ export const useAuthStore = defineStore("auth", {
     },
     actions: {
         async login(credentials) {
-            this.loading = true
-            this.error = null
+    this.loading = true
+    this.error = null
 
-            try {
-                const response = await axiosInstance.post('/login', credentials)
+    try {
+        const response = await axiosInstance.post('/login', credentials)
 
-                const token = response.data.data.token
+        const token = response.data.data.token
 
-                Cookies.set('token', token)
+        Cookies.set('token', token)
 
-                this.success = response.data.message
+        this.success = response.data.message
 
-                return response.data.data
-            } catch (error) {
-                this.error = handleError(error)
-            } finally {
-                this.loading = false
-            }
-        },
+        return response.data.data // Mengembalikan data user beserta role
+    } catch (error) {
+        this.error = handleError(error)
+        return null // Penting: kembalikan null saat gagal
+    } finally {
+        this.loading = false
+    }
+},
 
         async register(payload) {
             this.loading = true
