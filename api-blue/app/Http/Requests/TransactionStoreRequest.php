@@ -14,20 +14,20 @@ class TransactionStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'buyer_id' => 'required|string|exists:buyers,id',
-            'store_id' => 'required|string|exists:stores,id',
+            'buyer_id' => 'required|exists:buyers,id',
+            'store_id' => 'required|exists:stores,id',
             'address_id' => 'required|integer',
             'address' => 'required|string',
             'city' => 'required|string',
             'postal_code' => 'required|string',
-            'shipping' => 'required',
-            'shipping_type' => 'required',
-            'products' => 'required|array|min:1',
-            'products.*.product_id' => 'required|string|exists:products,id',
+            'shipping' => 'required|string',
+            'shipping_type' => 'required|string',
+            'shipping_cost' => 'required|numeric|min:0',
+            'products' => 'required|array',
+            'products.*.product_id' => 'required|exists:products,id',
             'products.*.qty' => 'required|integer|min:1'
         ];
     }
-
     public function attributes()
     {
         return [

@@ -62,6 +62,38 @@ export const useTransactionStore = defineStore("transaction", {
             } finally {
                 this.loading = false
             }
-        }
+        },
+
+            async updateTransaction(payload) {
+                this.loading = true
+                this.error = null
+                try {
+                    const formData = new FormData()
+                    formData.append('_method', 'PUT')
+                    formData.append('delivery_status', payload.delivery_status)
+                    
+                    if (payload.tracking_number) {
+                        formData.append('tracking_number', payload.tracking_number)
+                    }
+                    
+                    if (payload.delivery_proof instanceof File) {
+                        formData.append('delivery_proof', payload.delivery_proof)
+                    }
+
+                    const response = await axiosInstance.post(
+                        `transaction/${payload.id}`, 
+                        formData,
+                        { headers: { 'Content-Type': 'multipart/form-data' } }
+                    )
+
+                    this.success = response.data.message
+                    return response.data.data
+                } catch (error) {
+                    this.error = handleError(error)
+                    throw error
+                } finally {
+                    this.loading = false
+                }
+            }
     }
 })

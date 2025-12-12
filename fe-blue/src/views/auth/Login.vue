@@ -16,12 +16,18 @@ const form = ref({
 const handleSubmit = async () => {
     const response = await login(form.value)
 
-    if (error.value === 'Unauthorized') {
-        error.value = {
-            email: ['Email atau password salah']
+    // Cek apakah login berhasil (response ada dan memiliki data)
+    if (!response) {
+        // Login gagal, error sudah di-set oleh store
+        if (error.value === 'Unauthorized') {
+            error.value = {
+                email: ['Email atau password salah']
+            }
         }
+        return // Stop eksekusi
     }
 
+    // Login berhasil, redirect berdasarkan role
     if(response.role === 'buyer') {
         router.push({ name: 'app.home' })
     } else {
