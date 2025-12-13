@@ -176,7 +176,7 @@
                 <div class="flex flex-col flex-1 gap-5">
                     <p class="font-bold text-xl">Latest Transactions</p>
                     <div id="List-Transactions" class="flex flex-col gap-5">
-                        <div class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
+                         <div class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
                             <div class="flex items-center gap-[14px] w-full overflow-hidden">
                                 <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
                                     <img src="@/assets/images/thumbnails/th-4.svg" class="size-full object-cover" alt="photo">
@@ -305,25 +305,6 @@
                         <div class="flex flex-col gap-1 items-center text-center">
                             <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div id="Upgrade-To-Pro" class="relative flex items-center w-full rounded-[20px] p-5 gap-3 blue-gradient overflow-hidden">
-                <img src="@/assets/images/backgrounds/wave-lines.svg" class="size-full object-cover absolute" alt="backgrounds">
-                <div class="relative w-fit">
-                    <div class="flex size-14 rounded-full bg-custom-lime-green items-center justify-center overflow-hidden">
-                        <img src="@/assets/images/icons/crown-black-fill.svg" class="size-6" alt="icon">
-                    </div>
-                    <p class="absolute transform -translate-x-1/2 left-1/2 -bottom-2 rounded-[20px] py-1 px-2 bg-custom-black text-white w-fit font-extrabold text-[8px]">PRO</p>
-                </div>
-                <div class="relative flex flex-col gap-1 w-full">
-                    <p class="font-semibold text-sm text-custom-lime-green-char">Access Pro Featured</p>
-                    <div class="flex items-center justify-between w-full">
-                        <p class="font-bold text-[22px] text-white leading-none">Upgrade To Pro</p>
-                        <a href="#" class="flex items-center gap-1">
-                            <span class="font-semibold text-sm text-white hover:underline">Upgrade Now</span>
-                            <img src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-5 shrink-0" alt="icon">
-                        </a>
                     </div>
                 </div>
             </div>
