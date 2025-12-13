@@ -25,14 +25,24 @@ const handleImageChange = (e) => {
 }
 
 const handleSubmit = async () => {
-    await register(form.value)
+    const formData = new FormData()
+    
+    if (form.value.profile_picture) {
+        formData.append('profile_picture', form.value.profile_picture)
+    }
+    formData.append('name', form.value.name)
+    formData.append('email', form.value.email)
+    formData.append('password', form.value.password)
+    formData.append('role', form.value.role)
 
-    if (form.role === 'store') {
+    await register(formData)
+
+    if (form.value.role === 'store') {
         router.push({ name: 'admin.dashboard' })
+    } else {
+        router.push({ name: 'app.home' })
     }
 }
-
-
 </script>
 
 <template>
@@ -53,16 +63,15 @@ const handleSubmit = async () => {
                             <img id="Thumbnail" :src="form.profile_picture_url"
                                 data-default="@/assets/images/icons/photo-profile-default.svg"
                                 class="size-full object-cover" alt="icon" />
-                            <input type="file" id="File-Input" accept="image/*"
-                                class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange" />
                         </div>
-                        <button type="button"
-                            class="relative flex rounded-2xl py-4 px-6 bg-custom-black h-[56px] gap-[10px] font-medium text-white text-nowrap">
-                            <span id="Add-Photo" class="absolute inset-0 opacity-0"></span>
+                        <label
+                            class="relative flex rounded-2xl py-4 px-6 bg-custom-black h-[56px] gap-[10px] font-medium text-white text-nowrap cursor-pointer">
+                            <input type="file" accept="image/*"
+                                class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange" />
                             <img src="@/assets/images/icons/send-square-grey.svg" class="flex size-6 shrink-0"
                                 alt="icon">
                             Add Photo
-                        </button>
+                        </label>
                     </div>
                 </div>
                 <div class="flex flex-col gap-3">
