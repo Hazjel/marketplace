@@ -45,7 +45,20 @@ export const useStoreStore = defineStore("store", {
             }
         },
 
-        async fetchStoresByUsername(username) {
+        async fetchStoreById(id) {
+            this.loading = true
+            
+            try {
+                const response = await axiosInstance.get(`store/${id}`)
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async fetchStoreByUsername(username) {
             this.loading = true
             
             try {
@@ -59,7 +72,7 @@ export const useStoreStore = defineStore("store", {
             }
         },
 
-        async fetchStoresByUserId(userId) {
+        async fetchStoreByUserId(userId) {
             this.loading = true
             
             try {

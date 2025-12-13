@@ -62,7 +62,7 @@ const handleAddressInput = debounce(async (search) => {
     try {
         const response = await fetch(`/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`, {
             headers: {
-                'x-api-key': 'f0lW8jxe09eefaaa94eb3c99ABk9n8B6'
+                'x-api-key': '908hmdrmf60a3b2477a3ae43b4hVBDka'
             }
         });
 
@@ -102,7 +102,7 @@ const handleDeliveryModal = async () => {
             `/tariff/api/v1/calculate?shipper_destination_id=${store.storeAddressId}&receiver_destination_id=${transaction.value.address_id}&item_value=${totalValue}&weight=${totalWeight}`,
             {
                 headers: {
-                    'x-api-key': 'f0lW8jxe09eefaaa94eb3c99ABk9n8B6'
+                    'x-api-key': '908hmdrmf60a3b2477a3ae43b4hVBDka'
                 }
             }
         );
@@ -149,10 +149,12 @@ const handleSubmit = async () => {
         window.snap.pay(response.snap_token, {
             onSuccess: function (result) {
                 console.log('Payment success:', result);
-                // Show modal first before any other operations
+                
+                // ✅ Hapus items yang sudah di-checkout dari cart (bukan hanya selection)
+                cart.clearSelectedItems(); // Ganti dari clearSelectedStores()
+                
+                // Show success modal
                 showSuccessModal.value = true;
-                // Clear the selected stores from cart
-                cart.clearSelectedStores();
             },
             onPending: function (result) {
                 console.log('Payment pending:', result);

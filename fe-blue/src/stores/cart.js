@@ -177,6 +177,18 @@ export const useCartStore = defineStore('cart', {
 
             this.save()
         },
+        
+        clearSelectedItems() {
+            // Filter out carts from selected stores
+            this.carts = this.carts.filter(cart => !this.selectedStores.has(cart.storeId))
+            
+            // Clear selected stores
+            this.selectedStores.clear()
+            
+            // Save to localStorage
+            this.save()
+            this.saveSelectedStores()
+        },
 
         /**
          * Remove product from cart.

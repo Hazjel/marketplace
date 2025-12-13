@@ -118,22 +118,6 @@ const { decreaseQuantity, increaseQuantity, removeFromCart, toggleStoreSelection
 
             </section>
             <section id="Order-Summary" class="flex flex-col gap-5 w-[444px] shrink-0">
-                <button
-                    class="relative w-full rounded-[20px] bg-[linear-gradient(90deg,#02957E_0%,#17B1C8_100%)] overflow-hidden">
-                    <img src="@/assets/images/backgrounds/round-ornament.svg"
-                        class="size-full object-contain object-right opacity-35 contrast-200 absolute" alt="icon">
-                    <div class="relative flex items-center min-h-[104px] gap-[14px] p-5">
-                        <img src="@/assets/images/icons/ticket-discount-white-transparent-framed.svg"
-                            class="flex size-16 shrink-0" alt="icon">
-                        <div class="w-full text-left">
-                            <p class="font-bold text-lg text-white leading-none">Apply Discount Coupon</p>
-                            <p class="font-medium text-[#98E1E1] leading-none mt-2">You Have 23 Avalaible Coupons
-                            </p>
-                        </div>
-                        <img src="@/assets/images/icons/arrow-right-no-tail-white.svg" class="flex size-5 shrink-0"
-                            alt="icon">
-                    </div>
-                </button>
                 <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white">
                     <p class="font-bold text-xl">Order Summary</p>
                     <div class="flex flex-col rounded-xl border border-custom-stroke p-5 gap-4">
