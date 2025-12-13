@@ -41,11 +41,11 @@ defineProps({
                     </div>
                 </button>
                 <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }" class="group flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-[6px] bg-custom-blue/10 hover:bg-custom-blue transition-300">
-                    <div class="flex size-6 shrink-0 relative">
+                    <!-- <div class="flex size-6 shrink-0 relative">
                         <img src="@/assets/images/icons/shopping-cart-blue.svg" class="absolute flex size-6 shrink-0 opacity-100 group-hover:opacity-0 transition-300" alt="icon">
                         <img src="@/assets/images/icons/shopping-cart-white.svg" class="absolute flex size-6 shrink-0 opacity-0 group-hover:opacity-100 transition-300" alt="icon">
-                    </div>
-                    <span class="font-semibold text-custom-blue group-hover:text-white transition-300">Add to Cart</span>
+                    </div> -->
+                    <span class="font-semibold text-custom-blue group-hover:text-white transition-300">Detail</span>
                 </RouterLink>
             </div>
         </div>

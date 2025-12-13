@@ -261,10 +261,10 @@ watch(
                         </div>
                         <div class="flex flex-col gap-4">
                             <div class="flex items-center gap-5">
-                                <a @click.prevent="addToCart" class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
+                                <button @click.prevent="addToCart" class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
                                     <img src="@/assets/images/icons/shopping-cart-white.svg" class="flex size-6 shrink-0" alt="icon">
                                     <span class="font-bold text-white">Add to Cart</span>
-                                </a>
+                                </button>
                                 <button class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 border border-custom-stroke">
                                     <img src="@/assets/images/icons/heart-grey.svg" class="flex size-6 shrink-0" alt="icon">
                                     <span class="font-bold text-custom-grey">Add To Wishlist</span>

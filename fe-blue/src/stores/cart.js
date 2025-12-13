@@ -47,7 +47,7 @@ export const useCartStore = defineStore('cart', {
          * Mengembalikan array of objects, mewakili toko-toko yang dipilih.
          * @returns {Array}
          */
-        selectedCarts: (state) => {
+        selectedCarts(state) {
             return state.carts.filter(store => state.selectedStores.has(store.storeId))
         },
 
@@ -55,8 +55,8 @@ export const useCartStore = defineStore('cart', {
          * Menghitung total item yang dibeli dari toko-toko yang dipilih.
          * @returns {number}
          */
-        totalSelectedItems: (state) => {
-            return state.selectedCarts.reduce((sum, store) =>
+        totalSelectedItems() {
+            return this.selectedCarts.reduce((sum, store) =>
                 sum + store.products.length, 0)
         },
 
@@ -64,8 +64,8 @@ export const useCartStore = defineStore('cart', {
          * Menghitung total quantity yang dibeli dari toko-toko yang dipilih.
          * @returns {number}
          */
-        totalSelectedQuantity: (state) => {
-            return state.selectedCarts.reduce((sum, store) =>
+        totalSelectedQuantity() {
+            return this.selectedCarts.reduce((sum, store) =>
                 sum + store.products.reduce((s, p) => s + p.quantity, 0), 0)
         },
 
@@ -73,8 +73,8 @@ export const useCartStore = defineStore('cart', {
          * Menghitung subtotal dari toko-toko yang dipilih.
          * @returns {number}
          */
-        subtotalSelected: (state) => {
-            return state.selectedCarts.reduce((sum, store) =>
+        subtotalSelected() {
+            return this.selectedCarts.reduce((sum, store) =>
                 sum + store.products.reduce((s, p) => s + p.price * p.quantity, 0), 0)
         },
 
@@ -82,15 +82,15 @@ export const useCartStore = defineStore('cart', {
          * Menghitung ppn dari toko-toko yang dipilih.
          * @returns {number}
          */
-        ppnSelected: (state) => {
-            return state.subtotalSelected * 0.11
+        ppnSelected() {
+            return this.subtotalSelected * 0.11
         },
 
         /**
          * Menghitung discount dari toko-toko yang dipilih.
          * @returns {number}
          */
-        discountSelected: (state) => {
+        discountSelected() {
             return 0 // Bisa diubah sesuai dengan logika discount
         },
 
@@ -98,8 +98,8 @@ export const useCartStore = defineStore('cart', {
          * Menghitung grand total dari toko-toko yang dipilih.
          * @returns {number}
          */
-        grandTotalSelected: (state) => {
-            return state.subtotalSelected + state.ppnSelected - state.discountSelected
+        grandTotalSelected() {
+            return this.subtotalSelected + this.ppnSelected - this.discountSelected
         },
 
         /**
@@ -117,10 +117,11 @@ export const useCartStore = defineStore('cart', {
          * @param {string} storeId - id toko yang akan di-toggle
          */
         toggleStoreSelection(storeId) {
-            this.selectedStores.clear() // Clear existing selections first
             if (this.selectedStores.has(storeId)) {
                 this.selectedStores.delete(storeId)
             } else {
+                // Jika ingin single selection (hanya 1 toko), uncomment ini:
+                // this.selectedStores.clear()
                 this.selectedStores.add(storeId)
             }
             this.saveSelectedStores()
@@ -177,14 +178,14 @@ export const useCartStore = defineStore('cart', {
 
             this.save()
         },
-        
+
         clearSelectedItems() {
             // Filter out carts from selected stores
             this.carts = this.carts.filter(cart => !this.selectedStores.has(cart.storeId))
-            
+
             // Clear selected stores
             this.selectedStores.clear()
-            
+
             // Save to localStorage
             this.save()
             this.saveSelectedStores()
@@ -219,7 +220,11 @@ export const useCartStore = defineStore('cart', {
         decreaseQuantity(storeId, productId) {
             const store = this.carts.find(s => s.storeId === storeId)
             const product = store?.products.find(p => p.id === productId)
-            if (product) product.quantity--
+
+            // decrease only if quantity > 1
+            if (product && product.quantity > 1) {
+                product.quantity--
+            }
 
             this.save()
         },
