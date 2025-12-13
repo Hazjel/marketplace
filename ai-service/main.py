@@ -7,15 +7,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-# 1. Load Environment Variables
+# Load Environment Variables
 load_dotenv(override=True)
 
-# 2. Konfigurasi Gemini
+# Konfigurasi Gemini
 API_GEMINI = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=API_GEMINI)
-model = genai.GenerativeModel("gemini-2.5-flash") # Atau gemini-pro jika 2.5 belum available di akunmu
+model = genai.GenerativeModel("gemini-2.5-flash") # Gemini model
 
-# 3. Inisialisasi FastAPI
+# Inisialisasi FastAPI
 app = FastAPI()
 
 origins = [
@@ -32,13 +32,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 4. Model Data Request (Dari Laravel/Vue)
+# Model Data Request (Dari Laravel/Vue)
 class ChatRequest(BaseModel):
     message: str
 
-# --- SYSTEM PROMPT PERSONA RI ---
+# SYSTEM PROMPT PERSONA RI 
 SYSTEM_PROMPT = (
-    "Kamu adalah Ri, asisten virtual yang ramah, sopan, dan penuh empati. "
+    "Kamu adalah Ri, asisten virtual Calorizz yang ramah, sopan, dan penuh empati. "
     "Gunakan bahasa Indonesia yang santai tapi tetap sopan. "
     "Tugasmu adalah membantu pengguna menjawab pertanyaan seputar makanan, menjelaskan hal sulit dengan mudah, "
     "dan menjaga suasana percakapan tetap hangat dan positif. "
@@ -53,7 +53,7 @@ SYSTEM_PROMPT = (
     "Tolong berikan respon serapi mungkin, jika perlu buatlah baris baru"
 )
 
-# --- FUNGSI DATABASE ---
+# FUNGSI DATABASE 
 def get_db_connection():
     try:
         return mysql.connector.connect(
@@ -86,7 +86,7 @@ def search_db(keyword):
             cursor.close()
             conn.close()
 
-# --- FUNGSI BANTUAN AI ---
+# EXTRACT KEYWORD
 def analyze_prompt_and_extract_key(user_message):
     """Menggabungkan check_db_needed dan extract_keyword menjadi 1 panggilan API."""
     
@@ -96,7 +96,7 @@ def analyze_prompt_and_extract_key(user_message):
         "Jika TIDAK, keyword-nya harus 'none'. "
         "Balas HANYA dengan format: YA/TIDAK|kata kunci. Contoh: YA|Burger, atau: TIDAK|none."
         
-        # Tambahan contoh untuk membantu deteksi (Few-Shot Prompting)
+        # Contoh prompting (Few-Shot Prompting)
         "\nCONTOH 1: User bertanya: 'Apakah ada minuman dingin?'. Balas: TIDAK|none"
         "\nCONTOH 2: User bertanya: 'Apakah kalian jual ayam goreng?'. Balas: YA|ayam goreng"
         "\nCONTOH 3: User bertanya: 'harga pizza gimana?'. Balas: YA|pizza"
@@ -120,13 +120,13 @@ def analyze_prompt_and_extract_key(user_message):
             return False, 'none'
             
     except google_exceptions.ResourceExhausted as e:
-        # Tangani jika panggilan API ini yang menghabiskan kuota
+        # Jika pemanggilan API menghabiskan kuota
         raise e
     except Exception as e:
         print(f"Error Analisis API: {e}")
         return False, 'none'
 
-# --- ENDPOINT UTAMA ---
+# ENDPOINT UTAMA
 @app.post("/predict")
 async def predict_response(request: ChatRequest):
     user_msg = request.message
@@ -134,11 +134,11 @@ async def predict_response(request: ChatRequest):
     reply_text = ""
 
     try:
-        # 1. ANALISIS (PANGGILAN API 1)
+        # ANALISIS (PANGGILAN API 1)
         is_db_needed, keyword = analyze_prompt_and_extract_key(user_msg) 
         print(f"DEBUG: DB Needed={is_db_needed}, Keyword={keyword}")
         
-        # 2. Proses DB jika diperlukan
+        # Proses DB 
         if keyword != "none":
             products = search_db(keyword)
             
@@ -152,8 +152,7 @@ async def predict_response(request: ChatRequest):
             else:
                 context_info = "\n[SISTEM: User mencari produk, tapi tidak ditemukan di database. Beritahu user dengan sopan bahwa produk tidak ada~]"
                 
-        # 3. KIRIM PESAN AKHIR (PANGGILAN API 2)
-        # Gunakan persona dan context yang diperkaya
+        # 3. KIRIM PESAN (PANGGILAN API 2)
         chat = model.start_chat(history=[
             {"role": "user", "parts": [SYSTEM_PROMPT]}
         ])
@@ -164,13 +163,13 @@ async def predict_response(request: ChatRequest):
         reply_text = response.text.strip()
         
     except google_exceptions.ResourceExhausted:
-        # TANGANI ERROR QUOTA HABIS SECARA SPESIFIK
+        # PENANGANAN ERROR QUOTA HABIS
         print("ERROR: Kuota Gemini Habis (ResourceExhausted 429)")
         print(f"🔑 SERVER MEMBACA KEY: {API_GEMINI}")
         reply_text = "Maaf banget, Mikhael bilang Ri harus istirahat nih~ Coba tunggu sebentar (sekitar 1 menit) lalu coba lagi ya~ Janji deh, Ri akan bantu lagi~"
         
     except Exception as e:
-        # Tangani error umum lainnya
+        # Penanganan error lain
         reply_text = "Duh, Ri lagi pusing nih karena ada error di server, coba tanya lagi nanti ya~"
         print(f"Error Umum di Predict: {e}")
 
