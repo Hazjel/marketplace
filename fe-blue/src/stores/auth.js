@@ -44,15 +44,20 @@ export const useAuthStore = defineStore("auth", {
             this.error = null;
 
             try {
-                const response = await axiosInstance.post("/register", payload);
+                const response = await axiosInstance.post("/register", payload, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data' // ✅ Tambahkan ini
+                    }
+                });
 
                 const token = response.data.data.token;
-
                 Cookies.set("token", token);
-
                 this.success = response.data.message;
+                
+                return response.data.data; // ✅ Return data
             } catch (error) {
                 this.error = handleError(error);
+                throw error; // ✅ Throw error agar bisa dicatch di component
             } finally {
                 this.loading = false;
             }
