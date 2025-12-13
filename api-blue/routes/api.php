@@ -20,11 +20,12 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::apiResource('user', UserController::class);
     Route::get('user/all/paginated', [UserController::class, 'getAllPaginated']);
+    Route::get('store/all/paginated', [StoreController::class, 'getAllPaginated']);
     Route::post('store/{id}/verified', [StoreController::class, 'updateVerifiedStatus']);
     Route::get('store/username/{store}', [StoreController::class, 'showByUsername']);
     Route::get('my-store', [StoreController::class, 'showByUser']);
-    
 
+    Route::apiResource('store', StoreController::class);
     Route::apiResource('store-balance', StoreBalanceController::class)->except(['store', 'update', 'delete']);
     Route::get('store-balance/all/paginated', [StoreBalanceController::class, 'getAllPaginated']);
     Route::get('store-balance/all/paginated', [StoreBalanceController::class, 'getAllPaginated']);
