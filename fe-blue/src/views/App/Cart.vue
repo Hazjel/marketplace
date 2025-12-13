@@ -69,16 +69,17 @@ const { decreaseQuantity, increaseQuantity, removeFromCart, toggleStoreSelection
                                         <p class="font-bold text-lg truncate">{{ product.name }}</p>
                                         <p
                                             class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
-                                            <span class="font-bold text-custom-blue">{{ product.product_category.name
-                                            }}</span>
+                                            <span class="font-bold text-custom-blue">{{ product.product_category.name}}</span>
                                             <span class="text-[22px] leading-none">•</span>
                                             <span>{{ product.weight }} KG</span>
                                         </p>
                                     </div>
                                     <div
                                         class="quantity-container flex items-center shrink-0 rounded-2xl border border-custom-stroke p-4">
-                                        <button type="button" class="subtract size-5 flex items-center justify-center"
-                                            @click="decreaseQuantity(store.storeId, product.id)">
+                                        <button type="button" 
+                                            class="subtract size-5 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                            @click="decreaseQuantity(store.storeId, product.id)"
+                                            :disabled="product.quantity <= 1">
                                             <span class="text-[30px] font-light leading-none align-middle mb-1">-</span>
                                         </button>
                                         <div class="h-[18px] border border-custom-stroke ml-4"></div>
