@@ -5,6 +5,7 @@ import Banner from '@/components/App/home/Banner.vue';
 import Categories from '@/components/App/home/Categories.vue';
 import TopPicks from '@/components/App/home/TopPicks.vue';
 import Stores from '@/components/App/home/Stores.vue';
+import Chatbot from '@/components/App/Chatbot.vue';
 
 </script>
 
@@ -14,5 +15,6 @@ import Stores from '@/components/App/home/Stores.vue';
             <Categories />
             <TopPicks />
             <Stores />
+            <Chatbot />
         </main>
 </template>

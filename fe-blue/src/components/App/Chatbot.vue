@@ -2,7 +2,7 @@
     import { ref, nextTick } from 'vue';
     import axios from 'axios'; // Pakai axios plugin project kamu
 
-    axios.defaults.baseURL = 'http://localhost:8001';
+    axios.defaults.baseURL = 'http://localhost:8000';
 
     const isOpen = ref(false);
     const message = ref('');

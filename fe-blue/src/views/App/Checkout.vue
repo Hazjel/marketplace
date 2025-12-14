@@ -18,6 +18,8 @@ const { selectedCarts, totalSelectedItems, totalSelectedQuantity, subtotalSelect
 const { error } = storeToRefs(transactionStore)
 const { createTransaction } = transactionStore
 
+const isMidtransLoaded = ref(false)
+
 // Transaction data
 const transaction = ref({
     buyer_id: null,
@@ -50,6 +52,40 @@ const finalPpn = computed(() => Math.round(subtotalSelected.value * 0.11))
 const finalGrandTotal = computed(() => Math.round(finalSubtotal.value + finalPpn.value - discountSelected.value))
 
 const showSuccessModal = ref(false)
+
+const loadMidtransScript = () => {
+    return new Promise((resolve, reject) => {
+        // Cek jika sudah ada
+        if (window.snap) {
+            resolve();
+            return;
+        }
+
+        // Hapus script lama jika ada
+        const oldScripts = document.querySelectorAll('script[src*="snap.js"]');
+        oldScripts.forEach(s => s.remove());
+
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+        
+        // ✅ GANTI dengan Client Key Midtrans Anda
+        script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || 'YOUR_MIDTRANS_CLIENT_KEY');
+        
+        script.async = true;
+        script.onload = () => {
+            console.log('✅ Midtrans loaded successfully');
+            isMidtransLoaded.value = true;
+            resolve();
+        };
+        script.onerror = (error) => {
+            console.error('❌ Failed to load Midtrans:', error);
+            reject(new Error('Failed to load Midtrans payment system'));
+        };
+
+        document.head.appendChild(script);
+    });
+};
 
 // Address search functionality
 const handleAddressInput = debounce(async (search) => {
@@ -136,10 +172,15 @@ const handleSubmit = async () => {
         return;
     }
 
+    // ✅ CEK apakah Midtrans sudah loaded
+    if (!window.snap) {
+        alert('Payment system is not ready. Please refresh the page and try again.');
+        return;
+    }
+
     try {
         const response = await createTransaction(transaction.value);
         
-        // ✅ Validasi response sebelum mengakses snap_token
         if (!response || !response.snap_token) {
             alert('Failed to create transaction. Please try again.');
             console.error('Invalid response:', response);
@@ -149,12 +190,8 @@ const handleSubmit = async () => {
         window.snap.pay(response.snap_token, {
             onSuccess: function (result) {
                 console.log('Payment success:', result);
-                
-                // ✅ Hapus items yang sudah di-checkout dari cart (bukan hanya selection)
-                cart.clearSelectedItems(); // Ganti dari clearSelectedStores()
-                
-                // Show success modal
                 showSuccessModal.value = true;
+                cart.clearSelectedStores();
             },
             onPending: function (result) {
                 console.log('Payment pending:', result);
@@ -180,7 +217,17 @@ const closeModal = () => {
 };
 
 // Initialize transaction data
-onMounted(() => {
+onMounted(async () => {
+    // Load Midtrans script
+    try {
+        await loadMidtransScript();
+        console.log('Midtrans ready');
+    } catch (error) {
+        console.error('Midtrans load error:', error);
+        alert('Failed to load payment system. Please refresh the page.');
+    }
+
+    // Initialize transaction
     if (selectedCarts.value.length > 0) {
         const store = selectedCarts.value[0];
         transaction.value.store_id = store.storeId;
