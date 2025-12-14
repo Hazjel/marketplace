@@ -26,8 +26,8 @@ const items = [
         permission: 'dashboard-menu'
     },
     {
-        label: 'My Transacions',
-        path: '/admin/my-transaction',
+        label: 'My Transactions',
+        path: '/admin/my-transactions',
         iconDefault: StickyNoteGreyIcon,
         iconActive: StickyNoteBlueFillIcon,
         permission: 'transaction-menu',
@@ -79,6 +79,15 @@ const items = [
                 iconDefault: StickyNoteGreyIcon,
                 iconActive: StickyNoteBlueFillIcon,
                 permission: 'transaction-menu',
+                role: 'admin'
+            },
+            {
+                label: 'List Transaction',
+                path: '/admin/transaction',
+                iconDefault: StickyNoteGreyIcon,
+                iconActive: StickyNoteBlueFillIcon,
+                permission: 'transaction-menu',
+                role: 'store'
             }
         ]
     },
@@ -133,23 +142,6 @@ const items = [
                         <SidebarItem v-for="item in items" :item="item" />
                     </ul>
                 </nav>
-                <div class="flex flex-col gap-4 rounded-2xl p-4 bg-custom-blue mt-auto mb-5">
-                    <div class="flex items-center gap-[10px]">
-                        <div
-                            class="flex items-center justify-center size-[56px] shrink-0 rounded-full overflow-hidden bg-custom-orange">
-                            <img src="@/assets/images/icons/crown-white-fill.svg" class="flex size-6 shrink-0"
-                                alt="icon">
-                        </div>
-                        <p class="font-bold capitalize text-white">Unlock Free Pro Access</p>
-                    </div>
-                    <hr class="border-white/20">
-                    </hr>
-                    <a href="#" class="flex items-center justify-between">
-                        <span class="font-semibold text-white">Claim Your Free Pro</span>
-                        <img src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-5 shrink-0"
-                            alt="icon">
-                    </a>
-                </div>
             </div>
         </div>
     </aside>
