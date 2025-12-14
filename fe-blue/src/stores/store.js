@@ -47,7 +47,7 @@ export const useStoreStore = defineStore("store", {
 
         async fetchStoreById(id) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.get(`store/${id}`)
                 return response.data.data
@@ -60,7 +60,7 @@ export const useStoreStore = defineStore("store", {
 
         async fetchStoreByUsername(username) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.get(`store/username/${username}`)
 
@@ -74,7 +74,7 @@ export const useStoreStore = defineStore("store", {
 
         async fetchStoreByUserId(userId) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.get(`store/user/${userId}`)
                 return response.data.data
@@ -87,7 +87,7 @@ export const useStoreStore = defineStore("store", {
 
         async fetchStoreByUser() {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.get(`my-store`)
 
@@ -109,11 +109,52 @@ export const useStoreStore = defineStore("store", {
                 this.success = response.data.message
 
                 router.push({ name: 'admin.my-store' })
-                
+
             } catch (error) {
                 this.error = handleError(error)
             } finally {
                 this.loading = false
+            }
+        },
+
+        async updateStore(id, payload) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const formData = new FormData();
+
+                formData.append('user_id', payload.user_id);
+                formData.append('name', payload.name || '');
+                formData.append('about', payload.about || '');
+                formData.append('phone', payload.phone || '');
+                formData.append('address_id', payload.address_id || 0);
+                formData.append('city', payload.city || '');
+                formData.append('address', payload.address || '');
+                formData.append('postal_code', payload.postal_code || '');
+                formData.append('_method', 'PUT'); // ✅ Laravel method spoofing
+
+                // Append file hanya jika ada file baru
+                if (payload.logo instanceof File) {
+                    formData.append('logo', payload.logo);
+                }
+
+                const response = await axiosInstance.post(`store/${id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                this.success = response.data.message;
+
+                return response.data.data;
+
+            } catch (error) {
+                console.error('Update store error:', error.response?.data);
+                this.error = handleError(error);
+                throw error;
+            } finally {
+                this.loading = false;
             }
         },
 
@@ -131,9 +172,9 @@ export const useStoreStore = defineStore("store", {
             }
         },
 
-        async deleteStore(id){
+        async deleteStore(id) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.delete(`store/${id}`)
 

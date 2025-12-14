@@ -46,21 +46,31 @@ const handleImageChange = (e) => {
 }
 
 const handleAddressInput = debounce(async (search) => {
+    if (!search.trim()) {
+        showAddressOptions.value = false;
+        return;
+    }
+
     loadingAddress.value = true;
     try {
         const response = await fetch(`/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`, {
             headers: {
-                'X-API-KEY': import.meta.env.RAJAONGKIR_API_KEY
+                'x-api-key': import.meta.env.VITE_RAJAONGKIR_API_KEY
             }
         });
 
         const data = await response.json();
-
-        addressOptions.value = data.data;
-        showAddressOptions.value = true;
+        
+        console.log('Address search response:', data); // ✅ Debug
+        
+        if (data.data) {
+            addressOptions.value = data.data;
+            showAddressOptions.value = true;
+        }
 
     } catch (err) {
         console.error('Error fetching address:', err);
+        addressOptions.value = [];
     } finally {
         loadingAddress.value = false;
     }
