@@ -1,6 +1,5 @@
 <script setup>
 import { can } from '@/helpers/permissionHelper';
-import { formatDate } from '@/helpers/format';
 import { RouterLink } from 'vue-router';
 
 defineProps({
@@ -53,7 +52,7 @@ const emit = defineEmits(['delete'])
         <div class="flex items-center justify-between">
             <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
                 <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0" alt="icon"> 
-                Created on {{ formatDate(item.created_at) }}
+                Created on 19/02/2020
             </p>
             <div class="flex items-center justify-end gap-[14px]">
                 <button class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-red/10" v-if="can('store-delete')" @click="emit('delete', item.id)" >

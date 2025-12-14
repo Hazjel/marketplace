@@ -5,7 +5,6 @@ import { useProductStore } from '@/stores/product';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import { useCartStore } from '@/stores/cart';
 
 const route = useRoute()
 
@@ -15,9 +14,6 @@ const activeImage = ref()
 const productStore = useProductStore()
 const { products, loading } = storeToRefs(productStore)
 const { fetchProductBySlug, fetchProducts } = productStore
-
-const cart = useCartStore()
-const quantity = ref(1)
 
 const fetchProduct = async () => {
     const response = await fetchProductBySlug(route.params.slug)
@@ -33,25 +29,6 @@ const fetchProduct = async () => {
 
 function setActiveImage(image) {
     activeImage.value = image
-}
-
-const increase = () => {
-    if (quantity.value < product.value.stock) {
-        quantity.value++
-    }
-}
-
-const decrease = () => {
-    if (quantity.value > 1) {
-        quantity.value--
-    }
-}
-
-const addToCart = () => {
-    cart.addToCart({
-        ...product.value,
-        quantity: quantity.value
-    })
 }
 
 onMounted(() => {
@@ -248,23 +225,23 @@ watch(
                                 <p class="font-bold text-2xl text-custom-blue leading-none">Rp {{ formatRupiah(product?.price) }}</p>
                             </div>
                             <div class="quantity-container flex items-center shrink-0 rounded-2xl border border-custom-stroke p-4">
-                                <button type="button" class="subtract size-5 flex items-center justify-center" @click="decrease">
+                                <button type="button" class="subtract size-5 flex items-center justify-center">
                                     <span class="text-[30px] font-light leading-none align-middle mb-1">-</span>
                                 </button>
                                 <div class="h-[18px] border border-custom-stroke ml-4"></div>
-                                <input type="number" name="" value="1" class="amount appearance-none w-[70px] pl-5 text-center font-bold text-lg" v-model="quantity" >
+                                <input type="number" name="" value="1" class="amount appearance-none w-[70px] pl-5 text-center font-bold text-lg">
                                 <div class="h-[18px] border border-custom-stroke mr-4"></div>
-                                <button type="button" class="add size-5 flex items-center justify-center" @click="increase">
+                                <button type="button" class="add size-5 flex items-center justify-center">
                                     <span class="text-[24px] font-light leading-none align-middle mb-1">+</span>
                                 </button>
                             </div>
                         </div>
                         <div class="flex flex-col gap-4">
                             <div class="flex items-center gap-5">
-                                <button @click.prevent="addToCart" class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
+                                <a href="shopping-cart.html" class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
                                     <img src="@/assets/images/icons/shopping-cart-white.svg" class="flex size-6 shrink-0" alt="icon">
                                     <span class="font-bold text-white">Add to Cart</span>
-                                </button>
+                                </a>
                                 <button class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 border border-custom-stroke">
                                     <img src="@/assets/images/icons/heart-grey.svg" class="flex size-6 shrink-0" alt="icon">
                                     <span class="font-bold text-custom-grey">Add To Wishlist</span>

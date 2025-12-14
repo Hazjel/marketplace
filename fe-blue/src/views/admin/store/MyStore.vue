@@ -1,5 +1,4 @@
 <script setup>
-import { formatDate } from '@/helpers/format';
 import { useStoreStore } from '@/stores/store';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
@@ -56,17 +55,17 @@ onMounted(fetchStore)
                         </div>
                         <div class="flex flex-col gap-3">
                             <div class="flex items-center gap-[14px]">
-                                <RouterLink :to="{ name: 'admin.edit-store' }"
+                                <a href="#"
                                     class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-black">
                                     <img src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0"
                                         alt="icon">
                                     <span class="font-semibold text-white">Edit Store</span>
-                                </RouterLink>
+                                </a>
                             </div>
                             <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
                                 <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0"
                                     alt="icon">
-                                Created on {{ formatDate(store?.created_at) }}
+                                Created on 19/02/2020
                             </p>
                         </div>
                     </section>
@@ -80,7 +79,7 @@ onMounted(fetchStore)
                                         alt="icon">
                                 </div>
                                 <div class="flex flex-col gap-1">
-                                    <p class="font-bold text-lg leading-none">{{ store?.city }}</p>
+                                    <p class="font-bold text-lg leading-none">Malang</p>
                                     <p class="font-semibold text-custom-grey">City Location</p>
                                 </div>
                             </div>
@@ -92,7 +91,7 @@ onMounted(fetchStore)
                                         alt="icon">
                                 </div>
                                 <div class="flex flex-col gap-1">
-                                    <p class="font-bold text-lg leading-none">{{ store?.postal_code }}  </p>
+                                    <p class="font-bold text-lg leading-none">32250</p>
                                     <p class="font-semibold text-custom-grey">Post Code</p>
                                 </div>
                             </div>
