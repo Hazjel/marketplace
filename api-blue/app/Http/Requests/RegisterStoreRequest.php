@@ -14,7 +14,7 @@ class RegisterStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'profile_picture' => 'required|image',
+            'profile_picture' => 'required|image|',
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required',

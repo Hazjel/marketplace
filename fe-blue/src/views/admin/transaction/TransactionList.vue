@@ -15,9 +15,7 @@ const { fetchTransactionsPaginated, deleteTransaction } = transactionStore
 
 const serverOptions = ref({
     page: 1,
-    row_per_page: 10,
-    sort_by: 'created_at',
-    descending: true,
+    row_per_page: 10
 })
 
 const filters = ref({

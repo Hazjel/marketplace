@@ -32,23 +32,6 @@ export const useProductStore = defineStore("product", {
             }
         },
 
-        async searchProducts(params = {}) {
-            try {
-                const response = await axiosInstance.get('/product', { 
-                    params: {
-                        search: params.search || null,
-                        limit: params.limit || 5
-                    }
-                });
-                
-                // Return langsung tanpa simpan ke state
-                return response.data.data;
-            } catch (error) {
-                console.error('Search error:', error);
-                return [];
-            }
-        },
-
         async fetchProductsPaginated(params) {
             this.loading = true;
 

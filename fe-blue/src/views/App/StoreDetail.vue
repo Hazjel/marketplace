@@ -12,14 +12,14 @@ const store = ref({})
 
 const storeStore = useStoreStore()
 const { loading } = storeToRefs(storeStore)
-const { fetchStoreByUsername } = storeStore
+const { fetchStoresByUsername } = storeStore
 
 const productStore = useProductStore();
 const { products, loading: loadingProducts } = storeToRefs(productStore);
 const { fetchProducts } =  productStore ;
 
 const fetchStore = async () => {
-    const response = await fetchStoreByUsername(route.params.username)
+    const response = await fetchStoresByUsername(route.params.username)
 
     store.value = response
 }
@@ -39,18 +39,23 @@ onMounted(async() => {
     <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background">
         <div class="flex flex-col w-full max-w-[1280px] py-6 px-[52px] gap-3 mx-auto">
             <div class="flex items-center gap-3">
-                <RouterLink :to="{ name: 'app.home' }"
+                <a href="main.html"
                     class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
                     Homepage
-                </RouterLink>
+                </a>
                 <span class="font-medium text-xl text-custom-grey">/</span>
                 <a href="browse-category.html"
                     class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
-                    Stores
+                    Gadget
+                </a>
+                <span class="font-medium text-xl text-custom-grey">/</span>
+                <a href="product-details.html"
+                    class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
+                    Product Details
                 </a>
                 <span class="font-medium text-xl text-custom-grey">/</span>
                 <a href="#" class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
-                    {{ store?.name }}
+                    Store Details
                 </a>
             </div>
         </div>

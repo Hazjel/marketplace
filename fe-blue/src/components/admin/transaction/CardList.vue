@@ -41,11 +41,15 @@ const emit = defineEmits(['delete'])
         <div class="flex items-center gap-5 justify-between pr-[30px]">
             <div class="flex items-center gap-[14px] w-[320px]">
                 <div class="flex size-[84px] shrink-0 rounded-full bg-custom-background overflow-hidden">
-                    <img :src="item.buyer?.user?.profile_picture" class="size-full object-cover" alt="photo">
+                    <img :src="item.store?.logo" class="size-full object-cover" alt="photo">
                 </div>
                 <div class="flex flex-col gap-[6px] w-full overflow-hidden">
                     <p class="font-bold text-lg leading-tight w-full truncate">
-                        {{ item?.buyer?.user?.name }}
+                        {{ item?.store?.name }}
+                    </p>
+                    <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
+                        <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
+                        {{ item?.store?.user?.name }}
                     </p>
                 </div>
             </div>

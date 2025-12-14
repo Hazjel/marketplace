@@ -13,91 +13,83 @@ export const useAuthStore = defineStore("auth", {
         success: null,
     }),
     getters: {
-        token: () => Cookies.get("token"),
+        token: () => Cookies.get('token'),
         isAuthenticated: (state) => !!state.user,
     },
     actions: {
         async login(credentials) {
-            this.loading = true;
-            this.error = null;
+            this.loading = true
+            this.error = null
 
             try {
-                const response = await axiosInstance.post("/login", credentials);
+                const response = await axiosInstance.post('/login', credentials)
 
-                const token = response.data.data.token;
+                const token = response.data.data.token
 
-                Cookies.set("token", token);
+                Cookies.set('token', token)
 
-                this.success = response.data.message;
-
-                return response.data.data; // Mengembalikan data user beserta role
+                this.success = response.data.message
             } catch (error) {
-                this.error = handleError(error);
-                return null; // Penting: kembalikan null saat gagal
+                this.error = handleError(error)
             } finally {
-                this.loading = false;
+                this.loading = false
             }
         },
 
         async register(payload) {
-            this.loading = true;
-            this.error = null;
+            this.loading = true
+            this.error = null
 
             try {
-                const response = await axiosInstance.post("/register", payload, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data' // ✅ Tambahkan ini
-                    }
-                });
+                const response = await axiosInstance.post('/register', payload)
 
-                const token = response.data.data.token;
-                Cookies.set("token", token);
-                this.success = response.data.message;
-                
-                return response.data.data; // ✅ Return data
+                const token = response.data.data.token
+
+                Cookies.set('token', token)
+
+                this.success = response.data.message
             } catch (error) {
-                this.error = handleError(error);
-                throw error; // ✅ Throw error agar bisa dicatch di component
+                this.error = handleError(error)
             } finally {
-                this.loading = false;
+                this.loading = false
             }
         },
 
         async checkAuth() {
-            this.loading = true;
+            this.loading = true
 
             try {
-                const response = await axiosInstance.get("/me");
+                const response = await axiosInstance.get('/me')
 
-                this.user = response.data.data;
+                this.user = response.data.data
 
-                return this.user;
+                return this.user
             } catch (error) {
                 if (error.response?.status === 401) {
-                    Cookies.remove("token");
-                    throw new Error("Unauthorized");
+                    Cookies.remove('token')
+                    throw new Error('Unauthorized');
                 }
-                this.error = handleError(error);
+                this.error = handleError(error)
             } finally {
-                this.loading = false;
+                this.loading = false
             }
         },
 
         async logout() {
-            this.loading = true;
+            this.loading = true
             try {
-                await axiosInstance.post("/logout");
+                await axiosInstance.post('/logout')
 
-                Cookies.remove("token");
-                this.user = null;
-                this.error = null;
+                Cookies.remove('token')
+                this.user = null
+                this.error = null
 
-                router.push({ name: "auth.login" });
+                router.push({ name: 'auth.login' })
             } catch (error) {
-                this.error = handleError(error);
+                this.error = handleError(error)
             } finally {
-                this.loading = false;
+                this.loading = false
             }
-        },
-    },
+        }
+    }
 });
