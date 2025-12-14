@@ -19,18 +19,6 @@ const { logout } = authStore;
                     View Your {{ route.meta.title }}
                 </p>
             </div>
-            <div class="flex items-center flex-nowrap gap-3">
-                <a href="#">
-                    <div class="flex size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
-                        <img src="@/assets/images/icons/search-normal-black.svg" class="size-6" alt="icon">
-                    </div>
-                </a>
-                <a href="#">
-                    <div class="flex size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
-                        <img src="@/assets/images/icons/notification-black.svg" class="size-6" alt="icon">
-                    </div>
-                </a>
-            </div>
         </div>
         <div class="flex items-center gap-3 h-[102px] bg-white w-fit rounded-3xl p-[18px]">
             <div class="flex rounded-full overflow-hidden size-14">

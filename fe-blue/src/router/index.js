@@ -21,6 +21,7 @@ import ProductCreate from '@/views/admin/product/ProductCreate.vue'
 import ProductEdit from '@/views/admin/product/ProductEdit.vue'
 import StoreList from '@/views/admin/store/StoreList.vue'
 import StoreDetail from '@/views/admin/store/StoreDetail.vue'
+import StoreEdit from '@/views/admin/store/StoreEdit.vue'
 import TransactionList from '@/views/admin/transaction/TransactionList.vue'
 import TransactionDetail from '@/views/admin/transaction/TransactionDetail.vue'
 import MyTransaction from '@/views/admin/transaction/MyTransaction.vue'
@@ -118,8 +119,7 @@ const router = createRouter({
           component: Dashboard,
           meta: {
             title: 'Dashboard',
-            requiresAuth: true,
-            permission: 'dashboard-menu'
+            requiresAuth: true
           }
         },
         {
@@ -212,7 +212,7 @@ const router = createRouter({
             permission: 'store-list'
           }
         },
-         {
+        {
           path: 'my-store',
           name: 'admin.my-store',
           component: MyStore,
@@ -230,6 +230,16 @@ const router = createRouter({
             title: 'Create Store',
             requiresAuth: true,
             permission: 'store-create'
+          }
+        },
+        {
+          path: 'edit-store',
+          name: 'admin.edit-store',
+          component: StoreEdit,
+          meta: {
+            title: 'Edit My Store',
+            requiresAuth: true,
+            permission: 'store-edit'
           }
         },
         {
@@ -347,7 +357,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach(async(to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth) {
@@ -366,13 +376,13 @@ router.beforeEach(async(to, from, next) => {
 
         next()
       } catch (error) {
-          next({ name: 'auth.login' })
+        next({ name: 'auth.login' })
       }
     } else {
-        next({ name: 'auth.login' })
+      next({ name: 'auth.login' })
     }
   } else {
-      next()
+    next()
   }
 })
 

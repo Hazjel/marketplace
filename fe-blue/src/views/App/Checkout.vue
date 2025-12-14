@@ -62,7 +62,7 @@ const handleAddressInput = debounce(async (search) => {
     try {
         const response = await fetch(`/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`, {
             headers: {
-                'x-api-key': '908hmdrmf60a3b2477a3ae43b4hVBDka'
+                'x-api-key': import.meta.env.VITE_RAJAONGKIR_API_KEY
             }
         });
 
@@ -102,7 +102,7 @@ const handleDeliveryModal = async () => {
             `/tariff/api/v1/calculate?shipper_destination_id=${store.storeAddressId}&receiver_destination_id=${transaction.value.address_id}&item_value=${totalValue}&weight=${totalWeight}`,
             {
                 headers: {
-                    'x-api-key': '908hmdrmf60a3b2477a3ae43b4hVBDka'
+                    'x-api-key': import.meta.env.VITE_RAJAONGKIR_API_KEY
                 }
             }
         );
