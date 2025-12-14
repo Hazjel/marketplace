@@ -16,7 +16,7 @@ defineProps({
         </div>
         <div class="flex flex-col p-5 gap-6 bg-white">
             <div class="flex flex-col gap-2 w-full min-w-0 overflow-hidden">
-                <div class="flex items-center w-fit shrink-0 gap-1">
+                <div class="flex items-center w-fit shrink-0 gap-1" v-if="item?.is_verified">
                     <img src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0" alt="icon">
                     <p class="font-bold text-custom-blue text-nowrap uppercase">Verified Store
                     </p>

@@ -68,23 +68,13 @@ onMounted(async() => {
                                 <h1 class="font-bold text-lg leading-tight">
                                     {{ store?.name }}
                                 </h1>
-                                <img src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0" alt="icon">
+                                <img src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0" alt="icon" v-if="store?.is_verified">
                             </div>
                             <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
                                 <img src="@/assets/images/icons/box-grey.svg" class="size-5" alt="icon">
                                 {{ store?.product_count }} Total Products
                             </p>
                         </div>
-                    </div>
-                    <div class="flex gap-3 shrink-0">
-                        <button
-                            class="flex size-14 shrink-0 rounded-full items-center justify-center border border-custom-stroke">
-                            <img src="@/assets/images/icons/flag-2-grey.svg" class="size-6" alt="icon">
-                        </button>
-                        <button
-                            class="flex size-14 shrink-0 rounded-full items-center justify-center border border-custom-stroke">
-                            <img src="@/assets/images/icons/link-2-grey.svg" class="size-6" alt="icon">
-                        </button>
                     </div>
                 </div>
                 <hr class="border-custom-stroke">
