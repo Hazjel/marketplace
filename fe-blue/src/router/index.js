@@ -21,8 +21,10 @@ import ProductCreate from '@/views/admin/product/ProductCreate.vue'
 import ProductEdit from '@/views/admin/product/ProductEdit.vue'
 import StoreList from '@/views/admin/store/StoreList.vue'
 import StoreDetail from '@/views/admin/store/StoreDetail.vue'
+import StoreEdit from '@/views/admin/store/StoreEdit.vue'
 import TransactionList from '@/views/admin/transaction/TransactionList.vue'
 import TransactionDetail from '@/views/admin/transaction/TransactionDetail.vue'
+import MyTransaction from '@/views/admin/transaction/MyTransaction.vue'
 import StoreBalanceList from '@/views/admin/store-balance/StoreBalanceList.vue'
 import StoreBalanceDetail from '@/views/admin/store-balance/StoreBalanceDetail.vue'
 import MyStoreBalance from '@/views/admin/store-balance/MyStoreBalance.vue'
@@ -32,6 +34,8 @@ import WithdrawalCreate from '@/views/admin/withdrawal/WithdrawalCreate.vue'
 import UserList from '@/views/admin/user/UserList.vue'
 import MyStore from '@/views/admin/store/MyStore.vue'
 import StoreCreate from '@/views/admin/store/StoreCreate.vue'
+import Cart from '@/views/App/Cart.vue'
+import Checkout from '@/views/App/Checkout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -80,7 +84,29 @@ const router = createRouter({
           path: 'store/:username',
           name: 'app.store-detail',
           component: AppStoreDetail
-        }
+        },
+        {
+          path: '/cart',
+          name: 'app.cart',
+          component: Cart
+        },
+        {
+          path: '/checkout',
+          name: 'app.checkout',
+          component: Checkout,
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: '/my-transactions',
+          name: 'app.my-transactions',
+          component: TransactionList,
+          meta: {
+            requiresAuth: true,
+            title: 'My Transactions'
+          }
+        },
       ]
     },
     {
@@ -93,8 +119,7 @@ const router = createRouter({
           component: Dashboard,
           meta: {
             title: 'Dashboard',
-            requiresAuth: true,
-            permission: 'dashboard-menu'
+            requiresAuth: true
           }
         },
         {
@@ -187,7 +212,7 @@ const router = createRouter({
             permission: 'store-list'
           }
         },
-         {
+        {
           path: 'my-store',
           name: 'admin.my-store',
           component: MyStore,
@@ -208,6 +233,16 @@ const router = createRouter({
           }
         },
         {
+          path: 'edit-store',
+          name: 'admin.edit-store',
+          component: StoreEdit,
+          meta: {
+            title: 'Edit My Store',
+            requiresAuth: true,
+            permission: 'store-edit'
+          }
+        },
+        {
           path: 'store/:id',
           name: 'admin.store.detail',
           component: StoreDetail,
@@ -223,6 +258,16 @@ const router = createRouter({
           component: TransactionList,
           meta: {
             title: 'Transaction List',
+            requiresAuth: true,
+            permission: 'transaction-list'
+          }
+        },
+        {
+          path: 'my-transactions',
+          name: 'admin.my-transaction',
+          component: MyTransaction,
+          meta: {
+            title: 'My Transaction List',
             requiresAuth: true,
             permission: 'transaction-list'
           }
@@ -312,7 +357,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach(async(to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth) {
@@ -331,13 +376,13 @@ router.beforeEach(async(to, from, next) => {
 
         next()
       } catch (error) {
-          next({ name: 'auth.login' })
+        next({ name: 'auth.login' })
       }
     } else {
-        next({ name: 'auth.login' })
+      next({ name: 'auth.login' })
     }
   } else {
-      next()
+    next()
   }
 })
 

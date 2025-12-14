@@ -52,7 +52,7 @@ class ProductController extends Controller implements HasMiddleware
         }
     }
 
-    public function getAllPaginated(Request $request)
+    public function getAllPaginated(Request $request)   
     {
         $request = $request->validate([
             'search' => 'nullable|string',
