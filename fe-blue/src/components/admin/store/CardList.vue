@@ -1,5 +1,6 @@
 <script setup>
 import { can } from '@/helpers/permissionHelper';
+import { formatDate } from '@/helpers/format';
 import { RouterLink } from 'vue-router';
 
 defineProps({
