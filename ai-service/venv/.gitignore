@@ -1,5 +1,2 @@
-# Python Virtual Environment
-ai-service/venv/
-ai-service/__pycache__/
-*.pyc
-ai-service/.env
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*
