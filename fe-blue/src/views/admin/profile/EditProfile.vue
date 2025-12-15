@@ -61,7 +61,7 @@ const handleSubmit = async () => {
 
 <template>
     <div class="flex flex-col gap-8 w-full">
-        <div class="flex flex-col w-full bg-white rounded-[20px] p-8 gap-8">
+        <div class="flex flex-col w-full bg-white rounded-3xl p-6 gap-8">
             <div class="flex items-center gap-6">
                 <div class="flex size-[100px] shrink-0 rounded-full bg-custom-background overflow-hidden">
                     <img :src="user?.profile_picture" class="size-full object-cover" alt="profile picture">
@@ -84,12 +84,20 @@ const handleSubmit = async () => {
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <label class="font-semibold text-custom-black">Full Name</label>
-                    <div class="flex flex-col gap-2">
-                        <input type="text" v-model="form.name" autocomplete="name"
-                            class="flex w-full h-14 rounded-xl border border-custom-stroke px-5 bg-white focus:border-custom-blue outline-none transition-300"
-                            placeholder="Enter your full name">
-                        <span v-if="errors.name" class="text-custom-red text-sm">{{ errors.name[0] }}</span>
+                    <p class="font-semibold text-custom-grey">Full Name</p>
+                    <div class="group/errorState flex flex-col gap-2" :class="{ 'invalid': errors?.name }">
+                        <label class="group relative">
+                            <div class="input-icon">
+                                <img src="@/assets/images/icons/profile-circle-grey.svg" class="flex size-6 shrink-0"
+                                    alt="icon">
+                            </div>
+                            <p class="input-placeholder">
+                                Enter your full name
+                            </p>
+                            <input type="text" v-model="form.name" autocomplete="name" class="custom-input"
+                                placeholder="">
+                        </label>
+                        <span class="input-error" v-if="errors.name">{{ errors.name[0] }}</span>
                     </div>
                 </div>
 
@@ -101,32 +109,52 @@ const handleSubmit = async () => {
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <label class="font-semibold text-custom-black">Current Password</label>
-                    <div class="flex flex-col gap-2">
-                        <input type="password" v-model="form.current_password" autocomplete="current-password"
-                            class="flex w-full h-14 rounded-xl border border-custom-stroke px-5 bg-white focus:border-custom-blue outline-none transition-300"
-                            placeholder="Required to change password">
-                        <span v-if="errors.current_password" class="text-custom-red text-sm">{{
-                            errors.current_password[0] }}</span>
+                    <p class="font-semibold text-custom-grey">Current Password</p>
+                    <div class="group/errorState flex flex-col gap-2" :class="{ 'invalid': errors?.current_password }">
+                        <label class="group relative">
+                            <div class="input-icon">
+                                <img src="@/assets/images/icons/key-grey.svg" class="flex size-6 shrink-0" alt="icon">
+                            </div>
+                            <p class="input-placeholder">
+                                Required to change password
+                            </p>
+                            <input type="password" v-model="form.current_password" autocomplete="current-password"
+                                class="custom-input" placeholder="">
+                        </label>
+                        <span class="input-error" v-if="errors.current_password">{{ errors.current_password[0] }}</span>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <label class="font-semibold text-custom-black">New Password</label>
-                    <div class="flex flex-col gap-2">
-                        <input type="password" v-model="form.password" autocomplete="new-password"
-                            class="flex w-full h-14 rounded-xl border border-custom-stroke px-5 bg-white focus:border-custom-blue outline-none transition-300"
-                            placeholder="Minimum 8 characters">
-                        <span v-if="errors.password" class="text-custom-red text-sm">{{ errors.password[0] }}</span>
+                    <p class="font-semibold text-custom-grey">New Password</p>
+                    <div class="group/errorState flex flex-col gap-2" :class="{ 'invalid': errors?.password }">
+                        <label class="group relative">
+                            <div class="input-icon">
+                                <img src="@/assets/images/icons/key-grey.svg" class="flex size-6 shrink-0" alt="icon">
+                            </div>
+                            <p class="input-placeholder">
+                                Minimum 8 characters
+                            </p>
+                            <input type="password" v-model="form.password" autocomplete="new-password"
+                                class="custom-input" placeholder="">
+                        </label>
+                        <span class="input-error" v-if="errors.password">{{ errors.password[0] }}</span>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <label class="font-semibold text-custom-black">Confirm New Password</label>
-                    <div class="flex flex-col gap-2">
-                        <input type="password" v-model="form.password_confirmation" autocomplete="new-password"
-                            class="flex w-full h-14 rounded-xl border border-custom-stroke px-5 bg-white focus:border-custom-blue outline-none transition-300"
-                            placeholder="Re-enter new password">
+                    <p class="font-semibold text-custom-grey">Confirm New Password</p>
+                    <div class="group/errorState flex flex-col gap-2">
+                        <label class="group relative">
+                            <div class="input-icon">
+                                <img src="@/assets/images/icons/key-grey.svg" class="flex size-6 shrink-0" alt="icon">
+                            </div>
+                            <p class="input-placeholder">
+                                Re-enter new password
+                            </p>
+                            <input type="password" v-model="form.password_confirmation" autocomplete="new-password"
+                                class="custom-input" placeholder="">
+                        </label>
                     </div>
                 </div>
 

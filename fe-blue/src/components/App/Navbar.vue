@@ -66,7 +66,16 @@ const handleSearchInput = () => {
     }, 300);
 };
 
-// Handle product click
+// Handle pressing Enter
+const handleEnterSearch = () => {
+    const query = searchQuery.value.trim();
+    if (query.length > 0) {
+        showSearchResults.value = false;
+        router.push({ name: 'app.search', query: { q: query } });
+    }
+}
+
+// Handle product click: keep as is for direct navigation from autocomplete
 const handleProductClick = (slug) => {
     showSearchResults.value = false;
     searchQuery.value = '';
@@ -110,6 +119,7 @@ onUnmounted(() => {
                             <img src="@/assets/images/icons/search-normal-grey.svg" class="flex size-6 shrink-0"
                                 alt="icon">
                             <input type="text" v-model="searchQuery" @input="handleSearchInput"
+                                @keyup.enter="handleEnterSearch"
                                 class="appearance-none w-full placeholder:text-custom-grey font-semibold focus:outline-none"
                                 placeholder="Search any products">
                             <div v-if="isSearching" class="flex items-center">

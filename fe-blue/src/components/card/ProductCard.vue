@@ -51,7 +51,7 @@ const handleToggleWishlist = async () => {
                                 12
                         }) }}</span>
                     </div>
-                    <p class="font-semibold text-custom-red">120 Sold</p>
+                    <p class="font-semibold text-custom-red">{{ item?.total_sold }} Sold</p>
                 </div>
                 <div class="flex flex-col gap-1 w-full min-w-0 overflow-hidden">
                     <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }">

@@ -117,6 +117,26 @@ const router = createRouter({
             title: 'My Wishlist'
           }
         },
+        {
+          path: '/categories',
+          name: 'app.all-categories',
+          component: () => import('@/views/App/AllCategories.vue')
+        },
+        {
+          path: '/stores',
+          name: 'app.all-stores',
+          component: () => import('@/views/App/AllStores.vue')
+        },
+        {
+          path: '/products',
+          name: 'app.all-products',
+          component: () => import('@/views/App/AllProducts.vue'),
+        },
+        {
+          path: '/search',
+          name: 'app.search',
+          component: () => import('@/views/App/SearchResults.vue'),
+        },
       ]
     },
     {
