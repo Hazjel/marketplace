@@ -31,6 +31,10 @@ class TransactionRepository implements TransactionRepositoryInterface
             $query->where('store_id', auth()->user()->store->id ?? null);
         }
 
+        if (auth()->check() && auth()->user()->hasRole('buyer')) {
+            $query->where('buyer_id', auth()->user()->buyer->id ?? null);
+        }
+
         $query->orderBy('created_at', 'desc');
 
         if ($limit) {
@@ -57,6 +61,10 @@ class TransactionRepository implements TransactionRepositoryInterface
         
         if (auth()->check() && auth()->user()->hasRole('store')) {
             $query->where('store_id', auth()->user()->store->id ?? null);
+        }
+
+        if (auth()->check() && auth()->user()->hasRole('buyer')) {
+            $query->where('buyer_id', auth()->user()->buyer->id ?? null);
         }
 
         return $query->sum('grand_total');

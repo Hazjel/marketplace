@@ -38,10 +38,13 @@ const handleSubmit = async () => {
     }
 
     // Login berhasil, redirect berdasarkan role
-    if (response.role === 'buyer') {
-        router.push({ name: 'app.home' })
-    } else {
+    if (response.role === 'admin') {
         router.push({ name: 'admin.dashboard' })
+    } else {
+        router.push({
+            name: 'user.dashboard',
+            params: { username: response.username }
+        })
     }
 }
 

@@ -191,24 +191,21 @@ onUnmounted(() => {
                                 v-if="showDropdownProfile">
                                 <nav
                                     class="flex flex-col w-[201px] rounded-[20px] rounded-tr-none py-6 px-4 gap-[18px] bg-white shadow-[0px_6px_30px_0px_#00000017]">
-                                    <RouterLink v-if="user" :to="{ name: 'admin.dashboard' }"
+                                    <RouterLink v-if="user"
+                                        :to="{ name: user.role === 'admin' ? 'admin.dashboard' : 'user.dashboard', params: user.role === 'admin' ? {} : { username: user.username } }"
                                         class="flex w-full items-center justify-between"
                                         @click="showDropdownProfile = false">
-                                        <span class="font-medium text-custom-grey">My Profile</span>
+                                        <span class="font-medium text-custom-grey">My Dashboard</span>
                                         <img src="@/assets/images/icons/profile-circle-grey.svg"
                                             class="flex size-6 shrink-0" alt="icon">
                                     </RouterLink>
-                                    <RouterLink :to="{ name: 'admin.my-transaction' }"
+                                    <RouterLink
+                                        :to="{ name: user.role === 'admin' ? 'admin.edit-profile' : 'user.edit-profile', params: user.role === 'admin' ? {} : { username: user.username } }"
                                         class="flex w-full items-center justify-between">
-                                        <span class="font-medium text-custom-grey">My Transactions</span>
-                                        <img src="@/assets/images/icons/stickynote-grey.svg"
-                                            class="flex size-6 shrink-0" alt="icon">
-                                    </RouterLink>
-                                    <a href="#" class="flex w-full items-center justify-between">
-                                        <span class="font-medium text-custom-grey">Settings</span>
+                                        <span class="font-medium text-custom-grey">Edit Profile</span>
                                         <img src="@/assets/images/icons/setting-2-grey.svg" class="flex size-6 shrink-0"
                                             alt="icon">
-                                    </a>
+                                    </RouterLink>
                                     <hr class="border-custom-stroke">
                                     <button @click="logout" class="flex w-full items-center justify-between">
                                         <span class="font-medium text-custom-red">Log Out</span>
