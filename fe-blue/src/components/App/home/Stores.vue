@@ -48,28 +48,32 @@ onMounted(async () => {
     <section id="Trusted-Seller" class="flex flex-col gap-9">
         <div class="flex items-center justify-between">
             <h2 class="font-extrabold text-[32px]">Trusted Sellers,<br>Quality Guaranteed</h2>
-            <a href="#" class="flex items-center h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black">
+            <RouterLink :to="{ name: 'app.all-stores' }"
+                class="flex items-center h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black">
                 <span class="font-medium text-white">VIEW ALL</span>
                 <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-6 shrink-0" alt="icon">
-            </a>
+            </RouterLink>
         </div>
-        
+
         <div class="flex flex-col gap-6 relative">
             <div class="storeSwiper w-full overflow-hidden">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide w-full !grid !grid-cols-3 !gap-6" v-for="(storeChunk, index) in storeChunks" :key="index">
+                    <div class="swiper-slide w-full !grid !grid-cols-3 !gap-6"
+                        v-for="(storeChunk, index) in storeChunks" :key="index">
                         <StoreCard v-for="store in storeChunk" :item="store" :key="store.id" />
                     </div>
                 </div>
             </div>
-            
+
             <!-- Navigation -->
             <div class="relative flex items-center justify-center gap-6 h-14 w-fit mx-auto">
-                <button type="button" class="store-prev flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke cursor-pointer">
+                <button type="button"
+                    class="store-prev flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke cursor-pointer">
                     <img src="@/assets/images/icons/arrow-right-black.svg" class="size-6 rotate-180" alt="icon">
                 </button>
                 <div class="store-pagination flex items-center gap-2"></div>
-                <button type="button" class="store-next flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke cursor-pointer">
+                <button type="button"
+                    class="store-next flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke cursor-pointer">
                     <img src="@/assets/images/icons/arrow-right-black.svg" class="size-6" alt="icon">
                 </button>
             </div>

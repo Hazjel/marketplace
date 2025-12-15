@@ -261,7 +261,7 @@ watch(
                             <div class="flex items-center gap-3">
                                 <div class="rounded-[4px] p-2 bg-custom-blue/10 flex items-center justify-center">
                                     <span class="font-bold text-custom-blue text-lg">{{ product?.product_category?.name
-                                        }}</span>
+                                    }}</span>
                                 </div>
                                 <p class="flex items-center gap-[6px]">
                                     <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 p-0.5 shrink-0"
@@ -342,7 +342,7 @@ watch(
                             </div>
                             <p class="flex items-center gap-1 font-semibold text-custom-red text-lg leading-none">
                                 <img src="@/assets/images/icons/bag-tick-red.svg" class="size-5" alt="icon">
-                                120 Units Sold
+                                {{ product?.total_sold }} Units Sold
                             </p>
                         </div>
                     </div>
