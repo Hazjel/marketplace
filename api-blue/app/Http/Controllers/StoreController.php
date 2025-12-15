@@ -26,7 +26,6 @@ class StoreController extends Controller implements HasMiddleware
     {
         if (Auth::check()) {
             return [
-                new Middleware(PermissionMiddleware::using(['store-list|store-create|store-edit|store-delete']), only: ['index', 'getAllPaginated', 'show', 'showBySlug']),
                 new Middleware(PermissionMiddleware::using(['store-create']), only: ['store']),
                 new Middleware(PermissionMiddleware::using(['store-edit']), only: ['update']),
                 new Middleware(PermissionMiddleware::using(['store-delete']), only: ['destroy']),

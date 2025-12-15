@@ -56,6 +56,19 @@ class ProductRepository implements ProductRepositoryInterface
         return $query->paginate($rowPerPage);
     }
 
+    public function getTotalSold()
+    {
+        $query = DB::table('transaction_details')
+            ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+            ->where('transactions.payment_status', 'paid');
+
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $query->where('transactions.store_id', auth()->user()->store->id ?? null);
+        }
+
+        return $query->sum('transaction_details.qty');
+    }
+
     public function getById(string $id)
     {
         $query = Product::where('id', $id)->with('productImages', 'productReviews');

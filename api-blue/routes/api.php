@@ -64,6 +64,10 @@ Route::middleware('auth:sanctum')->group(function(){
 
     // Product Review
     Route::post('product-review', [ProductReviewController::class, 'store']);
+
+    // Wishlist
+    Route::get('wishlist', [App\Http\Controllers\WishlistController::class, 'index']);
+    Route::post('wishlist', [App\Http\Controllers\WishlistController::class, 'store']);
 });
 
 // Public routes (no authentication required)

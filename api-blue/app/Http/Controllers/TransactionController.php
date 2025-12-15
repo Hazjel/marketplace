@@ -57,8 +57,27 @@ class TransactionController extends Controller implements HasMiddleware
 
         try {
             $transactions = $this->transactionRepository->getAllPaginated($request['search'] ?? null, $request['row_per_page']);
+            $totalRevenue = $this->transactionRepository->getTotalRevenue();
 
-            return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', PaginateResource::make($transactions, TransactionResource::class), 200);
+            $response = PaginateResource::make($transactions, TransactionResource::class);
+            $responseData = $response->response()->getData(true);
+            $responseData['meta']['total_revenue'] = $totalRevenue;
+
+            // Manual wrapping because using getData(true) returns the array structure directly 
+            // but ResponseHelper expects to wrap it in 'data'
+            // Wait, ResponseHelper::jsonResponse wraps existing data in 'data'.
+            // If I pass $responseData (which has data, meta), ResponseHelper will wrap it AGAIN in 'data'.
+            // Making it response.data.data.data...
+            // PaginateResource::make returns a resource. JsonResponse helper handles resource.
+            // Let's modify the resource using additional()
+            
+            $resource = PaginateResource::make($transactions, TransactionResource::class)->additional([
+                'meta' => [
+                    'total_revenue' => $totalRevenue
+                ]
+            ]);
+
+            return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', $resource, 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }

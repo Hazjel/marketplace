@@ -35,7 +35,7 @@ const fetchData = async () => {
     }
 }
 
-async function handleDelete(id){
+async function handleDelete(id) {
     await deleteProduct(id)
 
     fetchData()
@@ -52,11 +52,11 @@ onMounted(fetchData)
 
 watch(serverOptions, () => {
     fetchData()
-}, {deep: true})
+}, { deep: true })
 
 watch(filters, () => {
     debounceFetchData()
-}, {deep: true})
+}, { deep: true })
 </script>
 
 <template>
@@ -80,7 +80,7 @@ watch(filters, () => {
                     <img src="@/assets/images/icons/presention-chart-blue.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">3.200</p>
+                    <p class="font-bold text-4xl">{{ meta.total_sold ? meta.total_sold.toLocaleString() : 0 }}</p>
                     <p class="font-medium text-lg text-custom-grey">
                         Total Sold
                     </p>
@@ -97,7 +97,9 @@ watch(filters, () => {
                     <p class="font-semibold text-custom-grey">{{ meta.total }} Total Products</p>
                 </div>
             </div>
-            <RouterLink :to="{ name: 'admin.product.create' }" class="flex h-14 items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]" v-if="can('product-create')">
+            <RouterLink :to="{ name: 'admin.product.create' }"
+                class="flex h-14 items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]"
+                v-if="can('product-create')">
                 <span class="font-semibold text-lg text-white leading-none">Add New</span>
                 <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0" alt="icon">
             </RouterLink>
@@ -105,15 +107,20 @@ watch(filters, () => {
         <alert :success="success" :error="error" @closeAlert="() => { success = null; error = null; }"></alert>
         <div id="Filter" class="flex items-center justify-between">
             <form action="#">
-                <label class="flex items-center w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
+                <label
+                    class="flex items-center w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
                     <img src="@/assets/images/icons/box-search-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    <input type="text" class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none" placeholder="Search product" v-model="filters.search">
+                    <input type="text"
+                        class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none"
+                        placeholder="Search product" v-model="filters.search">
                 </label>
             </form>
             <div class="flex items-center gap-4">
                 <p class="font-medium text-custom-grey">Show</p>
-                <label class="flex items-center h-14 rounded-2xl border border-custom-stroke py-4 px-5 pl-3 bg-white focus-within:border-custom-black transition-300">
-                    <select name="" id="" class="text-custom-black font-medium appearance-none focus:outline-none p-2" v-model="serverOptions.row_per_page">
+                <label
+                    class="flex items-center h-14 rounded-2xl border border-custom-stroke py-4 px-5 pl-3 bg-white focus-within:border-custom-black transition-300">
+                    <select name="" id="" class="text-custom-black font-medium appearance-none focus:outline-none p-2"
+                        v-model="serverOptions.row_per_page">
                         <option value="10" class="font-medium">10 Entries</option>
                         <option value="20" class="font-medium">20 Entries</option>
                         <option value="40" class="font-medium">40 Entries</option>
@@ -124,11 +131,13 @@ watch(filters, () => {
         </div>
         <div id="List-Categories" class="flex flex-col gap-6">
             <div id="List" class="flex flex-col gap-5">
-                <CardList v-for="product in products" :key="product.id" :item="product" @delete="handleDelete" v-if="!loading && products" />
+                <CardList v-for="product in products" :key="product.id" :item="product" @delete="handleDelete"
+                    v-if="!loading && products" />
             </div>
-            <Pagination :meta="meta" :server-options="serverOptions"/>
+            <Pagination :meta="meta" :server-options="serverOptions" />
         </div>
-        <div id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4" v-if="products?.length === 0">
+        <div id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4"
+            v-if="products?.length === 0">
             <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon">
             <div class="flex flex-col gap-1 items-center text-center">
                 <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>

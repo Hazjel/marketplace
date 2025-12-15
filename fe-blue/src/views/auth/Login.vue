@@ -2,16 +2,18 @@
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const authStore = useAuthStore()
 const { loading, error } = storeToRefs(authStore)
 const { login } = authStore
 
+const rememberMe = ref(false);
+
 const form = ref({
     email: null,
     password: null
-})
+});
 
 const handleSubmit = async () => {
     const response = await login(form.value)
@@ -27,17 +29,37 @@ const handleSubmit = async () => {
         return // Stop eksekusi
     }
 
+    if (rememberMe.value) {
+        localStorage.setItem('remembered_email', form.value.email);
+        localStorage.setItem('remembered_password', form.value.password);
+    } else {
+        localStorage.removeItem('remembered_email');
+        localStorage.removeItem('remembered_password');
+    }
+
     // Login berhasil, redirect berdasarkan role
-    if(response.role === 'buyer') {
+    if (response.role === 'buyer') {
         router.push({ name: 'app.home' })
     } else {
         router.push({ name: 'admin.dashboard' })
     }
 }
+
+onMounted(() => {
+    const savedEmail = localStorage.getItem('remembered_email');
+    const savedPassword = localStorage.getItem('remembered_password');
+
+    if (savedEmail && savedPassword) {
+        form.value.email = savedEmail;
+        form.value.password = savedPassword;
+        rememberMe.value = true;
+    }
+});
 </script>
 
 <template>
-    <form @submit.prevent="handleSubmit" class="flex flex-col w-[560px] h-full max-h-[772px] shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white">
+    <form @submit.prevent="handleSubmit" autocomplete="off"
+        class="flex flex-col w-[560px] h-full max-h-[772px] shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white">
         <img src="@/assets/images/logos/logo.svg" class="h-[37px] mx-auto" alt="logo">
         <div class="flex flex-col gap-[30px]">
             <div class="flex flex-col gap-3 text-center">
@@ -50,13 +72,13 @@ const handleSubmit = async () => {
                     <div class="group/errorState flex flex-col gap-2" :class="{ 'invalid': error?.email }">
                         <label class="group relative">
                             <div class="input-icon">
-                                <img src="@/assets/images/icons/sms-grey.svg" class="flex size-6 shrink-0"
-                                    alt="icon">
+                                <img src="@/assets/images/icons/sms-grey.svg" class="flex size-6 shrink-0" alt="icon">
                             </div>
                             <p class="input-placeholder">
                                 Enter Your Email
                             </p>
-                            <input type="email" class="custom-input" placeholder="" v-model="form.email">
+                            <input type="email" class="custom-input" placeholder="" v-model="form.email"
+                                autocomplete="off">
                         </label>
                         <span class="input-error" v-if="error?.email">{{ error?.email?.join(', ') }}</span>
                     </div>
@@ -66,19 +88,20 @@ const handleSubmit = async () => {
                     <div class="group/errorState flex flex-col gap-2" :class="{ 'invalid': error?.password }">
                         <label class="group relative">
                             <div class="input-icon">
-                                <img src="@/assets/images/icons/key-grey.svg" class="flex size-6 shrink-0"
-                                    alt="icon">
+                                <img src="@/assets/images/icons/key-grey.svg" class="flex size-6 shrink-0" alt="icon">
                             </div>
                             <p class="input-placeholder">
                                 Enter Your Password
                             </p>
-                            <input id="passwordInput" type="password" class="custom-input tracking-[0.3em]" placeholder="" v-model="form.password">
+                            <input id="passwordInput" type="password" class="custom-input tracking-[0.3em]"
+                                placeholder="" v-model="form.password" autocomplete="new-password">
                         </label>
                         <span class="input-error" v-if="error?.password">{{ error?.password?.join(', ') }}</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <label class="group flex items-center gap-1 relative">
-                            <input type="checkbox" name="" id="" class="-z-10 absolute">
+                            <input type="checkbox" name="remember" autocomplete="off" v-model="rememberMe"
+                                class="-z-10 absolute">
                             <div class="flex size-6 overflow-hidden relative">
                                 <img src="@/assets/images/icons/checkbox-unchecked.svg"
                                     class="size-full object-contain absolute group-has-[:checked]:opacity-0 transition-300"
@@ -105,7 +128,8 @@ const handleSubmit = async () => {
             </button>
             <p class="font-medium text-custom-grey text-center">
                 Don't have account?
-                <RouterLink :to="{ name: 'auth.register' }" class="font-semibold text-custom-blue hover:underline transition-300">
+                <RouterLink :to="{ name: 'auth.register' }"
+                    class="font-semibold text-custom-blue hover:underline transition-300">
                     Create Account
                 </RouterLink>
             </p>

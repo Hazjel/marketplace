@@ -62,21 +62,22 @@ const { decreaseQuantity, increaseQuantity, removeFromCart, toggleStoreSelection
                                 <div class="flex items-center gap-[14px] overflow-hidden">
                                     <div
                                         class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background overflow-hidden items-center justify-center">
-                                        <img :src="product.product_images.find(i => i.is_thumbnail).image"
+                                        <img :src="product.product_images.find(i => i.is_thumbnail)?.image || product.thumbnail"
                                             class="size-full object-contain" alt="icon">
                                     </div>
                                     <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
                                         <p class="font-bold text-lg truncate">{{ product.name }}</p>
                                         <p
                                             class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
-                                            <span class="font-bold text-custom-blue">{{ product.product_category.name}}</span>
+                                            <span class="font-bold text-custom-blue">{{
+                                                product.product_category.name}}</span>
                                             <span class="text-[22px] leading-none">•</span>
                                             <span>{{ product.weight }} KG</span>
                                         </p>
                                     </div>
                                     <div
                                         class="quantity-container flex items-center shrink-0 rounded-2xl border border-custom-stroke p-4">
-                                        <button type="button" 
+                                        <button type="button"
                                             class="subtract size-5 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                                             @click="decreaseQuantity(store.storeId, product.id)"
                                             :disabled="product.quantity <= 1">

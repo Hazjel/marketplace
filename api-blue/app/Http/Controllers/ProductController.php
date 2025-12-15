@@ -30,7 +30,6 @@ class ProductController extends Controller implements HasMiddleware
     {
         if (auth::check()) {
             return [
-                new Middleware(PermissionMiddleware::using(['product-list|product-create|product-edit|product-delete']), only: ['index', 'getAllPaginated', 'show', 'showBySlug']),
                 new Middleware(PermissionMiddleware::using(['product-create']), only: ['store']),
                 new Middleware(PermissionMiddleware::using(['product-edit']), only: ['update']),
                 new Middleware(PermissionMiddleware::using(['product-delete']), only: ['destroy']),
@@ -63,8 +62,15 @@ class ProductController extends Controller implements HasMiddleware
 
         try {
             $products = $this->productRepository->getAllPaginated($request['search'] ?? null, $request['store_id'] ?? null, $request['product_category_id'] ?? null, $request['row_per_page']);
+            $totalSold = $this->productRepository->getTotalSold();
 
-            return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', PaginateResource::make($products, ProductResource::class), 200);
+            $resource = PaginateResource::make($products, ProductResource::class)->additional([
+                'meta' => [
+                    'total_sold' => $totalSold
+                ]
+            ]);
+
+            return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', $resource, 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
