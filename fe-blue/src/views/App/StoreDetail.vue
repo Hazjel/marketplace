@@ -16,7 +16,7 @@ const { fetchStoreByUsername } = storeStore
 
 const productStore = useProductStore();
 const { products, loading: loadingProducts } = storeToRefs(productStore);
-const { fetchProducts } =  productStore ;
+const { fetchProducts } = productStore;
 
 const fetchStore = async () => {
     const response = await fetchStoreByUsername(route.params.username)
@@ -24,7 +24,7 @@ const fetchStore = async () => {
     store.value = response
 }
 
-onMounted(async() => {
+onMounted(async () => {
     await fetchStore()
 
     fetchProducts({
@@ -68,7 +68,8 @@ onMounted(async() => {
                                 <h1 class="font-bold text-lg leading-tight">
                                     {{ store?.name }}
                                 </h1>
-                                <img src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0" alt="icon" v-if="store?.is_verified">
+                                <img src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0" alt="icon"
+                                    v-if="store?.is_verified">
                             </div>
                             <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
                                 <img src="@/assets/images/icons/box-grey.svg" class="size-5" alt="icon">
@@ -100,11 +101,11 @@ onMounted(async() => {
                         <span class="font-bold text-white">Follow Store</span>
                         <img src="@/assets/images/icons/shop-add-white.svg" class="flex size-6 shrink-0" alt="icon">
                     </button>
-                    <a href="#"
+                    <RouterLink :to="{ name: 'app.chat', query: { userId: store?.user?.id } }"
                         class="flex items-center justify-center h-16 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue/10">
                         <img src="@/assets/images/icons/messages-blue.svg" class="flex size-6 shrink-0" alt="icon">
                         <span class="font-bold text-custom-blue">Message</span>
-                    </a>
+                    </RouterLink>
                 </div>
             </div>
             <a href="#" class="flex w-[253px] shrink-0 overflow-hidden">
@@ -168,12 +169,14 @@ onMounted(async() => {
                     </div>
                     <div class="flex flex-col gap-9">
                         <div class="grid grid-cols-4 gap-6">
-                            <ProductCard v-for="product in products" :key="product.id" :item="product" v-if="!loadingProducts" />
+                            <ProductCard v-for="product in products" :key="product.id" :item="product"
+                                v-if="!loadingProducts" />
                         </div>
                         <button
                             class="flex items-center w-fit h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black mx-auto">
                             <span class="font-medium text-white">Load More</span>
-                            <img src="@/assets/images/icons/arrow-down-white.svg" class="flex size-6 shrink-0" alt="icon">
+                            <img src="@/assets/images/icons/arrow-down-white.svg" class="flex size-6 shrink-0"
+                                alt="icon">
                         </button>
                     </div>
                 </section>

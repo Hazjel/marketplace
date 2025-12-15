@@ -137,6 +137,11 @@ const router = createRouter({
           name: 'app.search',
           component: () => import('@/views/App/SearchResults.vue'),
         },
+        {
+          path: '/chat',
+          name: 'app.chat',
+          component: () => import('@/views/App/Chat/ChatLayout.vue'),
+        },
       ]
     },
     {
@@ -146,7 +151,7 @@ const router = createRouter({
         {
           path: 'dashboard',
           name: 'admin.dashboard',
-          meta: { permission: 'dashboard-menu' },
+          meta: { permission: 'dashboard-menu', requiresAuth: true, title: 'Overview' },
           component: () => import('@/views/admin/Dashboard.vue')
         },
         {
@@ -302,7 +307,7 @@ const router = createRouter({
         {
           path: 'dashboard',
           name: 'user.dashboard',
-          meta: { permission: 'dashboard-menu' },
+          meta: { permission: 'dashboard-menu', requiresAuth: true, title: 'Overview' },
           component: () => import('@/views/admin/Dashboard.vue')
         },
         {

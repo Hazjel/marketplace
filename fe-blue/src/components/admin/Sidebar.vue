@@ -148,6 +148,15 @@ const marketplaceLink = {
     iconActive: GlobalSearchIcon,
     permission: 'dashboard-menu'
 }
+
+const chatLink = {
+    label: 'Messages',
+    path: '/chat',
+    iconDefault: StickyNoteGreyIcon,
+    iconActive: StickyNoteBlueFillIcon,
+    permission: 'dashboard-menu'
+}
+
 </script>
 
 <template>
@@ -165,7 +174,8 @@ const marketplaceLink = {
             </div>
 
             <div class="pb-8">
-                <ul class="flex flex-col">
+                <ul class="flex flex-col gap-2">
+                    <SidebarItem :item="chatLink" />
                     <SidebarItem :item="marketplaceLink" />
                 </ul>
             </div>

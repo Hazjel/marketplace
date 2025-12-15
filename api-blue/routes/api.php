@@ -12,7 +12,10 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\TransactionController;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('me', [AuthController::class, 'me']);
@@ -69,6 +72,11 @@ Route::middleware('auth:sanctum')->group(function(){
     // Wishlist
     Route::get('wishlist', [App\Http\Controllers\WishlistController::class, 'index']);
     Route::post('wishlist', [App\Http\Controllers\WishlistController::class, 'store']);
+    // Chat Routes
+    Route::get('chat/contacts', [App\Http\Controllers\ChatController::class, 'getContacts']);
+    Route::get('chat/user/{id}', [App\Http\Controllers\ChatController::class, 'getUserInfo']);
+    Route::get('chat/{user}', [App\Http\Controllers\ChatController::class, 'getMessages']);
+    Route::post('chat/send', [App\Http\Controllers\ChatController::class, 'sendMessage']);
 });
 
 // Public routes (no authentication required)
