@@ -12,7 +12,21 @@ import Pagination from '@/components/admin/Pagination.vue';
 
 
 const storeBalance = ref({})
+import { useAuthStore } from '@/stores/auth';
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
+const getRoute = (name, params = {}) => {
+    if (user.value?.role === 'admin') {
+        // Admin uses admin.* routes
+        return { name: `admin.${name}`, params }
+    }
+    // Seller uses user.* routes with username
+    return {
+        name: `user.${name}`,
+        params: { username: user.value?.username, ...params }
+    }
+}
 const storeBalanceStore = useStoreBalanceStore()
 const { loading } = storeToRefs(storeBalanceStore)
 const { fetchStoreBalanceByStore } = storeBalanceStore
@@ -44,15 +58,15 @@ const totalWithdrawals = computed(() => {
 
 // Computed untuk completed withdrawals
 const completedWithdrawals = computed(() => {
-    return Array.isArray(withdrawals.value) 
-        ? withdrawals.value.filter((w) => w.status === 'completed').length 
+    return Array.isArray(withdrawals.value)
+        ? withdrawals.value.filter((w) => w.status === 'completed').length
         : 0
 })
 
 // Computed untuk pending withdrawals
 const pendingWithdrawals = computed(() => {
-    return Array.isArray(withdrawals.value) 
-        ? withdrawals.value.filter((w) => w.status === 'pending').length 
+    return Array.isArray(withdrawals.value)
+        ? withdrawals.value.filter((w) => w.status === 'pending').length
         : 0
 })
 
@@ -89,8 +103,7 @@ onMounted(fetchStoreBalance)
                 <div class="flex items-center gap-[10px] w-[260px]">
                     <div
                         class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                        <img src="@/assets/images/icons/card-tick-black.svg" class="flex size-6 shrink-0"
-                            alt="icon">
+                        <img src="@/assets/images/icons/card-tick-black.svg" class="flex size-6 shrink-0" alt="icon">
                     </div>
                     <div class="flex flex-col gap-1">
                         <p class="font-bold text-lg leading-none">{{ completedWithdrawals }}</p>
@@ -101,8 +114,7 @@ onMounted(fetchStoreBalance)
                 <div class="flex items-center gap-[10px] w-[260px]">
                     <div
                         class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                        <img src="@/assets/images/icons/card-tick-black.svg" class="flex size-6 shrink-0"
-                            alt="icon">
+                        <img src="@/assets/images/icons/card-tick-black.svg" class="flex size-6 shrink-0" alt="icon">
                     </div>
                     <div class="flex flex-col gap-1">
                         <p class="font-bold text-lg leading-none">{{ pendingWithdrawals }}</p>
@@ -117,14 +129,12 @@ onMounted(fetchStoreBalance)
                 <img src="@/assets/images/backgrounds/round-ornament.svg"
                     class="size-full object-contain object-right opacity-55 absolute" alt="icon">
                 <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
-                    <img src="@/assets/images/icons/shield-tick-white-fill.svg"
-                        class="flex size-9 shrink-0" alt="icon">
+                    <img src="@/assets/images/icons/shield-tick-white-fill.svg" class="flex size-9 shrink-0" alt="icon">
                     <p class="font-bold text-lg text-white">Your funds are safe and well protected</p>
                 </div>
             </div>
             <div class="flex relative w-[470px] h-[304px] shrink-0 overflow-hidden">
-                <img src="@/assets/images/backgrounds/wallet.png" class="size-full object-contain"
-                    alt="wallet">
+                <img src="@/assets/images/backgrounds/wallet.png" class="size-full object-contain" alt="wallet">
                 <div
                     class="flex flex-col items-center justify-center gap-2 text-center min-w-0 w-full px-4 absolute transform -translate-x-1/2 left-1/2 top-[51px]">
                     <p class="font-medium text-[#BFC6E9] leading-none">Seller Balance:</p>
@@ -134,14 +144,14 @@ onMounted(fetchStoreBalance)
                 </div>
                 <button id="toggleBalance"
                     class="flex items-center justify-center rounded-full border border-white/[0.03] bg-white/[0.06] py-3 px-4 gap-2 absolute transform -translate-x-1/2 left-1/2 bottom-[42px]">
-                    <img id="eyeIcon" src="@/assets/images/icons/eye-slash-white.svg"
-                        class="flex size-5 shrink-0" alt="icon">
+                    <img id="eyeIcon" src="@/assets/images/icons/eye-slash-white.svg" class="flex size-5 shrink-0"
+                        alt="icon">
                     <p id="toggleText" class="font-medium text-white">Hide Balance</p>
                 </button>
             </div>
         </div>
     </div>
-    
+
     <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
         <div class="header flex items-center justify-between">
             <div class="flex flex-col gap-2">
@@ -151,61 +161,53 @@ onMounted(fetchStoreBalance)
                     <p class="font-semibold text-custom-grey">{{ totalWithdrawals }} Total Withdrawal</p>
                 </div>
             </div>
-            <RouterLink :to="{ name: 'admin.withdrawal.create' }"
+            <RouterLink :to="getRoute('withdrawal.create')"
                 class="flex h-14 items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]">
                 <span class="font-semibold text-lg text-white leading-none">Request Withdraw</span>
-                <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0"
-                    alt="icon">
-        </RouterLink>
+                <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0" alt="icon">
+            </RouterLink>
         </div>
-        
+
         <!-- Tampilkan list jika ada data -->
         <section v-if="hasWithdrawals" id="List-Withdrawal" class="flex flex-col flex-1 gap-6 w-full">
             <div class="list flex flex-col gap-5">
-                <div
-                    class="card flex rounded-[20px] border border-custom-stroke p-4 gap-5 justify-between bg-white" 
-                    v-for="withdrawal in withdrawals" 
-                    :key="withdrawal.id">
+                <div class="card flex rounded-[20px] border border-custom-stroke p-4 gap-5 justify-between bg-white"
+                    v-for="withdrawal in withdrawals" :key="withdrawal.id">
                     <div class="flex items-center gap-[14px] flex-1">
-                        <div
-                            :class="[
-                                'flex size-[72px] rounded-2xl overflow-hidden items-center justify-center p-5',
-                                withdrawal.status === 'completed' ? 'bg-custom-green/10' : 'bg-custom-orange/10'
-                            ]">
-                            <img 
-                                :src="withdrawal.status === 'completed' 
-                                    ? iconTickGreen 
-                                    : iconSendOrange"
-                                class="size-full object-contain"
-                                alt="icon">
+                        <div :class="[
+                            'flex size-[72px] rounded-2xl overflow-hidden items-center justify-center p-5',
+                            withdrawal.status === 'completed' ? 'bg-custom-green/10' : 'bg-custom-orange/10'
+                        ]">
+                            <img :src="withdrawal.status === 'completed'
+                                ? iconTickGreen
+                                : iconSendOrange" class="size-full object-contain" alt="icon">
                         </div>
                         <div class="flex flex-col gap-[6px]">
-                            <p class="font-bold text-[22px] text-custom-orange">Rp {{ formatRupiah(withdrawal.amount) }}</p>
+                            <p class="font-bold text-[22px] text-custom-orange">Rp {{ formatRupiah(withdrawal.amount) }}
+                            </p>
                             <p class="font-semibold text-custom-grey leading-none">Withdrawal</p>
                         </div>
                     </div>
                     <div class="flex flex-1 items-center">
-                        <p
-                            :class="[
-                                'badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase',
-                                withdrawal.status === 'completed' 
-                                    ? 'bg-custom-green/10 text-custom-green' 
-                                    : 'bg-custom-orange/10 text-custom-orange'
-                            ]">
+                        <p :class="[
+                            'badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase',
+                            withdrawal.status === 'completed'
+                                ? 'bg-custom-green/10 text-custom-green'
+                                : 'bg-custom-orange/10 text-custom-orange'
+                        ]">
                             {{ withdrawal.status }}
                         </p>
                     </div>
-                    <RouterLink :to="{ name: 'admin.withdrawal.detail', params: { id: withdrawal.id } }"
+                    <RouterLink :to="getRoute('withdrawal.detail', { id: withdrawal.id })"
                         class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
-                        <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0"
-                            alt="icon">
+                        <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon">
                         <span class="font-semibold text-white">Details</span>
                     </RouterLink>
                 </div>
             </div>
-            <Pagination :meta="meta" :server-options="serverOptions"/>
+            <Pagination :meta="meta" :server-options="serverOptions" />
         </section>
-        
+
         <!-- Tampilkan empty state jika tidak ada data -->
         <div v-if="showEmptyState" id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4">
             <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon">
