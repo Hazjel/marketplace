@@ -37,7 +37,7 @@ const clientFiltered = ref([])
 
 const displayTransactions = computed(() => {
     let items = (clientFiltered.value && clientFiltered.value.length) ? clientFiltered.value : filteredTransactions.value
-    
+
     // Filter berdasarkan search jika ada
     if (filters.value.search && filters.value.search.trim()) {
         const searchTerm = filters.value.search.trim().toLowerCase()
@@ -46,14 +46,14 @@ const displayTransactions = computed(() => {
             const buyerName = transaction?.buyer?.name?.toLowerCase() || ''
             const transactionId = transaction?.id?.toString() || ''
             const deliveryStatus = transaction?.delivery_status?.toLowerCase() || ''
-            
-            return storeName.includes(searchTerm) || 
-                   buyerName.includes(searchTerm) || 
-                   transactionId.includes(searchTerm) ||
-                   deliveryStatus.includes(searchTerm)
+
+            return storeName.includes(searchTerm) ||
+                buyerName.includes(searchTerm) ||
+                transactionId.includes(searchTerm) ||
+                deliveryStatus.includes(searchTerm)
         })
     }
-    
+
     return items
 })
 
@@ -63,13 +63,13 @@ const perPage = computed(() => {
 
 const paginatedTransactions = computed(() => {
     const page = serverOptions.value?.page || meta.value?.current_page || 1
-    
+
     // Jika ada search atau clientFiltered, gunakan client-side pagination
     if (filters.value.search || (clientFiltered.value && clientFiltered.value.length)) {
         const start = (page - 1) * perPage.value
         return displayTransactions.value.slice(start, start + perPage.value)
     }
-    
+
     // Jika tidak ada search, gunakan data dari server (sudah di-paginate)
     return displayTransactions.value
 })
@@ -83,12 +83,12 @@ const showPagination = computed(() => {
     if (filters.value.search) {
         return displayTransactions.value.length > perPage.value
     }
-    
+
     // Jika ada clientFiltered, gunakan panjang clientFiltered
     if (clientFiltered.value && clientFiltered.value.length) {
         return clientFiltered.value.length > perPage.value
     }
-    
+
     // Default: gunakan server pagination
     return (meta.value?.last_page || 1) > 1
 })
@@ -105,7 +105,7 @@ const filters = ref({
 const fetchData = async () => {
     // Reset clientFiltered ketika fetch data baru
     clientFiltered.value = []
-    
+
     const params = {
         ...serverOptions.value,
         ...filters.value,
@@ -144,6 +144,25 @@ const fetchData = async () => {
         console.log('[MyTransaction] full fetch fallback error:', err)
     }
 }
+
+const getDetailRoute = (transactionId) => {
+    if (user.value?.role === 'buyer') {
+        return {
+            name: 'user.transaction.detail',
+            params: { username: user.value.username, id: transactionId }
+        }
+    }
+    return {
+        name: 'admin.transaction.detail',
+        params: { id: transactionId }
+    }
+}
+
+const emptyStateText = computed(() => {
+    return filters.value.search
+        ? 'No transactions found matching your search'
+        : "Oops, you don't have any data yet"
+})
 
 const debounceFetchData = debounce(fetchData, 2000)
 
@@ -242,7 +261,8 @@ watch(filters, () => {
                                         class="flex size-6 shrink-0" alt="icon">
                                 </div>
                                 <div class="flex flex-col gap-1">
-                                    <p class="font-bold text-lg leading-none">{{ transaction.transaction_details?.length}}</p>
+                                    <p class="font-bold text-lg leading-none">{{
+                                        transaction.transaction_details?.length }}</p>
                                     <p class="font-semibold text-custom-grey">Total Products</p>
                                 </div>
                             </div>
@@ -255,7 +275,7 @@ watch(filters, () => {
                                 <div class="flex flex-col gap-1">
                                     <p class="font-bold text-lg leading-none">{{
                                         transaction.transaction_details?.reduce((total, detail) => total + detail.qty,
-                                        0) }}</p>
+                                            0)}}</p>
                                     <p class="font-semibold text-custom-grey">Total Quantity</p>
                                 </div>
                             </div>
@@ -264,7 +284,7 @@ watch(filters, () => {
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col gap-[6px]">
                                 <p class="font-bold text-xl text-custom-blue">{{ formatRupiah(transaction.grand_total)
-                                    }}</p>
+                                }}</p>
                                 <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
                                     <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0"
                                         alt="icon">
@@ -278,7 +298,7 @@ watch(filters, () => {
                                     <img src="@/assets/images/icons/receive-square-white.svg"
                                         class="flex size-6 shrink-0" alt="icon">
                                 </button>
-                                <RouterLink :to="{ name: 'admin.transaction.detail', params: { id: transaction.id } }"
+                                <RouterLink :to="getDetailRoute(transaction.id)"
                                     class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                                     <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0"
                                         alt="icon">
@@ -298,8 +318,8 @@ watch(filters, () => {
                                     class="size-6 group-has-[:disabled]:opacity-20 rotate-180" alt="icon">
                             </button>
                         </li>
-                        <li v-for="p in (filters.search || clientFiltered.length ? Math.ceil(displayTransactions.length / perPage) : meta.last_page || 1)" :key="p"
-                            class="group" :class="{ 'active': p === serverOptions.page }">
+                        <li v-for="p in (filters.search || clientFiltered.length ? Math.ceil(displayTransactions.length / perPage) : meta.last_page || 1)"
+                            :key="p" class="group" :class="{ 'active': p === serverOptions.page }">
                             <button @click="serverOptions.page = p"
                                 class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
                                 {{ p }}
@@ -319,7 +339,7 @@ watch(filters, () => {
                 <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon">
                 <div class="flex flex-col gap-1 items-center text-center">
                     <p class="font-semibold text-custom-grey">
-                        {{ filters.search ? 'No transactions found matching your search' : 'Oops, you don\'t have any data yet' }}
+                        {{ emptyStateText }}
                     </p>
                 </div>
             </div>
