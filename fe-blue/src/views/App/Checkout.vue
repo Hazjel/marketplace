@@ -68,13 +68,12 @@ const loadMidtransScript = () => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-        
+
         // ✅ GANTI dengan Client Key Midtrans Anda
         script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || 'YOUR_MIDTRANS_CLIENT_KEY');
-        
+
         script.async = true;
         script.onload = () => {
-            console.log('✅ Midtrans loaded successfully');
             isMidtransLoaded.value = true;
             resolve();
         };
@@ -106,7 +105,6 @@ const handleAddressInput = debounce(async (search) => {
         addressOptions.value = data.data;
         showAddressOptions.value = true;
     } catch (err) {
-        console.error('Error fetching address:', err);
         addressOptions.value = [];
     } finally {
         loadingAddress.value = false;
@@ -147,7 +145,6 @@ const handleDeliveryModal = async () => {
         couriers.value = data.data.calculate_reguler;
         showDeliveryModal.value = true;
     } catch (error) {
-        console.error('Error calculating delivery fee:', error);
         alert('Failed to calculate delivery fee. Please try again.');
     }
 };
@@ -165,48 +162,45 @@ const handleCourierSubmit = () => {
     showDeliveryModal.value = false;
 };
 
-// Form submission
+const isProcessingPayment = ref(false);
+
 const handleSubmit = async () => {
     if (!selectedCourier.value) {
         alert('Please select a courier first');
         return;
     }
 
-    // ✅ CEK apakah Midtrans sudah loaded
-    if (!window.snap) {
-        alert('Payment system is not ready. Please refresh the page and try again.');
-        return;
-    }
+    isProcessingPayment.value = true; // ✅ Start loading
 
     try {
         const response = await createTransaction(transaction.value);
-        
+
         if (!response || !response.snap_token) {
             alert('Failed to create transaction. Please try again.');
-            console.error('Invalid response:', response);
+            isProcessingPayment.value = false; // ✅ Stop loading
             return;
         }
 
         window.snap.pay(response.snap_token, {
             onSuccess: function (result) {
-                console.log('Payment success:', result);
+                cart.clearSelectedItems();
                 showSuccessModal.value = true;
-                cart.clearSelectedStores();
+                isProcessingPayment.value = false; // ✅ Stop loading
             },
             onPending: function (result) {
-                console.log('Payment pending:', result);
+                isProcessingPayment.value = false; // ✅ Stop loading
             },
             onError: function (result) {
-                console.error('Payment error:', result);
                 alert('Payment failed. Please try again.');
+                isProcessingPayment.value = false; // ✅ Stop loading
             },
             onClose: function () {
-                console.log('Payment popup closed');
+                isProcessingPayment.value = false; // ✅ Stop loading
             }
         })
     } catch (error) {
-        console.error('Transaction error:', error);
         alert('Failed to process transaction. Please try again.');
+        isProcessingPayment.value = false; // ✅ Stop loading
     }
 };
 
@@ -291,8 +285,7 @@ onMounted(async () => {
                                 <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-5" alt="icon">
                                 Subtotal
                             </p>
-                            <p class="font-bold text-lg text-custom-blue">Rp {{ formatRupiah(product.price *
-                                product.quantity) }}</p>
+                            <p class="font-bold text-lg text-custom-blue">Rp {{ formatRupiah(product.price * product.quantity) }}</p>
                         </div>
                     </div>
                 </div>
@@ -499,16 +492,28 @@ onMounted(async () => {
                                 formatRupiah(finalGrandTotal) }}</p>
                         </div>
                     </div>
-                    <button type="submit" id="Pay-Button" :disabled="selectedCarts.length === 0 || !selectedCourier"
+                    <button type="submit" id="Pay-Button"
+                        :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment"
                         class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300">
-                        <span class="font-bold text-white" v-if="selectedCarts.length > 0 && selectedCourier">
-                            Pay With Midtrans
-                        </span>
-                        <span class="font-bold text-white" v-else>
-                            Complete form to checkout
-                        </span>
-                        <img src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
-                            alt="icon">
+
+                        <!-- Loading State -->
+                        <template v-if="isProcessingPayment">
+                            <div class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin">
+                            </div>
+                            <span class="font-bold text-white">Processing Payment...</span>
+                        </template>
+
+                        <!-- Ready to Pay -->
+                        <template v-else-if="selectedCarts.length > 0 && selectedCourier">
+                            <span class="font-bold text-white">Pay With Midtrans</span>
+                            <img src="@/assets/images/icons/arrow-right-circle-white-thick.svg"
+                                class="flex size-6 shrink-0" alt="icon">
+                        </template>
+
+                        <!-- Incomplete Form -->
+                        <template v-else>
+                            <span class="font-bold text-white">Complete form to checkout</span>
+                        </template>
                     </button>
                 </div>
             </form>
@@ -574,7 +579,7 @@ onMounted(async () => {
                     </div>
                 </div>
                 <div class="flex flex-col gap-3">
-                    <RouterLink :to="{ name: 'app.my-transactions' }"
+                    <RouterLink :to="{ name: 'admin.my-transaction' }"
                         class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
                         <span class="font-bold text-white">View Transaction</span>
                     </RouterLink>
