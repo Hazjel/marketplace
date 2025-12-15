@@ -9,13 +9,19 @@ use Illuminate\Support\Facades\DB;
 
 class UserRepository implements UserRepositoryInterface
 {
-    public function getAll(?string $search, ?int $limit, bool $execute)
+    public function getAll(?string $search, ?int $limit, bool $execute, ?string $roles = null)
     {
         $query = User::where(function ($query) use ($search) {
             if ($search) {
                 $query->search($search);
             }
         });
+
+        if ($roles) {
+            $query->whereHas('roles', function ($q) use ($roles) {
+                $q->where('name', $roles);
+            });
+        }
 
         if ($limit) {
             $query->take($limit);
@@ -28,9 +34,9 @@ class UserRepository implements UserRepositoryInterface
         return $query;
     }
 
-    public function getAllPaginated(?string $search, ?int $rowPerPage)
+    public function getAllPaginated(?string $search, ?int $rowPerPage, ?string $roles = null)
     {
-        $query = $this->getAll($search, null, false);
+        $query = $this->getAll($search, null, false, $roles);
 
         return $query->paginate($rowPerPage);
     }

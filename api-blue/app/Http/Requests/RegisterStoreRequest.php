@@ -18,7 +18,8 @@ class RegisterStoreRequest extends FormRequest
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required',
-            'role' => 'required|in:buyer,store'
+            'role' => 'required|in:buyer,store',
+            'phone_number' => 'required|numeric'
         ];
     }
 
@@ -29,7 +30,8 @@ class RegisterStoreRequest extends FormRequest
             'name' => 'Nama',
             'email' => 'Email',
             'password' => 'Kata Sandi',
-            'role' => 'Peran'
+            'role' => 'Peran',
+            'phone_number' => 'Nomor Telepon'
         ];
     }
 }

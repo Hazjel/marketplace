@@ -14,15 +14,24 @@ class TransactionRepository implements TransactionRepositoryInterface
 {
     public function getAll(?string $search, ?int $limit, bool $execute)
     {
-        $query = Transaction::where(function ($query) use ($search) {
-            if ($search) {
-                $query->search($search);
-            }
-        });
+        $query = Transaction::with([
+            'buyer.user', 
+            'store', 
+            'transactionDetails.product.store', 
+            'transactionDetails.product.productCategory',
+            'transactionDetails.product.productImages'
+        ])
+            ->where(function ($query) use ($search) {
+                if ($search) {
+                    $query->search($search);
+                }
+            });
 
-        if (auth()->user()->hasRole('store')) {
+        if (auth()->check() && auth()->user()->hasRole('store')) {
             $query->where('store_id', auth()->user()->store->id ?? null);
         }
+
+        $query->orderBy('created_at', 'desc');
 
         if ($limit) {
             $query->take($limit);
@@ -41,6 +50,19 @@ class TransactionRepository implements TransactionRepositoryInterface
 
         return $query->paginate($rowPerPage);
     }
+
+    public function getTotalRevenue()
+    {
+        $query = Transaction::where('payment_status', 'paid');
+        
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $query->where('store_id', auth()->user()->store->id ?? null);
+        }
+
+        return $query->sum('grand_total');
+    }
+
+
 
     public function getById(string $id)
     {

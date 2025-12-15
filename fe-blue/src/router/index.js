@@ -5,6 +5,7 @@ import Home from '@/views/App/Home.vue'
 import BrowseCategory from '@/views/App/BrowseCategory.vue'
 import AppProductDetail from '@/views/App/ProductDetail.vue'
 import AppStoreDetail from '@/views/App/StoreDetail.vue'
+import Wishlist from '@/views/App/Wishlist.vue'
 import Auth from '@/layouts/Auth.vue'
 import Login from '@/views/auth/Login.vue'
 import Register from '@/views/auth/Register.vue'
@@ -105,6 +106,15 @@ const router = createRouter({
           meta: {
             requiresAuth: true,
             title: 'My Transactions'
+          }
+        },
+        {
+          path: '/wishlist',
+          name: 'app.wishlist',
+          component: Wishlist,
+          meta: {
+            requiresAuth: true,
+            title: 'My Wishlist'
           }
         },
       ]

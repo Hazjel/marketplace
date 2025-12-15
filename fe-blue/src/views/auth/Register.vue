@@ -13,6 +13,7 @@ const form = ref({
     profile_picture: null,
     profile_picture_url: PlaceHolder,
     email: null,
+    phone_number: null,
     password: null,
     role: null,
 })
@@ -26,12 +27,13 @@ const handleImageChange = (e) => {
 
 const handleSubmit = async () => {
     const formData = new FormData()
-    
+
     if (form.value.profile_picture) {
         formData.append('profile_picture', form.value.profile_picture)
     }
     formData.append('name', form.value.name)
     formData.append('email', form.value.email)
+    formData.append('phone_number', form.value.phone_number)
     formData.append('password', form.value.password)
     formData.append('role', form.value.role)
 
@@ -46,7 +48,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-    <form @submit.prevent="handleSubmit"
+    <form @submit.prevent="handleSubmit" autocomplete="off"
         class="flex flex-col w-[560px] h-fit shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white">
         <img src="@/assets/images/logos/logo.svg" class="h-[37px] mx-auto" alt="logo">
         <div class="flex flex-col gap-[30px]">
@@ -66,8 +68,8 @@ const handleSubmit = async () => {
                         </div>
                         <label
                             class="relative flex rounded-2xl py-4 px-6 bg-custom-black h-[56px] gap-[10px] font-medium text-white text-nowrap cursor-pointer">
-                            <input type="file" accept="image/*"
-                                class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange" />
+                            <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer"
+                                @change="handleImageChange" />
                             <img src="@/assets/images/icons/send-square-grey.svg" class="flex size-6 shrink-0"
                                 alt="icon">
                             Add Photo
@@ -120,7 +122,8 @@ const handleSubmit = async () => {
                             <p class="input-placeholder">
                                 Enter Your Full Name
                             </p>
-                            <input type="text" class="custom-input" placeholder="" v-model="form.name">
+                            <input type="text" class="custom-input" placeholder="" v-model="form.name"
+                                autocomplete="off">
                         </label>
                         <span class="input-error" v-if="error?.name">{{ error?.name?.join(', ') }}</span>
                     </div>
@@ -135,9 +138,27 @@ const handleSubmit = async () => {
                             <p class="input-placeholder">
                                 Enter Your Email
                             </p>
-                            <input type="email" class="custom-input" placeholder="" v-model="form.email">
+                            <input type="email" class="custom-input" placeholder="" v-model="form.email"
+                                autocomplete="off">
                         </label>
                         <span class="input-error" v-if="error?.email">{{ error?.email?.join(', ') }}</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <p class="font-semibold text-custom-grey">Phone Number</p>
+                    <div class="group/errorState flex flex-col gap-2" :class="{ 'invalid': error?.phone_number }">
+                        <label class="group relative">
+                            <div class="input-icon">
+                                <img src="@/assets/images/icons/call-grey.svg" class="flex size-6 shrink-0" alt="icon">
+                            </div>
+                            <p class="input-placeholder">
+                                Enter Your Phone Number
+                            </p>
+                            <input type="tel" class="custom-input" placeholder="" v-model="form.phone_number"
+                                autocomplete="off">
+                        </label>
+                        <span class="input-error" v-if="error?.phone_number">{{ error?.phone_number?.join(', ')
+                        }}</span>
                     </div>
                 </div>
             </div>
@@ -152,7 +173,7 @@ const handleSubmit = async () => {
                             Enter Your Password
                         </p>
                         <input id="passwordInput" type="password" class="custom-input tracking-[0.3em]" placeholder=""
-                            v-model="form.password">
+                            v-model="form.password" autocomplete="new-password">
                     </label>
                     <span class="input-error" v-if="error?.password">{{ error?.password?.join(', ') }}</span>
                 </div>

@@ -1,3 +1,92 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import { formatRupiah, formatDate } from '@/helpers/format';
+import { axiosInstance } from '@/plugins/axios';
+import { RouterLink } from 'vue-router';
+import defaultStoreImage from '@/assets/images/thumbnails/th-1.svg';
+import defaultTransactionImage from '@/assets/images/thumbnails/th-4.svg';
+
+// Dashboard data
+const stats = ref({
+    total_revenue: 0,
+    total_sellers: 0,
+    total_buyers: 0,
+    total_products: 0,
+    total_transactions: 0,
+    total_stores: 0
+});
+
+const latestStores = ref([]);
+const latestTransactions = ref([]);
+const loading = ref(true);
+
+// Fetch dashboard data
+const fetchDashboardData = async () => {
+    loading.value = true;
+    try {
+        // We use Promise.allSettled so if one fails, the others still load
+        const results = await Promise.allSettled([
+            axiosInstance.get('store/all/paginated', { params: { row_per_page: 1 } }),      // Index 0: Sellers (via Stores)
+            axiosInstance.get('user/all/paginated', { params: { row_per_page: 1, roles: 'buyer' } }), // Index 1: Buyers (Filtered by role)
+            axiosInstance.get('product/all/paginated', { params: { row_per_page: 1 } }),    // Index 2: Products
+            axiosInstance.get('transaction/all/paginated', { params: { row_per_page: 1 } }), // Index 3: Transactions
+            axiosInstance.get('store/all/paginated', { params: { row_per_page: 1, is_verified: 1 } }) // Index 4: Stores
+        ]);
+
+        // Helper to get count or default to 0
+        const getCount = (result) => {
+            return result.status === 'fulfilled' && result.value.data.data?.meta?.total
+                ? result.value.data.data.meta.total
+                : 0;
+        };
+
+        stats.value = {
+            total_revenue: results[3].status === 'fulfilled' ? (results[3].value.data.data?.meta?.total_revenue || 0) : 0,
+            total_sellers: getCount(results[0]),
+            total_buyers: getCount(results[1]),
+            total_products: getCount(results[2]),
+            total_transactions: getCount(results[3]),
+            total_stores: getCount(results[4])
+        };
+
+        // Log failures for debugging
+        if (results[0].status === 'rejected') console.warn('Failed to fetch sellers:', results[0].reason);
+        if (results[1].status === 'rejected') console.warn('Failed to fetch buyers:', results[1].reason);
+        if (results[2].status === 'rejected') console.warn('Failed to fetch products:', results[2].reason);
+        if (results[3].status === 'rejected') console.warn('Failed to fetch transactions:', results[3].reason);
+
+        // Fetch latest stores
+        try {
+            const storesResponse = await axiosInstance.get('store/all/paginated', {
+                params: { row_per_page: 3, is_verified: 1, sort_by: 'created_at', sort_direction: 'desc' }
+            });
+            latestStores.value = storesResponse.data.data?.data || storesResponse.data.data || [];
+        } catch (e) {
+            console.error('Failed to fetch latest stores:', e);
+        }
+
+        // Fetch latest transactions
+        try {
+            const transactionsResponse = await axiosInstance.get('transaction/all/paginated', {
+                params: { row_per_page: 3, sort_by: 'created_at', sort_direction: 'desc' }
+            });
+            latestTransactions.value = transactionsResponse.data.data?.data || transactionsResponse.data.data || [];
+        } catch (e) {
+            console.error('Failed to fetch latest transactions:', e);
+        }
+
+    } catch (error) {
+        console.error('Critical Error fetching dashboard data:', error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+onMounted(() => {
+    fetchDashboardData();
+});
+</script>
+
 <template>
     <div class="flex gap-5">
         <div class="flex flex-col w-[440px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
@@ -6,10 +95,8 @@
                     <img src="@/assets/images/icons/wallet-2-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">Rp 920.650.320</p>
-                    <p class="font-medium text-lg text-custom-grey">
-                        Total Revenue
-                    </p>
+                    <p class="font-bold text-4xl">{{ loading ? '...' : `Rp ${formatRupiah(stats.total_revenue)}` }}</p>
+                    <p class="font-medium text-lg text-custom-grey">Total Revenue</p>
                 </div>
             </div>
         </div>
@@ -19,10 +106,8 @@
                     <img src="@/assets/images/icons/profile-tick-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">6.400</p>
-                    <p class="font-medium text-lg text-custom-grey">
-                        Total Sellers
-                    </p>
+                    <p class="font-bold text-4xl">{{ loading ? '...' : stats.total_sellers.toLocaleString() }}</p>
+                    <p class="font-medium text-lg text-custom-grey">Total Sellers</p>
                 </div>
             </div>
         </div>
@@ -33,10 +118,8 @@
                         alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">16.560</p>
-                    <p class="font-medium text-lg text-custom-grey">
-                        Total Buyers
-                    </p>
+                    <p class="font-bold text-4xl">{{ loading ? '...' : stats.total_buyers.toLocaleString() }}</p>
+                    <p class="font-medium text-lg text-custom-grey">Total Buyers</p>
                 </div>
             </div>
         </div>
@@ -50,10 +133,8 @@
                             alt="icon">
                     </div>
                     <div class="flex flex-col gap-[6px]">
-                        <p class="font-bold text-4xl">320.500</p>
-                        <p class="font-medium text-lg text-custom-grey">
-                            Total Products
-                        </p>
+                        <p class="font-bold text-4xl">{{ loading ? '...' : stats.total_products.toLocaleString() }}</p>
+                        <p class="font-medium text-lg text-custom-grey">Total Products</p>
                     </div>
                 </div>
             </div>
@@ -63,30 +144,28 @@
                         <img src="@/assets/images/icons/shop-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                     </div>
                     <div class="flex flex-col gap-[6px]">
-                        <p class="font-bold text-4xl">320</p>
-                        <p class="font-medium text-lg text-custom-grey">
-                            Total Stores
-                        </p>
+                        <p class="font-bold text-4xl">{{ loading ? '...' : stats.total_stores.toLocaleString() }}</p>
+                        <p class="font-medium text-lg text-custom-grey">Total Stores</p>
                     </div>
                 </div>
                 <hr class="border-custom-stroke">
                 <div class="flex flex-col flex-1 gap-5">
                     <p class="font-bold text-xl">Latest Stores</p>
-                    <div id="List-Stores" class="flex flex-col gap-5">
-                        <div
+                    <div id="List-Stores" class="flex flex-col gap-5" v-if="!loading && latestStores.length > 0">
+                        <div v-for="store in latestStores" :key="store.id"
                             class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
                             <div class="flex items-center gap-[14px]">
                                 <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
-                                    <img src="@/assets/images/thumbnails/th-1.svg" class="size-full object-cover"
-                                        alt="photo">
+                                    <img :src="store.logo || defaultStoreImage" class="size-full object-cover"
+                                        alt="photo" @error="$event.target.src = defaultStoreImage">
                                 </div>
                                 <div class="flex flex-col gap-[6px] w-full overflow-hidden">
                                     <p class="font-bold text-lg leading-tight w-full truncate">
-                                        Shayna Sports
+                                        {{ store.name }}
                                     </p>
                                     <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
                                         <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                                        Princess Elsa
+                                        {{ store.user?.name || 'Unknown User' }}
                                     </p>
                                 </div>
                             </div>
@@ -95,77 +174,28 @@
                                 <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
                                     <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0"
                                         alt="icon">
-                                    Created on 19/02/2020
+                                    Created on {{ formatDate(store.created_at) }}
                                 </p>
-                                <a href="#" class="font-semibold text-custom-blue hover:underline">
+                                <RouterLink v-if="store.id"
+                                    :to="{ name: 'admin.store.detail', params: { id: store.id } }"
+                                    class="flex w-[96px] h-[56px] shrink-0 rounded-2xl bg-custom-blue/10 hover:ring-2 hover:ring-custom-blue transition-300 font-semibold text-custom-blue leading-none items-center justify-center text-center">
                                     View Details
-                                </a>
-                            </div>
-                        </div>
-                        <div
-                            class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
-                            <div class="flex items-center gap-[14px]">
-                                <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
-                                    <img src="@/assets/images/thumbnails/th-2.svg" class="size-full object-cover"
-                                        alt="photo">
-                                </div>
-                                <div class="flex flex-col gap-[6px] w-full overflow-hidden">
-                                    <p class="font-bold text-lg leading-tight w-full truncate">
-                                        Raffly Bookstore
-                                    </p>
-                                    <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                        <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                                        Rizky Ichsan
-                                    </p>
-                                </div>
-                            </div>
-                            <hr class="border-custom-stroke">
-                            <div class="flex items-center justify-between">
-                                <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
-                                    <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0"
-                                        alt="icon">
-                                    Created on 19/02/2020
-                                </p>
-                                <a href="#" class="font-semibold text-custom-blue hover:underline">
+                                </RouterLink>
+                                <span v-else class="font-semibold text-custom-blue cursor-not-allowed opacity-50">
                                     View Details
-                                </a>
-                            </div>
-                        </div>
-                        <div
-                            class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
-                            <div class="flex items-center gap-[14px]">
-                                <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
-                                    <img src="@/assets/images/thumbnails/th-3.svg" class="size-full object-cover"
-                                        alt="photo">
-                                </div>
-                                <div class="flex flex-col gap-[6px] w-full overflow-hidden">
-                                    <p class="font-bold text-lg leading-tight w-full truncate">
-                                        Marcy Beauty
-                                    </p>
-                                    <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                        <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                                        Chessta B
-                                    </p>
-                                </div>
-                            </div>
-                            <hr class="border-custom-stroke">
-                            <div class="flex items-center justify-between">
-                                <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
-                                    <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0"
-                                        alt="icon">
-                                    Created on 19/02/2020
-                                </p>
-                                <a href="#" class="font-semibold text-custom-blue hover:underline">
-                                    View Details
-                                </a>
+                                </span>
                             </div>
                         </div>
                     </div>
-                    <div id="Empty-State" class="hidden flex flex-col flex-1 items-center justify-center gap-4">
+                    <div id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4"
+                        v-else-if="!loading && latestStores.length === 0">
                         <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon">
                         <div class="flex flex-col gap-1 items-center text-center">
-                            <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>
+                            <p class="font-semibold text-custom-grey">No stores available yet</p>
                         </div>
+                    </div>
+                    <div v-else-if="loading" class="flex items-center justify-center p-8">
+                        <p class="text-custom-grey">Loading...</p>
                     </div>
                 </div>
             </div>
@@ -178,35 +208,37 @@
                             alt="icon">
                     </div>
                     <div class="flex flex-col gap-[6px]">
-                        <p class="font-bold text-4xl">163.200</p>
-                        <p class="font-medium text-lg text-custom-grey">
-                            Total Transaction
+                        <p class="font-bold text-4xl">{{ loading ? '...' : stats.total_transactions.toLocaleString() }}
                         </p>
+                        <p class="font-medium text-lg text-custom-grey">Total Transaction</p>
                     </div>
                 </div>
                 <hr class="border-custom-stroke">
                 <div class="flex flex-col flex-1 gap-5">
                     <p class="font-bold text-xl">Latest Transactions</p>
-                    <div id="List-Transactions" class="flex flex-col gap-5">
-                        <div
+                    <div id="List-Transactions" class="flex flex-col gap-5"
+                        v-if="!loading && latestTransactions.length > 0">
+                        <div v-for="transaction in latestTransactions" :key="transaction.id"
                             class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
                             <div class="flex items-center gap-[14px] w-full overflow-hidden">
                                 <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
-                                    <img src="@/assets/images/thumbnails/th-4.svg" class="size-full object-cover"
-                                        alt="photo">
+                                    <!-- Added more robust image handling -->
+                                    <img :src="transaction.transaction_details?.[0]?.product?.product_images?.[0]?.image || defaultTransactionImage"
+                                        class="size-full object-cover" alt="photo"
+                                        @error="$event.target.src = defaultTransactionImage">
                                 </div>
                                 <div class="flex flex-col gap-[6px] w-full flex-grow-0 overflow-hidden">
                                     <p class="font-bold text-lg leading-tight w-full">
-                                        Rierru Fashion
+                                        {{ transaction.store?.name || 'Unknown Store' }}
                                     </p>
                                     <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
                                         <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                                        Feary Reyn
+                                        {{ transaction.user?.name || 'Unknown Buyer' }}
                                     </p>
                                 </div>
                                 <div class="flex flex-col gap-2 items-end">
                                     <p class="font-bold text-lg leading-tight text-custom-blue text-nowrap">
-                                        Rp 384.000
+                                        Rp {{ formatRupiah(transaction.total_price || transaction.grand_total) }}
                                     </p>
                                     <p
                                         class="flex items-center gap-1 font-semibold text-custom-grey leading-none text-nowrap">
@@ -223,118 +255,30 @@
                                             class="flex size-6 shrink-0" alt="icon">
                                     </div>
                                     <div class="flex flex-col gap-1">
-                                        <p class="font-bold text-lg leading-none">12</p>
+                                        <p class="font-bold text-lg leading-none">{{
+                                            transaction.transaction_details?.length || 0 }}</p>
                                         <p class="font-semibold text-custom-grey">Total Products</p>
                                     </div>
                                 </div>
-                                <a href="#"
-                                    class="flex w-[96px] h-[56px] shrink-0 rounded-2xl py-[18px] px-5 bg-custom-blue/10 gap-2 hover:ring-2 hover:ring-custom-blue transition-300">
+                                <RouterLink v-if="transaction.id"
+                                    :to="{ name: 'admin.transaction.detail', params: { id: transaction.id } }"
+                                    class="flex w-[96px] h-[56px] shrink-0 rounded-2xl bg-custom-blue/10 hover:ring-2 hover:ring-custom-blue transition-300 items-center justify-center text-center">
                                     <span class="font-semibold text-custom-blue leading-none">
                                         Details
                                     </span>
-                                </a>
-                            </div>
-                        </div>
-                        <div
-                            class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
-                            <div class="flex items-center gap-[14px] w-full overflow-hidden">
-                                <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
-                                    <img src="@/assets/images/thumbnails/th-5.svg" class="size-full object-cover"
-                                        alt="photo">
-                                </div>
-                                <div class="flex flex-col gap-[6px] w-full flex-grow-0 overflow-hidden">
-                                    <p class="font-bold text-lg leading-tight w-full">
-                                        Marcy Beauty
-                                    </p>
-                                    <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                        <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                                        Shadam B
-                                    </p>
-                                </div>
-                                <div class="flex flex-col gap-2 items-end">
-                                    <p class="font-bold text-lg leading-tight text-custom-blue text-nowrap">
-                                        Rp 384.000
-                                    </p>
-                                    <p
-                                        class="flex items-center gap-1 font-semibold text-custom-grey leading-none text-nowrap">
-                                        Grand Total
-                                    </p>
-                                </div>
-                            </div>
-                            <hr class="border-custom-stroke">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-[10px]">
-                                    <div
-                                        class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                                        <img src="@/assets/images/icons/shopping-cart-black.svg"
-                                            class="flex size-6 shrink-0" alt="icon">
-                                    </div>
-                                    <div class="flex flex-col gap-1">
-                                        <p class="font-bold text-lg leading-none">12</p>
-                                        <p class="font-semibold text-custom-grey">Total Products</p>
-                                    </div>
-                                </div>
-                                <a href="#"
-                                    class="flex w-[96px] h-[56px] shrink-0 rounded-2xl py-[18px] px-5 bg-custom-blue/10 gap-2 hover:ring-2 hover:ring-custom-blue transition-300">
-                                    <span class="font-semibold text-custom-blue leading-none">
-                                        Details
-                                    </span>
-                                </a>
-                            </div>
-                        </div>
-                        <div
-                            class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
-                            <div class="flex items-center gap-[14px] w-full overflow-hidden">
-                                <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
-                                    <img src="@/assets/images/thumbnails/th-6.svg" class="size-full object-cover"
-                                        alt="photo">
-                                </div>
-                                <div class="flex flex-col gap-[6px] w-full flex-grow-0 overflow-hidden">
-                                    <p class="font-bold text-lg leading-tight w-full">
-                                        Raffly Bookstore
-                                    </p>
-                                    <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                        <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                                        M Raffly
-                                    </p>
-                                </div>
-                                <div class="flex flex-col gap-2 items-end">
-                                    <p class="font-bold text-lg leading-tight text-custom-blue text-nowrap">
-                                        Rp 384.000
-                                    </p>
-                                    <p
-                                        class="flex items-center gap-1 font-semibold text-custom-grey leading-none text-nowrap">
-                                        Grand Total
-                                    </p>
-                                </div>
-                            </div>
-                            <hr class="border-custom-stroke">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-[10px]">
-                                    <div
-                                        class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                                        <img src="@/assets/images/icons/shopping-cart-black.svg"
-                                            class="flex size-6 shrink-0" alt="icon">
-                                    </div>
-                                    <div class="flex flex-col gap-1">
-                                        <p class="font-bold text-lg leading-none">12</p>
-                                        <p class="font-semibold text-custom-grey">Total Products</p>
-                                    </div>
-                                </div>
-                                <a href="#"
-                                    class="flex w-[96px] h-[56px] shrink-0 rounded-2xl py-[18px] px-5 bg-custom-blue/10 gap-2 hover:ring-2 hover:ring-custom-blue transition-300">
-                                    <span class="font-semibold text-custom-blue leading-none">
-                                        Details
-                                    </span>
-                                </a>
+                                </RouterLink>
                             </div>
                         </div>
                     </div>
-                    <div id="Empty-State" class="hidden flex flex-col flex-1 items-center justify-center gap-4">
+                    <div id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4"
+                        v-else-if="!loading && latestTransactions.length === 0">
                         <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon">
                         <div class="flex flex-col gap-1 items-center text-center">
-                            <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>
+                            <p class="font-semibold text-custom-grey">No transactions available yet</p>
                         </div>
+                    </div>
+                    <div v-else-if="loading" class="flex items-center justify-center p-8">
+                        <p class="text-custom-grey">Loading...</p>
                     </div>
                 </div>
             </div>

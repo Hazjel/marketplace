@@ -49,11 +49,12 @@ class UserController extends Controller implements HasMiddleware
     {
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer'
+            'row_per_page' => 'required|integer',
+            'roles' => 'nullable|string'
         ]);
 
         try {
-            $users = $this->userRepository->getAllPaginated($request['search'] ?? null, $request['row_per_page']);
+            $users = $this->userRepository->getAllPaginated($request['search'] ?? null, $request['row_per_page'], $request['roles'] ?? null);
 
             return ResponseHelper::jsonResponse(true, 'Data User Berhasil Diambil', PaginateResource::make($users, UserResource::class), 200);
         } catch (\Exception $e) {

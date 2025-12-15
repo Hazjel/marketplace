@@ -43,12 +43,6 @@ defineProps({
                 </div>
             </div>
             <div class="flex items-center gap-3 w-full">
-                <button class="group flex items-center justify-center size-14 shrink-0 rounded-2xl p-4 gap-2 bg-custom-red/10 hover:bg-custom-red transition-300">
-                    <div class="relative size-6">
-                        <img src="@/assets/images/icons/heart-red.svg" class="absolute flex size-6 shrink-0 opacity-100 group-hover:opacity-0 transition-300" alt="icon">
-                        <img src="@/assets/images/icons/heart-white-fill.svg" class="absolute flex size-6 shrink-0 opacity-0 group-hover:opacity-100 transition-300" alt="icon">
-                    </div>
-                </button>
                 <RouterLink v-if="item?.username" :to="{ name: 'app.store-detail', params: { username: item.username } }" class="group flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-[6px] bg-custom-blue/10 hover:bg-custom-blue transition-300">
                     <span class="font-semibold text-custom-blue group-hover:text-white transition-300">Visit Store</span>
                 </RouterLink>

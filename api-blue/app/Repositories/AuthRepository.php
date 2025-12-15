@@ -29,7 +29,15 @@ class AuthRepository implements AuthRepositoryInterface
 
             if ($data['role'] == 'buyer') {
                 $user->buyer()->create([
-                    'phone_number' => null
+                    'phone_number' => $data['phone_number']
+                ]);
+            }
+
+            if ($data['role'] == 'store') {
+                $user->store()->create([
+                    'name' => $data['name'],
+                    'phone' => $data['phone_number'],
+                    'slug' => Str::slug($data['name']) . '-' . Str::random(5),
                 ]);
             }
 
