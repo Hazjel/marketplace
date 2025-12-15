@@ -27,7 +27,8 @@ class TransactionController extends Controller implements HasMiddleware
     public static function middleware()
     {
         return [
-            new Middleware(PermissionMiddleware::using(['transaction-list|transaction-create|transaction-edit|transaction-delete']), only: ['index', 'getAllPaginated', 'show']),
+            // Removed getAllPaginated from strict permissions list
+            new Middleware(PermissionMiddleware::using(['transaction-list|transaction-create|transaction-edit|transaction-delete']), only: ['index', 'show']),
             new Middleware(PermissionMiddleware::using(['transaction-create']), only: ['store']),
             new Middleware(PermissionMiddleware::using(['transaction-edit']), only: ['update']),
             new Middleware(PermissionMiddleware::using(['transaction-delete']), only: ['destroy']),
@@ -50,6 +51,11 @@ class TransactionController extends Controller implements HasMiddleware
 
     public function getAllPaginated(Request $request)
     {
+        // Manual Authorization: Allow Admin (permission), or Buyer, or Store
+        if (!auth()->user()->can('transaction-list') && !auth()->user()->hasRole('buyer') && !auth()->user()->hasRole('store')) {
+            return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+        }
+
         $request = $request->validate([
             'search' => 'nullable|string',
             'row_per_page' => 'required|integer'

@@ -54,6 +54,23 @@ class AuthController extends Controller
         }
     }
 
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'password' => 'nullable|min:8|string',
+            'current_password' => 'required_with:password|current_password'
+        ]);
+
+        try {
+            $user = $this->authRepository->updateProfile($request->all());
+
+            return ResponseHelper::jsonResponse(true, 'Profile Berhasil Diupdate', new UserResource($user), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
     public function logout()
     {
         try {
