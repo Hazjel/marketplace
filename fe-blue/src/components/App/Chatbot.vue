@@ -1,6 +1,6 @@
     <script setup>
     import { ref, nextTick } from 'vue';
-    import axios from 'axios'; // Pakai axios plugin project kamu
+    import axios from 'axios';
 
     axios.defaults.baseURL = 'http://localhost:8001';
 
@@ -11,7 +11,7 @@
 
     // Pesan awal
     const chats = ref([
-        { text: 'Halo! Aku Ri, istri Mikhael~ Ada yang bisa dibantu soal makanan di Calorizz?', isBot: true }
+        { text: 'Halo! Aku Ri, si asisten virtual~ Ada yang bisa dibantu soal makanan di Calorizz?', isBot: true }
     ]);
 
     const toggleChat = () => {
@@ -31,9 +31,9 @@
         const rawMsg = message.value;
         const userMsg = rawMsg.trim(); // Ambil nilai yang sudah di-trim
 
-        // 2. VALIDASI KETAT: Jika kosong setelah di-trim, batalkan dan jangan kirim
+        // Jika kosong setelah di-trim, batalkan dan jangan kirim
         if (!userMsg) {
-            message.value = ''; // Kosongkan input field yang berisi spasi saja
+            message.value = ''; // Mengosongkan input field yang berisi spasi saja
             return;
         }
         chats.value.push({ text: userMsg, isBot: false });
@@ -42,7 +42,7 @@
         scrollToBottom();
 
         try {
-            // 2. Kirim ke Laravel (/api/chat)
+            // Kirim ke Laravel (/api/chat)
             const response = await axios.post('/predict', {
                 message: userMsg
             }, {
@@ -51,7 +51,7 @@
                 }
             });
 
-            // 3. Tampilkan balasan Ri
+            // Tampilkan balasan Ri
             const reply = response.data.reply;
             chats.value.push({ text: reply, isBot: true });
 
@@ -66,11 +66,11 @@
 </script>
 
     <template>
-        <div class="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3 font-sans">
+        <div class="fixed z-[9999] bottom-6 right-6 flex flex-col items-end gap-3 font-sans">
 
             <transition name="fade">
-                <div v-if="isOpen"
-                    class="w-[350px] h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+                <div v-if="isOpen" class="bg-white rounded-2xl shadow-2xl flex flex-col border border-gray-200 w-[400px] max-w-[90vw]
+        h-[520px] max-h-[80vh]">
                     <div class="bg-custom-blue p-4 flex justify-between items-center text-white">
                         <div class="flex items-center gap-2">
                             <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">🤖</div>
@@ -85,13 +85,21 @@
                         <button @click="toggleChat" class="hover:bg-white/20 p-1 rounded transition">&times;</button>
                     </div>
 
-                    <div ref="chatContainer" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-gray-50">
-                        <div v-for="(chat, index) in chats" :key="index"
-                            class="max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
-                            :class="chat.isBot ? 'bg-white border border-gray-200 self-start text-gray-700 rounded-tl-none' : 'bg-custom-blue text-white self-end rounded-tr-none'">
-                            {{ chat.text }}
+                    <div ref="chatContainer"
+                        class="flex-1 p-4 overflow-y-auto overflow-x-hidden flex flex-col gap-3 bg-gray-50">
+
+                        <!-- CHAT BUBBLE -->
+                        <div v-for="(chat, index) in chats" :key="index" class="rounded-2xl flex"
+                            :class="chat.isBot ? 'justify-start' : 'justify-end'">
+                            <div class="text-sm break-words max-w-[50%] w-fit"
+                                :class="chat.isBot ? 'border border-gray-200' : 'bg-custom-blue text-white'">
+                                <p class="p-2">
+                                    {{ chat.text }}
+                                </p>
+                            </div>
                         </div>
 
+                        <!-- LOADING -->
                         <div v-if="isLoading"
                             class="bg-white border border-gray-200 self-start p-3 rounded-2xl rounded-tl-none w-fit">
                             <div class="flex gap-1">
@@ -100,8 +108,10 @@
                                 <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
                             </div>
                         </div>
+
                     </div>
 
+                    <!-- Chat Box -->
                     <div class="p-3 bg-white border-t flex gap-2">
                         <input v-model="message" @keyup.enter="sendMessage" type="text"
                             placeholder="Tanya rekomendasi makanan..."
@@ -125,10 +135,19 @@
 
 <style scoped>
 .fixed {
-    position: fixed !important;
-    bottom: 6px !important;
-    /* Gunakan nilai yang lebih kecil untuk melihat apakah dia bergerak */
-    right: 6px !important;
+    position: fixed;
+    bottom: 6px;
+    right: 6px;
+}
+
+.overflow-wrap-break-word {
+    /* Properti yang lebih modern. Memaksa kata yang terlalu panjang 
+    (misalnya URL atau string tanpa spasi) untuk pecah saat mencapai batas 
+    lebar container (max-w-[85%]).
+    */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    /* Fallback untuk browser lama */
 }
 
 .fade-enter-active,
