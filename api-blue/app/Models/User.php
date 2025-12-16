@@ -16,6 +16,14 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, UUID, HasRoles, HasApiTokens;
 
+    public function getProfilePictureAttribute($value)
+    {
+        if ($value) {
+            return asset('storage/' . $value);
+        }
+        return null;
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -24,6 +32,7 @@ class User extends Authenticatable
     protected $fillable = [
         'profile_picture',
         'name',
+        'username', // Added
         'email',
         'password',
     ];
@@ -67,5 +76,15 @@ class User extends Authenticatable
     public function buyer()
     {
         return $this->hasOne(Buyer::class);
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
     }
 }

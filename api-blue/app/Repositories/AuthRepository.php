@@ -21,6 +21,16 @@ class AuthRepository implements AuthRepositoryInterface
             $user = new User;
             $user->profile_picture = $data['profile_picture']->store('assets/user', 'public');
             $user->name = $data['name'];
+            
+            // Auto-generate username
+            $slug = Str::slug($data['name']);
+            $count = 1;
+            while (User::where('username', $slug)->exists()) {
+                $slug = Str::slug($data['name']) . '-' . $count;
+                $count++;
+            }
+            $user->username = $slug;
+
             $user->email = $data['email'];
             $user->password = bcrypt($data['password']);
             $user->save();
@@ -29,7 +39,15 @@ class AuthRepository implements AuthRepositoryInterface
 
             if ($data['role'] == 'buyer') {
                 $user->buyer()->create([
-                    'phone_number' => null
+                    'phone_number' => $data['phone_number']
+                ]);
+            }
+
+            if ($data['role'] == 'store') {
+                $user->store()->create([
+                    'name' => $data['name'],
+                    'phone' => $data['phone_number'],
+                    'slug' => Str::slug($data['name']) . '-' . Str::random(5),
                 ]);
             }
 
@@ -66,6 +84,37 @@ class AuthRepository implements AuthRepositoryInterface
             DB::rollBack();
 
             throw new Exception($e->getMessage(), $e->getCode());
+        }
+    }
+
+
+
+    public function updateProfile(array $data)
+    {
+        DB::beginTransaction();
+
+        try {
+            if (!Auth::check()) {
+                throw new Exception('Unauthorized', 401);
+            }
+
+            $user = Auth::user();
+
+            $user->name = $data['name'];
+
+            if (isset($data['password']) && !empty($data['password'])) {
+                $user->password = bcrypt($data['password']);
+            }
+
+            $user->save();
+
+            DB::commit();
+
+            return $user;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            throw new Exception($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 

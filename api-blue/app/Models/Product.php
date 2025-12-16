@@ -56,4 +56,13 @@ class Product extends Model
     {
         return $this->hasMany(ProductReview::class);
     }
+
+    public function getTotalSoldAttribute()
+    {
+        return $this->transactionDetails()
+            ->whereHas('transaction', function ($q) {
+                $q->where('payment_status', 'paid');
+            })
+            ->sum('qty');
+    }
 }

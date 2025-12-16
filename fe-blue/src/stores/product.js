@@ -32,6 +32,38 @@ export const useProductStore = defineStore("product", {
             }
         },
 
+        async searchProducts(params = {}) {
+            try {
+                const response = await axiosInstance.get('/product', {
+                    params: {
+                        search: params.search || null,
+                        limit: params.limit || 5
+                    }
+                });
+
+                // Return langsung tanpa simpan ke state
+                return response.data.data;
+            } catch (error) {
+                console.error('Search error:', error);
+                return [];
+            }
+        },
+
+        async loadMoreProducts(params) {
+            this.loading = true;
+
+            try {
+                const response = await axiosInstance.get(`product/all/paginated`, { params });
+
+                this.products.push(...response.data.data.data)
+                this.meta = response.data.data.meta
+            } catch (error) {
+                this.error = handleError(error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
         async fetchProductsPaginated(params) {
             this.loading = true;
 
@@ -49,7 +81,7 @@ export const useProductStore = defineStore("product", {
 
         async fetchProductById(id) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.get(`product/${id}`)
 
@@ -63,7 +95,7 @@ export const useProductStore = defineStore("product", {
 
         async fetchProductBySlug(slug) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.get(`product/slug/${slug}`)
 
@@ -83,10 +115,10 @@ export const useProductStore = defineStore("product", {
                 const response = await axiosInstance.post('product', payload)
 
                 this.success = response.data.message
-                
+
                 router.push({ name: 'admin.product' })
-                
-                
+
+
             } catch (error) {
                 this.error = handleError(error)
             } finally {
@@ -104,7 +136,7 @@ export const useProductStore = defineStore("product", {
                 })
 
                 this.success = response.data.message
-                
+
                 router.push({ name: 'admin.product' })
             } catch (error) {
                 this.error = handleError(error)
@@ -113,9 +145,9 @@ export const useProductStore = defineStore("product", {
             }
         },
 
-        async deleteProduct(id){
+        async deleteProduct(id) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.delete(`product/${id}`)
 
@@ -126,5 +158,5 @@ export const useProductStore = defineStore("product", {
                 this.loading = false
             }
         }
-    },
+    }
 });

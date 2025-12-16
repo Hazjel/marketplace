@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductRepository implements ProductRepositoryInterface
 {
-     public function getAll(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $limit, ?bool $random, bool $execute)
+    public function getAll(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $limit, ?bool $random, bool $execute)
     {
         $query = Product::where(function ($query) use ($search, $storeId, $ProductCategoryId) {
             if ($search) {
@@ -51,9 +51,22 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId = null, ?int $rowPerPage)
     {
-        $query = $this->getAll($search, $storeId, $ProductCategoryId, null, false,false);
+        $query = $this->getAll($search, $storeId, $ProductCategoryId, null, false, false);
 
         return $query->paginate($rowPerPage);
+    }
+
+    public function getTotalSold()
+    {
+        $query = DB::table('transaction_details')
+            ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
+            ->where('transactions.payment_status', 'paid');
+
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $query->where('transactions.store_id', auth()->user()->store->id ?? null);
+        }
+
+        return $query->sum('transaction_details.qty');
     }
 
     public function getById(string $id)
@@ -86,16 +99,16 @@ class ProductRepository implements ProductRepositoryInterface
             $product->stock = $data['stock'];
             $product->save();
 
-           $productImageRepository = new ProductImageRepository;
-           if (isset($data['product_images']))  {
-               foreach ($data['product_images'] as $productImage) {
-                   $productImageRepository->create([
-                       'product_id' => $product->id,
-                       'image' => $productImage['image'],
-                       'is_thumbnail' => $productImage['is_thumbnail'],
-                   ]);
-               }
-           }
+            $productImageRepository = new ProductImageRepository;
+            if (isset($data['product_images'])) {
+                foreach ($data['product_images'] as $productImage) {
+                    $productImageRepository->create([
+                        'product_id' => $product->id,
+                        'image' => $productImage['image'],
+                        'is_thumbnail' => $productImage['is_thumbnail'],
+                    ]);
+                }
+            }
 
             DB::commit();
 
@@ -108,7 +121,7 @@ class ProductRepository implements ProductRepositoryInterface
         }
     }
 
-    public function update(string $id,array $data)
+    public function update(string $id, array $data)
     {
         DB::beginTransaction();
 
@@ -125,25 +138,25 @@ class ProductRepository implements ProductRepositoryInterface
             $product->stock = $data['stock'];
             $product->save();
 
-           $productImageRepository = new ProductImageRepository;
+            $productImageRepository = new ProductImageRepository;
 
-           if (isset($data['deleted_product_images']))  {
-               foreach ($data['deleted_product_images'] as $productImage) {
-                   $productImageRepository->delete($productImage);
-               }
-           }
+            if (isset($data['deleted_product_images'])) {
+                foreach ($data['deleted_product_images'] as $productImage) {
+                    $productImageRepository->delete($productImage);
+                }
+            }
 
-           if (isset($data['product_images']))  {
-               foreach ($data['product_images'] as $productImage) {
-                   if (!isset($productImage['id'])){
-                    $productImageRepository->create([
-                       'product_id' => $product->id,
-                       'image' => $productImage['image'],
-                       'is_thumbnail' => $productImage['is_thumbnail'],
-                    ]);
-                   }
-               }
-           }
+            if (isset($data['product_images'])) {
+                foreach ($data['product_images'] as $productImage) {
+                    if (!isset($productImage['id'])) {
+                        $productImageRepository->create([
+                            'product_id' => $product->id,
+                            'image' => $productImage['image'],
+                            'is_thumbnail' => $productImage['is_thumbnail'],
+                        ]);
+                    }
+                }
+            }
 
             DB::commit();
 
@@ -160,14 +173,14 @@ class ProductRepository implements ProductRepositoryInterface
     {
         DB::beginTransaction();
 
-       try{
-        $product = Product::find($id);
-        $product->delete();
+        try {
+            $product = Product::find($id);
+            $product->delete();
 
-        DB::commit();
+            DB::commit();
 
-        return $product;
-       } catch (\Throwable $e) {
+            return $product;
+        } catch (\Throwable $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }

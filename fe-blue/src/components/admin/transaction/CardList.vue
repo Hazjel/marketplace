@@ -10,6 +10,24 @@ defineProps({
     }
 })
 
+import { useAuthStore } from '@/stores/auth';
+import { storeToRefs } from 'pinia';
+
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
+
+const getDetailRoute = (transactionId) => {
+    if (user.value?.role === 'admin') {
+        return {
+            name: 'admin.transaction.detail',
+            params: { id: transactionId }
+        }
+    }
+    return {
+        name: 'user.transaction.detail',
+        params: { username: user.value?.username, id: transactionId }
+    }
+}
 const emit = defineEmits(['delete'])
 </script>
 
@@ -41,15 +59,11 @@ const emit = defineEmits(['delete'])
         <div class="flex items-center gap-5 justify-between pr-[30px]">
             <div class="flex items-center gap-[14px] w-[320px]">
                 <div class="flex size-[84px] shrink-0 rounded-full bg-custom-background overflow-hidden">
-                    <img :src="item.store?.logo" class="size-full object-cover" alt="photo">
+                    <img :src="item.buyer?.user?.profile_picture" class="size-full object-cover" alt="photo">
                 </div>
                 <div class="flex flex-col gap-[6px] w-full overflow-hidden">
                     <p class="font-bold text-lg leading-tight w-full truncate">
-                        {{ item?.store?.name }}
-                    </p>
-                    <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                        <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                        {{ item?.store?.user?.name }}
+                        {{ item?.buyer?.user?.name }}
                     </p>
                 </div>
             </div>
@@ -69,7 +83,8 @@ const emit = defineEmits(['delete'])
                     <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-1">
-                    <p class="font-bold text-lg leading-none">{{ item?.transaction_details?.reduce((total, detail) => total + detail.qty, 0) }}</p>
+                    <p class="font-bold text-lg leading-none">{{item?.transaction_details?.reduce((total, detail) =>
+                        total + detail.qty, 0)}}</p>
                     <p class="font-semibold text-custom-grey">Total Quantity</p>
                 </div>
             </div>
@@ -89,11 +104,11 @@ const emit = defineEmits(['delete'])
                     <span class="font-semibold text-white">Export</span>
                     <img src="@/assets/images/icons/receive-square-white.svg" class="flex size-6 shrink-0" alt="icon">
                 </button>
-                <RouterLink :to="{name: 'admin.transaction.detail', params: {id: item.id}}"
+                <RouterLink :to="getDetailRoute(item.id)"
                     class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                     <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon">
                     <span class="font-semibold text-white">Details</span>
-                </RouterLink >
+                </RouterLink>
             </div>
         </div>
     </div>
