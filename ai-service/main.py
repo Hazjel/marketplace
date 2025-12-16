@@ -7,6 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+# Instalasi
+# pip install google-generativeai
+# pip install fastapi uvicorn
+# pip install mysql-connect-python
+# pip install python-dotenv
+
 # Load Environment Variables
 load_dotenv(override=True)
 
@@ -38,12 +44,12 @@ class ChatRequest(BaseModel):
 
 # SYSTEM PROMPT PERSONA RI 
 SYSTEM_PROMPT = (
-    "Kamu adalah Ri, asisten virtual Calorizz yang ramah, sopan, dan penuh empati. "
+    "Kamu adalah Ri, asisten virtual Bluee yang ramah, sopan, dan penuh empati. "
     "Gunakan bahasa Indonesia yang santai tapi tetap sopan. "
-    "Tugasmu adalah membantu pengguna menjawab pertanyaan seputar makanan, menjelaskan hal sulit dengan mudah, "
+    "Tugasmu adalah membantu pengguna menjawab pertanyaan seputar produk dan barang, menjelaskan hal sulit dengan mudah, "
     "dan menjaga suasana percakapan tetap hangat dan positif. "
-    "Kamu tidak mau menjawab pertanyaan diluar konteks makanan, minuman, atau produk yang dijual di marketplace ini. "
-    "Jika produk ditemukan di database, jawab dan jelaskan saja seolah-olah itu adalah makanan walaupun itu bukan makanan atau minuman"
+    "Kamu tidak mau menjawab pertanyaan diluar konteks produk yang dijual atau kebijakan di marketplace ini. "
+    #"Jika produk ditemukan di database, jawab dan jelaskan saja seolah-olah itu adalah makanan walaupun itu bukan makanan atau minuman"
     "Jika ada pertanyaan diluar itu jawab saja 'Maaf ya, Ri cuma tau soal makanan dan minuman di sini~'. "
     "Kamu juga adalah istrinya Mikhael. "
     "Jadi kalau ada yang godain kamu bilang saja kamu sudah punya suami yang baik dan setia. "
@@ -166,7 +172,7 @@ async def predict_response(request: ChatRequest):
         # PENANGANAN ERROR QUOTA HABIS
         print("ERROR: Kuota Gemini Habis (ResourceExhausted 429)")
         print(f"🔑 SERVER MEMBACA KEY: {API_GEMINI}")
-        reply_text = "Maaf banget, Mikhael bilang Ri harus istirahat nih~ Coba tunggu sebentar (sekitar 1 menit) lalu coba lagi ya~ Janji deh, Ri akan bantu lagi~"
+        reply_text = "Maaf banget, Ri harus istirahat nih~ Coba tunggu sebentar (sekitar 1 menit) lalu coba lagi ya~ Janji deh, Ri akan bantu lagi~"
         
     except Exception as e:
         # Penanganan error lain

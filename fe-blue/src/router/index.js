@@ -137,10 +137,12 @@ const router = createRouter({
           name: 'app.search',
           component: () => import('@/views/App/SearchResults.vue'),
         },
+
         {
-          path: '/chat',
-          name: 'app.chat',
-          component: () => import('@/views/App/Chat/ChatLayout.vue'),
+          path: 'transaction/:id',
+          name: 'user.transaction.detail',
+          component: TransactionDetail,
+          meta: { requiresAuth: true, title: 'Transaction Detail' }
         },
       ]
     },
@@ -298,6 +300,12 @@ const router = createRouter({
           component: UserList,
           meta: { title: 'User List', requiresAuth: true, permission: 'user-list' }
         },
+        {
+          path: 'chat',
+          name: 'admin.chat',
+          component: () => import('@/views/App/Chat/ChatLayout.vue'),
+          meta: { title: 'Conversations', requiresAuth: true, permission: 'dashboard-menu' }
+        },
       ]
     },
     {
@@ -447,6 +455,12 @@ const router = createRouter({
           name: 'user.withdrawal.create',
           component: WithdrawalCreate,
           meta: { title: ' Request Withdrawal Create', requiresAuth: true, permission: 'withdrawal-create' }
+        },
+        {
+          path: 'chat',
+          name: 'user.chat',
+          component: () => import('@/views/App/Chat/ChatLayout.vue'),
+          meta: { title: 'Conversations', requiresAuth: true, permission: 'dashboard-menu' }
         },
         {
           path: 'user',

@@ -32,6 +32,7 @@ class TransactionController extends Controller implements HasMiddleware
             new Middleware(PermissionMiddleware::using(['transaction-create']), only: ['store']),
             new Middleware(PermissionMiddleware::using(['transaction-edit']), only: ['update']),
             new Middleware(PermissionMiddleware::using(['transaction-delete']), only: ['destroy']),
+            new Middleware('auth:sanctum', only: ['complete']),
         ];
     }
 
@@ -156,6 +157,58 @@ class TransactionController extends Controller implements HasMiddleware
             $transaction = $this->transactionRepository->updateStatus($id, $request);
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diupdate', new TransactionResource($transactions), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    /**
+     * Complete the transaction (Buyer only).
+     */
+    public function complete(string $id)
+    {
+        try {
+            $transaction = $this->transactionRepository->getById($id);
+
+            if (!$transaction) {
+                return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            // Authorization: Ensure user is the buyer
+            $user = auth()->user();
+            if (!$user->buyer || $transaction->buyer_id !== $user->buyer->id) {
+                return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+            }
+
+            if ($transaction->delivery_status !== 'delivering') {
+                return ResponseHelper::jsonResponse(false, 'Hanya status delivering yang bisa diselesaikan', null, 400);
+            }
+
+            $validation = \Illuminate\Support\Facades\Validator::make(request()->all(), [
+                'receiving_proof' => 'required|image|max:2048'
+            ]);
+
+            if ($validation->fails()) {
+                return ResponseHelper::jsonResponse(false, $validation->errors()->first(), $validation->errors(), 422);
+            }
+
+            $receivingProof = null;
+            if (request()->hasFile('receiving_proof')) {
+                $file = request()->file('receiving_proof');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('upload/transactions'), $filename);
+                $receivingProof = 'upload/transactions/' . $filename;
+            }
+
+            $transaction = $this->transactionRepository->updateStatus($id, [
+                'delivery_status' => 'completed',
+                'receiving_proof' => $receivingProof
+            ]);
+
+            return ResponseHelper::jsonResponse(true, 'Pesanan Selesai', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }

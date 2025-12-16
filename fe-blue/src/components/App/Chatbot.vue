@@ -11,7 +11,7 @@ const chatContainer = ref(null);
 
 // Pesan awal
 const chats = ref([
-    { text: 'Halo! Aku Ri, istri Mikhael~ Ada yang bisa dibantu soal makanan di Calorizz?', isBot: true }
+    { text: 'Halo! Aku Ri, asisten virtual disini~ Ada yang bisa dibantu soal produk di Bluee?', isBot: true }
 ]);
 
 const toggleChat = () => {
@@ -66,7 +66,8 @@ const sendMessage = async () => {
 </script>
 
 <template>
-    <div class="fixed bottom-6 right-6 flex flex-col items-end gap-3 font-sans" style="max-width: 350px;">
+    <div class="fixed bottom-6 right-6 flex flex-col items-end gap-3 font-sans"
+        style="max-width: 350px; max-height: 800px;">
         <transition name="fade">
             <div v-if="isOpen"
                 class="w-[350px] h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">

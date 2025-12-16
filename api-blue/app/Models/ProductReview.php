@@ -10,10 +10,12 @@ class ProductReview extends Model
     use UUID;
 
     protected $fillable = [
-        'transation_id',
+        'transaction_id',
         'product_id',
+        'user_id',
         'rating',
-        'review'
+        'review',
+        'is_anonymous'
     ];
 
     public function transaction()
@@ -21,8 +23,18 @@ class ProductReview extends Model
         return $this->belongsTo(Transaction::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function attachments()
+    {
+        return $this->hasMany(ProductReviewAttachment::class);
     }
 }

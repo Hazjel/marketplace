@@ -45,8 +45,25 @@ class ChatController extends Controller
 
             $contacts = User::whereIn('id', $contactIds)->get();
 
-            // Optional: Attach last message for preview?
-            // For now just return users
+            // Attach unread count and latest message
+            foreach ($contacts as $contact) {
+                $contact->unread_count = Message::where('sender_id', $contact->id)
+                    ->where('receiver_id', $userId)
+                    ->where('is_read', false)
+                    ->count();
+                
+                $contact->last_message = Message::where(function($q) use ($userId, $contact) {
+                    $q->where('sender_id', $userId)->where('receiver_id', $contact->id);
+                })->orWhere(function($q) use ($userId, $contact) {
+                    $q->where('sender_id', $contact->id)->where('receiver_id', $userId);
+                })->latest()->first();
+            }
+            
+            // Sort by latest message
+            $contacts = $contacts->sortByDesc(function($contact) {
+                return $contact->last_message ? $contact->last_message->created_at : $contact->created_at;
+            })->values();
+
             return ResponseHelper::jsonResponse(true, 'Contacts fetched successfully', $contacts, 200);
 
         } catch (\Exception $e) {
@@ -58,6 +75,12 @@ class ChatController extends Controller
     {
         try {
             $userId = Auth::id();
+
+            // Mark as read
+            Message::where('sender_id', $otherUserId)
+                ->where('receiver_id', $userId)
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
 
             $messages = Message::where(function($q) use ($userId, $otherUserId) {
                 $q->where('sender_id', $userId)

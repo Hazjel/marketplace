@@ -191,65 +191,55 @@ watch(
                     </a>
                 </div>
                 <div id="Testimony" class="flex flex-col gap-6">
-                    <p class="font-bold text-lg">Product About</p>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="flex flex-col w-full rounded-[20px] border border-custom-stroke p-5 gap-4">
+                    <p class="font-bold text-lg">Customer Reviews ({{ product?.product_reviews?.length || 0 }})</p>
+                    <div class="grid grid-cols-2 gap-4" v-if="product?.product_reviews?.length > 0">
+                        <div v-for="review in product.product_reviews" :key="review.id" 
+                            class="flex flex-col w-full rounded-[20px] border border-custom-stroke p-5 gap-4">
                             <div class="flex items-center gap-[10px]">
                                 <div class="flex size-16 rounded-full overflow-hidden bg-custom-background">
-                                    <img src="@/assets/images/photos/photo-6.png" class="size-full object-cover"
-                                        alt="photo">
+                                    <img :src="review.user.avatar" class="size-full object-cover"
+                                        alt="photo" @error="$event.target.src = 'https://ui-avatars.com/api/?name=' + review.user.name">
                                 </div>
-                                <div class="flex flex-col items-center gap-[6px]">
-                                    <p class="font-bold text-lg">Bryan Utami</p>
-                                    <p class="font-medium text-custom-grey">3 Days Ago</p>
+                                <div class="flex flex-col gap-[2px]">
+                                    <p class="font-bold text-lg">{{ review.user.name }}</p>
+                                    <p class="font-medium text-custom-grey text-sm">{{ new Date(review.created_at).toLocaleDateString() }}</p>
                                 </div>
                             </div>
-                            <p class="font-semibold">“The MacBook is perfect for work, and the AirPods sound crystal
-                                clear. Plus, the store's service was amazing—fast delivery and great support!”</p>
+                            <p class="font-semibold">“{{ review.review }}”</p>
+                            
+                            <!-- Attachments -->
+                            <div v-if="review.attachments && review.attachments.length > 0" class="flex gap-2 overflow-x-auto pb-2">
+                                <template v-for="att in review.attachments" :key="att.id">
+                                    <div class="shrink-0 rounded-lg overflow-hidden border border-custom-stroke bg-custom-background cursor-pointer"
+                                         style="width: 80px; height: 80px;" 
+                                         @click="activeImage = { image: att.file_path }" v-if="att.file_type === 'image'">
+                                        <img :src="att.file_path" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="shrink-0 rounded-lg overflow-hidden border border-custom-stroke bg-custom-background relative"
+                                         style="width: 80px; height: 80px;"
+                                         v-else>
+                                        <video :src="att.file_path" class="w-full h-full object-cover"></video>
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+                                            <div class="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-1"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
                             <div class="flex items-center gap-0.5">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                            </div>
-                        </div>
-                        <div class="flex flex-col w-full rounded-[20px] border border-custom-stroke p-5 gap-4">
-                            <div class="flex items-center gap-[10px]">
-                                <div class="flex size-16 rounded-full overflow-hidden bg-custom-background">
-                                    <img src="@/assets/images/photos/photo-4.png" class="size-full object-cover"
-                                        alt="photo">
-                                </div>
-                                <div class="flex flex-col items-center gap-[6px]">
-                                    <p class="font-bold text-lg">Kintan Saff</p>
-                                    <p class="font-medium text-custom-grey">1 Days Ago</p>
-                                </div>
-                            </div>
-                            <p class="font-semibold">“The MacBook is perfect for work, and the AirPods sound crystal
-                                clear. Plus, the store's service was amazing—fast delivery and great support!”</p>
-                            <div class="flex items-center gap-0.5">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
-                                <img src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
+                                <template v-for="i in 5" :key="i">
+                                    <img v-if="i <= review.rating" src="@/assets/images/icons/Star-rounded.svg" class="size-[22px] p-0.5" alt="star">
+                                    <img v-else src="@/assets/images/icons/Star-pointy-outline.svg" class="size-[22px] p-0.5 opacity-50" alt="star">
+                                </template>
                             </div>
                         </div>
                     </div>
-                    <div id="Pagination" class="flex items-center gap-6">
-                        <button
-                            class="flex items-center justify-center size-14 rounded-full border border-custom-stroke">
-                            <img src="@/assets/images/icons/arrow-right-black.svg" class="size-6 rotate-180" alt="icon">
-                        </button>
-                        <div class="flex items-center gap-2">
-                            <button class="w-[42px] h-1 rounded-full bg-custom-blue"></button>
-                            <button class="w-[42px] h-1 rounded-full bg-custom-stroke"></button>
-                            <button class="w-[42px] h-1 rounded-full bg-custom-stroke"></button>
-                        </div>
-                        <button
-                            class="flex items-center justify-center size-14 rounded-full border border-custom-stroke">
-                            <img src="@/assets/images/icons/arrow-right-black.svg" class="size-6" alt="icon">
-                        </button>
+                    <div v-else class="flex flex-col items-center justify-center py-8">
+                        <p class="font-medium text-custom-grey">No reviews yet.</p>
+                    </div>
+
+                    <div id="Pagination" class="flex items-center gap-6 hidden">
+                        <!-- Pagination implementation pending requirement -->
                     </div>
                 </div>
             </div>

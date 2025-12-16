@@ -33,7 +33,7 @@ export const useTransactionStore = defineStore("transaction", {
 
         async fetchTransactionById(id) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.get(`transaction/${id}`)
 
@@ -48,7 +48,7 @@ export const useTransactionStore = defineStore("transaction", {
         async createTransaction(payload) {
             this.loading = true
             this.error = null
-            
+
             try {
                 const response = await axiosInstance.post(`transaction`, payload)
 
@@ -64,36 +64,58 @@ export const useTransactionStore = defineStore("transaction", {
             }
         },
 
-            async updateTransaction(payload) {
-                this.loading = true
-                this.error = null
-                try {
-                    const formData = new FormData()
-                    formData.append('_method', 'PUT')
-                    formData.append('delivery_status', payload.delivery_status)
-                    
-                    if (payload.tracking_number) {
-                        formData.append('tracking_number', payload.tracking_number)
-                    }
-                    
-                    if (payload.delivery_proof instanceof File) {
-                        formData.append('delivery_proof', payload.delivery_proof)
-                    }
+        async updateTransaction(payload) {
+            this.loading = true
+            this.error = null
+            try {
+                const formData = new FormData()
+                formData.append('_method', 'PUT')
+                formData.append('delivery_status', payload.delivery_status)
 
-                    const response = await axiosInstance.post(
-                        `transaction/${payload.id}`, 
-                        formData,
-                        { headers: { 'Content-Type': 'multipart/form-data' } }
-                    )
-
-                    this.success = response.data.message
-                    return response.data.data
-                } catch (error) {
-                    this.error = handleError(error)
-                    throw error
-                } finally {
-                    this.loading = false
+                if (payload.tracking_number) {
+                    formData.append('tracking_number', payload.tracking_number)
                 }
+
+                if (payload.delivery_proof instanceof File) {
+                    formData.append('delivery_proof', payload.delivery_proof)
+                }
+
+                const response = await axiosInstance.post(
+                    `transaction/${payload.id}`,
+                    formData,
+                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                )
+
+                this.success = response.data.message
+                return response.data.data
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+                throw error
+            } finally {
+                this.loading = false
             }
+        },
+
+        async completeTransaction(id, payload) {
+            this.loading = true
+            try {
+                const formData = new FormData()
+                if (payload && payload.receiving_proof) {
+                    formData.append('receiving_proof', payload.receiving_proof)
+                }
+
+                const response = await axiosInstance.post(`transaction/${id}/complete`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                })
+                this.success = response.data.message
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+                throw error
+            } finally {
+                this.loading = false
+            }
+        }
     }
 })

@@ -74,7 +74,11 @@ class TransactionRepository implements TransactionRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = Transaction::where('id', $id)->with('transactionDetails.product.productImages');
+        $query = Transaction::where('id', $id)->with([
+            'transactionDetails.product.productImages',
+            'productReviews.user',
+            'productReviews.attachments'
+        ]);
 
         return $query->first();
     }

@@ -7,6 +7,9 @@ import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import StarPointy from '@/assets/images/icons/Star-pointy.svg'
+import StarPointyOutline from '@/assets/images/icons/Star-pointy-outline.svg'
+import { useProductReviewStore } from '@/stores/productReview';
 
 const route = useRoute()
 
@@ -55,6 +58,8 @@ const handleAcceptOrder = () => {
     handleUpdateData()
 }
 
+const fileInput = ref(null)
+
 const handleDeliverySubmit = () => {
     transaction.value.delivery_status = 'delivering'
 
@@ -74,16 +79,125 @@ const closeAlert = () => {
     transactionStore.error = null
 }
 
-// Di bagian <script setup>, tambahkan:
 const getImageUrl = (path) => {
     if (!path) return PlaceHolder
-
     // Ganti dengan base URL Laravel Anda
     const laravelBaseUrl = 'http://localhost:8000' // atau gunakan env variable
     return `${laravelBaseUrl}/storage/${path}`
 }
 
-onMounted(fetchData)
+// Review Logic
+const productReviewStore = useProductReviewStore()
+const showReviewModal = ref(false)
+const submittingReview = ref(false)
+const reviewForm = ref({})
+const isAnonymous = ref(false)
+
+const receivingProofFile = ref(null)
+const receivingProofInput = ref(null)
+
+const initReviewForm = () => {
+    if (transaction.value?.transaction_details) {
+        transaction.value.transaction_details.forEach(detail => {
+            if (!reviewForm.value[detail.product_id]) {
+                reviewForm.value[detail.product_id] = {
+                    rating: 5,
+                    review: '',
+                    attachments: []
+                }
+            }
+        })
+    }
+}
+
+const openReviewModal = () => {
+    showReviewModal.value = true
+    isAnonymous.value = false
+    initReviewForm()
+}
+
+// Helper for stars
+const getStarIcon = (productId, starIndex) => {
+    const rating = reviewForm.value[productId]?.rating || 0
+    return rating >= starIndex ? StarPointy : StarPointyOutline
+}
+
+const createBlobUrl = (file) => {
+    if (!file) return ''
+    return URL.createObjectURL(file)
+}
+
+const handleReviewFileChange = (event, productId) => {
+    const files = Array.from(event.target.files)
+    if (reviewForm.value[productId]) {
+        reviewForm.value[productId].attachments = [...reviewForm.value[productId].attachments, ...files]
+    }
+}
+
+const removeAttachment = (productId, index) => {
+    if (reviewForm.value[productId]) {
+        reviewForm.value[productId].attachments.splice(index, 1)
+    }
+}
+
+const handleSubmitReview = async () => {
+    submittingReview.value = true
+    try {
+        const promises = Object.keys(reviewForm.value)
+            .filter(productId => {
+                const data = reviewForm.value[productId]
+                // Only submit if review text is present (backend requirement)
+                return data.review && data.review.trim() !== ''
+            })
+            .map(productId => {
+                const data = reviewForm.value[productId]
+                return productReviewStore.createReview({
+                    transaction_id: transaction.value.id,
+                    product_id: productId,
+                    rating: data.rating,
+                    review: data.review,
+                    is_anonymous: isAnonymous.value,
+                    attachments: data.attachments || [] 
+                })
+            })
+
+        await Promise.all(promises)
+        showReviewModal.value = false
+        await fetchData()
+    } catch (error) {
+        console.error('Failed to submit reviews', error)
+        // Show specific validation message if available
+        if (error.response && error.response.data && error.response.data.message) {
+             alert('Submission Failed: ' + error.response.data.message)
+        } else {
+             alert('Failed to submit reviews. Please check your input.')
+        }
+    } finally {
+        submittingReview.value = false
+    }
+}
+
+// Buyer Complete Order
+const handleCompleteOrderClick = () => {
+    receivingProofInput.value.click()
+}
+
+const handleReceivingProofChange = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    try {
+        await transactionStore.completeTransaction(transaction.value.id, { receiving_proof: file })
+        await fetchData()
+    } catch (error) {
+        console.error('Failed to complete order', error)
+    }
+}
+
+onMounted(async () => {
+    await fetchData()
+    initReviewForm()
+})
 </script>
 
 <template>
@@ -175,7 +289,7 @@ onMounted(fetchData)
                         </div>
                         <div class="flex flex-col gap-1">
                             <p class="font-bold text-lg leading-none">{{ formatToClientTimeZone(transaction?.created_at)
-                                }}</p>
+                            }}</p>
                             <p class="font-semibold text-custom-grey">Date Transaction</p>
                         </div>
                     </div>
@@ -455,10 +569,10 @@ onMounted(fetchData)
                             <img id="Thumbnail" :src="transaction.delivery_proof_url"
                                 data-default="@/assets/images/icons/gallery-default.svg"
                                 class="size-full object-contain" alt="icon" />
-                            <input type="file" id="File-Input" accept="image/*"
+                            <input type="file" id="File-Input" accept="image/*" ref="fileInput"
                                 class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange" />
                         </div>
-                        <button type="button" id="Add-Photo"
+                        <button type="button" id="Add-Photo" @click="fileInput.click()"
                             class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
                             Add Photo
                         </button>
@@ -522,14 +636,24 @@ onMounted(fetchData)
                         @error="(e) => e.target.src = PlaceHolder">
                 </div>
                 <div class="flex items-center justify-between">
-                    <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
-                        <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6" alt="icon">
-                        Delivery Status
-                    </p>
-                    <p
-                        class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-orange/10 text-custom-orange">
-                        Delivering
-                    </p>
+                    <div class="flex flex-col gap-2">
+                        <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
+                            <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6" alt="icon">
+                            Delivery Status
+                        </p>
+                        <p
+                            class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-orange/10 text-custom-orange w-fit">
+                            Delivering
+                        </p>
+                    </div>
+
+                    <input type="file" ref="receivingProofInput" class="hidden" accept="image/*"
+                        @change="handleReceivingProofChange">
+
+                    <button v-if="user?.role === 'buyer'" @click="handleCompleteOrderClick"
+                        class="flex items-center justify-center h-12 px-6 rounded-full bg-custom-blue text-white font-semibold shadow-lg hover:bg-blue-600 transition-300">
+                        Order Received
+                    </button>
                 </div>
                 <div class="flex items-center justify-between">
                     <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
@@ -593,30 +717,129 @@ onMounted(fetchData)
             </section>
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
                 <p class="font-bold text-xl">Customer Reviews</p>
-                <div class="flex flex-col rounded-2xl border border-custom-stroke p-4 gap-4">
-                    <div class="flex items-center justify-between">
-                        <p class="font-bold tracking-tight text-xl leading-none">
-                            <span class="text-[32px]">4.0</span>/5.0
-                        </p>
-                        <div class="flex">
-                            <img src="@/assets/images/icons/Star-pointy.svg" class="flex size-8 shrink-0 p-0.5"
-                                alt="star">
-                            <img src="@/assets/images/icons/Star-pointy.svg" class="flex size-8 shrink-0 p-0.5"
-                                alt="star">
-                            <img src="@/assets/images/icons/Star-pointy.svg" class="flex size-8 shrink-0 p-0.5"
-                                alt="star">
-                            <img src="@/assets/images/icons/Star-pointy.svg" class="flex size-8 shrink-0 p-0.5"
-                                alt="star">
-                            <img src="@/assets/images/icons/Star-pointy-outline.svg" class="flex size-8 shrink-0 p-0.5"
-                                alt="star">
+
+                <div v-if="transaction?.transaction_details?.some(d => d.product?.product_reviews?.length > 0)"
+                    class="flex flex-col gap-4">
+                    <div v-for="detail in transaction.transaction_details" :key="detail.id">
+                        <div v-for="review in detail.product?.product_reviews" :key="review.id"
+                            class="flex flex-col rounded-2xl border border-custom-stroke p-4 gap-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col">
+                                    <p class="font-bold text-lg">{{ detail.product.name }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-bold tracking-tight text-xl leading-none">
+                                            <span class="text-[32px]">{{ review.rating }}.0</span>/5.0
+                                        </p>
+                                        <div class="flex">
+                                            <template v-for="i in 5" :key="i">
+                                                <img v-if="i <= review.rating"
+                                                    src="@/assets/images/icons/Star-pointy.svg"
+                                                    class="flex size-8 shrink-0 p-0.5" alt="star">
+                                                <img v-else src="@/assets/images/icons/Star-pointy-outline.svg"
+                                                    class="flex size-8 shrink-0 p-0.5" alt="star">
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="border-custom-stroke">
+                            <p class="font-medium text-lg text-custom-grey">“{{ review.review }}”</p>
                         </div>
                     </div>
-                    <hr class="border-custom-stroke">
-                    <p class="font-medium text-lg text-custom-grey">“The iPhone is super fast, the MacBook
-                        is perfect for work, and the AirPods sound crystal clear. Plus, the store's service
-                        was amazing—fast delivery and great support!”</p>
+                </div>
+
+                <div v-else class="flex flex-col items-center justify-center py-8 gap-4">
+                    <p class="font-medium text-custom-grey"
+                        v-if="user?.role === 'buyer' && transaction?.delivery_status === 'completed'">
+                        You haven't reviewed this order yet.
+                    </p>
+                    <p class="font-medium text-custom-grey" v-else>
+                        No reviews yet.
+                    </p>
+
+                    <button v-if="user?.role === 'buyer' && transaction?.delivery_status === 'completed'"
+                        @click="openReviewModal"
+                        class="flex items-center justify-center h-12 px-6 rounded-full bg-custom-blue text-white font-semibold">
+                        Write a Review
+                    </button>
                 </div>
             </section>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div v-if="showReviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="bg-white rounded-[20px] p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col gap-6">
+            <div class="flex items-center justify-between">
+                <p class="font-bold text-2xl">Write a Review</p>
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" v-model="isAnonymous" class="w-5 h-5 rounded border-custom-stroke text-custom-blue focus:ring-custom-blue">
+                        <span class="font-medium text-custom-grey">Hide my name</span>
+                    </label>
+                    <button @click="showReviewModal = false">
+                        <img src="@/assets/images/icons/close-circle-black.svg" class="size-8" alt="close">
+                    </button>
+                </div>
+            </div>
+
+            <form @submit.prevent="handleSubmitReview" class="flex flex-col gap-6">
+                <div v-for="(detail, index) in transaction.transaction_details" :key="detail.id"
+                    class="flex flex-col gap-4">
+                    <div class="flex items-center gap-4 bg-custom-background p-3 rounded-xl">
+                        <img :src="detail.product?.product_images?.find(i => i.is_thumbnail)?.image || PlaceHolder"
+                            class="size-16 object-cover rounded-lg">
+                        <p class="font-bold text-lg">{{ detail.product.name }}</p>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <p class="font-semibold">Rating</p>
+                        <div class="flex gap-2">
+                            <button type="button" v-for="star in 5" :key="star"
+                                @click="reviewForm[detail.product_id].rating = star">
+                                <img :src="getStarIcon(detail.product_id, star)" class="size-8 cursor-pointer">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <p class="font-semibold">Review</p>
+                        <textarea v-model="reviewForm[detail.product_id].review"
+                            class="w-full rounded-xl border border-custom-stroke p-4 focus:outline-none focus:border-custom-blue"
+                            rows="3" placeholder="How was the product?"></textarea>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <p class="font-semibold">Add Photos/Videos</p>
+                        <div class="flex flex-wrap gap-2">
+                             <div v-for="(file, fIndex) in reviewForm[detail.product_id]?.attachments || []" :key="fIndex" 
+                                class="relative rounded-lg overflow-hidden border border-custom-stroke bg-custom-background shrink-0"
+                                style="width: 80px; height: 80px;">
+                                <img v-if="file.type.startsWith('image/')" :src="createBlobUrl(file)" class="w-full h-full object-cover">
+                                <video v-else :src="createBlobUrl(file)" class="w-full h-full object-cover"></video>
+                                <button type="button" @click="removeAttachment(detail.product_id, fIndex)" 
+                                    class="absolute top-1 right-1 bg-white/80 rounded-full p-0.5 hover:bg-white">
+                                    <img src="@/assets/images/icons/close-circle-black.svg" class="size-4">
+                                </button>
+                             </div>
+                             
+                             <label class="flex flex-col items-center justify-center rounded-lg border border-dashed border-custom-stroke cursor-pointer hover:border-custom-blue hover:bg-custom-blue/5 transition-all shrink-0"
+                                style="width: 80px; height: 80px;">
+                                <input type="file" class="hidden" accept="image/*,video/*" multiple @change="(e) => handleReviewFileChange(e, detail.product_id)">
+                                <span class="text-2xl text-custom-grey">+</span>
+                             </label>
+                        </div>
+                    </div>
+
+                    <hr class="border-custom-stroke" v-if="index < transaction.transaction_details.length - 1">
+                </div>
+
+                <button type="submit"
+                    class="h-14 w-full rounded-full bg-custom-blue text-white font-bold text-lg hover:shadow-lg transition-all"
+                    :disabled="submittingReview">
+                    {{ submittingReview ? 'Submitting...' : 'Submit Reviews' }}
+                </button>
+            </form>
         </div>
     </div>
 </template>

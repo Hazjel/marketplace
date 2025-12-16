@@ -166,6 +166,21 @@ const emptyStateText = computed(() => {
 
 const debounceFetchData = debounce(fetchData, 2000)
 
+const getTransactionStatusClass = (status) => {
+    switch (status) {
+        case 'pending':
+            return 'bg-custom-yellow text-[#544607]'
+        case 'processing':
+            return 'bg-custom-blue/10 text-custom-blue'
+        case 'delivering':
+            return 'bg-custom-orange/10 text-custom-orange'
+        case 'completed':
+            return 'bg-custom-green/10 text-custom-green'
+        default:
+            return 'bg-custom-grey/10 text-custom-grey'
+    }
+}
+
 const closeAlert = () => {
     transactionStore.success = null
     transactionStore.error = null
@@ -232,8 +247,8 @@ watch(filters, () => {
                                     alt="icon">
                                 {{ formatToClientTimeZone(transaction.created_at) }}
                             </p>
-                            <p
-                                class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-yellow text-[#544607]">
+                            <p class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase"
+                                :class="getTransactionStatusClass(transaction.delivery_status)">
                                 {{ transaction.delivery_status }}
                             </p>
                         </div>
