@@ -16,18 +16,6 @@ const { contacts } = storeToRefs(chatStore);
 const { fetchContacts, setActiveUser, fetchUserById } = chatStore;
 const route = useRoute();
 
-// Function to setup listener
-const setupEchoListener = (userId) => {
-    if (!userId) return;
-
-    console.log(`Listening on chat.${userId}`);
-    echo.private(`chat.${userId}`)
-        .listen('MessageSent', (e) => {
-            console.log('Message received:', e.message);
-            chatStore.pushMessage(e.message);
-        });
-};
-
 const handleInitialParams = async () => {
     const targetUserId = route.query.userId;
     if (targetUserId) {
@@ -47,33 +35,37 @@ const handleInitialParams = async () => {
 
 onMounted(async () => {
     if (user.value) {
-        setupEchoListener(user.value.id);
-
-        // Wait for contacts to be fetched first? Or parallel?
-        // Let's ensure we fetch contacts first
         await fetchContacts();
         await handleInitialParams();
     }
+
+    // Add ESC key listener
+    window.addEventListener('keydown', handleEscKey);
 });
 
 // Watch for user changes (e.g. late login)
 watch(user, (newUser) => {
-    if (newUser) {
-        setupEchoListener(newUser.id);
-    }
+    // No local listener setup needed, Sidebar handles global listener
 });
+
+const handleEscKey = (e) => {
+    if (e.key === 'Escape') {
+        setActiveUser(null);
+    }
+};
 
 onUnmounted(() => {
     if (user.value) {
         echo.leave(`chat.${user.value.id}`);
     }
+    window.removeEventListener('keydown', handleEscKey);
 });
 </script>
 
 <template>
-    <div class="w-full max-w-[1280px] mx-auto px-[52px] my-8">
+    <div class="flex flex-1 h-full w-full">
         <div
-            class="flex h-[calc(100vh-180px)] w-full border border-custom-stroke rounded-3xl overflow-hidden shadow-lg shadow-[#00000005]">
+            class="flex flex-1 w-full border border-custom-stroke rounded-3xl overflow-hidden shadow-sm bg-white">
             <ChatSidebar />
             <ChatRoom />
         </div>

@@ -58,6 +58,10 @@ watch(route, () => {
             <p class="font-medium group-[&.active]:text-custom-blue transition-300 w-full">
                 {{ item.label }}
             </p>
+            <div v-if="item.badge"
+                class="text-white text-[10px] font-bold px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full ml-auto mr-2" style="background-color: red;">
+                {{ item.badge > 99 ? '99+' : item.badge }}
+            </div>
             <div class="w-2 h-9 shrink-0 rounded-l-xl bg-custom-blue hidden group-[&.active]:flex transition-300">
             </div>
         </RouterLink>

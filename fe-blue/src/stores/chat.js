@@ -13,6 +13,12 @@ export const useChatStore = defineStore("chat", {
         error: null,
     }),
 
+    getters: {
+        totalUnreadCount: (state) => {
+            return state.contacts.reduce((total, contact) => total + (contact.unread_count || 0), 0);
+        }
+    },
+
     actions: {
         async fetchContacts() {
             this.loadingContacts = true;
@@ -32,6 +38,12 @@ export const useChatStore = defineStore("chat", {
             try {
                 const response = await axiosInstance.get(`/chat/${userId}`);
                 this.messages = response.data.data;
+
+                // Reset unread count for this user locally
+                const contact = this.contacts.find(c => c.id === userId);
+                if (contact) {
+                    contact.unread_count = 0;
+                }
             } catch (error) {
                 this.error = handleError(error);
             } finally {
@@ -63,7 +75,14 @@ export const useChatStore = defineStore("chat", {
                     this.messages.push(message);
                 }
             } else {
-                // TODO: Update unread count or move contact to top
+                // Update unread count for the sender
+                const contact = this.contacts.find(c => c.id === message.sender_id);
+                if (contact) {
+                    contact.unread_count = (contact.unread_count || 0) + 1;
+                } else {
+                    // Fetch contacts again if new user?
+                    this.fetchContacts();
+                }
                 console.log('New message from other user', message);
             }
         },
@@ -80,6 +99,30 @@ export const useChatStore = defineStore("chat", {
                 console.error("Failed to fetch user info", error);
                 return null;
             }
+        },
+
+        initializeChatListener(userId) {
+            console.log(`Initializing global chat listener for ${userId}`);
+            // Importing echo here or using global echo from plugins
+            // Since we can't easily import 'echo' inside actions if not at top, assumes echo is available or imported.
+            // We imported `axiosInstance` at top, we need to import `echo` at top of file.
+
+            // Check if already listening to avoid duplicates? Echo handles this usually.
+            // But good to track if initialized.
+
+            import('@/plugins/echo').then(({ default: echo }) => {
+                echo.private(`chat.${userId}`)
+                    .listen('MessageSent', (e) => {
+                        console.log('Global Message received:', e.message);
+                        this.pushMessage(e.message);
+                    });
+            });
+        },
+
+        cleanupChatListener(userId) {
+            import('@/plugins/echo').then(({ default: echo }) => {
+                echo.leave(`chat.${userId}`);
+            });
         }
     }
 });

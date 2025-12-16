@@ -76,6 +76,7 @@ class AuthRepository implements AuthRepositoryInterface
 
             $user = Auth::user();
             $user->token = $user->createToken('auth_token')->plainTextToken;
+            $user->permissions = $user->roles->flatMap->permissions->pluck('name');
 
             DB::commit();
 

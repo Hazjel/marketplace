@@ -64,9 +64,11 @@ Route::middleware('auth:sanctum')->group(function(){
     // Transaction routes - custom routes BEFORE resource
     Route::get('transaction/all/paginated', [TransactionController::class, 'getAllPaginated']);
     Route::get('transaction/code/{code}', [TransactionController::class, 'showByCode']);
+    Route::post('transaction/{id}/complete', [TransactionController::class, 'complete']);
     Route::apiResource('transaction', TransactionController::class);
 
     // Product Review
+    Route::get('product-review/all/paginated', [ProductReviewController::class, 'getAllPaginated']);
     Route::post('product-review', [ProductReviewController::class, 'store']);
 
     // Wishlist

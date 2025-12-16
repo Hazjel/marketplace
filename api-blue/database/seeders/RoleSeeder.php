@@ -68,6 +68,7 @@ class RoleSeeder extends Seeder
             'withdrawal-delete',
 
             'product-category-list',
+            'product-category-create',
 
             'product-menu',
             'product-list',

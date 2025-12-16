@@ -15,9 +15,27 @@ class ProductReviewResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'transaction' => new TransactionResource($this->transaction),
+            'user' => [
+                'name' => $this->is_anonymous 
+                    ? substr($this->user->name ?? $this->transaction->buyer?->user?->name ?? 'Unknown', 0, 1) . '***' . substr($this->user->name ?? $this->transaction->buyer?->user?->name ?? 'Unknown', -1) 
+                    : ($this->user->name ?? $this->transaction->buyer?->user?->name ?? 'Unknown'),
+                'avatar' => $this->is_anonymous 
+                    ? 'default-avatar-url' 
+                    : ($this->user->profile_picture ?? $this->transaction->buyer?->user?->profile_picture ?? null)
+            ],
             'rating' => $this->rating,
-            'review' => $this->review
+            'review' => $this->review,
+            'is_anonymous' => (bool)$this->is_anonymous,
+            'attachments' => $this->attachments->map(function($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'file_path' => asset($attachment->file_path),
+                    'file_type' => $attachment->file_type
+                ];
+            }),
+            'created_at' => $this->created_at
         ];
     }
 }

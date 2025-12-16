@@ -1,7 +1,8 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
+import { useChatStore } from '@/stores/chat'
 import SidebarItem from '@/components/admin/sidebar/SidebarItem.vue'
 import HomeBlackIcon from '@/assets/images/icons/home-black.svg'
 import HomeBlueFillIcon from '@/assets/images/icons/home-blue-fill.svg'
@@ -22,7 +23,24 @@ import GlobalSearchIcon from '@/assets/images/icons/global-search-grey.svg'
 import router from '@/router'
 
 const authStore = useAuthStore()
+const chatStore = useChatStore()
 const { user } = storeToRefs(authStore)
+const { totalUnreadCount } = storeToRefs(chatStore)
+
+onMounted(() => {
+    if (user.value) {
+        chatStore.fetchContacts()
+        chatStore.initializeChatListener(user.value.id)
+    }
+})
+
+// Ensure we listen if user logs in later or refreshes logic
+watch(user, (newUser) => {
+    if (newUser) {
+        chatStore.fetchContacts()
+        chatStore.initializeChatListener(newUser.id)
+    }
+})
 
 const prefix = computed(() => {
     if (user.value?.role === 'admin') return '/admin'
@@ -149,13 +167,14 @@ const marketplaceLink = {
     permission: 'dashboard-menu'
 }
 
-const chatLink = {
+const chatLink = computed(() => ({
     label: 'Messages',
-    path: '/chat',
+    path: `${prefix.value}/chat`,
     iconDefault: StickyNoteGreyIcon,
     iconActive: StickyNoteBlueFillIcon,
-    permission: 'dashboard-menu'
-}
+    permission: 'dashboard-menu',
+    badge: totalUnreadCount.value
+}))
 
 </script>
 
