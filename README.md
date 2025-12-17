@@ -40,6 +40,12 @@
 *   **Styling**: TailwindCSS
 *   **HTTP Client**: Axios
 
+### AI Service (`ai-service`)
+*   **Language**: Python 3.x
+*   **Framework**: FastAPI
+*   **AI Model**: Google Gemini (via `google-generativeai`)
+*   **Database Client**: MySQL Connector
+
 ---
 
 ## 🚀 Installation & Setup
