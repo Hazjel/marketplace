@@ -61,8 +61,6 @@ const handleAddressInput = debounce(async (search) => {
 
         const data = await response.json();
         
-        console.log('Address search response:', data); // ✅ Debug
-        
         if (data.data) {
             addressOptions.value = data.data;
             showAddressOptions.value = true;
@@ -76,9 +74,7 @@ const handleAddressInput = debounce(async (search) => {
     }
 }, 500);
 
-const handleAddressSelect = (selected) => {
-    console.log('Selected address:', selected);
-    store.value.address_id = selected.id;
+const handleAddressSelect = (selected) => {    store.value.address_id = selected.id;
     store.value.city = selected.city_name;
     store.value.address = selected.label;
     store.value.postal_code = selected.zip_code;

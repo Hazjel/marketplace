@@ -54,6 +54,11 @@ const router = createRouter({
           path: 'register',
           name: 'auth.register',
           component: Register
+        },
+        {
+          path: 'google/callback',
+          name: 'auth.google.callback',
+          component: () => import('@/views/auth/AuthCallback.vue')
         }
       ]
     },

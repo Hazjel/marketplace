@@ -16,14 +16,15 @@ class ProductReviewResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'transaction' => new TransactionResource($this->transaction),
+            'product_id' => $this->product_id,
+            'transaction' => $this->transaction ? new TransactionResource($this->transaction) : null,
             'user' => [
                 'name' => $this->is_anonymous 
-                    ? substr($this->user->name ?? $this->transaction->buyer?->user?->name ?? 'Unknown', 0, 1) . '***' . substr($this->user->name ?? $this->transaction->buyer?->user?->name ?? 'Unknown', -1) 
-                    : ($this->user->name ?? $this->transaction->buyer?->user?->name ?? 'Unknown'),
+                    ? substr($this->user?->name ?? $this->transaction?->buyer?->user?->name ?? 'Unknown', 0, 1) . '***' . substr($this->user?->name ?? $this->transaction?->buyer?->user?->name ?? 'Unknown', -1) 
+                    : ($this->user?->name ?? $this->transaction?->buyer?->user?->name ?? 'Unknown'),
                 'avatar' => $this->is_anonymous 
                     ? 'default-avatar-url' 
-                    : ($this->user->profile_picture ?? $this->transaction->buyer?->user?->profile_picture ?? null)
+                    : ($this->user?->profile_picture ?? $this->transaction?->buyer?->user?->profile_picture ?? null)
             ],
             'rating' => $this->rating,
             'review' => $this->review,

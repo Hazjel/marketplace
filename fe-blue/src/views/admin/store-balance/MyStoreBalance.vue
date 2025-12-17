@@ -75,7 +75,6 @@ const fetchStoreBalance = async () => {
     storeBalance.value = response
 
     await fetchWithdrawalsPaginated(serverOptions.value)
-    console.log('withdrawals fetched', withdrawals.value)
 }
 
 onMounted(fetchStoreBalance)

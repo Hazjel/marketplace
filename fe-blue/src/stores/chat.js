@@ -83,7 +83,6 @@ export const useChatStore = defineStore("chat", {
                     // Fetch contacts again if new user?
                     this.fetchContacts();
                 }
-                console.log('New message from other user', message);
             }
         },
 
@@ -102,7 +101,6 @@ export const useChatStore = defineStore("chat", {
         },
 
         initializeChatListener(userId) {
-            console.log(`Initializing global chat listener for ${userId}`);
             // Importing echo here or using global echo from plugins
             // Since we can't easily import 'echo' inside actions if not at top, assumes echo is available or imported.
             // We imported `axiosInstance` at top, we need to import `echo` at top of file.
@@ -113,7 +111,6 @@ export const useChatStore = defineStore("chat", {
             import('@/plugins/echo').then(({ default: echo }) => {
                 echo.private(`chat.${userId}`)
                     .listen('MessageSent', (e) => {
-                        console.log('Global Message received:', e.message);
                         this.pushMessage(e.message);
                     });
             });

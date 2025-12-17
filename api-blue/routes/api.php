@@ -96,6 +96,10 @@ Route::get('store/username/{store}', [StoreController::class, 'showByUsername'])
 // Auth routes
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::middleware(['web'])->group(function () {
+    Route::get('auth/google/redirect', [\App\Http\Controllers\GoogleAuthController::class, 'redirect']);
+    Route::get('auth/google/callback', [\App\Http\Controllers\GoogleAuthController::class, 'callback']);
+});
 
 // Midtrans callback
 Route::post('/midtrans-callback', [MidtransController::class, 'callback']);
