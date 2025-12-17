@@ -18,9 +18,12 @@ const productStore = useProductStore();
 const { products, loading: loadingProducts } = storeToRefs(productStore);
 const { fetchProducts } = productStore;
 
+import { useAuthStore } from '@/stores/auth';
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+
 const fetchStore = async () => {
     const response = await fetchStoreByUsername(route.params.username)
-
     store.value = response
 }
 
@@ -101,7 +104,13 @@ onMounted(async () => {
                         <span class="font-bold text-white">Follow Store</span>
                         <img src="@/assets/images/icons/shop-add-white.svg" class="flex size-6 shrink-0" alt="icon">
                     </button>
-                    <RouterLink :to="{ name: 'app.chat', query: { userId: store?.user?.id } }"
+                    <RouterLink v-if="user"
+                        :to="{ name: 'user.chat', params: { username: user.username }, query: { userId: store?.user?.id } }"
+                        class="flex items-center justify-center h-16 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue/10">
+                        <img src="@/assets/images/icons/messages-blue.svg" class="flex size-6 shrink-0" alt="icon">
+                        <span class="font-bold text-custom-blue">Message</span>
+                    </RouterLink>
+                    <RouterLink v-else :to="{ name: 'auth.login' }"
                         class="flex items-center justify-center h-16 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue/10">
                         <img src="@/assets/images/icons/messages-blue.svg" class="flex size-6 shrink-0" alt="icon">
                         <span class="font-bold text-custom-blue">Message</span>

@@ -58,6 +58,8 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'phone_number' => 'nullable|string|max:20', // Added phone validation
+            'profile_picture' => 'nullable|image|max:2048', // Max 2MB
             'password' => 'nullable|min:8|string',
             'current_password' => 'required_with:password|current_password'
         ]);

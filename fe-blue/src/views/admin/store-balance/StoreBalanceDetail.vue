@@ -24,7 +24,6 @@ const fetchData = async () => {
     const response = await fetchStoreBalanceById(route.params.id)
 
     storeBalance.value = response
-    console.log('Store balance histories:', histories.value)
 }
 
 const closeAlert = () => {

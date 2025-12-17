@@ -215,7 +215,6 @@ onMounted(async () => {
     // Load Midtrans script
     try {
         await loadMidtransScript();
-        console.log('Midtrans ready');
     } catch (error) {
         console.error('Midtrans load error:', error);
         alert('Failed to load payment system. Please refresh the page.');

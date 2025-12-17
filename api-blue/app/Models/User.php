@@ -19,6 +19,10 @@ class User extends Authenticatable
     public function getProfilePictureAttribute($value)
     {
         if ($value) {
+            // Check if it is an external URL (Google, etc.)
+            if (str_starts_with($value, 'http')) {
+                return $value;
+            }
             return asset('storage/' . $value);
         }
         return null;

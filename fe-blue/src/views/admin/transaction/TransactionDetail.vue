@@ -145,9 +145,8 @@ const handleSubmitReview = async () => {
     try {
         const promises = Object.keys(reviewForm.value)
             .filter(productId => {
-                const data = reviewForm.value[productId]
-                // Only submit if review text is present (backend requirement)
-                return data.review && data.review.trim() !== ''
+                // Submit review for all products in the form
+                return true
             })
             .map(productId => {
                 const data = reviewForm.value[productId]
@@ -192,6 +191,10 @@ const handleReceivingProofChange = async (event) => {
     } catch (error) {
         console.error('Failed to complete order', error)
     }
+}
+
+const getReviewsForProduct = (productId) => {
+    return transaction.value?.product_reviews?.filter(r => r.product_id === productId) || []
 }
 
 onMounted(async () => {
@@ -718,10 +721,10 @@ onMounted(async () => {
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
                 <p class="font-bold text-xl">Customer Reviews</p>
 
-                <div v-if="transaction?.transaction_details?.some(d => d.product?.product_reviews?.length > 0)"
+                <div v-if="transaction?.product_reviews?.length > 0"
                     class="flex flex-col gap-4">
                     <div v-for="detail in transaction.transaction_details" :key="detail.id">
-                        <div v-for="review in detail.product?.product_reviews" :key="review.id"
+                        <div v-for="review in getReviewsForProduct(detail.product_id)" :key="review.id"
                             class="flex flex-col rounded-2xl border border-custom-stroke p-4 gap-4">
                             <div class="flex items-center justify-between">
                                 <div class="flex flex-col">

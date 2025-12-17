@@ -58,6 +58,8 @@ onMounted(() => {
         rememberMe.value = true;
     }
 });
+
+const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/$/, '')
 </script>
 
 <template>
@@ -125,10 +127,20 @@ onMounted(() => {
             </div>
         </div>
         <div class="flex flex-col gap-3">
-            <button type="submit"
-                class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-[10px] bg-custom-blue font-semibold capitalize text-white">
-                Sign In
-            </button>
+            <div class="flex flex-col gap-3">
+                <a :href="`${apiUrl}/auth/google/redirect`"
+                    class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-[10px] border border-custom-stroke bg-white hover:bg-gray-50 transition-300">
+                    <img src="@/assets/images/icons/google.svg" class="size-6" alt="google"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <!-- Fallback if icon missing -->
+                    <span style="display:none" class="font-bold text-lg">G</span>
+                    <span class="font-semibold text-custom-black">Sign in with Google</span>
+                </a>
+                <button type="submit"
+                    class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-[10px] bg-custom-blue font-semibold capitalize text-white">
+                    Sign In
+                </button>
+            </div>
             <p class="font-medium text-custom-grey text-center">
                 Don't have account?
                 <RouterLink :to="{ name: 'auth.register' }"

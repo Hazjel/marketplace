@@ -3,7 +3,7 @@ import { computed, ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { axiosInstance as axios } from '@/plugins/axios';
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -14,8 +14,13 @@ const isLoading = ref(false)
 const errors = ref({})
 const successMessage = ref(null)
 
+const fileInput = ref(null)
+const previewImage = ref(null)
+const selectedFile = ref(null)
+
 const form = ref({
     name: '',
+    phone_number: '',
     current_password: '',
     password: '',
     password_confirmation: ''
@@ -24,8 +29,26 @@ const form = ref({
 onMounted(() => {
     if (user.value) {
         form.value.name = user.value.name
+        // Populate phone number based on role
+        if (user.value.role === 'buyer' && user.value.buyer) {
+            form.value.phone_number = user.value.buyer.phone_number
+        } else if (user.value.role === 'store' && user.value.store) {
+            form.value.phone_number = user.value.store.phone
+        }
     }
 })
+
+const triggerFileInput = () => {
+    fileInput.value.click()
+}
+
+const handleFileChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        selectedFile.value = file
+        previewImage.value = URL.createObjectURL(file)
+    }
+}
 
 const handleSubmit = async () => {
     isLoading.value = true
@@ -33,7 +56,34 @@ const handleSubmit = async () => {
     successMessage.value = null
 
     try {
-        const response = await axios.put('/profile', form.value)
+        const formData = new FormData()
+        formData.append('_method', 'PUT') // Method spoofing for Laravel
+        formData.append('name', form.value.name)
+        
+        if (form.value.phone_number) {
+            formData.append('phone_number', form.value.phone_number)
+        }
+
+        if (selectedFile.value) {
+            formData.append('profile_picture', selectedFile.value)
+        }
+
+        if (form.value.current_password) {
+            formData.append('current_password', form.value.current_password)
+        }
+
+        if (form.value.password) {
+            formData.append('password', form.value.password)
+            formData.append('password_confirmation', form.value.password_confirmation)
+        }
+
+        // Use POST with _method: PUT for file upload support
+        const response = await axios.post('/profile', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+
         successMessage.value = 'Profile updated successfully'
 
         // Refresh auth user data
@@ -43,6 +93,12 @@ const handleSubmit = async () => {
         form.value.current_password = ''
         form.value.password = ''
         form.value.password_confirmation = ''
+
+        // Clear file selection
+        selectedFile.value = null
+        // keep previewImage as it is now the current user image, or reset it? 
+        // Better to reset preview and show default user image from store (which is updated)
+        previewImage.value = null
 
     } catch (error) {
         if (error.response?.status === 422) {
@@ -63,12 +119,24 @@ const handleSubmit = async () => {
     <div class="flex flex-col gap-8 w-full">
         <div class="flex flex-col w-full bg-white rounded-3xl p-6 gap-8">
             <div class="flex items-center gap-6">
-                <div class="flex size-[100px] shrink-0 rounded-full bg-custom-background overflow-hidden">
-                    <img :src="user?.profile_picture" class="size-full object-cover" alt="profile picture">
+                <div @click="triggerFileInput"
+                    class="group relative flex size-[100px] shrink-0 rounded-full bg-custom-background overflow-hidden cursor-pointer">
+                    <img :src="previewImage || user?.profile_picture"
+                        class="size-full object-cover transition-opacity duration-300 group-hover:opacity-75"
+                        alt="profile picture">
+
+                    <!-- Hover Overlay -->
+                    <div
+                        class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30">
+                        <img src="@/assets/images/icons/camera-white.svg" class="size-8" alt="change">
+                    </div>
                 </div>
+
+                <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*" class="hidden">
+
                 <div class="flex flex-col gap-2">
                     <p class="font-bold text-xl text-custom-black capitalize">{{ user?.role }}</p>
-                    <p class="text-custom-grey">Profile picture cannot be changed yet.</p>
+                    <p class="text-custom-grey">Click image to change profile picture.</p>
                 </div>
             </div>
 
@@ -98,6 +166,24 @@ const handleSubmit = async () => {
                                 placeholder="">
                         </label>
                         <span class="input-error" v-if="errors.name">{{ errors.name[0] }}</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <p class="font-semibold text-custom-grey">Phone Number</p>
+                    <div class="group/errorState flex flex-col gap-2" :class="{ 'invalid': errors?.phone_number }">
+                        <label class="group relative">
+                            <div class="input-icon">
+                                <img src="@/assets/images/icons/call-grey.svg" class="flex size-6 shrink-0"
+                                    alt="icon">
+                            </div>
+                            <p class="input-placeholder">
+                                Enter your phone number
+                            </p>
+                            <input type="tel" v-model="form.phone_number" autocomplete="tel" class="custom-input"
+                                placeholder="">
+                        </label>
+                        <span class="input-error" v-if="errors.phone_number">{{ errors.phone_number[0] }}</span>
                     </div>
                 </div>
 

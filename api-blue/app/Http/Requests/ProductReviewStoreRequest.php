@@ -17,7 +17,7 @@ class ProductReviewStoreRequest extends FormRequest
             'transaction_id' => 'required|string|exists:transactions,id',
             'product_id' => 'required|string|exists:products,id',
             'rating' => 'required|integer|min:1|max:5',
-            'review' => 'required|string',
+            'review' => 'nullable|string',
             'is_anonymous' => 'nullable|boolean',
             'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,mov|max:10240'
         ];

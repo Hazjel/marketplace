@@ -57,3 +57,63 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Installation & Setup for Developers
+
+If you are cloning this repository for the first time, follow these steps to set up the environment:
+
+### 1. Backend Setup
+1.  Navigate to the `api-blue` directory:
+    ```bash
+    cd api-blue
+    ```
+2.  Install dependencies:
+    ```bash
+    composer install
+    ```
+3.  **Generate Environment File**:
+    Copy the example environment file to create your local configuration.
+    ```bash
+    cp .env.example .env
+    ```
+4.  **Generate App Key**:
+    ```bash
+    php artisan key:generate
+    ```
+5.  **Configure Database**:
+    Open `.env` and update the database credentials (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
+6.  **Configure Google Auth**:
+    Open `.env` and fill in the Google OAuth credentials. You can get these from the Google Cloud Console.
+    ```ini
+    GOOGLE_CLIENT_ID=your_client_id
+    GOOGLE_CLIENT_SECRET=your_client_secret
+    GOOGLE_REDIRECT_URL=http://localhost:8000/api/auth/google/callback
+    FRONTEND_URL=http://localhost:5173
+    ```
+7.  Run Migrations:
+    ```bash
+    php artisan migrate
+    ```
+8.  Serve Application:
+    ```bash
+    php artisan serve
+    ```
+
+### 2. Frontend Setup
+1.  Navigate to the `fe-blue` directory:
+    ```bash
+    cd fe-blue
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Configure Environment:
+    Create `.env` based on `.env.example` (if available) or ensure `VITE_API_BASE_URL` points to your backend.
+    ```ini
+    VITE_API_BASE_URL=http://localhost:8000/api
+    ```
+4.  Run Development Server:
+    ```bash
+    npm run dev
+    ```
