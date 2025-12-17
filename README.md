@@ -18,6 +18,7 @@
     *   **Wallet System**: Track earnings and request withdrawals.
 *   **Real-Time Interaction**:
     *   **Live Chat**: Direct messaging between Buyers and Sellers using WebSockets.
+    *   **Smart AI Assistant (Ri)**: Intelligent chatbot powered by Google Gemini to assist users with product recommendations.
     *   Notifications.
 *   **Trust & Verification**:
     *   Product Reviews with Image Uploads.
