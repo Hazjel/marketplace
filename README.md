@@ -115,9 +115,45 @@ cp .env.example .env
 # Or manually create .env with:
 # VITE_API_BASE_URL=http://localhost:8000/api
 
-# Start Development Server
-npm run dev
-```
+#### 4. AI Chatbot Setup (`ai-service`)
+The platform includes an intelligent chatbot powered by **Google Gemini AI**.
+
+1.  Navigate to the `ai-service` directory:
+    ```bash
+    cd ai-service
+    ```
+2.  **Create Virtual Environment**:
+    To avoid path issues (like `pyvenv.cfg` errors), always create a local virtual environment:
+    ```bash
+    python -m venv venv
+    ```
+3.  **Activate Virtual Environment**:
+    *   **Windows**:
+        ```bash
+        .\venv\Scripts\activate
+        ```
+    *   **Mac/Linux**:
+        ```bash
+        source venv/bin/activate
+        ```
+4.  **Install Dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+5.  **Configure Environment**:
+    Create a `.env` file in `ai-service/`:
+    ```ini
+    GEMINI_API_KEY=your_gemini_api_key
+    DB_HOST=127.0.0.1
+    DB_USER=root
+    DB_PASSWORD=
+    DB_NAME=blue_db
+    ```
+6.  **Run the Service**:
+    ```bash
+    uvicorn main:app --reload --port 8001
+    ```
+    *AI Service runs at: `http://localhost:8001`*
 *Frontend runs at: `http://localhost:5173`*
 
 ---

@@ -1,2 +1,14 @@
 # Ignore file env asli (RAHASIA)
 .env
+.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+env/
+
+# IDE
+.vscode/
