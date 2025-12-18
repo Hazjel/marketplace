@@ -47,6 +47,15 @@ class StoreRepository implements StoreRepositoryInterface
         return $query->paginate($rowPerPage);
     }
 
+    public function getLocations()
+    {
+         return Store::select('city')
+            ->whereNotNull('city')
+            ->where('city', '!=', '')
+            ->distinct()
+            ->pluck('city');
+    }
+
     public function getById(string $id)
     {
         $query = Store::where('id', $id);

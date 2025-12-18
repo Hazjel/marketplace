@@ -47,7 +47,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
     public function getByStore()
     {
         $user = Auth::user();
-        $query = StoreBalance::where('store_id', $user->store->id)->with(['storeBalanceHistories']);
+        $query = StoreBalance::where('store_id', $user->store->id)->with(['storeBalanceHistories', 'store.user']);
 
         return $query->first();
     }
@@ -61,13 +61,13 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
 
         try {
             $storeBalance = StoreBalance::find($id);
-            $storeBalance->balance = bcadd($storeBalance->balance, $amount, 2);
+            $storeBalance->balance = $storeBalance->balance + $amount;
             $storeBalance->save();
 
             DB::commit();
 
             return $storeBalance;
-        } catch (\exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
@@ -82,17 +82,17 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         try {
             $storeBalance = StoreBalance::find($id);
 
-            if(bccomp($storeBalance->balance, $amount, 2) < 0) {
+            if($storeBalance->balance < $amount) {
                 throw new Exception('Saldo Tidak Mencukupi');
             }
 
-            $storeBalance->balance = bcsub($storeBalance->balance, $amount, 2);
+            $storeBalance->balance = $storeBalance->balance - $amount;
             $storeBalance->save();
 
             DB::commit();
 
             return $storeBalance;
-        } catch (\exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }

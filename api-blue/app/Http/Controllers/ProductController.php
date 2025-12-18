@@ -43,7 +43,8 @@ class ProductController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         try {
-            $products = $this->productRepository->getAll($request->search, $request->store_id, $request->product_category_id, $request->limit, $request->random, true);
+            $filters = $request->only(['min_price', 'max_price', 'condition', 'city', 'min_rating']);
+            $products = $this->productRepository->getAll($request->search, $request->store_id, $request->product_category_id, $request->limit, $request->random, true, $filters);
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', ProductResource::collection($products), 200);
         } catch (\Exception $e) {
@@ -53,24 +54,40 @@ class ProductController extends Controller implements HasMiddleware
 
     public function getAllPaginated(Request $request)   
     {
-        $request = $request->validate([
+        $validated = $request->validate([
             'search' => 'nullable|string',
             'store_id' => 'nullable|exists:stores,id',
             'product_category_id' => 'nullable|exists:product_categories,id',
-            'row_per_page' => 'required|integer'
+            'row_per_page' => 'required|integer',
+            'min_price' => 'nullable|numeric',
+            'max_price' => 'nullable|numeric',
+            'condition' => 'nullable',
+            'city' => 'nullable|string',
+            'min_rating' => 'nullable|numeric|min:0|max:5',
+            'stock_status' => 'nullable|string', 
+            'created_since' => 'nullable|integer', 
         ]);
 
         try {
-            $products = $this->productRepository->getAllPaginated($request['search'] ?? null, $request['store_id'] ?? null, $request['product_category_id'] ?? null, $request['row_per_page']);
+            $filters = $request->only(['min_price', 'max_price', 'condition', 'city', 'min_rating', 'stock_status', 'created_since']);
+            $products = $this->productRepository->getAllPaginated($validated['search'] ?? null, $validated['store_id'] ?? null, $validated['product_category_id'] ?? null, $validated['row_per_page'], $filters);
             $totalSold = $this->productRepository->getTotalSold();
+            // Log::info("CONTROLLER debug totalSold: " . $totalSold);
+            // Log::info("CONTROLLER debug Auth: " . (auth()->check() ? auth()->user()->id : 'Guest'));
 
-            $resource = PaginateResource::make($products, ProductResource::class)->additional([
-                'meta' => [
-                    'total_sold' => $totalSold
-                ]
-            ]);
+            $resource = PaginateResource::make($products, ProductResource::class);
+            
+            // Resolve resource to array to ensure we can modify structure reliably
+            $data = $resource->resolve(request());
+            
+            // Append total_sold to meta
+            if (isset($data['meta'])) {
+                $data['meta']['total_sold'] = (int) $totalSold;
+            } else {
+                 $data['meta'] = ['total_sold' => (int) $totalSold];
+            }
 
-            return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', $resource, 200);
+            return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', $data, 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }

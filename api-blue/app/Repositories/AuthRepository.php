@@ -35,21 +35,12 @@ class AuthRepository implements AuthRepositoryInterface
             $user->password = bcrypt($data['password']);
             $user->save();
 
-            $user->assignRole($data['role']);
+            $user->assignRole('buyer');
 
-            if ($data['role'] == 'buyer') {
-                $user->buyer()->create([
-                    'phone_number' => $data['phone_number']
-                ]);
-            }
-
-            if ($data['role'] == 'store') {
-                $user->store()->create([
-                    'name' => $data['name'],
-                    'phone' => $data['phone_number'],
-                    'slug' => Str::slug($data['name']) . '-' . Str::random(5),
-                ]);
-            }
+            // Always create buyer profile
+            $user->buyer()->create([
+                'phone_number' => $data['phone_number']
+            ]);
 
 
             $user->token = $user->createToken('auth_token')->plainTextToken;

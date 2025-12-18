@@ -12,7 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Middleware\PermissionMiddleware;
+use Illuminate\Support\Str;
 
 class StoreController extends Controller implements HasMiddleware
 {
@@ -61,6 +63,16 @@ class StoreController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', PaginateResource::make($stores, StoreResource::class), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getLocations()
+    {
+        try {
+            $locations = $this->storeRepository->getLocations();
+            return ResponseHelper::jsonResponse(true, 'Data Lokasi Berhasil Diambil', $locations, 200);
+        } catch (\Exception $e) {
+             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 
@@ -183,6 +195,63 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Dihapus', new StoreResource($store), 200);
         } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+    public function registerStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:stores,name',
+            'phone' => 'nullable|string',
+            'city' => 'nullable|string',
+            'address' => 'nullable|string',
+            'postal_code' => 'nullable|string',
+        ]);
+
+        try {
+            DB::beginTransaction();
+            $user = Auth::user();
+
+            if ($user->hasRole('store')) {
+                return ResponseHelper::jsonResponse(false, 'Anda sudah memiliki toko.', null, 400);
+            }
+
+            // Create Store
+            $store = $user->store()->create([
+                'name' => $request->name,
+                'username' => Str::slug($request->name) . '-' . Str::random(5),
+                'phone' => $request->phone ?? $user->buyer?->phone_number,
+                'city' => $request->city,
+                'address' => $request->address,
+                'postal_code' => $request->postal_code,
+                'is_verified' => false,
+                'logo' => 'default-store.png',
+                'about' => '-',
+                'address_id' => '-',
+            ]);
+
+            // Create Store Balance
+            $store->storeBalance()->create([
+                'balance' => 0
+            ]);
+
+            // Change Role: Remove 'buyer', Assign 'store'
+            $user->removeRole('buyer');
+            $user->assignRole('store');
+            
+            // Refresh permissions
+            $user->permissions = $user->getPermissionsViaRoles()->pluck('name');
+            $user->token = $user->createToken('auth_token')->plainTextToken; // Refresh token with new permissions
+
+            DB::commit();
+
+            return ResponseHelper::jsonResponse(true, 'Toko Berhasil Dibuat!', [
+                'store' => new StoreResource($store),
+                'user' => new \App\Http\Resources\UserResource($user), // Wrap in Resource
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }

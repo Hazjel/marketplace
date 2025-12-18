@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Repositories\TransactionDetailRepository;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
@@ -70,6 +71,21 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $query->sum('grand_total');
     }
 
+    public function getTotalAdminFee()
+    {
+        $query = Transaction::where('payment_status', 'paid');
+        
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $query->where('store_id', auth()->user()->store->id ?? null);
+        }
+
+        if (auth()->check() && auth()->user()->hasRole('buyer')) {
+            $query->where('buyer_id', auth()->user()->buyer->id ?? null);
+        }
+
+        return $query->sum('admin_fee');
+    }
+
 
 
     public function getById(string $id)
@@ -122,6 +138,30 @@ class TransactionRepository implements TransactionRepositoryInterface
             $transactionDetails = [];
 
             foreach ($data['products'] as $productData) {
+                // Find Product with Lock for Atomic Update
+                Log::error("REPO: Deduction loop for Product ID: " . $productData['product_id']);
+                
+                $product = Product::where('id', $productData['product_id'])->lockForUpdate()->first();
+
+                if (!$product) {
+                    Log::error("REPO: Product NOT FOUND ID: " . $productData['product_id']);
+                    throw new Exception("Product not found: " . $productData['product_id']);
+                }
+
+                Log::error("REPO: Found Prod {$product->id} | Stock: {$product->stock} | Qty: {$productData['qty']}");
+
+                if ($product->stock < $productData['qty']) {
+                    Log::error("REPO ERROR: Insufficient stock for {$product->id}. Has {$product->stock}, need {$productData['qty']}");
+                    throw new Exception("Insufficient stock for product: " . $product->name);
+                }
+
+                // Deduct Stock
+                $oldStock = $product->stock;
+                $product->stock -= $productData['qty'];
+                $product->save();
+                
+                Log::error("REPO SUCCESS: Updated Stock {$oldStock} -> {$product->stock}");
+
                 $detail = $transactionDetailRepository->create([
                     'transaction_id' => $transaction->id,
                     'product_id' => $productData['product_id'],
@@ -160,6 +200,9 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             Log::info('=== BEFORE MIDTRANS ===');
 
+            // Load Buyer & User for Midtrans
+            $transaction->load('buyer.user');
+
             // Set your Merchant Server Key
             \Midtrans\Config::$serverKey = config('midtrans.serverKey');
             \Midtrans\Config::$isProduction = config('midtrans.isProduction');
@@ -172,8 +215,8 @@ class TransactionRepository implements TransactionRepositoryInterface
                     'gross_amount' => (int) $transaction->grand_total
                 ),
                 'customer_details' => array(
-                    'first_name' => $transaction->buyer->name,
-                    'email' => $transaction->buyer->email,
+                    'first_name' => $transaction->buyer->user?->name ?? 'Customer',
+                    'email' => $transaction->buyer->user?->email ?? 'no-email@example.com',
                 ),
             );
 
@@ -190,17 +233,11 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             return $transaction->fresh(['buyer', 'store', 'transactionDetails.product']);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-
-            Log::error('=== TRANSACTION FAILED ===');
-            Log::error('Error details:', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
+            $errorMsg = "REPO FATAL ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString();
+            Log::error($errorMsg);
+            file_put_contents(storage_path('logs/debug.txt'), $errorMsg, FILE_APPEND);
             throw new Exception($e->getMessage());
         }
     }
@@ -211,6 +248,12 @@ class TransactionRepository implements TransactionRepositoryInterface
 
         try {
             $transaction = Transaction::find($id);
+
+            // Restore stock if transaction is being deleted and was holding stock (pending/unpaid)
+            if (in_array($transaction->payment_status, ['pending', 'unpaid'])) {
+                $this->restoreStock($transaction);
+            }
+
             $transaction->delete();
 
             DB::commit();
@@ -220,6 +263,25 @@ class TransactionRepository implements TransactionRepositoryInterface
             DB::rollBack();
 
             throw new Exception($e->getMessage());
+        }
+    }
+
+    public function restoreStock(Transaction $transaction)
+    {
+        try {
+            Log::info('Start restoring stock for transaction: ' . $transaction->id);
+            $transaction->load('transactionDetails.product');
+            
+            foreach ($transaction->transactionDetails as $detail) {
+                $product = $detail->product;
+                if ($product) {
+                    $product->stock += $detail->qty;
+                    $product->save();
+                    Log::info("Product {$product->id} RESTORED: Stock -> {$product->stock}");
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error restoring stock: ' . $e->getMessage());
         }
     }
 

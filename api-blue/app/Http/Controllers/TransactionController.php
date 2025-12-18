@@ -15,6 +15,7 @@ use App\Http\Resources\PaginateResource;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
+use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller implements HasMiddleware
 {
@@ -65,10 +66,12 @@ class TransactionController extends Controller implements HasMiddleware
         try {
             $transactions = $this->transactionRepository->getAllPaginated($request['search'] ?? null, $request['row_per_page']);
             $totalRevenue = $this->transactionRepository->getTotalRevenue();
+            $totalAdminFee = $this->transactionRepository->getTotalAdminFee();
 
             $response = PaginateResource::make($transactions, TransactionResource::class);
             $responseData = $response->response()->getData(true);
             $responseData['meta']['total_revenue'] = $totalRevenue;
+            $responseData['meta']['total_admin_fee'] = $totalAdminFee;
 
             // Manual wrapping because using getData(true) returns the array structure directly 
             // but ResponseHelper expects to wrap it in 'data'
@@ -80,7 +83,8 @@ class TransactionController extends Controller implements HasMiddleware
             
             $resource = PaginateResource::make($transactions, TransactionResource::class)->additional([
                 'meta' => [
-                    'total_revenue' => $totalRevenue
+                    'total_revenue' => $totalRevenue,
+                    'total_admin_fee' => $totalAdminFee
                 ]
             ]);
 
@@ -95,6 +99,7 @@ class TransactionController extends Controller implements HasMiddleware
      */
     public function store(TransactionStoreRequest $request)
     {
+        Log::error("CONTROLLER: Store START. Payload: " . json_encode($request->all()));
         $request = $request->validated();
 
         try {
