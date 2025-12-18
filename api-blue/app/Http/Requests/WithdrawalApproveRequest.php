@@ -14,7 +14,7 @@ class WithdrawalApproveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'proof' => 'required|image|mimes:png,jpg|max:2048'
+            'proof' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048'
         ];
     }
 

@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductRepository implements ProductRepositoryInterface
 {
-    public function getAll(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $limit, ?bool $random, bool $execute)
+    public function getAll(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $limit, ?bool $random, bool $execute, array $filters = [])
     {
-        $query = Product::where(function ($query) use ($search, $storeId, $ProductCategoryId) {
+        $query = Product::where(function ($query) use ($search, $storeId, $ProductCategoryId, $filters) {
             if ($search) {
                 $query->search($search);
             }
@@ -27,6 +27,48 @@ class ProductRepository implements ProductRepositoryInterface
 
             if ($ProductCategoryId !== null) {
                 $query->where('product_category_id', $ProductCategoryId);
+            }
+
+            // Filters
+            if (!empty($filters['min_price'])) {
+                $query->where('price', '>=', $filters['min_price']);
+            }
+            if (!empty($filters['max_price'])) {
+                $query->where('price', '<=', $filters['max_price']);
+            }
+            if (!empty($filters['condition'])) {
+                // Ensure array
+                $conditions = is_array($filters['condition']) ? $filters['condition'] : [$filters['condition']];
+                $query->whereIn('condition', $conditions);
+            }
+            if (!empty($filters['city'])) {
+                $city = $filters['city'];
+                $query->whereHas('store', function($q) use ($city) {
+                    if (is_array($city)) {
+                        $q->whereIn('city', array_filter($city)); // array_filter to remove nulls
+                    } else {
+                        $q->where('city', $city);
+                    }
+                });
+            }
+            if (!empty($filters['min_rating'])) {
+                $minRating = $filters['min_rating'];
+                // Check if has review >= minRating
+                $query->whereHas('productReviews', function($q) use ($minRating) {
+                     $q->where('rating', '>=', $minRating);
+                });
+            }
+
+            // New Filters
+            if (!empty($filters['stock_status'])) {
+                 if ($filters['stock_status'] == 'ready_stock') {
+                     $query->where('stock', '>', 0);
+                 }
+            }
+
+            if (!empty($filters['created_since'])) { // days
+                 $days = (int) $filters['created_since'];
+                 $query->where('created_at', '>=', now()->subDays($days));
             }
         })->with('productImages');
 
@@ -49,21 +91,27 @@ class ProductRepository implements ProductRepositoryInterface
         return $query;
     }
 
-    public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId = null, ?int $rowPerPage)
+    public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId = null, ?int $rowPerPage, array $filters = [])
     {
-        $query = $this->getAll($search, $storeId, $ProductCategoryId, null, false, false);
+        $query = $this->getAll($search, $storeId, $ProductCategoryId, null, false, false, $filters);
 
         return $query->paginate($rowPerPage);
     }
 
     public function getTotalSold()
     {
+        // Calculate Total Sold based on PRODUCTS belonging to the store
+        // This ensures consistency with the "Product List" which shows products of the store.
+        // We join transaction_details -> transactions to check Payment Status.
+        // We filter by products.store_id.
+
         $query = DB::table('transaction_details')
+            ->join('products', 'transaction_details.product_id', '=', 'products.id')
             ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
             ->where('transactions.payment_status', 'paid');
 
         if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('transactions.store_id', auth()->user()->store->id ?? null);
+            $query->where('products.store_id', auth()->user()->store->id ?? null);
         }
 
         return $query->sum('transaction_details.qty');

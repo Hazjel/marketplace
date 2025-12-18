@@ -17,10 +17,16 @@ use Illuminate\Support\Facades\Route;
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
+// Public Routes that must take precedence
+Route::get('store/locations', [StoreController::class, 'getLocations']);
+
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('me', [AuthController::class, 'me']);
     Route::put('profile', [AuthController::class, 'updateProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
+
+    // Register Store (Upgrade Role)
+    Route::post('register-store', [StoreController::class, 'registerStore']);
 
     // User routes - custom routes BEFORE resource
     Route::get('user/all/paginated', [UserController::class, 'getAllPaginated']);
