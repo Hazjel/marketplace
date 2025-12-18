@@ -12,10 +12,11 @@ const { register } = authStore
 const form = ref({
     profile_picture: null,
     profile_picture_url: PlaceHolder,
+    name: null,
     email: null,
     phone_number: null,
     password: null,
-    role: null,
+    role: 'buyer', // Default to buyer
 })
 
 const handleImageChange = (e) => {
@@ -35,15 +36,12 @@ const handleSubmit = async () => {
     formData.append('email', form.value.email)
     formData.append('phone_number', form.value.phone_number)
     formData.append('password', form.value.password)
-    formData.append('role', form.value.role)
+    formData.append('role', 'buyer') // Force role to buyer
 
     await register(formData)
 
-    if (form.value.role === 'store') {
-        router.push({ name: 'admin.dashboard' })
-    } else {
-        router.push({ name: 'app.home' })
-    }
+    // Always redirect to App Home
+    router.push({ name: 'app.home' })
 }
 </script>
 
@@ -76,41 +74,8 @@ const handleSubmit = async () => {
                         </label>
                     </div>
                 </div>
-                <div class="flex flex-col gap-3">
-                    <p class="font-semibold text-custom-grey">Account Type</p>
-                    <div class="grid grid-cols-2 gap-6 h-[76px]">
-                        <label
-                            class="group relative flex items-center h-full py-4 px-5 gap-4 rounded-[18px] border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full">
-                            <div
-                                class="flex h-[28px] shrink-0 items-center pr-4 pl-1 border-r-[1.5px] border-custom-border ">
-                                <img src="@/assets/images/icons/shop-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                            </div>
-                            <p class="font-bold leading-none w-full">
-                                Seller
-                            </p>
-                            <div
-                                class="flex size-4 shrink-0 rounded-full ring-2 ring-custom-grey border-[3px] border-white group-has-[:checked]:bg-custom-blue group-has-[:checked]:ring-custom-blue transition-300">
-                            </div>
-                            <input type="radio" name="type" value="store" id="" class="absolute opacity-0"
-                                v-model="form.role">
-                        </label>
-                        <label
-                            class="group relative flex items-center h-full py-4 px-5 gap-4 rounded-[18px] border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full">
-                            <div
-                                class="flex h-[28px] shrink-0 items-center pr-4 pl-1 border-r-[1.5px] border-custom-border ">
-                                <img src="@/assets/images/icons/bag-2-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                            </div>
-                            <p class="font-bold leading-none w-full">
-                                Buyer
-                            </p>
-                            <div
-                                class="flex size-4 shrink-0 rounded-full ring-2 ring-custom-grey border-[3px] border-white group-has-[:checked]:bg-custom-blue group-has-[:checked]:ring-custom-blue transition-300">
-                            </div>
-                            <input type="radio" name="type" value="buyer" id="" class="absolute opacity-0"
-                                v-model="form.role">
-                        </label>
-                    </div>
-                </div>
+                <!-- Account Type Removed -->
+                
                 <div class="flex flex-col gap-3">
                     <p class="font-semibold text-custom-grey">Complete Name</p>
                     <div class="group/errorState flex flex-col gap-2" :class="{ 'invalid': error?.name }">

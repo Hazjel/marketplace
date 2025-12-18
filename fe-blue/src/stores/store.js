@@ -184,6 +184,16 @@ export const useStoreStore = defineStore("store", {
             } finally {
                 this.loading = false
             }
+        },
+
+        async fetchStoreLocations() {
+            try {
+                const response = await axiosInstance.get('store/locations');
+                return response.data.data;
+            } catch (error) {
+                console.error("Error fetching locations:", error);
+                return [];
+            }
         }
     }
 });

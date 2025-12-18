@@ -293,7 +293,7 @@ onMounted(async () => {
                                 Cancel
                             </RouterLink>
                             <button type="submit" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg">
-                                Create Now
+                                Update Product
                             </button>
                         </div>
                     </form>

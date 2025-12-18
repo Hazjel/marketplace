@@ -1,5 +1,6 @@
 <script setup>
 import { useStoreBalanceStore } from '@/stores/storeBalance';
+import { useStoreStore } from '@/stores/store';
 import { useWithdrawalStore } from '@/stores/withdrawal';
 import { storeToRefs } from 'pinia';
 import { onMounted, computed } from 'vue';
@@ -8,10 +9,14 @@ import { RouterLink } from 'vue-router';
 import { formatRupiah } from '@/helpers/format';
 import iconTickGreen from '@/assets/images/icons/card-tick-green-fill.svg';
 import iconSendOrange from '@/assets/images/icons/card-send-orange-fill.svg';
+import iconEyeSlash from '@/assets/images/icons/eye-slash-white.svg';
+import iconEye from '@/assets/images/icons/eye-white.svg';
 import Pagination from '@/components/admin/Pagination.vue';
 
 
 const storeBalance = ref({})
+const store = ref({})
+const isBalanceHidden = ref(false)
 import { useAuthStore } from '@/stores/auth';
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
@@ -30,6 +35,9 @@ const getRoute = (name, params = {}) => {
 const storeBalanceStore = useStoreBalanceStore()
 const { loading } = storeToRefs(storeBalanceStore)
 const { fetchStoreBalanceByStore } = storeBalanceStore
+
+const storeStore = useStoreStore()
+const { fetchStoreByUser } = storeStore
 
 const withdrawalStore = useWithdrawalStore()
 const { withdrawals, meta, loading: loadingWithdrawal } = storeToRefs(withdrawalStore)
@@ -70,10 +78,21 @@ const pendingWithdrawals = computed(() => {
         : 0
 })
 
+const toggleBalanceValue = computed(() => {
+    return isBalanceHidden.value ? 'Rp **********' : `Rp ${formatRupiah(storeBalance.value?.balance)}`
+})
+
+const toggleBalance = () => {
+    isBalanceHidden.value = !isBalanceHidden.value
+}
+
 const fetchStoreBalance = async () => {
     const response = await fetchStoreBalanceByStore()
-    storeBalance.value = response
-
+    storeBalance.value = response || { balance: 0 }
+    
+    const storeResponse = await fetchStoreByUser()
+    store.value = storeResponse
+    
     await fetchWithdrawalsPaginated(serverOptions.value)
 }
 
@@ -86,15 +105,15 @@ onMounted(fetchStoreBalance)
             <p class="font-bold text-xl">Store Details</p>
             <div class="flex items-center gap-[14px] w-full min-w-0">
                 <div class="flex size-[92px] shrink-0 rounded-full bg-custom-background overflow-hidden">
-                    <img :src="storeBalance?.store?.logo" class="size-full object-cover" alt="photo">
+                    <img :src="store?.logo" class="size-full object-cover" alt="photo">
                 </div>
                 <div class="flex flex-col gap-[6px] w-full overflow-hidden">
                     <p class="font-bold text-[22px] leading-tight w-full truncate">
-                        {{ storeBalance?.store?.name }}
+                        {{ store?.name }}
                     </p>
                     <p class="flex items-center gap-1 font-semibold text-lg text-custom-grey leading-none">
                         <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                        {{ storeBalance?.store?.user?.name }}
+                        {{ store?.user?.name }}
                     </p>
                 </div>
             </div>
@@ -138,14 +157,14 @@ onMounted(fetchStoreBalance)
                     class="flex flex-col items-center justify-center gap-2 text-center min-w-0 w-full px-4 absolute transform -translate-x-1/2 left-1/2 top-[51px]">
                     <p class="font-medium text-[#BFC6E9] leading-none">Seller Balance:</p>
                     <p class="w-full font-extrabold text-[40px] text-white leading-none">
-                        Rp <span id="balanceText">{{ formatRupiah(storeBalance.balance) }}</span>
+                        <span id="balanceText">{{ toggleBalanceValue }}</span>
                     </p>
                 </div>
-                <button id="toggleBalance"
+                <button id="toggleBalance" @click="toggleBalance"
                     class="flex items-center justify-center rounded-full border border-white/[0.03] bg-white/[0.06] py-3 px-4 gap-2 absolute transform -translate-x-1/2 left-1/2 bottom-[42px]">
-                    <img id="eyeIcon" src="@/assets/images/icons/eye-slash-white.svg" class="flex size-5 shrink-0"
+                    <img id="eyeIcon" :src="isBalanceHidden ? iconEye : iconEyeSlash" class="flex size-5 shrink-0"
                         alt="icon">
-                    <p id="toggleText" class="font-medium text-white">Hide Balance</p>
+                    <p id="toggleText" class="font-medium text-white">{{ isBalanceHidden ? 'Show Balance' : 'Hide Balance' }}</p>
                 </button>
             </div>
         </div>

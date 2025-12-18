@@ -3,7 +3,7 @@ import { formatDate } from '@/helpers/format';
 import { useStoreStore } from '@/stores/store';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { RouterLink } from 'vue-router';
 
 const store = ref({})
@@ -32,6 +32,20 @@ const fetchStore = async () => {
 }
 
 onMounted(fetchStore)
+
+const fullAddress = computed(() => {
+    if (!store.value) return ''
+    return [
+        store.value.address, 
+        store.value.city, 
+        store.value.postal_code
+    ].filter(Boolean).join(', ')
+})
+
+const mapSrc = computed(() => {
+    const query = fullAddress.value || 'Malang'
+    return `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(query)}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`
+})
 </script>
 
 <template>
@@ -108,12 +122,12 @@ onMounted(fetchStore)
                 <div class="w-full h-[290px] overflow-hidden rounded-3xl resize-none">
                     <div id="g-mapdisplay" class="size-full">
                         <iframe class="size-full border-none" frameborder="0"
-                            src="https://www.google.com/maps/embed/v1/place?q=Malang&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8">
+                            :src="mapSrc">
                         </iframe>
                     </div>
                 </div>
-                <p class="font-semibold text-lg leading-[1.6em]">Jl. Industri Raya No. 123 Kawasan Reyn
-                    Gadget Malang Kota, Jawa Timur, 17530</p>
+                <p class="font-semibold text-lg leading-[1.6em]" v-if="fullAddress">{{ fullAddress }}</p>
+                <p class="font-semibold text-lg leading-[1.6em]" v-else>No address set</p>
             </div>
         </section>
         <div id="Empty-State-Store" class="flex flex-1 bg-white rounded-[20px] p-5" v-else>

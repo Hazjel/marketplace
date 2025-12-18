@@ -188,6 +188,12 @@ onUnmounted(() => {
                             </div>
                         </div>
 
+                        <RouterLink :to="{ name: 'auth.open-store' }" v-if="user && user.role === 'buyer'"
+                            class="flex shrink-0 h-14 rounded-[18px] py-4 px-6 bg-custom-black text-white hover:shadow-lg transition-300">
+                             <img src="@/assets/images/icons/shop-white.svg" class="size-6 mr-2" alt="icon">
+                             <p class="font-medium">Start Selling</p>
+                        </RouterLink>
+
                         <RouterLink :to="{ name: 'auth.login' }"
                             class="flex shrink-0 h-14 rounded-[18px] py-4 px-8 bg-custom-blue" v-if="!user">
                             <p class="font-medium text-white">Sign In/Register</p>

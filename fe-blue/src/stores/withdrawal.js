@@ -36,7 +36,7 @@ export const useWithdrawalStore = defineStore("withdrawal", {
 
         async fetchWithdrawalById(id) {
             this.loading = true
-            
+
             try {
                 const response = await axiosInstance.get(`withdrawal/${id}`)
 
@@ -58,7 +58,7 @@ export const useWithdrawalStore = defineStore("withdrawal", {
                 this.success = response.data.message
 
                 router.push({ name: 'admin.my-store-balance' })
-                
+
             } catch (error) {
                 this.error = handleError(error)
             } finally {
@@ -70,10 +70,17 @@ export const useWithdrawalStore = defineStore("withdrawal", {
             this.loading = true
             this.error = null
             try {
-                const response = await axiosInstance.post(`withdrawal/${payload.id}/approve`, payload)
+                const formData = new FormData()
+                formData.append('proof', payload.proof)
+
+                const response = await axiosInstance.post(`withdrawal/${payload.id}/approve`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
 
                 this.success = response.data.message
-                
+
             } catch (error) {
                 this.error = handleError(error)
             } finally {

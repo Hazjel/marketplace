@@ -15,6 +15,11 @@ const { user } = storeToRefs(authStore)
 
 const withdrawal = ref({})
 const isConfirmed = ref(false)
+const fileInput = ref(null)
+
+const triggerFileInput = () => {
+    fileInput.value.click()
+}
 
 const withdrawalStore = useWithdrawalStore()
 const { loading, success, error } = storeToRefs(withdrawalStore)
@@ -113,10 +118,10 @@ onMounted(fetchData)
                         <img id="Thumbnail" :src="withdrawal.proof_url"
                             data-default="@/assets/images/icons/gallery-default.svg" class="size-full object-cover"
                             alt="icon" />
-                        <input type="file" id="File-Input" accept="image/*" required
-                            class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange" />
+                        <input type="file" ref="fileInput" id="File-Input" accept="image/*" required
+                            class="hidden" @change="handleImageChange" />
                     </div>
-                    <button type="button" id="Add-Photo"
+                    <button type="button" id="Add-Photo" @click="triggerFileInput"
                         class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
                         Add Photo
                     </button>

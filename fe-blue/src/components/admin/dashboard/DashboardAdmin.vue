@@ -9,6 +9,7 @@ import defaultTransactionImage from '@/assets/images/thumbnails/th-4.svg';
 // Dashboard data
 const stats = ref({
     total_revenue: 0,
+    total_revenue_fee: 0,
     total_sellers: 0,
     total_buyers: 0,
     total_products: 0,
@@ -42,6 +43,7 @@ const fetchDashboardData = async () => {
 
         stats.value = {
             total_revenue: results[3].status === 'fulfilled' ? (results[3].value.data.data?.meta?.total_revenue || 0) : 0,
+            total_revenue_fee: results[3].status === 'fulfilled' ? (results[3].value.data.data?.meta?.total_admin_fee || 0) : 0,
             total_sellers: getCount(results[0]),
             total_buyers: getCount(results[1]),
             total_products: getCount(results[2]),
@@ -89,14 +91,25 @@ onMounted(() => {
 
 <template>
     <div class="flex gap-5">
-        <div class="flex flex-col w-[440px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
+        <div class="flex flex-col w-[300px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                     <img src="@/assets/images/icons/wallet-2-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
+                    <p class="font-bold text-4xl">{{ loading ? '...' : `Rp ${formatRupiah(stats.total_revenue_fee)}` }}</p>
+                    <p class="font-medium text-lg text-custom-grey">Net Revenue (Profit)</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col w-[300px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
+            <div class="flex flex-col gap-6">
+                <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
+                    <img src="@/assets/images/icons/card-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
+                </div>
+                <div class="flex flex-col gap-[6px]">
                     <p class="font-bold text-4xl">{{ loading ? '...' : `Rp ${formatRupiah(stats.total_revenue)}` }}</p>
-                    <p class="font-medium text-lg text-custom-grey">Total Revenue</p>
+                    <p class="font-medium text-lg text-custom-grey">Total GMV</p>
                 </div>
             </div>
         </div>
