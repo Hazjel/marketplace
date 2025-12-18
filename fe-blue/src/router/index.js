@@ -63,6 +63,12 @@ const router = createRouter({
       ]
     },
     {
+      path: '/open-store',
+      name: 'auth.open-store',
+      component: () => import('@/views/auth/StoreRegister.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/',
       component: App,
       children: [

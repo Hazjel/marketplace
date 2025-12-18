@@ -38,6 +38,9 @@
     }
 
     watch(() => withdrawal.value.amount, (newAmount) => {
+        if (typeof newAmount === 'string' && newAmount.includes('-')) {
+            newAmount = newAmount.replace(/-/g, '')
+        }
         withdrawal.value.amount = formatRupiah(newAmount)
     })
 
@@ -132,7 +135,7 @@ onMounted(fetchStoreBalance)
                                     <p class="input-placeholder">
                                         Enter Bank Account Number
                                     </p>
-                                    <input type="number" class="custom-input" placeholder="" v-model="withdrawal.bank_account_number">
+                                    <input type="text" inputmode="numeric" class="custom-input" placeholder="" v-model="withdrawal.bank_account_number">
                                 </label>
                                 <span class="input-error" v-if="error?.bank_account_number">{{ error?.bank_account_number?.join(', ') }}</span>
                             </div>

@@ -65,7 +65,8 @@ function setActiveImage(image) {
 }
 
 const increase = () => {
-    if (quantity.value < product.value.stock) {
+    const stock = Number(product.value?.stock || 0)
+    if (quantity.value < stock) {
         quantity.value++
     }
 }
@@ -287,8 +288,8 @@ watch(
                             </div>
                             <hr class="border-custom-stroke">
                             <div class="flex items-center justify-between">
-                                <p class="font-semibold text-lg text-custom-grey">Order Status:</p>
-                                <p class="font-bold text-lg">Ready to Ship</p>
+                                <p class="font-semibold text-lg text-custom-grey">Stock:</p>
+                                <p class="font-bold text-lg">{{ product?.stock }} units</p>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
@@ -300,30 +301,32 @@ watch(
                                 <p class="font-bold text-2xl text-custom-blue leading-none">Rp {{
                                     formatRupiah(product?.price) }}</p>
                             </div>
-                            <div
+                                <div
                                 class="quantity-container flex items-center shrink-0 rounded-2xl border border-custom-stroke p-4">
-                                <button type="button" class="subtract size-5 flex items-center justify-center"
-                                    @click="decrease">
+                                <button type="button" class="subtract size-5 flex items-center justify-center cursor-pointer disabled:opacity-50"
+                                    @click="decrease" :disabled="quantity <= 1">
                                     <span class="text-[30px] font-light leading-none align-middle mb-1">-</span>
                                 </button>
                                 <div class="h-[18px] border border-custom-stroke ml-4"></div>
                                 <input type="number" name="" value="1"
                                     class="amount appearance-none w-[70px] pl-5 text-center font-bold text-lg"
-                                    v-model="quantity">
+                                    v-model="quantity" readonly>
                                 <div class="h-[18px] border border-custom-stroke mr-4"></div>
-                                <button type="button" class="add size-5 flex items-center justify-center"
-                                    @click="increase">
+                                <button type="button" class="add size-5 flex items-center justify-center cursor-pointer disabled:opacity-50"
+                                    @click="increase" :disabled="quantity >= (product?.stock || 0)">
                                     <span class="text-[24px] font-light leading-none align-middle mb-1">+</span>
                                 </button>
                             </div>
                         </div>
                         <div class="flex flex-col gap-4">
                             <div class="flex items-center gap-5">
-                                <button @click.prevent="addToCart"
-                                    class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
+                                <button @click.prevent="addToCart" :disabled="!product?.stock || product?.stock <= 0"
+                                    class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-grey disabled:cursor-not-allowed">
                                     <img src="@/assets/images/icons/shopping-cart-white.svg"
                                         class="flex size-6 shrink-0" alt="icon">
-                                    <span class="font-bold text-white">Add to Cart</span>
+                                    <span class="font-bold text-white">
+                                        {{ !product?.stock || product?.stock <= 0 ? 'Out of Stock' : 'Add to Cart' }}
+                                    </span>
                                 </button>
                                 <button @click="handleToggleWishlist"
                                     class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 border border-custom-stroke transition-all"
