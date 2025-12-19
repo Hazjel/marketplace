@@ -118,6 +118,31 @@ If you are cloning this repository for the first time, follow these steps to set
     ```bash
     php artisan reverb:start
     ```
+10. **Payment & Shipping Integration**:
+    - **RajaOngkir (Shipping)**:
+      Add your API key to `.env`:
+      ```ini
+      RAJAONGKIR_API_KEY=your_rajaongkir_key
+      ```
+    - **Midtrans (Payment)**:
+      Add your Merchant ID, Client Key, and Server Key to `.env`:
+      ```ini
+      MIDTRANS_MERCHANT_ID=your_merchant_id
+      MIDTRANS_CLIENT_KEY=your_client_key
+      MIDTRANS_SERVER_KEY=your_server_key
+      ```
+    - **Ngrok (For Webhooks)**:
+      Since Midtrans needs to send notifications to your local server, use ngrok to expose it.
+      1. Install ngrok and run:
+         ```bash
+         ngrok http 8000
+         ```
+      2. Copy the HTTPS URL (e.g., `https://your-ngrok-url.ngrok-free.app`).
+      3. In Midtrans Dashboard > Settings > Configuration, set the **Notification URL** to:
+         ```
+         https://your-ngrok-url.ngrok-free.app/api/midtrans/callback
+         ```
+      4. Note: Ensure `APP_URL` in `.env` matches your ngrok URL if required or if using it for other callback generations.
 
 ### 2. Frontend Setup
 1.  Navigate to the `fe-blue` directory:
