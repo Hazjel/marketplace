@@ -98,6 +98,26 @@ If you are cloning this repository for the first time, follow these steps to set
     ```bash
     php artisan serve
     ```
+9. **Realtime Chat Setup (Reverb)**:
+    - Ensure `.env` has Reverb configuration:
+    ```ini
+    BROADCAST_CONNECTION=reverb
+    REVERB_APP_ID=my-app-id
+    REVERB_APP_KEY=my-app-key
+    REVERB_APP_SECRET=my-app-secret
+    REVERB_HOST="localhost"
+    REVERB_PORT=8080
+    REVERB_SCHEME=http
+
+    VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+    VITE_REVERB_HOST="${REVERB_HOST}"
+    VITE_REVERB_PORT="${REVERB_PORT}"
+    VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+    ```
+    - Start the Reverb server:
+    ```bash
+    php artisan reverb:start
+    ```
 
 ### 2. Frontend Setup
 1.  Navigate to the `fe-blue` directory:
