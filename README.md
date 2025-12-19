@@ -107,6 +107,49 @@ php artisan serve
 ```
 *Backend runs at: `http://localhost:8000`*
 
+### 2.1. Realtime Chat Setup (Reverb)
+1.  **Configure Environment**:
+    Add Reverb keys to `api-blue/.env`:
+    ```ini
+    BROADCAST_CONNECTION=reverb
+    REVERB_APP_ID=my-app-id
+    REVERB_APP_KEY=my-app-key
+    REVERB_APP_SECRET=my-app-secret
+    REVERB_HOST="localhost"
+    REVERB_PORT=8080
+    REVERB_SCHEME=http
+
+    VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+    VITE_REVERB_HOST="${REVERB_HOST}"
+    VITE_REVERB_PORT="${REVERB_PORT}"
+    VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+    ```
+2.  **Start Reverb Server**:
+    ```bash
+    php artisan reverb:start
+    ```
+
+### 2.2. Payment & Shipping Integration
+1.  **RajaOngkir (Shipping)**:
+    Add API key to `api-blue/.env`:
+    ```ini
+    RAJAONGKIR_API_KEY=your_rajaongkir_key
+    ```
+2.  **Midtrans (Payment)**:
+    Add credentials to `api-blue/.env`:
+    ```ini
+    MIDTRANS_MERCHANT_ID=your_merchant_id
+    MIDTRANS_CLIENT_KEY=your_client_key
+    MIDTRANS_SERVER_KEY=your_server_key
+    ```
+3.  **Ngrok (For Webhooks)**:
+    Required for local development to receive Midtrans notifications.
+    ```bash
+    ngrok http 8000
+    ```
+    Set **Notification URL** in Midtrans Dashboard to:
+    `https://your-ngrok-url.ngrok-free.app/api/midtrans/callback`
+
 ### 3. Frontend Setup (`fe-blue`)
 Setting up the Vue.js client.
 
