@@ -71,7 +71,7 @@ const sendMessage = async () => {
         <transition name="fade">
             <div v-if="isOpen"
                 class="w-[350px] h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
-                <div class="bg-custom-blue p-4 flex justify-between items-center text-white">
+                <div class="bg-custom-blue p-4 flex justify-between items-center text-white shrink-0">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">🤖</div>
                         <div>
@@ -103,7 +103,7 @@ const sendMessage = async () => {
                     </div>
                 </div>
 
-                <div class="p-3 bg-white border-t flex gap-2">
+                <div class="p-3 bg-white border-t flex gap-2 shrink-0">
                     <input v-model="message" @keyup.enter="sendMessage" type="text"
                         placeholder="Tanya rekomendasi makanan..."
                         class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-custom-blue/50"

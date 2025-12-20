@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import echo from '@/plugins/echo';
 
 // Buat instance axios
 export const axiosInstance = axios.create({
@@ -15,11 +16,16 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = Cookies.get('token');
-        
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        
+
+        // Inject Socket ID for broadcasting toOthers()
+        if (echo && echo.socketId()) {
+            config.headers['X-Socket-Id'] = echo.socketId();
+        }
+
         return config;
     },
     (error) => {

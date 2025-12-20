@@ -2,16 +2,27 @@
 import ProductCard from '@/components/card/ProductCard.vue';
 import { useProductStore } from '@/stores/product';
 import { storeToRefs } from 'pinia';
-import { onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { onMounted, watch } from 'vue';
 
 const productStore = useProductStore()
 const { products, loading } = storeToRefs(productStore)
 const { fetchProducts } = productStore
+const route = useRoute()
+
+const loadProducts = () => {
+    fetchProducts({
+        limit: 100, // Fetch all products
+        ...route.query // Pass query params like sort=newest
+    })
+}
 
 onMounted(() => {
-    fetchProducts({
-        limit: 100 // Fetch all products
-    })
+    loadProducts()
+})
+
+watch(() => route.query, () => {
+    loadProducts()
 })
 </script>
 

@@ -174,9 +174,11 @@ onMounted(fetchData)
                         <p class="input-placeholder">
                             Enter Store Phone
                         </p>
-                        <input type="text" v-model="store.phone" class="custom-input" placeholder="">
+                        <input type="tel" v-model="store.phone" class="custom-input" placeholder=""
+                         @input="store.phone = store.phone.replace(/[^0-9]/g, '').slice(0, 15)">
                     </label>
                     <span class="input-error" v-if="error?.phone">{{ error?.phone?.join(', ') }}</span>
+                     <span class="input-error" v-else-if="store.phone && !store.phone.startsWith('08')">Phone number must start with 08</span>
                 </div>
             </div>
             <div class="flex justify-between">
