@@ -181,9 +181,10 @@ const handleSubmit = async () => {
                                 Enter your phone number
                             </p>
                             <input type="tel" v-model="form.phone_number" autocomplete="tel" class="custom-input"
-                                placeholder="">
+                                placeholder="" @input="form.phone_number = form.phone_number.replace(/[^0-9]/g, '').slice(0, 15)">
                         </label>
                         <span class="input-error" v-if="errors.phone_number">{{ errors.phone_number[0] }}</span>
+                         <span class="input-error" v-else-if="form.phone_number && !form.phone_number.startsWith('08')">Phone number must start with 08</span>
                     </div>
                 </div>
 

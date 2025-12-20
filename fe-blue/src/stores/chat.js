@@ -72,7 +72,8 @@ export const useChatStore = defineStore("chat", {
             // Only push if the message belongs to the current active chat
             if (this.activeUser && (message.sender_id === this.activeUser.id || message.receiver_id === this.activeUser.id)) {
                 // Check if message already exists to prevent duplicates from optimistic update + broadcast
-                const exists = this.messages.some(m => m.id === message.id);
+                // Check if message already exists to prevent duplicates from optimistic update + broadcast
+                const exists = this.messages.some(m => String(m.id) === String(message.id));
                 if (!exists) {
                     this.messages.push(message);
                 }

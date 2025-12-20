@@ -53,7 +53,7 @@ export const useAuthStore = defineStore("auth", {
                 const token = response.data.data.token;
                 Cookies.set("token", token);
                 this.success = response.data.message;
-                
+
                 return response.data.data; // ✅ Return data
             } catch (error) {
                 this.error = handleError(error);

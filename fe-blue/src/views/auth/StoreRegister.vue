@@ -150,7 +150,10 @@ const handleSubmit = async () => {
                                     <div class="input-icon">
                                         <img src="@/assets/images/icons/shop-grey.svg" class="flex size-6 shrink-0" alt="icon">
                                     </div>
-                                    <input type="text" class="custom-input" placeholder="e.g. Toko Sejahtera" v-model="form.name" required>
+                                    <p class="input-placeholder">
+                                        Store Name
+                                    </p>
+                                    <input type="text" class="custom-input" placeholder="" v-model="form.name" required>
                                 </label>
                                 <span class="input-error" v-if="errors.name">{{ errors.name[0] }}</span>
                             </div>
@@ -164,9 +167,14 @@ const handleSubmit = async () => {
                                     <div class="input-icon">
                                         <img src="@/assets/images/icons/call-grey.svg" class="flex size-6 shrink-0" alt="icon">
                                     </div>
-                                    <input type="tel" class="custom-input" placeholder="e.g. 0812345678" v-model="form.phone">
+                                    <p class="input-placeholder">
+                                        Ex: 0812345678
+                                    </p>
+                                    <input type="tel" class="custom-input" placeholder="" v-model="form.phone"
+                                        @input="form.phone = form.phone.replace(/[^0-9]/g, '').slice(0, 15)">
                                 </label>
                                 <span class="input-error" v-if="errors.phone">{{ errors.phone[0] }}</span>
+                                <span class="input-error" v-else-if="form.phone && !form.phone.startsWith('08')">Phone number must start with 08</span>
                             </div>
                         </div>
 
@@ -178,7 +186,10 @@ const handleSubmit = async () => {
                                     <div class="input-icon">
                                         <img src="@/assets/images/icons/global-search-grey.svg" class="flex size-6 shrink-0" alt="icon">
                                     </div>
-                                    <input type="text" class="custom-input" placeholder="Type district or city..." v-model="addressSearch"
+                                    <p class="input-placeholder">
+                                        Type district or city...
+                                    </p>
+                                    <input type="text" class="custom-input" placeholder="" v-model="addressSearch"
                                         @input="handleAddressInput(addressSearch)">
                                 </label>
                                 
@@ -206,7 +217,10 @@ const handleSubmit = async () => {
                                         <div class="input-icon">
                                             <img src="@/assets/images/icons/location-grey.svg" class="flex size-6 shrink-0" alt="icon">
                                         </div>
-                                        <input type="text" class="custom-input bg-gray-50 cursor-not-allowed" placeholder="Auto-filled" v-model="form.city" readonly>
+                                        <p class="input-placeholder text-gray-400">
+                                            Auto-filled
+                                        </p>
+                                        <input type="text" class="custom-input bg-gray-50 cursor-not-allowed" placeholder="" v-model="form.city" readonly>
                                     </label>
                                     <span class="input-error" v-if="errors.city">{{ errors.city[0] }}</span>
                                 </div>
@@ -218,7 +232,10 @@ const handleSubmit = async () => {
                                         <div class="input-icon">
                                             <img src="@/assets/images/icons/box-grey.svg" class="flex size-6 shrink-0" alt="icon">
                                         </div>
-                                        <input type="text" class="custom-input bg-gray-50 cursor-not-allowed" placeholder="Auto-filled" v-model="form.postal_code" readonly>
+                                        <p class="input-placeholder text-gray-400">
+                                            Auto-filled
+                                        </p>
+                                        <input type="text" class="custom-input bg-gray-50 cursor-not-allowed" placeholder="" v-model="form.postal_code" readonly>
                                     </label>
                                     <span class="input-error" v-if="errors.postal_code">{{ errors.postal_code[0] }}</span>
                                 </div>
@@ -233,13 +250,15 @@ const handleSubmit = async () => {
                                     <div class="input-icon h-fit pt-4">
                                         <img src="@/assets/images/icons/note-grey.svg" class="flex size-6 shrink-0" alt="icon">
                                     </div>
-                                    <textarea class="custom-input min-h-[100px] py-4" placeholder="Street name, Building number, etc." v-model="form.address"></textarea>
+                                    <p class="input-placeholder pt-4">
+                                        Street name, Building number, etc.
+                                    </p>
+                                    <textarea class="custom-input min-h-[100px] py-4" placeholder="" v-model="form.address"></textarea>
                                 </label>
                                 <span class="input-error" v-if="errors.address">{{ errors.address[0] }}</span>
                             </div>
                         </div>
-
-                        <!-- Mobile Map Preview -->
+                        <!-- Mobile/Tablet Map Preview (Visible when sidebar map is hidden) -->
                         <div class="flex flex-col gap-3 lg:hidden" v-if="form.city">
                             <p class="font-semibold text-custom-grey">Store Location Preview</p>
                             <div class="w-full h-[200px] rounded-2xl overflow-hidden border border-custom-stroke">

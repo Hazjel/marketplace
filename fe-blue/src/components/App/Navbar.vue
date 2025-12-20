@@ -105,7 +105,7 @@ onUnmounted(() => {
 
 <template>
     <section id="Navbar-Wrapper" class="flex h-[168px] w-full mx-auto relative">
-        <div class="fixed top-0 w-full bg-white min-h-[168px] border-b border-custom-stroke py-8 z-30">
+        <div class="fixed top-0 w-full bg-white min-h-[138px] border-b border-custom-stroke py-8 z-30">
             <div class="w-full max-w-[1920px] flex flex-col gap-6 px-7 mx-auto">
                 <div class="flex items-center gap-6 w-full">
                     <RouterLink :to="{ name: 'app.home' }" class="flex shrink-0">
@@ -188,16 +188,16 @@ onUnmounted(() => {
                             </div>
                         </div>
 
+                        <RouterLink :to="{ name: 'admin.dashboard' }" v-if="user && user.role === 'store'"
+                            class="flex shrink-0 h-14 rounded-[18px] py-4 px-6 bg-custom-black text-white hover:shadow-lg transition-300">
+                             <img src="@/assets/images/icons/shop-white.svg" class="size-6 mr-2" alt="icon">
+                             <p class="font-medium">Switch to Seller Mode</p>
+                        </RouterLink>
+
                         <RouterLink :to="{ name: 'auth.open-store' }" v-if="user && user.role === 'buyer'"
                             class="flex shrink-0 h-14 rounded-[18px] py-4 px-6 bg-custom-black text-white hover:shadow-lg transition-300">
                              <img src="@/assets/images/icons/shop-white.svg" class="size-6 mr-2" alt="icon">
                              <p class="font-medium">Start Selling</p>
-                        </RouterLink>
-
-                        <RouterLink :to="{ name: 'user.dashboard', params: { username: user.username } }" v-if="user && user.role === 'store'"
-                            class="flex shrink-0 h-14 rounded-[18px] py-4 px-6 bg-custom-black text-white hover:shadow-lg transition-300">
-                             <img src="@/assets/images/icons/shop-white.svg" class="size-6 mr-2" alt="icon">
-                             <p class="font-medium">Switch to Seller Mode</p>
                         </RouterLink>
 
                         <RouterLink :to="{ name: 'auth.login' }"
@@ -239,7 +239,7 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-8 flex-wrap">
+                <!-- <div class="flex items-center gap-8 flex-wrap">
                     <RouterLink :to="{ name: 'app.home' }" class="group flex items-center gap-2 active">
                         <img src="@/assets/images/icons/home-blue-fill.svg"
                             class="hidden size-6 shrink-0 group-[&.active]:flex" alt="icon">
@@ -271,7 +271,7 @@ onUnmounted(() => {
                         <img src="@/assets/images/icons/callcenter-grey.svg" class="flex size-6 shrink-0" alt="icon">
                         <span class="font-semibold text-custom-grey">Customer Services</span>
                     </a>
-                </div>
+                </div> -->
             </div>
         </div>
     </section>

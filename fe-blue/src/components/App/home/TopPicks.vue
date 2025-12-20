@@ -10,7 +10,7 @@ const { fetchProducts } = productStore
 
 onMounted(() => {
     fetchProducts({
-        limit: 8,
+        limit: 10,
         random: true,
     });
 });
@@ -25,7 +25,7 @@ onMounted(() => {
                 <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-6 shrink-0" alt="icon">
             </RouterLink>
         </div>
-        <div class="grid grid-cols-4 gap-6">
+        <div class="grid grid-cols-5 gap-6">
             <ProductCard v-for="product in products" :key="product.id" :item="product" v-if="!loading" />
         </div>
     </section>

@@ -24,10 +24,19 @@
                         <div class="flex flex-col gap-4">
                             <p class="font-semibold">Company</p>
                             <nav class="flex flex-col gap-4 *:font-medium *:text-custom-grey">
-                                <a href="#">Contact Us</a>
                                 <a href="#">About Us</a>
+                                <a href="#">Career</a>
                                 <a href="#">Privacy Policy</a>
                                 <a href="#">Terms & Conditions</a>
+                            </nav>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <p class="font-semibold">Support</p>
+                            <nav class="flex flex-col gap-4 *:font-medium *:text-custom-grey">
+                                <a href="#">Customer Services</a>
+                                <a href="#">Return & Refund</a>
+                                <a href="#">Shipping Info</a>
+                                <a href="#">Contact Us</a>
                             </nav>
                         </div>
                     </div>

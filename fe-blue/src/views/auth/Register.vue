@@ -42,10 +42,14 @@ const handleSubmit = async () => {
     formData.append('password', form.value.password)
     formData.append('role', 'buyer') // Force role to buyer
 
-    await register(formData)
-
-    // Always redirect to App Home
-    router.push({ name: 'app.home' })
+    try {
+        await register(formData)
+        // Only redirect on success
+        router.push({ name: 'app.home' })
+    } catch (e) {
+        console.error('Registration failed:', e)
+        // Error state is already handled by authStore and displayed in template
+    }
 }
 </script>
 
@@ -124,10 +128,11 @@ const handleSubmit = async () => {
                                 Enter Your Phone Number
                             </p>
                             <input type="tel" class="custom-input" placeholder="" v-model="form.phone_number"
-                                autocomplete="off">
+                                autocomplete="off" @input="form.phone_number = form.phone_number.replace(/[^0-9]/g, '').slice(0, 15)">
                         </label>
                         <span class="input-error" v-if="error?.phone_number">{{ error?.phone_number?.join(', ')
                         }}</span>
+                         <span class="input-error" v-else-if="form.phone_number && !form.phone_number.startsWith('08')">Phone number must start with 08</span>
                     </div>
                 </div>
             </div>

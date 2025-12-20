@@ -57,10 +57,10 @@ const handleFollow = () => {
                     Homepage
                 </RouterLink>
                 <span class="font-medium text-xl text-custom-grey">/</span>
-                <a href="browse-category.html"
+                <RouterLink :to="{ name: 'app.all-stores' }"
                     class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
                     Stores
-                </a>
+                </RouterLink>
                 <span class="font-medium text-xl text-custom-grey">/</span>
                 <a href="#" class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
                     {{ store?.name }}
