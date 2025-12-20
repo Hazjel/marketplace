@@ -75,7 +75,7 @@ class ProductController extends Controller implements HasMiddleware
             // Log::info("CONTROLLER debug totalSold: " . $totalSold);
             // Log::info("CONTROLLER debug Auth: " . (auth()->check() ? auth()->user()->id : 'Guest'));
 
-            $resource = PaginateResource::make($products, ProductResource::class);
+            $resource = (new PaginateResource($products, ProductResource::class));
             
             // Resolve resource to array to ensure we can modify structure reliably
             $data = $resource->resolve(request());

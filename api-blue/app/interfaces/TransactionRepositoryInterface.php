@@ -3,6 +3,7 @@
 Namespace App\Interfaces;
 
 use Illuminate\Support\Arr;
+use App\Models\Transaction;
 
 interface TransactionRepositoryInterface
 {
