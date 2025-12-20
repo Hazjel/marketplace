@@ -34,6 +34,7 @@ const addressSearch = ref('');
 const addressOptions = ref([]);
 const showAddressOptions = ref(false);
 const loadingAddress = ref(false);
+const fileInput = ref(null); // Reference for file input
 
 // Fetch existing store data
 const fetchData = async () => {
@@ -138,10 +139,11 @@ onMounted(fetchData)
                         class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
                         <img id="Thumbnail" :src="store.logo_url || '@/assets/images/icons/gallery-grey.svg'"
                             class="size-full object-contain" alt="icon" />
-                        <input type="file" id="File-Input" accept="image/*"
-                            class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange" />
+                        <!-- Input moved/hidden so it doesn't overlay image -->
+                        <input type="file" ref="fileInput" id="File-Input" accept="image/*"
+                            class="hidden" @change="handleImageChange" />
                     </div>
-                    <button type="button" id="Change-Photo"
+                    <button type="button" @click="$refs.fileInput.click()" id="Change-Photo"
                         class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
                         Change Photo
                     </button>

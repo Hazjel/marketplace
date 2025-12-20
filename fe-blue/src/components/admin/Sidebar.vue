@@ -60,8 +60,9 @@ const items = computed(() => [
         path: `${prefix.value}/my-transactions`,
         iconDefault: StickyNoteGreyIcon,
         iconActive: StickyNoteBlueFillIcon,
+        iconActive: StickyNoteBlueFillIcon,
         permission: 'transaction-menu',
-        role: 'buyer'
+        role: ['buyer', 'store'] // Both can see personal transactions
     },
     {
         label: 'Manage Product',
@@ -160,7 +161,7 @@ const items = computed(() => [
 ])
 
 const marketplaceLink = {
-    label: 'Back to Marketplace',
+    label: 'Switch to Buyer Mode',
     path: '/',
     iconDefault: GlobalSearchIcon,
     iconActive: GlobalSearchIcon,
@@ -194,8 +195,8 @@ const chatLink = computed(() => ({
 
             <div class="pb-8">
                 <ul class="flex flex-col gap-2">
-                    <SidebarItem :item="chatLink" />
-                    <SidebarItem :item="marketplaceLink" />
+                    <SidebarItem :item="chatLink" v-if="user?.role !== 'admin'" />
+                    <SidebarItem :item="marketplaceLink" v-if="user?.role !== 'admin'" />
                 </ul>
             </div>
         </div>

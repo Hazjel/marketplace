@@ -5,12 +5,6 @@ import { axiosInstance } from './axios';
 
 window.Pusher = Pusher;
 
-console.log('Reverb Config:', {
-    key: import.meta.env.VITE_REVERB_APP_KEY || 'reverbkey',
-    host: import.meta.env.VITE_REVERB_HOST || 'localhost',
-    port: import.meta.env.VITE_REVERB_PORT || 8080
-});
-
 const echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY || 'reverbkey',

@@ -178,10 +178,7 @@ watch(
                 </div>
                 <div id="Descriptions" class="group flex flex-col">
                     <p class="font-bold text-lg">Product About</p>
-                    <article id="Product-Descriptions"
-                        class="mt-3 overflow-y-hidden h-fit max-h-[390px] group-has-[:checked]:max-h-fit"
-                        v-html="product?.description">
-                    </article>
+                    <p class="font-semibold text-custom-grey whitespace-pre-wrap mt-3 overflow-y-hidden h-fit max-h-[390px] group-has-[:checked]:max-h-fit">{{ product?.description }}</p>
                     <label>
                         <span
                             class="font-bold text-lg text-custom-blue after:content-['Read_More'] group-has-[:checked]:after:content-['See_Lees']"></span>

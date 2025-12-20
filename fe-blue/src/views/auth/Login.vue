@@ -49,6 +49,8 @@ const handleSubmit = async () => {
 }
 
 onMounted(() => {
+    authStore.error = null; // Reset error state
+
     const savedEmail = localStorage.getItem('remembered_email');
     const savedPassword = localStorage.getItem('remembered_password');
 

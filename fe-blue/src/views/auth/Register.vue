@@ -2,7 +2,7 @@
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 
 const authStore = useAuthStore()
@@ -25,6 +25,10 @@ const handleImageChange = (e) => {
     form.value.profile_picture = file
     form.value.profile_picture_url = URL.createObjectURL(file)
 }
+
+onMounted(() => {
+    authStore.error = null; // Reset error state
+});
 
 const handleSubmit = async () => {
     const formData = new FormData()

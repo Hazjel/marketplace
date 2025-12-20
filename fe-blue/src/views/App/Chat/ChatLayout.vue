@@ -37,6 +37,7 @@ onMounted(async () => {
     if (user.value) {
         await fetchContacts();
         await handleInitialParams();
+        chatStore.joinPresenceChannel(); // Join presence channel
     }
 
     // Add ESC key listener
@@ -57,6 +58,7 @@ const handleEscKey = (e) => {
 onUnmounted(() => {
     if (user.value) {
         echo.leave(`chat.${user.value.id}`);
+        chatStore.leavePresenceChannel();
     }
     window.removeEventListener('keydown', handleEscKey);
 });
