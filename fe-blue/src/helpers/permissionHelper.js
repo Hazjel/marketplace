@@ -14,5 +14,9 @@ export const hasRole = role => {
     const authStore = useAuthStore()
     const userRole = authStore.user?.role || ''
 
+    if (Array.isArray(role)) {
+        return role.includes(userRole)
+    }
+
     return userRole === role
 }

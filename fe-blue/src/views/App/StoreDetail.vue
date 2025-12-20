@@ -4,7 +4,7 @@ import { useProductStore } from '@/stores/product';
 import { useStoreStore } from '@/stores/store';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute()
 
@@ -36,6 +36,16 @@ onMounted(async () => {
         random: true
     })
 })
+
+const router = useRouter() // Import useRouter before using
+const handleFollow = () => {
+    if (!authStore.token) {
+        router.push({ name: 'auth.login' })
+        return
+    }
+    // Logic for follow store (if implemented)
+}
+
 </script>
 
 <template>
@@ -99,7 +109,7 @@ onMounted(async () => {
                     </div>
                 </div>
                 <div class="flex gap-4">
-                    <button
+                    <button @click="handleFollow"
                         class="flex items-center justify-center h-16 w-full rounded-2xl p-4 px-6 gap-2 bg-custom-blue">
                         <span class="font-bold text-white">Follow Store</span>
                         <img src="@/assets/images/icons/shop-add-white.svg" class="flex size-6 shrink-0" alt="icon">

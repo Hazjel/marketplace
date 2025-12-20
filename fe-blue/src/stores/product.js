@@ -112,7 +112,33 @@ export const useProductStore = defineStore("product", {
             this.error = null
 
             try {
-                const response = await axiosInstance.post('product', payload)
+                let data = payload;
+
+                // Check if payload contains images, if so convert to FormData
+                if (payload.product_images && payload.product_images.length > 0) {
+                    data = new FormData();
+
+                    // Append regular fields
+                    for (const key in payload) {
+                        if (key !== 'product_images' && payload[key] !== null) {
+                            data.append(key, payload[key]);
+                        }
+                    }
+
+                    // Append images
+                    payload.product_images.forEach((item, index) => {
+                        if (item.image) {
+                            data.append(`product_images[${index}][image]`, item.image);
+                            data.append(`product_images[${index}][is_thumbnail]`, item.is_thumbnail ? 1 : 0);
+                        }
+                    });
+                }
+
+                const response = await axiosInstance.post('product', data, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
 
                 this.success = response.data.message
 

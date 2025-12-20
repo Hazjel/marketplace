@@ -22,7 +22,6 @@ const priceMin = ref(props.initialFilters.min_price || '');
 const priceMax = ref(props.initialFilters.max_price || '');
 const selectedConditions = ref(ensureArray(props.initialFilters.condition));
 const minRating = ref(props.initialFilters.min_rating || null);
-const stockStatus = ref(props.initialFilters.stock_status || '');
 const createdSince = ref(props.initialFilters.created_since ? parseInt(props.initialFilters.created_since) : null);
 
 // Data Lists
@@ -38,6 +37,8 @@ const timeOptions = [
     { label: '3 Bulan', value: 90 }
 ];
 
+const ratingLevels = [4];
+
 // Handle Changes
 const applyFilters = () => {
     emit('filter-change', {
@@ -45,13 +46,17 @@ const applyFilters = () => {
         max_price: priceMax.value,
         condition: selectedConditions.value,
         min_rating: minRating.value,
-        stock_status: stockStatus.value,
+        min_rating: minRating.value,
         created_since: createdSince.value
     });
 };
 
 // Auto-apply on change
-watch([priceMin, priceMax, selectedConditions, minRating, stockStatus, createdSince], () => {
+watch([priceMin, priceMax, selectedConditions, minRating, createdSince], () => {
+    // Middleware: Prevent negative values
+    if (priceMin.value < 0) priceMin.value = 0;
+    if (priceMax.value < 0) priceMax.value = 0;
+    
     applyFilters();
 });
 
@@ -60,7 +65,7 @@ const openSections = ref({
     price: true,
     condition: true,
     rating: true,
-    others: true,
+    rating: true,
     added: true
 });
 
@@ -120,26 +125,14 @@ const toggleSection = (section) => {
                     <i :class="openSections.rating ? 'rotate-180' : ''" class="transition-transform fa-solid fa-chevron-down text-xs"></i>
                 </button>
                 <div v-if="openSections.rating" class="flex flex-col gap-2">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" :true-value="4" :false-value="null" v-model="minRating" class="w-4 h-4 text-custom-blue rounded focus:ring-custom-blue">
-                        <div class="flex items-center gap-1">
-                            <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
-                            <span class="text-custom-grey text-sm">Rating 4 ke atas</span>
+                    <label v-for="level in ratingLevels" :key="level" class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" :true-value="level" :false-value="null" v-model="minRating" class="w-4 h-4 text-custom-blue rounded focus:ring-custom-blue">
+                        <div class="flex items-center gap-2">
+                            <div class="flex gap-0.5">
+                                <i v-for="n in level" :key="n" class="fa-solid fa-star text-xs" style="color: #FFC107;"></i>
+                            </div>
+                            <span class="text-custom-grey text-sm">{{ level }} ke atas</span>
                         </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Lainnya (Ready Stock) -->
-            <div class="border-b border-gray-100 last:border-0 pb-4 last:pb-0 pt-4">
-                 <button @click="toggleSection('others')" class="flex justify-between items-center w-full mb-3">
-                    <span class="font-bold text-custom-black dark:text-white">Opsi Lainnya</span>
-                    <i :class="openSections.others ? 'rotate-180' : ''" class="transition-transform fa-solid fa-chevron-down text-xs"></i>
-                </button>
-                <div v-if="openSections.others" class="flex flex-col gap-2">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" true-value="ready_stock" false-value="" v-model="stockStatus" class="w-4 h-4 text-custom-blue rounded focus:ring-custom-blue">
-                        <span class="text-custom-grey text-sm">Ready Stock</span>
                     </label>
                 </div>
             </div>

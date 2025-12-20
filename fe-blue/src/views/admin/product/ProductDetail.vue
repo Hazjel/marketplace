@@ -73,7 +73,7 @@ onMounted(() => {
             <hr class="border-custom-stroke">
             <div class="flex flex-col gap-2">
                 <p class="font-bold text-xl">About Product</p>
-                <p class="font-semibold text-custom-grey" v-html="product.description"></p>
+                <p class="font-semibold text-custom-grey whitespace-pre-wrap">{{ product.description }}</p>
             </div>
             <hr class="border-custom-stroke">
             <div class="flex items-center justify-between">

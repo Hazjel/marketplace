@@ -10,7 +10,9 @@ export const useChatStore = defineStore("chat", {
         loadingContacts: false,
         loadingMessages: false,
         sendingMessage: false,
+        sendingMessage: false,
         error: null,
+        onlineUsers: [], // Array of user IDs or objects
     }),
 
     getters: {
@@ -119,6 +121,27 @@ export const useChatStore = defineStore("chat", {
         cleanupChatListener(userId) {
             import('@/plugins/echo').then(({ default: echo }) => {
                 echo.leave(`chat.${userId}`);
+            });
+        },
+
+        joinPresenceChannel() {
+            import('@/plugins/echo').then(({ default: echo }) => {
+                echo.join('online')
+                    .here((users) => {
+                        this.onlineUsers = users;
+                    })
+                    .joining((user) => {
+                        this.onlineUsers.push(user);
+                    })
+                    .leaving((user) => {
+                        this.onlineUsers = this.onlineUsers.filter(u => u.id !== user.id);
+                    });
+            });
+        },
+
+        leavePresenceChannel() {
+            import('@/plugins/echo').then(({ default: echo }) => {
+                echo.leave('online');
             });
         }
     }

@@ -71,6 +71,25 @@ const router = createRouter({
     {
       path: '/',
       component: App,
+      beforeEnter: async (to, from, next) => {
+        const authStore = useAuthStore()
+
+        // Ensure user is loaded if token exists
+        if (authStore.token && !authStore.user) {
+          try {
+            await authStore.checkAuth()
+          } catch (e) {
+            // Token might be invalid, treat as guest
+          }
+        }
+
+        // If Admin, redirect to Dashboard
+        if (authStore.user?.role === 'admin') {
+          return next({ name: 'admin.dashboard' })
+        }
+
+        next()
+      },
       children: [
         {
           path: '403',
@@ -100,7 +119,8 @@ const router = createRouter({
         {
           path: '/cart',
           name: 'app.cart',
-          component: Cart
+          component: Cart,
+          meta: { requiresAuth: true }
         },
         {
           path: '/checkout',

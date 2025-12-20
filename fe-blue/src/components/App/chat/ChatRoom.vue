@@ -12,6 +12,20 @@ const { messages, activeUser, loadingMessages, sendingMessage } = storeToRefs(ch
 const { user: currentUser } = storeToRefs(authStore);
 const { fetchMessages, sendMessage } = chatStore;
 
+const isOnline = computed(() => {
+    if (!activeUser.value) return false;
+    return chatStore.onlineUsers.some(u => String(u.id) === String(activeUser.value.id));
+});
+
+const statusText = computed(() => {
+    if (isOnline.value) return 'Online';
+    if (activeUser.value?.last_seen_at) {
+         const date = new Date(activeUser.value.last_seen_at);
+         return `Last seen ${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+    return 'Offline';
+});
+
 const newMessage = ref('');
 const messagesContainer = ref(null);
 
@@ -67,7 +81,10 @@ const handleSend = async () => {
 
             <div>
                 <h2 class="font-bold text-lg">{{ activeUser.name }}</h2>
-                <p class="text-xs text-custom-grey">Online</p>
+                <div class="flex items-center gap-1.5">
+                    <div v-if="isOnline" class="size-2 rounded-full bg-green-500"></div>
+                    <p class="text-xs text-custom-grey">{{ statusText }}</p>
+                </div>
             </div>
         </div>
 

@@ -70,7 +70,7 @@ onMounted(fetchData)
                 <hr class="border-custom-stroke" />
                 <div class="flex flex-col gap-2">
                     <p class="font-bold text-xl">Store About</p>
-                    <p class="font-semibold text-custom-grey" v-html="store.about"></p>
+                    <p class="font-semibold text-custom-grey whitespace-pre-wrap">{{ store.about }}</p>
                 </div>
                 <div class="flex flex-col rounded-[20px] border border-custom-stroke p-4 gap-5">
                     <div class="flex items-center gap-[10px] w-[260px]">
@@ -155,7 +155,7 @@ onMounted(fetchData)
                 <hr class="border-custom-stroke" />
                 <div class="flex flex-col gap-2">
                     <p class="font-bold text-xl">Store About</p>
-                    <p class="font-semibold text-custom-grey" v-html="store.about"></p>
+                    <p class="font-semibold text-custom-grey whitespace-pre-wrap">{{ store.about }}</p>
                 </div>
                 <div class="flex flex-col gap-3">
                     <div class="flex items-center gap-[14px]">
