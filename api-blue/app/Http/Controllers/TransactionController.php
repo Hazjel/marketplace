@@ -58,6 +58,8 @@ class TransactionController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
         }
 
+
+
         $request = $request->validate([
             'search' => 'nullable|string',
             'row_per_page' => 'required|integer'
@@ -68,10 +70,7 @@ class TransactionController extends Controller implements HasMiddleware
             $totalRevenue = $this->transactionRepository->getTotalRevenue();
             $totalAdminFee = $this->transactionRepository->getTotalAdminFee();
 
-            $response = PaginateResource::make($transactions, TransactionResource::class);
-            $responseData = $response->response()->getData(true);
-            $responseData['meta']['total_revenue'] = $totalRevenue;
-            $responseData['meta']['total_admin_fee'] = $totalAdminFee;
+
 
             // Manual wrapping because using getData(true) returns the array structure directly 
             // but ResponseHelper expects to wrap it in 'data'
@@ -81,7 +80,8 @@ class TransactionController extends Controller implements HasMiddleware
             // PaginateResource::make returns a resource. JsonResponse helper handles resource.
             // Let's modify the resource using additional()
             
-            $resource = PaginateResource::make($transactions, TransactionResource::class)->additional([
+            // Use 'new' because 'make' static method often only accepts one arg, causing resourceClass to be null
+            $resource = (new PaginateResource($transactions, TransactionResource::class))->additional([
                 'meta' => [
                     'total_revenue' => $totalRevenue,
                     'total_admin_fee' => $totalAdminFee
@@ -89,7 +89,8 @@ class TransactionController extends Controller implements HasMiddleware
             ]);
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', $resource, 200);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error("TRANSACTION LIST ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
@@ -100,6 +101,12 @@ class TransactionController extends Controller implements HasMiddleware
     public function store(TransactionStoreRequest $request)
     {
         Log::error("CONTROLLER: Store START. Payload: " . json_encode($request->all()));
+
+        // Security: Prevent Admin from creating transactions
+        if ($request->user()->hasRole('admin')) {
+            return ResponseHelper::jsonResponse(false, 'Admin forbidden from creating transactions.', null, 403);
+        }
+
         $request = $request->validated();
 
         try {
@@ -121,6 +128,15 @@ class TransactionController extends Controller implements HasMiddleware
 
             if (!$transactions) {
                 return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            // Security: Prevent IDOR (Only Buyer, Seller, or Admin can view)
+            $user = auth()->user();
+            if ($user->hasRole('buyer') && $transactions->buyer_id !== $user->buyer?->id) {
+                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
+            }
+            if ($user->hasRole('store') && $transactions->store_id !== $user->store?->id) {
+                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', new TransactionResource($transactions), 200);

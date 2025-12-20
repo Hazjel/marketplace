@@ -25,8 +25,9 @@ class UserResource extends JsonResource
             'role' => $role,
             'permissions' => $this->permissions,
             'token' => $this->token,
-            'store' => $role === 'store' ? $this->store : null,
-            'buyer' => $role === 'buyer' ? $this->buyer : null
+            'store' => $this->store, // Return store if exists
+            'buyer' => $this->buyer,  // Return buyer if exists (Even if role is store)
+            'last_seen_at' => $this->last_seen_at // Added
         ];
     }
 }

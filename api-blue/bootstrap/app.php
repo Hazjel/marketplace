@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         'midtrans-callback',
     ]);
     $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
+    $middleware->append(\App\Http\Middleware\UpdateLastSeen::class);
 })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

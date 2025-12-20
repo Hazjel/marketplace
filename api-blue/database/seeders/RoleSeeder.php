@@ -17,7 +17,8 @@ class RoleSeeder extends Seeder
             return !in_array($permission->name, [
                 'product-create',
                 'product-edit',
-                'product-delete'
+                'product-delete',
+                'transaction-create' // Admin cannot buy
             ]);
         });
 
@@ -68,7 +69,6 @@ class RoleSeeder extends Seeder
             'withdrawal-delete',
 
             'product-category-list',
-            'product-category-create',
 
             'product-menu',
             'product-list',
