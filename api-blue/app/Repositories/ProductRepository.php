@@ -72,9 +72,8 @@ class ProductRepository implements ProductRepositoryInterface
             }
         })->with('productImages');
 
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('store_id', auth()->user()->store->id ?? null);
-        }
+        // Removed implicit filtering by store_id for store role users to allow them to see all products in buyer mode
+
 
         if ($limit) {
             $query->take($limit);
