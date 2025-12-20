@@ -2,6 +2,7 @@
 import Alert from '@/components/admin/Alert.vue';
 import CardList from '@/components/admin/product/CardList.vue';
 import Pagination from '@/components/admin/Pagination.vue';
+import { useAuthStore } from '@/stores/auth';
 import { useProductStore } from '@/stores/product';
 import { debounce } from 'lodash';
 import { storeToRefs } from 'pinia';
@@ -12,6 +13,9 @@ import { can } from '@/helpers/permissionHelper';
 const productStore = useProductStore()
 const { products, meta, loading, success, error } = storeToRefs(productStore)
 const { fetchProductsPaginated, deleteProduct } = productStore
+
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
 const serverOptions = ref({
     page: 1,
@@ -27,7 +31,8 @@ const totalProductsSummary = ref(0)
 const fetchData = async () => {
     await fetchProductsPaginated({
         ...serverOptions.value,
-        ...filters.value
+        ...filters.value,
+        store_id: user.value?.store?.id
     })
 
     if (!filters.value.search) {
