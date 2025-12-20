@@ -96,8 +96,8 @@ FRONTEND_URL=http://localhost:5173
 # Generate App Key
 php artisan key:generate
 
-# Run Migrations (Create Database Tables)
-php artisan migrate
+# Run Migrations & Seeders (Create Database Tables & Default Users)
+php artisan migrate:fresh --seed
 
 # Link Storage (For Images)
 php artisan storage:link
@@ -108,8 +108,16 @@ php artisan serve
 *Backend runs at: `http://localhost:8000`*
 
 ### 2.1. Realtime Chat Setup (Reverb)
-1.  **Configure Environment**:
-    Add Reverb keys to `api-blue/.env`:
+1.  **Install & Configure Reverb**:
+    Run the broadcasting installation command to scaffold the necessary configuration and generate keys automatically:
+    ```bash
+    php artisan install:broadcasting
+    ```
+    *   Select **Reverb** when prompted.
+    *   This will automatically update your `.env` file with `REVERB_APP_ID`, `REVERB_APP_KEY`, etc.
+
+2.  *(Optional)* **Manual Configuration**:
+    If you skipped the installer, manually add these to `api-blue/.env`:
     ```ini
     BROADCAST_CONNECTION=reverb
     REVERB_APP_ID=my-app-id
@@ -124,12 +132,44 @@ php artisan serve
     VITE_REVERB_PORT="${REVERB_PORT}"
     VITE_REVERB_SCHEME="${REVERB_SCHEME}"
     ```
-2.  **Start Reverb Server**:
+
+3.  **Start Reverb Server**:
     ```bash
     php artisan reverb:start
     ```
 
-### 2.2. Payment & Shipping Integration
+### 2.2. Google OAuth Setup (For Social Login)
+To enable "Sign in with Google", you need to obtain credentials from Google Cloud Console.
+
+1.  **Create Project**:
+    *   Go to [Google Cloud Console](https://console.cloud.google.com/).
+    *   Create a new project (e.g., "Blue Marketplace").
+
+2.  **Configure Consent Screen**:
+    *   Go to **APIs & Services > OAuth consent screen**.
+    *   Select **External** user type and click Create.
+    *   Fill in required details (App Name, Support Email).
+
+3.  **Get Credentials**:
+    *   Go to **Credentials > Create Credentials > OAuth client ID**.
+    *   Application Type: **Web application**.
+    *   **Authorized JavaScript origins**:
+        *   `http://localhost:5173` (Frontend)
+        *   `http://localhost:8000` (Backend)
+    *   **Authorized redirect URIs**:
+        *   `http://localhost:8000/api/auth/google/callback`
+    *   Click **Create**.
+
+4.  **Update Environment**:
+    *   Copy the **Client ID** and **Client Secret**.
+    *   Paste them into your `api-blue/.env` file:
+        ```ini
+        GOOGLE_CLIENT_ID=your_pasted_client_id
+        GOOGLE_CLIENT_SECRET=your_pasted_client_secret
+        GOOGLE_REDIRECT_URL=http://localhost:8000/api/auth/google/callback
+        ```
+
+### 2.3. Payment & Shipping Integration
 1.  **RajaOngkir (Shipping)**:
     Add API key to `api-blue/.env`:
     ```ini
