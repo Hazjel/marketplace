@@ -17,7 +17,7 @@ class StoreUpdateRequest extends FormRequest
             'name' => 'required|string|max:255',
             'logo' => 'nullable|mimes:png,jpg|max:2048',
             'about' => 'required|string',
-            'phone' => 'required|string',
+            'phone' => 'required|numeric|regex:/^08[0-9]{8,13}$/',
             'address_id' => 'required',
             'city' => 'required|string',
             'address' => 'required|string',

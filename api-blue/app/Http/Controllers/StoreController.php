@@ -202,7 +202,7 @@ class StoreController extends Controller implements HasMiddleware
     {
         $request->validate([
             'name' => 'required|string|unique:stores,name',
-            'phone' => 'nullable|string',
+            'phone' => 'required|numeric|regex:/^08[0-9]{8,13}$/',
             'city' => 'nullable|string',
             'address' => 'nullable|string',
             'postal_code' => 'nullable|string',
@@ -224,7 +224,7 @@ class StoreController extends Controller implements HasMiddleware
                 'city' => $request->city,
                 'address' => $request->address,
                 'postal_code' => $request->postal_code,
-                'is_verified' => false,
+                'is_verified' => true,
                 'logo' => 'default-store.png',
                 'about' => '-',
                 'address_id' => '-',
@@ -238,7 +238,7 @@ class StoreController extends Controller implements HasMiddleware
             // Change Role: Remove 'buyer', Assign 'store'
             $user->removeRole('buyer');
             $user->assignRole('store');
-            
+
             // Refresh permissions
             $user->permissions = $user->getPermissionsViaRoles()->pluck('name');
             $user->token = $user->createToken('auth_token')->plainTextToken; // Refresh token with new permissions

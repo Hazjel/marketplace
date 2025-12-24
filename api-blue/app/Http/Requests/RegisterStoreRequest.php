@@ -19,7 +19,7 @@ class RegisterStoreRequest extends FormRequest
             'email' => 'required|email|unique:users',
             'password' => 'required',
             'role' => 'required|in:buyer,store',
-            'phone_number' => 'required|numeric'
+            'phone_number' => 'required|numeric|regex:/^08[0-9]{8,13}$/'
         ];
     }
 
