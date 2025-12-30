@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173'], // Add frontend URL
+    'allowed_origins' => ['*'], // Allow ALL origins temporarily for debugging
 
     'allowed_origins_patterns' => [],
 
