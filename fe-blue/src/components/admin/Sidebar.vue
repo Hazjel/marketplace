@@ -47,7 +47,11 @@ const prefix = computed(() => {
     return `/${user.value?.username}`
 })
 
-const items = computed(() => [
+const items = computed(() => {
+    const mode = authStore.activeMode;
+    
+    // Base items available to both, but we might want to restrict some based on mode
+    const allItems = [
     {
         label: 'Overview',
         path: `${prefix.value}/dashboard`,
@@ -82,7 +86,8 @@ const items = computed(() => [
                 iconActive: BagBlueFillIcon,
                 permission: 'product-menu'
             }
-        ]
+        ],
+        mode: 'store' // Only show in store mode
     },
     {
         label: 'Manage Store',
@@ -120,7 +125,8 @@ const items = computed(() => [
                 permission: 'transaction-menu',
                 role: 'store'
             }
-        ]
+        ],
+        mode: 'store' // Only show in store mode
     },
     {
         label: 'Manage Wallet',
@@ -147,9 +153,12 @@ const items = computed(() => [
                 path: `${prefix.value}/withdrawal`,
                 iconDefault: EmpyWalletGreyIcon,
                 iconActive: Wallet3BlueFillIcon,
-                permission: 'withdrawal-menu'
+                permission: 'withdrawal-menu',
+                 role: 'store' // Explicitly restrict if needed, though permission might handle it
             },
-        ]
+        ],
+        // Wallet management usually for store, but if buyer has a wallet, remove mode restriction
+        mode: 'store' 
     },
     {
         label: 'Manage Users',
@@ -158,15 +167,27 @@ const items = computed(() => [
         iconActive: User2BlueIcon,
         permission: 'user-menu'
     },
-])
+    ];
 
-const marketplaceLink = {
-    label: 'Switch to Buyer Mode',
-    path: '/',
-    iconDefault: GlobalSearchIcon,
-    iconActive: GlobalSearchIcon,
-    permission: 'dashboard-menu'
-}
+    return allItems.filter(item => {
+        // If item has a mode restriction, check if it matches activeMode
+        if (item.mode && item.mode !== mode && user.value?.role !== 'admin') {
+            return false;
+        }
+        return true;
+    });
+})
+
+const marketplaceLink = computed(() => {
+    const isBuyerMode = authStore.activeMode === 'buyer'
+    return {
+        label: isBuyerMode ? 'Back to Homepage' : 'Back to Buyer Mode',
+        path: isBuyerMode ? '/' : null,
+        iconDefault: isBuyerMode ? HomeBlackIcon : GlobalSearchIcon,
+        iconActive: isBuyerMode ? HomeBlueFillIcon : GlobalSearchIcon,
+        permission: 'dashboard-menu'
+    }
+})
 
 const chatLink = computed(() => ({
     label: 'Messages',
@@ -177,6 +198,12 @@ const chatLink = computed(() => ({
     badge: totalUnreadCount.value
 }))
 
+const handleSwitchMode = () => {
+    if (authStore.activeMode === 'store') {
+        authStore.setMode('buyer')
+        router.push({ name: 'app.home' })
+    }
+}
 </script>
 
 <template>
@@ -196,7 +223,7 @@ const chatLink = computed(() => ({
             <div class="pb-8">
                 <ul class="flex flex-col gap-2">
                     <SidebarItem :item="chatLink" v-if="user?.role !== 'admin'" />
-                    <SidebarItem :item="marketplaceLink" v-if="user?.role !== 'admin'" />
+                    <SidebarItem :item="marketplaceLink" v-if="user?.role !== 'admin'" @click="handleSwitchMode" />
                 </ul>
             </div>
         </div>

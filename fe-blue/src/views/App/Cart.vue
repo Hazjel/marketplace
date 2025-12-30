@@ -5,7 +5,37 @@ import { storeToRefs } from 'pinia';
 
 const cart = useCartStore()
 const { carts, selectedStores, totalSelectedItems, totalSelectedQuantity, subtotalSelected, ppnSelected, discountSelected, grandTotalSelected, hasSelectedStores } = storeToRefs(cart)
-const { decreaseQuantity, increaseQuantity, removeFromCart, toggleStoreSelection } = cart
+const { decreaseQuantity, increaseQuantity, removeFromCart, toggleStoreSelection, updateQuantity } = cart
+
+const handleIncreaseQuantity = (storeId, productId) => {
+    const store = carts.value.find(s => s.storeId === storeId)
+    const product = store?.products.find(p => p.id === productId)
+    if (product) {
+       if (product.quantity < product.stock) {
+           increaseQuantity(storeId, productId)
+       } else {
+           alert('Max stock reached')
+       }
+    }
+}
+
+const handleUpdateQuantity = (storeId, productId, event) => {
+    const value = parseInt(event.target.value)
+    const store = carts.value.find(s => s.storeId === storeId)
+    const product = store?.products.find(p => p.id === productId)
+    
+    if (product) {
+        if (value > product.stock) {
+            alert(`Stock insufficient. Max stock is ${product.stock}`)
+            event.target.value = product.stock 
+            updateQuantity(storeId, productId, product.stock)
+        } else if (value < 1) {
+             updateQuantity(storeId, productId, 1)
+        } else {
+             updateQuantity(storeId, productId, value)
+        }
+    }
+}
 </script>
 
 <template>
@@ -86,10 +116,10 @@ const { decreaseQuantity, increaseQuantity, removeFromCart, toggleStoreSelection
                                         <div class="h-[18px] border border-custom-stroke ml-4"></div>
                                         <input type="number" name=""
                                             class="amount appearance-none w-[70px] pl-5 text-center font-bold text-lg"
-                                            v-model="product.quantity">
+                                            :value="product.quantity" @change="handleUpdateQuantity(store.storeId, product.id, $event)">
                                         <div class="h-[18px] border border-custom-stroke mr-4" value="1"></div>
                                         <button type="button" class="add size-5 flex items-center justify-center"
-                                            @click="increaseQuantity(store.storeId, product.id)">
+                                            @click="handleIncreaseQuantity(store.storeId, product.id)">
                                             <span class="text-[24px] font-light leading-none align-middle mb-1">+</span>
                                         </button>
                                     </div>

@@ -17,7 +17,7 @@ const transaction = ref({})
 
 const transactionStore = useTransactionStore()
 const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
+const { user, activeMode } = storeToRefs(authStore)
 const { loading, success, error } = storeToRefs(transactionStore)
 const { fetchTransactionById, updateTransaction } = transactionStore
 
@@ -514,7 +514,7 @@ onMounted(async () => {
                     </p>
                 </div>
                 <div class="flex flex-col text-center gap-4"
-                    v-if="transaction?.payment_status === 'paid' && user?.role === 'store'">
+                    v-if="transaction?.payment_status === 'paid' && activeMode === 'store' && user?.store?.id === transaction?.store?.id">
                     <button @click="handleAcceptOrder"
                         class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300">
                         <span class="font-semibold text-lg text-white">Accept Order</span>
@@ -565,7 +565,7 @@ onMounted(async () => {
                         processing
                     </p>
                 </div>
-                <template v-if="user?.role === 'store'">
+                <template v-if="activeMode === 'store' && user?.store?.id === transaction?.store?.id">
                     <div class="flex items-center justify-between w-full">
                         <div
                             class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
@@ -653,7 +653,7 @@ onMounted(async () => {
                     <input type="file" ref="receivingProofInput" class="hidden" accept="image/*"
                         @change="handleReceivingProofChange">
 
-                    <button v-if="user?.role === 'buyer'" @click="handleCompleteOrderClick"
+                    <button v-if="activeMode === 'buyer'" @click="handleCompleteOrderClick"
                         class="flex items-center justify-center h-12 px-6 rounded-full bg-custom-blue text-white font-semibold shadow-lg hover:bg-blue-600 transition-300">
                         Order Received
                     </button>
@@ -753,14 +753,14 @@ onMounted(async () => {
 
                 <div v-else class="flex flex-col items-center justify-center py-8 gap-4">
                     <p class="font-medium text-custom-grey"
-                        v-if="user?.role === 'buyer' && transaction?.delivery_status === 'completed'">
+                        v-if="activeMode === 'buyer' && transaction?.delivery_status === 'completed'">
                         You haven't reviewed this order yet.
                     </p>
                     <p class="font-medium text-custom-grey" v-else>
                         No reviews yet.
                     </p>
 
-                    <button v-if="user?.role === 'buyer' && transaction?.delivery_status === 'completed'"
+                    <button v-if="activeMode === 'buyer' && transaction?.delivery_status === 'completed'"
                         @click="openReviewModal"
                         class="flex items-center justify-center h-12 px-6 rounded-full bg-custom-blue text-white font-semibold">
                         Write a Review

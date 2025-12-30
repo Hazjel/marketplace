@@ -521,6 +521,12 @@ router.beforeEach(async (to, from, next) => {
           return
         }
 
+        // Restrict 'store' mode users from accessing buyer pages (app.*)
+        if (authStore.activeMode === 'store' && to.name && to.name.toString().startsWith('app.')) {
+          next({ name: 'user.dashboard', params: { username: authStore.user.username } })
+          return
+        }
+
         next()
       } catch (error) {
         next({ name: 'auth.login' })
@@ -529,6 +535,14 @@ router.beforeEach(async (to, from, next) => {
       next({ name: 'auth.login' })
     }
   } else {
+    // Also check for non-auth routes if necessary, but 'app.home' is public?
+    // If 'app.home' does not require auth, we still might want to restrict if the user IS logged in and IS in store mode.
+
+    if (authStore.token && authStore.user && authStore.activeMode === 'store' && to.name && to.name.toString().startsWith('app.')) {
+      next({ name: 'user.dashboard', params: { username: authStore.user.username } })
+      return
+    }
+
     next()
   }
 })

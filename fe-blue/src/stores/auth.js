@@ -8,6 +8,7 @@ import { defineStore } from "pinia";
 export const useAuthStore = defineStore("auth", {
     state: () => ({
         user: null,
+        activeMode: Cookies.get('activeMode') || 'buyer', // 'buyer' or 'store'
         loading: false,
         error: null,
         success: null,
@@ -15,8 +16,14 @@ export const useAuthStore = defineStore("auth", {
     getters: {
         token: () => Cookies.get("token"),
         isAuthenticated: (state) => !!state.user,
+        currentMode: (state) => state.activeMode,
     },
     actions: {
+        setMode(mode) {
+            console.log('setMode called with:', mode);
+            this.activeMode = mode;
+            Cookies.set('activeMode', mode);
+        },
         async login(credentials) {
             this.loading = true;
             this.error = null;

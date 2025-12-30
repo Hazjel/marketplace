@@ -68,6 +68,8 @@ const increase = () => {
     const stock = Number(product.value?.stock || 0)
     if (quantity.value < stock) {
         quantity.value++
+    } else {
+        alert('Max stock reached')
     }
 }
 
@@ -80,6 +82,24 @@ const decrease = () => {
 const addToCart = () => {
     if (!authStore.token) {
         router.push({ name: 'auth.login' })
+        return
+    }
+
+    const stock = product.value?.stock || 0
+    const storeId = product.value?.store?.id
+    
+    // Find current quantity in cart
+    let currentInCart = 0
+    const storeCart = cart.carts.find(s => s.storeId === storeId)
+    if (storeCart) {
+        const existingProduct = storeCart.products.find(p => p.id === product.value.id)
+        if (existingProduct) {
+            currentInCart = existingProduct.quantity
+        }
+    }
+
+    if (currentInCart + quantity.value > stock) {
+        alert(`Stock insufficient. You have ${currentInCart} in cart and want to add ${quantity.value}. Max stock is ${stock}.`)
         return
     }
 
@@ -184,16 +204,6 @@ watch(
                             class="font-bold text-lg text-custom-blue after:content-['Read_More'] group-has-[:checked]:after:content-['See_Lees']"></span>
                         <input type="checkbox" class="hidden">
                     </label>
-                </div>
-                <div id="Promo-Card" class="flex gap-5 overflow-hidden">
-                    <a href="#" class="overflow-hidden">
-                        <img src="@/assets/images/thumbnails/promo-potrait-1.png" class="size-full object-contain"
-                            alt="promo">
-                    </a>
-                    <a href="#" class="overflow-hidden">
-                        <img src="@/assets/images/thumbnails/promo-potrait-2.png" class="size-full object-contain"
-                            alt="promo">
-                    </a>
                 </div>
                 <div id="Testimony" class="flex flex-col gap-6">
                     <p class="font-bold text-lg">Customer Reviews ({{ product?.product_reviews?.length || 0 }})</p>

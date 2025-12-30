@@ -26,10 +26,11 @@ const { logout } = authStore;
             </div>
             <div class="flex flex-col gap-[6px] min-w-[155px] w-fit">
                 <p class="font-semibold text-lg leading-tight">{{ user?.name }}</p>
-                <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
-                    <img src="@/assets/images/icons/user-grey.svg" class="size-[18px]" alt="icon"> 
-                    {{ user?.role }}
-                </p>
+                <div class="flex flex-col items-start">
+                    <p class="flex items-center gap-1 font-bold text-custom-blue text-sm uppercase leading-none">
+                        {{ authStore.currentMode }}
+                    </p>
+                </div>
             </div>
             <a @click="logout" class="flex w-6">
                 <img src="@/assets/images/icons/logout.svg" class="flex size-6 shrink-0" alt="icon">

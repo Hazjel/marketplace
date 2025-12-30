@@ -72,9 +72,16 @@ const fetchData = async () => {
                 sort_direction: 'desc'
             }
         })
+
         if (reviewsResponse.data.data) {
-            stats.value.total_reviews = reviewsResponse.data.data.meta?.total || 0
-            latestReviews.value = reviewsResponse.data.data.data || []
+            // Check if data is array (meta missing) or object (with meta)
+            if (Array.isArray(reviewsResponse.data.data)) {
+                latestReviews.value = reviewsResponse.data.data
+                stats.value.total_reviews = reviewsResponse.data.meta?.total || latestReviews.value.length
+            } else {
+                 stats.value.total_reviews = reviewsResponse.data.data.meta?.total || 0
+                 latestReviews.value = reviewsResponse.data.data.data || []
+            }
         }
 
         // Buyers approximation (or API limitation)
@@ -228,18 +235,15 @@ onMounted(() => {
                         class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
                         <div class="flex items-center gap-[10px] min-w-0">
                             <div class="flex size-14 shrink-0 rounded-full bg-custom-background overflow-hidden">
-                                <img :src="review.transaction?.user?.photo || '/src/assets/images/photos/photo-8.png'"
+                                <img :src="review.user?.avatar || '/src/assets/images/photos/photo-8.png'"
                                     class="size-full object-cover text-xs" alt="photo"
                                     onerror="this.src='/src/assets/images/photos/photo-8.png'">
                             </div>
-                            <div class="flex flex-col gap-[6px] w-full overflow-hidden">
+                            <div class="flex flex-col gap-[6px] w-full overflow-hidden justify-center">
                                 <p class="font-bold text-lg leading-tight w-full truncate">
-                                    {{ review.transaction?.user?.name || 'User' }}
+                                    {{ review.user?.name || 'User' }}
                                 </p>
-                                <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                    <img src="@/assets/images/icons/call-grey.svg" class="size-5" alt="icon">
-                                    {{ review.transaction?.user?.phone_number || '-' }}
-                                </p>
+                                <!-- Phone number removed as it is not strictly available in the simplified user resource and anonymity might hide it -->
                             </div>
                         </div>
                         <hr class="border-custom-stroke">

@@ -46,8 +46,8 @@ watch(route, () => {
 
 <template>
     <li class="group" v-if="!item.children && can(item.permission) && hasRole(item.role)"
-        :class="{ 'active': isActive }">
-        <RouterLink :to="item.path"
+        :class="{ 'active': isActive }" v-bind="$attrs">
+        <RouterLink v-if="item.path" :to="item.path"
             class="flex items-center w-full min-h-14 gap-2 rounded-2xl overflow-hidden py-[10px] pl-4 group-[&.active]:bg-custom-blue/10 transition-300">
             <div class="relative flex size-6 shrink-0">
                 <img :src="item.iconDefault"
@@ -65,10 +65,28 @@ watch(route, () => {
             <div class="w-2 h-9 shrink-0 rounded-l-xl bg-custom-blue hidden group-[&.active]:flex transition-300">
             </div>
         </RouterLink>
+        <div v-else
+            class="flex items-center w-full min-h-14 gap-2 rounded-2xl overflow-hidden py-[10px] pl-4 group-[&.active]:bg-custom-blue/10 transition-300 cursor-pointer">
+            <div class="relative flex size-6 shrink-0">
+                <img :src="item.iconDefault"
+                    class="size-6 absolute opacity-100 group-[&.active]:opacity-0 transition-300" alt="icon">
+                <img :src="item.iconActive"
+                    class="size-6 absolute opacity-0 group-[&.active]:opacity-100 transition-300" alt="icon">
+            </div>
+            <p class="font-medium group-[&.active]:text-custom-blue transition-300 w-full">
+                {{ item.label }}
+            </p>
+            <div v-if="item.badge"
+                class="text-white text-[10px] font-bold px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full ml-auto mr-2" style="background-color: red;">
+                {{ item.badge > 99 ? '99+' : item.badge }}
+            </div>
+            <div class="w-2 h-9 shrink-0 rounded-l-xl bg-custom-blue hidden group-[&.active]:flex transition-300">
+            </div>
+        </div>
     </li>
 
     <li class="group flex flex-col"
-        v-if="item.children && item.children.some(child => can(child.permission) && hasRole(child.role))">
+        v-if="item.children && item.children.some(child => can(child.permission) && hasRole(child.role))" v-bind="$attrs">
         <button data-accordion-type="nav"
             :data-expand="`accordion-${(item.path || item.label || 'default').replace(/[\/\s]/g, '-')}`"
             @click="isOpen = !isOpen"

@@ -109,11 +109,6 @@ const handleFollow = () => {
                     </div>
                 </div>
                 <div class="flex gap-4">
-                    <button @click="handleFollow"
-                        class="flex items-center justify-center h-16 w-full rounded-2xl p-4 px-6 gap-2 bg-custom-blue">
-                        <span class="font-bold text-white">Follow Store</span>
-                        <img src="@/assets/images/icons/shop-add-white.svg" class="flex size-6 shrink-0" alt="icon">
-                    </button>
                     <RouterLink v-if="user"
                         :to="{ name: 'user.chat', params: { username: user.username }, query: { userId: store?.user?.id } }"
                         class="flex items-center justify-center h-16 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue/10">
