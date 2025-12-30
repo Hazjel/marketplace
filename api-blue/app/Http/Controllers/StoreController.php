@@ -224,7 +224,7 @@ class StoreController extends Controller implements HasMiddleware
                 'city' => $request->city,
                 'address' => $request->address,
                 'postal_code' => $request->postal_code,
-                'is_verified' => true,
+                'is_verified' => false,
                 'logo' => 'default-store.png',
                 'about' => '-',
                 'address_id' => '-',

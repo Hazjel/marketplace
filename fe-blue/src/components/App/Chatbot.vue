@@ -2,7 +2,9 @@
 import { ref, nextTick } from 'vue';
 import axios from 'axios'; // Pakai axios plugin project kamu
 
-axios.defaults.baseURL = 'http://localhost:8001';
+const chatAxios = axios.create({
+    baseURL: 'http://localhost:8001'
+});
 
 const isOpen = ref(false);
 const message = ref('');
@@ -43,7 +45,7 @@ const sendMessage = async () => {
 
     try {
         // 2. Kirim ke Laravel (/api/chat)
-        const response = await axios.post('/predict', {
+        const response = await chatAxios.post('/predict', {
             message: userMsg
         }, {
             headers: {
