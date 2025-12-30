@@ -28,7 +28,7 @@ const { logout } = authStore;
                 <p class="font-semibold text-lg leading-tight">{{ user?.name }}</p>
                 <div class="flex flex-col items-start">
                     <p class="flex items-center gap-1 font-bold text-custom-blue text-sm uppercase leading-none">
-                        {{ authStore.currentMode }}
+                        {{ user?.role === 'admin' ? 'ADMIN' : authStore.currentMode }}
                     </p>
                 </div>
             </div>

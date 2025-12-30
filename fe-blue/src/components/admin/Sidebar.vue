@@ -154,7 +154,7 @@ const items = computed(() => {
                 iconDefault: EmpyWalletGreyIcon,
                 iconActive: Wallet3BlueFillIcon,
                 permission: 'withdrawal-menu',
-                 role: 'store' // Explicitly restrict if needed, though permission might handle it
+                role: ['store', 'admin'] // Explicitly restrict if needed, though permission might handle it
             },
         ],
         // Wallet management usually for store, but if buyer has a wallet, remove mode restriction
