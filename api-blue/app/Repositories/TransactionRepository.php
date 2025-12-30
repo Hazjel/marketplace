@@ -237,7 +237,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             DB::rollBack();
             $errorMsg = "REPO FATAL ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString();
             Log::error($errorMsg);
-            file_put_contents(storage_path('logs/debug.txt'), $errorMsg, FILE_APPEND);
+            // file_put_contents(storage_path('logs/debug.txt'), $errorMsg, FILE_APPEND); // Reverted original or comment out
             throw new Exception($e->getMessage());
         }
     }

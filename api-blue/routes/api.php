@@ -1,5 +1,7 @@
 <?php
 
+
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UserController;
