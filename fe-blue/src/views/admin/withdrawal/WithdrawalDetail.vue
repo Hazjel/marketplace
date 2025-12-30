@@ -33,6 +33,10 @@ const fetchData = async () => {
 }
 
 const handleAprroveWithdrawal = async () => {
+    if (!withdrawal.value.proof) {
+        alert('Please upload a proof of payment first');
+        return;
+    }
     await approveWithdrawal(withdrawal.value)
 
     fetchData()
@@ -51,6 +55,8 @@ onMounted(fetchData)
 <template>
     <div class="flex w-full gap-5">
         <div class="flex flex-col w-full gap-5">
+            <Alert :type="'success'" :message="success" v-if="success" />
+            <Alert :type="'error'" :message="error" v-if="error" />
             <div class="relative w-full rounded-[20px] bg-custom-orange overflow-hidden" v-if="withdrawal?.status === 'pending'">
                 <img src="@/assets/images/backgrounds/round-ornament.svg"
                     class="size-full object-contain object-right opacity-55 absolute" alt="icon">
