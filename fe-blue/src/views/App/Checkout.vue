@@ -129,6 +129,12 @@ const handleDeliveryModal = async () => {
 
     try {
         const store = selectedCarts.value[0];
+
+        if (!store.storeAddressId || store.storeAddressId === '-') {
+            alert('Store address is not available. Cannot calculate delivery.');
+            return;
+        }
+
         const totalWeight = store.products.reduce((sum, p) => sum + p.weight * p.quantity, 0);
         const totalValue = finalSubtotal.value;
 

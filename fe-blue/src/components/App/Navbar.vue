@@ -189,12 +189,14 @@ onUnmounted(() => {
                         </div>
 
                         <RouterLink :to="{ name: 'admin.dashboard' }" v-if="user && user.role === 'store'"
+                            @click="authStore.setMode('store')"
                             class="flex shrink-0 h-14 rounded-[18px] py-4 px-6 bg-custom-black text-white hover:shadow-lg transition-300">
                              <img src="@/assets/images/icons/shop-white.svg" class="size-6 mr-2" alt="icon">
-                             <p class="font-medium">Switch to Seller Mode</p>
+                             <p class="font-medium">{{ authStore.activeMode === 'buyer' ? 'Switch to Seller' : 'Seller Dashboard' }}</p>
                         </RouterLink>
 
                         <RouterLink :to="{ name: 'auth.open-store' }" v-if="user && user.role === 'buyer'"
+                            @click="authStore.setMode('buyer')"
                             class="flex shrink-0 h-14 rounded-[18px] py-4 px-6 bg-custom-black text-white hover:shadow-lg transition-300">
                              <img src="@/assets/images/icons/shop-white.svg" class="size-6 mr-2" alt="icon">
                              <p class="font-medium">Start Selling</p>
@@ -216,7 +218,7 @@ onUnmounted(() => {
                                     <RouterLink v-if="user"
                                         :to="{ name: user.role === 'admin' ? 'admin.dashboard' : 'user.dashboard', params: user.role === 'admin' ? {} : { username: user.username } }"
                                         class="flex w-full items-center justify-between"
-                                        @click="showDropdownProfile = false">
+                                        @click="() => { showDropdownProfile = false; authStore.setMode('buyer') }">
                                         <span class="font-medium text-custom-grey">My Dashboard</span>
                                         <img src="@/assets/images/icons/profile-circle-grey.svg"
                                             class="flex size-6 shrink-0" alt="icon">

@@ -307,12 +307,6 @@ watch(filters, () => {
                                 </p>
                             </div>
                             <div class="flex items-center justify-end gap-[14px]">
-                                <button
-                                    class="flex items-center justify-center h-14 w-fit shrink-0 rounded-2xl p-4 gap-2 bg-custom-black">
-                                    <span class="font-semibold text-white">Export</span>
-                                    <img src="@/assets/images/icons/receive-square-white.svg"
-                                        class="flex size-6 shrink-0" alt="icon">
-                                </button>
                                 <RouterLink :to="getDetailRoute(transaction.id)"
                                     class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                                     <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0"

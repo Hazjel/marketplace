@@ -13,7 +13,8 @@ const router = useRouter()
 const route = useRoute()
 
 watchEffect(() => {
-    if (user.value?.role === 'store' && route.name === 'admin.dashboard') {
+    // Only redirect if user is store AND activeMode is store AND on the generic admin dashboard route
+    if (user.value?.role === 'store' && authStore.activeMode === 'store' && route.name === 'admin.dashboard') {
         router.replace({ 
             name: 'user.dashboard', 
             params: { username: user.value.username } 
@@ -24,6 +25,6 @@ watchEffect(() => {
 
 <template>
     <DashboardAdmin v-if="user?.role === 'admin'" />
-    <DashboardBuyer v-if="user?.role === 'buyer'" />
-    <DashboardStore v-if="user?.role === 'store'" />
+    <DashboardBuyer v-else-if="authStore.activeMode === 'buyer'" />
+    <DashboardStore v-else-if="authStore.activeMode === 'store'" />
 </template>
