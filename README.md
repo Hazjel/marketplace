@@ -252,8 +252,6 @@ The platform includes an intelligent chatbot powered by **Google Gemini AI**.
 
 If you ran database seeders, you can use these default accounts:
 
-*   **Admin**: `admin@example.com` / `password`
-*   **Buyer**: `buyer@example.com` / `password`
-*   **Seller**: `seller@example.com` / `password`
+*   **Admin**: `admin@gmail.com` / `password`
 
 Happy Coding! 🚀
