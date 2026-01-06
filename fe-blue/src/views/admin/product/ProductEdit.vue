@@ -288,7 +288,7 @@ onMounted(async () => {
                             </div>
                         </div>
                         <div class="flex items-center justify-end gap-4">
-                            <RouterLink to="{ name: 'admin.product' }"
+                            <RouterLink :to="{ name: 'admin.product' }"
                                 class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg">
                                 Cancel
                             </RouterLink>
