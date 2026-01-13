@@ -14,8 +14,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background p-[52px]">
-        <div class="flex flex-col w-full max-w-[1280px] px-[52px] gap-3 mx-auto">
+    <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background py-8 md:p-[52px]">
+        <div class="flex flex-col w-full max-w-[1280px] px-4 md:px-[52px] gap-3 mx-auto">
             <div class="flex items-center gap-3">
                 <RouterLink :to="{ name: 'app.home' }" class="font-medium text-lg text-custom-grey">
                     Homepage
@@ -28,13 +28,13 @@ onMounted(() => {
         </div>
     </header>
 
-    <main class="flex flex-col w-full max-w-[1280px] px-[52px] mt-[72px] mb-[100px] mx-auto">
+    <main class="flex flex-col w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[72px] mb-20 md:mb-[100px] mx-auto">
         <section class="flex flex-col gap-9">
             <div v-if="loading" class="flex items-center justify-center min-h-[200px]">
                 <div class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
             </div>
 
-            <div v-else-if="items.length > 0" class="grid grid-cols-4 gap-6">
+            <div v-else-if="items.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <ProductCard v-for="product in items" :key="product.id" :item="product" />
             </div>
 

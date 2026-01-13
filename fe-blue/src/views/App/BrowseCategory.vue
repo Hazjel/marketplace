@@ -42,8 +42,8 @@ onMounted(async () => {
 </script>
 
 <template>
-    <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background p-[52px]">
-        <div class="flex flex-col w-full max-w-[1280px] px-[52px] gap-3 mx-auto">
+    <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background py-8 md:p-[52px]">
+        <div class="flex flex-col w-full max-w-[1280px] px-4 md:px-[52px] gap-3 mx-auto">
             <div class="flex items-center gap-3">
                 <RouterLink :to="{ name: 'app.home' }"
                     class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
@@ -69,12 +69,12 @@ onMounted(async () => {
             </div>
         </div>
     </header>
-    <main class="flex flex-col gap-[100px] w-full max-w-[1280px] px-[52px] mt-[72px] mb-[100px] mx-auto">
+    <main class="flex flex-col gap-8 md:gap-[100px] w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[72px] mb-20 md:mb-[100px] mx-auto">
         <section id="Popular" class="flex flex-col gap-9">
             <div class="flex items-center justify-between">
                 <h2 class="font-extrabold text-[32px]">Sedang Popular 🔥 </h2>
             </div>
-            <div class="grid grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <ProductCard v-for="product in products" :key="product.id" :item="product" />
             </div>
             <!-- Popular section might also need its own data or just hide load more here if it's duping -->
@@ -85,7 +85,7 @@ onMounted(async () => {
                 <h2 class="font-extrabold text-[32px] capitalize">Just Released in {{ productCategory?.name }} 🙌🏻
                 </h2>
             </div>
-            <div class="grid grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <!-- Using same products list for now as per previous implementation -->
                 <ProductCard v-for="product in products" :key="product.id" :item="product" />
             </div>

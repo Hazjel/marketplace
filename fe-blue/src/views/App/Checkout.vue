@@ -240,10 +240,10 @@ onMounted(async () => {
 </script>
 
 <template>
-    <section class="flex flex-col gap-6 w-full max-w-[1280px] px-[52px] mx-auto">
-        <h1 class="font-bold text-[32px]">Checkout Page</h1>
+    <section class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto">
+        <h1 class="font-bold text-2xl md:text-[32px]">Checkout Page</h1>
 
-        <div class="flex gap-5">
+        <div class="flex flex-col md:flex-row gap-5">
             <!-- Cart Items Section -->
             <section id="Carts-Container" class="flex flex-col gap-5 w-full h-fit rounded-[20px] p-5 bg-white min-w-0">
                 <p class="font-bold text-xl">Your Cart</p>
@@ -265,21 +265,23 @@ onMounted(async () => {
 
                     <div v-for="product in store.products" :key="product.id"
                         class="items-detail flex flex-col w-full rounded-[20px] border border-custom-stroke p-5 gap-5">
-                        <div class="flex items-center gap-[14px] overflow-hidden">
-                            <div
-                                class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background overflow-hidden items-center justify-center">
-                                <img :src="product.product_images.find(i => i.is_thumbnail).image"
-                                    class="size-full object-contain" alt="icon">
+                        <div class="flex flex-col sm:flex-row gap-4 w-full">
+                            <div class="flex items-center gap-[14px] flex-1 overflow-hidden">
+                                <div
+                                    class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background overflow-hidden items-center justify-center">
+                                    <img :src="product.product_images?.find(i => i.is_thumbnail)?.image || '/src/assets/images/thumbnails/th-1.svg'"
+                                        class="size-full object-contain" alt="icon" @error="(e) => e.target.src = '/src/assets/images/thumbnails/th-1.svg'">
+                                </div>
+                                <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
+                                    <p class="font-bold text-lg leading-tight truncate">{{ product.name }}</p>
+                                    <p class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
+                                        <span class="font-bold text-custom-blue">{{ product.product_category.name }}</span>
+                                        <span class="text-[22px] leading-none">•</span>
+                                        <span>{{ product.weight }} KG</span>
+                                    </p>
+                                </div>
                             </div>
-                            <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
-                                <p class="font-bold text-lg">{{ product.name }}</p>
-                                <p class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
-                                    <span class="font-bold text-custom-blue">{{ product.product_category.name }}</span>
-                                    <span class="text-[22px] leading-none">•</span>
-                                    <span>{{ product.weight }} KG</span>
-                                </p>
-                            </div>
-                            <div class="flex flex-col shrink-0 items-end">
+                            <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto shrink-0 pl-[106px] sm:pl-0">
                                 <p class="font-bold text-custom-blue">Rp {{ formatRupiah(product.price) }}</p>
                                 <p class="font-semibold text-grey">({{ product.quantity }}x)</p>
                             </div>
@@ -297,7 +299,7 @@ onMounted(async () => {
             </section>
 
             <!-- Checkout Form Section -->
-            <form @submit.prevent="handleSubmit" class="flex flex-col gap-5 w-[581px] shrink-0">
+            <form @submit.prevent="handleSubmit" class="flex flex-col gap-5 w-full md:w-[581px] shrink-0">
                 <!-- Security Notice -->
                 <div class="relative w-full rounded-[20px] bg-custom-blue overflow-hidden">
                     <img src="@/assets/images/backgrounds/round-ornament.svg"

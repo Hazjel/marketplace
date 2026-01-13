@@ -12,7 +12,7 @@ import { storeToRefs } from 'pinia';
 const authStore = useAuthStore();
 const chatStore = useChatStore();
 const { user } = storeToRefs(authStore);
-const { contacts } = storeToRefs(chatStore);
+const { contacts, activeUser } = storeToRefs(chatStore);
 const { fetchContacts, setActiveUser, fetchUserById } = chatStore;
 const route = useRoute();
 
@@ -68,8 +68,17 @@ onUnmounted(() => {
     <div class="flex flex-1 h-full w-full">
         <div
             class="flex flex-1 w-full border border-custom-stroke rounded-3xl overflow-hidden shadow-sm bg-white">
-            <ChatSidebar />
-            <ChatRoom />
+            
+            <!-- Sidebar Wrapper -->
+            <div :class="['h-full', activeUser ? 'hidden md:flex' : 'w-full md:w-auto']">
+                <ChatSidebar class="h-full" />
+            </div>
+
+            <!-- ChatRoom Wrapper -->
+            <div :class="['h-full flex-1 min-w-0', !activeUser ? 'hidden md:flex' : 'flex']">
+                <ChatRoom class="h-full" />
+            </div>
+            
         </div>
     </div>
 </template>

@@ -74,6 +74,9 @@ const handleSend = async () => {
     <div v-if="activeUser" class="flex flex-col flex-1 h-full bg-custom-background relative">
         <!-- Chat Header -->
         <div class="flex items-center gap-4 p-6 bg-white border-b border-custom-stroke shrink-0 relative">
+            <button @click="chatStore.setActiveUser(null)" class="md:hidden p-2 -ml-2 text-custom-grey">
+                <img src="@/assets/images/icons/arrow-left-grey.svg" class="size-6" alt="back">
+            </button>
             <div class="size-12 rounded-full overflow-hidden bg-gray-200">
                 <img :src="activeUser.profile_picture || defaultAvatar" class="size-full object-cover" alt="avatar"
                     @error="$event.target.src = defaultAvatar">
@@ -100,7 +103,14 @@ const handleSend = async () => {
                 <p class="text-sm">Say hello directly to {{ activeUser.name }}!</p>
             </div>
 
-            <TransitionGroup name="message" tag="div" class="flex flex-col gap-4 w-full p-1">
+            <TransitionGroup 
+                tag="div" 
+                class="flex flex-col gap-4 w-full p-1"
+                enter-active-class="transition-all duration-300 ease-in-out"
+                leave-active-class="transition-all duration-300 ease-in-out"
+                enter-from-class="opacity-0 translate-y-5"
+                leave-to-class="opacity-0 translate-y-5"
+            >
                 <div v-for="msg in messages" :key="msg.id"
                     :class="['w-full flex', String(msg.sender_id) === String(currentUser?.id) ? 'justify-end' : 'justify-start']">
 
@@ -142,16 +152,3 @@ const handleSend = async () => {
         <p>Pick a person from the left sidebar to start chatting</p>
     </div>
 </template>
-
-<style scoped>
-.message-enter-active,
-.message-leave-active {
-    transition: all 0.3s ease;
-}
-
-.message-enter-from,
-.message-leave-to {
-    opacity: 0;
-    transform: translateY(20px);
-}
-</style>

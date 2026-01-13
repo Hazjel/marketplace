@@ -15,6 +15,8 @@ const form = ref({
     password: null
 });
 
+const showPassword = ref(false);
+
 const handleSubmit = async () => {
     const response = await login(form.value)
 
@@ -66,7 +68,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
 
 <template>
     <form @submit.prevent="handleSubmit" autocomplete="off"
-        class="flex flex-col w-[560px] h-full max-h-[772px] shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white">
+        class="flex flex-col w-full max-w-[560px] h-full max-h-[772px] shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white">
         <img src="@/assets/images/logos/logo.svg" class="h-[37px] mx-auto" alt="logo">
         <div class="flex flex-col gap-[30px]">
             <div class="flex flex-col gap-3 text-center">
@@ -100,8 +102,14 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
                             <p class="input-placeholder">
                                 Enter Your Password
                             </p>
-                            <input id="passwordInput" type="password" class="custom-input tracking-[0.3em]"
-                                placeholder="" v-model="form.password" autocomplete="new-password">
+                            <input id="passwordInput" :type="showPassword ? 'text' : 'password'"
+                                class="custom-input tracking-[0.3em] pr-12" placeholder="" v-model="form.password"
+                                autocomplete="new-password">
+                            <button type="button" @click="showPassword = !showPassword"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition">
+                                <img :src="showPassword ? '/src/assets/images/icons/eye-blue.svg' : '/src/assets/images/icons/eye-grey.svg'"
+                                    class="size-6" alt="toggle password">
+                            </button>
                         </label>
                         <span class="input-error" v-if="error?.password">{{ error?.password?.join(', ') }}</span>
                     </div>

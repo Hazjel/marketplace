@@ -82,7 +82,7 @@ const closeAlert = () => {
 const getImageUrl = (path) => {
     if (!path) return PlaceHolder
     // Ganti dengan base URL Laravel Anda
-    const laravelBaseUrl = 'http://localhost:8000' // atau gunakan env variable
+    const laravelBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
     return `${laravelBaseUrl}/storage/${path}`
 }
 
@@ -204,8 +204,8 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="flex flex-1 gap-5">
-        <div class="flex flex-col gap-5 w-full">
+    <div class="flex flex-col md:flex-row flex-1 gap-5">
+        <div class="flex flex-col gap-5 w-full min-w-0">
             <div class="relative w-full rounded-[20px] bg-custom-yellow overflow-hidden"
                 v-if="transaction?.delivery_status === 'pending'">
                 <img src="@/assets/images/backgrounds/round-ornament.svg"
@@ -316,7 +316,7 @@ onMounted(async () => {
                 <div id="Products" class="flex flex-col gap-4 mt-5">
                     <div class="card flex flex-col rounded-2xl border border-custom-stroke p-4 gap-5"
                         v-for="product in transaction?.transaction_details">
-                        <div class="flex items-center w-full gap-5">
+                        <div class="flex flex-col sm:flex-row w-full gap-5">
                             <div class="flex items-center gap-[14px] w-full min-w-0 overflow-hidden">
                                 <div class="flex size-[92px] rounded-2xl bg-custom-background overflow-hidden shrink-0">
                                     <img :src="product?.product?.product_images?.find(image => image.is_thumbnail)?.image ?? PlaceHolder"
@@ -332,7 +332,7 @@ onMounted(async () => {
                                     </p>
                                 </div>
                             </div>
-                            <div class="flex flex-col gap-2 shrink-0 text-right">
+                            <div class="flex flex-row sm:flex-col gap-2 shrink-0 justify-between sm:justify-end sm:text-right w-full sm:w-auto mt-2 sm:mt-0 ml-[106px] sm:ml-0">
                                 <p class="font-bold text-custom-blue">Rp {{ formatRupiah(product?.product?.price) }}</p>
                                 <p class="font-semibold leading-none text-custom-grey">{{ product.qty }}</p>
                             </div>
@@ -349,7 +349,7 @@ onMounted(async () => {
                 </div>
             </section>
         </div>
-        <div class="flex flex-col gap-5 w-[470px] shrink-0">
+        <div class="flex flex-col gap-5 w-full md:w-[470px] shrink-0">
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
                 <p class="font-bold text-xl">Customer Details</p>
                 <div class="flex items-center gap-[10px] w-full min-w-0">

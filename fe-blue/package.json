@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
@@ -19,6 +20,7 @@
     "numeral": "^2.0.6",
     "pinia": "^3.0.3",
     "swiper": "^12.0.3",
+    "tailwindcss": "^4.1.18",
     "vue": "^3.5.25",
     "vue-router": "^4.6.3"
   },

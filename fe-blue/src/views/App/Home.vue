@@ -11,7 +11,7 @@ import Chatbot from '@/components/App/Chatbot.vue';
 
 <template>
     <Banner />
-        <main class="flex flex-col gap-[100px] w-full max-w-[1280px] px-[52px] mt-[72px] mb-[100px] mx-auto">
+        <main class="flex flex-col gap-8 md:gap-[100px] w-full max-w-[1280px] px-4 mt-8 md:mt-[72px] mb-20 md:mb-[100px] mx-auto">
             <Categories />
             <TopPicks />
             <Stores />

@@ -16,12 +16,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-8 w-full max-w-[1280px] px-[75px] mx-auto mt-10 mb-24">
+    <div class="flex flex-col gap-8 w-full max-w-[1280px] px-4 md:px-[75px] mx-auto mt-8 md:mt-10 mb-20 md:mb-24">
         <div class="flex items-center justify-between">
             <h1 class="font-bold text-[32px] text-custom-black">Trusted Sellers</h1>
         </div>
 
-        <div class="grid grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
             <StoreCard v-for="store in stores" :item="store" :key="store.id" />
         </div>
     </div>

@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+    --color-custom-black: #292D32;
+    --color-custom-blue: #1053D5;
+    --color-custom-red: #FF133D;
+    --color-custom-grey: #6A7686;
+    --color-custom-stroke: #E8E8E8;
+    --color-custom-green: #00A48A;
+    --color-custom-orange: #FF7020;
+    --color-custom-lime-green-char: #DEFF6E;
+    --color-custom-background: #F3F5F9;
+    --color-custom-icon-background: #F3F3F3;
+
+    --font-sans: "Lexend Deca", sans-serif;
+}
+
+body {
+    @apply font-sans flex flex-col min-h-screen text-[#292D32];
+}
+
+#root {
+    @apply flex flex-grow flex-shrink basis-0;
+}
+
+
+@layer components {
+    .custom-input {
+        @apply h-[76px] w-full border-[1.5px] border-custom-stroke rounded-[18px] pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-semibold transition-all duration-300 appearance-none outline-none;
+    }
+
+    /* Placeholder shown state override */
+    .custom-input:placeholder-shown,
+    .custom-input:-moz-placeholder-shown {
+        @apply pt-[14.5px];
+    }
+
+    .custom-input:focus {
+        @apply border-custom-black;
+    }
+
+    /* Error state */
+    .group\/errorState.invalid .custom-input {
+        @apply border-2 border-custom-red;
+    }
+
+    /* Floating placeholder label */
+    .input-placeholder {
+        @apply absolute left-[81px] top-[25px] -translate-y-1/2 text-sm font-semibold text-custom-grey transition-all duration-300 pointer-events-none;
+    }
+
+    .group:focus-within .input-placeholder {
+        @apply top-[25px];
+    }
+
+    /* When input has value or placeholder hidden */
+    .group:has(:placeholder-shown) .input-placeholder,
+    .group:has(:-moz-placeholder-shown) .input-placeholder {
+        @apply top-[38px] text-base font-bold text-custom-black;
+    }
+
+    /* Icon styling */
+    .input-icon {
+        @apply absolute top-1/2 left-6 flex h-7 -translate-y-1/2 items-center border-r-[1.5px] border-custom-stroke pr-4;
+    }
+
+    /* Error message */
+    .input-error {
+        @apply hidden text-sm font-semibold leading-none text-custom-red;
+    }
+
+    .group\/errorState.invalid .input-error {
+        @apply block;
+    }
+
+    /* Gradients */
+    .blue-gradient {
+        background: linear-gradient(336.99deg, #0A3A89 0%, #1053D5 100%);
+    }
+
+    .gradient-black-transparent {
+        background: linear-gradient(180deg, rgba(14, 22, 38, 0) 0%, rgba(14, 22, 38, 0.75) 50%, #0E1626 100%);
+    }
+
+    /* Search Result Dropdown */
+    .search-result {
+        @apply absolute bottom-[-30px] w-full z-[1] bg-white border border-[#ccc] rounded-[16px] shadow-md max-h-[200px] overflow-y-auto;
+    }
+
+    .search-result ul {
+        @apply list-none m-0 p-0;
+    }
+
+    .search-result li {
+        @apply p-2 cursor-pointer hover:bg-[#f0f0f0];
+    }
+}
+
+@layer utilities {
+    .transition-300 {
+        transition: all 300ms ease-in-out;
+    }
+
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Hide native password toggle */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+    margin: 0;
+}

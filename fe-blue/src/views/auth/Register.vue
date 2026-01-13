@@ -19,6 +19,8 @@ const form = ref({
     role: 'buyer', // Default to buyer
 })
 
+const showPassword = ref(false);
+
 const handleImageChange = (e) => {
     const file = e.target.files[0]
 
@@ -55,7 +57,7 @@ const handleSubmit = async () => {
 
 <template>
     <form @submit.prevent="handleSubmit" autocomplete="off"
-        class="flex flex-col w-[560px] h-fit shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white">
+        class="flex flex-col w-full max-w-[560px] h-fit shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white">
         <img src="@/assets/images/logos/logo.svg" class="h-[37px] mx-auto" alt="logo">
         <div class="flex flex-col gap-[30px]">
             <div class="flex flex-col gap-3 text-center">
@@ -146,8 +148,14 @@ const handleSubmit = async () => {
                         <p class="input-placeholder">
                             Enter Your Password
                         </p>
-                        <input id="passwordInput" type="password" class="custom-input tracking-[0.3em]" placeholder=""
-                            v-model="form.password" autocomplete="new-password">
+                        <input id="passwordInput" :type="showPassword ? 'text' : 'password'"
+                            class="custom-input tracking-[0.3em] pr-12" placeholder="" v-model="form.password"
+                            autocomplete="new-password">
+                        <button type="button" @click="showPassword = !showPassword"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition">
+                            <img :src="showPassword ? '/src/assets/images/icons/eye-blue.svg' : '/src/assets/images/icons/eye-grey.svg'"
+                                class="size-6" alt="toggle password">
+                        </button>
                     </label>
                     <span class="input-error" v-if="error?.password">{{ error?.password?.join(', ') }}</span>
                 </div>

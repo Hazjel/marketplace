@@ -22,23 +22,23 @@ onMounted(() => {
     <section id="Promo" class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background py-8">
         <div class="swiper">
             <div class="swiper-wrapper">
-                <div class="swiper-slide !w-fit">
-                    <a href="" class="flex ratio-[773/360] w-[773px] bg-custom-icon-background rounded-3xl overflow-hidden">
+                <div class="swiper-slide !w-fit max-w-[90vw] md:max-w-none">
+                    <a href="" class="flex ratio-[773/360] w-full md:w-[773px] bg-custom-icon-background rounded-2xl md:rounded-3xl overflow-hidden">
                         <img src="@/assets/images/thumbnails/Slide 1.png" class="size-full object-cover" alt="slide">
                     </a>
                 </div>
-                <div class="swiper-slide !w-fit">
-                    <a href="" class="flex ratio-[773/360] w-[773px] bg-custom-icon-background rounded-3xl overflow-hidden">
+                <div class="swiper-slide !w-fit max-w-[90vw] md:max-w-none">
+                    <a href="" class="flex ratio-[773/360] w-full md:w-[773px] bg-custom-icon-background rounded-2xl md:rounded-3xl overflow-hidden">
                         <img src="@/assets/images/thumbnails/Slide 2.png" class="size-full object-cover" alt="slide">
                     </a>
                 </div>
-                <div class="swiper-slide !w-fit">
-                    <a href="" class="flex ratio-[773/360] w-[773px] bg-custom-icon-background rounded-3xl overflow-hidden">
+                <div class="swiper-slide !w-fit max-w-[90vw] md:max-w-none">
+                    <a href="" class="flex ratio-[773/360] w-full md:w-[773px] bg-custom-icon-background rounded-2xl md:rounded-3xl overflow-hidden">
                         <img src="@/assets/images/thumbnails/Slide 1.png" class="size-full object-cover" alt="slide">
                     </a>
                 </div>
-                <div class="swiper-slide !w-fit">
-                    <a href="" class="flex ratio-[773/360] w-[773px] bg-custom-icon-background rounded-3xl overflow-hidden">
+                <div class="swiper-slide !w-fit max-w-[90vw] md:max-w-none">
+                    <a href="" class="flex ratio-[773/360] w-full md:w-[773px] bg-custom-icon-background rounded-2xl md:rounded-3xl overflow-hidden">
                         <img src="@/assets/images/thumbnails/Slide 2.png" class="size-full object-cover" alt="slide">
                     </a>
                 </div>
