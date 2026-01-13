@@ -9,12 +9,35 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useWishlistStore } from '@/stores/wishlist';
 import { useCartStore } from '@/stores/cart';
 import { useAuthStore } from '@/stores/auth';
+import { useHead } from '@vueuse/head';
 
 const route = useRoute()
 const router = useRouter()
 
 const product = ref({})
 const activeImage = ref()
+
+useHead({
+    title: computed(() => product.value?.name ? `${product.value.name} | Blue E-commerce` : 'Product Detail | Blue E-commerce'),
+    meta: [
+        {
+            name: 'description',
+            content: computed(() => product.value?.description?.slice(0, 160) || 'Buy this amazing product on Blue E-commerce')
+        },
+        {
+            property: 'og:title',
+            content: computed(() => product.value?.name || 'Product Detail')
+        },
+        {
+            property: 'og:description',
+            content: computed(() => product.value?.description?.slice(0, 160) || '')
+        },
+        {
+            property: 'og:image',
+            content: computed(() => product.value?.product_images?.find(img => img.is_thumbnail)?.image || '')
+        }
+    ]
+})
 
 const productStore = useProductStore()
 const { products, loading } = storeToRefs(productStore)

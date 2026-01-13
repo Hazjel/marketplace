@@ -75,7 +75,7 @@ const toggleSection = (section) => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-6 w-[250px] min-w-[250px]">
+    <div class="flex flex-col gap-6 w-full md:w-[250px] md:min-w-[250px]">
         <h3 class="font-bold text-xl">Filter</h3>
 
         <div class="flex flex-col gap-4 bg-white p-4 rounded-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
