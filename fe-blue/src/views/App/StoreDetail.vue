@@ -5,10 +5,30 @@ import { useStoreStore } from '@/stores/store';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useHead } from '@vueuse/head';
+import { computed } from 'vue';
 
 const route = useRoute()
 
 const store = ref({})
+
+useHead({
+    title: computed(() => store.value?.name ? `${store.value.name} | Blue E-commerce` : 'Store Detail | Blue E-commerce'),
+    meta: [
+        {
+            name: 'description',
+            content: computed(() => `Visit ${store.value?.name} on Blue E-commerce. ${store.value?.address || ''}`)
+        },
+        {
+            property: 'og:title',
+            content: computed(() => store.value?.name || 'Store Detail')
+        },
+        {
+            property: 'og:image',
+            content: computed(() => store.value?.logo || '')
+        }
+    ]
+})
 
 const storeStore = useStoreStore()
 const { loading } = storeToRefs(storeStore)

@@ -21,6 +21,7 @@ const { fetchStores } = storeStore;
 
 const searchQuery = ref('');
 const currentFilters = ref({});
+const showFilters = ref(false); // Mobile filter toggle
 
 const performSearch = async () => {
     const query = route.query.q;
@@ -90,8 +91,15 @@ watch(
     </header>
 
     <main class="flex flex-col lg:flex-row gap-10 w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[50px] mb-20 md:mb-[100px] mx-auto">
+        <!-- Mobile Filter Toggle -->
+        <button @click="showFilters = !showFilters"
+            class="flex lg:hidden items-center justify-between w-full p-4 bg-white border border-custom-stroke rounded-xl">
+            <span class="font-bold text-lg">Filter Products</span>
+            <i class="fa-solid fa-chevron-down transition-transform" :class="{ 'rotate-180': showFilters }"></i>
+        </button>
+
         <!-- Sidebar -->
-        <aside class="shrink-0 w-full lg:w-auto">
+        <aside class="shrink-0 w-full lg:w-auto" :class="{ 'hidden lg:block': !showFilters }">
             <FilterSidebar :initialFilters="currentFilters" @filter-change="handleFilterChange" />
         </aside>
 
