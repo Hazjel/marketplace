@@ -100,7 +100,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex gap-5">
+    <div class="flex flex-col gap-5 md:flex-row">
         <div class="flex flex-col w-[360px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
@@ -145,8 +145,8 @@ onMounted(() => {
             </div>
         </div>
     </div>
-    <div class="flex gap-5 flex-1">
-        <div class="flex flex-col gap-5 w-[470px] shrink-0">
+    <div class="flex flex-col gap-5 flex-1 md:flex-row">
+        <div class="flex flex-col gap-5 w-full shrink-0 md:w-[470px]">
             <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
                 <div class="flex flex-col gap-6">
                     <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
@@ -166,8 +166,8 @@ onMounted(() => {
                     <div id="List-Transactions" class="flex flex-col gap-5" v-if="latestTransactions.length > 0">
                         <div v-for="transaction in latestTransactions" :key="transaction.id"
                             class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-[10px] min-w-0">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+                                <div class="flex items-center gap-[10px] w-full min-w-0">
                                     <div
                                         class="flex size-14 shrink-0 rounded-full bg-custom-background overflow-hidden items-center justify-center">
                                         <img :src="transaction.buyer?.user?.profile_picture || '/src/assets/images/photos/photo-1.png'"
@@ -184,7 +184,7 @@ onMounted(() => {
                                         </p>
                                     </div>
                                 </div>
-                                <div class="flex flex-col gap-2 items-end">
+                                <div class="flex flex-row md:flex-col gap-2 items-center md:items-end justify-between md:justify-center w-full md:w-auto pl-[66px] md:pl-0">
                                     <p class="font-bold text-lg leading-tight text-custom-blue text-nowrap">
                                         Rp {{ formatRupiah(transaction.grand_total) }}
                                     </p>
@@ -195,8 +195,8 @@ onMounted(() => {
                                 </div>
                             </div>
                             <hr class="border-custom-stroke">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-[10px] w-[260px]">
+                            <div class="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between">
+                                <div class="flex items-center gap-[10px] w-full md:w-[260px]">
                                     <div
                                         class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
                                         <img src="@/assets/images/icons/shopping-cart-black.svg"
@@ -210,7 +210,7 @@ onMounted(() => {
                                 </div>
                                 <RouterLink
                                     :to="{ name: 'user.transaction.detail', params: { username: user?.username, id: transaction.id } }"
-                                    class="flex w-[96px] h-[56px] shrink-0 rounded-2xl py-[18px] px-5 bg-custom-blue/10 gap-2 hover:ring-2 hover:ring-custom-blue transition-300">
+                                    class="flex w-full md:w-[96px] justify-center h-[56px] shrink-0 rounded-2xl py-[18px] px-5 bg-custom-blue/10 gap-2 hover:ring-2 hover:ring-custom-blue transition-300">
                                     <span class="font-semibold text-custom-blue leading-none">
                                         Details
                                     </span>

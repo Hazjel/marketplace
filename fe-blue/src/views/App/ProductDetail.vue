@@ -134,7 +134,7 @@ watch(
 
 <template>
     <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background">
-        <div class="flex flex-col w-full max-w-[1280px] py-6 px-[52px] gap-3 mx-auto">
+        <div class="flex flex-col w-full max-w-[1280px] py-4 md:py-6 px-4 md:px-[52px] gap-3 mx-auto">
             <div class="flex items-center gap-3">
                 <RouterLink :to="{ name: 'app.home' }"
                     class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
@@ -152,8 +152,8 @@ watch(
             </div>
         </div>
     </header>
-    <main class="flex flex-col gap-[52px] w-full max-w-[1280px] px-[52px] mt-8 mb-[100px] mx-auto">
-        <div class="flex gap-[72px] flex-1">
+    <main class="flex flex-col gap-[52px] w-full max-w-[1280px] px-4 md:px-[52px] mt-8 mb-[100px] mx-auto">
+        <div class="flex flex-col md:flex-row gap-8 md:gap-[72px] flex-1">
             <div class="flex flex-col w-full gap-[52px]">
                 <div id="Gallery" class="flex flex-col gap-3">
                     <div id="Main-Thumbnail"
@@ -170,29 +170,30 @@ watch(
                     </div>
                 </div>
                 <div id="Store"
-                    class="flex items-center justify-between rounded-3xl border border-custom-stroke p-5 gap-4">
-                    <div class="flex items-center w-full gap-5">
+                    class="flex flex-col md:flex-row items-start md:items-center justify-between rounded-3xl border border-custom-stroke p-4 md:p-5 gap-4">
+                    <div class="flex items-center w-full gap-4 md:gap-5">
                         <div class="flex items-center gap-[14px] w-full min-w-0">
-                            <div class="flex size-[86px] shrink-0 rounded-full bg-custom-background overflow-hidden">
+                            <div class="flex size-[60px] md:size-[86px] shrink-0 rounded-full bg-custom-background overflow-hidden">
                                 <img :src="product?.store?.logo" class="size-full object-cover" alt="photo">
                             </div>
                             <div class="flex flex-col gap-[6px] w-full overflow-hidden">
                                 <div class="flex items-center gap-[6px] w-full overflow-hidden">
-                                    <p class="font-bold text-lg leading-tight">
+                                    <p class="font-bold text-base md:text-lg leading-tight truncate">
                                         {{ product?.store?.name }}
                                     </p>
-                                    <img src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0"
+                                    <img src="@/assets/images/icons/verify-star.svg" class="flex size-5 md:size-6 shrink-0"
                                         alt="icon">
                                 </div>
-                                <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                    <img src="@/assets/images/icons/box-grey.svg" class="size-5" alt="icon">
+                                <p class="flex items-center gap-1 font-semibold text-custom-grey text-sm md:text-base leading-none">
+                                    <img src="@/assets/images/icons/box-grey.svg" class="size-4 md:size-5" alt="icon">
                                     {{ product?.store?.product_count }} Total Products
                                 </p>
                             </div>
                         </div>
                         <RouterLink v-if="product?.store?.username"
                             :to="{ name: 'app.store-detail', params: { username: product?.store?.username } }"
-                            class="font-semibold text-lg text-custom-blue text-nowrap hover:underline">Visit Store
+                            class="font-semibold text-sm md:text-lg text-custom-blue text-nowrap hover:underline ml-auto md:ml-0">
+                            Visit Store
                         </RouterLink>
                     </div>
                 </div>
@@ -264,7 +265,7 @@ watch(
                     </div>
                 </div>
             </div>
-            <div class="relative flex w-[504px] shrink-0">
+            <div class="relative flex w-full md:w-[504px] shrink-0">
                 <div class="w-full">
                     <div class="sticky top-[200px] flex flex-col gap-6">
                         <div class="flex flex-col gap-3">
@@ -365,7 +366,7 @@ watch(
                     <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-6 shrink-0" alt="icon">
                 </a>
             </div>
-            <div class="grid grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <ProductCard v-for="product in products" :key="product.id" :item="product" v-if="!loading" />
             </div>
         </section>

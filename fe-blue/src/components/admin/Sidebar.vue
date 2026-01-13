@@ -21,11 +21,23 @@ import User2BlackIcon from '@/assets/images/icons/profile-2user-black.svg'
 import User2BlueIcon from '@/assets/images/icons/profile-2user-blue-fill.svg'
 import GlobalSearchIcon from '@/assets/images/icons/global-search-grey.svg'
 import router from '@/router'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const authStore = useAuthStore()
 const chatStore = useChatStore()
+
 const { user } = storeToRefs(authStore)
 const { totalUnreadCount } = storeToRefs(chatStore)
+
+const props = defineProps({
+    isOpen: {
+        type: Boolean,
+        default: false
+    }
+})
+
+const emit = defineEmits(['close'])
 
 onMounted(() => {
     if (user.value) {
@@ -41,6 +53,16 @@ watch(user, (newUser) => {
         chatStore.initializeChatListener(newUser.id)
     }
 })
+
+// Auto-close sidebar on mobile when route changes
+watch(
+    () => route.fullPath,
+    () => {
+        if (window.innerWidth < 768 && props.isOpen) {
+            emit('close')
+        }
+    }
+)
 
 const prefix = computed(() => {
     if (user.value?.role === 'admin') return '/admin'
@@ -207,10 +229,24 @@ const handleSwitchMode = () => {
 </script>
 
 <template>
-    <aside class="relative flex h-auto w-[280px] shrink-0 bg-white">
-        <div class="flex flex-col fixed top-0 w-[280px] shrink-0 h-screen pt-[30px] px-4 gap-[30px] bg-white">
-            <img src="@/assets/images/logos/logo.svg" class="h-8 w-fit cursor-pointer" alt="logo"
-                @click="router.push({ name: 'app.home' })" />
+    <!-- Overlay Background -->
+    <div v-if="isOpen" class="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity" @click="$emit('close')"></div>
+
+    <!-- Sidebar Content -->
+    <aside 
+        class="fixed inset-y-0 left-0 z-50 w-[280px] bg-white transform transition-transform duration-300 md:relative md:translate-x-0"
+        :class="isOpen ? 'translate-x-0' : '-translate-x-full'"
+    >
+        <div class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white">
+            <div class="flex items-center justify-between">
+                <img src="@/assets/images/logos/logo.svg" class="h-8 w-fit cursor-pointer" alt="logo"
+                    @click="router.push({ name: 'app.home' })" />
+                <!-- Close Button (Mobile) -->
+                <button @click="$emit('close')" class="md:hidden p-2 text-custom-grey">
+                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
             <div class="flex flex-col gap-5 overflow-y-scroll hide-scrollbar h-full overscroll-contain flex-1">
                 <nav class="flex flex-col gap-4">
                     <p class="font-medium text-custom-grey">Main Menu</p>
@@ -224,6 +260,14 @@ const handleSwitchMode = () => {
                 <ul class="flex flex-col gap-2">
                     <SidebarItem :item="chatLink" v-if="user?.role !== 'admin'" />
                     <SidebarItem :item="marketplaceLink" v-if="user?.role !== 'admin'" @click="handleSwitchMode" />
+                    <!-- Logout Button -->
+                    <li class="list-none">
+                        <button @click="authStore.logout"
+                            class="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full transition-all duration-300 hover:bg-custom-background">
+                            <img src="@/assets/images/icons/logout.svg" class="size-6 text-custom-red svg-red filter-red" alt="icon">
+                            <span class="font-medium text-custom-red">Logout</span>
+                        </button>
+                    </li>
                 </ul>
             </div>
         </div>

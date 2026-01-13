@@ -15,12 +15,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-8 w-full max-w-[1280px] px-[75px] mx-auto mt-10 mb-24">
+    <div class="flex flex-col gap-8 w-full max-w-[1280px] px-4 md:px-[75px] mx-auto mt-8 md:mt-10 mb-20 md:mb-24">
         <div class="flex items-center justify-between">
             <h1 class="font-bold text-[32px] text-custom-black">All Categories</h1>
         </div>
 
-        <div class="grid grid-cols-5 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6">
             <RouterLink :to="{ name: 'app.browse-category', params: { slug: category.slug } }" class="group card"
                 v-for="category in productCategories" :key="category.id">
                 <div

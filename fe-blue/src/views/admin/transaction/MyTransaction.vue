@@ -117,7 +117,9 @@ const fetchData = async () => {
 
     await fetchTransactionsPaginated(params)
 
-    if (transactionStore.error) console.log('[MyTransaction] fetch error:', transactionStore.error)
+    if (transactionStore.error) {
+        // Handle error silently or show toast
+    }
 
     // If server returned transactions but none matched the current user,
     // try fetching all pages and filtering client-side as a fallback.
@@ -141,7 +143,8 @@ const fetchData = async () => {
             clientFiltered.value = matched
         }
     } catch (err) {
-        console.log('[MyTransaction] full fetch fallback error:', err)
+        // Error handled primarily in store
+        // console.log('[MyTransaction] full fetch fallback error:', err)
     }
 }
 
@@ -212,17 +215,17 @@ watch(filters, () => {
                 </div>
             </div>
         </div>
-        <div id="Filter" class="flex items-center justify-between">
-            <form action="#">
+        <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <form action="#" class="w-full md:w-auto">
                 <label
-                    class="flex items-center w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
+                    class="flex items-center w-full md:w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
                     <img src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0" alt="icon">
                     <input type="text"
                         class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none"
                         placeholder="Search Transaction" v-model="filters.search">
                 </label>
             </form>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 w-full md:w-auto justify-start">
                 <p class="font-medium text-custom-grey">Show</p>
                 <label
                     class="flex items-center h-14 rounded-2xl border border-custom-stroke py-4 px-5 pl-3 bg-white focus-within:border-custom-black transition-300">
@@ -253,8 +256,8 @@ watch(filters, () => {
                             </p>
                         </div>
                         <hr class="border-custom-stroke">
-                        <div class="flex items-center gap-5 justify-between pr-[30px]">
-                            <div class="flex items-center gap-[14px] w-[320px]">
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]">
+                            <div class="flex items-center gap-[14px] w-full md:w-[320px]">
                                 <div
                                     class="flex size-[84px] shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
                                     <img :src="transaction?.store?.logo" class="size-full object-cover" alt="photo">
@@ -269,34 +272,37 @@ watch(filters, () => {
                                     </p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-[10px] w-[260px]">
-                                <div
-                                    class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                                    <img src="@/assets/images/icons/shopping-cart-black.svg"
-                                        class="flex size-6 shrink-0" alt="icon">
+                            <!-- Stats Container: Grid on mobile (2 cols), Row on desktop -->
+                            <div class="grid grid-cols-2 gap-5 w-full md:flex md:w-auto md:gap-10">
+                                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]">
+                                    <div
+                                        class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                                        <img src="@/assets/images/icons/shopping-cart-black.svg"
+                                            class="flex size-6 shrink-0" alt="icon">
+                                    </div>
+                                    <div class="flex flex-col gap-1 w-full overflow-hidden">
+                                        <p class="font-bold text-lg leading-none truncate">{{
+                                            transaction.transaction_details?.length }}</p>
+                                        <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">Total Products</p>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col gap-1">
-                                    <p class="font-bold text-lg leading-none">{{
-                                        transaction.transaction_details?.length }}</p>
-                                    <p class="font-semibold text-custom-grey">Total Products</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-[10px] w-[260px]">
-                                <div
-                                    class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                                    <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0"
-                                        alt="icon">
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <p class="font-bold text-lg leading-none">{{
-                                        transaction.transaction_details?.reduce((total, detail) => total + detail.qty,
-                                            0)}}</p>
-                                    <p class="font-semibold text-custom-grey">Total Quantity</p>
+                                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]">
+                                    <div
+                                        class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                                        <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0"
+                                            alt="icon">
+                                    </div>
+                                    <div class="flex flex-col gap-1 w-full overflow-hidden">
+                                        <p class="font-bold text-lg leading-none truncate">{{
+                                            transaction.transaction_details?.reduce((total, detail) => total + detail.qty,
+                                                0)}}</p>
+                                        <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">Total Quantity</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <hr class="border-custom-stroke">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                             <div class="flex flex-col gap-[6px]">
                                 <p class="font-bold text-xl text-custom-blue">{{ formatRupiah(transaction.grand_total)
                                 }}</p>
@@ -306,9 +312,9 @@ watch(filters, () => {
                                     Grand Total
                                 </p>
                             </div>
-                            <div class="flex items-center justify-end gap-[14px]">
+                            <div class="flex items-center justify-end gap-[14px] w-full md:w-auto">
                                 <RouterLink :to="getDetailRoute(transaction.id)"
-                                    class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
+                                    class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                                     <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0"
                                         alt="icon">
                                     <span class="font-semibold text-white">Details</span>

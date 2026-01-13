@@ -20,7 +20,7 @@ export const useAuthStore = defineStore("auth", {
     },
     actions: {
         setMode(mode) {
-            console.log('setMode called with:', mode);
+
             this.activeMode = mode;
             Cookies.set('activeMode', mode);
         },

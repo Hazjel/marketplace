@@ -24,12 +24,13 @@ onMounted(async () => {
     nextTick(() => {
         if (stores.value.length > 0) {
             new Swiper('.storeSwiper', {
-                loop: true,
+                loop: stores.value.length > 3, // Only loop if enough slides
                 slidesPerView: 1,
                 spaceBetween: 24,
                 pagination: {
                     el: ".store-pagination",
                     clickable: true,
+                    bulletActiveClass: 'swiper-pagination-bullet-active !bg-blue-600',
                     renderBullet: function (index, className) {
                         return '<span class="flex shrink-0 w-[42px] h-1 rounded-full bg-custom-stroke ' + className + '"></span>';
                     },
@@ -45,20 +46,20 @@ onMounted(async () => {
 </script>
 
 <template>
-    <section id="Trusted-Seller" class="flex flex-col gap-9">
-        <div class="flex items-center justify-between">
-            <h2 class="font-extrabold text-[32px]">Trusted Sellers,<br>Quality Guaranteed</h2>
+    <section id="Trusted-Seller" class="flex flex-col gap-6 md:gap-9">
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="font-extrabold text-lg md:text-[32px] leading-tight">Trusted Sellers,<br class="hidden md:block"> Quality Guaranteed</h2>
             <RouterLink :to="{ name: 'app.all-stores' }"
-                class="flex items-center h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black">
-                <span class="font-medium text-white">VIEW ALL</span>
-                <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-6 shrink-0" alt="icon">
+                class="flex shrink-0 items-center h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 gap-[10px] bg-custom-black">
+                <span class="font-medium text-white hidden md:block">VIEW ALL</span>
+                <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-5 md:size-6 shrink-0" alt="icon">
             </RouterLink>
         </div>
 
         <div class="flex flex-col gap-6 relative">
             <div class="storeSwiper w-full overflow-hidden">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide w-full !grid !grid-cols-3 !gap-6"
+                    <div class="swiper-slide w-full !grid !grid-cols-1 sm:!grid-cols-3 !gap-3 md:!gap-6"
                         v-for="(storeChunk, index) in storeChunks" :key="index">
                         <StoreCard v-for="store in storeChunk" :item="store" :key="store.id" />
                     </div>
@@ -81,8 +82,3 @@ onMounted(async () => {
     </section>
 </template>
 
-<style scoped>
-.store-pagination :deep(.swiper-pagination-bullet-active) {
-    background-color: #3b82f6;
-}
-</style>

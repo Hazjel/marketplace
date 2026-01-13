@@ -4,16 +4,18 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
+import tailwindcss from '@tailwindcss/vite'
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueDevTools()],
+  plugins: [vue(), vueDevTools(), tailwindcss()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
   server: {
-    port: 5173,  
+    port: 5173,
     open: true,
     proxy: {
       '/api': {
@@ -21,7 +23,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/tariff/api': {
-        target: 'https://api-sandbox.collaborator.komerce.id', 
+        target: 'https://api-sandbox.collaborator.komerce.id',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/tariff\/api/, '/tariff/api'),
       },

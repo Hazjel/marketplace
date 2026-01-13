@@ -17,16 +17,28 @@ onMounted(() => {
 </script>
 <template>
     <section id="Top-Picks" class="flex flex-col gap-9">
-        <div class="flex items-center justify-between">
-            <h2 class="font-extrabold text-[32px]">Shop Quality Picks<br>from Top Sellers</h2>
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="font-extrabold text-lg md:text-[32px] leading-tight">Shop Quality Picks<br class="hidden md:block"> from Top Sellers</h2>
             <RouterLink :to="{ name: 'app.all-products' }"
-                class="flex items-center h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black">
-                <span class="font-medium text-white">VIEW ALL</span>
-                <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-6 shrink-0" alt="icon">
+                class="flex shrink-0 items-center h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 gap-[10px] bg-custom-black">
+                <span class="font-medium text-white hidden md:block">VIEW ALL</span>
+                <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-5 md:size-6 shrink-0" alt="icon">
             </RouterLink>
         </div>
-        <div class="grid grid-cols-5 gap-6">
-            <ProductCard v-for="product in products" :key="product.id" :item="product" v-if="!loading" />
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-6">
+            <template v-for="(product, index) in products" :key="product.id">
+                <ProductCard 
+                    :item="product" 
+                    v-if="!loading"
+                    :class="{
+                        'block': true,
+                        'sm:hidden': index === 9,
+                        'lg:hidden': index >= 8,
+                        'xl:block': true
+                    }"
+                    class="transition-all duration-300"
+                />
+            </template>
         </div>
     </section>
 </template>

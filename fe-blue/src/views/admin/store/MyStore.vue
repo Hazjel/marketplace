@@ -49,10 +49,10 @@ const mapSrc = computed(() => {
 </script>
 
 <template>
-    <div class="flex flex-1 gap-5">
-        <section class=" flex flex-col w-full h-fit rounded-[20px] p-5 gap-5 bg-white" v-if="store">
+    <div class="flex flex-col md:flex-row flex-1 gap-5">
+        <section class="flex flex-col w-full md:w-auto md:flex-1 h-fit rounded-[20px] p-5 gap-5 bg-white" v-if="store">
             <p class="font-bold text-xl">Store Details</p>
-            <div class="flex items-center w-full gap-5">
+            <div class="flex flex-col md:flex-row items-start md:items-center w-full gap-5">
                 <div class="flex items-center gap-[14px] w-full min-w-0">
                     <div class="flex size-[84px] shrink-0 rounded-full bg-custom-background overflow-hidden">
                         <img :src="store?.logo" class="size-full object-cover" alt="photo">
@@ -67,7 +67,7 @@ const mapSrc = computed(() => {
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center w-fit shrink-0 gap-1">
+                <div class="flex items-center w-fit shrink-0 gap-1 ml-[98px] md:ml-0">
                     <img src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0" alt="icon"
                         v-if="store?.is_verified">
                     <p class="font-bold text-custom-blue text-nowrap" v-if="store?.is_verified">VERIFIED</p>
@@ -93,10 +93,10 @@ const mapSrc = computed(() => {
                 </p>
             </div>
         </section>
-        <section class="flex flex-col w-full h-fit rounded-[20px] p-5 gap-5 bg-white" v-if="store">
+        <section class="flex flex-col w-full md:w-[350px] lg:w-[400px] shrink-0 h-fit rounded-[20px] p-5 gap-5 bg-white" v-if="store">
             <p class="font-bold text-xl">Store Address</p>
             <div class="flex flex-col rounded-[20px] border border-custom-stroke p-4 gap-5">
-                <div class="flex items-center gap-[10px] w-[260px]">
+                <div class="flex items-center gap-[10px] w-full">
                     <div
                         class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
                         <img src="@/assets/images/icons/buildings-black.svg" class="flex size-6 shrink-0" alt="icon">
@@ -107,7 +107,7 @@ const mapSrc = computed(() => {
                     </div>
                 </div>
                 <hr class="border-custom-stroke last:hidden">
-                <div class="flex items-center gap-[10px] w-[260px]">
+                <div class="flex items-center gap-[10px] w-full">
                     <div
                         class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
                         <img src="@/assets/images/icons/keyboard-black.svg" class="flex size-6 shrink-0" alt="icon">

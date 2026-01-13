@@ -73,8 +73,8 @@ watch(
 </script>
 
 <template>
-    <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background p-[52px]">
-        <div class="flex flex-col w-full max-w-[1280px] px-[52px] gap-3 mx-auto">
+    <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background py-8 md:p-[52px]">
+        <div class="flex flex-col w-full max-w-[1280px] px-4 md:px-[52px] gap-3 mx-auto">
             <div class="flex items-center gap-3">
                 <RouterLink :to="{ name: 'app.home' }"
                     class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
@@ -89,14 +89,14 @@ watch(
         </div>
     </header>
 
-    <main class="flex gap-10 w-full max-w-[1280px] px-[52px] mt-[50px] mb-[100px] mx-auto">
+    <main class="flex flex-col lg:flex-row gap-10 w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[50px] mb-20 md:mb-[100px] mx-auto">
         <!-- Sidebar -->
-        <aside class="shrink-0">
+        <aside class="shrink-0 w-full lg:w-auto">
             <FilterSidebar :initialFilters="currentFilters" @filter-change="handleFilterChange" />
         </aside>
 
         <!-- Content -->
-        <div class="flex flex-col gap-[80px] w-full">
+        <div class="flex flex-col gap-10 md:gap-[80px] w-full">
             <!-- Products Section -->
             <section v-if="loadingProducts || products.length > 0" class="flex flex-col gap-9">
                 <div class="flex items-center justify-between">
@@ -105,7 +105,7 @@ watch(
                 <div v-if="loadingProducts" class="flex justify-center py-10">
                     <div class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
                 </div>
-                <div v-else class="grid grid-cols-3 xl:grid-cols-4 gap-6">
+                <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     <ProductCard v-for="product in products" :key="product.id" :item="product" />
                 </div>
             </section>
@@ -127,7 +127,7 @@ watch(
                 <div v-if="loadingStores" class="flex justify-center py-10">
                     <div class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
                 </div>
-                <div v-else class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     <StoreCard v-for="store in stores" :key="store.id" :item="store" />
                 </div>
             </section>

@@ -104,18 +104,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <section id="Navbar-Wrapper" class="flex h-[168px] w-full mx-auto relative">
-        <div class="fixed top-0 w-full bg-white min-h-[138px] border-b border-custom-stroke py-8 z-30">
-            <div class="w-full max-w-[1920px] flex flex-col gap-6 px-7 mx-auto">
-                <div class="flex items-center gap-6 w-full">
+    <section id="Navbar-Wrapper" class="flex h-auto md:h-[168px] w-full mx-auto relative mb-[180px] md:mb-0">
+        <div class="fixed top-0 w-full bg-white md:min-h-[138px] border-b border-custom-stroke py-4 md:py-8 z-30">
+            <div class="w-full max-w-[1920px] flex flex-col gap-6 px-4 md:px-7 mx-auto">
+                <div class="flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-6 w-full">
                     <RouterLink :to="{ name: 'app.home' }" class="flex shrink-0">
                         <img src="@/assets/images/logos/logo.svg" class="h-8" alt="logo">
                     </RouterLink>
 
                     <!-- Search Bar with Autocomplete -->
-                    <div class="relative w-full search-container">
+                    <div class="relative order-last md:order-none w-full md:w-auto md:flex-1 search-container">
                         <label
-                            class="flex items-center w-full h-14 rounded-[18px] p-4 px-6 gap-2 bg-white border-[1.5px] border-custom-stroke focus-within:border-custom-black transition-300">
+                            class="flex items-center w-full h-12 md:h-14 rounded-[18px] p-3 md:p-4 md:px-6 gap-2 bg-white border-[1.5px] border-custom-stroke focus-within:border-custom-black transition-300">
                             <img src="@/assets/images/icons/search-normal-grey.svg" class="flex size-6 shrink-0"
                                 alt="icon">
                             <input type="text" v-model="searchQuery" @input="handleSearchInput"
@@ -157,18 +157,18 @@ onUnmounted(() => {
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3 shrink-0">
+                    <div class="flex items-center gap-2 md:gap-3 shrink-0 ml-auto md:ml-0">
                         <!-- Wishlist Icon with Badge -->
                         <div class="relative">
                             <RouterLink :to="{ name: 'app.wishlist' }">
                                 <div
-                                    class="flex size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
-                                    <img src="@/assets/images/icons/heart-black.svg" class="size-6" alt="icon">
+                                    class="flex size-10 md:size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
+                                    <img src="@/assets/images/icons/heart-black.svg" class="size-5 md:size-6" alt="icon">
                                 </div>
                             </RouterLink>
                             <div v-if="totalWishlistItems > 0"
-                                class="absolute top-0 right-0 flex items-center justify-center min-w-[20px] min-h-[20px] rounded-full bg-custom-red border-2 border-white px-1">
-                                <span class="text-white text-[10px] font-bold leading-none">{{ totalWishlistItems > 99 ?
+                                class="absolute top-0 right-0 flex items-center justify-center min-w-[16px] md:min-w-[20px] min-h-[16px] md:min-h-[20px] rounded-full bg-custom-red border-2 border-white px-1">
+                                <span class="text-white text-[8px] md:text-[10px] font-bold leading-none">{{ totalWishlistItems > 99 ?
                                     '99+' : totalWishlistItems }}</span>
                             </div>
                         </div>
@@ -177,41 +177,41 @@ onUnmounted(() => {
                         <div class="relative">
                             <RouterLink :to="{ name: 'app.cart' }">
                                 <div
-                                    class="flex size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
-                                    <img src="@/assets/images/icons/shopping-cart-black.svg" class="size-6" alt="icon">
+                                    class="flex size-10 md:size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
+                                    <img src="@/assets/images/icons/shopping-cart-black.svg" class="size-5 md:size-6" alt="icon">
                                 </div>
                             </RouterLink>
                             <div v-if="totalItems > 0"
-                                class="absolute top-0 right-0 flex items-center justify-center min-w-[20px] min-h-[20px] rounded-full bg-custom-red border-2 border-white px-1">
-                                <span class="text-white text-[10px] font-bold leading-none">{{ totalItems > 99 ? '99+' :
+                                class="absolute top-0 right-0 flex items-center justify-center min-w-[16px] md:min-w-[20px] min-h-[16px] md:min-h-[20px] rounded-full bg-custom-red border-2 border-white px-1">
+                                <span class="text-white text-[8px] md:text-[10px] font-bold leading-none">{{ totalItems > 99 ? '99+' :
                                     totalItems }}</span>
                             </div>
                         </div>
 
                         <RouterLink :to="{ name: 'admin.dashboard' }" v-if="user && user.role === 'store'"
                             @click="authStore.setMode('store')"
-                            class="flex shrink-0 h-14 rounded-[18px] py-4 px-6 bg-custom-black text-white hover:shadow-lg transition-300">
-                             <img src="@/assets/images/icons/shop-white.svg" class="size-6 mr-2" alt="icon">
-                             <p class="font-medium">{{ authStore.activeMode === 'buyer' ? 'Switch to Seller' : 'Seller Dashboard' }}</p>
+                            class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 bg-custom-black text-white hover:shadow-lg transition-300">
+                             <img src="@/assets/images/icons/shop-white.svg" class="size-5 md:size-6 md:mr-2" alt="icon">
+                             <p class="font-medium hidden md:block">{{ authStore.activeMode === 'buyer' ? 'Switch to Seller' : 'Seller Dashboard' }}</p>
                         </RouterLink>
 
                         <RouterLink :to="{ name: 'auth.open-store' }" v-if="user && user.role === 'buyer'"
                             @click="authStore.setMode('buyer')"
-                            class="flex shrink-0 h-14 rounded-[18px] py-4 px-6 bg-custom-black text-white hover:shadow-lg transition-300">
-                             <img src="@/assets/images/icons/shop-white.svg" class="size-6 mr-2" alt="icon">
-                             <p class="font-medium">Start Selling</p>
+                            class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 bg-custom-black text-white hover:shadow-lg transition-300">
+                             <img src="@/assets/images/icons/shop-white.svg" class="size-5 md:size-6 md:mr-2" alt="icon">
+                             <p class="font-medium hidden md:block">Start Selling</p>
                         </RouterLink>
 
                         <RouterLink :to="{ name: 'auth.login' }"
-                            class="flex shrink-0 h-14 rounded-[18px] py-4 px-8 bg-custom-blue" v-if="!user">
-                            <p class="font-medium text-white">Sign In/Register</p>
+                            class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-4 md:py-4 md:px-8 bg-custom-blue" v-if="!user">
+                            <p class="font-medium text-white text-sm md:text-base">Sign In</p>
                         </RouterLink>
                         <div class="relative" v-if="user">
                             <button @click="showDropdownProfile = !showDropdownProfile"
-                                class="flex size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
+                                class="flex size-10 md:size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
                                 <img :src="user.profile_picture" class="size-full object-cover" alt="icon">
                             </button>
-                            <div id="Profile-Dropdown" class="absolute transform top-[calc(100%+12px)] right-0 z-30"
+                            <div id="Profile-Dropdown" class="absolute transform top-[calc(100%+8px)] md:top-[calc(100%+12px)] right-0 z-30"
                                 v-if="showDropdownProfile">
                                 <nav
                                     class="flex flex-col w-[201px] rounded-[20px] rounded-tr-none py-6 px-4 gap-[18px] bg-white shadow-[0px_6px_30px_0px_#00000017]">

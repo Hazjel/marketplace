@@ -39,9 +39,9 @@ const handleUpdateQuantity = (storeId, productId, event) => {
 </script>
 
 <template>
-    <form action="checkout.html" class="flex flex-col gap-6 w-full max-w-[1280px] px-[52px] mx-auto ">
+    <form action="checkout.html" class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto ">
         <h1 class="font-bold text-[32px]">My Shopping Cart</h1>
-        <div class="flex gap-5">
+        <div class="flex flex-col lg:flex-row gap-5">
             <section id="Carts-Container" class="flex flex-col gap-5 w-full min-w-0">
                 <div id="Empty-Cart-State"
                     class=" flex flex-col flex-1 items-center justify-center rounded-[20px] bg-white gap-9"
@@ -149,7 +149,7 @@ const handleUpdateQuantity = (storeId, productId, event) => {
                 </div>
 
             </section>
-            <section id="Order-Summary" class="flex flex-col gap-5 w-[444px] shrink-0">
+            <section id="Order-Summary" class="flex flex-col gap-5 w-full lg:w-[444px] shrink-0">
                 <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white">
                     <p class="font-bold text-xl">Order Summary</p>
                     <div class="flex flex-col rounded-xl border border-custom-stroke p-5 gap-4">

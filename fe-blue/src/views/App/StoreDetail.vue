@@ -50,7 +50,7 @@ const handleFollow = () => {
 
 <template>
     <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background">
-        <div class="flex flex-col w-full max-w-[1280px] py-6 px-[52px] gap-3 mx-auto">
+        <div class="flex flex-col w-full max-w-[1280px] py-4 md:py-6 px-4 md:px-[52px] gap-3 mx-auto">
             <div class="flex items-center gap-3">
                 <RouterLink :to="{ name: 'app.home' }"
                     class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
@@ -68,12 +68,12 @@ const handleFollow = () => {
             </div>
         </div>
     </header>
-    <main class="flex flex-col gap-[52px] w-full max-w-[1280px] px-[52px] mt-8 mb-[100px] mx-auto">
-        <section class="flex gap-5 w-full">
+    <main class="flex flex-col gap-8 md:gap-[52px] w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-8 mb-20 md:mb-[100px] mx-auto">
+        <section class="flex flex-col lg:flex-row gap-5 w-full">
             <div id="Store-Info" class="flex flex-col rounded-3xl border border-custom-stroke p-5 gap-5 w-full">
                 <div class="flex items-center w-full gap-5">
                     <div class="flex items-center gap-[14px] w-full min-w-0">
-                        <div class="flex size-[86px] shrink-0 rounded-full bg-custom-background overflow-hidden">
+                        <div class="flex size-[60px] md:size-[86px] shrink-0 rounded-full bg-custom-background overflow-hidden">
                             <img :src="store?.logo" class="size-full object-cover" alt="photo">
                         </div>
                         <div class="flex flex-col gap-[6px] w-full overflow-hidden">
@@ -122,12 +122,12 @@ const handleFollow = () => {
                     </RouterLink>
                 </div>
             </div>
-            <a href="#" class="flex w-[253px] shrink-0 overflow-hidden">
-                <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-contain"
+            <a href="#" class="flex w-full md:w-[253px] shrink-0 overflow-hidden rounded-2xl">
+                <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover"
                     alt="promo">
             </a>
-            <a href="#" class="flex w-[253px] shrink-0 overflow-hidden">
-                <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-contain"
+            <a href="#" class="flex w-full md:w-[253px] shrink-0 overflow-hidden rounded-2xl">
+                <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover"
                     alt="promo">
             </a>
         </section>
@@ -140,7 +140,7 @@ const handleFollow = () => {
                 <section id="Products-Content" class="flex flex-col gap-6">
                     <div class="flex flex-col gap-6">
                         <h2 class="font-bold text-[32px]">Store Products</h2>
-                        <div class="flex items-center gap-5">
+                        <div class="flex items-center gap-3 md:gap-5 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible scrollbar-hide">
                             <button class="group">
                                 <div
                                     class="flex items-center h-14 rounded-2xl p-4 gap-2 border border-custom-stroke bg-custom-black">
@@ -182,7 +182,7 @@ const handleFollow = () => {
                         </div>
                     </div>
                     <div class="flex flex-col gap-9">
-                        <div class="grid grid-cols-4 gap-6">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                             <ProductCard v-for="product in products" :key="product.id" :item="product"
                                 v-if="!loadingProducts" />
                         </div>

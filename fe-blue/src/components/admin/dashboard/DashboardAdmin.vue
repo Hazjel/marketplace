@@ -90,7 +90,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex gap-5">
+    <div class="flex flex-col gap-5 xl:flex-row">
         <div class="flex flex-col w-[300px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
@@ -137,9 +137,9 @@ onMounted(() => {
             </div>
         </div>
     </div>
-    <div class="flex gap-5 flex-1">
+    <div class="flex flex-col gap-5 flex-1 xl:flex-row">
         <div class="flex flex-col gap-5">
-            <div class="flex flex-col w-[440px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
+            <div class="flex flex-col w-full shrink-0 rounded-[20px] p-5 gap-6 bg-white xl:w-[440px]">
                 <div class="flex flex-col gap-6">
                     <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                         <img src="@/assets/images/icons/shopping-cart-blue-fill.svg" class="flex size-6 shrink-0"
@@ -151,7 +151,7 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col flex-1 w-[440px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
+            <div class="flex flex-col flex-1 w-full shrink-0 rounded-[20px] p-5 gap-6 bg-white xl:w-[440px]">
                 <div class="flex flex-col gap-6">
                     <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                         <img src="@/assets/images/icons/shop-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">

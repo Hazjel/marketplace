@@ -35,7 +35,7 @@ onMounted(() => {
 
 <template>
     <main class="flex flex-1 min-h-screen items-center min-w-0 bg-custom-background">
-        <div class="h-screen max-w-[660px] w-[calc(100%-620px)] shrink-0 overflow-hidden relative">
+        <div class="hidden lg:block h-screen max-w-[660px] w-[calc(100%-620px)] shrink-0 overflow-hidden relative">
             <div class="swiper !fixed top-0 flex max-w-[660px] w-[calc(100%-620px)] h-screen overflow-hidden">
                 <div class="swiper-wrapper">
                     <div class="swiper-slide relative flex w-full h-full overflow-hidden">

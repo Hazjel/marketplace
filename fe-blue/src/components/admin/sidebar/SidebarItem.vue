@@ -107,14 +107,15 @@ watch(route, () => {
         <div :id="`accordion-${(item.path || item.label || 'default').replace(/[\/\s]/g, '-')}`" class="flex"
             v-show="isOpen">
             <div class="flex w-[56px] shrink-0 justify-end items-start relative">
-                <div class="branch-line"
+                <div class="w-[2px] h-full bg-gray-200 absolute top-0 left-1/2 -translate-x-1/2 rounded-[1px] last:h-[55%]"
                     v-for="n in Math.max(0, item.children.filter(child => can(child.permission) && hasRole(child.role)).length - 1)"
                     :key="n"></div>
             </div>
             <ul class="flex flex-col gap-1 w-full">
                 <li class="group relative" :class="{ 'active': route.path.startsWith(child.path) }"
                     v-for="child in item.children" :key="child.path">
-                    <div class="curve-branch" v-if="can(child.permission) && hasRole(child.role)"></div>
+                    <div class="absolute left-0 top-0 w-[28px] h-[32px] border-l-2 border-b-2 border-gray-200 rounded-bl-2xl bg-transparent z-[1] -translate-x-[104%]"
+                        v-if="can(child.permission) && hasRole(child.role)"></div>
                     <RouterLink :to="child.path"
                         class="flex items-center w-full min-h-14 gap-2 rounded-2xl overflow-hidden py-[10px] pl-4 group-[&.active]:bg-custom-blue/10 transition-300"
                         :class="{ 'active': route.path.startsWith(child.path) }"
@@ -139,34 +140,3 @@ watch(route, () => {
         </div>
     </li>
 </template>
-
-<style scoped>
-.branch-line {
-    width: 2px;
-    height: 100%;
-    background-color: #e5e7eb;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 1px;
-}
-
-.branch-line:last-child {
-    height: 55%;
-}
-
-.curve-branch {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 28px;
-    height: 32px;
-    border-left: 2px solid #e5e7eb;
-    border-bottom: 2px solid #e5e7eb;
-    border-bottom-left-radius: 16px;
-    background: transparent;
-    z-index: 1;
-    transform: translateX(-104%);
-}
-</style>

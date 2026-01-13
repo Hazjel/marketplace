@@ -11,8 +11,13 @@ const { logout } = authStore;
 </script>
 
 <template>
-    <div id="Top-Bar" class="flex items-center w-full gap-6 mt-[30px] mb-6">
-        <div class="flex items-center gap-6 h-[102px] bg-white w-full rounded-3xl p-[18px]">
+    <div id="Top-Bar" class="flex items-center w-full gap-4 md:gap-6 mt-8 mb-6">
+        <!-- Sidebar Toggle (Mobile) -->
+        <button @click="$emit('toggleSidebar')" class="flex md:hidden items-center justify-center size-14 shrink-0 bg-white rounded-3xl">
+             <img src="@/assets/images/icons/menu-grey.svg" class="size-6" alt="menu">
+        </button>
+
+        <div class="flex items-center gap-6 min-h-[102px] h-auto bg-white w-full rounded-3xl p-[18px]">
             <div class="flex flex-col gap-2 w-full">
                 <h1 class="font-bold text-2xl capitalize">{{ route.meta.title }}</h1>
                 <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
@@ -20,7 +25,7 @@ const { logout } = authStore;
                 </p>
             </div>
         </div>
-        <div class="flex items-center gap-3 h-[102px] bg-white w-fit rounded-3xl p-[18px]">
+        <div class="hidden md:flex items-center gap-3 min-h-[102px] h-auto bg-white w-fit rounded-3xl p-[18px]">
             <div class="flex rounded-full overflow-hidden size-14">
                 <img :src="user?.profile_picture" class="size-full object-cover" alt="photo">
             </div>

@@ -63,7 +63,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex gap-5">
+    <div class="flex flex-col gap-5 md:flex-row">
         <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
@@ -97,8 +97,8 @@ onMounted(() => {
             <div id="List-Transactions" class="flex flex-col gap-5" v-if="!loading && buyerTransactions.length > 0">
                 <div v-for="transaction in buyerTransactions.slice(0, 5)" :key="transaction.id"
                     class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
-                    <div class="flex items-center gap-5 justify-between pr-[30px]">
-                        <div class="flex items-center gap-[14px] w-[320px]">
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]">
+                        <div class="flex items-center gap-[14px] w-full md:w-[320px]">
                             <div class="flex size-[84px] shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
                                 <img :src="transaction.store?.logo || transaction.store?.image || '/src/assets/images/thumbnails/th-1.svg'"
                                     class="size-full object-cover"
@@ -114,34 +114,37 @@ onMounted(() => {
                                 </p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-[10px] w-[260px]">
-                            <div
-                                class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                                <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0"
-                                    alt="icon">
+                        <div class="grid grid-cols-2 gap-5 w-full md:flex md:w-auto md:gap-10">
+                            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]">
+                                <div
+                                    class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                                    <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0"
+                                        alt="icon">
+                                </div>
+                                <div class="flex flex-col gap-1 w-full overflow-hidden">
+                                    <p class="font-bold text-lg leading-none truncate">{{ transaction?.transaction_details?.length }}
+                                    </p>
+                                    <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">Total Products</p>
+                                </div>
                             </div>
-                            <div class="flex flex-col gap-1">
-                                <p class="font-bold text-lg leading-none">{{ transaction?.transaction_details?.length }}
-                                </p>
-                                <p class="font-semibold text-custom-grey">Total Products</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-[10px] w-[260px]">
-                            <div
-                                class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                                <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0" alt="icon">
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <p class="font-bold text-lg leading-none">
-                                    {{transaction?.transaction_details?.reduce((total, detail) => total + detail.qty,
-                                        0)}}
-                                </p>
-                                <p class="font-semibold text-custom-grey">Total Quantity</p>
+                            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]">
+                                <div
+                                    class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                                    <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0"
+                                        alt="icon">
+                                </div>
+                                <div class="flex flex-col gap-1 w-full overflow-hidden">
+                                    <p class="font-bold text-lg leading-none truncate">
+                                        {{transaction?.transaction_details?.reduce((total, detail) => total + detail.qty,
+                                            0)}}
+                                    </p>
+                                    <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">Total Quantity</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <hr class="border-custom-stroke">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div class="flex flex-col gap-[6px]">
                             <p class="font-bold text-xl text-custom-blue">Rp {{ formatRupiah(transaction.grand_total) }}
                             </p>
@@ -150,10 +153,10 @@ onMounted(() => {
                                 Grand Total
                             </p>
                         </div>
-                        <div class="flex items-center justify-end gap-[14px]">
+                        <div class="flex items-center justify-end gap-[14px] w-full md:w-auto">
                             <RouterLink
                                 :to="{ name: `${user?.role === 'admin' ? 'admin' : 'user'}.transaction.detail`, params: { id: transaction.id, username: user?.username } }"
-                                class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
+                                class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                                 <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon">
                                 <span class="font-semibold text-white">Details</span>
                             </RouterLink>

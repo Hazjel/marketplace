@@ -17,7 +17,7 @@ const selectUser = (user) => {
 </script>
 
 <template>
-    <div class="flex flex-col w-[320px] border-r border-custom-stroke h-full bg-white">
+    <div class="flex flex-col w-full md:w-[320px] border-r border-custom-stroke h-full bg-white">
         <div class="p-6 border-b border-custom-stroke">
             <h2 class="font-bold text-xl">Messages</h2>
         </div>

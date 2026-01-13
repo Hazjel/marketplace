@@ -3,7 +3,7 @@ import { ref, nextTick } from 'vue';
 import axios from 'axios'; // Pakai axios plugin project kamu
 
 const chatAxios = axios.create({
-    baseURL: 'http://localhost:8001'
+    baseURL: import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8001'
 });
 
 const isOpen = ref(false);
@@ -68,11 +68,15 @@ const sendMessage = async () => {
 </script>
 
 <template>
-    <div class="fixed bottom-6 right-6 flex flex-col items-end gap-3 font-sans"
-        style="max-width: 350px; max-height: 800px;">
-        <transition name="fade">
+    <div class="fixed z-[9999] bottom-4 right-4 w-auto flex flex-col items-end gap-3 font-sans">
+        <transition
+            enter-active-class="transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            leave-active-class="transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            enter-from-class="opacity-0 translate-y-5 scale-95"
+            leave-to-class="opacity-0 translate-y-5 scale-95"
+        >
             <div v-if="isOpen"
-                class="w-[350px] h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+                class="w-[85vw] max-w-[350px] h-[60vh] md:h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
                 <div class="bg-custom-blue p-4 flex justify-between items-center text-white shrink-0">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">🤖</div>
@@ -118,7 +122,12 @@ const sendMessage = async () => {
             </div>
         </transition>
 
-        <transition name="scale">
+        <transition
+            enter-active-class="transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            leave-active-class="transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            enter-from-class="opacity-0 scale-0"
+            leave-to-class="opacity-0 scale-0"
+        >
             <button v-if="!isOpen" @click="toggleChat"
                 class="w-14 h-14 bg-custom-blue rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform duration-300 text-white text-2xl absolute bottom-0 right-0">
                 <span>💬</span>
@@ -126,36 +135,3 @@ const sendMessage = async () => {
         </transition>
     </div>
 </template>
-
-<style scoped>
-.fixed {
-    position: fixed !important;
-    bottom: 24px !important;
-    right: 24px !important;
-    z-index: 99999 !important;
-}
-
-/* Chat Window Transition */
-.fade-enter-active,
-.fade-leave-active {
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-}
-
-/* Button Transition */
-.scale-enter-active,
-.scale-leave-active {
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.scale-enter-from,
-.scale-leave-to {
-    opacity: 0;
-    transform: scale(0);
-}
-</style>
