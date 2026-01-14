@@ -16,7 +16,7 @@ onMounted( () => {
 </script>
 
 <template>
-    <section id="Categories" class="flex flex-col gap-6 md:gap-9">
+    <section id="Categories" class="flex flex-col gap-6 md:gap-9 animate-fade-in-up delay-100">
         <div class="flex items-center justify-between gap-4">
             <h2 class="font-extrabold text-lg md:text-[32px] leading-tight">Explore High Quality<br class="hidden md:block"> Products by Categories</h2>
             <RouterLink :to="{name: 'app.all-categories'}" class="flex shrink-0 items-center h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 gap-[10px] bg-custom-black">
@@ -36,7 +36,7 @@ onMounted( () => {
                         'lg:hidden': index === 5         // Desktop (lg): Hide 6th item (Index 5) -> Total 5
                     }"
                 >
-                    <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-6 md:py-8 px-4 md:px-6 items-center gap-4 md:gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300 h-full">
+                    <div class="flex flex-col rounded-[20px] ring-1 ring-custom-stroke py-6 md:py-8 px-4 md:px-6 items-center gap-4 md:gap-6 group-hover:ring-2 group-hover:ring-custom-blue group-hover:bg-custom-blue/5 transition-300 h-full hover-scale">
                         <img :src="category.image" class="size-9" alt="icon">
                         <div class="flex flex-col items-center gap-1 text-center">
                             <p class="font-bold text-xs capitalize">{{ category.name }}</p>

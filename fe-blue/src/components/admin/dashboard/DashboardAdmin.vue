@@ -90,26 +90,26 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-5 xl:flex-row">
-        <div class="flex flex-col w-[300px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
+        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                     <img src="@/assets/images/icons/wallet-2-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ loading ? '...' : `Rp ${formatRupiah(stats.total_revenue_fee)}` }}</p>
-                    <p class="font-medium text-lg text-custom-grey">Net Revenue (Profit)</p>
+                    <p class="font-bold text-2xl md:text-4xl">{{ loading ? '...' : `Rp ${formatRupiah(stats.total_revenue_fee)}` }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">Net Revenue (Profit)</p>
                 </div>
             </div>
         </div>
-        <div class="flex flex-col w-[300px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
+        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                     <img src="@/assets/images/icons/card-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ loading ? '...' : `Rp ${formatRupiah(stats.total_revenue)}` }}</p>
-                    <p class="font-medium text-lg text-custom-grey">Total GMV</p>
+                    <p class="font-bold text-2xl md:text-4xl">{{ loading ? '...' : `Rp ${formatRupiah(stats.total_revenue)}` }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">Total GMV</p>
                 </div>
             </div>
         </div>
@@ -119,8 +119,8 @@ onMounted(() => {
                     <img src="@/assets/images/icons/profile-tick-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ loading ? '...' : stats.total_sellers.toLocaleString() }}</p>
-                    <p class="font-medium text-lg text-custom-grey">Total Sellers</p>
+                    <p class="font-bold text-2xl md:text-4xl">{{ loading ? '...' : stats.total_sellers.toLocaleString() }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">Total Sellers</p>
                 </div>
             </div>
         </div>
@@ -131,15 +131,15 @@ onMounted(() => {
                         alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ loading ? '...' : stats.total_buyers.toLocaleString() }}</p>
-                    <p class="font-medium text-lg text-custom-grey">Total Buyers</p>
+                    <p class="font-bold text-2xl md:text-4xl">{{ loading ? '...' : stats.total_buyers.toLocaleString() }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">Total Buyers</p>
                 </div>
             </div>
         </div>
     </div>
-    <div class="flex flex-col gap-5 flex-1 xl:flex-row">
-        <div class="flex flex-col gap-5">
-            <div class="flex flex-col w-full shrink-0 rounded-[20px] p-5 gap-6 bg-white xl:w-[440px]">
+    <div class="flex flex-col gap-5 xl:flex-row">
+        <div class="flex flex-col gap-5 w-full xl:w-[440px] shrink-0">
+            <div class="flex flex-col w-full shrink-0 rounded-[20px] p-5 gap-6 bg-white">
                 <div class="flex flex-col gap-6">
                     <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                         <img src="@/assets/images/icons/shopping-cart-blue-fill.svg" class="flex size-6 shrink-0"
@@ -151,7 +151,7 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col flex-1 w-full shrink-0 rounded-[20px] p-5 gap-6 bg-white xl:w-[440px]">
+            <div class="flex flex-col flex-1 w-full shrink-0 rounded-[20px] p-5 gap-6 bg-white">
                 <div class="flex flex-col gap-6">
                     <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                         <img src="@/assets/images/icons/shop-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">

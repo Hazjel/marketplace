@@ -1,6 +1,6 @@
 import { handleError } from "@/helpers/errorHelper";
 import { axiosInstance } from "@/plugins/axios";
-import router from "@/router";
+// import router from "@/router"; // Removed to prevent circular dependency
 import Cookies from "js-cookie";
 import { register } from "numeral";
 import { defineStore } from "pinia";
@@ -99,9 +99,11 @@ export const useAuthStore = defineStore("auth", {
                 this.user = null;
                 this.error = null;
 
-                router.push({ name: "auth.login" });
+                // Return true to indicate success, let component handle redirect
+                return true;
             } catch (error) {
                 this.error = handleError(error);
+                return false;
             } finally {
                 this.loading = false;
             }

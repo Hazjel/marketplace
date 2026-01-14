@@ -1,5 +1,4 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import CardList from '@/components/admin/transaction/CardList.vue';
 import Pagination from '@/components/admin/Pagination.vue';
 import { useTransactionStore } from '@/stores/transaction';
@@ -8,7 +7,9 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { can } from '@/helpers/permissionHelper';
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const transactionStore = useTransactionStore()
 const { transactions, meta, loading, success, error } = storeToRefs(transactionStore)
 const { fetchTransactionsPaginated, deleteTransaction } = transactionStore
@@ -39,20 +40,26 @@ async function handleDelete(id){
 
 const debounceFetchData = debounce(fetchData, 500)
 
-const closeAlert = () => {
-    transactionStore.success = null
-    transactionStore.error = null
-}
-
 onMounted(fetchData)
 
 watch(serverOptions, () => {
     fetchData()
 }, {deep: true})
-
 watch(filters, () => {
     debounceFetchData()
 }, {deep: true})
+watch(success, (value) => {
+    if (value) {
+        toast.success(value);
+        transactionStore.success = null;
+    }
+});
+watch(error, (value) => {
+    if (value) {
+        toast.error(value);
+        transactionStore.error = null;
+    }
+});
 </script>
 
 <template>

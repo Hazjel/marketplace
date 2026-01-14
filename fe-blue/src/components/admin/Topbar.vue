@@ -1,17 +1,26 @@
 <script setup>
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 
 const route = useRoute();
+const router = useRouter();
 
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 const { logout } = authStore;
+
+const handleProfileClick = () => {
+    if (user.value?.role === 'admin') {
+        router.push({ name: 'admin.edit-profile' });
+    } else {
+        router.push({ name: 'user.edit-profile', params: { username: user.value.username } });
+    }
+}
 </script>
 
 <template>
-    <div id="Top-Bar" class="flex items-center w-full gap-4 md:gap-6 mt-8 mb-6">
+    <div id="Top-Bar" class="flex items-center w-full gap-4 md:gap-6 mt-5 mb-5 md:mt-8 md:mb-6">
         <!-- Sidebar Toggle (Mobile) -->
         <button @click="$emit('toggleSidebar')" class="flex md:hidden items-center justify-center size-14 shrink-0 bg-white rounded-3xl">
              <img src="@/assets/images/icons/menu-grey.svg" class="size-6" alt="menu">
@@ -25,21 +34,20 @@ const { logout } = authStore;
                 </p>
             </div>
         </div>
-        <div class="hidden md:flex items-center gap-3 min-h-[102px] h-auto bg-white w-fit rounded-3xl p-[18px]">
-            <div class="flex rounded-full overflow-hidden size-14">
-                <img :src="user?.profile_picture" class="size-full object-cover" alt="photo">
-            </div>
-            <div class="flex flex-col gap-[6px] min-w-[155px] w-fit">
-                <p class="font-semibold text-lg leading-tight">{{ user?.name }}</p>
-                <div class="flex flex-col items-start">
-                    <p class="flex items-center gap-1 font-bold text-custom-blue text-sm uppercase leading-none">
-                        {{ user?.role === 'admin' ? 'ADMIN' : authStore.currentMode }}
+        
+        <!-- Desktop User Profile (Flat Card - Click to Edit) -->
+        <div @click="handleProfileClick" class="hidden md:flex items-center gap-3 min-h-[102px] h-auto bg-white min-w-[260px] rounded-3xl p-[18px] cursor-pointer hover:bg-slate-50 transition-colors">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="flex rounded-full overflow-hidden size-14 shrink-0 border border-slate-100">
+                    <img :src="user?.profile_picture || '@/assets/images/placeholder-avatar.png'" class="size-full object-cover" alt="photo" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'">
+                </div>
+                <div class="flex flex-col gap-[6px] text-left">
+                    <p class="font-semibold text-lg leading-tight line-clamp-1">{{ user?.name || 'Loading...' }}</p>
+                    <p class="font-bold text-custom-blue text-sm uppercase leading-none">
+                        {{ user ? (user.role === 'admin' ? 'ADMIN' : authStore.currentMode) : '...' }}
                     </p>
                 </div>
             </div>
-            <a @click="logout" class="flex w-6">
-                <img src="@/assets/images/icons/logout.svg" class="flex size-6 shrink-0" alt="icon">
-            </a>
         </div>
     </div>
 </template>

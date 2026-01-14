@@ -1,5 +1,4 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { formatRupiah, formatToClientTimeZone } from '@/helpers/format';
 import { useTransactionStore } from '@/stores/transaction';
@@ -10,22 +9,50 @@ import { RouterLink, useRoute } from 'vue-router';
 import StarPointy from '@/assets/images/icons/Star-pointy.svg'
 import StarPointyOutline from '@/assets/images/icons/Star-pointy-outline.svg'
 import { useProductReviewStore } from '@/stores/productReview';
+import { useToast } from "vue-toastification";
 
 const route = useRoute()
+const toast = useToast()
 
 const transaction = ref({})
 
 const transactionStore = useTransactionStore()
 const authStore = useAuthStore()
 const { user, activeMode } = storeToRefs(authStore)
-const { loading, success, error } = storeToRefs(transactionStore)
-const { fetchTransactionById, updateTransaction } = transactionStore
+const { loading } = storeToRefs(transactionStore)
+const { fetchTransactionById, updateTransaction, checkTransactionStatus } = transactionStore
+
+const handleCheckStatus = async () => {
+    try {
+        const updatedTransaction = await checkTransactionStatus(transaction.value.id)
+        transaction.value = updatedTransaction
+        if(updatedTransaction.payment_status === 'paid') {
+            toast.success("Status pembayaran terverifikasi: PAID")
+        } else {
+             toast.info("Status pembayaran saat ini: " + updatedTransaction.payment_status)
+        }
+    } catch (error) {
+         toast.error("Gagal memverifikasi status pembayaran")
+    }
+}
+
+onMounted(async () => {
+    await fetchData()
+    initReviewForm()
+    loadMidtransScript().catch(console.error)
+})
 
 const fetchData = async () => {
-    const response = await fetchTransactionById(route.params.id)
-
-    transaction.value = response
-    transaction.value.delivery_proof_url = PlaceHolder
+    try {
+        const response = await fetchTransactionById(route.params.id)
+        if (!response) throw new Error("Transaction not found")
+        
+        transaction.value = response
+        transaction.value.delivery_proof_url = response.delivery_proof ? getImageUrl(response.delivery_proof) : PlaceHolder
+    } catch (error) {
+        console.error("Error fetching transaction:", error)
+        toast.error("Gagal memuat data transaksi. Terjadi kesalahan atau data tidak ditemukan.")
+    }
 }
 
 
@@ -47,8 +74,10 @@ const handleUpdateData = async () => {
 
         await updateTransaction(payload)
         await fetchData()
+        toast.success('Status transaksi berhasil diperbarui')
     } catch (err) {
         console.error('Update failed:', err)
+        toast.error('Gagal memperbarui transaksi')
     }
 }
 
@@ -67,6 +96,8 @@ const handleDeliverySubmit = () => {
 }
 
 const handleImageChange = (e) => {
+    if (!e.target.files || !e.target.files[0]) return;
+    
     const file = e.target.files[0]
 
     transaction.value.delivery_proof = file
@@ -74,16 +105,16 @@ const handleImageChange = (e) => {
 }
 
 
-const closeAlert = () => {
-    transactionStore.success = null
-    transactionStore.error = null
-}
-
 const getImageUrl = (path) => {
     if (!path) return PlaceHolder
-    // Ganti dengan base URL Laravel Anda
-    const laravelBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-    return `${laravelBaseUrl}/storage/${path}`
+    let laravelBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
+    // Remove '/api' suffix and trailing slashes to get the root URL
+    laravelBaseUrl = laravelBaseUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '')
+    
+    // Ensure path doesn't start with /
+    const cleanPath = path.toString().startsWith('/') ? path.substring(1) : path
+    
+    return `${laravelBaseUrl}/storage/${cleanPath}`
 }
 
 // Review Logic
@@ -163,13 +194,14 @@ const handleSubmitReview = async () => {
         await Promise.all(promises)
         showReviewModal.value = false
         await fetchData()
+        toast.success('Ulasan berhasil dikirim')
     } catch (error) {
         console.error('Failed to submit reviews', error)
         // Show specific validation message if available
         if (error.response && error.response.data && error.response.data.message) {
-             alert('Submission Failed: ' + error.response.data.message)
+             toast.error('Gagal mengirim ulasan: ' + error.response.data.message)
         } else {
-             alert('Failed to submit reviews. Please check your input.')
+             toast.error('Gagal mengirim ulasan. Mohon cek input Anda.')
         }
     } finally {
         submittingReview.value = false
@@ -188,8 +220,10 @@ const handleReceivingProofChange = async (event) => {
     try {
         await transactionStore.completeTransaction(transaction.value.id, { receiving_proof: file })
         await fetchData()
+        toast.success('Pesanan diterima & diselesaikan')
     } catch (error) {
         console.error('Failed to complete order', error)
+        toast.error('Gagal menyelesaikan pesanan')
     }
 }
 
@@ -197,15 +231,74 @@ const getReviewsForProduct = (productId) => {
     return transaction.value?.product_reviews?.filter(r => r.product_id === productId) || []
 }
 
+const isProcessingPayment = ref(false)
+
+const loadMidtransScript = () => {
+    return new Promise((resolve, reject) => {
+        if (window.snap) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+        script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || 'YOUR_MIDTRANS_CLIENT_KEY');
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load Midtrans'));
+        document.head.appendChild(script);
+    });
+};
+
+const handleRepayment = () => {
+    if (!transaction.value.snap_token) {
+        toast.error("Tidak dapat memproses pembayaran. Token hilang.");
+        return;
+    }
+
+    isProcessingPayment.value = true;
+    window.snap.pay(transaction.value.snap_token, {
+        onSuccess: async function (result) {
+            toast.success("Pembayaran berhasil! Memverifikasi status...");
+            await handleCheckStatus();
+            isProcessingPayment.value = false;
+        },
+        onPending: function (result) {
+            toast.info("Menunggu pembayaran...");
+            isProcessingPayment.value = false;
+        },
+        onError: function (result) {
+            toast.error("Pembayaran gagal.");
+            isProcessingPayment.value = false;
+        },
+        onClose: function () {
+            isProcessingPayment.value = false;
+        }
+    });
+}
+
 onMounted(async () => {
     await fetchData()
     initReviewForm()
+    loadMidtransScript().catch(console.error)
 })
 </script>
 
 <template>
-    <div class="flex flex-col md:flex-row flex-1 gap-5">
-        <div class="flex flex-col gap-5 w-full min-w-0">
+    <div v-if="loading" class="flex flex-1 items-center justify-center min-h-[400px]">
+        <div class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
+    </div>
+    
+    <div v-else-if="!transaction || !transaction.id" class="flex flex-col flex-1 items-center justify-center min-h-[400px] gap-4">
+         <img src="@/assets/images/icons/bag-grey.svg" class="size-20 opacity-50" alt="Not Found">
+         <p class="font-bold text-xl text-custom-grey">Transaction Not Found</p>
+         <RouterLink :to="{ name: 'admin.my-transaction' }" class="text-custom-blue font-semibold hover:underline">
+            Back to My Transactions
+         </RouterLink>
+    </div>
+
+    <div v-else class="flex flex-col md:flex-row flex-1 gap-5">
+        <div class="flex flex-col gap-5 w-full min-w-0 animate-fade-in-up">
             <div class="relative w-full rounded-[20px] bg-custom-yellow overflow-hidden"
                 v-if="transaction?.delivery_status === 'pending'">
                 <img src="@/assets/images/backgrounds/round-ornament.svg"
@@ -349,7 +442,7 @@ onMounted(async () => {
                 </div>
             </section>
         </div>
-        <div class="flex flex-col gap-5 w-full md:w-[470px] shrink-0">
+        <div class="flex flex-col gap-5 w-full md:w-[470px] shrink-0 animate-fade-in-up delay-200">
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
                 <p class="font-bold text-xl">Customer Details</p>
                 <div class="flex items-center gap-[10px] w-full min-w-0">
@@ -462,6 +555,7 @@ onMounted(async () => {
                     </div>
                     <hr class="border-custom-stroke last:hidden">
                     <hr class="border-custom-stroke last:hidden">
+                <div class="flex flex-col gap-3">
                     <div class="flex items-center justify-between">
                         <p class="flex items-center gap-1 font-semibold text-lg text-custom-grey leading-none">
                             <img src="@/assets/images/icons/money-grey.svg" class="size-6" alt="icon">
@@ -470,6 +564,17 @@ onMounted(async () => {
                         <p class="font-bold text-lg leading-none text-custom-blue"> {{ transaction?.payment_status }}
                         </p>
                     </div>
+
+                    <!-- Repayment Button -->
+                    <button v-if="activeMode === 'buyer' && transaction?.payment_status === 'unpaid'" 
+                        @click="handleRepayment"
+                        :disabled="isProcessingPayment"
+                        class="flex items-center justify-center h-12 w-full rounded-2xl bg-custom-blue disabled:bg-custom-stroke transition-300">
+                        <span class="font-bold text-white">{{ isProcessingPayment ? 'Processing...' : 'Pay Now' }}</span>
+                    </button>
+                    
+
+                </div>
                     <hr class="border-custom-stroke last:hidden">
                 </div>
             </section>
@@ -514,7 +619,7 @@ onMounted(async () => {
                     </p>
                 </div>
                 <div class="flex flex-col text-center gap-4"
-                    v-if="transaction?.payment_status === 'paid' && activeMode === 'store' && user?.store?.id === transaction?.store?.id">
+                    v-if="transaction?.payment_status === 'paid' && activeMode === 'store' && user?.store?.id == transaction?.store?.id">
                     <button @click="handleAcceptOrder"
                         class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300">
                         <span class="font-semibold text-lg text-white">Accept Order</span>
@@ -635,9 +740,10 @@ onMounted(async () => {
                     </div>
                 </div>
                 <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
-                    <img :src="getImageUrl(transaction?.delivery_proof)" class="size-full object-cover" alt="thumbnail"
+                    <img :src="transaction?.delivery_proof_url || PlaceHolder" class="size-full object-cover" alt="thumbnail"
                         @error="(e) => e.target.src = PlaceHolder">
                 </div>
+
                 <div class="flex items-center justify-between">
                     <div class="flex flex-col gap-2">
                         <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
@@ -698,7 +804,8 @@ onMounted(async () => {
                     </div>
                 </div>
                 <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
-                    <img src="@/assets/images/thumbnails/delivering.svg" class="size-full object-cover" alt="thumbnail">
+                    <img :src="transaction?.delivery_proof_url || PlaceHolder" class="size-full object-cover" alt="thumbnail"
+                        @error="(e) => e.target.src = PlaceHolder">
                 </div>
                 <div class="flex items-center justify-between">
                     <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">

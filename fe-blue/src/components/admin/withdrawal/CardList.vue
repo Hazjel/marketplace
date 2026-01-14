@@ -33,8 +33,8 @@ const emit = defineEmits(['delete'])
 
 <template>
     <div class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
-        <div class="flex items-center gap-5 justify-between">
-            <div class="flex items-center gap-[14px] w-[320px]">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between">
+            <div class="flex items-center gap-[14px] w-full md:w-[320px]">
                 <div class="flex size-[84px] shrink-0 rounded-full bg-custom-background overflow-hidden">
                     <img :src="item?.store_balance?.store?.logo" class="size-full object-cover" alt="photo">
                 </div>
@@ -48,23 +48,25 @@ const emit = defineEmits(['delete'])
                     </p>
                 </div>
             </div>
-            <div class="flex items-center gap-[10px] w-[260px]">
-                <div
-                    class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                    <img src="@/assets/images/icons/calendar-2-black.svg" class="flex size-6 shrink-0" alt="icon">
+            <div class="grid grid-cols-2 gap-5 w-full md:flex md:w-auto md:gap-10 items-center">
+                <div class="flex items-center gap-[10px] w-full md:w-[260px]">
+                    <div
+                        class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                        <img src="@/assets/images/icons/calendar-2-black.svg" class="flex size-6 shrink-0" alt="icon">
+                    </div>
+                    <div class="flex flex-col gap-1 overflow-hidden">
+                        <p class="font-bold text-lg leading-none truncate">{{ formatToClientTimeZone(item.created_at) }}</p>
+                        <p class="font-semibold text-custom-grey truncate">Request Date</p>
+                    </div>
                 </div>
-                <div class="flex flex-col gap-1">
-                    <p class="font-bold text-lg leading-none">{{ formatToClientTimeZone(item.created_at) }}</p>
-                    <p class="font-semibold text-custom-grey">Request Date</p>
-                </div>
+                <p
+                    class="badge w-fit rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-orange/10 text-custom-orange">
+                    {{ item.status }}
+                </p>
             </div>
-            <p
-                class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-orange/10 text-custom-orange">
-                {{ item.status }}
-            </p>
         </div>
         <hr class="border-custom-stroke">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div class="flex flex-col gap-[6px]">
                 <p class="font-bold text-xl text-custom-blue">Rp {{ formatRupiah(item?.amount) }}</p>
                 <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
@@ -72,14 +74,14 @@ const emit = defineEmits(['delete'])
                     Withdrawal Request
                 </p>
             </div>
-            <div class="flex items-center justify-end gap-[14px]">
+            <div class="flex flex-col md:flex-row items-center justify-end gap-[14px] w-full md:w-auto">
                 <button
-                    class="flex items-center justify-center h-14 w-fit shrink-0 rounded-2xl p-4 gap-2 bg-custom-black">
+                    class="flex items-center justify-center h-14 w-full md:w-fit shrink-0 rounded-2xl p-4 gap-2 bg-custom-black">
                     <span class="font-semibold text-white">Export</span>
                     <img src="@/assets/images/icons/receive-square-white.svg" class="flex size-6 shrink-0" alt="icon">
                 </button>
                 <RouterLink :to="getDetailRoute(item.id)"
-                    class="flex items-center justify-center h-14 w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
+                    class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
                     <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon">
                     <span class="font-semibold text-white">Details</span>
                 </RouterLink>

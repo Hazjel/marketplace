@@ -97,6 +97,19 @@ export const useTransactionStore = defineStore("transaction", {
             }
         },
 
+        async checkTransactionStatus(id) {
+            this.loading = true
+            try {
+                const response = await axiosInstance.post(`transaction/${id}/check-status`)
+                return response.data.data
+            } catch (error) {
+                this.error = handleError(error)
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
         async completeTransaction(id, payload) {
             this.loading = true
             try {

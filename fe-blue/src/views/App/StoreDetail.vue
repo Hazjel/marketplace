@@ -1,5 +1,6 @@
 <script setup>
 import ProductCard from '@/components/card/ProductCard.vue';
+import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue';
 import { useProductStore } from '@/stores/product';
 import { useStoreStore } from '@/stores/store';
 import { storeToRefs } from 'pinia';
@@ -90,7 +91,7 @@ const handleFollow = () => {
     </header>
     <main class="flex flex-col gap-8 md:gap-[52px] w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-8 mb-20 md:mb-[100px] mx-auto">
         <section class="flex flex-col lg:flex-row gap-5 w-full">
-            <div id="Store-Info" class="flex flex-col rounded-3xl border border-custom-stroke p-5 gap-5 w-full">
+            <div id="Store-Info" class="flex flex-col rounded-3xl border border-custom-stroke p-5 gap-5 w-full animate-fade-in-up">
                 <div class="flex items-center w-full gap-5">
                     <div class="flex items-center gap-[14px] w-full min-w-0">
                         <div class="flex size-[60px] md:size-[86px] shrink-0 rounded-full bg-custom-background overflow-hidden">
@@ -151,7 +152,7 @@ const handleFollow = () => {
                     alt="promo">
             </a>
         </section>
-        <section class="flex flex-col gap-8">
+        <section class="flex flex-col gap-8 animate-fade-in-up delay-200">
             <div id="Tab-Buttons" class="flex items-center gap-[38px] w-full pb-3 border-b border-custom-stroke">
                 <button class="font-bold text-xl text-custom-grey [&.active]:text-custom-blue active">Products</button>
                 <button class="font-bold text-xl text-custom-grey [&.active]:text-custom-blue">Testimony</button>
@@ -203,8 +204,12 @@ const handleFollow = () => {
                     </div>
                     <div class="flex flex-col gap-9">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                            <ProductCard v-for="product in products" :key="product.id" :item="product"
-                                v-if="!loadingProducts" />
+                            <template v-if="loadingProducts">
+                                <SkeletonProductCard v-for="i in 8" :key="i" />
+                            </template>
+                            <template v-else>
+                                <ProductCard v-for="product in products" :key="product.id" :item="product" />
+                            </template>
                         </div>
                         <button
                             class="flex items-center w-fit h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black mx-auto">

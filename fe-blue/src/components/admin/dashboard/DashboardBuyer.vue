@@ -57,41 +57,96 @@ const totalTransaction = computed(() => {
     return buyerTransactions.value.length
 })
 
+// Status Counts
+const countUnpaid = computed(() => {
+    return buyerTransactions.value.filter(t => t.payment_status === 'unpaid').length
+})
+
+const countProcessed = computed(() => {
+    return buyerTransactions.value.filter(t => 
+        t.payment_status === 'paid' && 
+        t.delivery_status === 'pending'
+    ).length
+})
+
+const countShipped = computed(() => {
+    return buyerTransactions.value.filter(t => t.delivery_status === 'shipping').length
+})
+
+const countCompleted = computed(() => {
+    return buyerTransactions.value.filter(t => t.delivery_status === 'delivered').length
+})
+
 onMounted(() => {
     fetchData()
 })
 </script>
 
 <template>
-    <div class="flex flex-col gap-5 md:flex-row">
-        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-5">
+        <!-- Total Expense (1 Column) -->
+        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white border border-custom-stroke col-span-1 animate-fade-in-up">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                     <img src="@/assets/images/icons/wallet-2-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">Rp {{ formatRupiah(totalExpense) }}</p>
-                    <p class="font-medium text-lg text-custom-grey">
+                    <p class="font-bold text-2xl md:text-3xl">Rp {{ formatRupiah(totalExpense) }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">
                         Total Expense
                     </p>
                 </div>
             </div>
         </div>
-        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
-            <div class="flex flex-col gap-6">
-                <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
-                    <img src="@/assets/images/icons/stickynote-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
+
+        <!-- Transaction Statuses (3 Columns -> Inner Grid 4 Cols for ALL screens) -->
+        <div class="grid grid-cols-4 gap-2 md:gap-4 col-span-1 xl:col-span-3">
+             <!-- Unpaid -->
+            <div class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white border border-custom-stroke items-center justify-center text-center animate-fade-in-up delay-100">
+                <div class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full">
+                    <img src="@/assets/images/icons/card-black.svg" class="flex size-4 md:size-5 shrink-0" alt="icon">
                 </div>
-                <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ totalTransaction }}</p>
-                    <p class="font-medium text-lg text-custom-grey">
-                        Total Transaction
-                    </p>
+                <div class="flex flex-col gap-0.5 md:gap-1">
+                    <p class="font-bold text-sm md:text-xl">{{ countUnpaid }}</p>
+                    <p class="font-medium text-[10px] md:text-sm text-custom-grey">Unpaid</p>
+                </div>
+            </div>
+
+            <!-- Processed -->
+            <div class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white border border-custom-stroke items-center justify-center text-center animate-fade-in-up delay-100">
+                <div class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full">
+                    <img src="@/assets/images/icons/box-black.svg" class="flex size-4 md:size-5 shrink-0" alt="icon">
+                </div>
+                <div class="flex flex-col gap-0.5 md:gap-1">
+                    <p class="font-bold text-sm md:text-xl">{{ countProcessed }}</p>
+                    <p class="font-medium text-[10px] md:text-sm text-custom-grey">Processed</p>
+                </div>
+            </div>
+
+            <!-- Shipped -->
+            <div class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white border border-custom-stroke items-center justify-center text-center animate-fade-in-up delay-200">
+                <div class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full">
+                    <img src="@/assets/images/icons/car-delivery-black.svg" class="flex size-4 md:size-5 shrink-0" alt="icon">
+                </div>
+                <div class="flex flex-col gap-0.5 md:gap-1">
+                    <p class="font-bold text-sm md:text-xl">{{ countShipped }}</p>
+                    <p class="font-medium text-[10px] md:text-sm text-custom-grey">Shipped</p>
+                </div>
+            </div>
+
+            <!-- Completed -->
+            <div class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white border border-custom-stroke items-center justify-center text-center animate-fade-in-up delay-300">
+                <div class="flex size-8 md:size-10 bg-custom-blue/10 items-center justify-center rounded-full">
+                    <img src="@/assets/images/icons/clipboard-tick-blue-fill.svg" class="flex size-4 md:size-5 shrink-0" alt="icon">
+                </div>
+                <div class="flex flex-col gap-0.5 md:gap-1">
+                    <p class="font-bold text-sm md:text-xl">{{ countCompleted }}</p>
+                    <p class="font-medium text-[10px] md:text-sm text-custom-grey">Done</p>
                 </div>
             </div>
         </div>
     </div>
-    <div class="flex flex-col flex-1 w-full rounded-[20px] p-5 gap-6 bg-white">
+    <div class="flex flex-col flex-1 w-full rounded-[20px] p-5 gap-6 bg-white animate-fade-in-up delay-300">
         <div class="flex flex-col flex-1 gap-5">
             <p class="font-bold text-xl">Latest Transactions</p>
             <div id="List-Transactions" class="flex flex-col gap-5" v-if="!loading && buyerTransactions.length > 0">

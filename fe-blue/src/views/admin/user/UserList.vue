@@ -54,17 +54,17 @@ watch(filters, () => {
                 </div>
             </div>
         </div>
-        <div id="Filter" class="flex items-center justify-between">
-            <form action="#">
+        <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <form action="#" class="w-full md:w-auto">
                 <label
-                    class="flex items-center w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
+                    class="flex items-center w-full md:w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
                     <img src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0" alt="icon">
                     <input type="text"
                         class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none"
                         placeholder="Search User" v-model="filters.search">
                 </label>
             </form>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
                 <p class="font-medium text-custom-grey">Show</p>
                 <label
                     class="flex items-center h-14 rounded-2xl border border-custom-stroke py-4 px-5 pl-3 bg-white focus-within:border-custom-black transition-300">

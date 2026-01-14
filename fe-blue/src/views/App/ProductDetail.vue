@@ -10,9 +10,11 @@ import { useWishlistStore } from '@/stores/wishlist';
 import { useCartStore } from '@/stores/cart';
 import { useAuthStore } from '@/stores/auth';
 import { useHead } from '@vueuse/head';
+import { useToast } from "vue-toastification";
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 const product = ref({})
 const activeImage = ref()
@@ -92,7 +94,7 @@ const increase = () => {
     if (quantity.value < stock) {
         quantity.value++
     } else {
-        alert('Max stock reached')
+        toast.error('Maksimal stok tercapai', { timeout: 2000 })
     }
 }
 
@@ -122,7 +124,7 @@ const addToCart = () => {
     }
 
     if (currentInCart + quantity.value > stock) {
-        alert(`Stock insufficient. You have ${currentInCart} in cart and want to add ${quantity.value}. Max stock is ${stock}.`)
+        toast.error(`Stok tidak cukup. Anda punya ${currentInCart} di keranjang. Maksimal stok ${stock}.`)
         return
     }
 
@@ -130,6 +132,7 @@ const addToCart = () => {
         ...product.value,
         quantity: quantity.value
     })
+    toast.success('Produk berhasil ditambahkan ke keranjang')
 }
 
 onMounted(() => {

@@ -146,6 +146,7 @@ class AuthRepository implements AuthRepositoryInterface
             }
 
             $user = Auth::user();
+            $user->load(['buyer', 'store']);
             $user->permissions = $user->roles->flatMap->permissions->pluck('name');
 
             DB::commit();

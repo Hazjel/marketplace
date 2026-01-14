@@ -1,5 +1,4 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import CardList from '@/components/admin/product/CardList.vue';
 import Pagination from '@/components/admin/Pagination.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -9,7 +8,9 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { can } from '@/helpers/permissionHelper';
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const productStore = useProductStore()
 const { products, meta, loading, success, error } = storeToRefs(productStore)
 const { fetchProductsPaginated, deleteProduct } = productStore
@@ -48,54 +49,60 @@ async function handleDelete(id) {
 
 const debounceFetchData = debounce(fetchData, 500)
 
-const closeAlert = () => {
-    productStore.success = null
-    productStore.error = null
-}
-
 onMounted(fetchData)
 
 watch(serverOptions, () => {
     fetchData()
 }, { deep: true })
-
 watch(filters, () => {
     debounceFetchData()
 }, { deep: true })
+watch(success, (value) => {
+    if (value) {
+        toast.success(value);
+        productStore.success = null;
+    }
+});
+watch(error, (value) => {
+    if (value) {
+        toast.error(value);
+        productStore.error = null;
+    }
+});
 </script>
 
 <template>
-    <div class="flex w-full gap-5">
-        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+    <div class="flex flex-col md:flex-row w-full gap-4 md:gap-5">
+        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white animate-fade-in-up">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                     <img src="@/assets/images/icons/shopping-cart-blue.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ totalProductsSummary }}</p>
-                    <p class="font-medium text-lg text-custom-grey">
+                    <p class="font-bold text-2xl md:text-4xl">{{ totalProductsSummary }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">
                         Total Products
                     </p>
                 </div>
             </div>
         </div>
-        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
+        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white animate-fade-in-up delay-100">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                     <img src="@/assets/images/icons/presention-chart-blue.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ meta.total_sold ? meta.total_sold.toLocaleString() : 0 }}</p>
-                    <p class="font-medium text-lg text-custom-grey">
+                    <p class="font-bold text-2xl md:text-4xl">{{ meta.total_sold ? meta.total_sold.toLocaleString() : 0 }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">
                         Total Sold
                     </p>
                 </div>
             </div>
         </div>
     </div>
-    <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
-        <div class="header flex items-center justify-between">
-            <div class="flex flex-col gap-2">
+    <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white animate-fade-in-up delay-200">
+        <div class="header flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+            <div class="flex flex-col gap-2 w-full md:w-auto items-start">
                 <p class="font-bold text-xl">All Products</p>
                 <div class="flex items-center gap-1">
                     <img src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0" alt="icon">
@@ -103,13 +110,12 @@ watch(filters, () => {
                 </div>
             </div>
             <RouterLink :to="{ name: 'admin.product.create' }"
-                class="flex h-14 items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]"
+                class="flex h-14 w-full md:w-auto justify-center items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]"
                 v-if="can('product-create')">
                 <span class="font-semibold text-lg text-white leading-none">Add New</span>
                 <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0" alt="icon">
             </RouterLink>
         </div>
-        <alert :success="success" :error="error" @closeAlert="() => { success = null; error = null; }"></alert>
         <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
             <form action="#" class="w-full md:w-auto">
                 <label

@@ -1,5 +1,4 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { formatRupiah, formatToClientTimeZone } from '@/helpers/format';
 import { useWithdrawalStore } from '@/stores/withdrawal';
@@ -7,8 +6,10 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref} from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useToast } from "vue-toastification";
 
 const route = useRoute()
+const toast = useToast()
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
@@ -22,7 +23,7 @@ const triggerFileInput = () => {
 }
 
 const withdrawalStore = useWithdrawalStore()
-const { loading, success, error } = storeToRefs(withdrawalStore)
+const { loading } = storeToRefs(withdrawalStore)
 const { fetchWithdrawalById, approveWithdrawal } = withdrawalStore
 
 const fetchData = async () => {
@@ -34,10 +35,11 @@ const fetchData = async () => {
 
 const handleAprroveWithdrawal = async () => {
     if (!withdrawal.value.proof) {
-        alert('Please upload a proof of payment first');
+        toast.error('Silakan unggah bukti pembayaran terlebih dahulu');
         return;
     }
     await approveWithdrawal(withdrawal.value)
+    toast.success('Penarikan berhasil disetujui');
 
     fetchData()
 }
@@ -55,8 +57,6 @@ onMounted(fetchData)
 <template>
     <div class="flex w-full gap-5">
         <div class="flex flex-col w-full gap-5">
-            <Alert :type="'success'" :message="success" v-if="success" />
-            <Alert :type="'error'" :message="error" v-if="error" />
             <div class="relative w-full rounded-[20px] bg-custom-orange overflow-hidden" v-if="withdrawal?.status === 'pending'">
                 <img src="@/assets/images/backgrounds/round-ornament.svg"
                     class="size-full object-contain object-right opacity-55 absolute" alt="icon">

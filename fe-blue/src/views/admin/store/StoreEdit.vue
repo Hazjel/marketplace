@@ -5,15 +5,16 @@ import { storeToRefs } from 'pinia';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { debounce } from 'lodash';
-import Alert from '@/components/admin/Alert.vue';
+import { useToast } from "vue-toastification";
 
 const router = useRouter()
+const toast = useToast()
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
 const storeStore = useStoreStore()
-const { loading, error, success } = storeToRefs(storeStore)
+const { loading } = storeToRefs(storeStore)
 const { fetchStoreByUser, updateStore } = storeStore
 
 const store = ref({
@@ -58,11 +59,12 @@ const fetchData = async () => {
 const handleSubmit = async () => {
     try {
         if (!store.value.name) {
-            alert('Store name is required');
+            toast.error('Nama Toko wajib diisi');
             return;
         }
 
         await updateStore(store.value.id, store.value);
+        toast.success('Informasi Toko berhasil diperbarui');
 
         // Redirect after success
         setTimeout(() => {
@@ -118,18 +120,11 @@ const handleAddressSelect = (selected) => {
     showAddressOptions.value = false;
 };
 
-const closeAlert = () => {
-    storeStore.success = null
-    storeStore.error = null
-}
-
 onMounted(fetchData)
 </script>
 
 <template>
     <div class="flex flex-col gap-5">
-        <Alert :success="success" :error="error" @closeAlert="closeAlert" />
-
         <form @submit.prevent="handleSubmit" class="flex flex-col w-full rounded-3xl p-5 gap-5 bg-white">
             <h2 class="font-bold text-xl capitalize">Edit Store Information</h2>
             <div class="flex items-center justify-between">

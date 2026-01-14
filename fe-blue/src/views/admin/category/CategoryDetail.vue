@@ -1,12 +1,13 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import { useProductCategoryStore } from '@/stores/productCategory';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { RouterLink } from 'vue-router';
 import { useRoute } from 'vue-router';
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const route = useRoute()
 
 const productCategoryStore = useProductCategoryStore()
@@ -28,15 +29,22 @@ async function handleDelete(id){
 
 onMounted(fetchData)
 
-const closeAlert = () => {
-    productCategoryStore.success = null
-    productCategoryStore.error = null
-}
+watch(success, (value) => {
+    if (value) {
+        toast.success(value);
+        productCategoryStore.success = null;
+    }
+});
+watch(error, (value) => {
+    if (value) {
+        toast.error(value);
+        productCategoryStore.error = null;
+    }
+});
 </script>
 
 <template>
     <div class="flex flex-col gap-5">
-        <Alert :success="success" :error="error" @closeAlert="closeAlert" />
         <div class="flex gap-5">
         <section class="flex gap-5 flex-1">
             <div class="card flex flex-col h-fit w-full rounded-[20px] p-5 gap-5 bg-white">
