@@ -1,10 +1,11 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import { useStoreStore } from '@/stores/store';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref} from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const route = useRoute()
 
 const store = ref({})
@@ -19,30 +20,32 @@ const fetchData = async () => {
     store.value = response
 }
 
-const closeAlert = () => {
-    storeStore.success = null
-    storeStore.error = null
-}
-
 async function handleApprovedStore () {
     await approveStore(route.params.id)
 
     fetchData()
-
-    setTimeout(() => {
-        success.value = null
-        error.value = null
-    }, 3000)
 }
 
 onMounted(fetchData)
+
+watch(success, (value) => {
+    if (value) {
+        toast.success(value);
+        storeStore.success = null;
+    }
+});
+watch(error, (value) => {
+    if (value) {
+        toast.error(value);
+        storeStore.error = null;
+    }
+});
 </script>
 
 <template>
-    <Alert :success="success" :error="error" @closeAlert="closeAlert"/>
 
     <div class="flex gap-5">
-        <div class="flex flex-col gap-5 w-full">
+        <div class="flex flex-col gap-5 w-full animate-fade-in-up">
             <!-- Temporary container -->
             <section class="flex flex-col w-full h-fit rounded-[20px] p-5 gap-5 bg-white" v-if="store.is_verified">
                 <p class="font-bold text-xl">Store Details</p>
@@ -173,7 +176,7 @@ onMounted(fetchData)
                 </div>
             </section>
         </div>
-        <section class="flex flex-col w-full h-fit rounded-[20px] p-5 gap-5 bg-white">
+        <section class="flex flex-col w-full h-fit rounded-[20px] p-5 gap-5 bg-white animate-fade-in-up delay-100">
             <p class="font-bold text-xl">Store Address</p>
             <div class="flex flex-col rounded-[20px] border border-custom-stroke p-4 gap-5">
                 <div class="flex items-center gap-[10px] w-[260px]">

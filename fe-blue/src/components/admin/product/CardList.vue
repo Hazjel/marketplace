@@ -14,8 +14,8 @@ const emit = defineEmits(['delete'])
 </script>
 
 <template>
-    <div class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white">
-        <div class="flex flex-col md:flex-row items-center gap-5 justify-between pr-0 md:pr-[30px]">
+    <div class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white hover-scale transition-all duration-300">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]">
             <div class="flex w-full md:w-auto flex-1 items-center gap-[14px] overflow-hidden">
                 <div
                     class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background overflow-hidden items-center justify-center">
@@ -23,9 +23,9 @@ const emit = defineEmits(['delete'])
                         class="size-full object-contain" alt="icon">
                 </div>
                 <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
-                    <p class="font-bold text-lg truncate">{{ item.name }}</p>
+                    <p class="font-bold text-base md:text-lg truncate">{{ item.name }}</p>
                     <p class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
-                        <span class="font-bold text-custom-blue">{{ item.product_category?.name }}</span>
+                        <span class="font-bold text-sm md:text-base text-custom-blue">{{ item.product_category?.name }}</span>
                     </p>
                 </div>
             </div>
@@ -37,9 +37,9 @@ const emit = defineEmits(['delete'])
                         <img src="@/assets/images/icons/status-up-black.svg" class="flex size-6 shrink-0" alt="icon">
                     </div>
                     <div class="flex flex-col gap-1 overflow-hidden">
-                        <p class="font-bold text-lg leading-none truncate">{{ item.total_sold ? item.total_sold.toLocaleString() : 0
+                        <p class="font-bold text-base md:text-lg leading-none truncate">{{ item.total_sold ? item.total_sold.toLocaleString() : 0
                             }}</p>
-                        <p class="font-semibold text-custom-grey truncate">Total Sold</p>
+                        <p class="font-semibold text-sm md:text-base text-custom-grey truncate">Total Sold</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-[10px] w-full md:w-auto">
@@ -48,8 +48,8 @@ const emit = defineEmits(['delete'])
                         <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0" alt="icon">
                     </div>
                     <div class="flex flex-col gap-1 overflow-hidden">
-                        <p class="font-bold text-lg leading-none truncate">{{ item.stock }}</p>
-                        <p class="font-semibold text-custom-grey truncate">Total Stock</p>
+                        <p class="font-bold text-base md:text-lg leading-none truncate">{{ item.stock }}</p>
+                        <p class="font-semibold text-sm md:text-base text-custom-grey truncate">Total Stock</p>
                     </div>
                 </div>
             </div>

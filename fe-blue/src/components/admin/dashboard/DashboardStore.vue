@@ -100,15 +100,15 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-5 md:flex-row">
-        <div class="flex flex-col w-[360px] shrink-0 rounded-[20px] p-5 gap-6 bg-white">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+        <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white">
             <div class="flex flex-col gap-6">
                 <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
                     <img src="@/assets/images/icons/wallet-2-blue-fill.svg" class="flex size-6 shrink-0" alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">Rp {{ formatRupiah(storeBalance?.balance || 0) }}</p>
-                    <p class="font-medium text-lg text-custom-grey">
+                    <p class="font-bold text-2xl md:text-4xl">Rp {{ formatRupiah(storeBalance?.balance || 0) }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">
                         Total Revenue (Balance)
                     </p>
                 </div>
@@ -121,8 +121,8 @@ onMounted(() => {
                         alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ stats.total_products }}</p>
-                    <p class="font-medium text-lg text-custom-grey">
+                    <p class="font-bold text-2xl md:text-4xl">{{ stats.total_products }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">
                         Total Products
                     </p>
                 </div>
@@ -137,8 +137,8 @@ onMounted(() => {
                         alt="icon">
                 </div>
                 <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-4xl">{{ stats.total_reviews }}</p>
-                    <p class="font-medium text-lg text-custom-grey">
+                    <p class="font-bold text-2xl md:text-4xl">{{ stats.total_reviews }}</p>
+                    <p class="font-medium text-sm md:text-lg text-custom-grey">
                         Total Reviews
                     </p>
                 </div>

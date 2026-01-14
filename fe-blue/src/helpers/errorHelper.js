@@ -8,6 +8,6 @@ export function handleError(error) {
     } else if (error.response && error.response.status === 500) {
         return error.response.data.message
     } else {
-        alert('An unexpected error occurred. Please try again later.');
+        return 'An unexpected error occurred. Please try again later.';
     }
 }

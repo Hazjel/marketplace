@@ -60,23 +60,23 @@ const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
 
 <template>
     <nav id="Pagination">
-        <ul class="flex items-center gap-3">
+        <ul class="flex items-center gap-1 md:gap-3">
             <li class="group">
                 <button @click="serverOptions.page = meta.current_page - 1" :disabled="meta.current_page === 1"
-                    class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
+                    class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
                     <img src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
-                        class="size-6 group-has-[:disabled]:opacity-20 rotate-180" alt="icon">
+                        class="size-5 md:size-6 group-has-[:disabled]:opacity-20 rotate-180" alt="icon">
                 </button>
             </li>
 
             <li v-for="page in getPageNumbers(meta.current_page, meta.last_page)" :key="page" class="group"
                 :class="{ 'active': page === meta.current_page }">
                 <button v-if="page !== '...'" @click="serverOptions.page = page"
-                    class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
+                    class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold text-sm md:text-base">
                     {{ page }}
                 </button>
                 <span v-else
-                    class="flex size-11 shrink-0 rounded-full items-center justify-center text-gray-500 font-semibold">
+                    class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center text-gray-500 font-semibold text-sm md:text-base">
                     {{ page }}
                 </span>
             </li>
@@ -84,9 +84,9 @@ const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
             <li class="group">
                 <button @click="serverOptions.page = meta.current_page + 1"
                     :disabled="meta.current_page === meta.last_page"
-                    class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
+                    class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
                     <img src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
-                        class="size-6 group-has-[:disabled]:opacity-20" alt="icon">
+                        class="size-5 md:size-6 group-has-[:disabled]:opacity-20" alt="icon">
                 </button>
             </li>
         </ul>

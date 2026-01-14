@@ -46,7 +46,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <section id="Trusted-Seller" class="flex flex-col gap-6 md:gap-9">
+    <section id="Trusted-Seller" class="flex flex-col gap-6 md:gap-9 animate-fade-in-up delay-300">
         <div class="flex items-center justify-between gap-4">
             <h2 class="font-extrabold text-lg md:text-[32px] leading-tight">Trusted Sellers,<br class="hidden md:block"> Quality Guaranteed</h2>
             <RouterLink :to="{ name: 'app.all-stores' }"

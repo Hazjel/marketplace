@@ -2,8 +2,10 @@
 import { formatRupiah } from '@/helpers/format';
 import { useCartStore } from '@/stores/cart'
 import { storeToRefs } from 'pinia';
+import { useToast } from "vue-toastification";
 
 const cart = useCartStore()
+const toast = useToast()
 const { carts, selectedStores, totalSelectedItems, totalSelectedQuantity, subtotalSelected, ppnSelected, discountSelected, grandTotalSelected, hasSelectedStores } = storeToRefs(cart)
 const { decreaseQuantity, increaseQuantity, removeFromCart, toggleStoreSelection, updateQuantity } = cart
 
@@ -14,7 +16,7 @@ const handleIncreaseQuantity = (storeId, productId) => {
        if (product.quantity < product.stock) {
            increaseQuantity(storeId, productId)
        } else {
-           alert('Max stock reached')
+           toast.error('Maksimal stok tercapai')
        }
     }
 }
@@ -26,7 +28,7 @@ const handleUpdateQuantity = (storeId, productId, event) => {
     
     if (product) {
         if (value > product.stock) {
-            alert(`Stock insufficient. Max stock is ${product.stock}`)
+            toast.error(`Stok tidak cukup. Maksimal stok ${product.stock}`)
             event.target.value = product.stock 
             updateQuantity(storeId, productId, product.stock)
         } else if (value < 1) {

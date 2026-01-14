@@ -116,7 +116,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             $transaction = new Transaction;
 
-            $transaction->code = 'BLUE' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+            $transaction->code = 'BLUE' . now()->format('dmYHis') . mt_rand(10, 99);
             $transaction->buyer_id = $data['buyer_id'];
             $transaction->store_id = $data['store_id'];
             $transaction->address_id = $data['address_id'];
@@ -218,6 +218,9 @@ class TransactionRepository implements TransactionRepositoryInterface
                     'first_name' => $transaction->buyer->user?->name ?? 'Customer',
                     'email' => $transaction->buyer->user?->email ?? 'no-email@example.com',
                 ),
+                'callbacks' => array(
+                    'finish' => env('FRONTEND_URL', 'http://localhost:5173') . '/admin/transaction/' . $transaction->id
+                )
             );
 
             Log::info('Midtrans params:', ['params' => $params]);
@@ -297,7 +300,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 $transaction->tracking_number = $data['tracking_number'];
             }
 
-            if (isset($data['delivery_proof'])) {
+            if (isset($data['delivery_proof']) && $data['delivery_proof'] instanceof \Illuminate\Http\UploadedFile) {
                 $transaction->delivery_proof = $data['delivery_proof']->store('assets/transaction', 'public');
             }
 

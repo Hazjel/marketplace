@@ -73,6 +73,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('transaction/all/paginated', [TransactionController::class, 'getAllPaginated']);
     Route::get('transaction/code/{code}', [TransactionController::class, 'showByCode']);
     Route::post('transaction/{id}/complete', [TransactionController::class, 'complete']);
+    Route::post('transaction/{id}/check-status', [TransactionController::class, 'checkPaymentStatus']);
+    Route::post('transaction', [TransactionController::class, 'store']);
     Route::apiResource('transaction', TransactionController::class);
 
     // Product Review

@@ -16,7 +16,7 @@ onMounted(() => {
 });
 </script>
 <template>
-    <section id="Top-Picks" class="flex flex-col gap-9">
+    <section id="Top-Picks" class="flex flex-col gap-9 animate-fade-in-up delay-200">
         <div class="flex items-center justify-between gap-4">
             <h2 class="font-extrabold text-lg md:text-[32px] leading-tight">Shop Quality Picks<br class="hidden md:block"> from Top Sellers</h2>
             <RouterLink :to="{ name: 'app.all-products' }"

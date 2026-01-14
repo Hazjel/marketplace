@@ -1,5 +1,4 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import Pagination from '@/components/admin/Pagination.vue';
 import { useTransactionStore } from '@/stores/transaction';
 import { debounce } from 'lodash';
@@ -10,7 +9,9 @@ import { RouterLink } from 'vue-router';
 import { can } from '@/helpers/permissionHelper';
 import { formatToClientTimeZone } from '@/helpers/format';
 import { formatRupiah } from '@/helpers/format';
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const transactionStore = useTransactionStore()
 const { transactions, meta, loading, success, error } = storeToRefs(transactionStore)
 const { fetchTransactionsPaginated } = transactionStore
@@ -184,11 +185,6 @@ const getTransactionStatusClass = (status) => {
     }
 }
 
-const closeAlert = () => {
-    transactionStore.success = null
-    transactionStore.error = null
-}
-
 onMounted(async () => {
     await fetchData()
 })
@@ -202,6 +198,18 @@ watch(filters, () => {
     serverOptions.value.page = 1
     debounceFetchData()
 }, { deep: true })
+watch(success, (value) => {
+    if (value) {
+        toast.success(value);
+        transactionStore.success = null;
+    }
+});
+watch(error, (value) => {
+    if (value) {
+        toast.error(value);
+        transactionStore.error = null;
+    }
+});
 </script>
 
 <template>

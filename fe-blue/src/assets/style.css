@@ -9,10 +9,15 @@
     --color-custom-green: #00A48A;
     --color-custom-orange: #FF7020;
     --color-custom-lime-green-char: #DEFF6E;
+    --color-custom-lime-green: #84CC16;
     --color-custom-background: #F3F5F9;
     --color-custom-icon-background: #F3F3F3;
 
     --font-sans: "Lexend Deca", sans-serif;
+
+    /* Shadcn Animations */
+    --animate-in: enter 150ms ease-out;
+    --animate-out: exit 150ms ease-in;
 }
 
 body {
@@ -108,6 +113,138 @@ body {
 
     .hide-scrollbar::-webkit-scrollbar {
         display: none;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    .delay-100 {
+        animation-delay: 100ms;
+    }
+
+    .delay-200 {
+        animation-delay: 200ms;
+    }
+
+    .delay-300 {
+        animation-delay: 300ms;
+    }
+
+    /* Global Route Transition */
+    .fade-enter-active,
+    .fade-leave-active {
+        transition: opacity 0.3s ease;
+    }
+
+    .fade-enter-from,
+    .fade-leave-to {
+        opacity: 0;
+    }
+
+    /* Hover Utilities */
+    .hover-scale {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+
+    /* Shadcn/Radix Animation Utilities Support for V4 without Plugin */
+    @keyframes enter {
+        from {
+            opacity: var(--tw-enter-opacity, 1);
+            transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), 1) rotate(var(--tw-enter-rotate, 0));
+        }
+    }
+
+    @keyframes exit {
+        to {
+            opacity: var(--tw-exit-opacity, 1);
+            transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), 1) rotate(var(--tw-exit-rotate, 0));
+        }
+    }
+
+    .animate-in {
+        animation-name: enter;
+        animation-duration: 150ms;
+        --tw-enter-opacity: initial;
+        --tw-enter-scale: initial;
+        --tw-enter-rotate: initial;
+        --tw-enter-translate-x: initial;
+        --tw-enter-translate-y: initial;
+    }
+
+    .animate-out {
+        animation-name: exit;
+        animation-duration: 150ms;
+        --tw-exit-opacity: initial;
+        --tw-exit-scale: initial;
+        --tw-exit-rotate: initial;
+        --tw-exit-translate-x: initial;
+        --tw-exit-translate-y: initial;
+    }
+
+    .fade-in-0 {
+        --tw-enter-opacity: 0;
+    }
+
+    .fade-out-0 {
+        --tw-exit-opacity: 0;
+    }
+
+    .slide-in-from-top {
+        --tw-enter-translate-y: -100%;
+    }
+
+    .slide-in-from-bottom {
+        --tw-enter-translate-y: 100%;
+    }
+
+    .slide-in-from-left {
+        --tw-enter-translate-x: -100%;
+    }
+
+    .slide-in-from-right {
+        --tw-enter-translate-x: 100%;
+    }
+
+    .slide-out-to-top {
+        --tw-exit-translate-y: -100%;
+    }
+
+    .slide-out-to-bottom {
+        --tw-exit-translate-y: 100%;
+    }
+
+    .slide-out-to-left {
+        --tw-exit-translate-x: -100%;
+    }
+
+    .slide-out-to-right {
+        --tw-exit-translate-x: 100%;
+    }
+
+    .zoom-in-95 {
+        --tw-enter-scale: 0.95;
+    }
+
+    .zoom-out-95 {
+        --tw-exit-scale: 0.95;
     }
 }
 

@@ -6,11 +6,13 @@ import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, computed } from 'vue';
 import { debounce } from 'lodash';
+import { useToast } from "vue-toastification";
 
 // Store imports
 const authStore = useAuthStore()
 const cart = useCartStore()
 const transactionStore = useTransactionStore()
+const toast = useToast()
 
 // Store refs
 const { user } = storeToRefs(authStore)
@@ -118,12 +120,13 @@ const handleAddressSelect = (selected) => {
     transaction.value.postal_code = selected.zip_code;
     addressSearch.value = selected.label;
     showAddressOptions.value = false;
+    toast.success('Alamat berhasil dipilih')
 };
 
 // Delivery calculation functionality
 const handleDeliveryModal = async () => {
     if (!transaction.value.address) {
-        alert('Please select an address first');
+        toast.error('Silakan pilih alamat terlebih dahulu');
         return;
     }
 
@@ -131,7 +134,7 @@ const handleDeliveryModal = async () => {
         const store = selectedCarts.value[0];
 
         if (!store.storeAddressId || store.storeAddressId === '-') {
-            alert('Store address is not available. Cannot calculate delivery.');
+            toast.error('Alamat toko tidak tersedia. Tidak bisa menghitung ongkir.');
             return;
         }
 
@@ -151,13 +154,13 @@ const handleDeliveryModal = async () => {
         couriers.value = data.data.calculate_reguler;
         showDeliveryModal.value = true;
     } catch (error) {
-        alert('Failed to calculate delivery fee. Please try again.');
+        toast.error('Gagal menghitung ongkir. Silakan coba lagi.');
     }
 };
 
 const handleCourierSubmit = () => {
     if (!selectedCourier.value) {
-        alert('Please select a courier');
+        toast.error('Silakan pilih kurir');
         return;
     }
 
@@ -166,13 +169,14 @@ const handleCourierSubmit = () => {
     transaction.value.shipping_cost = selectedCourier.value.shipping_cost_net;
     deliveryFee.value = selectedCourier.value.shipping_cost_net;
     showDeliveryModal.value = false;
+    toast.success('Kurir berhasil dipilih')
 };
 
 const isProcessingPayment = ref(false);
 
 const handleSubmit = async () => {
     if (!selectedCourier.value) {
-        alert('Please select a courier first');
+        toast.error('Silakan pilih kurir terlebih dahulu');
         return;
     }
 
@@ -182,7 +186,7 @@ const handleSubmit = async () => {
         const response = await createTransaction(transaction.value);
 
         if (!response || !response.snap_token) {
-            alert('Failed to create transaction. Please try again.');
+            toast.error('Gagal membuat transaksi. Silakan coba lagi.');
             isProcessingPayment.value = false; // ✅ Stop loading
             return;
         }
@@ -192,12 +196,14 @@ const handleSubmit = async () => {
                 cart.clearSelectedItems();
                 showSuccessModal.value = true;
                 isProcessingPayment.value = false; // ✅ Stop loading
+                toast.success('Pembayaran berhasil!')
             },
             onPending: function (result) {
                 isProcessingPayment.value = false; // ✅ Stop loading
+                toast.info('Menunggu pembayaran...')
             },
             onError: function (result) {
-                alert('Payment failed. Please try again.');
+                toast.error('Pembayaran gagal. Silakan coba lagi.');
                 isProcessingPayment.value = false; // ✅ Stop loading
             },
             onClose: function () {
@@ -205,7 +211,7 @@ const handleSubmit = async () => {
             }
         })
     } catch (error) {
-        alert('Failed to process transaction. Please try again.');
+        toast.error('Gagal memproses transaksi. Silakan coba lagi.');
         isProcessingPayment.value = false; // ✅ Stop loading
     }
 };
@@ -223,7 +229,7 @@ onMounted(async () => {
         await loadMidtransScript();
     } catch (error) {
         console.error('Midtrans load error:', error);
-        alert('Failed to load payment system. Please refresh the page.');
+        toast.error('Gagal memuat sistem pembayaran. Silakan refresh halaman.');
     }
 
     // Initialize transaction

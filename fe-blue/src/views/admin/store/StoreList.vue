@@ -1,5 +1,4 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import CardList from '@/components/admin/store/CardList.vue';
 import Pagination from '@/components/admin/Pagination.vue';
 import { useStoreStore } from '@/stores/store';
@@ -8,7 +7,9 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { can } from '@/helpers/permissionHelper';
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const storeStore = useStoreStore()
 const { stores, meta, loading, success, error } = storeToRefs(storeStore)
 const { fetchStoresPaginated, deleteStore } = storeStore
@@ -45,56 +46,60 @@ async function handleDelete(id){
 
 const debounceFetchData = debounce(fetchData, 500)
 
-const closeAlert = () => {
-    storeStore.success = null
-    storeStore.error = null
-}
-
 onMounted(fetchData)
 
 watch(serverOptions, () => {
     fetchData()
 }, {deep: true})
-
 watch(filters, () => {
     debounceFetchData()
 }, {deep: true})
+watch(success, (value) => {
+    if (value) {
+        toast.success(value);
+        storeStore.success = null;
+    }
+});
+watch(error, (value) => {
+    if (value) {
+        toast.error(value);
+        storeStore.error = null;
+    }
+});
 </script>
 
 <template>
     <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
-        <div class="header flex items-center justify-between">
-            <div class="flex flex-col gap-2">
+        <div class="header flex flex-col md:flex-row items-center justify-between gap-5">
+            <div class="flex flex-col gap-2 w-full md:w-auto">
                 <p class="font-bold text-xl">All Stores</p>
                 <div class="flex items-center gap-1">
                     <img src="@/assets/images/icons/shop-grey.svg" class="flex size-6 shrink-0" alt="icon">
                     <p class="font-semibold text-custom-grey">{{ meta.total }} Total Stores</p>
                 </div>
             </div>
-            <div id="TabButtons" class="flex items-center gap-0.5 h-14 w-[460px] rounded-xl bg-custom-icon-background">
-                <button type="button" class="tab-btn group w-full" :class="{ 'active': filters.is_verified }" @click="filters.is_verified = true">
+            <div id="TabButtons" class="flex items-center gap-0.5 h-14 w-full md:w-[460px] rounded-xl bg-custom-icon-background overflow-x-auto">
+                <button type="button" class="tab-btn group w-full shrink-0" :class="{ 'active': filters.is_verified }" @click="filters.is_verified = true">
                     <div class="flex items-center justify-center h-12 w-full shrink-0 rounded-xl py-[14px] px-3 gap-2 bg-custom-icon-background group-[&.active]:bg-custom-blue transition-300">
-                        <span class="font-semibold group-[&.active]:text-white text-custom-grey transition-300">Verified Store</span>
+                        <span class="font-semibold group-[&.active]:text-white text-custom-grey transition-300 text-nowrap">Verified Store</span>
                     </div>
                 </button>
-                <button type="button" class="tab-btn group w-full" :class="{ 'active': !filters.is_verified }" @click="filters.is_verified = false">
+                <button type="button" class="tab-btn group w-full shrink-0" :class="{ 'active': !filters.is_verified }" @click="filters.is_verified = false">
                     <div class="flex items-center justify-center h-12 w-full shrink-0 rounded-xl py-[14px] px-3 gap-2 bg-custom-icon-background group-[&.active]:bg-custom-blue transition-300">
-                        <span class="font-semibold group-[&.active]:text-white text-custom-grey transition-300">Awaiting approval</span>
+                        <span class="font-semibold group-[&.active]:text-white text-custom-grey transition-300 text-nowrap">Awaiting approval</span>
                     </div>
                 </button>
             </div>
         </div>
 
-        <Alert :success="success" :error="error" @closeAlert="closeAlert"/>
-
-        <div id="Filter" class="flex items-center justify-between">
-            <form action="#">
-                <label class="flex items-center w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
+        <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <form action="#" class="w-full md:w-auto">
+                <label class="flex items-center w-full md:w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300">
                     <img src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0" alt="icon">
                     <input type="text" class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none" placeholder="Search store" v-model="filters.search">
                 </label>
             </form>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
                 <p class="font-medium text-custom-grey">Show</p>
                 <label class="flex items-center h-14 rounded-2xl border border-custom-stroke py-4 px-5 pl-3 bg-white focus-within:border-custom-black transition-300">
                     <select name="" id="" class="text-custom-black font-medium appearance-none focus:outline-none p-2" v-model="serverOptions.row_per_page">

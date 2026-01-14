@@ -19,7 +19,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <section id="Promo" class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background py-8">
+    <section id="Promo" class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background py-8 animate-fade-in-up">
         <div class="swiper">
             <div class="swiper-wrapper">
                 <div class="swiper-slide !w-fit max-w-[90vw] md:max-w-none">

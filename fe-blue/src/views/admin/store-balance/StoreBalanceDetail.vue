@@ -1,13 +1,14 @@
 <script setup>
-import Alert from '@/components/admin/Alert.vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { formatRupiah, formatToClientTimeZone } from '@/helpers/format';
 import { useStoreBalanceStore } from '@/stores/storeBalance';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Pagination from '@/components/admin/Pagination.vue';
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const route = useRoute()
 
 const storeBalance = ref({})
@@ -26,12 +27,20 @@ const fetchData = async () => {
     storeBalance.value = response
 }
 
-const closeAlert = () => {
-    storeBalanceStore.success = null
-    storeBalanceStore.error = null
-}
-
 onMounted(fetchData)
+
+watch(success, (value) => {
+    if (value) {
+        toast.success(value);
+        storeBalanceStore.success = null;
+    }
+});
+watch(error, (value) => {
+    if (value) {
+        toast.error(value);
+        storeBalanceStore.error = null;
+    }
+});
 </script>
 
 <template>

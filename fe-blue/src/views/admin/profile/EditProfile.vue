@@ -1,11 +1,11 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+
 import { axiosInstance as axios } from '@/plugins/axios';
 
-const router = useRouter()
+
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 const { checkAuth } = authStore
@@ -26,16 +26,33 @@ const form = ref({
     password_confirmation: ''
 })
 
-onMounted(() => {
+const populateForm = () => {
+
     if (user.value) {
         form.value.name = user.value.name
         // Populate phone number based on role
         if (user.value.role === 'buyer' && user.value.buyer) {
-            form.value.phone_number = user.value.buyer.phone_number
+
+            form.value.phone_number = String(user.value.buyer?.phone_number || '')
         } else if (user.value.role === 'store' && user.value.store) {
-            form.value.phone_number = user.value.store.phone
+            form.value.phone_number = String(user.value.store?.phone || '')
         }
     }
+}
+
+onMounted(async () => {
+    // If user is missing, OR if user is buyer/store but missing relation data, forcing a refresh
+    if (!user.value || 
+        (user.value.role === 'buyer' && !user.value.buyer) || 
+        (user.value.role === 'store' && !user.value.store)) {
+
+        await checkAuth()
+    }
+    populateForm()
+})
+
+watch(user, () => {
+    populateForm()
 })
 
 const triggerFileInput = () => {
@@ -116,7 +133,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-8 w-full">
+    <div v-if="user" class="flex flex-col gap-8 w-full">
         <div class="flex flex-col w-full bg-white rounded-3xl p-6 gap-8">
             <div class="flex items-center gap-6">
                 <div @click="triggerFileInput"
@@ -135,7 +152,7 @@ const handleSubmit = async () => {
                 <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*" class="hidden">
 
                 <div class="flex flex-col gap-2">
-                    <p class="font-bold text-xl text-custom-black capitalize">{{ user?.role }}</p>
+                    <p class="font-bold text-xl text-custom-black capitalize">{{ user?.role || '&nbsp;' }}</p>
                     <p class="text-custom-grey">Click image to change profile picture.</p>
                 </div>
             </div>

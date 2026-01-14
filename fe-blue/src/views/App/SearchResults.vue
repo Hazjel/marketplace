@@ -6,6 +6,8 @@ import { onMounted, watch, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router'; // Added useRouter
 import ProductCard from '@/components/card/ProductCard.vue';
 import StoreCard from '@/components/card/StoreCard.vue';
+import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue';
+import SkeletonStoreCard from '@/components/skeleton/SkeletonStoreCard.vue';
 import FilterSidebar from '@/components/App/FilterSidebar.vue'; // Import
 
 const route = useRoute();
@@ -110,8 +112,8 @@ watch(
                 <div class="flex items-center justify-between">
                     <h2 class="font-extrabold text-[32px]">Products Found</h2>
                 </div>
-                <div v-if="loadingProducts" class="flex justify-center py-10">
-                    <div class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
+                <div v-if="loadingProducts" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+                    <SkeletonProductCard v-for="i in 8" :key="i" />
                 </div>
                 <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     <ProductCard v-for="product in products" :key="product.id" :item="product" />
@@ -132,8 +134,8 @@ watch(
                 <div class="flex items-center justify-between">
                     <h2 class="font-extrabold text-[32px]">Stores Found</h2>
                 </div>
-                <div v-if="loadingStores" class="flex justify-center py-10">
-                    <div class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
+                <div v-if="loadingStores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+                    <SkeletonStoreCard v-for="i in 6" :key="i" />
                 </div>
                 <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     <StoreCard v-for="store in stores" :key="store.id" :item="store" />
