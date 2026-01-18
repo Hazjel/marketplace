@@ -58,7 +58,7 @@ const handleSubmit = async () => {
 <template>
     <form @submit.prevent="handleSubmit" autocomplete="off"
         class="flex flex-col w-full max-w-[560px] h-fit shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white">
-        <img src="@/assets/images/logos/logo.svg" class="h-[37px] mx-auto" alt="logo">
+        <img src="@/assets/images/logos/blukios_logo.png" class="h-12 mx-auto" alt="logo">
         <div class="flex flex-col gap-[30px]">
             <div class="flex flex-col gap-3 text-center">
                 <p class="font-bold text-2xl capitalize">Hey 🙌🏻, Welcome Aboard!</p>

@@ -104,12 +104,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <section id="Navbar-Wrapper" class="flex h-auto md:h-[168px] w-full mx-auto relative mb-[180px] md:mb-0">
-        <div class="fixed top-0 w-full bg-white md:min-h-[138px] border-b border-custom-stroke py-4 md:py-8 z-30">
+    <section id="Navbar-Wrapper" class="sticky top-0 left-0 w-full bg-white border-b border-custom-stroke py-4 md:py-8 z-50 transition-all duration-300 overflow-hidden">
+        <div class="w-full">
             <div class="w-full max-w-[1920px] flex flex-col gap-6 px-4 md:px-7 mx-auto">
-                <div class="flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-6 w-full">
+                <div class="flex flex-wrap md:flex-nowrap items-center justify-between md:justify-start gap-2 md:gap-6 w-full">
                     <RouterLink :to="{ name: 'app.home' }" class="flex shrink-0">
-                        <img src="@/assets/images/logos/logo.svg" class="h-8" alt="logo">
+                        <img src="@/assets/images/logos/blukios_logo.png" class="h-8 md:h-12 max-w-[120px] md:max-w-none object-contain" alt="logo">
                     </RouterLink>
 
                     <!-- Search Bar with Autocomplete -->
@@ -203,8 +203,8 @@ onUnmounted(() => {
                         </RouterLink>
 
                         <RouterLink :to="{ name: 'auth.login' }"
-                            class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-4 md:py-4 md:px-8 bg-custom-blue" v-if="!user">
-                            <p class="font-medium text-white text-sm md:text-base">Sign In</p>
+                            class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-8 bg-custom-blue" v-if="!user">
+                            <p class="font-medium text-white text-xs md:text-base">Sign In</p>
                         </RouterLink>
                         <div class="relative" v-if="user">
                             <button @click="showDropdownProfile = !showDropdownProfile"

@@ -549,7 +549,7 @@ router.beforeEach(async (to, from, next) => {
 
 router.afterEach((to, from) => {
   window.scrollTo(0, 0)
-  const defaultTitle = 'Blue E-commerce'
+  const defaultTitle = 'Blukios'
   document.title = to.meta.title ? `${to.meta.title} | ${defaultTitle}` : defaultTitle
 })
 

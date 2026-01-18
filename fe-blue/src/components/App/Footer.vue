@@ -4,7 +4,7 @@
                 <div class="flex flex-col lg:flex-row gap-8 lg:gap-[72px]">
                     <div class="flex flex-col gap-4 md:gap-6 w-full lg:w-[349px]">
                         <a href="main.html" class="flex shrink-0">
-                            <img src="@/assets/images/logos/logo.svg" class="h-8" alt="logo">
+                            <img src="@/assets/images/logos/blukios_logo.png" class="h-12" alt="logo">
                         </a>
                         <p class="font-medium text-custom-grey">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text</p>
                     </div>
