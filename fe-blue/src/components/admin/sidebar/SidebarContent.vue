@@ -202,7 +202,7 @@ const handleLogout = async () => {
     <!-- original sidebar content starts here -->
     <div class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white">
         <div class="flex items-center justify-between">
-            <img src="@/assets/images/logos/logo.svg" class="h-8 w-fit cursor-pointer" alt="logo"
+            <img src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" alt="logo"
                 @click="router.push({ name: 'app.home' })" />
             <!-- Close Button Slot (Optional) -->
             <slot name="close-button"></slot>

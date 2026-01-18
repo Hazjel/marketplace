@@ -14,11 +14,11 @@ const route = useRoute()
 const store = ref({})
 
 useHead({
-    title: computed(() => store.value?.name ? `${store.value.name} | Blue E-commerce` : 'Store Detail | Blue E-commerce'),
+    title: computed(() => store.value?.name ? `${store.value.name} | Blukios` : 'Store Detail | Blukios'),
     meta: [
         {
             name: 'description',
-            content: computed(() => `Visit ${store.value?.name} on Blue E-commerce. ${store.value?.address || ''}`)
+            content: computed(() => `Visit ${store.value?.name} on Blukios. ${store.value?.address || ''}`)
         },
         {
             property: 'og:title',

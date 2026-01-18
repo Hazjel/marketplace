@@ -20,11 +20,11 @@ const product = ref({})
 const activeImage = ref()
 
 useHead({
-    title: computed(() => product.value?.name ? `${product.value.name} | Blue E-commerce` : 'Product Detail | Blue E-commerce'),
+    title: computed(() => product.value?.name ? `${product.value.name} | Blukios` : 'Product Detail | Blukios'),
     meta: [
         {
             name: 'description',
-            content: computed(() => product.value?.description?.slice(0, 160) || 'Buy this amazing product on Blue E-commerce')
+            content: computed(() => product.value?.description?.slice(0, 160) || 'Buy this amazing product on Blukios')
         },
         {
             property: 'og:title',
