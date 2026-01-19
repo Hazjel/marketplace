@@ -87,6 +87,9 @@ const handleClickOutside = (e) => {
     if (!e.target.closest('.search-container')) {
         showSearchResults.value = false;
     }
+    if (!e.target.closest('.profile-dropdown-container')) {
+        showDropdownProfile.value = false;
+    }
 };
 
 onMounted(() => {
@@ -104,7 +107,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <section id="Navbar-Wrapper" class="sticky top-0 left-0 w-full bg-white border-b border-custom-stroke py-4 md:py-8 z-50 transition-all duration-300 overflow-hidden">
+    <section id="Navbar-Wrapper" class="sticky top-0 left-0 w-full bg-white border-b border-custom-stroke py-4 md:py-8 z-50 transition-all duration-300">
         <div class="w-full">
             <div class="w-full max-w-[1920px] flex flex-col gap-6 px-4 md:px-7 mx-auto">
                 <div class="flex flex-wrap md:flex-nowrap items-center justify-between md:justify-start gap-2 md:gap-6 w-full">
@@ -206,7 +209,7 @@ onUnmounted(() => {
                             class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-8 bg-custom-blue" v-if="!user">
                             <p class="font-medium text-white text-xs md:text-base">Sign In</p>
                         </RouterLink>
-                        <div class="relative" v-if="user">
+                        <div class="relative profile-dropdown-container" v-if="user">
                             <button @click="showDropdownProfile = !showDropdownProfile"
                                 class="flex size-10 md:size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
                                 <img :src="user.profile_picture" class="size-full object-cover" alt="icon">

@@ -59,6 +59,9 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('buyer/all/paginated', [BuyerController::class, 'getAllPaginated']);
     Route::apiResource('buyer', BuyerController::class);
 
+    // Address routes
+    Route::apiResource('address', \App\Http\Controllers\AddressController::class);
+
     // Product Category routes - custom routes BEFORE resource
     Route::get('product-category/all/paginated', [ProductCategoryController::class, 'getAllPaginated']);
     Route::get('product-category/slug/{slug}', [ProductCategoryController::class, 'showBySlug']);

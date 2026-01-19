@@ -110,7 +110,7 @@ watch(error, (value) => {
                 </div>
             </div>
             <RouterLink :to="{ name: 'admin.product.create' }"
-                class="flex h-14 w-full md:w-auto justify-center items-center rounded-full py-4 px-6 bg-custom-blue gap-[6px]"
+                class="flex h-14 w-full md:w-auto justify-center items-center rounded-full py-4 px-6 bg-custom-black gap-[6px] hover:bg-black/80 transition-300"
                 v-if="can('product-create')">
                 <span class="font-semibold text-lg text-white leading-none">Add New</span>
                 <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0" alt="icon">

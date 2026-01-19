@@ -277,7 +277,7 @@ const handleSubmit = async () => {
 
                     <div class="flex flex-col gap-3 mt-4">
                         <button type="submit" :disabled="isLoading"
-                            class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-[10px] bg-custom-blue font-semibold capitalize text-white hover:shadow-lg transition-300 disabled:opacity-50">
+                            class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-[10px] bg-custom-black font-semibold capitalize text-white hover:bg-black/80 hover:shadow-lg transition-300 disabled:opacity-50">
                             <span v-if="!isLoading">Open My Store Now</span>
                             <span v-else>Processing...</span>
                         </button>

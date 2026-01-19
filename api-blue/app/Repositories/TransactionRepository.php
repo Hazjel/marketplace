@@ -220,6 +220,11 @@ class TransactionRepository implements TransactionRepositoryInterface
                 ),
                 'callbacks' => array(
                     'finish' => env('FRONTEND_URL', 'http://localhost:5173') . '/admin/transaction/' . $transaction->id
+                ),
+                'expiry' => array(
+                  'start_time' => date("Y-m-d H:i:s O"),
+                  'unit' => 'minute',
+                  'duration' => 15
                 )
             );
 
@@ -304,7 +309,23 @@ class TransactionRepository implements TransactionRepositoryInterface
                 $transaction->delivery_proof = $data['delivery_proof']->store('assets/transaction', 'public');
             }
 
-            $transaction->delivery_status = $data['delivery_status'];
+            // Restore stock if being cancelled/failed AND it wasn't already cancelled/failed
+            if (isset($data['delivery_status']) && 
+                in_array($data['delivery_status'], ['cancelled', 'failed']) && 
+                !in_array($transaction->delivery_status, ['cancelled', 'failed'])) {
+                
+                $this->restoreStock($transaction);
+            }
+
+            if (isset($data['delivery_status'])) {
+                 $transaction->delivery_status = $data['delivery_status'];
+                 
+                 // Also sync payment status for consistency if cancelled
+                 if ($data['delivery_status'] === 'cancelled' && $transaction->payment_status !== 'failed') {
+                     $transaction->payment_status = 'failed';
+                 }
+            }
+            
             $transaction->save();
 
             DB::commit();
@@ -466,5 +487,44 @@ class TransactionRepository implements TransactionRepositoryInterface
             ]);
             throw $e;
         }
+    }
+
+    public function getChartData()
+    {
+        $storeId = null;
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $storeId = auth()->user()->store?->id;
+        }
+
+        if (!$storeId) return [];
+
+        // Get last 7 days metrics
+        $startDate = now()->subDays(6)->startOfDay();
+        $endDate = now()->endOfDay();
+
+        $transactions = Transaction::where('store_id', $storeId)
+            ->where('payment_status', 'paid')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('DATE(created_at) as date, SUM(grand_total) as total, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        // Fill missing dates with 0
+        $data = [];
+        $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+
+        foreach ($period as $date) {
+            $dateString = $date->format('Y-m-d');
+            $record = $transactions->firstWhere('date', $dateString);
+            
+            $data[] = [
+                'date' => $date->format('d M'), // Format: 01 Jan
+                'total' => $record ? (int)$record->total : 0,
+                'count' => $record ? (int)$record->count : 0
+            ];
+        }
+
+        return $data;
     }
 }

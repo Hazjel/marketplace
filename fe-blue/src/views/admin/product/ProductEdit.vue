@@ -79,22 +79,38 @@ const fetchData = async () => {
     product.value.product_category_id = product.value.product_category.id
 }
 
+const deletedImages = ref([])
+
 const handleSubmit = async () => {
     await updateProduct({
         ...product.value,
         price: parseRupiah(product.value.price),
         product_images: product.value.product_images.filter(image => image.image).map(image => {
             return {
-                id: image.id,
+                // If it has an image (new file), we don't send ID so it creates new
+                // If we want to keep existing, we wouldn't be in this filter (since image.image is null for existing)
+                // BUT: logic above filters WHERE image.image is truthy.
+                // So this only sends NEW images.
+                // We must separate:
+                // 1. Existing images (don't send? Backend update logic doesn't touch them if not sent? Yes, loop only creates)
+                // 2. New images (send without ID)
+                id: null, // Ensure ID is null for new uploads
                 image: image.image,
                 is_thumbnail: image.is_thumbnail ? 1 : 0
             }
-        })
+        }),
+        deleted_product_images: deletedImages.value
     })
 }
 
 const handleImageChange = (event, index) => {
     const file = event.target.files[0]
+
+    // If there was an ID (existing image), mark it for deletion
+    if (product.value.product_images[index].id) {
+        deletedImages.value.push(product.value.product_images[index].id)
+        product.value.product_images[index].id = null // treat as new
+    }
 
     product.value.product_images[index].image = file
     product.value.product_images[index].url = URL.createObjectURL(file)
@@ -289,10 +305,10 @@ onMounted(async () => {
                         </div>
                         <div class="flex items-center justify-end gap-4">
                             <RouterLink :to="{ name: 'admin.product' }"
-                                class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg">
+                                class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-gray-100 text-custom-grey font-semibold text-lg hover:bg-gray-200 transition-300">
                                 Cancel
                             </RouterLink>
-                            <button type="submit" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg">
+                            <button type="submit" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-black text-white font-semibold text-lg hover:bg-black/80 transition-300">
                                 Update Product
                             </button>
                         </div>

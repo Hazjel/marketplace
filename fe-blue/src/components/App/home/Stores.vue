@@ -1,6 +1,9 @@
 <script setup>
-import Swiper from 'swiper/bundle';
-import 'swiper/swiper-bundle.css'
+import Swiper from 'swiper';
+import { Navigation, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import { onMounted, computed, nextTick } from 'vue';
 import StoreCard from '@/components/card/StoreCard.vue';
 import { useStoreStore } from '@/stores/store';
@@ -25,6 +28,7 @@ onMounted(async () => {
     nextTick(() => {
         if (stores.value.length > 0) {
             new Swiper('.storeSwiper', {
+                modules: [Navigation, Pagination],
                 loop: stores.value.length > 3, // Only loop if enough slides
                 slidesPerView: 1,
                 spaceBetween: 24,
@@ -49,8 +53,7 @@ onMounted(async () => {
 <template>
     <section id="Trusted-Seller" class="flex flex-col gap-6 md:gap-9 animate-fade-in-up delay-300">
         <SectionHeader 
-            title="Trusted Sellers," 
-            subtitle="Quality Guaranteed"
+            title="Official Stores" 
             :link="{ name: 'app.all-stores' }"
         />
 

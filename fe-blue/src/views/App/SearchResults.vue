@@ -14,6 +14,20 @@ const route = useRoute();
 const router = useRouter(); // Init router
 const productStore = useProductStore();
 const storeStore = useStoreStore();
+import { useHead } from '@vueuse/head';
+import { computed } from 'vue';
+
+const searchQuery = ref('');
+
+useHead({
+    title: computed(() => searchQuery.value ? `Search: ${searchQuery.value} | Blukios` : 'Search | Blukios'),
+    meta: [
+        {
+            name: 'description',
+            content: computed(() => `Search results for ${searchQuery.value} on Blukios.`)
+        }
+    ]
+})
 
 const { products, loading: loadingProducts } = storeToRefs(productStore);
 const { stores, loading: loadingStores } = storeToRefs(storeStore);
@@ -21,7 +35,6 @@ const { stores, loading: loadingStores } = storeToRefs(storeStore);
 const { fetchProducts } = productStore;
 const { fetchStores } = storeStore;
 
-const searchQuery = ref('');
 const currentFilters = ref({});
 const showFilters = ref(false); // Mobile filter toggle
 
@@ -112,10 +125,10 @@ watch(
                 <div class="flex items-center justify-between">
                     <h2 class="font-extrabold text-[32px]">Products Found</h2>
                 </div>
-                <div v-if="loadingProducts" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
-                    <SkeletonProductCard v-for="i in 8" :key="i" />
+                <div v-if="loadingProducts" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+                    <SkeletonProductCard v-for="i in 10" :key="i" />
                 </div>
-                <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+                <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
                     <ProductCard v-for="product in products" :key="product.id" :item="product" />
                 </div>
             </section>

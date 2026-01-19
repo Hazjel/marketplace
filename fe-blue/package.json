@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "@unovis/ts": "^1.6.2",
+    "@unovis/vue": "^1.6.2",
     "@vueuse/head": "^2.0.0",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
