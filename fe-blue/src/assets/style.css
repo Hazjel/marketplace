@@ -28,6 +28,15 @@ body {
     @apply flex flex-grow flex-shrink basis-0;
 }
 
+/* Safe Areas & Constants */
+:root {
+    --header-height-mobile: auto;
+    --header-height-desktop: 138px;
+    --z-navbar: 50;
+    --z-dropdown: 40;
+    --z-modal: 100;
+}
+
 
 @layer components {
     .custom-input {

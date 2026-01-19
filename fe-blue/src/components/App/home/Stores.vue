@@ -6,6 +6,7 @@ import StoreCard from '@/components/card/StoreCard.vue';
 import { useStoreStore } from '@/stores/store';
 import { storeToRefs } from 'pinia';
 import { chunk } from 'lodash';
+import SectionHeader from '@/components/Molecule/SectionHeader.vue';
 
 const storeStore = useStoreStore()
 const { stores, loading } = storeToRefs(storeStore)
@@ -47,14 +48,11 @@ onMounted(async () => {
 
 <template>
     <section id="Trusted-Seller" class="flex flex-col gap-6 md:gap-9 animate-fade-in-up delay-300">
-        <div class="flex items-center justify-between gap-4">
-            <h2 class="font-extrabold text-lg md:text-[32px] leading-tight">Trusted Sellers,<br class="hidden md:block"> Quality Guaranteed</h2>
-            <RouterLink :to="{ name: 'app.all-stores' }"
-                class="flex shrink-0 items-center h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 gap-[10px] bg-custom-black">
-                <span class="font-medium text-white hidden md:block">VIEW ALL</span>
-                <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-5 md:size-6 shrink-0" alt="icon">
-            </RouterLink>
-        </div>
+        <SectionHeader 
+            title="Trusted Sellers," 
+            subtitle="Quality Guaranteed"
+            :link="{ name: 'app.all-stores' }"
+        />
 
         <div class="flex flex-col gap-6 relative">
             <div class="storeSwiper w-full overflow-hidden">
