@@ -9,6 +9,8 @@ import { formatRupiah, formatDate } from '@/helpers/format';
 import { axiosInstance } from '@/plugins/axios';
 import { RouterLink } from 'vue-router';
 
+import RevenueChart from './RevenueChart.vue'
+
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
@@ -16,9 +18,11 @@ const transactionStore = useTransactionStore()
 const productStore = useProductStore()
 const storeBalanceStore = useStoreBalanceStore()
 const { fetchStoreBalanceByStore } = storeBalanceStore
+const { fetchChartData } = transactionStore
 
 // Local ref since store doesn't keep single balance in state
 const storeBalance = ref(null)
+const chartData = ref([])
 
 const stats = ref({
     total_products: 0,
@@ -37,6 +41,10 @@ const fetchData = async () => {
         const storeId = user.value?.store?.id
 
         if (!storeId) return
+
+        // 0. Chart Data
+        chartData.value = await fetchChartData()
+        console.log('Chart Data:', chartData.value)
 
         // 1. Total Revenue (Balance)
         // Fetch balance directly using the logged-in user's token
@@ -145,6 +153,16 @@ onMounted(() => {
             </div>
         </div>
     </div>
+    
+    <!-- Revenue Chart Section -->
+    <div class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white col-span-1 md:col-span-3">
+        <div class="flex flex-col gap-2">
+            <h3 class="font-bold text-xl">Revenue Analytics</h3>
+            <p class="text-custom-grey text-sm">Income in the last 7 days</p>
+        </div>
+        <RevenueChart :data="chartData" />
+    </div>
+
     <div class="flex flex-col gap-5 flex-1 md:flex-row">
         <div class="flex flex-col gap-5 w-full shrink-0 md:w-[470px]">
             <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">

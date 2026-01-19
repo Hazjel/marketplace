@@ -8,6 +8,8 @@ import { onMounted, ref, computed } from 'vue';
 import { debounce } from 'lodash';
 import { useToast } from "vue-toastification";
 
+import { axiosInstance } from '@/plugins/axios';
+
 // Store imports
 const authStore = useAuthStore()
 const cart = useCartStore()
@@ -21,6 +23,35 @@ const { error } = storeToRefs(transactionStore)
 const { createTransaction } = transactionStore
 
 const isMidtransLoaded = ref(false)
+
+// Saved Addresses
+const savedAddresses = ref([])
+const showSavedAddresses = ref(false)
+
+const fetchSavedAddresses = async () => {
+    try {
+        const response = await axiosInstance.get('/address')
+        savedAddresses.value = response.data.data
+        
+        // Auto-select primary
+        const primary = savedAddresses.value.find(a => a.is_primary)
+        if (primary) {
+            selectSavedAddress(primary)
+            showSavedAddresses.value = true
+        }
+    } catch (error) {
+        console.error('Failed to fetch addresses', error)
+    }
+}
+
+const selectSavedAddress = (addr) => {
+    transaction.value.address_id = addr.city_id; // Set City ID for shipping calc
+    transaction.value.city = addr.city;
+    transaction.value.address = addr.address;
+    transaction.value.postal_code = addr.postal_code;
+    addressSearch.value = addr.city; // Sync search input visual
+    toast.success('Address applied: ' + addr.label)
+}
 
 // Transaction data
 const transaction = ref({
@@ -69,10 +100,29 @@ const loadMidtransScript = () => {
 
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-
         // ✅ GANTI dengan Client Key Midtrans Anda
-        script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || 'YOUR_MIDTRANS_CLIENT_KEY');
+        const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY;
+        if (!clientKey) {
+            console.error('❌ Midtrans Client Key is missing in .env');
+            reject(new Error('Midtrans configuration error'));
+            return;
+        }
+        script.setAttribute('data-client-key', clientKey);
+
+        // Use explicit environment variable, fallback to key detection if not set
+        const isProductionEnv = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
+        const isKeyProduction = !clientKey.startsWith('SB-');
+        
+        // Prioritize explicit config, otherwise guess based on key
+        const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION !== undefined 
+            ? isProductionEnv 
+            : isKeyProduction;
+
+        const snapUrl = isProduction 
+            ? 'https://app.midtrans.com/snap/snap.js' 
+            : 'https://app.sandbox.midtrans.com/snap/snap.js';
+        
+        script.src = snapUrl;
 
         script.async = true;
         script.onload = () => {
@@ -145,7 +195,7 @@ const handleDeliveryModal = async () => {
             `/tariff/api/v1/calculate?shipper_destination_id=${store.storeAddressId}&receiver_destination_id=${transaction.value.address_id}&item_value=${totalValue}&weight=${totalWeight}`,
             {
                 headers: {
-                    'x-api-key': import.meta.env.VITE_RAJAONGKIR_API_KEY
+                    'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
                 }
             }
         );
@@ -242,6 +292,9 @@ onMounted(async () => {
             qty: p.quantity
         }));
     }
+
+    // Fetch user saved addresses
+    fetchSavedAddresses();
 });
 </script>
 
@@ -269,36 +322,20 @@ onMounted(async () => {
                         {{ store.storeName }}
                     </p>
 
-                    <div v-for="product in store.products" :key="product.id"
-                        class="items-detail flex flex-col w-full rounded-[20px] border border-custom-stroke p-5 gap-5">
-                        <div class="flex flex-col sm:flex-row gap-4 w-full">
-                            <div class="flex items-center gap-[14px] flex-1 overflow-hidden">
-                                <div
-                                    class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background overflow-hidden items-center justify-center">
-                                    <img :src="product.product_images?.find(i => i.is_thumbnail)?.image || '/src/assets/images/thumbnails/th-1.svg'"
-                                        class="size-full object-contain" alt="icon" @error="(e) => e.target.src = '/src/assets/images/thumbnails/th-1.svg'">
-                                </div>
-                                <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
-                                    <p class="font-bold text-lg leading-tight truncate">{{ product.name }}</p>
-                                    <p class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
-                                        <span class="font-bold text-custom-blue">{{ product.product_category.name }}</span>
-                                        <span class="text-[22px] leading-none">•</span>
-                                        <span>{{ product.weight }} KG</span>
-                                    </p>
+                    <div class="flex flex-col gap-4 pl-4 border-l-2 border-gray-100">
+                         <div v-for="product in store.products" :key="product.id" class="flex items-start gap-4 w-full">
+                            <div class="flex size-[64px] shrink-0 rounded-xl bg-gray-50 p-2 items-center justify-center">
+                                <img :src="product.product_images?.find(i => i.is_thumbnail)?.image || product.thumbnail"
+                                    class="size-full object-contain mix-blend-multiply" alt="icon" @error="(e) => e.target.src = '/src/assets/images/thumbnails/th-1.svg'">
+                            </div>
+                            <div class="flex flex-col flex-1 gap-1">
+                                <p class="font-bold text-sm leading-tight line-clamp-2">{{ product.name }}</p>
+                                <p class="text-xs text-custom-grey font-medium">{{ product.weight }} KG • {{ product.product_category.name }}</p>
+                                <div class="flex items-center justify-between mt-1">
+                                    <p class="font-bold text-sm text-custom-black">Rp {{ formatRupiah(product.price) }}</p>
+                                    <p class="font-semibold text-xs text-custom-grey">x{{ product.quantity }}</p>
                                 </div>
                             </div>
-                            <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto shrink-0 pl-[106px] sm:pl-0">
-                                <p class="font-bold text-custom-blue">Rp {{ formatRupiah(product.price) }}</p>
-                                <p class="font-semibold text-grey">({{ product.quantity }}x)</p>
-                            </div>
-                        </div>
-                        <hr class="border-custom-stroke">
-                        <div class="flex items-center justify-between">
-                            <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-5" alt="icon">
-                                Subtotal
-                            </p>
-                            <p class="font-bold text-lg text-custom-blue">Rp {{ formatRupiah(product.price * product.quantity) }}</p>
                         </div>
                     </div>
                 </div>
@@ -324,23 +361,57 @@ onMounted(async () => {
 
                     <!-- Address Search -->
                     <div class="flex flex-col gap-3">
-                        <p class="font-semibold text-custom-grey">Address Searching</p>
-                        <div class="group/errorState flex flex-col gap-2 relative">
-                            <label class="group relative">
-                                <div class="input-icon">
-                                    <img src="@/assets/images/icons/global-search-grey.svg" class="flex size-6 shrink-0"
-                                        alt="icon">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-custom-grey">Address Details</p>
+                            <button v-if="savedAddresses.length > 0 && !showSavedAddresses" 
+                                @click="showSavedAddresses = true"
+                                type="button"
+                                class="text-sm font-bold text-custom-blue hover:underline">
+                                Select Saved Address
+                            </button>
+                            <button v-else-if="showSavedAddresses" 
+                                @click="showSavedAddresses = false"
+                                type="button"
+                                class="text-sm font-bold text-custom-red hover:underline">
+                                Cancel Selection
+                            </button>
+                        </div>
+
+                        <!-- Saved Addresses Grid -->
+                        <div v-if="showSavedAddresses" class="grid grid-cols-1 gap-3 mb-2">
+                             <div v-for="addr in savedAddresses" :key="addr.id" 
+                                @click="selectSavedAddress(addr)"
+                                class="cursor-pointer border border-custom-stroke rounded-xl p-4 hover:border-custom-blue hover:bg-blue-50 transition-all group"
+                                :class="{'border-custom-blue bg-blue-50 ring-1 ring-custom-blue': transaction.address === addr.address}">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="font-bold text-custom-black">{{ addr.label }}</span>
+                                    <span v-if="addr.is_primary" class="text-[10px] font-bold bg-blue-100 text-custom-blue px-2 py-0.5 rounded-full">PRIMARY</span>
                                 </div>
-                                <p class="input-placeholder">Enter District</p>
-                                <input type="text" class="custom-input" placeholder="" v-model="addressSearch"
-                                    @input="handleAddressInput(addressSearch)">
-                            </label>
-                            <ul class="search-result" v-if="showAddressOptions">
-                                <li v-for="option in addressOptions" :key="option.id"
-                                    @click="handleAddressSelect(option)">
-                                    {{ option.label }}
-                                </li>
-                            </ul>
+                                <p class="text-sm font-semibold text-custom-black">{{ addr.recipient_name }} ({{ addr.phone }})</p>
+                                <p class="text-xs text-custom-grey line-clamp-1 mt-1">{{ addr.address }}, {{ addr.city }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Manual Search (Fallback) -->
+                        <div v-if="!showSavedAddresses || savedAddresses.length === 0">
+                            <p class="font-semibold text-custom-grey text-xs uppercase tracking-wider mb-1">Or search manually</p>
+                            <div class="group/errorState flex flex-col gap-2 relative">
+                                <label class="group relative">
+                                    <div class="input-icon">
+                                        <img src="@/assets/images/icons/global-search-grey.svg" class="flex size-6 shrink-0"
+                                            alt="icon">
+                                    </div>
+                                    <p class="input-placeholder">Enter District / City</p>
+                                    <input type="text" class="custom-input" placeholder="" v-model="addressSearch"
+                                        @input="handleAddressInput(addressSearch)">
+                                </label>
+                                <ul class="search-result" v-if="showAddressOptions">
+                                    <li v-for="option in addressOptions" :key="option.id"
+                                        @click="handleAddressSelect(option)">
+                                        {{ option.label }}
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 

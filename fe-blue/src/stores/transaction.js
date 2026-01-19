@@ -31,6 +31,16 @@ export const useTransactionStore = defineStore("transaction", {
             }
         },
 
+        async fetchChartData() {
+            try {
+                const response = await axiosInstance.get('transaction/chart-data')
+                return response.data.data
+            } catch (error) {
+                console.error('Failed to fetch chart data:', error)
+                return []
+            }
+        },
+
         async fetchTransactionById(id) {
             this.loading = true
 

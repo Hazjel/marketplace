@@ -10,41 +10,52 @@ defineProps({
 </script>
 
 <template>
-    <div class="card flex flex-col rounded-[20px] border border-custom-stroke overflow-hidden h-full group">
-        <div class="thumbnail w-full h-[130px] md:h-[202px] overflow-hidden bg-custom-background items-center justify-center">
-            <img :src="item.logo" class="size-full object-cover transition-transform duration-500 group-hover:scale-105" alt="thumbnail">
+    <div class="card relative flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 overflow-hidden h-full group">
+        <!-- Banner -->
+        <div class="h-20 w-full bg-gradient-to-r from-blue-400 to-indigo-500 relative overflow-hidden">
+            <img v-if="item.banner" :src="item.banner" class="w-full h-full object-cover opacity-50" loading="lazy" alt="banner">
+             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
         </div>
-        <div class="flex flex-col p-4 md:p-5 gap-4 md:gap-6 bg-white flex-1">
-            <div class="flex flex-col gap-2 w-full min-w-0 overflow-hidden">
-                <div class="flex items-center w-fit shrink-0 gap-1" v-if="item?.is_verified">
-                    <img src="@/assets/images/icons/verify-star.svg" class="flex size-5 md:size-6 shrink-0" alt="icon">
-                    <p class="font-bold text-custom-blue text-nowrap uppercase text-xs md:text-sm">Verified Store
-                    </p>
-                </div>
-                <p class="font-bold text-base md:text-xl leading-tight w-full truncate">
+
+        <!-- Floating Logo -->
+        <div class="absolute top-10 left-1/2 -translate-x-1/2">
+            <div class="size-[70px] rounded-full border-4 border-white bg-white shadow-md overflow-hidden">
+                <img :src="item.logo" class="w-full h-full object-cover" loading="lazy" alt="logo">
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex flex-col items-center pt-12 pb-5 px-4 flex-1 text-center">
+            
+            <!-- Store Name & Verified -->
+            <div class="flex flex-col items-center gap-1 w-full">
+                <h3 class="font-bold text-lg text-custom-black leading-tight line-clamp-1 w-full" :title="item.name">
                     {{ item.name }}
-                </p>
-            </div>
-            <hr class="border-custom-stroke">
-            <div class="grid grid-cols-2 gap-4 md:gap-6 mt-auto">
-                <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-sm md:text-lg leading-tight truncate">{{ item.user?.name }}</p>
-                    <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none text-xs md:text-base">
-                        <img src="@/assets/images/icons/user-grey.svg" class="size-4 md:size-5" alt="icon">
-                        Seller Name
-                    </p>
-                </div>
-                <div class="flex flex-col gap-[6px]">
-                    <p class="font-bold text-sm md:text-lg leading-tight truncate">{{ item.city }}</p>
-                    <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none text-xs md:text-base">
-                        <img src="@/assets/images/icons/location-grey.svg" class="size-4 md:size-5" alt="icon">
-                        Location
-                    </p>
+                </h3>
+                <div v-if="item?.is_verified" class="inline-flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                    <img src="@/assets/images/icons/verify-star.svg" class="size-3.5 shrink-0" alt="icon">
+                    <span class="text-[10px] font-bold text-custom-blue uppercase tracking-wide">Official</span>
                 </div>
             </div>
-            <div class="flex items-center gap-3 w-full">
-                <RouterLink v-if="item?.username" :to="{ name: 'app.store-detail', params: { username: item.username } }" class="group/btn flex items-center justify-center h-10 md:h-14 w-full rounded-2xl p-2 md:p-4 gap-[6px] bg-custom-blue/10 hover:bg-custom-blue transition-300">
-                    <span class="font-semibold text-sm md:text-base text-custom-blue group-hover/btn:text-white transition-300">Visit Store</span>
+
+            <!-- Stats (Location / User) -->
+            <div class="mt-4 flex items-center justify-center gap-3 text-xs text-custom-grey w-full">
+                <div class="flex items-center gap-1 truncate max-w-[45%]">
+                     <i class="fa-solid fa-location-dot text-[10px]"></i>
+                     <span class="truncate">{{ item.city || 'Jakarta' }}</span>
+                </div>
+                <div class="w-1 h-1 rounded-full bg-gray-300 shrink-0"></div>
+                <div class="flex items-center gap-1">
+                    <i class="fa-solid fa-star text-custom-orange text-[10px]"></i>
+                    <span>4.9 ({{ Math.floor(Math.random() * 50) + 1 }}k)</span>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="mt-auto w-full pt-5">
+                <RouterLink v-if="item?.username" :to="{ name: 'app.store-detail', params: { username: item.username } }" 
+                    class="flex items-center justify-center h-10 w-full rounded-full border border-custom-stroke font-bold text-sm text-custom-black bg-white hover:bg-custom-black hover:text-white hover:border-custom-black transition-all duration-300">
+                   Kunjungi Toko
                 </RouterLink>
             </div>
         </div>

@@ -23,14 +23,14 @@ class StoreRepository implements StoreRepositoryInterface
             }
         });
 
-        $query->orderBy('created_at', 'desc');
+        if ($random) {
+            $query->inRandomOrder();
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
 
         if ($limit) {
             $query->take($limit);
-        }
-
-        if ($random) {
-            $query->inRandomOrder();
         }
 
         if ($execute) {

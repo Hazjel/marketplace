@@ -2,13 +2,26 @@
 import { useProductCategoryStore } from '@/stores/productCategory';
 import { useProductStore } from '@/stores/product';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ProductCard from '@/components/card/ProductCard.vue';
+import FilterSidebar from '@/components/App/FilterSidebar.vue';
 
 const route = useRoute()
+import { useHead } from '@vueuse/head'
+import { computed } from 'vue'
 
 const productCategory = ref({})
+
+useHead({
+    title: computed(() => productCategory.value?.name ? `${productCategory.value.name} | Blukios` : 'Category | Blukios'),
+    meta: [
+        {
+            name: 'description',
+            content: computed(() => `Explore high quality ${productCategory.value?.name || 'products'} on Blukios. Authenticity Guaranteed.`)
+        }
+    ]
+})
 
 const productCategoryStore = useProductCategoryStore()
 const { fetchProductCategoryBySlug } = productCategoryStore
@@ -17,27 +30,46 @@ const productStore = useProductStore()
 const { products, loading: loadingProducts, meta } = storeToRefs(productStore)
 const { fetchProductsPaginated, loadMoreProducts } = productStore
 
+const showFilters = ref(false)
+const currentFilters = ref({})
+
 const fetchProductCategory = async () => {
     const response = await fetchProductCategoryBySlug(route.params.slug)
-
     productCategory.value = response
+}
+
+const fetchProducts = async (filters = {}) => {
+    if (!productCategory.value.id) return
+    
+    await fetchProductsPaginated({
+        product_category_id: productCategory.value.id,
+        row_per_page: 12,
+        ...filters
+    })
 }
 
 const handleLoadMore = async () => {
     await loadMoreProducts({
         product_category_id: productCategory.value.id,
         row_per_page: 8,
-        page: meta.value.current_page + 1
+        page: meta.value.current_page + 1,
+        ...currentFilters.value
     })
+}
+
+const handleFilterChange = (newFilters) => {
+    currentFilters.value = newFilters
+    fetchProducts(newFilters)
 }
 
 onMounted(async () => {
     await fetchProductCategory()
+    await fetchProducts()
+})
 
-    fetchProductsPaginated({
-        product_category_id: productCategory.value.id,
-        row_per_page: 8,
-    })
+watch(() => route.params.slug, async () => {
+    await fetchProductCategory()
+    await fetchProducts(currentFilters.value)
 })
 </script>
 
@@ -69,32 +101,49 @@ onMounted(async () => {
             </div>
         </div>
     </header>
-    <main class="flex flex-col gap-8 md:gap-[100px] w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[72px] mb-20 md:mb-[100px] mx-auto">
-        <section id="Popular" class="flex flex-col gap-9">
-            <div class="flex items-center justify-between">
-                <h2 class="font-extrabold text-[32px]">Sedang Popular 🔥 </h2>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
-                <ProductCard v-for="product in products" :key="product.id" :item="product" />
-            </div>
-            <!-- Popular section might also need its own data or just hide load more here if it's duping -->
-            <!-- Use v-if="meta.current_page < meta.last_page" logic here too if this section shares the same list -->
-        </section>
-        <section id="Just-Released" class="flex flex-col gap-9">
-            <div class="flex items-center justify-between">
-                <h2 class="font-extrabold text-[32px] capitalize">Just Released in {{ productCategory?.name }} 🙌🏻
-                </h2>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
-                <!-- Using same products list for now as per previous implementation -->
-                <ProductCard v-for="product in products" :key="product.id" :item="product" />
-            </div>
 
-            <button v-if="meta.current_page < meta.last_page" @click="handleLoadMore"
-                class="flex items-center w-fit h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black mx-auto">
-                <span class="font-medium text-white">Load More</span>
-                <img src="@/assets/images/icons/arrow-down-white.svg" class="flex size-6 shrink-0" alt="icon">
-            </button>
-        </section>
+    <main class="flex flex-col lg:flex-row gap-10 w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[50px] mb-20 md:mb-[100px] mx-auto">
+        <!-- Mobile Filter Toggle -->
+        <button @click="showFilters = !showFilters"
+            class="flex lg:hidden items-center justify-between w-full p-4 bg-white border border-custom-stroke rounded-xl">
+            <span class="font-bold text-lg">Filter Products</span>
+            <i class="fa-solid fa-chevron-down transition-transform" :class="{ 'rotate-180': showFilters }"></i>
+        </button>
+
+        <!-- Sidebar -->
+        <aside class="shrink-0 w-full lg:w-auto" :class="{ 'hidden lg:block': !showFilters }">
+            <FilterSidebar :initialFilters="currentFilters" @filter-change="handleFilterChange" />
+        </aside>
+
+        <!-- Content -->
+        <div class="flex flex-col gap-10 w-full">
+            <template v-if="loadingProducts || products.length > 0">
+                <section id="Popular" class="flex flex-col gap-9">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-extrabold text-[32px]">All Products</h2>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+                        <ProductCard v-for="product in products" :key="product.id" :item="product" />
+                    </div>
+                </section>
+                
+                <button v-if="meta.current_page < meta.last_page" @click="handleLoadMore"
+                    class="flex items-center w-fit h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black mx-auto">
+                    <span class="font-medium text-white">Load More</span>
+                    <img src="@/assets/images/icons/arrow-down-white.svg" class="flex size-6 shrink-0" alt="icon">
+                </button>
+            </template>
+            
+            <section v-else class="flex flex-col gap-9 items-center justify-center py-20 text-center">
+                <div class="flex flex-col items-center gap-4">
+                    <img src="@/assets/images/icons/box-search-grey.svg" class="size-20 opacity-50" alt="No results">
+                    <h2 class="font-bold text-2xl text-custom-grey">Belum ada produk di kategori ini</h2>
+                    <p class="text-custom-grey">Coba cek kategori lain atau kembali ke beranda.</p>
+                    <RouterLink :to="{ name: 'app.home' }" class="mt-2 px-6 py-3 bg-custom-black text-white rounded-full font-medium hover:bg-black/80 transition-colors">
+                        Ke Beranda
+                    </RouterLink>
+                </div>
+            </section>
+        </div>
     </main>
 </template>

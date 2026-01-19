@@ -265,11 +265,11 @@ onMounted(async () => {
                             </div>
                         </div>
                         <div class="flex items-center justify-end gap-4">
-                            <RouterLink to="{ name: 'admin.product' }"
-                                class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg">
+                            <RouterLink :to="{ name: 'admin.product' }"
+                                class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-gray-100 text-custom-grey font-semibold text-lg hover:bg-gray-200 transition-300">
                                 Cancel
                             </RouterLink>
-                            <button type="submit" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg">
+                            <button type="submit" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-black text-white font-semibold text-lg hover:bg-black/80 transition-300">
                                 Create Now
                             </button>
                         </div>

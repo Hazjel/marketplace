@@ -20,13 +20,12 @@ const props = defineProps({
 const router = useRouter()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
-const { hasProduct } = storeToRefs(wishlistStore)
+const { wishlistIds } = storeToRefs(wishlistStore)
 const { toggleWishlist } = wishlistStore
 
 const isInWishlist = computed(() => {
-    // Ensure hasProduct is available and item exists
-    if (hasProduct.value && props.item) {
-        return hasProduct.value(props.item.id)
+    if (wishlistIds.value && props.item) {
+        return wishlistIds.value.includes(props.item.id)
     }
     return false
 })
@@ -36,7 +35,8 @@ const handleToggleWishlist = async () => {
         router.push({ name: 'auth.login' })
         return
     }
-    await toggleWishlist(props.item.id)
+    // Pass full item object so store can add it to list immediately
+    await toggleWishlist(props.item)
 }
 </script>
 
@@ -51,10 +51,11 @@ const handleToggleWishlist = async () => {
 
         <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }" class="flex flex-col h-full">
             <!-- Image -->
-            <div class="relative w-full aspect-square bg-custom-background overflow-hidden">
-                <img :src="item?.product_images?.find(image => image.is_thumbnail)?.image"
-                    class="size-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                    alt="thumbnail">
+            <div class="h-[180px] md:h-[220px] w-full bg-gray-100 overflow-hidden relative group-hover:opacity-90 transition-opacity">
+                <img :src="item.thumbnail" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" alt="product">
+                <div v-if="item.stock <= 0" class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span class="text-white font-bold text-sm px-3 py-1 bg-black/50 rounded-full">Habis</span>
+                </div>
             </div>
 
             <!-- Content -->
@@ -81,8 +82,10 @@ const handleToggleWishlist = async () => {
                         <img src="@/assets/images/icons/Star-pointy.svg" class="size-3" alt="star">
                         <span class="text-custom-black">4.9</span> 
                     </div>
-                    <span class="w-px h-3 bg-custom-stroke"></span>
-                    <span>Terjual {{ item?.total_sold || '100+' }}</span>
+                    <template v-if="item?.total_sold">
+                        <span class="w-px h-3 bg-custom-stroke"></span>
+                        <span>Terjual {{ item?.total_sold }}</span>
+                    </template>
                 </div>
             </div>
         </RouterLink>

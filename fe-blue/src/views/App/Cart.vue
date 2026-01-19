@@ -80,70 +80,56 @@ const handleUpdateQuantity = (storeId, productId, event) => {
                         </p>
                     </div>
                     <div class="cart-items-container flex flex-col pl-[10px]">
-                        <div class="items group flex w-full" v-for="product in store.products">
-                            <div class="branch-line-ornaments relative flex shrink-0 w-[30px] overflow-hidden">
-                                <div
-                                    class="absolute h-full border border-custom-stroke group-[&:last-of-type]:h-[calc(50%-24px)]">
-                                </div>
-                                <div
-                                    class="line-to-items flex h-1/2 w-[200%] shrink-0 border-2 border-custom-stroke border-t-0 border-r-0 rounded-bl-3xl">
-                                </div>
-                            </div>
-                            <div
-                                class="items-detail flex flex-col w-full rounded-[20px] border border-custom-stroke p-5 gap-5 mt-4">
-                                <div class="flex items-center gap-[14px] overflow-hidden">
-                                    <div
-                                        class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background overflow-hidden items-center justify-center">
+                        <div class="items group flex w-full border-b border-gray-100 last:border-0 pb-6 mb-6 last:pb-0 last:mb-0" v-for="product in store.products">
+                            <div class="items-detail flex flex-col w-full gap-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="flex size-[80px] shrink-0 rounded-xl bg-gray-50 p-2 items-center justify-center">
                                         <img :src="product.product_images.find(i => i.is_thumbnail)?.image || product.thumbnail"
-                                            class="size-full object-contain" alt="icon">
+                                            class="size-full object-contain mix-blend-multiply" alt="icon">
                                     </div>
-                                    <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
-                                        <p class="font-bold text-lg truncate">{{ product.name }}</p>
-                                        <p
-                                            class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
-                                            <span class="font-bold text-custom-blue">{{
-                                                product.product_category.name}}</span>
-                                            <span class="text-[22px] leading-none">•</span>
-                                            <span>{{ product.weight }} KG</span>
-                                        </p>
-                                    </div>
-                                    <div
-                                        class="quantity-container flex items-center shrink-0 rounded-2xl border border-custom-stroke p-4">
-                                        <button type="button"
-                                            class="subtract size-5 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                                            @click="decreaseQuantity(store.storeId, product.id)"
-                                            :disabled="product.quantity <= 1">
-                                            <span class="text-[30px] font-light leading-none align-middle mb-1">-</span>
-                                        </button>
-                                        <div class="h-[18px] border border-custom-stroke ml-4"></div>
-                                        <input type="number" name=""
-                                            class="amount appearance-none w-[70px] pl-5 text-center font-bold text-lg"
-                                            :value="product.quantity" @change="handleUpdateQuantity(store.storeId, product.id, $event)">
-                                        <div class="h-[18px] border border-custom-stroke mr-4" value="1"></div>
-                                        <button type="button" class="add size-5 flex items-center justify-center"
-                                            @click="handleIncreaseQuantity(store.storeId, product.id)">
-                                            <span class="text-[24px] font-light leading-none align-middle mb-1">+</span>
-                                        </button>
+                                    <div class="flex flex-col flex-1 gap-1">
+                                        <p class="font-bold text-base leading-tight line-clamp-2 w-full">{{ product.name }}</p>
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-xs font-semibold text-custom-blue bg-blue-50 px-2 py-1 rounded-md">
+                                                {{ product.product_category.name}}
+                                            </p>
+                                            <p class="text-sm text-custom-grey">{{ product.weight }} KG</p>
+                                        </div>
+                                        <p class="font-bold text-lg text-custom-black mt-2">Rp {{ formatRupiah(product.price) }}</p>
                                     </div>
                                 </div>
-                                <hr class="border-custom-stroke">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex flex-col gap-[6px]">
-                                        <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                            <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-5"
-                                                alt="icon">
-                                            Subtotal
-                                        </p>
-                                        <p class="font-bold text-lg text-custom-blue leading-none">Rp {{
-                                            formatRupiah(product.price * product.quantity) }}</p>
-                                    </div>
-                                    <button
-                                        class="flex items-center w-fit h-[52px] rounded-xl py-[14px] px-4 gap-[6px] bg-custom-red/10"
-                                        @click="removeFromCart(store.storeId, product.id)" type="button">
-                                        <img src="@/assets/images/icons/trash-red.svg" class="size-6 flex shrink-0"
-                                            alt="icon">
-                                        <span class="font-semibold text-custom-red">Remove</span>
+                                
+                                <div class="flex items-center justify-between w-full pl-[96px]">
+                                     <button
+                                        class="flex items-center gap-1 text-custom-grey hover:text-custom-blue transition-colors"
+                                        type="button">
+                                        <i class="fa-regular fa-pen-to-square text-sm"></i>
+                                        <span class="font-medium text-sm">Tulis Catatan</span>
                                     </button>
+
+                                    <div class="flex items-center gap-4">
+                                         <button
+                                            class="flex items-center gap-1 text-custom-grey hover:text-custom-red transition-colors mr-2"
+                                            @click="removeFromCart(store.storeId, product.id)" type="button">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+
+                                        <div class="quantity-container flex items-center shrink-0 rounded-full border border-gray-200 p-1">
+                                            <button type="button"
+                                                class="subtract size-7 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-50 transition-all"
+                                                @click="decreaseQuantity(store.storeId, product.id)"
+                                                :disabled="product.quantity <= 1">
+                                                <i class="fa-solid fa-minus text-xs"></i>
+                                            </button>
+                                            <input type="number" 
+                                                class="amount appearance-none w-10 text-center font-bold text-sm outline-none"
+                                                :value="product.quantity" @change="handleUpdateQuantity(store.storeId, product.id, $event)">
+                                            <button type="button" class="add size-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all"
+                                                @click="handleIncreaseQuantity(store.storeId, product.id)">
+                                                <i class="fa-solid fa-plus text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

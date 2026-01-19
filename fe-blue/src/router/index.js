@@ -428,6 +428,24 @@ const router = createRouter({
           meta: { title: 'Edit My Store', requiresAuth: true, permission: 'store-edit' }
         },
         {
+          path: 'settings/address',
+          name: 'user.settings.address',
+          component: () => import('@/views/user/settings/AddressList.vue'),
+          meta: { title: 'My Addresses', requiresAuth: true }
+        },
+        {
+          path: 'settings/address/create',
+          name: 'user.settings.address.create',
+          component: () => import('@/views/user/settings/AddressForm.vue'),
+          meta: { title: 'Add Address', requiresAuth: true }
+        },
+        {
+          path: 'settings/address/:id/edit',
+          name: 'user.settings.address.edit',
+          component: () => import('@/views/user/settings/AddressForm.vue'),
+          meta: { title: 'Edit Address', requiresAuth: true }
+        },
+        {
           path: 'store/:id',
           name: 'user.store.detail',
           component: StoreDetail,
@@ -468,6 +486,12 @@ const router = createRouter({
           name: 'user.my-store-balance',
           component: MyStoreBalance,
           meta: { title: 'Manage My Wallet', requiresAuth: true, permission: 'store-balance-list' }
+        },
+        {
+          path: 'orders/incoming',
+          name: 'admin.orders.incoming', // Naming convention: admin. prefix is often used for dashboard routes even for users
+          component: () => import('@/views/admin/order/IncomingOrders.vue'),
+          meta: { title: 'Incoming Orders', requiresAuth: true, permission: 'transaction-list' }
         },
         {
           path: 'withdrawal',

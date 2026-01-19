@@ -12,6 +12,18 @@ onErrorCaptured((err, instance, info) => {
   }
   return false // Prevent error from propagating further
 })
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useWishlistStore } from '@/stores/wishlist'
+
+const authStore = useAuthStore()
+const wishlistStore = useWishlistStore()
+
+onMounted(async () => {
+    if (authStore.user) {
+         await wishlistStore.fetchWishlist()
+    }
+})
 </script>
 
 <template>

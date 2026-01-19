@@ -19,10 +19,10 @@ import EmpyWalletGreyIcon from '@/assets/images/icons/empty-wallet-grey.svg'
 import Wallet3BlueFillIcon from '@/assets/images/icons/wallet-3-blue-fill.svg'
 import User2BlackIcon from '@/assets/images/icons/profile-2user-black.svg'
 import User2BlueIcon from '@/assets/images/icons/profile-2user-blue-fill.svg'
+import LocationGreyIcon from '@/assets/images/icons/location-grey.svg'
 import GlobalSearchIcon from '@/assets/images/icons/global-search-grey.svg'
 
 import { useRouter } from 'vue-router'
-
 const router = useRouter()
 const authStore = useAuthStore()
 const chatStore = useChatStore()
@@ -55,6 +55,14 @@ const items = computed(() => {
         role: ['buyer', 'store']
     },
     {
+        label: 'My Addresses',
+        path: `${prefix.value}/settings/address`,
+        iconDefault: LocationGreyIcon,
+        iconActive: LocationGreyIcon,
+        permission: 'dashboard-menu',
+        role: ['buyer']
+    },
+    {
         label: 'Manage Product',
         iconDefault: BoxBlackIcon,
         children: [
@@ -74,6 +82,14 @@ const items = computed(() => {
             }
         ],
         mode: 'store'
+    },
+    {
+        label: 'Incoming Orders',
+        iconDefault: BagGreyIcon, 
+        iconActive: BagBlueFillIcon,
+        permission: 'transaction-list', // Check permission
+        role: ['store'],
+        path: `${prefix.value}/orders/incoming`
     },
     {
         label: 'Manage Store',

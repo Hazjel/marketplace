@@ -7,6 +7,17 @@ import TopPicks from '@/components/App/home/TopPicks.vue';
 import Stores from '@/components/App/home/Stores.vue';
 import Chatbot from '@/components/App/Chatbot.vue';
 
+import { useHead } from '@vueuse/head';
+
+useHead({
+    title: 'Blukios | #1 Gadget Marketplace',
+    meta: [
+        {
+            name: 'description',
+            content: 'Blukios is the best place to buy gadgets, electronics, and accessories. Official Stores, Quality Guaranteed.'
+        }
+    ]
+})
 </script>
 
 <template>

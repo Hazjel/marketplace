@@ -108,6 +108,24 @@ body {
     .search-result li {
         @apply p-2 cursor-pointer hover:bg-[#f0f0f0];
     }
+
+    /* Product Detail Tabs */
+    .sticky-tabs {
+        position: sticky;
+        top: 80px;
+        /* Adjust based on header height */
+        z-index: 40;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .tab-link {
+        @apply px-5 py-2.5 font-bold text-custom-grey rounded-full transition-all hover:bg-gray-100 cursor-pointer;
+    }
+
+    .tab-link.active {
+        @apply text-white bg-custom-black shadow-lg shadow-gray-500/20;
+    }
 }
 
 @layer utilities {

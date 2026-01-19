@@ -9,6 +9,17 @@ const productStore = useProductStore()
 const { products, loading } = storeToRefs(productStore)
 const { fetchProducts } = productStore
 const route = useRoute()
+import { useHead } from '@vueuse/head'
+
+useHead({
+    title: 'Top Picks | Blukios',
+    meta: [
+        {
+            name: 'description',
+            content: 'Discover our top picks for gadgets and accessories.'
+        }
+    ]
+})
 
 const loadProducts = () => {
     fetchProducts({

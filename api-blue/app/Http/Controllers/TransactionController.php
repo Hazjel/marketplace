@@ -313,6 +313,11 @@ class TransactionController extends Controller implements HasMiddleware
                 } else if ($newStatus !== $transaction->payment_status) {
                     $transaction->payment_status = $newStatus;
                     $transaction->save();
+                    
+                    // Restore stock if payment failed/expired/cancelled
+                    if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
+                        $this->transactionRepository->restoreStock($transaction);
+                    }
                 }
 
                 return ResponseHelper::jsonResponse(true, 'Status Payment Berhasil Diupdate', new TransactionResource($transaction), 200);
@@ -341,6 +346,15 @@ class TransactionController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Dihapus', new TransactionResource($transactions), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+    public function getChartData()
+    {
+        try {
+            $data = $this->transactionRepository->getChartData();
+            return ResponseHelper::success($data);
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage(), 500);
         }
     }
 }
