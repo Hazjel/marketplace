@@ -226,6 +226,14 @@ onUnmounted(() => {
                                         <img src="@/assets/images/icons/profile-circle-grey.svg"
                                             class="flex size-6 shrink-0" alt="icon">
                                     </RouterLink>
+                                    <RouterLink v-if="user && user.role === 'buyer'"
+                                        :to="{ name: 'user.my-transaction', params: { username: user.username } }"
+                                        class="flex w-full items-center justify-between"
+                                        @click="showDropdownProfile = false">
+                                        <span class="font-medium text-custom-grey">My Transactions</span>
+                                        <img src="@/assets/images/icons/box-search-grey.svg"
+                                            class="flex size-6 shrink-0" alt="icon">
+                                    </RouterLink>
                                     <RouterLink
                                         :to="{ name: user.role === 'admin' ? 'admin.edit-profile' : 'user.edit-profile', params: user.role === 'admin' ? {} : { username: user.username } }"
                                         class="flex w-full items-center justify-between">
