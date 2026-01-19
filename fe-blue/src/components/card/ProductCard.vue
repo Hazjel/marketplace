@@ -1,6 +1,5 @@
 <script setup>
 import { formatRupiah } from '@/helpers/format';
-import _ from 'lodash';
 import { useWishlistStore } from '@/stores/wishlist';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
@@ -25,7 +24,11 @@ const { hasProduct } = storeToRefs(wishlistStore)
 const { toggleWishlist } = wishlistStore
 
 const isInWishlist = computed(() => {
-    return hasProduct.value(props.item.id)
+    // Ensure hasProduct is available and item exists
+    if (hasProduct.value && props.item) {
+        return hasProduct.value(props.item.id)
+    }
+    return false
 })
 
 const handleToggleWishlist = async () => {
@@ -38,55 +41,50 @@ const handleToggleWishlist = async () => {
 </script>
 
 <template>
-    <div class="card flex flex-col rounded-t-[20px] overflow-hidden h-full">
-        <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }">
-            <div class="thumbnail w-full overflow-hidden bg-custom-background items-center justify-center transition-all duration-300 aspect-square p-4"
-                :class="compact ? '' : ''">
+    <div class="group flex flex-col bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full cursor-pointer relative border border-transparent hover:border-custom-blue/10">
+        <!-- Wishlist Overlay -->
+        <button @click.prevent="handleToggleWishlist"
+            class="absolute top-2 right-2 z-10 flex size-8 items-center justify-center rounded-full bg-black/20 hover:bg-black/30 backdrop-blur-sm transition-all duration-200">
+             <img v-if="!isInWishlist" src="@/assets/images/icons/heart-white-fill.svg" class="size-5 transition-transform active:scale-90" alt="wishlist">
+             <img v-else src="@/assets/images/icons/heart-red.svg" class="size-5 transition-transform active:scale-90" alt="wishlist">
+        </button>
+
+        <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }" class="flex flex-col h-full">
+            <!-- Image -->
+            <div class="relative w-full aspect-square bg-custom-background overflow-hidden">
                 <img :src="item?.product_images?.find(image => image.is_thumbnail)?.image"
-                    class="size-full object-contain" alt="thumbnail">
+                    class="size-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    alt="thumbnail">
+            </div>
+
+            <!-- Content -->
+            <div class="flex flex-col p-3 gap-1 flex-1">
+                <!-- Title -->
+                <h3 class="font-medium text-custom-black text-sm leading-snug line-clamp-2 mb-1 group-hover:text-custom-blue transition-colors">
+                    {{ item?.name }}
+                </h3>
+
+                <!-- Price -->
+                <p class="font-bold text-base text-custom-black">
+                    Rp {{ formatRupiah(item?.price) }}
+                </p>
+
+                <!-- Location / Store -->
+                <div class="flex items-center gap-1 mt-auto pt-2">
+                     <img src="@/assets/images/icons/verify-star.svg" class="size-4" v-if="item?.store?.is_official" alt="official">
+                     <span class="text-xs text-custom-grey truncate">{{ item?.store?.name || 'Jakarta Pusat' }}</span>
+                </div>
+
+                <!-- Rating & Sold -->
+                <div class="flex items-center gap-2 text-xs text-custom-grey mt-1">
+                    <div class="flex items-center gap-1">
+                        <img src="@/assets/images/icons/Star-pointy.svg" class="size-3" alt="star">
+                        <span class="text-custom-black">4.9</span> 
+                    </div>
+                    <span class="w-px h-3 bg-custom-stroke"></span>
+                    <span>Terjual {{ item?.total_sold || '100+' }}</span>
+                </div>
             </div>
         </RouterLink>
-        <div class="flex flex-col rounded-b-[20px] overflow-hidden border border-custom-stroke border-t-0 bg-white transition-all duration-300"
-            :class="compact ? 'p-3 gap-3' : 'p-3 gap-3 md:p-5 md:gap-6'">
-            <div class="flex flex-col gap-3">
-                <div class="flex items-center gap-3" :class="compact ? 'text-xs' : 'text-xs md:text-base'">
-                    <div class="rounded-[4px] bg-custom-blue/10 flex items-center justify-center min-w-0 max-w-full"
-                        :class="compact ? 'p-1' : 'p-1 md:p-2'">
-                        <span class="font-bold text-custom-blue truncate block">{{ item?.product_category?.name }}</span>
-                    </div>
-                    <p class="font-semibold text-custom-red text-nowrap">{{ item?.total_sold }} Sold</p>
-                </div>
-                <div class="flex flex-col gap-1 w-full min-w-0 overflow-hidden">
-                    <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }">
-                        <p class="font-bold w-full truncate" :class="compact ? 'text-base' : 'text-base md:text-xl'">{{ item?.name
-                            }}</p>
-                    </RouterLink>
-                    <p class="font-bold text-custom-blue" :class="compact ? 'text-base' : 'text-base md:text-xl'"> Rp {{
-                        formatRupiah(item?.price) }}</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3 w-full">
-                <button @click.prevent="handleToggleWishlist"
-                    class="group flex items-center justify-center shrink-0 rounded-2xl transition-300"
-                    :class="[
-                        isInWishlist ? 'bg-custom-red hover:bg-custom-red/80' : 'bg-custom-red/10 hover:bg-custom-red',
-                        compact ? 'size-10 p-2' : 'size-10 p-2 md:size-14 md:p-4 md:gap-2'
-                    ]">
-                    <div class="relative flex shrink-0" :class="compact ? 'size-5' : 'size-5 md:size-6'">
-                        <img v-if="!isInWishlist" src="@/assets/images/icons/heart-red.svg"
-                            class="absolute flex size-full shrink-0 opacity-100 group-hover:opacity-0 transition-300"
-                            alt="icon">
-                        <img src="@/assets/images/icons/heart-white-fill.svg"
-                            class="absolute flex size-full shrink-0 transition-300"
-                            :class="isInWishlist ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'" alt="icon">
-                    </div>
-                </button>
-                <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }"
-                    class="group flex items-center justify-center w-full rounded-2xl bg-custom-blue/10 hover:bg-custom-blue transition-300"
-                    :class="compact ? 'h-10 p-2 text-sm' : 'h-10 p-2 text-sm md:h-14 md:p-4 md:text-base md:gap-[6px]'">
-                    <span class="font-semibold text-custom-blue group-hover:text-white transition-300">Detail</span>
-                </RouterLink>
-            </div>
-        </div>
     </div>
 </template>

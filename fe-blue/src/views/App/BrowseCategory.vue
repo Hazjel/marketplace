@@ -74,7 +74,7 @@ onMounted(async () => {
             <div class="flex items-center justify-between">
                 <h2 class="font-extrabold text-[32px]">Sedang Popular 🔥 </h2>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
                 <ProductCard v-for="product in products" :key="product.id" :item="product" />
             </div>
             <!-- Popular section might also need its own data or just hide load more here if it's duping -->
@@ -85,7 +85,7 @@ onMounted(async () => {
                 <h2 class="font-extrabold text-[32px] capitalize">Just Released in {{ productCategory?.name }} 🙌🏻
                 </h2>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
                 <!-- Using same products list for now as per previous implementation -->
                 <ProductCard v-for="product in products" :key="product.id" :item="product" />
             </div>

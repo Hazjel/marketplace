@@ -3,6 +3,7 @@ import { useProductCategoryStore } from '@/stores/productCategory';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
+import SectionHeader from '@/components/Molecule/SectionHeader.vue';
 
 const productCategoryStore = useProductCategoryStore();
 const { productCategories, loading } = storeToRefs(productCategoryStore);
@@ -17,13 +18,11 @@ onMounted( () => {
 
 <template>
     <section id="Categories" class="flex flex-col gap-6 md:gap-9 animate-fade-in-up delay-100">
-        <div class="flex items-center justify-between gap-4">
-            <h2 class="font-extrabold text-lg md:text-[32px] leading-tight">Explore High Quality<br class="hidden md:block"> Products by Categories</h2>
-            <RouterLink :to="{name: 'app.all-categories'}" class="flex shrink-0 items-center h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 gap-[10px] bg-custom-black">
-                <span class="font-medium text-white hidden md:block">VIEW ALL</span>
-                <img src="@/assets/images/icons/arrow-right-white.svg" class="flex size-5 md:size-6 shrink-0" alt="icon">
-            </RouterLink>
-        </div>
+        <SectionHeader 
+            title="Explore High Quality" 
+            subtitle="Products by Categories"
+            :link="{name: 'app.all-categories'}"
+        />
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6">
             <template v-for="(category, index) in productCategories" :key="category.id">
                 <RouterLink 

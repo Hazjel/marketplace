@@ -2,6 +2,7 @@
 import { formatRupiah, formatToClientTimeZone } from '@/helpers/format';
 import { can } from '@/helpers/permissionHelper';
 import { RouterLink } from 'vue-router';
+import Badge from '@/components/Atom/Badge.vue';
 
 defineProps({
     item: {
@@ -38,22 +39,18 @@ const emit = defineEmits(['delete'])
                 <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0" alt="icon">
                 {{ formatToClientTimeZone(item.created_at) }}
             </p>
-            <p class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-yellow text-[#544607]"
-                v-if="item.delivery_status === 'pending'">
+            <Badge variant="warning" size="sm" v-if="item.delivery_status === 'pending'">
                 Pending
-            </p>
-            <p class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-blue/10 text-custom-blue"
-                v-if="item.delivery_status === 'processing'">
+            </Badge>
+            <Badge variant="info" size="sm" v-if="item.delivery_status === 'processing'">
                 Processing
-            </p>
-            <p class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-orange/10 text-custom-orange"
-                v-if="item.delivery_status === 'delivering'">
+            </Badge>
+            <Badge variant="orange" size="sm" v-if="item.delivery_status === 'delivering'">
                 Delivering
-            </p>
-            <p class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-green/10 text-custom-green"
-                v-if="item.delivery_status === 'completed'">
+            </Badge>
+            <Badge variant="success" size="sm" v-if="item.delivery_status === 'completed'">
                 Completed
-            </p>
+            </Badge>
         </div>
         <hr class="border-custom-stroke">
         <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]">

@@ -32,7 +32,7 @@ watch(() => route.query, () => {
             <h1 class="font-bold text-[32px] text-custom-black">Top Picks</h1>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
             <ProductCard v-for="product in products" :key="product.id" :item="product" />
         </div>
     </div>

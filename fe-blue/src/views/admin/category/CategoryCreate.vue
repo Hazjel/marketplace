@@ -4,6 +4,8 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { RouterLink, useRoute } from 'vue-router';
+import Button from '@/components/Atom/Button.vue';
+import Input from '@/components/Atom/Input.vue';
 
 const route = useRoute()
 
@@ -52,54 +54,52 @@ onMounted(async () => {
                     <img id="Thumbnail" :src="productCategory.image_url" data-default="@/assets/images/icons/gallery-grey.svg" class="size-full object-contain" alt="icon"/>
                     <input type="file" id="File-Input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange"/>
                 </div>
-                <button type="button" id="Add-Photo" class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
+                <Button type="button" variant="secondary" id="Add-Photo">
                     Add Photo
-                </button>
+                </Button>
             </div>
         </div>
         <div class="flex items-center justify-between" v-if="productCategory.parent_id">
             <p class="font-semibold text-custom-grey">Category Parent</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.parent_id }">
-                <label class="group relative">
-                    <div class="input-icon">
+            <div class="w-1/2">
+                <Input 
+                    label="Enter Category Parent" 
+                    v-model="productCategory.parent_name" 
+                    readonly
+                    :error="error?.parent_id"
+                >
+                    <template #icon>
                         <img src="@/assets/images/icons/note-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    </div>
-                    <p class="input-placeholder">
-                        Enter Category Parent
-                    </p>
-                    <input type="text" class="custom-input" placeholder="" v-model="productCategory.parent_name" readonly>
-                </label>
-                <span class="input-error" v-if="error?.parent_id">{{ error?.parent_id?.join(', ') }}</span>
+                    </template>
+                </Input>
             </div>
         </div>
         <div class="flex items-center justify-between">
             <p class="font-semibold text-custom-grey">Category Name</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.name }">
-                <label class="group relative">
-                    <div class="input-icon">
+            <div class="w-1/2">
+                <Input 
+                    label="Enter Category Name" 
+                    v-model="productCategory.name" 
+                    :error="error?.name"
+                >
+                    <template #icon>
                         <img src="@/assets/images/icons/note-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    </div>
-                    <p class="input-placeholder">
-                        Enter Category Name
-                    </p>
-                    <input type="text" class="custom-input" placeholder="" v-model="productCategory.name">
-                </label>
-                <span class="input-error" v-if="error?.name">{{ error?.name?.join(', ') }}</span>
+                    </template>
+                </Input>
             </div>
         </div>
         <div class="flex items-center justify-between">
             <p class="font-semibold text-custom-grey">Category Tagline</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.tagline }">
-                <label class="group relative">
-                    <div class="input-icon">
+            <div class="w-1/2">
+                <Input 
+                    label="Enter Tagline Category" 
+                    v-model="productCategory.tagline" 
+                    :error="error?.tagline"
+                >
+                    <template #icon>
                         <img src="@/assets/images/icons/stickynote-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    </div>
-                    <p class="input-placeholder">
-                        Enter Tagline Category
-                    </p>
-                    <input type="text" class="custom-input" placeholder="" v-model="productCategory.tagline">
-                </label>
-                <span class="input-error" v-if="error?.tagline">{{ error?.tagline?.join(', ') }}</span>
+                    </template>
+                </Input>
             </div>
         </div>
         <div class="flex justify-between">
@@ -120,15 +120,23 @@ onMounted(async () => {
             </div>
         </div>
         <div class="flex items-center justify-end gap-4">
-            <RouterLink :to="{ name: 'admin.category.detail', params: { id: productCategory?.parent_id }}" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg" v-if="productCategory?.parent_id">
+            <Button 
+                v-if="productCategory?.parent_id"
+                variant="danger" 
+                :to="{ name: 'admin.category.detail', params: { id: productCategory?.parent_id }}"
+            >
                 Cancel
-            </RouterLink>
-            <RouterLink :to="{ name: 'admin.category' }" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg" v-if="!productCategory.parent_id">
+            </Button>
+            <Button 
+                v-if="!productCategory.parent_id"
+                variant="danger" 
+                :to="{ name: 'admin.category' }"
+            >
                 Cancel
-            </RouterLink>
-            <button type="submit" class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg">
+            </Button>
+            <Button type="submit" variant="primary" :loading="loading">
                 Create Now
-            </button>
+            </Button>
         </div>
     </form>
 </template>
