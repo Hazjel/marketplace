@@ -241,23 +241,39 @@ const handleSubmit = async () => {
             return;
         }
 
+        // 1. Clear cart immediately to prevent duplicate orders
+        cart.clearSelectedItems();
+        
+        // 2. Open Snap Popup
         window.snap.pay(response.snap_token, {
             onSuccess: function (result) {
-                cart.clearSelectedItems();
                 showSuccessModal.value = true;
-                isProcessingPayment.value = false; // ✅ Stop loading
+                isProcessingPayment.value = false;
                 toast.success('Pembayaran berhasil!')
             },
             onPending: function (result) {
-                isProcessingPayment.value = false; // ✅ Stop loading
-                toast.info('Menunggu pembayaran...')
+                isProcessingPayment.value = false;
+                toast.info('Menunggu pembayaran...');
+                // Redirect to My Transactions with username param
+                if (user.value?.username) {
+                    router.push({ name: 'user.my-transaction', params: { username: user.value.username } });
+                } else {
+                     window.location.href = '/my-transactions'; // Fallback
+                }
             },
             onError: function (result) {
                 toast.error('Pembayaran gagal. Silakan coba lagi.');
-                isProcessingPayment.value = false; // ✅ Stop loading
+                isProcessingPayment.value = false;
             },
             onClose: function () {
-                isProcessingPayment.value = false; // ✅ Stop loading
+                isProcessingPayment.value = false;
+                toast.warning('Pembayaran tertunda. Silakan cek menu Transaksi.');
+                 // Redirect to My Transactions with username param
+                if (user.value?.username) {
+                    router.push({ name: 'user.my-transaction', params: { username: user.value.username } });
+                } else {
+                    window.location.href = '/my-transactions'; // Fallback
+                }
             }
         })
     } catch (error) {
