@@ -93,4 +93,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
+
+    public function followingStores()
+    {
+        return $this->belongsToMany(Store::class, 'store_followers', 'user_id', 'store_id')->withTimestamps();
+    }
 }

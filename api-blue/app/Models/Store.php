@@ -52,4 +52,9 @@ class Store extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'store_followers', 'store_id', 'user_id')->withTimestamps();
+    }
 }

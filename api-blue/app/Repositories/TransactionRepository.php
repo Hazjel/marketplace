@@ -15,6 +15,8 @@ class TransactionRepository implements TransactionRepositoryInterface
 {
     public function getAll(?string $search, ?int $limit, bool $execute)
     {
+        $mode = request('mode');
+
         $query = Transaction::with([
             'buyer.user', 
             'store', 
@@ -28,12 +30,22 @@ class TransactionRepository implements TransactionRepositoryInterface
                 }
             });
 
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('store_id', auth()->user()->store?->id ?? null);
-        }
-
-        if (auth()->check() && auth()->user()->hasRole('buyer')) {
-            $query->where('buyer_id', auth()->user()->buyer?->id ?? null);
+        // Strict Mode Filtering
+        if ($mode === 'store' && auth()->check() && auth()->user()->hasRole('store')) {
+             $query->where('store_id', auth()->user()->store?->id);
+        } elseif ($mode === 'buyer' && auth()->check() && auth()->user()->hasRole('buyer')) {
+             $query->where('buyer_id', auth()->user()->buyer?->id);
+        } else {
+             // Fallback / Admin / Legacy behavior
+             if (auth()->check() && !auth()->user()->hasRole('admin')) {
+                 // If not admin and no mode specified, apply broad filters carefully
+                 // (This fallback might still be ambiguous for dual roles, but controller should send mode)
+                 if (auth()->user()->hasRole('store')) {
+                    $query->where('store_id', auth()->user()->store?->id);
+                 } elseif (auth()->user()->hasRole('buyer')) {
+                    $query->where('buyer_id', auth()->user()->buyer?->id);
+                 }
+             }
         }
 
         $query->orderBy('created_at', 'desc');
