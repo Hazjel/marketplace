@@ -10,6 +10,7 @@ import StarPointy from '@/assets/images/icons/Star-pointy.svg'
 import StarPointyOutline from '@/assets/images/icons/Star-pointy-outline.svg'
 import { useProductReviewStore } from '@/stores/productReview';
 import { useToast } from "vue-toastification";
+import ReviewModal from '@/components/ReviewModal.vue';
 
 const route = useRoute()
 const toast = useToast()
@@ -38,7 +39,6 @@ const handleCheckStatus = async () => {
 
 onMounted(async () => {
     await fetchData()
-    initReviewForm()
     loadMidtransScript().catch(console.error)
 })
 
@@ -118,97 +118,28 @@ const getImageUrl = (path) => {
 }
 
 // Review Logic
-const productReviewStore = useProductReviewStore()
 const showReviewModal = ref(false)
-const submittingReview = ref(false)
-const reviewForm = ref({})
-const isAnonymous = ref(false)
+const selectedProductForReview = ref(null)
 
-const receivingProofFile = ref(null)
-const receivingProofInput = ref(null)
-
-const initReviewForm = () => {
-    if (transaction.value?.transaction_details) {
-        transaction.value.transaction_details.forEach(detail => {
-            if (!reviewForm.value[detail.product_id]) {
-                reviewForm.value[detail.product_id] = {
-                    rating: 5,
-                    review: '',
-                    attachments: []
-                }
-            }
-        })
+const handleOpenReview = (detail) => {
+    selectedProductForReview.value = {
+        id: detail.product_id,
+        name: detail.product?.name,
+        image: detail.product?.product_images?.find(image => image.is_thumbnail)?.image || PlaceHolder
     }
-}
-
-const openReviewModal = () => {
     showReviewModal.value = true
-    isAnonymous.value = false
-    initReviewForm()
 }
 
-// Helper for stars
-const getStarIcon = (productId, starIndex) => {
-    const rating = reviewForm.value[productId]?.rating || 0
-    return rating >= starIndex ? StarPointy : StarPointyOutline
+const handleReviewSubmitted = async () => {
+    await fetchData()
 }
 
-const createBlobUrl = (file) => {
-    if (!file) return ''
-    return URL.createObjectURL(file)
-}
-
-const handleReviewFileChange = (event, productId) => {
-    const files = Array.from(event.target.files)
-    if (reviewForm.value[productId]) {
-        reviewForm.value[productId].attachments = [...reviewForm.value[productId].attachments, ...files]
-    }
-}
-
-const removeAttachment = (productId, index) => {
-    if (reviewForm.value[productId]) {
-        reviewForm.value[productId].attachments.splice(index, 1)
-    }
-}
-
-const handleSubmitReview = async () => {
-    submittingReview.value = true
-    try {
-        const promises = Object.keys(reviewForm.value)
-            .filter(productId => {
-                // Submit review for all products in the form
-                return true
-            })
-            .map(productId => {
-                const data = reviewForm.value[productId]
-                return productReviewStore.createReview({
-                    transaction_id: transaction.value.id,
-                    product_id: productId,
-                    rating: data.rating,
-                    review: data.review,
-                    is_anonymous: isAnonymous.value,
-                    attachments: data.attachments || [] 
-                })
-            })
-
-        await Promise.all(promises)
-        showReviewModal.value = false
-        await fetchData()
-        toast.success('Ulasan berhasil dikirim')
-    } catch (error) {
-        console.error('Failed to submit reviews', error)
-        // Show specific validation message if available
-        if (error.response && error.response.data && error.response.data.message) {
-             toast.error('Gagal mengirim ulasan: ' + error.response.data.message)
-        } else {
-             toast.error('Gagal mengirim ulasan. Mohon cek input Anda.')
-        }
-    } finally {
-        submittingReview.value = false
-    }
+const hasReviewed = (productId) => {
+    return transaction.value?.product_reviews?.some(r => r.product_id === productId)
 }
 
 // Buyer Complete Order
+const receivingProofInput = ref(null)
 const handleCompleteOrderClick = () => {
     receivingProofInput.value.click()
 }
@@ -279,7 +210,6 @@ const handleRepayment = () => {
 
 onMounted(async () => {
     await fetchData()
-    initReviewForm()
     loadMidtransScript().catch(console.error)
 })
 </script>
@@ -335,6 +265,8 @@ onMounted(async () => {
                     <p class="font-bold text-lg text-white">The order is arrived to customer address</p>
                 </div>
             </div>
+
+
             <section class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white">
                 <p class="font-bold text-xl">Order Reviews</p>
                 <div class="flex items-center gap-[14px] w-full min-w-0">
@@ -437,6 +369,17 @@ onMounted(async () => {
                                 Subtotal
                             </p>
                             <p class="font-bold text-lg text-custom-blue">Rp {{ formatRupiah(product.subtotal) }}</p>
+                        </div>
+                        
+                        <!-- Review Button -->
+                        <div v-if="transaction?.delivery_status === 'completed' && activeMode === 'buyer'" class="flex justify-end pt-2">
+                             <div v-if="hasReviewed(product.product_id)" class="px-4 py-2 bg-green-50 text-green-600 rounded-full text-sm font-bold border border-green-100 flex items-center gap-2">
+                                 <span class="text-green-500">✓</span> Ulasan Terkirim
+                             </div>
+                             <button v-else @click="handleOpenReview(product)" 
+                                 class="px-5 py-2.5 rounded-full bg-custom-blue text-white text-sm font-bold hover:shadow-lg hover:shadow-custom-blue/30 transition-all">
+                                 Beri Ulasan
+                             </button>
                         </div>
                     </div>
                 </div>
@@ -677,8 +620,6 @@ onMounted(async () => {
                             <img id="Thumbnail" :src="transaction.delivery_proof_url"
                                 data-default="@/assets/images/icons/gallery-default.svg"
                                 class="size-full object-contain" alt="icon" />
-                            <input type="file" id="File-Input" accept="image/*" ref="fileInput"
-                                class="absolute inset-0 opacity-0 cursor-pointer" @change="handleImageChange" />
                         </div>
                         <button type="button" id="Add-Photo" @click="fileInput.click()"
                             class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
@@ -756,8 +697,7 @@ onMounted(async () => {
                         </p>
                     </div>
 
-                    <input type="file" ref="receivingProofInput" class="hidden" accept="image/*"
-                        @change="handleReceivingProofChange">
+
 
                     <button v-if="activeMode === 'buyer'" @click="handleCompleteOrderClick"
                         class="flex items-center justify-center h-12 px-6 rounded-full bg-custom-blue text-white font-semibold shadow-lg hover:bg-blue-600 transition-300">
@@ -866,90 +806,26 @@ onMounted(async () => {
                     <p class="font-medium text-custom-grey" v-else>
                         No reviews yet.
                     </p>
-
-                    <button v-if="activeMode === 'buyer' && transaction?.delivery_status === 'completed'"
-                        @click="openReviewModal"
-                        class="flex items-center justify-center h-12 px-6 rounded-full bg-custom-blue text-white font-semibold">
-                        Write a Review
-                    </button>
                 </div>
             </section>
         </div>
     </div>
+    <!-- Global hidden inputs -->
+    <input type="file" ref="receivingProofInput" class="hidden" accept="image/*"
+        @change="handleReceivingProofChange">
+    <input type="file" ref="fileInput" accept="image/*" class="hidden"
+        @change="handleImageChange" />
 
-    <!-- Review Modal -->
-    <div v-if="showReviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div class="bg-white rounded-[20px] p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col gap-6">
-            <div class="flex items-center justify-between">
-                <p class="font-bold text-2xl">Write a Review</p>
-                <div class="flex items-center gap-4">
-                    <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" v-model="isAnonymous" class="w-5 h-5 rounded border-custom-stroke text-custom-blue focus:ring-custom-blue">
-                        <span class="font-medium text-custom-grey">Hide my name</span>
-                    </label>
-                    <button @click="showReviewModal = false">
-                        <img src="@/assets/images/icons/close-circle-black.svg" class="size-8" alt="close">
-                    </button>
-                </div>
-            </div>
-
-            <form @submit.prevent="handleSubmitReview" class="flex flex-col gap-6">
-                <div v-for="(detail, index) in transaction.transaction_details" :key="detail.id"
-                    class="flex flex-col gap-4">
-                    <div class="flex items-center gap-4 bg-custom-background p-3 rounded-xl">
-                        <img :src="detail.product?.product_images?.find(i => i.is_thumbnail)?.image || PlaceHolder"
-                            class="size-16 object-cover rounded-lg">
-                        <p class="font-bold text-lg">{{ detail.product.name }}</p>
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <p class="font-semibold">Rating</p>
-                        <div class="flex gap-2">
-                            <button type="button" v-for="star in 5" :key="star"
-                                @click="reviewForm[detail.product_id].rating = star">
-                                <img :src="getStarIcon(detail.product_id, star)" class="size-8 cursor-pointer">
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <p class="font-semibold">Review</p>
-                        <textarea v-model="reviewForm[detail.product_id].review"
-                            class="w-full rounded-xl border border-custom-stroke p-4 focus:outline-none focus:border-custom-blue"
-                            rows="3" placeholder="How was the product?"></textarea>
-                    </div>
-
-                    <div class="flex flex-col gap-2">
-                        <p class="font-semibold">Add Photos/Videos</p>
-                        <div class="flex flex-wrap gap-2">
-                             <div v-for="(file, fIndex) in reviewForm[detail.product_id]?.attachments || []" :key="fIndex" 
-                                class="relative rounded-lg overflow-hidden border border-custom-stroke bg-custom-background shrink-0"
-                                style="width: 80px; height: 80px;">
-                                <img v-if="file.type.startsWith('image/')" :src="createBlobUrl(file)" class="w-full h-full object-cover">
-                                <video v-else :src="createBlobUrl(file)" class="w-full h-full object-cover"></video>
-                                <button type="button" @click="removeAttachment(detail.product_id, fIndex)" 
-                                    class="absolute top-1 right-1 bg-white/80 rounded-full p-0.5 hover:bg-white">
-                                    <img src="@/assets/images/icons/close-circle-black.svg" class="size-4">
-                                </button>
-                             </div>
-                             
-                             <label class="flex flex-col items-center justify-center rounded-lg border border-dashed border-custom-stroke cursor-pointer hover:border-custom-blue hover:bg-custom-blue/5 transition-all shrink-0"
-                                style="width: 80px; height: 80px;">
-                                <input type="file" class="hidden" accept="image/*,video/*" multiple @change="(e) => handleReviewFileChange(e, detail.product_id)">
-                                <span class="text-2xl text-custom-grey">+</span>
-                             </label>
-                        </div>
-                    </div>
-
-                    <hr class="border-custom-stroke" v-if="index < transaction.transaction_details.length - 1">
-                </div>
-
-                <button type="submit"
-                    class="h-14 w-full rounded-full bg-custom-blue text-white font-bold text-lg hover:shadow-lg transition-all"
-                    :disabled="submittingReview">
-                    {{ submittingReview ? 'Submitting...' : 'Submit Reviews' }}
-                </button>
-            </form>
-        </div>
-    </div>
+    <Teleport to="body">
+        <ReviewModal 
+            v-if="transaction?.id && selectedProductForReview"
+            :show="showReviewModal"
+            :transaction-id="transaction.id"
+            :product-id="selectedProductForReview.id"
+            :product-name="selectedProductForReview.name"
+            :product-image="selectedProductForReview.image"
+            @close="showReviewModal = false"
+            @submitted="handleReviewSubmitted"
+        />
+    </Teleport>
 </template>

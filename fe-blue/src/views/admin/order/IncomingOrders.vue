@@ -93,7 +93,8 @@ const openResiModal = (id) => {
 const submitResi = async () => {
     if (!resiInput.value) return;
     
-    await updateTransaction(selectedTransactionId.value, {
+    await updateTransaction({
+        id: selectedTransactionId.value,
         delivery_status: 'delivering',
         tracking_number: resiInput.value
     });
@@ -103,7 +104,8 @@ const submitResi = async () => {
 };
 
 const handleAccept = async (id) => {
-    await updateTransaction(id, {
+    await updateTransaction({
+        id: id,
         delivery_status: 'processing'
     });
     fetchData();
@@ -111,7 +113,8 @@ const handleAccept = async (id) => {
 
 const handleReject = async (id) => {
     if(confirm('Are you sure you want to reject this order? Stock will be restored.')) {
-        await updateTransaction(id, {
+        await updateTransaction({
+            id: id,
             delivery_status: 'cancelled'
         });
         fetchData();

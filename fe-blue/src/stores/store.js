@@ -4,7 +4,9 @@ import { defineStore } from "pinia";
 
 export const useStoreStore = defineStore("store", {
     state: () => ({
+        store: null,
         stores: [],
+        reviews: [],
         meta: {
             current_page: 1,
             last_page: 1,
@@ -173,16 +175,59 @@ export const useStoreStore = defineStore("store", {
         },
 
         async deleteStore(id) {
-            this.loading = true
-
+            this.loading = true;
             try {
-                const response = await axiosInstance.delete(`store/${id}`)
-
-                this.success = response.data.message
+                const response = await axiosInstance.delete(`store/${id}`);
+                this.success = response.data.message;
             } catch (error) {
-                this.error = handleError(error)
+                this.error = handleError(error);
+                throw error;
             } finally {
-                this.loading = false
+                this.loading = false;
+            }
+        },
+
+        async followStore(id) {
+            try {
+                const response = await axiosInstance.post(`store/${id}/follow`);
+                return response.data;
+            } catch (error) {
+                this.error = handleError(error);
+                throw error;
+            }
+        },
+
+        async unfollowStore(id) {
+            try {
+                const response = await axiosInstance.post(`store/${id}/unfollow`);
+                return response.data;
+            } catch (error) {
+                this.error = handleError(error);
+                throw error;
+            }
+        },
+
+        async checkFollowStatus(id) {
+            try {
+                const response = await axiosInstance.get(`store/${id}/follow-status`);
+                return response.data.data.is_following;
+            } catch (error) {
+                // If not logged in or other error, return false
+                return false;
+            }
+        },
+
+        async fetchStoreReviews(username) {
+            this.loading = true;
+            try {
+                const response = await axiosInstance.get(`store/username/${username}/reviews`);
+                this.reviews = response.data.data.data;
+                return response.data.data;
+            } catch (error) {
+                this.error = handleError(error);
+                throw error;
+            } finally {
+                this.loading = false;
             }
         },
 

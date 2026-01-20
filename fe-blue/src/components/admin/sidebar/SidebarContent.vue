@@ -89,7 +89,8 @@ const items = computed(() => {
         iconActive: BagBlueFillIcon,
         permission: 'transaction-list', // Check permission
         role: ['store'],
-        path: `${prefix.value}/orders/incoming`
+        path: `${prefix.value}/orders/incoming`,
+        mode: 'store'
     },
     {
         label: 'Manage Store',

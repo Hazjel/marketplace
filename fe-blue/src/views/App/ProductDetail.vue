@@ -1,11 +1,12 @@
 <script setup>
 import ProductCard from '@/components/card/ProductCard.vue';
-import { formatRupiah } from '@/helpers/format';
+import { formatRupiah, formatDate } from '@/helpers/format';
 import { useProductStore } from '@/stores/product';
 import { storeToRefs } from 'pinia';
 import SectionHeader from '@/components/Molecule/SectionHeader.vue';
 import ProductGallery from '@/components/Molecule/ProductGallery.vue';
-
+import StarPointy from '@/assets/images/icons/Star-pointy.svg';
+import StarPointyOutline from '@/assets/images/icons/Star-pointy-outline.svg';
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useWishlistStore } from '@/stores/wishlist';
@@ -271,7 +272,7 @@ watch(
                  <!-- Reviews Section -->
                  <div id="Reviews" class="flex flex-col gap-4 scroll-mt-[180px]">
                     <h3 class="font-bold text-lg">Ulasan Pembeli</h3>
-                   <div class="flex items-start gap-10">
+                   <div class="flex flex-col md:flex-row items-center gap-10">
                         <div class="flex flex-col gap-2">
                              <div class="flex items-center gap-2">
                                 <img src="@/assets/images/icons/Star-pointy.svg" class="size-8" />
@@ -281,7 +282,7 @@ watch(
                             <span class="text-sm font-semibold text-custom-black">{{ product?.product_reviews?.length || 0 }} Ulasan</span>
                         </div>
                         
-                        <div class="flex flex-col gap-1 flex-1 max-w-sm">
+                        <div class="flex flex-col gap-1 flex-1 w-full max-w-sm">
                             <div v-for="star in 5" :key="star" class="flex items-center gap-2">
                                 <img src="@/assets/images/icons/Star-pointy.svg" class="size-4" />
                                 <span class="text-sm font-bold w-3 text-custom-grey">{{ 6 - star }}</span>
@@ -289,6 +290,54 @@ watch(
                                     <div class="h-full bg-custom-green rounded-full" :style="{ width: `${getRatingPercentage(6 - star)}%` }"></div>
                                 </div>
                                 <span class="text-xs text-custom-grey w-8 text-right">{{ getRatingCount(6 - star) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review List -->
+                    <div class="flex flex-col gap-6 mt-4">
+                        <div v-if="!product?.product_reviews || product.product_reviews.length === 0" class="text-center py-8 text-custom-grey">
+                            Belum ada ulasan untuk produk ini.
+                        </div>
+                        <div v-else class="flex flex-col gap-6">
+                            <div v-for="review in product.product_reviews" :key="review.id" class="flex gap-4 border-b border-gray-100 pb-6 last:border-0">
+                                <!-- User Avatar -->
+                                <div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex-shrink-0">
+                                    <img v-if="!review.is_anonymous && review.user?.profile_picture" :src="review.user.profile_picture" class="w-full h-full object-cover">
+                                    <div v-else class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 font-bold text-xs uppercase">
+                                        {{ review.is_anonymous ? 'A' : (review.user?.name?.[0] || 'U') }}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-col gap-2 flex-1">
+                                    <!-- Header: Name & Date -->
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-sm text-custom-black">
+                                                {{ review.is_anonymous ? 'Anonim' : review.user?.name }}
+                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <div class="flex">
+                                                    <img v-for="i in 5" :key="i" 
+                                                        :src="i <= review.rating ? StarPointy : StarPointyOutline" 
+                                                        class="w-3.5 h-3.5" />
+                                                </div>
+                                                <span class="text-xs text-gray-400 ml-2">{{ formatDate(review.created_at) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <p class="text-sm text-gray-700 leading-relaxed">{{ review.review }}</p>
+
+                                    <!-- Media Attachments -->
+                                    <div v-if="review.attachments && review.attachments.length > 0" class="flex gap-2 mt-2 overflow-x-auto pb-2">
+                                        <div v-for="media in review.attachments" :key="media.id" class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200">
+                                            <img v-if="media.file_type === 'image'" :src="media.file_path" class="w-full h-full object-cover cursor-pointer hover:opacity-90">
+                                            <video v-else :src="media.file_path" class="w-full h-full object-cover"></video>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

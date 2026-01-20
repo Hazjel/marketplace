@@ -1,17 +1,31 @@
+```html
 <script setup>
 import ProductCard from '@/components/card/ProductCard.vue';
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue';
+import ReviewCard from '@/components/card/ReviewCard.vue';
+import StoreHeader from '@/components/store/StoreHeader.vue';
 import { useProductStore } from '@/stores/product';
 import { useStoreStore } from '@/stores/store';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useHead } from '@vueuse/head';
 import { computed } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
 const route = useRoute()
+const router = useRouter()
 
-const store = ref({})
+const storeStore = useStoreStore()
+const { store, reviews } = storeToRefs(storeStore)
+const { fetchStoreByUsername, followStore, unfollowStore, checkFollowStatus, fetchStoreReviews } = storeStore
+
+const productStore = useProductStore();
+const { products, loading: loadingProducts, storeCategories } = storeToRefs(productStore);
+const { fetchProducts, fetchCategoriesByStore } = productStore;
+
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 
 useHead({
     title: computed(() => store.value?.name ? `${store.value.name} | Blukios` : 'Store Detail | Blukios'),
@@ -31,42 +45,105 @@ useHead({
     ]
 })
 
-const storeStore = useStoreStore()
-const { loading } = storeToRefs(storeStore)
-const { fetchStoreByUsername } = storeStore
-
-const productStore = useProductStore();
-const { products, loading: loadingProducts } = storeToRefs(productStore);
-const { fetchProducts } = productStore;
-
-import { useAuthStore } from '@/stores/auth';
-const authStore = useAuthStore();
-const { user } = storeToRefs(authStore);
+const isFollowing = ref(false)
+const activeTab = ref('products')
+const selectedCategory = ref(null);
+const selectedSort = ref('default');
 
 const fetchStore = async () => {
     const response = await fetchStoreByUsername(route.params.username)
     store.value = response
+    
+    // Check follow status if user is logged in
+    if (user.value && store.value?.id) {
+        isFollowing.value = await checkFollowStatus(store.value.id)
+    }
 }
 
-onMounted(async () => {
-    await fetchStore()
+const handleSortChange = () => {
+    let sortParams = {};
+    switch (selectedSort.value) {
+        case 'newest':
+            sortParams = { sort_by: 'created_at', sort_direction: 'desc' };
+            break;
+        case 'price_low':
+            sortParams = { sort_by: 'price', sort_direction: 'asc' };
+            break;
+        case 'price_high':
+            sortParams = { sort_by: 'price', sort_direction: 'desc' };
+            break;
+        case 'sold':
+            sortParams = { sort_by: 'sold', sort_direction: 'desc' };
+            break;
+        default:
+            sortParams = {}; // Default backend sorting
+    }
 
+    const params = {
+        limit: 12,
+        store_id: store.value.id,
+        category_id: selectedCategory.value ? selectedCategory.value.id : null,
+        ...sortParams
+    };
+
+    fetchProducts(params);
+};
+
+const handleFollow = async () => {
+    if (!user.value) {
+        return router.push({ name: 'auth.login' })
+    }
+    try {
+        await followStore(store.value.id)
+        isFollowing.value = true
+    } catch (error) {
+        console.error('Follow failed', error)
+    }
+}
+
+const handleUnfollow = async () => {
+    try {
+        await unfollowStore(store.value.id)
+        isFollowing.value = false
+    } catch (error) {
+        console.error('Unfollow failed', error)
+    }
+}
+
+const handleCategoryFilter = (category) => {
+    selectedCategory.value = category;
+    
+    const params = {
+        limit: 12,
+        store_id: store.value.id,
+        category_id: category ? category.id : null,
+    };
+
+    fetchProducts(params);
+};
+
+watch(activeTab, (newTab) => {
+    if (newTab === 'reviews' && reviews.value.length === 0) {
+        fetchStoreReviews(route.params.username)
+    }
+})
+
+onMounted(async () => {
+    // Reset reviews to prevent showing reviews from previous store
+    reviews.value = []
+    
+    await fetchStore()
+    
+    // Fetch Initial Products
     fetchProducts({
         limit: 12,
         store_id: store.value.id,
         random: true
     })
+
+    // Fetch Store Categories
+    fetchCategoriesByStore(route.params.username)
 })
-
-const router = useRouter() // Import useRouter before using
-const handleFollow = () => {
-    if (!authStore.token) {
-        router.push({ name: 'auth.login' })
-        return
-    }
-    // Logic for follow store (if implemented)
-}
-
 </script>
 
 <template>
@@ -90,135 +167,148 @@ const handleFollow = () => {
         </div>
     </header>
     <main class="flex flex-col gap-8 md:gap-[52px] w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-8 mb-20 md:mb-[100px] mx-auto">
-        <section class="flex flex-col lg:flex-row gap-5 w-full">
-            <div id="Store-Info" class="flex flex-col rounded-3xl border border-custom-stroke p-5 gap-5 w-full animate-fade-in-up">
-                <div class="flex items-center w-full gap-5">
-                    <div class="flex items-center gap-[14px] w-full min-w-0">
-                        <div class="flex size-[60px] md:size-[86px] shrink-0 rounded-full bg-custom-background overflow-hidden">
-                            <img :src="store?.logo" class="size-full object-cover" alt="photo">
-                        </div>
-                        <div class="flex flex-col gap-[6px] w-full overflow-hidden">
-                            <div class="flex items-center gap-[6px] w-full overflow-hidden">
-                                <h1 class="font-bold text-lg leading-tight">
-                                    {{ store?.name }}
-                                </h1>
-                                <img src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0" alt="icon"
-                                    v-if="store?.is_verified">
-                            </div>
-                            <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                                <img src="@/assets/images/icons/box-grey.svg" class="size-5" alt="icon">
-                                {{ store?.product_count }} Total Products
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <hr class="border-custom-stroke">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="flex flex-col gap-[6px]">
-                        <p class="font-bold text-lg leading-tight">{{ store?.user?.name }}</p>
-                        <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                            <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon">
-                            Seller Name
-                        </p>
-                    </div>
-                    <div class="flex flex-col gap-[6px]">
-                        <p class="font-bold text-lg leading-tight">{{ store?.city }}</p>
-                        <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-                            <img src="@/assets/images/icons/location-grey.svg" class="size-5" alt="icon">
-                            Store Location
-                        </p>
-                    </div>
-                </div>
-                <div class="flex gap-4">
-                    <RouterLink v-if="user"
-                        :to="{ name: 'user.chat', params: { username: user.username }, query: { userId: store?.user?.id } }"
-                        class="flex items-center justify-center h-16 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue/10">
-                        <img src="@/assets/images/icons/messages-blue.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-bold text-custom-blue">Message</span>
-                    </RouterLink>
-                    <RouterLink v-else :to="{ name: 'auth.login' }"
-                        class="flex items-center justify-center h-16 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue/10">
-                        <img src="@/assets/images/icons/messages-blue.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-bold text-custom-blue">Message</span>
-                    </RouterLink>
-                </div>
+        <section class="flex flex-col gap-5 w-full">
+            <StoreHeader 
+                :store="store" 
+                :is-following="isFollowing"
+                @follow="handleFollow"
+                @unfollow="handleUnfollow"
+            />
+            
+            <div class="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+                <a href="#" class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all">
+                    <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover"
+                        alt="promo">
+                </a>
+                <a href="#" class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all">
+                    <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover"
+                        alt="promo">
+                </a>
             </div>
-            <a href="#" class="flex w-full md:w-[253px] shrink-0 overflow-hidden rounded-2xl">
-                <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover"
-                    alt="promo">
-            </a>
-            <a href="#" class="flex w-full md:w-[253px] shrink-0 overflow-hidden rounded-2xl">
-                <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover"
-                    alt="promo">
-            </a>
         </section>
-        <section class="flex flex-col gap-8 animate-fade-in-up delay-200">
-            <div id="Tab-Buttons" class="flex items-center gap-[38px] w-full pb-3 border-b border-custom-stroke">
-                <button class="font-bold text-xl text-custom-grey [&.active]:text-custom-blue active">Products</button>
-                <button class="font-bold text-xl text-custom-grey [&.active]:text-custom-blue">Testimony</button>
+        <section class="flex flex-col gap-6 md:gap-8 animate-fade-in-up delay-200">
+            <!-- Tabs Navigation -->
+            <div id="Tab-Buttons" class="sticky top-0 z-30 bg-custom-background/95 backdrop-blur-sm pt-4 pb-2 border-b border-custom-stroke flex items-center gap-8 w-full overflow-x-auto hide-scrollbar">
+                <button 
+                    @click="activeTab = 'home'"
+                    :class="['font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2', activeTab === 'home' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700']">
+                    Beranda
+                    <div v-if="activeTab === 'home'" class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
+                </button>
+                <button 
+                    @click="activeTab = 'products'"
+                     :class="['font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2', activeTab === 'products' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700']">
+                    Produk
+                    <div v-if="activeTab === 'products'" class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
+                </button>
+                <button 
+                    @click="activeTab = 'reviews'"
+                     :class="['font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2', activeTab === 'reviews' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700']">
+                    Ulasan
+                    <div v-if="activeTab === 'reviews'" class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
+                </button>
             </div>
-            <div id="Tab-Contents">
-                <section id="Products-Content" class="flex flex-col gap-6">
-                    <div class="flex flex-col gap-6">
-                        <h2 class="font-bold text-[32px]">Store Products</h2>
-                        <div class="flex items-center gap-3 md:gap-5 overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible scrollbar-hide">
-                            <button class="group">
-                                <div
-                                    class="flex items-center h-14 rounded-2xl p-4 gap-2 border border-custom-stroke bg-custom-black">
-                                    <span class="text-white leading-none">
-                                        Just Released 🙌🏻
-                                    </span>
-                                </div>
-                            </button>
-                            <button class="group">
-                                <div
-                                    class="flex items-center h-14 rounded-2xl p-4 gap-2 border border-custom-stroke group-[&.active]:border-custom-blue transition-300">
-                                    <img src="@/assets/images/icons/mobile-blue-transparent.svg"
-                                        class="flex size-6 shrink-0" alt="icon">
-                                    <span class="leading-none">
-                                        Gadget
-                                    </span>
-                                </div>
-                            </button>
-                            <button class="group">
-                                <div
-                                    class="flex items-center h-14 rounded-2xl p-4 gap-2 border border-custom-stroke group-[&.active]:border-custom-blue transition-300">
-                                    <img src="@/assets/images/icons/tree-blue-transparent.svg"
-                                        class="flex size-6 shrink-0" alt="icon">
-                                    <span class="leading-none">
-                                        Furniture
-                                    </span>
-                                </div>
-                            </button>
-                            <button class="group">
-                                <div
-                                    class="flex items-center h-14 rounded-2xl p-4 gap-2 border border-custom-stroke group-[&.active]:border-custom-blue transition-300">
-                                    <img src="@/assets/images/icons/lamp-blue-transparent.svg"
-                                        class="flex size-6 shrink-0" alt="icon">
-                                    <span class="leading-none">
-                                        electronic
-                                    </span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-9">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                            <template v-if="loadingProducts">
-                                <SkeletonProductCard v-for="i in 8" :key="i" />
-                            </template>
-                            <template v-else>
-                                <ProductCard v-for="product in products" :key="product.id" :item="product" />
-                            </template>
-                        </div>
-                        <button
-                            class="flex items-center w-fit h-14 rounded-[18px] py-4 px-6 gap-[10px] bg-custom-black mx-auto">
-                            <span class="font-medium text-white">Load More</span>
-                            <img src="@/assets/images/icons/arrow-down-white.svg" class="flex size-6 shrink-0"
-                                alt="icon">
-                        </button>
+
+            <div id="Tab-Contents" class="min-h-[500px]">
+                
+                <!-- Home Tab -->
+                <section v-if="activeTab === 'home'" class="flex flex-col gap-6">
+                    <h2 class="font-bold text-2xl">Featured Products</h2>
+                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+                        <template v-if="loadingProducts">
+                            <SkeletonProductCard v-for="i in 5" :key="i" />
+                        </template>
+                        <template v-else>
+                            <ProductCard v-for="product in products.slice(0, 5)" :key="product.id" :item="product" />
+                        </template>
                     </div>
                 </section>
+
+                <!-- Products Tab (With Sidebar) -->
+                <section v-if="activeTab === 'products'" class="flex flex-col md:flex-row gap-8">
+                    <!-- Sidebar Filter (Desktop) -->
+                    <aside class="hidden md:flex flex-col w-64 shrink-0 gap-6">
+                        <div class="rounded-2xl border border-custom-stroke bg-white p-5 flex flex-col gap-4 sticky top-24">
+                            <h3 class="font-bold text-lg">Etalase Toko</h3>
+                            <div class="flex flex-col gap-1">
+                                <button @click="handleCategoryFilter(null)"
+                                    :class="['text-left px-3 py-2 rounded-lg font-medium transition-colors', !selectedCategory ? 'bg-blue-50 text-custom-blue font-semibold' : 'text-custom-grey hover:bg-gray-50 hover:text-custom-black']">
+                                    Semua Produk
+                                </button>
+                                <hr class="my-2 border-gray-100">
+                                <button v-for="category in storeCategories" :key="category.id"
+                                    @click="handleCategoryFilter(category)"
+                                    :class="['text-left px-3 py-2 rounded-lg font-medium transition-colors', selectedCategory?.id === category.id ? 'bg-blue-50 text-custom-blue font-semibold' : 'text-custom-grey hover:bg-gray-50 hover:text-custom-black']">
+                                    {{ category.name }}
+                                    <span class="text-xs text-gray-400 ml-1">({{ category.products_count }})</span>
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Product Grid & Sorting -->
+                    <div class="flex flex-col w-full gap-6">
+                        <!-- Mobile Filter (Horizontal) -->
+                         <div class="md:hidden flex overflow-x-auto pb-2 -mx-4 px-4 gap-2 hide-scrollbar">
+                            <button @click="handleCategoryFilter(null)"
+                                :class="['whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors', !selectedCategory ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold' : 'border-custom-stroke bg-white text-custom-grey font-medium']">
+                                Semua
+                            </button>
+                             <button v-for="category in storeCategories" :key="category.id"
+                                @click="handleCategoryFilter(category)"
+                                :class="['whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors', selectedCategory?.id === category.id ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold' : 'border-custom-stroke bg-white text-custom-grey font-medium']">
+                                {{ category.name }}
+                            </button>
+                        </div>
+
+                        <!-- Sorting -->
+                         <div class="flex items-center justify-between">
+                            <p class="font-semibold text-custom-grey"><span class="text-custom-black font-bold">{{ products.length }}</span> Produk</p>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-custom-grey font-medium">Urutkan:</span>
+                                <select v-model="selectedSort" @change="handleSortChange" class="border-none bg-transparent font-bold text-custom-black focus:ring-0 cursor-pointer text-sm">
+                                    <option value="default">Paling Sesuai</option>
+                                    <option value="newest">Terbaru</option>
+                                    <option value="price_low">Harga Terendah</option>
+                                    <option value="price_high">Harga Tertinggi</option>
+                                    <option value="sold">Terlaris</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Products Grid -->
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <template v-if="loadingProducts">
+                               <SkeletonProductCard v-for="n in 8" :key="n" />
+                            </template>
+                            <ProductCard 
+                                v-else
+                                v-for="product in products" 
+                                :key="product.id" 
+                                :item="product"
+                            />            
+                            <div v-if="!loadingProducts && products.length === 0" class="col-span-full py-12 flex flex-col items-center justify-center text-center">
+                                <img src="@/assets/images/icons/box-2-grey.svg" class="w-24 h-24 mb-4 opacity-50" alt="Empty">
+                                <h3 class="font-bold text-gray-400 text-lg">Belum ada produk</h3>
+                                <p class="text-sm text-gray-400">Toko ini belum memiliki produk di etalase ini.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reviews Tab -->
+                <section v-if="activeTab === 'reviews'" class="flex flex-col gap-6">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <ReviewCard v-for="review in reviews" :key="review.id" :review="review" />
+                        
+                        <div v-if="reviews.length === 0" class="col-span-full py-12 flex flex-col items-center justify-center text-center">
+                            <img src="@/assets/images/icons/message-text-grey.svg" class="w-24 h-24 mb-4 opacity-50" alt="Empty">
+                            <h3 class="font-bold text-gray-400 text-lg">Belum ada ulasan</h3>
+                            <p class="text-sm text-gray-400">Toko ini belum memiliki ulasan dari pembeli.</p>
+                        </div>
+                    </div>
+                </section>
+
             </div>
         </section>
     </main>
