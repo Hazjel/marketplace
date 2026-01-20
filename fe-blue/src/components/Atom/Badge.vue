@@ -5,7 +5,7 @@ const props = defineProps({
     variant: {
         type: String,
         default: 'primary',
-        validator: (value) => ['primary', 'success', 'warning', 'danger', 'info', 'neutral'].includes(value)
+        validator: (value) => ['primary', 'success', 'warning', 'danger', 'info', 'neutral', 'orange'].includes(value)
     },
     // Light variant (bg-color/10 text-color) vs Solid variant (bg-color text-white)
     type: {

@@ -95,6 +95,16 @@ class TransactionController extends Controller implements HasMiddleware
         }
     }
 
+    public function getChartData()
+    {
+        try {
+            $data = $this->transactionRepository->getChartData();
+            return ResponseHelper::jsonResponse(true, 'success', $data, 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -348,13 +358,5 @@ class TransactionController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
-    public function getChartData()
-    {
-        try {
-            $data = $this->transactionRepository->getChartData();
-            return ResponseHelper::success($data);
-        } catch (\Exception $e) {
-            return ResponseHelper::error($e->getMessage(), 500);
-        }
-    }
+
 }

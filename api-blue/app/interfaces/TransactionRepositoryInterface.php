@@ -11,6 +11,7 @@ interface TransactionRepositoryInterface
     public function getAllPaginated(?string $search, ?int $rowPerPage);
     public function getTotalRevenue();
     public function getTotalAdminFee();
+    public function getChartData();
     public function getById(string $id);
     public function getByCode(string $code);
     public function create(array $data);

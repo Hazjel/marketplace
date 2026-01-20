@@ -73,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::apiResource('product', ProductController::class);
 
     // Transaction routes - custom routes BEFORE resource
+    Route::get('transaction/chart-data', [TransactionController::class, 'getChartData']);
     Route::get('transaction/all/paginated', [TransactionController::class, 'getAllPaginated']);
     Route::get('transaction/code/{code}', [TransactionController::class, 'showByCode']);
     Route::post('transaction/{id}/complete', [TransactionController::class, 'complete']);
