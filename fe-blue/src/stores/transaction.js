@@ -1,5 +1,6 @@
 import { handleError } from "@/helpers/errorHelper";
 import { axiosInstance } from "@/plugins/axios";
+import { useAuthStore } from "@/stores/auth";
 import { defineStore } from "pinia";
 
 export const useTransactionStore = defineStore("transaction", {
@@ -18,9 +19,13 @@ export const useTransactionStore = defineStore("transaction", {
     actions: {
         async fetchTransactionsPaginated(params) {
             this.loading = true;
+            const authStore = useAuthStore();
+            const mode = authStore.activeMode;
 
             try {
-                const response = await axiosInstance.get(`transaction/all/paginated`, { params });
+                // Merge params with mode
+                const queryParams = { ...params, mode };
+                const response = await axiosInstance.get(`transaction/all/paginated`, { params: queryParams });
 
                 this.transactions = response.data.data.data
                 this.meta = response.data.data.meta

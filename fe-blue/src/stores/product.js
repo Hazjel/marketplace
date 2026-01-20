@@ -5,6 +5,7 @@ import router from "@/router";
 
 export const useProductStore = defineStore("product", {
     state: () => ({
+        storeCategories: [],
         products: [],
         meta: {
             current_page: 1,
@@ -29,6 +30,19 @@ export const useProductStore = defineStore("product", {
                 this.error = handleError(error);
             } finally {
                 this.loading = false;
+            }
+        },
+
+        async fetchCategoriesByStore(username) {
+            this.loading = true
+            try {
+                const response = await axiosInstance.get(`store/username/${username}/categories`)
+                this.storeCategories = response.data.data
+            } catch (error) {
+                console.error('Fetch Store Categories Error', error)
+                this.error = handleError(error)
+            } finally {
+                this.loading = false
             }
         },
 

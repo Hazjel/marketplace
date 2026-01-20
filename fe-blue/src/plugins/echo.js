@@ -28,4 +28,6 @@ const echo = new Echo({
     },
 });
 
+window.Echo = echo;
+
 export default echo;
