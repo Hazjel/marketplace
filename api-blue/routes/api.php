@@ -39,6 +39,9 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('store/{id}/verified', [StoreController::class, 'updateVerifiedStatus']);
     Route::get('store/username/{store}', [StoreController::class, 'showByUsername']);
     Route::get('my-store', [StoreController::class, 'showByUser']);
+    Route::post('store/{id}/follow', [StoreController::class, 'followStore']);
+    Route::post('store/{id}/unfollow', [StoreController::class, 'unfollowStore']);
+    Route::get('store/{id}/follow-status', [StoreController::class, 'checkFollowStatus']);
     Route::apiResource('store', StoreController::class);
 
     // Store Balance routes - custom routes BEFORE resource
@@ -106,6 +109,8 @@ Route::get('product/slug/{slug}', [ProductController::class, 'showBySlug']);
 
 Route::get('store', [StoreController::class, 'index']);
 Route::get('store/username/{store}', [StoreController::class, 'showByUsername']);
+Route::get('store/username/{username}/categories', [StoreController::class, 'getCategories']);
+Route::get('store/username/{username}/reviews', [StoreController::class, 'getReviews']);
 
 // Auth routes
 Route::post('register', [AuthController::class, 'register']);

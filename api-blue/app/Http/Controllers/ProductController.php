@@ -66,10 +66,12 @@ class ProductController extends Controller implements HasMiddleware
             'min_rating' => 'nullable|numeric|min:0|max:5',
             'stock_status' => 'nullable|string', 
             'created_since' => 'nullable|integer', 
+            'sort_by' => 'nullable|string|in:price,created_at,sold',
+            'sort_direction' => 'nullable|string|in:asc,desc',
         ]);
 
         try {
-            $filters = $request->only(['min_price', 'max_price', 'condition', 'city', 'min_rating', 'stock_status', 'created_since']);
+            $filters = $request->only(['min_price', 'max_price', 'condition', 'city', 'min_rating', 'stock_status', 'created_since', 'sort_by', 'sort_direction']);
             $products = $this->productRepository->getAllPaginated($validated['search'] ?? null, $validated['store_id'] ?? null, $validated['product_category_id'] ?? null, $validated['row_per_page'], $filters);
             $totalSold = $this->productRepository->getTotalSold();
             // Log::info("CONTROLLER debug totalSold: " . $totalSold);

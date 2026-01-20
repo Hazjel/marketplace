@@ -81,6 +81,22 @@ class ProductRepository implements ProductRepositoryInterface
 
         if ($random) {
             $query->inRandomOrder();
+        } elseif (!empty($filters['sort_by'])) {
+            $sortDirection = $filters['sort_direction'] ?? 'desc';
+            
+            if ($filters['sort_by'] === 'price') {
+                $query->orderBy('price', $sortDirection);
+            } elseif ($filters['sort_by'] === 'created_at') {
+                $query->orderBy('created_at', $sortDirection);
+            } elseif ($filters['sort_by'] === 'sold') {
+                $query->withSum(['transactionDetails' => function ($q) {
+                    $q->whereHas('transaction', function ($t) {
+                        $t->where('payment_status', 'paid');
+                    });
+                }], 'qty')->orderBy('transaction_details_sum_qty', $sortDirection);
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
         if ($execute) {
@@ -118,14 +134,14 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = Product::where('id', $id)->with('productImages', 'productReviews');
+        $query = Product::where('id', $id)->with(['productImages', 'productReviews.user', 'productReviews.attachments']);
 
         return $query->first();
     }
 
     public function getBySlug(string $slug)
     {
-        $query = Product::where('slug', $slug)->with('productImages', 'productReviews');
+        $query = Product::where('slug', $slug)->with(['productImages', 'productReviews.user', 'productReviews.attachments']);
 
         return $query->first();
     }

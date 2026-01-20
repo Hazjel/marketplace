@@ -140,6 +140,22 @@ class StoreController extends Controller implements HasMiddleware
         }
     }
 
+    public function getCategories(string $username)
+    {
+        try {
+            $store = $this->storeRepository->getByUsername($username);
+
+            if (!$store) {
+                return ResponseHelper::jsonResponse(false, 'Store not found', null, 404);
+            }
+
+            $categories = $this->storeRepository->getCategories($store->id);
+            return ResponseHelper::jsonResponse(true, 'Store Categories Fetched', \App\Http\Resources\ProductCategoryResource::collection($categories), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
     public function updateVerifiedStatus(string $id)
     {
         try {
@@ -247,12 +263,64 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Toko Berhasil Dibuat!', [
                 'store' => new StoreResource($store),
-                'user' => new \App\Http\Resources\UserResource($user), // Wrap in Resource
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+
+    public function followStore(string $id)
+    {
+        try {
+            $user = Auth::user();
+            $this->storeRepository->follow($id, $user->id);
+            return ResponseHelper::jsonResponse(true, 'Berhasil mengikuti toko', null, 200);
+        } catch (\Exception $e) {
+             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    public function unfollowStore(string $id)
+    {
+         try {
+            $user = Auth::user();
+            $this->storeRepository->unfollow($id, $user->id);
+            return ResponseHelper::jsonResponse(true, 'Berhasil berhenti mengikuti toko', null, 200);
+        } catch (\Exception $e) {
+             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    public function checkFollowStatus(string $id)
+    {
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                 return ResponseHelper::jsonResponse(true, 'Not Logged In', ['is_following' => false], 200);
+            }
+            $status = $this->storeRepository->checkFollowStatus($id, $user->id);
+            return ResponseHelper::jsonResponse(true, 'Check Success', ['is_following' => $status], 200);
+        } catch (\Exception $e) {
+             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getReviews(string $username)
+    {
+        try {
+            $store = $this->storeRepository->getByUsername($username);
+            if (!$store) {
+                 return ResponseHelper::jsonResponse(false, 'Store not found', null, 404);
+            }
+
+            $reviews = $this->storeRepository->getReviews($store->id);
+            return ResponseHelper::jsonResponse(true, 'Review Toko Berhasil Diambil', \App\Http\Resources\PaginateResource::make($reviews, \App\Http\Resources\ProductReviewResource::class), 200);
+
+        } catch (\Exception $e) {
+             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 }

@@ -63,6 +63,13 @@ class StoreRepository implements StoreRepositoryInterface
         return $query->first();
     }
 
+    public function getCategories(string $id)
+    {
+        return \App\Models\ProductCategory::whereHas('products', function ($query) use ($id) {
+            $query->where('store_id', $id);
+        })->get();
+    }
+
     public function getByUsername(string $username)
     {
         $query = Store::where('username', $username);
@@ -180,5 +187,41 @@ class StoreRepository implements StoreRepositoryInterface
 
             throw new Exception($e->getMessage());
         }
+    }
+
+    public function follow(string $storeId, string $userId)
+    {
+        $store = Store::find($storeId);
+        if (!$store) throw new Exception("Store not found");
+
+        $store->followers()->syncWithoutDetaching([$userId]);
+        return true;
+    }
+
+    public function unfollow(string $storeId, string $userId)
+    {
+        $store = Store::find($storeId);
+        if (!$store) throw new Exception("Store not found");
+
+        $store->followers()->detach($userId);
+        return true;
+    }
+
+    public function checkFollowStatus(string $storeId, string $userId)
+    {
+        $store = Store::find($storeId);
+        if (!$store) return false;
+
+        return $store->followers()->where('user_id', $userId)->exists();
+    }
+
+    public function getReviews(string $storeId, ?int $limit = 10)
+    {
+        return \App\Models\ProductReview::whereHas('product', function ($query) use ($storeId) {
+            $query->where('store_id', $storeId);
+        })
+        ->with(['user', 'product', 'attachments'])
+        ->orderBy('created_at', 'desc')
+        ->paginate($limit);
     }
 }
