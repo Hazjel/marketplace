@@ -86,7 +86,48 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $query->sum('admin_fee');
     }
 
+    public function getChartData()
+    {
+        $storeId = null;
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $storeId = auth()->user()->store?->id;
+        }
 
+        if (!$storeId) return [];
+
+        // Generate last 7 days period ending today (inclusive)
+        $endDate = now()->endOfDay();
+        $startDate = now()->subDays(6)->startOfDay();
+        $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+
+        // Fetch data based on date range
+        $transactions = Transaction::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('SUM(grand_total) as total_revenue'),
+            DB::raw('COUNT(*) as total_transaction')
+        )
+        ->where('store_id', $storeId)
+        ->where('payment_status', 'paid')
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->groupBy('date')
+        ->orderBy('date', 'ASC')
+        ->get();
+
+        // Fill missing dates with 0
+        $data = [];
+        foreach ($period as $date) {
+            $dateString = $date->format('Y-m-d');
+            $record = $transactions->firstWhere('date', $dateString);
+            
+            $data[] = [
+                'date' => $dateString,
+                'total_revenue' => $record ? (int)$record->total_revenue : 0,
+                'total_transaction' => $record ? (int)$record->total_transaction : 0
+            ];
+        }
+
+        return $data;
+    }
 
     public function getById(string $id)
     {
@@ -489,42 +530,5 @@ class TransactionRepository implements TransactionRepositoryInterface
         }
     }
 
-    public function getChartData()
-    {
-        $storeId = null;
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $storeId = auth()->user()->store?->id;
-        }
 
-        if (!$storeId) return [];
-
-        // Get last 7 days metrics
-        $startDate = now()->subDays(6)->startOfDay();
-        $endDate = now()->endOfDay();
-
-        $transactions = Transaction::where('store_id', $storeId)
-            ->where('payment_status', 'paid')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw('DATE(created_at) as date, SUM(grand_total) as total, COUNT(*) as count')
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get();
-
-        // Fill missing dates with 0
-        $data = [];
-        $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
-
-        foreach ($period as $date) {
-            $dateString = $date->format('Y-m-d');
-            $record = $transactions->firstWhere('date', $dateString);
-            
-            $data[] = [
-                'date' => $date->format('d M'), // Format: 01 Jan
-                'total' => $record ? (int)$record->total : 0,
-                'count' => $record ? (int)$record->count : 0
-            ];
-        }
-
-        return $data;
-    }
 }

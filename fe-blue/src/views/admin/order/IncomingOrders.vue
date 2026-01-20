@@ -25,13 +25,13 @@ const serverOptions = ref({
 });
 
 const tabs = [
-    { label: 'All Orders', value: 'all' },
-    { label: 'Unpaid', value: 'unpaid' },
-    { label: 'New Orders', value: 'paid' }, // Paid but not processed
-    { label: 'Processing', value: 'processing' },
-    { label: 'Delivering', value: 'delivering' },
-    { label: 'Completed', value: 'completed' },
-    { label: 'Cancelled', value: 'cancelled' },
+    { label: 'Semua', value: 'all' },
+    { label: 'Belum Dibayar', value: 'unpaid' },
+    { label: 'Pesanan Baru', value: 'paid' }, 
+    { label: 'Siap Dikirim', value: 'processing' },
+    { label: 'Dalam Pengiriman', value: 'delivering' },
+    { label: 'Selesai', value: 'completed' },
+    { label: 'Dibatalkan', value: 'cancelled' },
 ];
 
 const fetchData = async () => {
@@ -193,16 +193,21 @@ watch(error, (val) => {
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-2 mt-auto">
-                        <img src="@/assets/images/icons/location-grey.svg" class="w-4 h-4" alt="">
-                        <p class="text-sm text-custom-grey">{{ t.city }}, {{ t.postal_code }}</p>
+                    <div class="flex items-center gap-4 mt-auto pt-2 border-t border-dashed border-gray-200">
+                        <div class="flex items-center gap-2">
+                            <img src="@/assets/images/icons/location-grey.svg" class="w-4 h-4" alt="">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold text-custom-black uppercase">{{ t.shipping }} - {{ t.shipping_type }}</span>
+                                <span class="text-xs text-custom-grey">{{ t.city }}, {{ t.postal_code }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Customer & Actions -->
                 <div class="flex flex-col justify-between items-end gap-4 min-w-[200px]">
                     <div class="text-right">
-                        <p class="text-sm text-custom-grey">Total Amount</p>
+                        <p class="text-sm text-custom-grey">Total Belanja</p>
                         <p class="font-bold text-xl text-custom-blue">{{ formatRupiah(t.grand_total) }}</p>
                         <p class="text-xs text-custom-grey mt-1">{{ formatDate(t.created_at) }}</p>
                     </div>
@@ -211,10 +216,10 @@ watch(error, (val) => {
                         <!-- Actions for New Paid Orders -->
                         <template v-if="t.payment_status === 'paid' && t.delivery_status === 'pending'">
                              <button @click="handleAccept(t.id)" class="px-6 py-3 rounded-full bg-custom-black text-white font-semibold text-sm hover:bg-black/80 transition-300">
-                                Accept Order
+                                Terima Pesanan
                             </button>
                             <button @click="handleReject(t.id)" class="px-6 py-3 rounded-full bg-gray-100 text-custom-red font-semibold text-sm hover:bg-red-50 transition-300">
-                                Reject Order
+                                Tolak Pesanan
                             </button>
                         </template>
 
@@ -226,9 +231,9 @@ watch(error, (val) => {
                         </template>
                         
                         <!-- Tracking Info -->
-                        <div v-if="t.tracking_number" class="text-right bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300">
-                             <p class="text-xs text-custom-grey">Tracking Number</p>
-                             <p class="font-bold font-mono">{{ t.tracking_number }}</p>
+                        <div v-if="t.tracking_number" class="text-right bg-blue-50 p-3 rounded-xl border border-dashed border-blue-200">
+                             <p class="text-xs text-custom-blue font-semibold">No. Resi</p>
+                             <p class="font-bold font-mono text-custom-black">{{ t.tracking_number }}</p>
                         </div>
                     </div>
                 </div>
