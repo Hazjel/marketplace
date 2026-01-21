@@ -58,7 +58,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = Store::where('id', $id);
+        $query = Store::where('id', $id)->withCount('followers');
 
         return $query->first();
     }
@@ -72,7 +72,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getByUsername(string $username)
     {
-        $query = Store::where('username', $username);
+        $query = Store::where('username', $username)->withCount('followers');
 
         return $query->first();
     }
