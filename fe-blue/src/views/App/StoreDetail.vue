@@ -96,6 +96,7 @@ const handleFollow = async () => {
     try {
         await followStore(store.value.id)
         isFollowing.value = true
+        store.value.followers_count = (store.value.followers_count || 0) + 1
     } catch (error) {
         console.error('Follow failed', error)
     }
@@ -105,6 +106,7 @@ const handleUnfollow = async () => {
     try {
         await unfollowStore(store.value.id)
         isFollowing.value = false
+        store.value.followers_count = Math.max(0, (store.value.followers_count || 0) - 1)
     } catch (error) {
         console.error('Unfollow failed', error)
     }
