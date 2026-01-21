@@ -1,6 +1,8 @@
 <script setup>
 import { VisXYContainer, VisLine, VisAxis, VisScatter, VisTooltip, VisCrosshair } from '@unovis/vue'
+import { Scatter } from '@unovis/ts'
 import { ref, computed } from 'vue'
+import { formatRupiah } from '@/helpers/format'
 
 const props = defineProps({
   data: {
@@ -26,6 +28,17 @@ const yTickFormat = (d) => {
     return d
 }
 
+const triggers = {
+    [Scatter.selectors.point]: (d) => {
+        return `
+            <div style="background: white; padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #E5E7EB;">
+                <p style="color: #6B7280; font-size: 12px; margin-bottom: 4px;">Pendapatan</p>
+                <p style="color: #111827; font-weight: bold; font-size: 14px;">Rp ${formatRupiah(d.total_revenue)}</p>
+            </div>
+        `
+    }
+}
+
 </script>
 
 <template>
@@ -36,7 +49,7 @@ const yTickFormat = (d) => {
         <VisAxis type="x" :tickFormat="tickFormat" :gridLine="false" />
         <VisAxis type="y" :tickFormat="yTickFormat" />
         <VisCrosshair />
-        <VisTooltip />
+        <VisTooltip :triggers="triggers" />
     </VisXYContainer>
   </div>
 </template>

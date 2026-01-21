@@ -20,7 +20,7 @@
     const { fetchStoreBalanceByStore } = storeBalanceStore
 
     const withdrawalStore = useWithdrawalStore()
-    const { loading: loadingWithdrawal, error } = storeToRefs(withdrawalStore)
+    const { loading: loadingWithdrawal, error, success } = storeToRefs(withdrawalStore)
     const { createWithdrawal } = withdrawalStore
 
     const fetchStoreBalance = async () => {
@@ -30,11 +30,26 @@
         withdrawal.value.store_balance_id = response.id
     }
 
+    import { useToast } from "vue-toastification";
+
+    const toast = useToast();
+
     const handleSubmit = async () => {
+        const amount = parseRupiah(withdrawal.value.amount)
+        if (amount > storeBalance.value.balance) {
+            toast.error("Saldo tidak mencukupi untuk melakukan penarikan dana.")
+            return
+        }
+
         await createWithdrawal({
             ...withdrawal.value,
-            amount: parseRupiah(withdrawal.value.amount)
+            amount: amount
         })
+
+        if(success.value) {
+            toast.success("Permintaan penarikan berhasil dibuat")
+             // Redirect or reset form handled by parent/router usually, but good to have toast.
+        }
     }
 
     watch(() => withdrawal.value.amount, (newAmount) => {

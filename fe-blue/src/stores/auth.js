@@ -82,9 +82,11 @@ export const useAuthStore = defineStore("auth", {
             } catch (error) {
                 if (error.response?.status === 401) {
                     Cookies.remove("token");
-                    throw new Error("Unauthorized");
+                    this.user = null;
+                    return null;
                 }
                 this.error = handleError(error);
+                return null;
             } finally {
                 this.loading = false;
             }

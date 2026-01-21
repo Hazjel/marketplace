@@ -170,10 +170,20 @@ const emptyStateText = computed(() => {
 
 const debounceFetchData = debounce(fetchData, 2000)
 
-const getTransactionStatusClass = (status) => {
-    switch (status) {
-        case 'pending':
-            return 'bg-custom-yellow text-[#544607]'
+const resolveStatusStyle = (transaction) => {
+    // Prioritize Payment Failures
+    const failureStatuses = ['expire', 'cancel', 'deny', 'failure', 'failed'];
+    if (failureStatuses.includes(transaction.payment_status)) {
+        return 'bg-red-100 text-red-600';
+    }
+
+    // Pending Logic
+    if (transaction.payment_status === 'pending') {
+         return 'bg-custom-yellow text-[#544607]';
+    }
+
+    // If paid, check delivery status
+    switch (transaction.delivery_status) {
         case 'processing':
             return 'bg-custom-blue/10 text-custom-blue'
         case 'delivering':
@@ -183,6 +193,19 @@ const getTransactionStatusClass = (status) => {
         default:
             return 'bg-custom-grey/10 text-custom-grey'
     }
+}
+
+const resolveStatusLabel = (transaction) => {
+    const failureStatuses = ['expire', 'cancel', 'deny', 'failure', 'failed'];
+    if (failureStatuses.includes(transaction.payment_status)) {
+        return 'Failed';
+    }
+
+    if (transaction.payment_status === 'pending') {
+        return 'Pending';
+    }
+
+    return transaction.delivery_status;
 }
 
 onMounted(async () => {
@@ -265,8 +288,8 @@ watch(error, (value) => {
                                 </div>
                             </div>
                             <span class="rounded-full px-3 py-1 text-xs font-bold capitalize"
-                                :class="getTransactionStatusClass(transaction.delivery_status)">
-                                {{ transaction.delivery_status }}
+                                :class="resolveStatusStyle(transaction)">
+                                {{ resolveStatusLabel(transaction) }}
                             </span>
                         </div>
 
