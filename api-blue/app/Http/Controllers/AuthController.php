@@ -24,6 +24,25 @@ class AuthController extends Controller
         try {
             $user = $this->authRepository->register($request);
 
+            event(new \Illuminate\Auth\Events\Registered($user));
+
+            \Illuminate\Support\Facades\Log::info('Register Debug: Environment is ' . app()->environment());
+
+            if (app()->isLocal()) {
+                \Illuminate\Support\Facades\Log::info('Register Debug: Attempting to verify email for ' . $user->email);
+                
+                // Fix: Unset token to avoid "Unknown column 'token'" error during save
+                $token = $user->token; 
+                unset($user->token); 
+
+                $user->markEmailAsVerified();
+                
+                // Restore token for response
+                $user->token = $token; 
+
+                \Illuminate\Support\Facades\Log::info('Register Debug: Verification called. Verified at: ' . $user->email_verified_at);
+            }
+
             return ResponseHelper::jsonResponse(true, 'Registrasi Berhasil', new UserResource($user), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);

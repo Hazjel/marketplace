@@ -102,15 +102,8 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
 
             $withdrawal->save();
 
-            $storeBalanceHistoryRepository = new StoreBalanceHistoryRepository();
-            $storeBalanceHistoryRepository->create([
-                'store_balance_id' => $withdrawal->store_balance_id,
-                'type' => 'withdraw',
-                'reference_id' => $withdrawal->id,
-                'reference_type' => Withdrawal::class,
-                'amount' => -$withdrawal->amount,
-                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number} disetujui"
-            ]);
+            // Note: Money was already deducted at creation (WithdrawalRepository::create)
+            // We do NOT create another history entry here to avoid double deduction.
 
             DB::commit();
 
