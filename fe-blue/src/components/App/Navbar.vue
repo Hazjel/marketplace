@@ -226,7 +226,7 @@ onUnmounted(() => {
                                         <img src="@/assets/images/icons/profile-circle-grey.svg"
                                             class="flex size-6 shrink-0" alt="icon">
                                     </RouterLink>
-                                    <RouterLink v-if="user && user.role === 'buyer'"
+                                    <RouterLink v-if="user && (user.role === 'buyer' || user.role === 'store')"
                                         :to="{ name: 'user.my-transaction', params: { username: user.username } }"
                                         class="flex w-full items-center justify-between"
                                         @click="showDropdownProfile = false">

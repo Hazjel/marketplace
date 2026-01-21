@@ -82,7 +82,7 @@ const handleSortChange = () => {
     const params = {
         limit: 12,
         store_id: store.value.id,
-        category_id: selectedCategory.value ? selectedCategory.value.id : null,
+        product_category_id: selectedCategory.value ? selectedCategory.value.id : null,
         ...sortParams
     };
 
@@ -118,7 +118,7 @@ const handleCategoryFilter = (category) => {
     const params = {
         limit: 12,
         store_id: store.value.id,
-        category_id: category ? category.id : null,
+        product_category_id: category ? category.id : null,
     };
 
     fetchProducts(params);

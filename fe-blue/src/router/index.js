@@ -536,6 +536,7 @@ router.beforeEach(async (to, from, next) => {
       try {
         if (!authStore.user) {
           await authStore.checkAuth()
+          if (!authStore.user) throw new Error("Unauthorized")
         }
 
         const userPermissions = authStore.user?.permissions || []
