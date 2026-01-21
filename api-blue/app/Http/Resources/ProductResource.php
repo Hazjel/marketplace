@@ -29,6 +29,10 @@ class ProductResource extends JsonResource
             'total_sold' => $this->total_sold,
             'created_at' => $this->created_at,
             'product_images' => ProductImageResource::collection($this->whenLoaded('productImages')),
+            'thumbnail' => $this->whenLoaded('productImages', function () {
+                $img = $this->productImages->where('is_thumbnail', 1)->first() ?? $this->productImages->first();
+                return $img ? asset('storage/' . $img->image) : null;
+            }),
             'product_reviews' => ProductReviewResource::collection($this->whenLoaded('productReviews'))
         ];
     }

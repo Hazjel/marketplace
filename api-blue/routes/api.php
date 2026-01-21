@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('logout', [AuthController::class, 'logout']);
 
     // Register Store (Upgrade Role)
-    Route::post('register-store', [StoreController::class, 'registerStore']);
+    Route::post('register-store', [StoreController::class, 'registerStore'])->middleware('verified');
 
     // User routes - custom routes BEFORE resource
     Route::get('user/all/paginated', [UserController::class, 'getAllPaginated']);
@@ -81,8 +81,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('transaction/code/{code}', [TransactionController::class, 'showByCode']);
     Route::post('transaction/{id}/complete', [TransactionController::class, 'complete']);
     Route::post('transaction/{id}/check-status', [TransactionController::class, 'checkPaymentStatus']);
-    Route::post('transaction', [TransactionController::class, 'store']);
-    Route::apiResource('transaction', TransactionController::class);
+    Route::middleware(['throttle:10,1', 'verified'])->post('transaction', [TransactionController::class, 'store']);
+    Route::apiResource('transaction', TransactionController::class)->except(['store']);
 
     // Product Review
     Route::get('product-review/all/paginated', [ProductReviewController::class, 'getAllPaginated']);
@@ -113,8 +113,19 @@ Route::get('store/username/{username}/categories', [StoreController::class, 'get
 Route::get('store/username/{username}/reviews', [StoreController::class, 'getReviews']);
 
 // Auth routes
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
+Route::middleware('throttle:6,1')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+});
+
+// Verification Routes
+Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\VerificationController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+
+Route::post('/email/resend', [\App\Http\Controllers\VerificationController::class, 'resend'])
+    ->middleware(['auth:sanctum', 'throttle:6,1'])
+    ->name('verification.send');
 Route::middleware(['web'])->group(function () {
     Route::get('auth/google/redirect', [\App\Http\Controllers\GoogleAuthController::class, 'redirect']);
     Route::get('auth/google/callback', [\App\Http\Controllers\GoogleAuthController::class, 'callback']);
@@ -122,3 +133,6 @@ Route::middleware(['web'])->group(function () {
 
 // Midtrans callback
 Route::post('/midtrans-callback', [MidtransController::class, 'callback']);
+
+// Logistics Webhook (Simulation - RajaOngkir/Komerce)
+Route::post('/logistics/webhook', [\App\Http\Controllers\LogisticsController::class, 'webhook']);
