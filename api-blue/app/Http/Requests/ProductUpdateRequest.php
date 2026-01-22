@@ -39,6 +39,13 @@ class ProductUpdateRequest extends FormRequest
             'product_images' => 'nullable|array',
             'product_images.*.image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'product_images.*.is_thumbnail' => 'required|boolean',
+            'variants' => 'nullable|array',
+            'variants.*.id' => 'nullable|string',
+            'variants.*.name' => 'required_with:variants|string',
+            'variants.*.price' => 'required_with:variants|numeric|min:0',
+            'variants.*.stock' => 'required_with:variants|integer|min:0',
+            'variants.*.sku' => 'nullable|string',
+            'variants.*.variant_attributes' => 'nullable|array',
         ];
     }
 

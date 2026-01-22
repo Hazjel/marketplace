@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\ProductRepositoryInterface;
 use App\Models\Product;
+use App\Models\ProductVariantMongo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Interfaces\ProductImageRepositoryInterface;
@@ -134,15 +135,14 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = Product::where('id', $id)->with(['productImages', 'productReviews.user', 'productReviews.attachments']);
+        $query = Product::where('id', $id)->with(['productImages', 'variants', 'productReviews.user', 'productReviews.attachments']);
 
         return $query->first();
     }
 
     public function getBySlug(string $slug)
     {
-        $query = Product::where('slug', $slug)->with(['productImages', 'productReviews.user', 'productReviews.attachments']);
-
+        $query = Product::where('slug', $slug)->with(['productImages', 'variants', 'productReviews.user', 'productReviews.attachments']);
         return $query->first();
     }
     public function create(array $data)
@@ -161,6 +161,21 @@ class ProductRepository implements ProductRepositoryInterface
             $product->weight = $data['weight'];
             $product->stock = $data['stock'];
             $product->save();
+
+            if (!empty($data['variants'])) {
+                 $product->has_variants = true;
+                 $product->save();
+ 
+                 foreach ($data['variants'] as $variant) {
+                     $product->variants()->create([
+                         'name' => $variant['name'],
+                         'price' => $variant['price'],
+                         'stock' => $variant['stock'],
+                         'sku' => $variant['sku'] ?? null,
+                         'variant_attributes' => $variant['variant_attributes'] ?? [],
+                     ]);
+                 }
+            }
 
             $productImageRepository = new ProductImageRepository;
             if (isset($data['product_images'])) {
@@ -199,6 +214,51 @@ class ProductRepository implements ProductRepositoryInterface
             $product->price = $data['price'];
             $product->weight = $data['weight'];
             $product->stock = $data['stock'];
+            
+            // Sync Variants (Mongo)
+            if (isset($data['variants'])) {
+                // Get existing IDs from request (if any)
+                $sentIds = array_filter(array_column($data['variants'], 'id'));
+
+                // Delete variants not in request
+                if (!empty($sentIds)) {
+                     $product->variants()->whereNotIn('id', $sentIds)->delete();
+                } else {
+                     // If no IDs sent (all new, or empty list), delete ALL existing variants to prevent orphans
+                     $product->variants()->delete();
+                }
+
+                foreach ($data['variants'] as $variant) {
+                    if (isset($variant['id']) && $variant['id']) {
+                        $v = ProductVariantMongo::find($variant['id']);
+                        if ($v) {
+                            $v->update([
+                                'name' => $variant['name'],
+                                'price' => $variant['price'],
+                                'stock' => $variant['stock'],
+                                'sku' => $variant['sku'] ?? null,
+                                'variant_attributes' => $variant['variant_attributes'] ?? [],
+                            ]);
+                        }
+                    } else {
+                         // Only create if valid data present
+                         if ($variant['name']) {
+                            $product->variants()->create([
+                                'product_id' => (string) $product->id, 
+                                'name' => $variant['name'],
+                                'price' => $variant['price'],
+                                'stock' => $variant['stock'],
+                                'sku' => $variant['sku'] ?? null,
+                                'variant_attributes' => $variant['variant_attributes'] ?? [],
+                            ]);
+                         }
+                    }
+                }
+                
+                // Update has_variants flag based on actual data presence
+                $product->has_variants = count($data['variants']) > 0;
+            }
+            
             $product->save();
 
             $productImageRepository = new ProductImageRepository;

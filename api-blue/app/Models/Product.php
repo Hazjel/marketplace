@@ -6,9 +6,11 @@ use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use MongoDB\Laravel\Eloquent\HybridRelations;
+
 class Product extends Model
 {
-    use UUID, HasFactory;
+    use UUID, HasFactory, HybridRelations;
 
     protected $fillable = [
         'store_id',
@@ -19,12 +21,15 @@ class Product extends Model
         'condition',
         'price',
         'weight',
-        'stock'
+        'stock',
+        'has_variants'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
-        'weight' => 'decimal:2'
+        'weight' => 'decimal:2',
+        'stock' => 'integer',
+        'has_variants' => 'boolean',
     ];
 
     public function scopeSearch($query, $search)
@@ -55,6 +60,11 @@ class Product extends Model
     public function productReviews()
     {
         return $this->hasMany(ProductReview::class);
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(ProductVariantMongo::class, 'product_id', 'id');
     }
 
     public function getTotalSoldAttribute()

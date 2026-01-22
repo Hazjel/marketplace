@@ -17,8 +17,11 @@ class UpdateLastSeen
     {
         if (auth()->check()) {
             $user = auth()->user();
-            $user->last_seen_at = now();
-            $user->saveQuietly(); // Use saveQuietly to avoid triggering events/updates timestamps if not needed
+            // Optimization: Only update if last update was > 5 minutes ago
+            if (!$user->last_seen_at || $user->last_seen_at->diffInMinutes(now()) >= 5) {
+                $user->last_seen_at = now();
+                $user->saveQuietly();
+            }
         }
 
         return $next($request);
