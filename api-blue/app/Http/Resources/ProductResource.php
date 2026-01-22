@@ -33,7 +33,9 @@ class ProductResource extends JsonResource
                 $img = $this->productImages->where('is_thumbnail', 1)->first() ?? $this->productImages->first();
                 return $img ? asset('storage/' . $img->image) : null;
             }),
-            'product_reviews' => ProductReviewResource::collection($this->whenLoaded('productReviews'))
+            'product_reviews' => ProductReviewResource::collection($this->whenLoaded('productReviews')),
+            'has_variants' => $this->has_variants,
+            'variants' => $this->variants ? ProductVariantResource::collection($this->variants) : [],
         ];
     }
 }
