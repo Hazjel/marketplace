@@ -188,10 +188,10 @@ onMounted(async () => {
 <template>
     <form @submit.prevent="handleSubmit" class="flex flex-col w-full rounded-3xl p-5 gap-5 bg-white">
         <h2 class="font-bold text-xl capitalize">Complete the form</h2>
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <p class="font-semibold text-custom-grey">Product Image</p>
-            <div class="flex items-center justify-between w-1/2">
-                <div class="thumbnail-input-container group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background"
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-1/2">
+                <div class="thumbnail-input-container group relative flex w-full aspect-square rounded-2xl overflow-hidden items-center justify-center bg-custom-background"
                     v-for="(image, index) in product.product_images">
                     <input type="file" accept="image/*"
                         class="product-image-input absolute inset-0 opacity-0 cursor-pointer z-10"
@@ -201,9 +201,9 @@ onMounted(async () => {
                 </div>
             </div>
         </div>
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <p class="font-semibold text-custom-grey">Product Name</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.name }">
+            <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ 'invalid': error?.name }">
                 <label class="group relative">
                     <div class="input-icon">
                         <img src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0" alt="icon">
@@ -216,9 +216,9 @@ onMounted(async () => {
                 <span class="input-error" v-if="error?.name">{{ error?.name?.join(', ') }}</span>
             </div>
         </div>
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <p class="font-semibold text-custom-grey">Product Weight</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.weight }">
+            <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ 'invalid': error?.weight }">
                 <div class="relative">
                     <label class="group relative h-full block">
                         <div class="input-icon">
@@ -242,9 +242,9 @@ onMounted(async () => {
                 <span class="input-error" v-if="error?.weight">{{ error?.weight?.join(', ') }}</span>
             </div>
         </div>
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <p class="font-semibold text-custom-grey">Product Type</p>
-            <div class="grid grid-cols-2 gap-6 h-[76px] w-1/2">
+            <div class="grid grid-cols-2 gap-6 h-[76px] w-full md:w-1/2">
                 <label
                     class="group relative flex items-center h-full py-4 px-5 gap-4 rounded-[18px] border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full">
                     <div class="flex h-[28px] shrink-0 items-center pr-4 pl-1 border-r-[1.5px] border-custom-border ">
@@ -275,9 +275,9 @@ onMounted(async () => {
                 </label>
             </div>
         </div>
-        <div class="flex items-center justify-between">
-            <p class="font-semibold text-custom-grey">Product Variants</p>
-            <div class="w-1/2 flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <p class="font-semibold text-custom-grey pt-2">Product Variants</p>
+            <div class="w-full md:w-1/2 flex flex-col gap-4">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" v-model="product.has_variants" class="toggle toggle-primary" />
                     <span class="font-semibold">Enable Variants (Size, Color, etc.)</span>
@@ -356,9 +356,39 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div class="flex justify-between" v-if="!product.has_variants">
-            <p class="font-semibold text-custom-grey mt-5">Product Price & Stock</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.description }">
+        <div class="flex flex-col md:flex-row justify-between gap-4" v-if="!product.has_variants">
+            <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Price & Stock</p>
+            <div class="flex gap-6 w-full md:w-1/2">
+                <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.price }">
+                    <label class="group relative">
+                        <div class="input-icon">
+                            <img src="@/assets/images/icons/money-grey.svg" class="flex size-6 shrink-0" alt="icon">
+                        </div>
+                        <p class="input-placeholder">
+                            Enter Product Price
+                        </p>
+                        <input type="number" class="custom-input" placeholder="" v-model="product.price">
+                    </label>
+                    <span class="input-error" v-if="error?.price">{{ error?.price?.join(', ') }}</span>
+                </div>
+                <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.stock }">
+                    <label class="group relative">
+                        <div class="input-icon">
+                            <img src="@/assets/images/icons/box-grey.svg" class="flex size-6 shrink-0" alt="icon">
+                        </div>
+                        <p class="input-placeholder">
+                            Enter Product Stock
+                        </p>
+                        <input type="number" class="custom-input" placeholder="" v-model="product.stock">
+                    </label>
+                    <span class="input-error" v-if="error?.stock">{{ error?.stock?.join(', ') }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between gap-4">
+            <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Description</p>
+            <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
+                :class="{ 'invalid': error?.description }">
                 <label
                     class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red">
                     <div class="flex h-full pr-4 pt-2 border-r-[1.5px] border-custom-border ">
@@ -377,9 +407,9 @@ onMounted(async () => {
                     v-if="error?.description">{{ error?.description?.join(', ') }}</span>
             </div>
         </div>
-        <div class="peer flex items-center justify-between">
-            <p class="font-semibold text-custom-grey">Product Category</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2">
+        <div class="peer flex flex-col md:flex-row justify-between gap-4">
+            <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Category</p>
+            <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2">
                 <label
                     class="group relative rounded-[18px] border-[1.5px] border-custom-stroke focus-within:border-custom-black transition-300 overflow-hidden w-full group-[&.invalid]/errorState:border-custom-red">
                     <div class="input-icon">
@@ -402,9 +432,10 @@ onMounted(async () => {
                 </label>
             </div>
         </div>
-        <div class="peer-has-[:valid]:flex hidden items-center justify-between">
-            <p class="font-semibold text-custom-grey">Product Sub Category</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.product_category_id }">
+        <div class="peer-has-[:valid]:flex hidden flex-col md:flex-row justify-between gap-4">
+            <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Sub Category</p>
+            <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
+                :class="{ 'invalid': error?.product_category_id }">
                 <label
                     class="group relative rounded-[18px] border-[1.5px] border-custom-stroke focus-within:border-custom-black transition-300 overflow-hidden w-full group-[&.invalid]/errorState:border-custom-red">
                     <div class="input-icon">
@@ -427,36 +458,7 @@ onMounted(async () => {
                 }}</span>
             </div>
         </div>
-        <div class="flex items-center justify-between">
-            <p class="font-semibold text-custom-grey">Product Price</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.product_price }">
-                <label class="group relative">
-                    <div class="input-icon">
-                        <img src="@/assets/images/icons/money-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    </div>
-                    <p class="input-placeholder">
-                        Enter Product Price
-                    </p>
-                    <input type="number" class="custom-input" placeholder="" v-model="product.price">
-                </label>
-                <span class="input-error" v-if="error?.product_price">{{ error?.product_price?.join(', ') }}</span>
-            </div>
-        </div>
-        <div class="flex items-center justify-between">
-            <p class="font-semibold text-custom-grey">Product Stock</p>
-            <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.stock }">
-                <label class="group relative">
-                    <div class="input-icon">
-                        <img src="@/assets/images/icons/box-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                    </div>
-                    <p class="input-placeholder">
-                        Enter Product Stock
-                    </p>
-                    <input type="number" class="custom-input" placeholder="" v-model="product.stock">
-                </label>
-                <span class="input-error" v-if="error?.stock">{{ error?.stock?.join(', ') }}</span>
-            </div>
-        </div>
+
         <div class="flex items-center justify-end gap-4">
             <RouterLink :to="{ name: 'admin.product' }"
                 class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-gray-100 text-custom-grey font-semibold text-lg hover:bg-gray-200 transition-300">

@@ -127,16 +127,16 @@ onMounted(fetchData)
     <div class="flex flex-col gap-5">
         <form @submit.prevent="handleSubmit" class="flex flex-col w-full rounded-3xl p-5 gap-5 bg-white">
             <h2 class="font-bold text-xl capitalize">Edit Store Information</h2>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <p class="font-semibold text-custom-grey">Store Image</p>
-                <div class="flex items-center justify-between w-1/2">
+                <div class="flex items-center justify-between w-full md:w-1/2">
                     <div
                         class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
                         <img id="Thumbnail" :src="store.logo_url || '@/assets/images/icons/gallery-grey.svg'"
                             class="size-full object-contain" alt="icon" />
                         <!-- Input moved/hidden so it doesn't overlay image -->
-                        <input type="file" ref="fileInput" id="File-Input" accept="image/*"
-                            class="hidden" @change="handleImageChange" />
+                        <input type="file" ref="fileInput" id="File-Input" accept="image/*" class="hidden"
+                            @change="handleImageChange" />
                     </div>
                     <button type="button" @click="$refs.fileInput.click()" id="Change-Photo"
                         class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg">
@@ -144,9 +144,9 @@ onMounted(fetchData)
                     </button>
                 </div>
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <p class="font-semibold text-custom-grey">Store Name</p>
-                <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.name }">
+                <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ 'invalid': error?.name }">
                     <label class="group relative">
                         <div class="input-icon">
                             <img src="@/assets/images/icons/shop-grey.svg" class="flex size-6 shrink-0" alt="icon">
@@ -159,9 +159,9 @@ onMounted(fetchData)
                     <span class="input-error" v-if="error?.name">{{ error?.name?.join(', ') }}</span>
                 </div>
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <p class="font-semibold text-custom-grey">Store Phone</p>
-                <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.phone }">
+                <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ 'invalid': error?.phone }">
                     <label class="group relative">
                         <div class="input-icon">
                             <img src="@/assets/images/icons/shop-grey.svg" class="flex size-6 shrink-0" alt="icon">
@@ -170,15 +170,16 @@ onMounted(fetchData)
                             Enter Store Phone
                         </p>
                         <input type="tel" v-model="store.phone" class="custom-input" placeholder=""
-                         @input="store.phone = store.phone.replace(/[^0-9]/g, '').slice(0, 15)">
+                            @input="store.phone = store.phone.replace(/[^0-9]/g, '').slice(0, 15)">
                     </label>
                     <span class="input-error" v-if="error?.phone">{{ error?.phone?.join(', ') }}</span>
-                     <span class="input-error" v-else-if="store.phone && !store.phone.startsWith('08')">Phone number must start with 08</span>
+                    <span class="input-error" v-else-if="store.phone && !store.phone.startsWith('08')">Phone number must
+                        start with 08</span>
                 </div>
             </div>
-            <div class="flex justify-between">
-                <p class="font-semibold text-custom-grey mt-5">Store Description</p>
-                <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.about }">
+            <div class="flex flex-col md:flex-row justify-between gap-4">
+                <p class="font-semibold text-custom-grey mt-2 md:mt-5">Store Description</p>
+                <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ 'invalid': error?.about }">
                     <label
                         class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red">
                         <div class="flex h-full pr-4 pt-2 border-r-[1.5px] border-custom-border ">
@@ -199,9 +200,9 @@ onMounted(fetchData)
                         v-if="error?.about">{{ error?.about?.join(', ') }}</span>
                 </div>
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <p class="font-semibold text-custom-grey">Address Searching</p>
-                <div class="group/errorState flex flex-col gap-2 w-1/2 relative">
+                <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2 relative">
                     <label class="group relative">
                         <div class="input-icon">
                             <img src="@/assets/images/icons/global-search-grey.svg" class="flex size-6 shrink-0"
@@ -220,9 +221,10 @@ onMounted(fetchData)
                     </ul>
                 </div>
             </div>
-            <div class="flex justify-between">
-                <p class="font-semibold text-custom-grey mt-5">Store Address</p>
-                <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.address }">
+            <div class="flex flex-col md:flex-row justify-between gap-4">
+                <p class="font-semibold text-custom-grey mt-2 md:mt-5">Store Address</p>
+                <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
+                    :class="{ 'invalid': error?.address }">
                     <label
                         class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red">
                         <div class="flex h-full pr-4 pt-2 border-r-[1.5px] border-custom-border ">
@@ -242,13 +244,12 @@ onMounted(fetchData)
                         v-if="error?.address">{{ error?.address?.join(', ') }}</span>
                 </div>
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <p class="font-semibold text-custom-grey">Store City</p>
-                <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.city }">
+                <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ 'invalid': error?.city }">
                     <label class="group relative">
                         <div class="input-icon">
-                            <img src="@/assets/images/icons/buildings-grey.svg" class="flex size-6 shrink-0"
-                                alt="icon">
+                            <img src="@/assets/images/icons/buildings-grey.svg" class="flex size-6 shrink-0" alt="icon">
                         </div>
                         <p class="input-placeholder">
                             Enter City
@@ -258,9 +259,10 @@ onMounted(fetchData)
                     <span class="input-error" v-if="error?.city">{{ error?.city?.join(', ') }}</span>
                 </div>
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <p class="font-semibold text-custom-grey">Post Code</p>
-                <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ 'invalid': error?.postal_code }">
+                <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
+                    :class="{ 'invalid': error?.postal_code }">
                     <label class="group relative">
                         <div class="input-icon">
                             <img src="@/assets/images/icons/keyboard-grey.svg" class="flex size-6 shrink-0" alt="icon">
