@@ -1,25 +1,73 @@
 @import "tailwindcss";
 
+/* =========================================
+   THEME CONFIGURATION
+   ========================================= */
 @theme {
-    --color-custom-black: #292D32;
-    --color-custom-blue: #1053D5;
-    --color-custom-red: #FF133D;
-    --color-custom-grey: #6A7686;
-    --color-custom-stroke: #E8E8E8;
-    --color-custom-green: #00A48A;
-    --color-custom-orange: #FF7020;
+    /* ----------------------------------
+       Semantic Palette
+       ---------------------------------- */
+    --color-primary: #2563EB;
+    /* Blue-600 */
+    --color-primary-dark: #1E3A8A;
+    /* Navy/Blue-900 */
+    --color-primary-light: #EFF6FF;
+    /* Blue-50 */
+
+    --color-secondary: #F97316;
+    /* Orange-500 */
+    --color-secondary-dark: #C2410C;
+    /* Orange-700 */
+
+    --color-neutral: #64748B;
+    /* Slate-500 */
+    --color-neutral-dark: #1E293B;
+    /* Slate-800 */
+    --color-surface: #F8FAFC;
+    /* Slate-50 */
+
+    /* ----------------------------------
+       Legacy / Custom Mapping
+       ---------------------------------- */
+    --color-custom-black: #1E293B;
+    /* Mapped to Neutral Dark */
+    --color-custom-blue: var(--color-primary);
+    --color-custom-red: #EF4444;
+    /* Red-500 */
+    --color-custom-grey: var(--color-neutral);
+    --color-custom-stroke: #E2E8F0;
+    /* Slate-200 */
+    --color-custom-green: #10B981;
+    /* Emerald-500 */
+    --color-custom-yellow: #EAB308;
+    /* Yellow-500 */
+    --color-custom-orange: var(--color-secondary);
     --color-custom-lime-green-char: #DEFF6E;
     --color-custom-lime-green: #84CC16;
-    --color-custom-background: #F3F5F9;
-    --color-custom-icon-background: #F3F3F3;
+    --color-custom-background: #F8FAFC;
+    --color-custom-icon-background: #F1F5F9;
 
+    /* ----------------------------------
+       Typography
+       ---------------------------------- */
     --font-sans: "Lexend Deca", sans-serif;
 
-    /* Shadcn Animations */
+    /* ----------------------------------
+       Shadows & Effects
+       ---------------------------------- */
+    --shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-floating: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    /* ----------------------------------
+       Animations (Shadcn/Radix)
+       ---------------------------------- */
     --animate-in: enter 150ms ease-out;
     --animate-out: exit 150ms ease-in;
 }
 
+/* =========================================
+   BASE STYLES & RESETS
+   ========================================= */
 body {
     @apply font-sans flex flex-col min-h-screen text-[#292D32];
 }
@@ -37,28 +85,32 @@ body {
     --z-modal: 100;
 }
 
-
+/* =========================================
+   COMPONENTS
+   ========================================= */
 @layer components {
+
+    /* --- Form Elements --- */
     .custom-input {
         @apply h-[76px] w-full border-[1.5px] border-custom-stroke rounded-[18px] pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-semibold transition-all duration-300 appearance-none outline-none;
     }
 
-    /* Placeholder shown state override */
+    /* Placeholder Logic */
     .custom-input:placeholder-shown,
     .custom-input:-moz-placeholder-shown {
         @apply pt-[14.5px];
     }
 
     .custom-input:focus {
-        @apply border-custom-black;
+        @apply border-custom-blue ring-1 ring-custom-blue;
     }
 
-    /* Error state */
+    /* Error States */
     .group\/errorState.invalid .custom-input {
-        @apply border-2 border-custom-red;
+        @apply border-2 border-custom-red ring-custom-red;
     }
 
-    /* Floating placeholder label */
+    /* Floating Labels */
     .input-placeholder {
         @apply absolute left-[81px] top-[25px] -translate-y-1/2 text-sm font-semibold text-custom-grey transition-all duration-300 pointer-events-none;
     }
@@ -67,18 +119,16 @@ body {
         @apply top-[25px];
     }
 
-    /* When input has value or placeholder hidden */
     .group:has(:placeholder-shown) .input-placeholder,
     .group:has(:-moz-placeholder-shown) .input-placeholder {
         @apply top-[38px] text-base font-bold text-custom-black;
     }
 
-    /* Icon styling */
+    /* Input Icons */
     .input-icon {
         @apply absolute top-1/2 left-6 flex h-7 -translate-y-1/2 items-center border-r-[1.5px] border-custom-stroke pr-4;
     }
 
-    /* Error message */
     .input-error {
         @apply hidden text-sm font-semibold leading-none text-custom-red;
     }
@@ -87,7 +137,7 @@ body {
         @apply block;
     }
 
-    /* Gradients */
+    /* --- Visual Utilities --- */
     .blue-gradient {
         background: linear-gradient(336.99deg, #0A3A89 0%, #1053D5 100%);
     }
@@ -96,7 +146,7 @@ body {
         background: linear-gradient(180deg, rgba(14, 22, 38, 0) 0%, rgba(14, 22, 38, 0.75) 50%, #0E1626 100%);
     }
 
-    /* Search Result Dropdown */
+    /* --- Search --- */
     .search-result {
         @apply absolute bottom-[-30px] w-full z-[1] bg-white border border-[#ccc] rounded-[16px] shadow-md max-h-[200px] overflow-y-auto;
     }
@@ -109,7 +159,7 @@ body {
         @apply p-2 cursor-pointer hover:bg-[#f0f0f0];
     }
 
-    /* Product Detail Tabs */
+    /* --- Sticky Tabs --- */
     .sticky-tabs {
         position: sticky;
         top: 80px;
@@ -128,11 +178,17 @@ body {
     }
 }
 
+/* =========================================
+   UTILITIES & ANIMATIONS
+   ========================================= */
 @layer utilities {
+
+    /* --- Transitions --- */
     .transition-300 {
         transition: all 300ms ease-in-out;
     }
 
+    /* --- Scrollbars --- */
     .hide-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
@@ -142,7 +198,16 @@ body {
         display: none;
     }
 
-    /* Animations */
+    /* --- Effects --- */
+    .hover-scale {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+
+    /* --- Keyframes --- */
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -155,6 +220,21 @@ body {
         }
     }
 
+    @keyframes enter {
+        from {
+            opacity: var(--tw-enter-opacity, 1);
+            transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), 1) rotate(var(--tw-enter-rotate, 0));
+        }
+    }
+
+    @keyframes exit {
+        to {
+            opacity: var(--tw-exit-opacity, 1);
+            transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), 1) rotate(var(--tw-exit-rotate, 0));
+        }
+    }
+
+    /* --- Animation Classes --- */
     .animate-fade-in-up {
         animation: fadeInUp 0.5s ease-out forwards;
     }
@@ -171,7 +251,6 @@ body {
         animation-delay: 300ms;
     }
 
-    /* Global Route Transition */
     .fade-enter-active,
     .fade-leave-active {
         transition: opacity 0.3s ease;
@@ -182,30 +261,7 @@ body {
         opacity: 0;
     }
 
-    /* Hover Utilities */
-    .hover-scale {
-        transition: transform 0.3s ease;
-    }
-
-    .hover-scale:hover {
-        transform: scale(1.02);
-    }
-
-    /* Shadcn/Radix Animation Utilities Support for V4 without Plugin */
-    @keyframes enter {
-        from {
-            opacity: var(--tw-enter-opacity, 1);
-            transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), 1) rotate(var(--tw-enter-rotate, 0));
-        }
-    }
-
-    @keyframes exit {
-        to {
-            opacity: var(--tw-exit-opacity, 1);
-            transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), 1) rotate(var(--tw-exit-rotate, 0));
-        }
-    }
-
+    /* Shadcn Animation Maps */
     .animate-in {
         animation-name: enter;
         animation-duration: 150ms;
@@ -232,6 +288,14 @@ body {
 
     .fade-out-0 {
         --tw-exit-opacity: 0;
+    }
+
+    .zoom-in-95 {
+        --tw-enter-scale: 0.95;
+    }
+
+    .zoom-out-95 {
+        --tw-exit-scale: 0.95;
     }
 
     .slide-in-from-top {
@@ -265,16 +329,11 @@ body {
     .slide-out-to-right {
         --tw-exit-translate-x: 100%;
     }
-
-    .zoom-in-95 {
-        --tw-enter-scale: 0.95;
-    }
-
-    .zoom-out-95 {
-        --tw-exit-scale: 0.95;
-    }
 }
 
+/* =========================================
+   BROWSER OVERRIDES
+   ========================================= */
 /* Hide native password toggle */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {

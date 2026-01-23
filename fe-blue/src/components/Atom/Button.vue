@@ -49,11 +49,14 @@ const sizeClasses = computed(() => {
 const variantClasses = computed(() => {
     switch (props.variant) {
         case 'primary':
-            return 'bg-custom-blue text-white hover:shadow-lg hover:shadow-custom-blue/30 active:scale-95';
+            return 'bg-custom-blue text-white hover:bg-blue-700 hover:shadow-soft active:scale-95';
+        case 'accent':
+            return 'bg-custom-orange text-white hover:bg-orange-600 hover:shadow-soft active:scale-95';
         case 'secondary':
-            return 'bg-custom-black text-white hover:bg-custom-black/80 active:scale-95 rounded-2xl'; // Override rounded for secondary based on existing usage
+        case 'dark':
+            return 'bg-custom-black text-white hover:bg-gray-800 active:scale-95 rounded-2xl';
         case 'outline':
-            return 'border-[1.5px] border-custom-stroke bg-white text-custom-black hover:border-custom-black active:bg-gray-50';
+            return 'border-[1.5px] border-custom-stroke bg-white text-custom-black hover:border-custom-black hover:bg-gray-50';
         case 'ghost':
             return 'bg-transparent text-custom-grey hover:text-custom-black hover:bg-gray-100';
         case 'danger':
@@ -67,13 +70,8 @@ const widthClass = computed(() => props.block ? 'w-full' : 'w-fit');
 </script>
 
 <template>
-    <component 
-        :is="to ? RouterLink : 'button'" 
-        :to="to"
-        :type="to ? null : type"
-        :disabled="loading || disabled"
-        :class="[baseClasses, sizeClasses, variantClasses, widthClass]"
-    >
+    <component :is="to ? RouterLink : 'button'" :to="to" :type="to ? null : type" :disabled="loading || disabled"
+        :class="[baseClasses, sizeClasses, variantClasses, widthClass]">
         <span v-if="loading" class="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
         <slot v-else></slot>
     </component>
