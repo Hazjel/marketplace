@@ -479,7 +479,7 @@ watch(
                                         :style="{ width: `${getRatingPercentage(6 - star)}%` }"></div>
                                 </div>
                                 <span class="text-xs text-custom-grey w-8 text-right">{{ getRatingCount(6 - star)
-                                }}</span>
+                                    }}</span>
                             </div>
                         </div>
                     </div>
@@ -562,36 +562,15 @@ watch(
 
                     <!-- Variant Selector -->
                     <!-- Multi-Dimensional Variant Selector -->
-                    <div v-if="product?.has_variants && uniqueAttributes && Object.keys(uniqueAttributes).length > 0"
-                        class="flex flex-col gap-4">
-                        <div v-for="(values, optionName) in uniqueAttributes" :key="optionName"
-                            class="flex flex-col gap-2">
-                            <span class="text-sm font-semibold text-custom-black capitalize">{{ optionName }}:
-                                <span class="text-custom-grey font-normal">{{ selectedOptions?.[optionName] || '-'
-                                    }}</span>
-                            </span>
-                            <div class="flex flex-wrap gap-2">
-                                <button v-for="value in values" :key="value" @click="selectOption(optionName, value)"
-                                    class="px-4 py-2 rounded-xl text-sm font-medium border transition-all"
-                                    :class="(selectedOptions?.[optionName] === value)
-                                        ? 'bg-custom-blue/10 text-custom-blue border-custom-blue ring-1 ring-custom-blue'
-                                        : 'bg-white text-gray-700 border-gray-200 hover:border-custom-blue hover:text-custom-blue'">
-                                    {{ value }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fallback for legacy simple variants (if any) -->
-                    <div v-else-if="product?.has_variants && product?.variants?.length > 0" class="flex flex-col gap-2">
-                        <span class="text-sm font-semibold text-custom-black">Pilih Varian:</span>
+                    <!-- Selected Variant Display (Read Only) -->
+                    <div v-if="product?.has_variants && Object.keys(selectedOptions).length > 0"
+                        class="flex flex-col gap-1">
+                        <span class="text-sm font-semibold text-custom-black">Varian Dipilih:</span>
                         <div class="flex flex-wrap gap-2">
-                            <button v-for="variant in product.variants" :key="variant.id"
-                                class="px-3 py-1.5 rounded-lg text-sm font-medium border"
-                                :class="selectedVariant?.id === variant.id ? 'bg-custom-blue text-white' : 'bg-white border-gray-200'"
-                                @click="selectedVariant = variant">
-                                {{ variant.name }}
-                            </button>
+                            <span v-for="(value, key) in selectedOptions" :key="key"
+                                class="px-2 py-1 bg-gray-100 rounded text-xs font-medium text-custom-black border border-gray-200 capitalize">
+                                {{ key }}: {{ value }}
+                            </span>
                         </div>
                     </div>
 

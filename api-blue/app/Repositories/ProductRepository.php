@@ -157,24 +157,27 @@ class ProductRepository implements ProductRepositoryInterface
             $product->slug = Str::slug($data['name']) . '-i' . rand(100000, 999999) . '.' . rand(10000000, 9999999);
             $product->description = $data['description'];
             $product->condition = $data['condition'];
-            $product->price = $data['price'];
             $product->weight = $data['weight'];
-            $product->stock = $data['stock'];
-            $product->save();
-
             if (!empty($data['variants'])) {
-                 $product->has_variants = true;
-                 $product->save();
- 
-                 foreach ($data['variants'] as $variant) {
-                     $product->variants()->create([
-                         'name' => $variant['name'],
-                         'price' => $variant['price'],
-                         'stock' => $variant['stock'],
-                         'sku' => $variant['sku'] ?? null,
-                         'variant_attributes' => $variant['variant_attributes'] ?? [],
-                     ]);
-                 }
+                $product->has_variants = true;
+                $product->price = collect($data['variants'])->min('price');
+                $product->stock = collect($data['variants'])->sum('stock');
+                $product->save();
+
+                foreach ($data['variants'] as $variant) {
+                    $product->variants()->create([
+                        'name' => $variant['name'],
+                        'price' => $variant['price'],
+                        'stock' => $variant['stock'],
+                        'sku' => $variant['sku'] ?? null,
+                        'variant_attributes' => $variant['variant_attributes'] ?? [],
+                    ]);
+                }
+            } else {
+                $product->has_variants = false;
+                $product->price = $data['price'];
+                $product->stock = $data['stock'];
+                $product->save();
             }
 
             $productImageRepository = new ProductImageRepository;
@@ -257,6 +260,12 @@ class ProductRepository implements ProductRepositoryInterface
                 
                 // Update has_variants flag based on actual data presence
                 $product->has_variants = count($data['variants']) > 0;
+
+                // Auto-calculate price and stock from variants if they exist
+                 if ($product->has_variants) {
+                    $product->price = collect($data['variants'])->min('price');
+                    $product->stock = collect($data['variants'])->sum('stock');
+                 }
             }
             
             $product->save();

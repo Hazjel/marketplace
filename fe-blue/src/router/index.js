@@ -66,7 +66,21 @@ const router = createRouter({
       path: '/open-store',
       name: 'auth.open-store',
       component: () => import('@/views/auth/StoreRegister.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
+      beforeEnter: async (to, from, next) => {
+        const authStore = useAuthStore()
+
+        if (!authStore.user) {
+          await authStore.checkAuth()
+        }
+
+        if (authStore.user?.store) {
+          // User already has a store, redirect to their store dashboard or home
+          next({ name: 'user.dashboard', params: { username: authStore.user.username } })
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/',
@@ -175,6 +189,36 @@ const router = createRouter({
           component: TransactionDetail,
           meta: { requiresAuth: true, title: 'Transaction Detail' }
         },
+      ]
+    },
+    {
+      path: '/',
+      component: () => import('@/layouts/Company.vue'),
+      children: [
+        {
+          path: 'about',
+          name: 'app.about',
+          component: () => import('@/views/App/Company/AboutUs.vue'),
+          meta: { title: 'About Us' }
+        },
+        {
+          path: 'career',
+          name: 'app.career',
+          component: () => import('@/views/App/Company/Career.vue'),
+          meta: { title: 'Career' }
+        },
+        {
+          path: 'privacy',
+          name: 'app.privacy',
+          component: () => import('@/views/App/Company/PrivacyPolicy.vue'),
+          meta: { title: 'Privacy Policy' }
+        },
+        {
+          path: 'terms',
+          name: 'app.terms',
+          component: () => import('@/views/App/Company/TermsConditions.vue'),
+          meta: { title: 'Terms & Conditions' }
+        }
       ]
     },
     {
