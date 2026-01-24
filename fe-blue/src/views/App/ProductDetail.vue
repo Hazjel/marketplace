@@ -55,6 +55,25 @@ const { toggleWishlist, fetchWishlist } = wishlistStore
 
 const quantity = ref(1)
 const selectedOptions = ref({})
+const showVariantDrawer = ref(false)
+const drawerAction = ref('cart') // 'cart' or 'buy'
+
+const openDrawer = (action) => {
+    drawerAction.value = action
+    showVariantDrawer.value = true
+}
+
+const handleDrawerAction = () => {
+    if (drawerAction.value === 'cart') {
+        addToCart()
+    } else {
+        // Implement Buy Direct logic here (e.g., push to checkout with query params)
+        addToCart() // For now just add to cart, usually redirects to checkout
+        router.push({ name: 'app.cart' }) // Redirect example
+    }
+    showVariantDrawer.value = false
+}
+
 
 const uniqueAttributes = computed(() => {
     const variants = product.value?.variants || []
@@ -479,7 +498,7 @@ watch(
                                         :style="{ width: `${getRatingPercentage(6 - star)}%` }"></div>
                                 </div>
                                 <span class="text-xs text-custom-grey w-8 text-right">{{ getRatingCount(6 - star)
-                                    }}</span>
+                                }}</span>
                             </div>
                         </div>
                     </div>
@@ -624,18 +643,26 @@ watch(
         <!-- Mobile Sticky Bottom Bar -->
         <div
             class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-custom-stroke p-4 md:hidden shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)] flex gap-3 items-center">
+            <!-- Wishlist/Chat Icon Button -->
             <button @click="handleToggleWishlist"
-                class="flex items-center justify-center size-14 rounded-2xl border border-custom-stroke grow-0 shrink-0"
+                class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke grow-0 shrink-0"
                 :class="{ 'bg-custom-red/10 border-custom-red': isInWishlist }">
                 <img v-if="isInWishlist" src="@/assets/images/icons/heart-red.svg" class="size-6 shrink-0" alt="icon" />
                 <img v-else src="@/assets/images/icons/heart-grey.svg" class="size-6 shrink-0" alt="icon" />
             </button>
-            <button @click.prevent="addToCart" :disabled="!product?.stock || product?.stock <= 0"
-                class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-grey disabled:cursor-not-allowed grow">
-                <img src="@/assets/images/icons/shopping-cart-white.svg" class="flex size-6 shrink-0" alt="icon" />
-                <span class="font-bold text-white">
-                    {{ !product?.stock || product?.stock <= 0 ? 'Out of Stock' : 'Add to Cart' }} </span>
-            </button>
+
+            <!-- Action Buttons Container -->
+            <div class="flex gap-3 grow h-12">
+                <button
+                    class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors">
+                    Beli Langsung
+                </button>
+                <button @click.prevent="addToCart" :disabled="!product?.stock || product?.stock <= 0"
+                    class="flex-1 rounded-xl bg-custom-blue text-white font-bold text-sm flex items-center justify-center gap-2 disabled:bg-custom-grey disabled:cursor-not-allowed hover:bg-blue-700 transition-colors">
+                    <img src="@/assets/images/icons/shopping-cart-white.svg" class="size-5 shrink-0" alt="icon" />
+                    <span>+ Keranjang</span>
+                </button>
+            </div>
         </div>
 
         <section id="Recommendation" class="flex flex-col gap-9 scroll-mt-[150px]">
@@ -646,4 +673,83 @@ watch(
             </div>
         </section>
     </main>
+
+
+    <!-- Mobile Variant Drawer (Bottom Sheet) -->
+    <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0"
+        enter-to-class="opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100"
+        leave-to-class="opacity-0">
+        <div v-if="showVariantDrawer" class="fixed inset-0 z-[60] bg-black/50 md:hidden"
+            @click="showVariantDrawer = false"></div>
+    </Transition>
+
+    <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-full"
+        enter-to-class="translate-y-0" leave-active-class="transition duration-200 ease-in"
+        leave-from-class="translate-y-0" leave-to-class="translate-y-full">
+        <div v-if="showVariantDrawer"
+            class="fixed bottom-0 left-0 w-full z-[70] bg-white rounded-t-2xl p-4 md:hidden flex flex-col max-h-[85vh] shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
+            <!-- Handle Bar -->
+            <div class="mx-auto w-12 h-1.5 bg-gray-300 rounded-full mb-4 shrink-0"></div>
+
+            <!-- Header: Product Info -->
+            <div class="flex gap-3 mb-4 shrink-0">
+                <div class="size-24 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-custom-stroke">
+                    <img :src="selectedVariant?.image || product?.product_images?.find(img => img.is_thumbnail)?.image"
+                        class="size-full object-cover" />
+                </div>
+                <div class="flex flex-col gap-1 items-start">
+                    <span class="text-custom-red font-bold text-lg">Rp {{ formatRupiah(displayedPrice) }}</span>
+                    <span class="text-xs text-custom-grey">Stok: {{ displayedStock || 0 }}</span>
+                </div>
+                <button class="ml-auto -mt-2 text-custom-grey p-2" @click="showVariantDrawer = false">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <hr class="border-custom-stroke mb-4 shrink-0" />
+
+            <!-- Scrollable Content: Variants & Quantity -->
+            <div class="overflow-y-auto no-scrollbar flex-1 flex flex-col gap-6 pb-20">
+                <!-- Variants -->
+                <div v-if="product?.variants?.length > 0" class="flex flex-col gap-4">
+                    <div v-for="(values, key) in uniqueAttributes" :key="key">
+                        <h3 class="font-bold text-sm mb-2 capitalize">{{ key }}</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button v-for="value in values" :key="value" @click="selectOption(key, value)"
+                                class="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all" :class="selectedOptions[key] === value
+                                    ? 'bg-custom-black text-white border-custom-black'
+                                    : 'bg-white text-custom-black border-gray-200 hover:border-custom-black'">
+                                {{ value }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+                    <span class="font-bold text-sm">Jumlah</span>
+                    <div class="flex items-center gap-3 border border-custom-stroke rounded-lg p-1">
+                        <button type="button" @click="decrease" :disabled="quantity <= 1"
+                            class="size-8 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300">
+                            <i class="fa-solid fa-minus text-sm"></i>
+                        </button>
+                        <input type="number" v-model="quantity" readonly
+                            class="w-10 text-center font-bold text-sm outline-none" />
+                        <button type="button" @click="increase" :disabled="quantity >= (displayedStock || 0)"
+                            class="size-8 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300">
+                            <i class="fa-solid fa-plus text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticky Bottom Action -->
+            <div class="absolute bottom-0 left-0 w-full p-4 bg-white border-t border-custom-stroke">
+                <button @click="handleDrawerAction" :disabled="!displayedStock || displayedStock <= 0"
+                    class="w-full py-3 bg-custom-green text-white rounded-xl font-bold hover:bg-green-600 disabled:bg-gray-300 transition-colors shadow-lg shadow-green-100">
+                    {{ drawerAction === 'cart' ? '+ Keranjang' : 'Beli Sekarang' }}
+                </button>
+            </div>
+        </div>
+    </Transition>
 </template>

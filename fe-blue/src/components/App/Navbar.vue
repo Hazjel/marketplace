@@ -4,16 +4,12 @@ import { useCartStore } from '@/stores/cart';
 import { useProductStore } from '@/stores/product';
 import { useWishlistStore } from '@/stores/wishlist';
 import { storeToRefs } from 'pinia';
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { formatRupiah } from '@/helpers/format';
 
 const router = useRouter()
 const showDropdownProfile = ref(false);
-const searchQuery = ref('');
-const searchResults = ref([]);
-const showSearchResults = ref(false);
-const isSearching = ref(false);
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
@@ -27,28 +23,88 @@ const { totalItems: totalWishlistItems } = storeToRefs(wishlistStore)
 const { fetchWishlist } = wishlistStore
 
 const productStore = useProductStore()
-const { searchProducts } = productStore // ✅ Gunakan method searchProducts
+const { searchProducts } = productStore
 
-// Debounce function
+// Computed properties for template logic safety
+const sellerDashboardLabel = computed(() => {
+    return authStore.activeMode === 'buyer' ? 'Switch to Seller' : 'Seller Dashboard';
+});
+
+const wishlistBadgeText = computed(() => {
+    return totalWishlistItems.value > 99 ? '99+' : totalWishlistItems.value;
+});
+
+const cartBadgeText = computed(() => {
+    return totalItems.value > 99 ? '99+' : totalItems.value;
+});
+
+const getProductImage = (product) => {
+    if (product.product_images && Array.isArray(product.product_images)) {
+        const thumb = product.product_images.find(i => i.is_thumbnail);
+        if (thumb) return thumb.image;
+    }
+    return product.thumbnail || 'https://placehold.co/100';
+};
+
+// Search State
+const searchQuery = ref('');
+const searchResults = ref([]);
+const showSearchResults = ref(false);
+const isSearching = ref(false);
+const showHistory = ref(false);
+const searchHistory = ref([]);
+
+// History Management
+const loadHistory = () => {
+    const history = localStorage.getItem('blukios_search_history');
+    if (history) {
+        searchHistory.value = JSON.parse(history);
+    }
+};
+
+const saveHistory = (query) => {
+    if (!query) return;
+    let history = searchHistory.value;
+    history = history.filter(item => item.toLowerCase() !== query.toLowerCase());
+    history.unshift(query);
+    if (history.length > 5) history.pop();
+    searchHistory.value = history;
+    localStorage.setItem('blukios_search_history', JSON.stringify(history));
+};
+
+const removeHistoryItem = (index) => {
+    searchHistory.value.splice(index, 1);
+    localStorage.setItem('blukios_search_history', JSON.stringify(searchHistory.value));
+};
+
+const clearHistory = () => {
+    searchHistory.value = [];
+    localStorage.removeItem('blukios_search_history');
+};
+
+const applyHistorySearch = (item) => {
+    searchQuery.value = item;
+    handleSearchInput();
+};
+
 let searchTimeout = null;
 
-// Handle search input dengan debounce
 const handleSearchInput = () => {
     clearTimeout(searchTimeout);
-
     const query = searchQuery.value.trim();
 
-    if (query.length < 2) {
+    if (query.length === 0) {
         showSearchResults.value = false;
+        showHistory.value = true;
         searchResults.value = [];
         return;
     }
 
+    showHistory.value = false;
     isSearching.value = true;
 
     searchTimeout = setTimeout(async () => {
         try {
-            // ✅ Gunakan searchProducts yang tidak mengubah state utama
             const results = await searchProducts({
                 search: query,
                 limit: 5
@@ -66,29 +122,40 @@ const handleSearchInput = () => {
     }, 300);
 };
 
-// Handle pressing Enter
 const handleEnterSearch = () => {
     const query = searchQuery.value.trim();
     if (query.length > 0) {
+        saveHistory(query);
         showSearchResults.value = false;
+        showHistory.value = false;
         router.push({ name: 'app.search', query: { q: query } });
     }
 }
 
-// Handle product click: keep as is for direct navigation from autocomplete
-const handleProductClick = (slug) => {
+const handleProductClick = (slug, name) => {
+    saveHistory(name);
     showSearchResults.value = false;
+    showHistory.value = false;
     searchQuery.value = '';
     router.push({ name: 'app.product-detail', params: { slug } });
 };
 
-// Close search results when clicking outside
 const handleClickOutside = (e) => {
     if (!e.target.closest('.search-container')) {
         showSearchResults.value = false;
+        showHistory.value = false;
     }
     if (!e.target.closest('.profile-dropdown-container')) {
         showDropdownProfile.value = false;
+    }
+};
+
+const handleFocus = () => {
+    loadHistory();
+    if (searchQuery.value.trim() === '') {
+        showHistory.value = true;
+    } else {
+        showSearchResults.value = true;
     }
 };
 
@@ -97,22 +164,26 @@ onMounted(() => {
     if (user.value) {
         fetchWishlist();
     }
+    loadHistory();
     document.addEventListener('click', handleClickOutside);
 });
 
-// Cleanup
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
 <template>
-    <section id="Navbar-Wrapper" class="sticky top-0 left-0 w-full bg-white border-b border-custom-stroke py-4 md:py-8 z-50 transition-all duration-300">
+    <section id="Navbar-Wrapper"
+        class="sticky top-0 left-0 w-full bg-white border-b border-custom-stroke py-4 md:py-8 z-50 transition-all duration-300">
         <div class="w-full">
             <div class="w-full max-w-[1920px] flex flex-col gap-6 px-4 md:px-7 mx-auto">
-                <div class="flex flex-wrap md:flex-nowrap items-center justify-between md:justify-start gap-2 md:gap-6 w-full">
+                <div
+                    class="flex flex-wrap md:flex-nowrap items-center justify-between md:justify-start gap-2 md:gap-6 w-full">
+                    <!-- Logo -->
                     <RouterLink :to="{ name: 'app.home' }" class="flex shrink-0">
-                        <img src="@/assets/images/logos/blukios_logo.png" class="h-8 md:h-12 max-w-[120px] md:max-w-none object-contain" alt="logo">
+                        <img src="@/assets/images/logos/blukios_logo.png"
+                            class="h-8 md:h-12 max-w-[120px] md:max-w-none object-contain" alt="logo">
                     </RouterLink>
 
                     <!-- Search Bar with Autocomplete -->
@@ -133,29 +204,72 @@ onUnmounted(() => {
                         </label>
 
                         <!-- Search Results Dropdown -->
-                        <div v-if="showSearchResults"
+                        <div v-show="showSearchResults || showHistory"
                             class="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-[0px_6px_30px_0px_#00000017] border border-custom-stroke overflow-hidden z-50">
-                            <div class="flex flex-col max-h-[400px] overflow-y-auto">
-                                <button v-for="product in searchResults" :key="product.id"
-                                    @click="handleProductClick(product.slug)"
-                                    class="flex items-center gap-4 p-4 hover:bg-custom-background transition-300 text-left">
-                                    <div class="flex size-16 shrink-0 rounded-xl bg-custom-background overflow-hidden">
-                                        <img :src="product.product_images.find(i => i.is_thumbnail)?.image || product.thumbnail"
-                                            class="size-full object-cover" alt="product" />
+
+                            <!-- History Section -->
+                            <div v-if="showHistory && searchHistory.length > 0">
+                                <div
+                                    class="flex items-center justify-between px-4 py-3 border-b border-custom-stroke/50">
+                                    <span class="text-xs font-bold text-custom-grey uppercase tracking-wider">Recent
+                                        Searches</span>
+                                    <button @click="clearHistory"
+                                        class="text-xs font-semibold text-custom-red hover:underline">Clear All</button>
+                                </div>
+                                <div class="flex flex-col">
+                                    <div v-for="(item, index) in searchHistory" :key="index"
+                                        class="flex items-center justify-between p-4 hover:bg-custom-background transition-300 cursor-pointer group"
+                                        @click="applyHistorySearch(item)">
+                                        <div class="flex items-center gap-3">
+                                            <img src="@/assets/images/icons/search-normal-grey.svg"
+                                                class="size-5 opacity-60" alt="history">
+                                            <span
+                                                class="font-medium text-custom-black group-hover:text-custom-blue transition-colors">{{
+                                                    item }}</span>
+                                        </div>
+                                        <button @click.stop="removeHistoryItem(index)"
+                                            class="hidden group-hover:flex p-1 hover:bg-gray-200 rounded-full">
+                                            <img src="@/assets/images/icons/close-circle-black.svg" class="size-4"
+                                                alt="remove">
+                                        </button>
                                     </div>
-                                    <div class="flex flex-col gap-1 flex-1 min-w-0">
-                                        <p class="font-bold text-sm truncate">{{ product.name }}</p>
-                                        <p class="text-custom-grey text-xs">{{ product.product_category?.name }}</p>
-                                        <p class="font-bold text-custom-blue text-sm">Rp {{ formatRupiah(product.price)
-                                            }}</p>
-                                    </div>
-                                    <img src="@/assets/images/icons/arrow-right-black.svg" class="size-5 shrink-0"
-                                        alt="icon">
-                                </button>
+                                </div>
                             </div>
-                            <div class="p-3 bg-custom-background border-t border-custom-stroke">
-                                <p class="text-xs text-custom-grey text-center">Showing {{ searchResults.length }}
-                                    results for "{{ searchQuery }}"</p>
+
+                            <!-- Product Results Section -->
+                            <div v-else-if="showSearchResults">
+                                <div class="flex flex-col max-h-[400px] overflow-y-auto custom-scrollbar">
+                                    <button v-for="product in searchResults" :key="product.id"
+                                        @click="handleProductClick(product.slug, product.name)"
+                                        class="flex items-center gap-4 p-4 hover:bg-custom-background transition-300 text-left border-b border-custom-stroke/30 last:border-0">
+                                        <div
+                                            class="flex size-14 shrink-0 rounded-xl bg-custom-background overflow-hidden border border-custom-stroke/50">
+                                            <img :src="getProductImage(product)" class="size-full object-cover"
+                                                alt="product">
+                                        </div>
+                                        <div class="flex flex-col gap-1 flex-1 min-w-0">
+                                            <p class="font-bold text-sm truncate text-custom-black">{{ product.name }}
+                                            </p>
+                                            <div class="flex items-center gap-2">
+                                                <p class="text-custom-grey text-xs">{{ product.product_category?.name }}
+                                                </p>
+                                            </div>
+                                            <p class="font-bold text-custom-blue text-sm">Rp {{
+                                                formatRupiah(product.price) }}</p>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div class="p-3 bg-custom-background border-t border-custom-stroke hover:bg-custom-blue/5 transition-colors cursor-pointer text-center"
+                                    @click="handleEnterSearch">
+                                    <p class="text-xs font-bold text-custom-blue">See all results for "{{ searchQuery
+                                    }}"</p>
+                                </div>
+                            </div>
+
+                            <!-- Empty State for History -->
+                            <div v-else-if="!showSearchResults && showHistory && searchHistory.length === 0"
+                                class="p-8 text-center text-custom-grey">
+                                <p class="text-sm">No recent searches</p>
                             </div>
                         </div>
                     </div>
@@ -166,13 +280,14 @@ onUnmounted(() => {
                             <RouterLink :to="{ name: 'app.wishlist' }">
                                 <div
                                     class="flex size-10 md:size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
-                                    <img src="@/assets/images/icons/heart-black.svg" class="size-5 md:size-6" alt="icon">
+                                    <img src="@/assets/images/icons/heart-black.svg" class="size-5 md:size-6"
+                                        alt="icon">
                                 </div>
                             </RouterLink>
                             <div v-if="totalWishlistItems > 0"
                                 class="absolute top-0 right-0 flex items-center justify-center min-w-[16px] md:min-w-[20px] min-h-[16px] md:min-h-[20px] rounded-full bg-custom-red border-2 border-white px-1">
-                                <span class="text-white text-[8px] md:text-[10px] font-bold leading-none">{{ totalWishlistItems > 99 ?
-                                    '99+' : totalWishlistItems }}</span>
+                                <span class="text-white text-[8px] md:text-[10px] font-bold leading-none">{{
+                                    wishlistBadgeText }}</span>
                             </div>
                         </div>
 
@@ -181,32 +296,34 @@ onUnmounted(() => {
                             <RouterLink :to="{ name: 'app.cart' }">
                                 <div
                                     class="flex size-10 md:size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
-                                    <img src="@/assets/images/icons/shopping-cart-black.svg" class="size-5 md:size-6" alt="icon">
+                                    <img src="@/assets/images/icons/shopping-cart-black.svg" class="size-5 md:size-6"
+                                        alt="icon">
                                 </div>
                             </RouterLink>
                             <div v-if="totalItems > 0"
                                 class="absolute top-0 right-0 flex items-center justify-center min-w-[16px] md:min-w-[20px] min-h-[16px] md:min-h-[20px] rounded-full bg-custom-red border-2 border-white px-1">
-                                <span class="text-white text-[8px] md:text-[10px] font-bold leading-none">{{ totalItems > 99 ? '99+' :
-                                    totalItems }}</span>
+                                <span class="text-white text-[8px] md:text-[10px] font-bold leading-none">{{
+                                    cartBadgeText }}</span>
                             </div>
                         </div>
 
                         <RouterLink :to="{ name: 'admin.dashboard' }" v-if="user && user.role === 'store'"
                             @click="authStore.setMode('store')"
                             class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 bg-custom-black text-white hover:shadow-lg transition-300">
-                             <img src="@/assets/images/icons/shop-white.svg" class="size-5 md:size-6 md:mr-2" alt="icon">
-                             <p class="font-medium hidden md:block">{{ authStore.activeMode === 'buyer' ? 'Switch to Seller' : 'Seller Dashboard' }}</p>
+                            <img src="@/assets/images/icons/shop-white.svg" class="size-5 md:size-6 md:mr-2" alt="icon">
+                            <p class="font-medium hidden md:block">{{ sellerDashboardLabel }}</p>
                         </RouterLink>
 
                         <RouterLink :to="{ name: 'auth.open-store' }" v-if="user && user.role === 'buyer'"
                             @click="authStore.setMode('buyer')"
                             class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-6 bg-custom-black text-white hover:shadow-lg transition-300">
-                             <img src="@/assets/images/icons/shop-white.svg" class="size-5 md:size-6 md:mr-2" alt="icon">
-                             <p class="font-medium hidden md:block">Start Selling</p>
+                            <img src="@/assets/images/icons/shop-white.svg" class="size-5 md:size-6 md:mr-2" alt="icon">
+                            <p class="font-medium hidden md:block">Start Selling</p>
                         </RouterLink>
 
                         <RouterLink :to="{ name: 'auth.login' }"
-                            class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-8 bg-custom-blue" v-if="!user">
+                            class="flex shrink-0 h-10 md:h-14 rounded-[18px] py-2 px-3 md:py-4 md:px-8 bg-custom-blue"
+                            v-if="!user">
                             <p class="font-medium text-white text-xs md:text-base">Sign In</p>
                         </RouterLink>
                         <div class="relative profile-dropdown-container" v-if="user">
@@ -214,7 +331,8 @@ onUnmounted(() => {
                                 class="flex size-10 md:size-14 rounded-full bg-custom-icon-background items-center justify-center overflow-hidden">
                                 <img :src="user.profile_picture" class="size-full object-cover" alt="icon">
                             </button>
-                            <div id="Profile-Dropdown" class="absolute transform top-[calc(100%+8px)] md:top-[calc(100%+12px)] right-0 z-30"
+                            <div id="Profile-Dropdown"
+                                class="absolute transform top-[calc(100%+8px)] md:top-[calc(100%+12px)] right-0 z-30"
                                 v-if="showDropdownProfile">
                                 <nav
                                     class="flex flex-col w-[201px] rounded-[20px] rounded-tr-none py-6 px-4 gap-[18px] bg-white shadow-[0px_6px_30px_0px_#00000017]">
@@ -252,39 +370,6 @@ onUnmounted(() => {
                         </div>
                     </div>
                 </div>
-                <!-- <div class="flex items-center gap-8 flex-wrap">
-                    <RouterLink :to="{ name: 'app.home' }" class="group flex items-center gap-2 active">
-                        <img src="@/assets/images/icons/home-blue-fill.svg"
-                            class="hidden size-6 shrink-0 group-[&.active]:flex" alt="icon">
-                        <img src="@/assets/images/icons/home-grey.svg"
-                            class="flex size-6 shrink-0 group-[&.active]:hidden" alt="icon">
-                        <span class="font-semibold text-custom-grey group-[&.active]:text-custom-blue">Homepage</span>
-                    </RouterLink>
-                    <a href="#" class="group flex items-center gap-2">
-                        <img src="@/assets/images/icons/flash-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-semibold text-custom-grey">Flash Deals</span>
-                    </a>
-                    <a href="#" class="group flex items-center gap-2">
-                        <img src="@/assets/images/icons/box-search-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-semibold text-custom-grey">Track Order</span>
-                    </a>
-                    <a href="#" class="group flex items-center gap-2">
-                        <img src="@/assets/images/icons/note-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-semibold text-custom-grey">Return & Refund</span>
-                    </a>
-                    <a href="#" class="group flex items-center gap-2">
-                        <img src="@/assets/images/icons/car-delivery-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-semibold text-custom-grey">Shipping Info</span>
-                    </a>
-                    <a href="#" class="group flex items-center gap-2">
-                        <img src="@/assets/images/icons/buildings-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-semibold text-custom-grey">About Us</span>
-                    </a>
-                    <a href="#" class="group flex items-center gap-2">
-                        <img src="@/assets/images/icons/callcenter-grey.svg" class="flex size-6 shrink-0" alt="icon">
-                        <span class="font-semibold text-custom-grey">Customer Services</span>
-                    </a>
-                </div> -->
             </div>
         </div>
     </section>
