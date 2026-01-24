@@ -34,7 +34,8 @@ onMounted(() => {
                 <div class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
             </div>
 
-            <div v-else-if="items.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <div v-else-if="items.length > 0"
+                class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
                 <ProductCard v-for="product in items" :key="product.id" :item="product" />
             </div>
 

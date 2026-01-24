@@ -9,6 +9,8 @@ import { debounce } from 'lodash';
 import { useToast } from "vue-toastification";
 
 import { axiosInstance } from '@/plugins/axios';
+import CheckoutStepper from '@/components/Molecule/CheckoutStepper.vue';
+import TrustBadges from '@/components/Molecule/TrustBadges.vue';
 
 // Store imports
 const authStore = useAuthStore()
@@ -32,7 +34,7 @@ const fetchSavedAddresses = async () => {
     try {
         const response = await axiosInstance.get('/address')
         savedAddresses.value = response.data.data
-        
+
         // Auto-select primary
         const primary = savedAddresses.value.find(a => a.is_primary)
         if (primary) {
@@ -112,16 +114,16 @@ const loadMidtransScript = () => {
         // Use explicit environment variable, fallback to key detection if not set
         const isProductionEnv = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true';
         const isKeyProduction = !clientKey.startsWith('SB-');
-        
+
         // Prioritize explicit config, otherwise guess based on key
-        const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION !== undefined 
-            ? isProductionEnv 
+        const isProduction = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION !== undefined
+            ? isProductionEnv
             : isKeyProduction;
 
-        const snapUrl = isProduction 
-            ? 'https://app.midtrans.com/snap/snap.js' 
+        const snapUrl = isProduction
+            ? 'https://app.midtrans.com/snap/snap.js'
             : 'https://app.sandbox.midtrans.com/snap/snap.js';
-        
+
         script.src = snapUrl;
 
         script.async = true;
@@ -243,7 +245,7 @@ const handleSubmit = async () => {
 
         // 1. Clear cart immediately to prevent duplicate orders
         cart.clearSelectedItems();
-        
+
         // 2. Open Snap Popup
         window.snap.pay(response.snap_token, {
             onSuccess: function (result) {
@@ -258,7 +260,7 @@ const handleSubmit = async () => {
                 if (user.value?.username) {
                     router.push({ name: 'user.my-transaction', params: { username: user.value.username } });
                 } else {
-                     window.location.href = '/my-transactions'; // Fallback
+                    window.location.href = '/my-transactions'; // Fallback
                 }
             },
             onError: function (result) {
@@ -268,7 +270,7 @@ const handleSubmit = async () => {
             onClose: function () {
                 isProcessingPayment.value = false;
                 toast.warning('Pembayaran tertunda. Silakan cek menu Transaksi.');
-                 // Redirect to My Transactions with username param
+                // Redirect to My Transactions with username param
                 if (user.value?.username) {
                     router.push({ name: 'user.my-transaction', params: { username: user.value.username } });
                 } else {
@@ -315,8 +317,8 @@ onMounted(async () => {
 </script>
 
 <template>
-    <section class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto">
-        <h1 class="font-bold text-2xl md:text-[32px]">Checkout Page</h1>
+    <section class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto pt-4">
+        <CheckoutStepper :currentStep="2" />
 
         <div class="flex flex-col md:flex-row gap-5">
             <!-- Cart Items Section -->
@@ -339,16 +341,20 @@ onMounted(async () => {
                     </p>
 
                     <div class="flex flex-col gap-4 pl-4 border-l-2 border-gray-100">
-                         <div v-for="product in store.products" :key="product.id" class="flex items-start gap-4 w-full">
-                            <div class="flex size-[64px] shrink-0 rounded-xl bg-gray-50 p-2 items-center justify-center">
+                        <div v-for="product in store.products" :key="product.id" class="flex items-start gap-4 w-full">
+                            <div
+                                class="flex size-[64px] shrink-0 rounded-xl bg-gray-50 p-2 items-center justify-center">
                                 <img :src="product.product_images?.find(i => i.is_thumbnail)?.image || product.thumbnail"
-                                    class="size-full object-contain mix-blend-multiply" alt="icon" @error="(e) => e.target.src = '/src/assets/images/thumbnails/th-1.svg'">
+                                    class="size-full object-contain mix-blend-multiply" alt="icon"
+                                    @error="(e) => e.target.src = '/src/assets/images/thumbnails/th-1.svg'">
                             </div>
                             <div class="flex flex-col flex-1 gap-1">
                                 <p class="font-bold text-sm leading-tight line-clamp-2">{{ product.name }}</p>
-                                <p class="text-xs text-custom-grey font-medium">{{ product.weight }} KG • {{ product.product_category.name }}</p>
+                                <p class="text-xs text-custom-grey font-medium">{{ product.weight }} KG • {{
+                                    product.product_category.name }}</p>
                                 <div class="flex items-center justify-between mt-1">
-                                    <p class="font-bold text-sm text-custom-black">Rp {{ formatRupiah(product.price) }}</p>
+                                    <p class="font-bold text-sm text-custom-black">Rp {{ formatRupiah(product.price) }}
+                                    </p>
                                     <p class="font-semibold text-xs text-custom-grey">x{{ product.quantity }}</p>
                                 </div>
                             </div>
@@ -379,15 +385,12 @@ onMounted(async () => {
                     <div class="flex flex-col gap-3">
                         <div class="flex items-center justify-between">
                             <p class="font-semibold text-custom-grey">Address Details</p>
-                            <button v-if="savedAddresses.length > 0 && !showSavedAddresses" 
-                                @click="showSavedAddresses = true"
-                                type="button"
+                            <button v-if="savedAddresses.length > 0 && !showSavedAddresses"
+                                @click="showSavedAddresses = true" type="button"
                                 class="text-sm font-bold text-custom-blue hover:underline">
                                 Select Saved Address
                             </button>
-                            <button v-else-if="showSavedAddresses" 
-                                @click="showSavedAddresses = false"
-                                type="button"
+                            <button v-else-if="showSavedAddresses" @click="showSavedAddresses = false" type="button"
                                 class="text-sm font-bold text-custom-red hover:underline">
                                 Cancel Selection
                             </button>
@@ -395,27 +398,30 @@ onMounted(async () => {
 
                         <!-- Saved Addresses Grid -->
                         <div v-if="showSavedAddresses" class="grid grid-cols-1 gap-3 mb-2">
-                             <div v-for="addr in savedAddresses" :key="addr.id" 
-                                @click="selectSavedAddress(addr)"
+                            <div v-for="addr in savedAddresses" :key="addr.id" @click="selectSavedAddress(addr)"
                                 class="cursor-pointer border border-custom-stroke rounded-xl p-4 hover:border-custom-blue hover:bg-blue-50 transition-all group"
-                                :class="{'border-custom-blue bg-blue-50 ring-1 ring-custom-blue': transaction.address === addr.address}">
+                                :class="{ 'border-custom-blue bg-blue-50 ring-1 ring-custom-blue': transaction.address === addr.address }">
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="font-bold text-custom-black">{{ addr.label }}</span>
-                                    <span v-if="addr.is_primary" class="text-[10px] font-bold bg-blue-100 text-custom-blue px-2 py-0.5 rounded-full">PRIMARY</span>
+                                    <span v-if="addr.is_primary"
+                                        class="text-[10px] font-bold bg-blue-100 text-custom-blue px-2 py-0.5 rounded-full">PRIMARY</span>
                                 </div>
-                                <p class="text-sm font-semibold text-custom-black">{{ addr.recipient_name }} ({{ addr.phone }})</p>
-                                <p class="text-xs text-custom-grey line-clamp-1 mt-1">{{ addr.address }}, {{ addr.city }}</p>
+                                <p class="text-sm font-semibold text-custom-black">{{ addr.recipient_name }} ({{
+                                    addr.phone }})</p>
+                                <p class="text-xs text-custom-grey line-clamp-1 mt-1">{{ addr.address }}, {{ addr.city
+                                }}</p>
                             </div>
                         </div>
 
                         <!-- Manual Search (Fallback) -->
                         <div v-if="!showSavedAddresses || savedAddresses.length === 0">
-                            <p class="font-semibold text-custom-grey text-xs uppercase tracking-wider mb-1">Or search manually</p>
+                            <p class="font-semibold text-custom-grey text-xs uppercase tracking-wider mb-1">Or search
+                                manually</p>
                             <div class="group/errorState flex flex-col gap-2 relative">
                                 <label class="group relative">
                                     <div class="input-icon">
-                                        <img src="@/assets/images/icons/global-search-grey.svg" class="flex size-6 shrink-0"
-                                            alt="icon">
+                                        <img src="@/assets/images/icons/global-search-grey.svg"
+                                            class="flex size-6 shrink-0" alt="icon">
                                     </div>
                                     <p class="input-placeholder">Enter District / City</p>
                                     <input type="text" class="custom-input" placeholder="" v-model="addressSearch"
@@ -615,6 +621,8 @@ onMounted(async () => {
                             <span class="font-bold text-white">Complete form to checkout</span>
                         </template>
                     </button>
+
+                    <TrustBadges />
                 </div>
             </form>
         </div>
@@ -624,7 +632,8 @@ onMounted(async () => {
     <div id="Delivery-Modal" class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50"
         v-if="showDeliveryModal">
         <div class="backdrop absolute w-full h-full bg-[#292D32B2]" @click="closeModal"></div>
-        <div id="Select-Courier" class="relative flex flex-col w-[460px] shrink-0 h-fit rounded-2xl overflow-hidden">
+        <div id="Select-Courier"
+            class="relative flex flex-col w-full max-w-[460px] mx-4 shrink-0 h-fit rounded-2xl overflow-hidden">
             <div class="header flex items-center p-5 gap-3 justify-between bg-custom-black">
                 <p class="font-semibold text-lg text-white">Select Courier</p>
                 <button type="button" @click="closeModal">
