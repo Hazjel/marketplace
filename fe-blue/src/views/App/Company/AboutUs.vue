@@ -8,9 +8,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <main class="w-full bg-white pb-20 overflow-hidden">
+    <main class="w-full bg-white pb-24 md:pb-32 overflow-hidden">
         <!-- Hero Section -->
-        <section class="relative w-full h-[600px] flex items-center justify-center overflow-hidden">
+        <section class="relative w-full min-h-[600px] flex items-center justify-center overflow-hidden pb-20 md:pb-0">
             <!-- Background Image -->
             <div class="absolute inset-0">
                 <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
@@ -20,7 +20,7 @@ onMounted(() => {
             </div>
 
             <!-- Content -->
-            <div class="relative z-10 w-full max-w-[1280px] px-5 md:px-[52px] pt-20">
+            <div class="relative z-10 w-full max-w-[1280px] px-5 md:px-[52px] pt-20 pb-20 md:pb-32">
                 <div class="max-w-3xl flex flex-col gap-6 animate-fade-in-up">
                     <span
                         class="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-custom-blue font-bold text-sm tracking-widest border border-white/20 w-fit">
@@ -203,7 +203,7 @@ onMounted(() => {
         </section>
 
         <!-- CTA -->
-        <section class="max-w-[1280px] mx-auto px-5 md:px-[52px] py-20 pb-0">
+        <section class="max-w-[1280px] mx-auto px-5 md:px-[52px] py-10 md:py-24">
             <div class="bg-custom-black rounded-[40px] p-10 md:p-24 text-center relative overflow-hidden group">
                 <!-- Background Image Overlay -->
                 <div class="absolute inset-0 opacity-20 group-hover:scale-105 transition-transform duration-700">
