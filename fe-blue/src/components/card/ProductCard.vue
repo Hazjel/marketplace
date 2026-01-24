@@ -42,21 +42,34 @@ const handleToggleWishlist = async () => {
 
 <template>
     <div
-        class="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-floating hover:-translate-y-1 transition-all duration-300 h-full cursor-pointer relative border border-transparent hover:border-custom-blue/10">
+        class="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-floating hover:-translate-y-1 transition-all duration-300 h-full cursor-pointer relative border border-transparent hover:border-custom-blue/10 w-full">
         <!-- Wishlist Overlay -->
         <button @click.prevent="handleToggleWishlist"
-            class="absolute top-2 right-2 z-10 flex size-8 items-center justify-center rounded-full bg-black/20 hover:bg-black/30 backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100">
+            class="absolute top-2 right-2 z-20 flex size-8 md:size-9 items-center justify-center rounded-full bg-black/20 hover:bg-black/30 backdrop-blur-sm transition-all duration-200 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 active:scale-95 touch-manipulation">
             <img v-if="!isInWishlist" src="@/assets/images/icons/heart-white-fill.svg"
-                class="size-5 transition-transform active:scale-90" alt="wishlist">
-            <img v-else src="@/assets/images/icons/heart-red.svg" class="size-5 transition-transform active:scale-90"
+                class="size-5 md:size-5 transition-transform" alt="wishlist">
+            <img v-else src="@/assets/images/icons/heart-red.svg" class="size-5 md:size-5 transition-transform"
                 alt="wishlist">
         </button>
 
-        <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }" class="flex flex-col h-full">
+        <!-- Dynamic Badges (Optional) -->
+        <div v-if="item.is_new || item.discount > 0" class="absolute top-2 left-2 z-20 flex flex-col gap-1">
+            <span v-if="item.is_new"
+                class="px-2 py-0.5 bg-custom-green/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-lg uppercase tracking-wider shadow-sm">
+                New
+            </span>
+            <span v-if="item.discount > 0"
+                class="px-2 py-0.5 bg-custom-orange/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-lg uppercase tracking-wider shadow-sm">
+                {{ item.discount }}% OFF
+            </span>
+        </div>
+
+        <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }"
+            class="flex flex-col h-full w-full">
             <!-- Image -->
-            <div class="aspect-[4/3] w-full bg-gray-50 overflow-hidden relative">
+            <div class="aspect-[1/1] md:aspect-[4/3] w-full bg-gray-50 overflow-hidden relative">
                 <img :src="item.thumbnail"
-                    class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 will-change-transform"
                     loading="lazy" alt="product">
                 <div v-if="item.stock <= 0"
                     class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10">
@@ -66,33 +79,43 @@ const handleToggleWishlist = async () => {
             </div>
 
             <!-- Content -->
-            <div class="flex flex-col p-4 gap-1 flex-1">
+            <div class="flex flex-col p-3 md:p-4 gap-1 flex-1 min-w-0">
                 <!-- Store -->
-                <div class="flex items-center gap-1 mb-1">
-                    <img src="@/assets/images/icons/verify-star.svg" class="size-3.5" v-if="item?.store?.is_official"
-                        alt="official">
-                    <span class="text-[10px] uppercase font-bold text-custom-grey tracking-wider truncate">{{
-                        item?.store?.name || 'Store' }}</span>
+                <div class="flex items-center gap-1 mb-0.5">
+                    <img src="@/assets/images/icons/verify-star.svg" class="size-3 md:size-3.5 shrink-0"
+                        v-if="item?.store?.is_official" alt="official">
+                    <span
+                        class="text-[10px] uppercase font-bold text-custom-grey tracking-wider truncate flex-1 md:flex-none">{{
+                            item?.store?.name || 'Store' }}</span>
                 </div>
 
                 <!-- Title -->
                 <h3
-                    class="font-medium text-custom-black text-sm leading-snug line-clamp-2 mb-1 group-hover:text-custom-blue transition-colors min-h-[40px]">
+                    class="font-medium text-custom-black text-sm leading-snug line-clamp-2 md:mb-1 group-hover:text-custom-blue transition-colors h-[40px] md:min-h-[40px]">
                     {{ item?.name }}
                 </h3>
 
                 <!-- Price -->
-                <p class="font-bold text-base text-custom-black mt-auto">
-                    Rp {{ formatRupiah(item?.price) }}
-                </p>
+                <div class="mt-auto flex flex-col gap-0.5">
+                    <p class="font-bold text-sm md:text-base text-custom-black">
+                        Rp {{ formatRupiah(item?.price) }}
+                    </p>
+                    <p v-if="item.original_price && item.discount > 0"
+                        class="text-[10px] text-custom-grey line-through decoration-custom-grey/60">
+                        Rp {{ formatRupiah(item.original_price) }}
+                    </p>
+                </div>
 
-                <!-- Rating -->
-                <div class="flex items-center gap-2 text-xs text-custom-grey mt-2">
+                <!-- Rating & Sold -->
+                <div class="flex flex-wrap items-center gap-2 text-xs text-custom-grey mt-2">
                     <div class="flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 rounded">
                         <i class="fa-solid fa-star text-custom-orange text-[10px]"></i>
                         <span class="font-bold text-custom-black">4.9</span>
                     </div>
-                    <span class="text-xs">{{ item?.total_sold || 0 }} Sold</span>
+                    <span class="text-[10px] md:text-xs truncate">{{ item?.total_sold || 0 }} Sold</span>
+                    <span v-if="item.location"
+                        class="text-[10px] text-custom-grey/60 hidden md:inline-block md:ml-auto">• {{ item.location
+                        }}</span>
                 </div>
             </div>
         </RouterLink>

@@ -5,6 +5,7 @@ import { useProductStore } from '@/stores/product';
 import { storeToRefs } from 'pinia';
 import SectionHeader from '@/components/Molecule/SectionHeader.vue';
 import ProductGallery from '@/components/Molecule/ProductGallery.vue';
+import ProductSpecs from '@/components/Molecule/ProductSpecs.vue';
 import StarPointy from '@/assets/images/icons/Star-pointy.svg';
 import StarPointyOutline from '@/assets/images/icons/Star-pointy-outline.svg';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -248,7 +249,7 @@ const handleToggleWishlist = async () => {
         router.push({ name: 'auth.login' })
         return
     }
-    await toggleWishlist(product.value.id)
+    await toggleWishlist(product.value)
 }
 
 const fetchProduct = async () => {
@@ -329,6 +330,36 @@ const addToCart = () => {
     toast.success('Produk berhasil ditambahkan ke keranjang')
 }
 
+watch(
+    () => route.params.slug,
+    () => {
+        fetchProduct();
+        fetchProducts({
+            limit: 4,
+            random: true
+        });
+    }
+);
+
+const activeTab = ref('Detail');
+
+const scrollToSection = (id) => {
+    activeTab.value = id;
+    const element = document.getElementById(id);
+    if (element) {
+        const offset = 180; // height of sticky header + tabs
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+        });
+    }
+};
+
 onMounted(() => {
     fetchProduct()
     fetchProducts({
@@ -338,18 +369,25 @@ onMounted(() => {
     if (authStore.user) {
         fetchWishlist()
     }
-})
 
-watch(
-    () => route.params.slug,
-    () => {
-        fetchProduct()
-        fetchProducts({
-            limit: 4,
-            random: true
-        })
-    }
-)
+    // Scroll Spy
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                activeTab.value = entry.target.id;
+            }
+        });
+    }, {
+        threshold: 0.2,
+        rootMargin: "-150px 0px -50% 0px"
+    });
+
+    const sections = ['Detail', 'Reviews', 'Recommendation'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+    });
+});
 </script>
 
 <template>
@@ -383,19 +421,30 @@ watch(
             <div class="lg:col-span-5 flex flex-col gap-6">
                 <!-- Title & Stats -->
                 <div>
-                    <h1 class="font-bold text-xl md:text-2xl leading-snug mb-2">{{ product?.name }}</h1>
-                    <div class="flex items-center gap-3 text-sm">
-                        <div class="flex items-center gap-1">
-                            <span class="font-bold text-custom-black">Terjual {{ product?.total_sold || 0 }}</span>
-                            <span class="text-custom-grey">•</span>
-                            <div class="flex items-center gap-1 border border-custom-stroke rounded px-1.5 py-0.5">
-                                <img src="@/assets/images/icons/Star-pointy.svg" class="size-3.5" />
-                                <span class="font-bold text-custom-black">{{ averageRating }}</span>
-                                <span class="text-custom-grey">({{ product?.product_reviews?.length || 0 }})</span>
+                    <h1 class="font-bold text-xl md:text-2xl leading-snug mb-3">{{ product?.name }}</h1>
+
+                    <!-- Social Proof Header -->
+                    <div class="flex items-center gap-4 text-sm mb-4">
+                        <div class="flex items-center gap-1.5 pr-4 border-r border-gray-200">
+                            <span class="font-bold text-custom-orange text-lg">{{ averageRating }}</span>
+                            <div class="flex">
+                                <img src="@/assets/images/icons/Star-pointy.svg" class="size-4" />
                             </div>
                         </div>
+                        <div
+                            class="flex items-center gap-1.5 pr-4 border-r border-gray-200 cursor-pointer hover:text-custom-blue">
+                            <span
+                                class="font-bold text-custom-black underline decoration-gray-300 underline-offset-2">{{
+                                    product?.product_reviews?.length || 0 }}</span>
+                            <span class="text-custom-grey">Ulasan</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-bold text-custom-black">{{ product?.total_sold || 0 }}</span>
+                            <span class="text-custom-grey">Terjual</span>
+                        </div>
                     </div>
-                    <div class="text-3xl font-bold text-custom-black mt-4">
+
+                    <div class="text-3xl font-bold text-custom-black mt-2">
                         Rp {{ formatRupiah(displayedPrice) }}
                     </div>
 
@@ -420,35 +469,32 @@ watch(
                 <!-- Tabs Navigation (Sticky) -->
                 <div
                     class="sticky-tabs flex items-center gap-6 overflow-x-auto hide-scrollbar bg-white -mx-4 px-4 md:mx-0 md:px-0">
-                    <a href="#Detail" class="tab-link active">Detail</a>
-                    <a href="#Reviews" class="tab-link">Ulasan</a>
-                    <a href="#Recommendation" class="tab-link">Rekomendasi</a>
+                    <button @click="scrollToSection('Detail')"
+                        class="tab-link transition-colors duration-300 border-b-2 py-3 font-semibold text-sm whitespace-nowrap"
+                        :class="activeTab === 'Detail' ? 'text-custom-black border-custom-black' : 'text-custom-grey border-transparent hover:text-custom-black'">
+                        Detail
+                    </button>
+                    <button @click="scrollToSection('Reviews')"
+                        class="tab-link transition-colors duration-300 border-b-2 py-3 font-semibold text-sm whitespace-nowrap"
+                        :class="activeTab === 'Reviews' ? 'text-custom-black border-custom-black' : 'text-custom-grey border-transparent hover:text-custom-black'">
+                        Ulasan
+                    </button>
+                    <button @click="scrollToSection('Recommendation')"
+                        class="tab-link transition-colors duration-300 border-b-2 py-3 font-semibold text-sm whitespace-nowrap"
+                        :class="activeTab === 'Recommendation' ? 'text-custom-black border-custom-black' : 'text-custom-grey border-transparent hover:text-custom-black'">
+                        Rekomendasi
+                    </button>
                 </div>
 
                 <!-- Detail Section -->
-                <div id="Detail" class="flex flex-col gap-4 scroll-mt-[180px]">
-                    <h3 class="font-bold text-lg">Detail Produk</h3>
-                    <div class="flex flex-col gap-3 text-sm text-custom-grey">
-                        <div class="flex">
-                            <span class="w-32 shrink-0">Kondisi</span>
-                            <span class="font-medium text-custom-black">{{ product?.condition }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-32 shrink-0">Berat Satuan</span>
-                            <span class="font-medium text-custom-black">{{ product?.weight }} kg</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-32 shrink-0">Kategori</span>
-                            <span class="font-medium text-custom-blue">{{ product?.product_category?.name }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-32 shrink-0">Etalase</span>
-                            <span class="font-medium text-custom-blue">Semua Etalase</span>
-                        </div>
-                    </div>
+                <div id="Detail" class="flex flex-col gap-6 scroll-mt-[180px]">
+                    <ProductSpecs :product="product" />
 
-                    <div class="whitespace-pre-wrap text-custom-black leading-relaxed text-sm mt-2">
-                        {{ product?.description }}
+                    <div class="flex flex-col gap-2">
+                        <h3 class="font-bold text-lg">Deskripsi</h3>
+                        <div class="whitespace-pre-wrap text-custom-black leading-relaxed text-sm">
+                            {{ product?.description }}
+                        </div>
                     </div>
                 </div>
 
@@ -498,7 +544,7 @@ watch(
                                         :style="{ width: `${getRatingPercentage(6 - star)}%` }"></div>
                                 </div>
                                 <span class="text-xs text-custom-grey w-8 text-right">{{ getRatingCount(6 - star)
-                                }}</span>
+                                    }}</span>
                             </div>
                         </div>
                     </div>
@@ -564,7 +610,7 @@ watch(
             </div>
 
             <!-- Right Column: Sticky Action Card (Span 3) -->
-            <div class="lg:col-span-3">
+            <div class="hidden lg:block lg:col-span-3">
                 <div
                     class="sticky top-[120px] bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 flex flex-col gap-5">
                     <h3 class="font-bold text-base">Atur jumlah dan catatan</h3>
