@@ -7,45 +7,51 @@
     /* ----------------------------------
        Semantic Palette
        ---------------------------------- */
-    --color-primary: #2563EB;
-    /* Blue-600 */
-    --color-primary-dark: #1E3A8A;
-    /* Navy/Blue-900 */
-    --color-primary-light: #EFF6FF;
-    /* Blue-50 */
+    --color-primary: #0F52BA;
+    /* Main Blue */
+    --color-primary-dark: #000926;
+    /* Midnight Blue */
+    --color-primary-light: #D6E6F3;
+    /* Light Blue */
 
-    --color-secondary: #F97316;
-    /* Orange-500 */
-    --color-secondary-dark: #C2410C;
-    /* Orange-700 */
+    --color-secondary: #A6C5D7;
+    /* Greyish Blue */
+    --color-secondary-dark: #0F52BA;
+    /* Darker Accents */
 
     --color-neutral: #64748B;
-    /* Slate-500 */
-    --color-neutral-dark: #1E293B;
-    /* Slate-800 */
+    /* Keep Slate-500 for text readability if needed, or use A6C5D7 if intended */
+    --color-neutral-dark: #000926;
+    /* Main Text */
     --color-surface: #F8FAFC;
-    /* Slate-50 */
+    /* White/Slate-50 */
 
     /* ----------------------------------
        Legacy / Custom Mapping
        ---------------------------------- */
-    --color-custom-black: #1E293B;
-    /* Mapped to Neutral Dark */
+    --color-custom-black: #000926;
+    /* Mapped to Darkest */
     --color-custom-blue: var(--color-primary);
     --color-custom-red: #EF4444;
     /* Red-500 */
-    --color-custom-grey: var(--color-neutral);
-    --color-custom-stroke: #E2E8F0;
-    /* Slate-200 */
+    --color-custom-grey: #64748B;
+    /* Keeping text grey readable for now, A6C5D7 might be too low contrast for small text. 
+       Use A6C5D7 for borders/icons via a new var if needed, or stick to neutral. */
+    --color-custom-stroke: #A6C5D7;
+    /* Using the Mid Blue for borders */
+
     --color-custom-green: #10B981;
     /* Emerald-500 */
     --color-custom-yellow: #EAB308;
     /* Yellow-500 */
     --color-custom-orange: var(--color-secondary);
+
     --color-custom-lime-green-char: #DEFF6E;
     --color-custom-lime-green: #84CC16;
     --color-custom-background: #F8FAFC;
-    --color-custom-icon-background: #F1F5F9;
+    /* Keep white-ish background for content, use D6E6F3 for sections */
+    --color-custom-icon-background: #D6E6F3;
+    /* Use Light Blue for icon backgrounds */
 
     /* ----------------------------------
        Typography
@@ -73,7 +79,7 @@ body {
 }
 
 #root {
-    @apply flex flex-grow flex-shrink basis-0;
+    @apply flex flex-grow flex-shrink basis-0 w-full;
 }
 
 /* Safe Areas & Constants */
