@@ -341,25 +341,6 @@ watch(
     }
 );
 
-const activeTab = ref('Detail');
-
-const scrollToSection = (id) => {
-    activeTab.value = id;
-    const element = document.getElementById(id);
-    if (element) {
-        const offset = 180; // height of sticky header + tabs
-        const bodyRect = document.body.getBoundingClientRect().top;
-        const elementRect = element.getBoundingClientRect().top;
-        const elementPosition = elementRect - bodyRect;
-        const offsetPosition = elementPosition - offset;
-
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth"
-        });
-    }
-};
-
 onMounted(() => {
     fetchProduct()
     fetchProducts({
@@ -369,24 +350,6 @@ onMounted(() => {
     if (authStore.user) {
         fetchWishlist()
     }
-
-    // Scroll Spy
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                activeTab.value = entry.target.id;
-            }
-        });
-    }, {
-        threshold: 0.2,
-        rootMargin: "-150px 0px -50% 0px"
-    });
-
-    const sections = ['Detail', 'Reviews', 'Recommendation'];
-    sections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) observer.observe(el);
-    });
 });
 </script>
 
@@ -467,24 +430,7 @@ onMounted(() => {
                 <hr class="border-custom-stroke" />
 
                 <!-- Tabs Navigation (Sticky) -->
-                <div
-                    class="sticky-tabs flex items-center gap-6 overflow-x-auto hide-scrollbar bg-white -mx-4 px-4 md:mx-0 md:px-0">
-                    <button @click="scrollToSection('Detail')"
-                        class="tab-link transition-colors duration-300 border-b-2 py-3 font-semibold text-sm whitespace-nowrap"
-                        :class="activeTab === 'Detail' ? 'text-custom-black border-custom-black' : 'text-custom-grey border-transparent hover:text-custom-black'">
-                        Detail
-                    </button>
-                    <button @click="scrollToSection('Reviews')"
-                        class="tab-link transition-colors duration-300 border-b-2 py-3 font-semibold text-sm whitespace-nowrap"
-                        :class="activeTab === 'Reviews' ? 'text-custom-black border-custom-black' : 'text-custom-grey border-transparent hover:text-custom-black'">
-                        Ulasan
-                    </button>
-                    <button @click="scrollToSection('Recommendation')"
-                        class="tab-link transition-colors duration-300 border-b-2 py-3 font-semibold text-sm whitespace-nowrap"
-                        :class="activeTab === 'Recommendation' ? 'text-custom-black border-custom-black' : 'text-custom-grey border-transparent hover:text-custom-black'">
-                        Rekomendasi
-                    </button>
-                </div>
+
 
                 <!-- Detail Section -->
                 <div id="Detail" class="flex flex-col gap-6 scroll-mt-[180px]">
@@ -544,7 +490,7 @@ onMounted(() => {
                                         :style="{ width: `${getRatingPercentage(6 - star)}%` }"></div>
                                 </div>
                                 <span class="text-xs text-custom-grey w-8 text-right">{{ getRatingCount(6 - star)
-                                    }}</span>
+                                }}</span>
                             </div>
                         </div>
                     </div>
@@ -612,7 +558,7 @@ onMounted(() => {
             <!-- Right Column: Sticky Action Card (Span 3) -->
             <div class="hidden lg:block lg:col-span-3">
                 <div
-                    class="sticky top-[120px] bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 flex flex-col gap-5">
+                    class="sticky top-[160px] bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 flex flex-col gap-5 transition-all duration-300">
                     <h3 class="font-bold text-base">Atur jumlah dan catatan</h3>
 
                     <div class="flex items-center gap-3 my-2">
@@ -710,7 +656,6 @@ onMounted(() => {
                 </button>
             </div>
         </div>
-
         <section id="Recommendation" class="flex flex-col gap-9 scroll-mt-[150px]">
             <SectionHeader title="Shop Quality Picks" subtitle="from Top Sellers"
                 :link="{ name: 'app.all-products' }" />
