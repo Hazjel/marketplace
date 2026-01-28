@@ -193,7 +193,7 @@ onUnmounted(() => {
                     </RouterLink>
 
                     <!-- Search Bar with Autocomplete -->
-                    <div class="relative order-last md:order-none w-full md:w-auto md:flex-1 search-container">
+                    <div class="relative order-last md:order-0 w-full md:w-auto md:flex-1 search-container">
                         <label
                             class="flex items-center w-full h-12 md:h-14 rounded-[18px] p-3 md:p-4 md:px-6 gap-2 bg-white dark:bg-white/5 border-[1.5px] border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
                             <img src="@/assets/images/icons/search-normal-grey.svg"
@@ -211,26 +211,25 @@ onUnmounted(() => {
 
                         <!-- Search Results Dropdown -->
                         <div v-show="showSearchResults || showHistory"
-                            class="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-[0px_6px_30px_0px_#00000017] border border-custom-stroke overflow-hidden z-50">
+                            class="absolute top-full mt-2 w-full bg-white dark:bg-surface-card rounded-2xl shadow-[0px_6px_30px_0px_#00000017] border border-custom-stroke dark:border-white/5 overflow-hidden z-50">
 
                             <!-- History Section -->
                             <div v-if="showHistory && searchHistory.length > 0">
                                 <div
-                                    class="flex items-center justify-between px-4 py-3 border-b border-custom-stroke/50">
-                                    <span class="text-xs font-bold text-custom-grey uppercase tracking-wider">Recent
-                                        Searches</span>
+                                    class="flex items-center justify-between px-4 py-3 border-b border-custom-stroke/50 dark:border-white/5">
+                                    <span class="text-xs font-bold text-custom-grey uppercase tracking-wider">Recent Searches</span>
                                     <button @click="clearHistory"
                                         class="text-xs font-semibold text-custom-red hover:underline">Clear All</button>
                                 </div>
                                 <div class="flex flex-col">
                                     <div v-for="(item, index) in searchHistory" :key="index"
-                                        class="flex items-center justify-between p-4 hover:bg-custom-background transition-300 cursor-pointer group"
+                                        class="flex items-center justify-between p-4 hover:bg-custom-background dark:hover:bg-white/5 transition-300 cursor-pointer group"
                                         @click="applyHistorySearch(item)">
                                         <div class="flex items-center gap-3">
                                             <img src="@/assets/images/icons/search-normal-grey.svg"
-                                                class="size-5 opacity-60" alt="history">
+                                                class="size-5 opacity-60 dark:brightness-0 dark:invert" alt="history">
                                             <span
-                                                class="font-medium text-custom-black group-hover:text-custom-blue transition-colors">{{
+                                                class="font-medium text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">{{
                                                     item }}</span>
                                         </div>
                                         <button @click.stop="removeHistoryItem(index)"
@@ -247,14 +246,16 @@ onUnmounted(() => {
                                 <div class="flex flex-col max-h-[400px] overflow-y-auto custom-scrollbar">
                                     <button v-for="product in searchResults" :key="product.id"
                                         @click="handleProductClick(product.slug, product.name)"
-                                        class="flex items-center gap-4 p-4 hover:bg-custom-background transition-300 text-left border-b border-custom-stroke/30 last:border-0">
+                                        class="flex items-center gap-4 p-4 hover:bg-custom-background dark:hover:bg-white/5 transition-300 text-left border-b border-custom-stroke/30 dark:border-white/5 last:border-0 group">
                                         <div
-                                            class="flex size-14 shrink-0 rounded-xl bg-custom-background overflow-hidden border border-custom-stroke/50">
+                                            class="flex size-14 shrink-0 rounded-xl bg-custom-background dark:bg-white/5 overflow-hidden border border-custom-stroke/50 dark:border-white/5">
                                             <img :src="getProductImage(product)" class="size-full object-cover"
                                                 alt="product">
                                         </div>
                                         <div class="flex flex-col gap-1 flex-1 min-w-0">
-                                            <p class="font-bold text-sm truncate text-custom-black">{{ product.name }}
+                                            <p
+                                                class="font-bold text-sm truncate text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
+                                                {{ product.name }}
                                             </p>
                                             <div class="flex items-center gap-2">
                                                 <p class="text-custom-grey text-xs">{{ product.product_category?.name }}
@@ -265,7 +266,7 @@ onUnmounted(() => {
                                         </div>
                                     </button>
                                 </div>
-                                <div class="p-3 bg-custom-background border-t border-custom-stroke hover:bg-custom-blue/5 transition-colors cursor-pointer text-center"
+                                <div class="p-3 bg-custom-background dark:bg-white/5 border-t border-custom-stroke dark:border-white/10 hover:bg-custom-blue/5 transition-colors cursor-pointer text-center"
                                     @click="handleEnterSearch">
                                     <p class="text-xs font-bold text-custom-blue">See all results for "{{ searchQuery
                                     }}"</p>
@@ -297,7 +298,7 @@ onUnmounted(() => {
                         </div>
 
                         <!-- Vertical Divider -->
-                        <div class="w-[1px] h-6 bg-custom-stroke dark:bg-white/10 mx-1 hidden md:block"></div>
+                        <div class="w-px h-6 bg-custom-stroke dark:bg-white/10 mx-1 hidden md:block"></div>
 
                         <!-- Login Button (If Guest) -->
                         <RouterLink :to="{ name: 'auth.login' }"
@@ -436,8 +437,7 @@ onUnmounted(() => {
                                                     <img src="@/assets/images/icons/setting-black.svg"
                                                         class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
                                                         alt="settings">
-                                                    <span class="text-sm font-medium text-custom-black">Account
-                                                        Settings</span>
+                                                    <span class="text-sm font-medium text-custom-black">Account Settings</span>
                                                 </div>
                                             </RouterLink>
 

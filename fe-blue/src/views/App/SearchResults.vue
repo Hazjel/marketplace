@@ -89,7 +89,8 @@ watch(
 </script>
 
 <template>
-    <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background py-8 md:p-[52px]">
+    <header
+        class="w-full max-w-[1920px] mx-auto overflow-hidden bg-white dark:bg-surface py-8 md:p-[52px] border-b border-custom-stroke dark:border-white/5">
         <div class="flex flex-col w-full max-w-[1280px] px-4 md:px-[52px] gap-3 mx-auto">
             <div class="flex items-center gap-3">
                 <RouterLink :to="{ name: 'app.home' }"
@@ -101,7 +102,8 @@ watch(
                     Search Results
                 </span>
             </div>
-            <h1 class="font-extrabold text-[32px] capitalize text-custom-black">Results for "{{ searchQuery }}"</h1>
+            <h1 class="font-extrabold text-[32px] capitalize text-custom-black dark:text-white">Results for "{{
+                searchQuery }}"</h1>
         </div>
     </header>
 
@@ -109,7 +111,7 @@ watch(
         class="flex flex-col lg:flex-row gap-10 w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[50px] mb-20 md:mb-[100px] mx-auto">
         <!-- Mobile Filter Toggle -->
         <button @click="showFilters = !showFilters"
-            class="flex lg:hidden items-center justify-between w-full p-4 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/5 rounded-xl shadow-sm text-custom-black">
+            class="flex lg:hidden items-center justify-between w-full p-4 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/5 rounded-xl shadow-sm text-custom-black dark:text-white">
             <span class="font-bold text-lg">Filter Products</span>
             <i class="fa-solid fa-chevron-down transition-transform" :class="{ 'rotate-180': showFilters }"></i>
         </button>
@@ -124,7 +126,7 @@ watch(
             <!-- Products Section -->
             <section v-if="loadingProducts || products.length > 0" class="flex flex-col gap-9">
                 <div class="flex items-center justify-between">
-                    <h2 class="font-extrabold text-[32px] text-custom-black">Products Found</h2>
+                    <h2 class="font-extrabold text-[32px] text-custom-black dark:text-white">Products Found</h2>
                 </div>
                 <div v-if="loadingProducts"
                     class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
@@ -148,7 +150,7 @@ watch(
             <!-- Stores Section -->
             <section v-if="loadingStores || stores.length > 0" class="flex flex-col gap-9">
                 <div class="flex items-center justify-between">
-                    <h2 class="font-extrabold text-[32px] text-custom-black">Stores Found</h2>
+                    <h2 class="font-extrabold text-[32px] text-custom-black dark:text-white">Stores Found</h2>
                 </div>
                 <div v-if="loadingStores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     <SkeletonStoreCard v-for="i in 6" :key="i" />

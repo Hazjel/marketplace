@@ -13,10 +13,10 @@ defineProps({
     <div
         class="card relative flex flex-col bg-white dark:bg-surface-card rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm overflow-hidden h-full group hover-glow-blue">
         <!-- Banner -->
-        <div class="h-20 w-full bg-gradient-to-r from-blue-400 to-indigo-500 relative overflow-hidden">
+        <div class="h-20 w-full bg-linear-to-r from-blue-400 to-indigo-500 relative overflow-hidden">
             <img v-if="item.banner" :src="item.banner" class="w-full h-full object-cover opacity-50" loading="lazy"
                 alt="banner">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            <div class="absolute inset-0 bg-linear-to-t from-black/20 to-transparent"></div>
         </div>
 
         <!-- Floating Logo -->
