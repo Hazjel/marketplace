@@ -35,9 +35,9 @@ onMounted(async () => {
 <template>
     <section class="flex flex-col gap-4">
         <div class="flex items-center justify-between px-1 md:px-0">
-            <h2 class="text-xl md:text-2xl font-bold text-custom-black">Recommended For You</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-custom-black dark:text-white">Recommended For You</h2>
             <RouterLink :to="{ name: 'app.all-products' }"
-                class="text-sm font-semibold text-custom-blue hover:underline">
+                class="text-sm font-semibold text-custom-blue dark:text-blue-400 hover:underline">
                 See All
             </RouterLink>
         </div>

@@ -38,35 +38,35 @@ onMounted(() => {
             <div class="swiper-wrapper">
                 <div class="swiper-slide w-full">
                     <a href=""
-                        class="block w-full aspect-[4/5] md:aspect-[21/9] relative bg-custom-icon-background overflow-hidden group/slide">
+                        class="block w-full aspect-4/5 md:aspect-21/9 relative bg-custom-icon-background overflow-hidden group/slide">
                         <img src="@/assets/images/banners/banner_mega_sale.png"
                             class="size-full object-cover group-hover/slide:scale-105 transition-transform duration-700"
                             alt="Mega Sale">
                         <!-- Cinematic Overlay -->
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60">
+                            class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60">
                         </div>
                     </a>
                 </div>
                 <div class="swiper-slide w-full">
                     <a href=""
-                        class="block w-full aspect-[4/5] md:aspect-[21/9] relative bg-custom-icon-background overflow-hidden group/slide">
+                        class="block w-full aspect-4/5 md:aspect-21/9 relative bg-custom-icon-background overflow-hidden group/slide">
                         <img src="@/assets/images/banners/banner_gadgets.png"
                             class="size-full object-cover group-hover/slide:scale-105 transition-transform duration-700"
                             alt="Gadgets">
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60">
+                            class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60">
                         </div>
                     </a>
                 </div>
                 <div class="swiper-slide w-full">
                     <a href=""
-                        class="block w-full aspect-[4/5] md:aspect-[21/9] relative bg-custom-icon-background overflow-hidden group/slide">
+                        class="block w-full aspect-4/5 md:aspect-21/9 relative bg-custom-icon-background overflow-hidden group/slide">
                         <img src="@/assets/images/banners/banner_mega_sale.png"
                             class="size-full object-cover group-hover/slide:scale-105 transition-transform duration-700"
                             alt="Special Offer">
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60">
+                            class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60">
                         </div>
                     </a>
                 </div>
@@ -78,7 +78,7 @@ onMounted(() => {
         <!-- Custom Navigation Buttons -->
         <!-- Prev Button -->
         <button
-            class="swiper-button-prev-custom absolute left-6 top-1/2 -translate-y-1/2 z-20 flex size-8 md:size-10 items-center justify-center rounded-full bg-white/90 shadow-lg text-custom-black opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-white disabled:opacity-0 cursor-pointer">
+            class="swiper-button-prev-custom absolute left-6 top-1/2 -translate-y-1/2 z-20 flex size-8 md:size-10 items-center justify-center rounded-full bg-white/90 dark:bg-surface-card shadow-lg text-custom-black dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-white dark:hover:bg-custom-blue disabled:opacity-0 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                 stroke="currentColor" class="size-4 md:size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -86,7 +86,7 @@ onMounted(() => {
         </button>
         <!-- Next Button -->
         <button
-            class="swiper-button-next-custom absolute right-6 top-1/2 -translate-y-1/2 z-20 flex size-8 md:size-10 items-center justify-center rounded-full bg-white/90 shadow-lg text-custom-black opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-white disabled:opacity-0 cursor-pointer">
+            class="swiper-button-next-custom absolute right-6 top-1/2 -translate-y-1/2 z-20 flex size-8 md:size-10 items-center justify-center rounded-full bg-white/90 dark:bg-surface-card shadow-lg text-custom-black dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-white dark:hover:bg-custom-blue disabled:opacity-0 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                 stroke="currentColor" class="size-4 md:size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
