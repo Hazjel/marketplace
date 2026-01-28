@@ -448,7 +448,7 @@ onMounted(() => {
 
                 <!-- Store Info -->
                 <div class="flex items-center gap-3">
-                    <div class="size-12 rounded-full overflow-hidden bg-gray-100 shrink-0">
+                    <div class="size-12 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 shrink-0">
                         <img :src="product?.store?.logo" class="size-full object-cover" />
                     </div>
                     <div class="flex flex-col">
@@ -503,13 +503,14 @@ onMounted(() => {
                         </div>
                         <div v-else class="flex flex-col gap-6">
                             <div v-for="review in product.product_reviews" :key="review.id"
-                                class="flex gap-4 border-b border-gray-100 pb-6 last:border-0">
+                                class="flex gap-4 border-b border-border pb-6 last:border-0">
                                 <!-- User Avatar -->
-                                <div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex-shrink-0">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden flex-shrink-0">
                                     <img v-if="!review.is_anonymous && review.user?.profile_picture"
                                         :src="review.user.profile_picture" class="w-full h-full object-cover">
                                     <div v-else
-                                        class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 font-bold text-xs uppercase">
+                                        class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-white/5 text-gray-500 dark:text-gray-400 font-bold text-xs uppercase">
                                         {{ review.is_anonymous ? 'A' : (review.user?.name?.[0] || 'U') }}
                                     </div>
                                 </div>
@@ -534,7 +535,7 @@ onMounted(() => {
                                     </div>
 
                                     <!-- Content -->
-                                    <p class="text-sm text-gray-700 leading-relaxed">{{ review.review }}</p>
+                                    <p class="text-sm text-custom-grey leading-relaxed">{{ review.review }}</p>
 
                                     <!-- Media Attachments -->
                                     <div v-if="review.attachments && review.attachments.length > 0"
@@ -558,11 +559,11 @@ onMounted(() => {
             <!-- Right Column: Sticky Action Card (Span 3) -->
             <div class="hidden lg:block lg:col-span-3">
                 <div
-                    class="sticky top-[160px] bg-white rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 flex flex-col gap-5 transition-all duration-300">
+                    class="sticky top-[160px] bg-white dark:bg-surface-card rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-border flex flex-col gap-5 transition-all duration-300">
                     <h3 class="font-bold text-base">Atur jumlah dan catatan</h3>
 
                     <div class="flex items-center gap-3 my-2">
-                        <div class="size-12 rounded bg-gray-100 overflow-hidden shrink-0">
+                        <div class="size-12 rounded bg-gray-100 dark:bg-white/10 overflow-hidden shrink-0">
                             <img :src="product?.product_images?.find(img => img.is_thumbnail)?.image"
                                 class="size-full object-cover" />
                         </div>

@@ -101,14 +101,15 @@ watch(
                     Search Results
                 </span>
             </div>
-            <h1 class="font-extrabold text-[32px] capitalize">Results for "{{ searchQuery }}"</h1>
+            <h1 class="font-extrabold text-[32px] capitalize text-custom-black">Results for "{{ searchQuery }}"</h1>
         </div>
     </header>
 
-    <main class="flex flex-col lg:flex-row gap-10 w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[50px] mb-20 md:mb-[100px] mx-auto">
+    <main
+        class="flex flex-col lg:flex-row gap-10 w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[50px] mb-20 md:mb-[100px] mx-auto">
         <!-- Mobile Filter Toggle -->
         <button @click="showFilters = !showFilters"
-            class="flex lg:hidden items-center justify-between w-full p-4 bg-white border border-custom-stroke rounded-xl">
+            class="flex lg:hidden items-center justify-between w-full p-4 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/5 rounded-xl shadow-sm text-custom-black">
             <span class="font-bold text-lg">Filter Products</span>
             <i class="fa-solid fa-chevron-down transition-transform" :class="{ 'rotate-180': showFilters }"></i>
         </button>
@@ -123,9 +124,10 @@ watch(
             <!-- Products Section -->
             <section v-if="loadingProducts || products.length > 0" class="flex flex-col gap-9">
                 <div class="flex items-center justify-between">
-                    <h2 class="font-extrabold text-[32px]">Products Found</h2>
+                    <h2 class="font-extrabold text-[32px] text-custom-black">Products Found</h2>
                 </div>
-                <div v-if="loadingProducts" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+                <div v-if="loadingProducts"
+                    class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
                     <SkeletonProductCard v-for="i in 10" :key="i" />
                 </div>
                 <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
@@ -136,7 +138,8 @@ watch(
             <section v-else-if="!loadingProducts && products.length === 0 && !loadingStores && stores.length === 0"
                 class="flex flex-col gap-9 items-center justify-center py-20 text-center">
                 <div class="flex flex-col items-center gap-4">
-                    <img src="@/assets/images/icons/box-search-grey.svg" class="size-20 opacity-50" alt="No results">
+                    <img src="@/assets/images/icons/box-search-grey.svg"
+                        class="size-20 opacity-50 dark:brightness-0 dark:invert" alt="No results">
                     <h2 class="font-bold text-2xl text-custom-grey">No results found for "{{ searchQuery }}"</h2>
                     <p class="text-custom-grey">Try refreshing the page or check your spelling.</p>
                 </div>
@@ -145,7 +148,7 @@ watch(
             <!-- Stores Section -->
             <section v-if="loadingStores || stores.length > 0" class="flex flex-col gap-9">
                 <div class="flex items-center justify-between">
-                    <h2 class="font-extrabold text-[32px]">Stores Found</h2>
+                    <h2 class="font-extrabold text-[32px] text-custom-black">Stores Found</h2>
                 </div>
                 <div v-if="loadingStores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     <SkeletonStoreCard v-for="i in 6" :key="i" />

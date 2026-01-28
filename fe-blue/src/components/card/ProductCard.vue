@@ -41,8 +41,8 @@ const handleToggleWishlist = async () => {
 </script>
 
 <template>
-    <div
-        class="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-floating hover:-translate-y-1 transition-all duration-300 h-full cursor-pointer relative border border-transparent hover:border-custom-blue/10 w-full">
+    <div <div
+        class="group flex flex-col bg-white dark:bg-surface-card rounded-2xl overflow-hidden shadow-sm hover-glow-blue h-full cursor-pointer relative w-full">
         <!-- Wishlist Overlay -->
         <button @click.prevent="handleToggleWishlist"
             class="absolute top-2 right-2 z-20 flex size-8 md:size-9 items-center justify-center rounded-full bg-black/20 hover:bg-black/30 backdrop-blur-sm transition-all duration-200 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 active:scale-95 touch-manipulation">
@@ -67,14 +67,14 @@ const handleToggleWishlist = async () => {
         <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }"
             class="flex flex-col h-full w-full">
             <!-- Image -->
-            <div class="aspect-[1/1] md:aspect-[4/3] w-full bg-gray-50 overflow-hidden relative">
+            <div class="aspect-square md:aspect-4/3 w-full bg-gray-50 overflow-hidden relative">
                 <img :src="item.thumbnail"
                     class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 will-change-transform"
                     loading="lazy" alt="product">
                 <div v-if="item.stock <= 0"
-                    class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+                    class="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-10">
                     <span
-                        class="text-custom-black font-bold text-xs uppercase tracking-widest px-3 py-1 bg-white border border-gray-200 rounded-full shadow-sm">Habis</span>
+                        class="text-custom-black dark:text-white font-bold text-xs uppercase tracking-widest px-3 py-1 bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 rounded-full shadow-sm">Habis</span>
                 </div>
             </div>
 
@@ -91,13 +91,12 @@ const handleToggleWishlist = async () => {
 
                 <!-- Title -->
                 <h3
-                    class="font-medium text-custom-black text-sm leading-snug line-clamp-2 md:mb-1 group-hover:text-custom-blue transition-colors h-[40px] md:min-h-[40px]">
+                    class="font-medium text-custom-black dark:text-white text-sm leading-snug line-clamp-2 md:mb-1 transition-colors h-[40px] md:min-h-[40px]">
                     {{ item?.name }}
                 </h3>
 
-                <!-- Price -->
                 <div class="mt-auto flex flex-col gap-0.5">
-                    <p class="font-bold text-sm md:text-base text-custom-black">
+                    <p class="font-bold text-sm md:text-base text-custom-black dark:text-white">
                         Rp {{ formatRupiah(item?.price) }}
                     </p>
                     <p v-if="item.original_price && item.discount > 0"
@@ -106,11 +105,10 @@ const handleToggleWishlist = async () => {
                     </p>
                 </div>
 
-                <!-- Rating & Sold -->
                 <div class="flex flex-wrap items-center gap-2 text-xs text-custom-grey mt-2">
-                    <div class="flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 rounded">
+                    <div class="flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 dark:bg-white/5 rounded">
                         <i class="fa-solid fa-star text-custom-orange text-[10px]"></i>
-                        <span class="font-bold text-custom-black">4.9</span>
+                        <span class="font-bold text-custom-black dark:text-white">4.9</span>
                     </div>
                     <span class="text-[10px] md:text-xs truncate">{{ item?.total_sold || 0 }} Sold</span>
                     <span v-if="item.location"

@@ -52,10 +52,7 @@ onMounted(async () => {
 
 <template>
     <section id="Trusted-Seller" class="flex flex-col gap-6 md:gap-9 animate-fade-in-up delay-300">
-        <SectionHeader 
-            title="Official Stores" 
-            :link="{ name: 'app.all-stores' }"
-        />
+        <SectionHeader title="Official Stores" :link="{ name: 'app.all-stores' }" />
 
         <div class="flex flex-col gap-6 relative">
             <div class="storeSwiper w-full overflow-hidden">
@@ -82,4 +79,3 @@ onMounted(async () => {
         </div>
     </section>
 </template>
-

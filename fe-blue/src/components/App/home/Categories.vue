@@ -38,7 +38,7 @@ onMounted(() => {
                                 {{ category.name }}</p>
                             <span
                                 class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-custom-grey group-hover:bg-blue-50 group-hover:text-custom-blue transition-colors">{{
-                                category.product_count }} items</span>
+                                    category.product_count }} items</span>
                         </div>
                     </div>
                 </RouterLink>
