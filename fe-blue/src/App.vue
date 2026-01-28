@@ -15,14 +15,19 @@ onErrorCaptured((err, instance, info) => {
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
+import { useThemeStore } from '@/stores/theme'
 
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
 
 onMounted(async () => {
-    if (authStore.user) {
-         await wishlistStore.fetchWishlist()
-    }
+  // Initialize theme system
+  const themeStore = useThemeStore()
+  themeStore.initListener()
+
+  if (authStore.user) {
+    await wishlistStore.fetchWishlist()
+  }
 })
 </script>
 
@@ -39,7 +44,8 @@ onMounted(async () => {
         <p class="font-bold">Stack:</p>
         <pre class="text-xs whitespace-pre-wrap">{{ error.stack }}</pre>
       </div>
-      <button @click="error = null; $router.go(0)" class="bg-white text-red-900 px-6 py-2 rounded font-bold hover:bg-gray-200">
+      <button @click="error = null; $router.go(0)"
+        class="bg-white text-red-900 px-6 py-2 rounded font-bold hover:bg-gray-200">
         Reload Application
       </button>
     </div>

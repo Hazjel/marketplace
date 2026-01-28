@@ -403,49 +403,49 @@ const router = createRouter({
           path: 'category',
           name: 'user.category',
           component: CategoryList,
-          meta: { title: 'Category List', requiresAuth: true, permission: 'product-category-list' }
+          meta: { title: 'Category List', requiresAuth: true, permission: 'product-category-list', requiresStore: true }
         },
         {
           path: 'category/create',
           name: 'user.category.create',
           component: CategoryCreate,
-          meta: { title: 'Category Create', requiresAuth: true, permission: 'product-category-create' }
+          meta: { title: 'Category Create', requiresAuth: true, permission: 'product-category-create', requiresStore: true }
         },
         {
           path: 'category/edit/:id',
           name: 'user.category.edit',
           component: CategoryEdit,
-          meta: { title: 'Category Edit', requiresAuth: true, permission: 'product-category-edit' }
+          meta: { title: 'Category Edit', requiresAuth: true, permission: 'product-category-edit', requiresStore: true }
         },
         {
           path: 'category/:id',
           name: 'user.category.detail',
           component: CategoryDetail,
-          meta: { title: 'Category Detail', requiresAuth: true, permission: 'product-category-list' }
+          meta: { title: 'Category Detail', requiresAuth: true, permission: 'product-category-list', requiresStore: true }
         },
         {
           path: 'product',
           name: 'user.product',
           component: ProductList,
-          meta: { title: 'Product Detail', requiresAuth: true, permission: 'product-list' }
+          meta: { title: 'Product Detail', requiresAuth: true, permission: 'product-list', requiresStore: true }
         },
         {
           path: 'product/create',
           name: 'user.product.create',
           component: ProductCreate,
-          meta: { title: 'Product Create', requiresAuth: true, permission: 'product-create' }
+          meta: { title: 'Product Create', requiresAuth: true, permission: 'product-create', requiresStore: true }
         },
         {
           path: 'product/:id',
           name: 'user.product.detail',
           component: ProductDetail,
-          meta: { title: 'Product Detail', requiresAuth: true, permission: 'product-list' }
+          meta: { title: 'Product Detail', requiresAuth: true, permission: 'product-list', requiresStore: true }
         },
         {
           path: 'product/edit/:id',
           name: 'user.product.edit',
           component: ProductEdit,
-          meta: { title: 'Product Edit', requiresAuth: true, permission: 'product-edit' }
+          meta: { title: 'Product Edit', requiresAuth: true, permission: 'product-edit', requiresStore: true }
         },
         {
           path: 'store',
@@ -457,7 +457,7 @@ const router = createRouter({
           path: 'my-store',
           name: 'user.my-store',
           component: MyStore,
-          meta: { title: 'My Store', requiresAuth: true, permission: 'store-list' }
+          meta: { title: 'My Store', requiresAuth: true, permission: 'store-list', requiresStore: true }
         },
         {
           path: 'create-store',
@@ -469,7 +469,7 @@ const router = createRouter({
           path: 'edit-store',
           name: 'user.edit-store',
           component: StoreEdit,
-          meta: { title: 'Edit My Store', requiresAuth: true, permission: 'store-edit' }
+          meta: { title: 'Edit My Store', requiresAuth: true, permission: 'store-edit', requiresStore: true }
         },
         {
           path: 'settings/address',
@@ -517,19 +517,19 @@ const router = createRouter({
           path: 'store-balance',
           name: 'user.store-balance',
           component: StoreBalanceList,
-          meta: { title: 'Store Wallet', requiresAuth: true, permission: 'store-balance-list' }
+          meta: { title: 'Store Wallet', requiresAuth: true, permission: 'store-balance-list', requiresStore: true }
         },
         {
           path: 'store-balance/:id',
           name: 'user.store-balance.detail',
           component: StoreBalanceDetail,
-          meta: { title: 'Store Wallet Detail', requiresAuth: true, permission: 'store-balance-list' }
+          meta: { title: 'Store Wallet Detail', requiresAuth: true, permission: 'store-balance-list', requiresStore: true }
         },
         {
           path: 'my-store-balance',
           name: 'user.my-store-balance',
           component: MyStoreBalance,
-          meta: { title: 'Manage My Wallet', requiresAuth: true, permission: 'store-balance-list' }
+          meta: { title: 'Manage My Wallet', requiresAuth: true, permission: 'store-balance-list', requiresStore: true }
         },
         {
           path: 'orders/incoming',
@@ -587,6 +587,14 @@ router.beforeEach(async (to, from, next) => {
 
         if (to.meta.permission && !userPermissions.includes(to.meta.permission)) {
           next({ name: '403' })
+          return
+
+        }
+
+        // Middleware: Check if route requires Store role
+        if (to.meta.requiresStore && authStore.user?.role !== 'store' && authStore.user?.role !== 'admin') {
+          // Redirect to open store page or home
+          next({ name: 'auth.open-store' })
           return
         }
 

@@ -25,6 +25,10 @@
     /* Main Text */
     --color-surface: #F8FAFC;
     /* White/Slate-50 */
+    --color-surface-card: #FFFFFF;
+    --color-text-main: #000926;
+    --color-text-muted: #64748B;
+    --color-border: #E2E8F0;
 
     /* ----------------------------------
        Legacy / Custom Mapping
@@ -67,8 +71,24 @@
     /* ----------------------------------
        Animations (Shadcn/Radix)
        ---------------------------------- */
-    --animate-in: enter 150ms ease-out;
     --animate-out: exit 150ms ease-in;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+    --color-surface: #0B1120;
+    --color-surface-card: #151E32;
+    --color-text-main: #F1F5F9;
+    --color-text-muted: #94A3B8;
+    --color-border: #334155;
+
+    --color-custom-black: #F1F5F9;
+    /* Invert black to white for text */
+    --color-custom-background: #0B1120;
+    --color-custom-icon-background: #1E293B;
+    --color-custom-stroke: #334155;
+    --color-custom-grey: #94A3B8;
 }
 
 /* =========================================
@@ -79,7 +99,7 @@ body {
 }
 
 #root {
-    @apply flex flex-grow flex-shrink basis-0 w-full;
+    @apply flex grow shrink basis-0 w-full;
 }
 
 /* Safe Areas & Constants */
@@ -154,7 +174,7 @@ body {
 
     /* --- Search --- */
     .search-result {
-        @apply absolute bottom-[-30px] w-full z-[1] bg-white border border-[#ccc] rounded-[16px] shadow-md max-h-[200px] overflow-y-auto;
+        @apply absolute bottom-[-30px] w-full z-1 bg-white border border-[#ccc] rounded-[16px] shadow-md max-h-[200px] overflow-y-auto;
     }
 
     .search-result ul {
@@ -181,6 +201,28 @@ body {
 
     .tab-link.active {
         @apply text-white bg-custom-black shadow-lg shadow-gray-500/20;
+    }
+
+    /* --- Universal Interactive Card --- */
+    .hover-glow-blue {
+        @apply transition-all duration-300 border border-transparent dark:border-white/5;
+    }
+
+    .hover-glow-blue:hover {
+        @apply border-custom-blue/10 shadow-floating -translate-y-1;
+    }
+
+    .hover-glow-blue:hover :where(h3, span, p) {
+        @apply text-custom-blue;
+    }
+
+    /* Dark Mode Overrides (Explicit) */
+    :is(.dark .hover-glow-blue:hover) {
+        @apply border-blue-400/50 ! shadow-[0_20px_25px_-5px_#3b82f61a] !;
+    }
+
+    :is(.dark .hover-glow-blue:hover :where(h3, span, p)) {
+        @apply text-blue-400 !;
     }
 }
 
