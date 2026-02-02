@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 const props = defineProps({
   class: { type: String, default: '' },
-  asChild: { type: Boolean, default: false },
+  asChild: { type: Boolean, default: false }
 })
 </script>
 

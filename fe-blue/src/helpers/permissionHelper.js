@@ -1,22 +1,22 @@
 import { useAuthStore } from '@/stores/auth'
 
-export const can = permission => {
-    const authStore = useAuthStore()
+export const can = (permission) => {
+  const authStore = useAuthStore()
 
-    const userPermissions = authStore.user?.permissions || []
+  const userPermissions = authStore.user?.permissions || []
 
-    return userPermissions.includes(permission)
+  return userPermissions.includes(permission)
 }
 
-export const hasRole = role => {
-    if (!role) return true
+export const hasRole = (role) => {
+  if (!role) return true
 
-    const authStore = useAuthStore()
-    const userRole = authStore.user?.role || ''
+  const authStore = useAuthStore()
+  const userRole = authStore.user?.role || ''
 
-    if (Array.isArray(role)) {
-        return role.includes(userRole)
-    }
+  if (Array.isArray(role)) {
+    return role.includes(userRole)
+  }
 
-    return userRole === role
+  return userRole === role
 }

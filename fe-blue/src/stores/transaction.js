@@ -1,149 +1,149 @@
-import { handleError } from "@/helpers/errorHelper";
-import { axiosInstance } from "@/plugins/axios";
-import { useAuthStore } from "@/stores/auth";
-import { defineStore } from "pinia";
+import { handleError } from '@/helpers/errorHelper'
+import { axiosInstance } from '@/plugins/axios'
+import { useAuthStore } from '@/stores/auth'
+import { defineStore } from 'pinia'
 
-export const useTransactionStore = defineStore("transaction", {
-    state: () => ({
-        transactions: [],
-        meta: {
-            current_page: 1,
-            last_page: 1,
-            per_page: 10,
-            total: 0,
-        },
-        loading: false,
-        error: null,
-        success: null,
-    }),
-    actions: {
-        async fetchTransactionsPaginated(params) {
-            this.loading = true;
-            const authStore = useAuthStore();
-            const mode = authStore.activeMode;
+export const useTransactionStore = defineStore('transaction', {
+  state: () => ({
+    transactions: [],
+    meta: {
+      current_page: 1,
+      last_page: 1,
+      per_page: 10,
+      total: 0
+    },
+    loading: false,
+    error: null,
+    success: null
+  }),
+  actions: {
+    async fetchTransactionsPaginated(params) {
+      this.loading = true
+      const authStore = useAuthStore()
+      const mode = authStore.activeMode
 
-            try {
-                // Merge params with mode
-                const queryParams = { ...params, mode };
-                const response = await axiosInstance.get(`transaction/all/paginated`, { params: queryParams });
+      try {
+        // Merge params with mode
+        const queryParams = { ...params, mode }
+        const response = await axiosInstance.get(`transaction/all/paginated`, {
+          params: queryParams
+        })
 
-                this.transactions = response.data.data.data
-                this.meta = response.data.data.meta
-            } catch (error) {
-                this.error = handleError(error);
-            } finally {
-                this.loading = false;
-            }
-        },
+        this.transactions = response.data.data.data
+        this.meta = response.data.data.meta
+      } catch (error) {
+        this.error = handleError(error)
+      } finally {
+        this.loading = false
+      }
+    },
 
-        async fetchChartData() {
-            try {
-                const response = await axiosInstance.get('transaction/chart-data')
-                return response.data.data
-            } catch (error) {
-                console.error('Failed to fetch chart data:', error)
-                return []
-            }
-        },
+    async fetchChartData() {
+      try {
+        const response = await axiosInstance.get('transaction/chart-data')
+        return response.data.data
+      } catch (error) {
+        console.error('Failed to fetch chart data:', error)
+        return []
+      }
+    },
 
-        async fetchTransactionById(id) {
-            this.loading = true
+    async fetchTransactionById(id) {
+      this.loading = true
 
-            try {
-                const response = await axiosInstance.get(`transaction/${id}`)
+      try {
+        const response = await axiosInstance.get(`transaction/${id}`)
 
-                return response.data.data
-            } catch (error) {
-                this.error = handleError(error)
-            } finally {
-                this.loading = false
-            }
-        },
+        return response.data.data
+      } catch (error) {
+        this.error = handleError(error)
+      } finally {
+        this.loading = false
+      }
+    },
 
-        async createTransaction(payload) {
-            this.loading = true
-            this.error = null
+    async createTransaction(payload) {
+      this.loading = true
+      this.error = null
 
-            try {
-                const response = await axiosInstance.post(`transaction`, payload)
+      try {
+        const response = await axiosInstance.post(`transaction`, payload)
 
-                this.success = response.data.message
+        this.success = response.data.message
 
-                return response.data.data
-            } catch (error) {
-                this.error = handleError(error)
-                // ✅ Throw error agar bisa di-catch di component
-                throw error
-            } finally {
-                this.loading = false
-            }
-        },
+        return response.data.data
+      } catch (error) {
+        this.error = handleError(error)
+        // ✅ Throw error agar bisa di-catch di component
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
 
-        async updateTransaction(payload) {
-            this.loading = true
-            this.error = null
-            try {
-                const formData = new FormData()
-                formData.append('_method', 'PUT')
-                formData.append('delivery_status', payload.delivery_status)
+    async updateTransaction(payload) {
+      this.loading = true
+      this.error = null
+      try {
+        const formData = new FormData()
+        formData.append('_method', 'PUT')
+        formData.append('delivery_status', payload.delivery_status)
 
-                if (payload.tracking_number) {
-                    formData.append('tracking_number', payload.tracking_number)
-                }
-
-                if (payload.delivery_proof instanceof File) {
-                    formData.append('delivery_proof', payload.delivery_proof)
-                }
-
-                const response = await axiosInstance.post(
-                    `transaction/${payload.id}`,
-                    formData,
-                    { headers: { 'Content-Type': 'multipart/form-data' } }
-                )
-
-                this.success = response.data.message
-                return response.data.data
-                return response.data.data
-            } catch (error) {
-                this.error = handleError(error)
-                throw error
-            } finally {
-                this.loading = false
-            }
-        },
-
-        async checkTransactionStatus(id) {
-            this.loading = true
-            try {
-                const response = await axiosInstance.post(`transaction/${id}/check-status`)
-                return response.data.data
-            } catch (error) {
-                this.error = handleError(error)
-                throw error
-            } finally {
-                this.loading = false
-            }
-        },
-
-        async completeTransaction(id, payload) {
-            this.loading = true
-            try {
-                const formData = new FormData()
-                if (payload && payload.receiving_proof) {
-                    formData.append('receiving_proof', payload.receiving_proof)
-                }
-
-                const response = await axiosInstance.post(`transaction/${id}/complete`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                })
-                this.success = response.data.message
-                return response.data.data
-            } catch (error) {
-                this.error = handleError(error)
-                throw error
-            } finally {
-                this.loading = false
-            }
+        if (payload.tracking_number) {
+          formData.append('tracking_number', payload.tracking_number)
         }
+
+        if (payload.delivery_proof instanceof File) {
+          formData.append('delivery_proof', payload.delivery_proof)
+        }
+
+        const response = await axiosInstance.post(`transaction/${payload.id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+
+        this.success = response.data.message
+        return response.data.data
+        return response.data.data
+      } catch (error) {
+        this.error = handleError(error)
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async checkTransactionStatus(id) {
+      this.loading = true
+      try {
+        const response = await axiosInstance.post(`transaction/${id}/check-status`)
+        return response.data.data
+      } catch (error) {
+        this.error = handleError(error)
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async completeTransaction(id, payload) {
+      this.loading = true
+      try {
+        const formData = new FormData()
+        if (payload && payload.receiving_proof) {
+          formData.append('receiving_proof', payload.receiving_proof)
+        }
+
+        const response = await axiosInstance.post(`transaction/${id}/complete`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        this.success = response.data.message
+        return response.data.data
+      } catch (error) {
+        this.error = handleError(error)
+        throw error
+      } finally {
+        this.loading = false
+      }
     }
+  }
 })

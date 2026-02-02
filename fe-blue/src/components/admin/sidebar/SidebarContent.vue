@@ -32,229 +32,243 @@ const { user } = storeToRefs(authStore)
 const { totalUnreadCount } = storeToRefs(chatStore)
 
 const prefix = computed(() => {
-    if (!user.value) return '';
-    if (user.value?.role === 'admin') return '/admin';
-    return `/${user.value?.username}`;
-});
-
+  if (!user.value) return ''
+  if (user.value?.role === 'admin') return '/admin'
+  return `/${user.value?.username}`
+})
 
 const items = computed(() => {
-    const mode = authStore.activeMode;
-    const allItems = [
+  const mode = authStore.activeMode
+  const allItems = [
+    {
+      label: 'Overview',
+      path: `${prefix.value}/dashboard`,
+      iconDefault: HomeBlackIcon,
+      iconActive: HomeBlueFillIcon,
+      permission: 'dashboard-menu'
+    },
+    {
+      label: 'My Transactions',
+      path: `${prefix.value}/my-transactions`,
+      iconDefault: StickyNoteBlackIcon,
+      iconActive: StickyNoteBlueFillIcon,
+      permission: 'transaction-menu',
+      role: ['buyer', 'store']
+    },
+    {
+      label: 'My Addresses',
+      path: `${prefix.value}/settings/address`,
+      iconDefault: LocationGreyIcon,
+      iconActive: LocationGreyIcon,
+      permission: 'dashboard-menu',
+      role: ['buyer']
+    },
+    {
+      label: 'Manage Product',
+      iconDefault: BoxBlackIcon,
+      children: [
         {
-            label: 'Overview',
-            path: `${prefix.value}/dashboard`,
-            iconDefault: HomeBlackIcon,
-            iconActive: HomeBlueFillIcon,
-            permission: 'dashboard-menu'
+          label: 'Categories',
+          path: `${prefix.value}/category`,
+          iconDefault: BagGreyIcon,
+          iconActive: BagBlueFillIcon,
+          permission: 'product-category-menu'
         },
         {
-            label: 'My Transactions',
-            path: `${prefix.value}/my-transactions`,
-            iconDefault: StickyNoteBlackIcon,
-            iconActive: StickyNoteBlueFillIcon,
-            permission: 'transaction-menu',
-            role: ['buyer', 'store']
-        },
-        {
-            label: 'My Addresses',
-            path: `${prefix.value}/settings/address`,
-            iconDefault: LocationGreyIcon,
-            iconActive: LocationGreyIcon,
-            permission: 'dashboard-menu',
-            role: ['buyer']
-        },
-        {
-            label: 'Manage Product',
-            iconDefault: BoxBlackIcon,
-            children: [
-                {
-                    label: 'Categories',
-                    path: `${prefix.value}/category`,
-                    iconDefault: BagGreyIcon,
-                    iconActive: BagBlueFillIcon,
-                    permission: 'product-category-menu'
-                },
-                {
-                    label: 'Products',
-                    path: `${prefix.value}/product`,
-                    iconDefault: BagGreyIcon,
-                    iconActive: BagBlueFillIcon,
-                    permission: 'product-menu'
-                }
-            ],
-            mode: 'store'
-        },
-        {
-            label: 'Incoming Orders',
-            iconDefault: BagBlackIcon,
-            iconActive: BagBlueFillIcon,
-            permission: 'transaction-list', // Check permission
-            role: ['store'],
-            path: `${prefix.value}/orders/incoming`,
-            mode: 'store'
-        },
-        {
-            label: 'Manage Store',
-            iconDefault: Bag2BlackIcon,
-            children: [
-                {
-                    label: 'List Store',
-                    path: `${prefix.value}/store`,
-                    iconDefault: ShopGreyIcon,
-                    iconActive: ShopBlueFillIcon,
-                    permission: 'store-menu',
-                    role: 'admin'
-                },
-                {
-                    label: 'My Store',
-                    path: `${prefix.value}/my-store`,
-                    iconDefault: EmpyWalletGreyIcon,
-                    iconActive: Wallet3BlueFillIcon,
-                    permission: 'store-menu',
-                    role: 'store'
-                },
-                {
-                    label: 'List Transaction',
-                    path: `${prefix.value}/transaction`,
-                    iconDefault: StickyNoteGreyIcon,
-                    iconActive: StickyNoteBlueFillIcon,
-                    permission: 'transaction-menu',
-                    role: 'admin'
-                },
-                {
-                    label: 'List Transaction',
-                    path: `${prefix.value}/transaction`,
-                    iconDefault: StickyNoteGreyIcon,
-                    iconActive: StickyNoteBlueFillIcon,
-                    permission: 'transaction-menu',
-                    role: 'store'
-                }
-            ],
-            mode: 'store'
-        },
-        {
-            label: 'Manage Wallet',
-            iconDefault: Wallet2BlackIcon,
-            children: [
-                {
-                    label: 'Store Wallet',
-                    path: `${prefix.value}/store-balance`,
-                    iconDefault: EmpyWalletGreyIcon,
-                    iconActive: Wallet3BlueFillIcon,
-                    permission: 'store-balance-menu',
-                    role: 'admin'
-                },
-                {
-                    label: 'My Wallet',
-                    path: `${prefix.value}/my-store-balance`,
-                    iconDefault: EmpyWalletGreyIcon,
-                    iconActive: Wallet3BlueFillIcon,
-                    permission: 'store-balance-menu',
-                    role: 'store'
-                },
-                {
-                    label: 'Withdrawal',
-                    path: `${prefix.value}/withdrawal`,
-                    iconDefault: EmpyWalletGreyIcon,
-                    iconActive: Wallet3BlueFillIcon,
-                    permission: 'withdrawal-menu',
-                    role: ['store', 'admin']
-                },
-            ],
-            mode: 'store'
-        },
-        {
-            label: 'Manage Users',
-            path: `${prefix.value}/user`,
-            iconDefault: User2BlackIcon,
-            iconActive: User2BlueIcon,
-            permission: 'user-menu'
-        },
-    ];
-
-    return allItems.filter(item => {
-        if (item.mode && item.mode !== mode && user.value?.role !== 'admin') {
-            return false;
+          label: 'Products',
+          path: `${prefix.value}/product`,
+          iconDefault: BagGreyIcon,
+          iconActive: BagBlueFillIcon,
+          permission: 'product-menu'
         }
-        return true;
-    });
+      ],
+      mode: 'store'
+    },
+    {
+      label: 'Incoming Orders',
+      iconDefault: BagBlackIcon,
+      iconActive: BagBlueFillIcon,
+      permission: 'transaction-list', // Check permission
+      role: ['store'],
+      path: `${prefix.value}/orders/incoming`,
+      mode: 'store'
+    },
+    {
+      label: 'Manage Store',
+      iconDefault: Bag2BlackIcon,
+      children: [
+        {
+          label: 'List Store',
+          path: `${prefix.value}/store`,
+          iconDefault: ShopGreyIcon,
+          iconActive: ShopBlueFillIcon,
+          permission: 'store-menu',
+          role: 'admin'
+        },
+        {
+          label: 'My Store',
+          path: `${prefix.value}/my-store`,
+          iconDefault: EmpyWalletGreyIcon,
+          iconActive: Wallet3BlueFillIcon,
+          permission: 'store-menu',
+          role: 'store'
+        },
+        {
+          label: 'List Transaction',
+          path: `${prefix.value}/transaction`,
+          iconDefault: StickyNoteGreyIcon,
+          iconActive: StickyNoteBlueFillIcon,
+          permission: 'transaction-menu',
+          role: 'admin'
+        },
+        {
+          label: 'List Transaction',
+          path: `${prefix.value}/transaction`,
+          iconDefault: StickyNoteGreyIcon,
+          iconActive: StickyNoteBlueFillIcon,
+          permission: 'transaction-menu',
+          role: 'store'
+        }
+      ],
+      mode: 'store'
+    },
+    {
+      label: 'Manage Wallet',
+      iconDefault: Wallet2BlackIcon,
+      children: [
+        {
+          label: 'Store Wallet',
+          path: `${prefix.value}/store-balance`,
+          iconDefault: EmpyWalletGreyIcon,
+          iconActive: Wallet3BlueFillIcon,
+          permission: 'store-balance-menu',
+          role: 'admin'
+        },
+        {
+          label: 'My Wallet',
+          path: `${prefix.value}/my-store-balance`,
+          iconDefault: EmpyWalletGreyIcon,
+          iconActive: Wallet3BlueFillIcon,
+          permission: 'store-balance-menu',
+          role: 'store'
+        },
+        {
+          label: 'Withdrawal',
+          path: `${prefix.value}/withdrawal`,
+          iconDefault: EmpyWalletGreyIcon,
+          iconActive: Wallet3BlueFillIcon,
+          permission: 'withdrawal-menu',
+          role: ['store', 'admin']
+        }
+      ],
+      mode: 'store'
+    },
+    {
+      label: 'Manage Users',
+      path: `${prefix.value}/user`,
+      iconDefault: User2BlackIcon,
+      iconActive: User2BlueIcon,
+      permission: 'user-menu'
+    }
+  ]
+
+  return allItems.filter((item) => {
+    if (item.mode && item.mode !== mode && user.value?.role !== 'admin') {
+      return false
+    }
+    return true
+  })
 })
 
 const marketplaceLink = computed(() => {
-    const isBuyerMode = authStore.activeMode === 'buyer'
-    return {
-        label: isBuyerMode ? 'Back to Homepage' : 'Back to Buyer Mode',
-        path: isBuyerMode ? '/' : null,
-        iconDefault: isBuyerMode ? HomeBlackIcon : GlobalSearchIcon,
-        iconActive: isBuyerMode ? HomeBlueFillIcon : GlobalSearchIcon,
-        permission: 'dashboard-menu'
-    }
+  const isBuyerMode = authStore.activeMode === 'buyer'
+  return {
+    label: isBuyerMode ? 'Back to Homepage' : 'Back to Buyer Mode',
+    path: isBuyerMode ? '/' : null,
+    iconDefault: isBuyerMode ? HomeBlackIcon : GlobalSearchIcon,
+    iconActive: isBuyerMode ? HomeBlueFillIcon : GlobalSearchIcon,
+    permission: 'dashboard-menu'
+  }
 })
 
 const chatLink = computed(() => ({
-    label: 'Messages',
-    path: `${prefix.value}/chat`,
-    iconDefault: StickyNoteGreyIcon,
-    iconActive: StickyNoteBlueFillIcon,
-    permission: 'dashboard-menu',
-    badge: totalUnreadCount.value
+  label: 'Messages',
+  path: `${prefix.value}/chat`,
+  iconDefault: StickyNoteGreyIcon,
+  iconActive: StickyNoteBlueFillIcon,
+  permission: 'dashboard-menu',
+  badge: totalUnreadCount.value
 }))
 
 const handleSwitchMode = () => {
-    if (authStore.activeMode === 'store') {
-        authStore.setMode('buyer')
-        router.push({ name: 'app.home' })
-    }
+  if (authStore.activeMode === 'store') {
+    authStore.setMode('buyer')
+    router.push({ name: 'app.home' })
+  }
 }
 
 const handleLogout = async () => {
-    const success = await authStore.logout()
-    if (success) {
-        router.push({ name: 'auth.login' })
-    }
+  const success = await authStore.logout()
+  if (success) {
+    router.push({ name: 'auth.login' })
+  }
 }
 </script>
 
 <template>
-    <div v-if="user" class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white">
-        <!-- original sidebar content starts here -->
-        <div class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white">
-            <div class="flex items-center justify-between">
-                <img src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" alt="logo"
-                    @click="router.push({ name: 'app.home' })" />
-                <!-- Close Button Slot (Optional) -->
-                <slot name="close-button"></slot>
-            </div>
+  <div v-if="user" class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white">
+    <!-- original sidebar content starts here -->
+    <div class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white">
+      <div class="flex items-center justify-between">
+        <img
+          src="@/assets/images/logos/blukios_logo.png"
+          class="h-8 w-fit cursor-pointer"
+          alt="logo"
+          @click="router.push({ name: 'app.home' })"
+        />
+        <!-- Close Button Slot (Optional) -->
+        <slot name="close-button"></slot>
+      </div>
 
-            <div class="flex flex-col gap-5 overflow-y-scroll hide-scrollbar h-full overscroll-contain flex-1">
-                <nav class="flex flex-col gap-4 animate-fade-in-up">
-                    <p class="font-medium text-custom-grey">Main Menu</p>
-                    <ul class="flex flex-col gap-2">
-                        <SidebarItem v-for="(item, index) in items" :key="index" :item="item" />
-                    </ul>
-                </nav>
-            </div>
+      <div
+        class="flex flex-col gap-5 overflow-y-scroll hide-scrollbar h-full overscroll-contain flex-1"
+      >
+        <nav class="flex flex-col gap-4 animate-fade-in-up">
+          <p class="font-medium text-custom-grey">Main Menu</p>
+          <ul class="flex flex-col gap-2">
+            <SidebarItem v-for="(item, index) in items" :key="index" :item="item" />
+          </ul>
+        </nav>
+      </div>
 
-            <div class="pb-8 animate-fade-in-up delay-100">
-                <ul class="flex flex-col gap-2">
-                    <SidebarItem :item="chatLink" v-if="user?.role !== 'admin'" />
-                    <SidebarItem :item="marketplaceLink" v-if="user?.role !== 'admin'" @click="handleSwitchMode" />
-                    <!-- Logout Button -->
-                    <li class="list-none">
-                        <button @click="handleLogout"
-                            class="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full transition-all duration-300 hover:bg-custom-background">
-                            <img src="@/assets/images/icons/logout.svg"
-                                class="size-6 text-custom-red svg-red filter-red" alt="icon">
-                            <span class="font-medium text-custom-red">Logout</span>
-                        </button>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <!-- original sidebar content ends here -->
+      <div class="pb-8 animate-fade-in-up delay-100">
+        <ul class="flex flex-col gap-2">
+          <SidebarItem v-if="user?.role !== 'admin'" :item="chatLink" />
+          <SidebarItem
+            v-if="user?.role !== 'admin'"
+            :item="marketplaceLink"
+            @click="handleSwitchMode"
+          />
+          <!-- Logout Button -->
+          <li class="list-none">
+            <button
+              class="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full transition-all duration-300 hover:bg-custom-background"
+              @click="handleLogout"
+            >
+              <img
+                src="@/assets/images/icons/logout.svg"
+                class="size-6 text-custom-red svg-red filter-red"
+                alt="icon"
+              />
+              <span class="font-medium text-custom-red">Logout</span>
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
-    <div v-else class="flex items-center justify-center h-screen">
-        <span class="text-custom-grey text-xl">Loading menu...</span>
-    </div>
+    <!-- original sidebar content ends here -->
+  </div>
+  <div v-else class="flex items-center justify-center h-screen">
+    <span class="text-custom-grey text-xl">Loading menu...</span>
+  </div>
 </template>

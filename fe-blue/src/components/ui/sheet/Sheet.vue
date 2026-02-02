@@ -4,7 +4,7 @@ import { DialogRoot } from 'radix-vue'
 const props = defineProps({
   open: { type: Boolean, required: false },
   defaultOpen: { type: Boolean, required: false },
-  modal: { type: Boolean, default: true },
+  modal: { type: Boolean, default: true }
 })
 
 const emits = defineEmits(['update:open'])
