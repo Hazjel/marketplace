@@ -12,7 +12,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
-    },
+    }
   },
   server: {
     port: 5173,
@@ -20,13 +20,13 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:8000', // Laravel backend
-        changeOrigin: true,
+        changeOrigin: true
       },
       '/tariff/api': {
         target: 'https://api-sandbox.collaborator.komerce.id',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/tariff\/api/, '/tariff/api'),
-      },
+        rewrite: (path) => path.replace(/^\/tariff\/api/, '/tariff/api')
+      }
     }
   }
 })
