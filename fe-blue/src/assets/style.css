@@ -104,41 +104,62 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  --color-surface: #0b1120;
-  --color-surface-card: #151e32;
-  --color-text-main: #f1f5f9;
+  /* --- Premium Dark Mode Palette --- */
+
+  /* Backgrounds: Richer, deeper blues (Slate 950/900) */
+  --color-surface: #020617;
+  /* Slate 950 - Main Background */
+  --color-surface-card: #0f172a;
+  /* Slate 900 - Card Background */
+
+  /* Text: High Contrast & Legibility */
+  --color-text-main: #f8fafc;
+  /* Slate 50 - Primary Text */
   --color-text-muted: #94a3b8;
-  --color-border: #334155;
+  /* Slate 400 - Muted Text */
 
-  --color-background: #0b1120;
-  --color-foreground: #f1f5f9;
+  /* Borders: Subtle & Refined */
+  --color-border: rgba(255, 255, 255, 0.08);
+  /* White Alpha 8% */
 
-  --color-card: #151e32;
-  --color-card-foreground: #f1f5f9;
+  /* Standard Tokens Mapping */
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-text-main);
 
-  --color-popover: #151e32;
-  --color-popover-foreground: #f1f5f9;
+  --color-card: var(--color-surface-card);
+  --color-card-foreground: var(--color-text-main);
 
-  --color-primary-foreground: #f1f5f9;
-  --color-secondary-foreground: #f1f5f9;
+  --color-popover: var(--color-surface-card);
+  --color-popover-foreground: var(--color-text-main);
+
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #ffffff;
 
   --color-muted: #1e293b;
+  /* Slate 800 */
   --color-muted-foreground: #94a3b8;
 
   --color-accent: #1e293b;
-  --color-accent-foreground: #f1f5f9;
+  /* Slate 800 */
+  --color-accent-foreground: #ffffff;
 
   --color-destructive: #ef4444;
-  --color-destructive-foreground: #f1f5f9;
+  --color-destructive-foreground: #ffffff;
 
-  --color-input: #334155;
-  --color-ring: #334155;
+  --color-input: rgba(255, 255, 255, 0.08);
+  /* Matches border */
+  --color-ring: #0f52ba;
+  /* Keep Primary Blue for focus rings */
 
-  --color-custom-black: #f1f5f9;
-  /* Invert black to white for text */
-  --color-custom-background: #0b1120;
+  /* Custom Mappings */
+  --color-custom-black: #ffffff;
+  /* Text is white in dark mode */
+  --color-custom-background: #020617;
+  /* Matches surface */
   --color-custom-icon-background: #1e293b;
-  --color-custom-stroke: #334155;
+  /* Slate 800 */
+  --color-custom-stroke: rgba(255, 255, 255, 0.08);
+  /* Matches border */
   --color-custom-grey: #94a3b8;
 }
 

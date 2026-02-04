@@ -15,8 +15,7 @@ defineProps({
     class="relative flex flex-col overflow-hidden h-full group hover-glow-blue border-gray-100 dark:border-white/5 rounded-2xl">
     <!-- Banner -->
     <div class="h-20 w-full bg-linear-to-r from-blue-400 to-indigo-500 relative overflow-hidden">
-      <img
-v-if="item.banner" :src="item.banner" class="w-full h-full object-cover opacity-50" loading="lazy"
+      <img v-if="item.banner" :src="item.banner" class="w-full h-full object-cover opacity-50" loading="lazy"
         alt="banner" />
       <div class="absolute inset-0 bg-linear-to-t from-black/20 to-transparent"></div>
     </div>
@@ -33,15 +32,14 @@ v-if="item.banner" :src="item.banner" class="w-full h-full object-cover opacity-
     <CardContent class="flex flex-col items-center pt-12 pb-5 px-4 flex-1 text-center">
       <!-- Store Name & Verified -->
       <div class="flex flex-col items-center gap-1 w-full">
-        <h3
-class="font-bold text-lg text-custom-black dark:text-white leading-tight line-clamp-1 w-full"
+        <h3 class="font-bold text-lg text-custom-black dark:text-white leading-tight line-clamp-1 w-full"
           :title="item.name">
           {{ item.name }}
         </h3>
-        <div
-v-if="item?.is_verified"
+        <div v-if="item?.is_verified"
           class="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800">
-          <img src="@/assets/images/icons/verify-star.svg" class="size-3.5 shrink-0" alt="icon" />
+          <img src="@/assets/images/icons/verify-star.svg" class="size-3.5 shrink-0 dark:brightness-0 dark:invert"
+            alt="icon" />
           <span class="text-xs font-bold text-custom-blue uppercase tracking-wide">Official</span>
         </div>
       </div>
@@ -61,8 +59,7 @@ v-if="item?.is_verified"
 
       <!-- Action Button -->
       <div class="mt-auto w-full pt-5">
-        <RouterLink
-v-if="item?.username" :to="{ name: 'app.store-detail', params: { username: item.username } }"
+        <RouterLink v-if="item?.username" :to="{ name: 'app.store-detail', params: { username: item.username } }"
           class="flex items-center justify-center h-10 w-full rounded-full border border-custom-stroke dark:border-white/20 font-bold text-sm text-custom-black dark:text-white bg-white dark:bg-transparent hover:bg-custom-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-custom-black dark:hover:border-white transition-all duration-300">
           Kunjungi Toko
         </RouterLink>

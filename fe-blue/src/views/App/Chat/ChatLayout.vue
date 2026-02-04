@@ -66,8 +66,7 @@ onUnmounted(() => {
 <template>
   <div class="flex flex-1 h-full w-full">
     <div
-      class="flex flex-1 w-full border border-custom-stroke rounded-3xl overflow-hidden shadow-sm bg-white"
-    >
+      class="flex flex-1 w-full border border-custom-stroke dark:border-white/10 rounded-3xl overflow-hidden shadow-sm bg-white dark:bg-surface-card">
       <!-- Sidebar Wrapper -->
       <div :class="['h-full', activeUser ? 'hidden md:flex' : 'w-full md:w-auto']">
         <ChatSidebar class="h-full" />

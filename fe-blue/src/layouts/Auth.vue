@@ -45,41 +45,18 @@ onMounted(() => {
       <div class="swiper w-full h-full">
         <div class="swiper-wrapper">
           <div class="swiper-slide relative flex w-full h-full overflow-hidden group">
-            <img
-              src="@/assets/images/backgrounds/login-slide-1.webp"
-              class="w-full h-full object-cover object-top ken-burns"
-              alt="thumbnail"
-            />
+            <img src="@/assets/images/backgrounds/login-slide-1.webp"
+              class="w-full h-full object-cover object-top ken-burns" alt="thumbnail" />
             <!-- Glassmorphism Testimonial -->
             <div
-              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl"
-            >
+              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl">
               <div class="flex items-center gap-1 mb-4">
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
+                <img src="@/assets/images/icons/Star-rounded.svg"
+                  class="flex size-6 shrink-0 dark:brightness-0 dark:invert" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
               </div>
               <p class="font-serif text-2xl lg:text-3xl leading-relaxed italic opacity-90">
                 “Moving my business online truly made 🎯 growth and daily management much simpler.”
@@ -95,40 +72,16 @@ onMounted(() => {
           </div>
           <!-- Slide 2 -->
           <div class="swiper-slide relative flex w-full h-full overflow-hidden group">
-            <img
-              src="@/assets/images/backgrounds/login-slide-2.webp"
-              class="w-full h-full object-cover object-top ken-burns"
-              alt="thumbnail"
-            />
+            <img src="@/assets/images/backgrounds/login-slide-2.webp"
+              class="w-full h-full object-cover object-top ken-burns" alt="thumbnail" />
             <div
-              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl"
-            >
+              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl">
               <div class="flex items-center gap-1 mb-4">
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
               </div>
               <p class="font-serif text-2xl lg:text-3xl leading-relaxed italic opacity-90">
                 “Since taking my business online, everything—from growth to daily operations—has
@@ -145,40 +98,16 @@ onMounted(() => {
           </div>
           <!-- Slide 3 -->
           <div class="swiper-slide relative flex w-full h-full overflow-hidden group">
-            <img
-              src="@/assets/images/backgrounds/login-slide-3.webp"
-              class="w-full h-full object-cover object-top ken-burns"
-              alt="thumbnail"
-            />
+            <img src="@/assets/images/backgrounds/login-slide-3.webp"
+              class="w-full h-full object-cover object-top ken-burns" alt="thumbnail" />
             <div
-              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl"
-            >
+              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl">
               <div class="flex items-center gap-1 mb-4">
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
               </div>
               <p class="font-serif text-2xl lg:text-3xl leading-relaxed italic opacity-90">
                 "Ever since I started shopping at Bluee, finding stuff and checking prices is super
@@ -195,40 +124,16 @@ onMounted(() => {
           </div>
           <!-- Slide 4 -->
           <div class="swiper-slide relative flex w-full h-full overflow-hidden group">
-            <img
-              src="@/assets/images/backgrounds/login-slide-4.webp"
-              class="w-full h-full object-cover object-top ken-burns"
-              alt="thumbnail"
-            />
+            <img src="@/assets/images/backgrounds/login-slide-4.webp"
+              class="w-full h-full object-cover object-top ken-burns" alt="thumbnail" />
             <div
-              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl"
-            >
+              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl">
               <div class="flex items-center gap-1 mb-4">
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
-                <img
-                  src="@/assets/images/icons/Star-rounded.svg"
-                  class="flex size-6 shrink-0"
-                  alt="star"
-                />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
+                <img src="@/assets/images/icons/Star-rounded.svg" class="flex size-6 shrink-0" alt="star" />
               </div>
               <p class="font-serif text-2xl lg:text-3xl leading-relaxed italic opacity-90">
                 “Going digital was a game changer 🎯 It simplified growth and cut out the chaos.”
@@ -247,31 +152,19 @@ onMounted(() => {
         <!-- Nav Arrows -->
         <div class="flex items-center absolute w-fit gap-4 bottom-14 right-20 z-10">
           <div
-            class="custom-prev flex !size-12 shrink-0 relative cursor-pointer hover:scale-110 transition-transform bg-white/10 backdrop-blur-md border border-white/30 rounded-full items-center justify-center hover:bg-white/20"
-          >
-            <img
-              src="@/assets/images/icons/arrow-circle-left-white.svg"
-              class="flex size-6"
-              alt="icon"
-            />
+            class="custom-prev flex !size-12 shrink-0 relative cursor-pointer hover:scale-110 transition-transform bg-white/10 backdrop-blur-md border border-white/30 rounded-full items-center justify-center hover:bg-white/20">
+            <img src="@/assets/images/icons/arrow-circle-left-white.svg" class="flex size-6" alt="icon" />
           </div>
           <div
-            class="custom-next flex !size-12 shrink-0 relative cursor-pointer hover:scale-110 transition-transform bg-white/10 backdrop-blur-md border border-white/30 rounded-full items-center justify-center hover:bg-white/20"
-          >
-            <img
-              src="@/assets/images/icons/arrow-circle-right-white.svg"
-              class="flex size-6"
-              alt="icon"
-            />
+            class="custom-next flex !size-12 shrink-0 relative cursor-pointer hover:scale-110 transition-transform bg-white/10 backdrop-blur-md border border-white/30 rounded-full items-center justify-center hover:bg-white/20">
+            <img src="@/assets/images/icons/arrow-circle-right-white.svg" class="flex size-6" alt="icon" />
           </div>
         </div>
       </div>
     </div>
 
     <!-- Right Side: Form Container -->
-    <div
-      class="flex w-full lg:w-[50%] min-h-screen items-center justify-center p-8 lg:p-24 relative overflow-y-auto"
-    >
+    <div class="flex w-full lg:w-[50%] min-h-screen items-center justify-center p-8 lg:p-24 relative overflow-y-auto">
       <div class="w-full max-w-[480px]">
         <RouterView />
       </div>

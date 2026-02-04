@@ -390,7 +390,7 @@ watch(error, (value) => {
         </nav>
       </template>
       <div v-else-if="!loading" id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4">
-        <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon" />
+        <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px] dark:invert" alt="icon" />
         <div class="flex flex-col gap-1 items-center text-center">
           <p class="font-semibold text-custom-grey dark:text-gray-400">
             {{ emptyStateText }}
