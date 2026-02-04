@@ -4,47 +4,59 @@
 
 ## 🌟 Key Features
 
-*   **Multi-Role System**: Dedicated panels for **Buyers**, **Sellers (Stores)**, and **Admins**.
-*   **Authentication**:
+*   **👥 Multi-Role System**: Dedicated panels for **Buyers**, **Sellers (Stores)**, and **Admins** with specific permissions.
+*   **🔐 Authentication**:
     *   Secure Email/Password Login.
     *   **Social Login** via Google OAuth.
-*   **Shopping Experience**:
-    *   Product Browsing & Search.
+*   **🛒 Shopping Experience**:
+    *   Product Browsing & Search with History.
     *   Cart & Wishlist Management.
-    *   Seamless Checkout Process.
-*   **Store Management**:
+    *   Seamless Checkout Process with **Midtrans** Payment Gateway.
+*   **🏪 Store Management**:
     *   Create and customize stores.
     *   Manage products, inventories, and orders.
     *   **Wallet System**: Track earnings and request withdrawals.
-*   **Real-Time Interaction**:
-    *   **Live Chat**: Direct messaging between Buyers and Sellers using WebSockets.
-    *   **Smart AI Assistant (Ri)**: Intelligent chatbot powered by Google Gemini to assist users with product recommendations.
-    *   Notifications.
-*   **Trust & Verification**:
+*   **💬 Real-Time Interaction**:
+    *   **Live Chat**: Direct messaging between Buyers and Sellers using **Laravel Reverb**.
+    *   **Notifications**: Real-time order and system updates.
+    *   **Smart AI Assistant (Ri)**: An intelligent, empathetic chatbot powered by **Google Gemini**. 'Ri' can search the product database to give accurate recommendations and maintains a consistent, friendly persona.
+*   **🎨 Modern UI/UX**:
+    *   **Dark Mode (Beta)**: Fully integrated dark theme support across the platform.
+    *   **Responsive Design**: Built with TailwindCSS for a premium mobile-first experience.
+    *   **Admin Dashboard**: Comprehensive analytics (Charts, Stats) and management tools.
+*   **✅ Trust & Verification**:
     *   Product Reviews with Image Uploads.
     *   Rating System.
+
+---
 
 ## 🛠️ Tech Stack
 
 ### Backend (`api-blue`)
 *   **Framework**: Laravel 12
 *   **Auth**: Laravel Sanctum (API Tokens), Laravel Socialite (Google Auth)
+*   **Real-time**: Laravel Reverb (WebSockets)
 *   **Database**: MySQL
-*   **Real-time**: Pusher / Laravel Echo
+*   **Storage**: Local / S3 Compatible
 *   **Roles**: Spatie Permission
 
 ### Frontend (`fe-blue`)
 *   **Framework**: Vue.js 3 (Composition API)
 *   **State Management**: Pinia
 *   **Router**: Vue Router
-*   **Styling**: TailwindCSS
+*   **Styling**: TailwindCSS (Custom Design System)
 *   **HTTP Client**: Axios
+*   **Theme**: Light & Dark Mode (Beta)
 
 ### AI Service (`ai-service`)
 *   **Language**: Python 3.x
 *   **Framework**: FastAPI
-*   **AI Model**: Google Gemini (via `google-generativeai`)
-*   **Database Client**: MySQL Connector
+*   **AI Model**: Google Gemini (Proprietary Persona 'Ri')
+*   **Integration**: Direct MySQL Database Access for RAG (Retrieval-Augmented Generation) capabilities.
+
+## 📚 Documentation
+
+*   **[API Documentation](API_DOCUMENTATION.md)**: Detailed reference for all backend endpoints.
 
 ---
 
@@ -57,6 +69,7 @@ Follow these commands to set up the project locally.
 *   Composer
 *   Node.js & NPM
 *   MySQL
+*   Python 3.10+
 
 ### 1. Clone the Repository
 ```bash
@@ -107,88 +120,35 @@ php artisan serve
 ```
 *Backend runs at: `http://localhost:8000`*
 
-### 2.1. Realtime Chat Setup (Reverb)
-1.  **Install & Configure Reverb**:
-    Run the broadcasting installation command to scaffold the necessary configuration and generate keys automatically:
-    ```bash
-    php artisan install:broadcasting
-    ```
-    *   Select **Reverb** when prompted.
-    *   This will automatically update your `.env` file with `REVERB_APP_ID`, `REVERB_APP_KEY`, etc.
-
-2.  *(Optional)* **Manual Configuration**:
-    If you skipped the installer, manually add these to `api-blue/.env`:
-    ```ini
-    BROADCAST_CONNECTION=reverb
-    REVERB_APP_ID=my-app-id
-    REVERB_APP_KEY=my-app-key
-    REVERB_APP_SECRET=my-app-secret
-    REVERB_HOST="localhost"
-    REVERB_PORT=8080
-    REVERB_SCHEME=http
-
-    VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
-    VITE_REVERB_HOST="${REVERB_HOST}"
-    VITE_REVERB_PORT="${REVERB_PORT}"
-    VITE_REVERB_SCHEME="${REVERB_SCHEME}"
-    ```
-
-3.  **Start Reverb Server**:
+#### 2.1. Realtime Chat Setup (Reverb)
+1.  **Start Reverb Server**:
     ```bash
     php artisan reverb:start
     ```
+    Ensure `BROADCAST_CONNECTION=reverb` is set in your `.env`.
 
-### 2.2. Google OAuth Setup (For Social Login)
-To enable "Sign in with Google", you need to obtain credentials from Google Cloud Console.
+#### 2.2. Payment & Shipping Integration
+*   **RajaOngkir**: Add `RAJAONGKIR_API_KEY` to `.env`.
+*   **Midtrans**: Add `MIDTRANS_MERCHANT_ID`, `CLIENT_KEY`, and `SERVER_KEY` to `.env`.
+*   **Ngrok** (Optional): Use `ngrok http 8000` for webhook testing.
 
-1.  **Create Project**:
-    *   Go to [Google Cloud Console](https://console.cloud.google.com/).
-    *   Create a new project (e.g., "Blue Marketplace").
+#### 2.3. Queue Worker (Important)
+Since the app uses queues for email/notifications, don't forget to run:
+```bash
+php artisan queue:work
+```
+Or for scheduled tasks:
+```bash
+php artisan schedule:work
+```
 
-2.  **Configure Consent Screen**:
-    *   Go to **APIs & Services > OAuth consent screen**.
-    *   Select **External** user type and click Create.
-    *   Fill in required details (App Name, Support Email).
+#### 2.4. Running Tests
+To ensure everything is working correctly:
+```bash
+php artisan test
+```
 
-3.  **Get Credentials**:
-    *   Go to **Credentials > Create Credentials > OAuth client ID**.
-    *   Application Type: **Web application**.
-    *   **Authorized JavaScript origins**:
-        *   `http://localhost:5173` (Frontend)
-        *   `http://localhost:8000` (Backend)
-    *   **Authorized redirect URIs**:
-        *   `http://localhost:8000/api/auth/google/callback`
-    *   Click **Create**.
-
-4.  **Update Environment**:
-    *   Copy the **Client ID** and **Client Secret**.
-    *   Paste them into your `api-blue/.env` file:
-        ```ini
-        GOOGLE_CLIENT_ID=your_pasted_client_id
-        GOOGLE_CLIENT_SECRET=your_pasted_client_secret
-        GOOGLE_REDIRECT_URL=http://localhost:8000/api/auth/google/callback
-        ```
-
-### 2.3. Payment & Shipping Integration
-1.  **RajaOngkir (Shipping)**:
-    Add API key to `api-blue/.env`:
-    ```ini
-    RAJAONGKIR_API_KEY=your_rajaongkir_key
-    ```
-2.  **Midtrans (Payment)**:
-    Add credentials to `api-blue/.env`:
-    ```ini
-    MIDTRANS_MERCHANT_ID=your_merchant_id
-    MIDTRANS_CLIENT_KEY=your_client_key
-    MIDTRANS_SERVER_KEY=your_server_key
-    ```
-3.  **Ngrok (For Webhooks)**:
-    Required for local development to receive Midtrans notifications.
-    ```bash
-    ngrok http 8000
-    ```
-    Set **Notification URL** in Midtrans Dashboard to:
-    `https://your-ngrok-url.ngrok-free.app/api/midtrans/callback`
+---
 
 ### 3. Frontend Setup (`fe-blue`)
 Setting up the Vue.js client.
@@ -201,36 +161,46 @@ cd ../fe-blue
 npm install
 
 # Environment Configuration
-cp .env.example .env 
-# Or manually create .env with:
-# VITE_API_BASE_URL=http://localhost:8000/api
+cp .env.example .env
+```
 
-#### 4. AI Chatbot Setup (`ai-service`)
+**Configure `.env`:**
+```ini
+VITE_API_BASE_URL=http://localhost:8000/api
+VITE_REVERB_APP_KEY=your_reverb_key
+VITE_REVERB_HOST=localhost
+VITE_REVERB_PORT=8080
+```
+
+**Run Frontend:**
+```bash
+npm run dev
+```
+*Frontend runs at: `http://localhost:5173`*
+
+---
+
+### 4. AI Chatbot Setup (`ai-service`)
 The platform includes an intelligent chatbot powered by **Google Gemini AI**.
 
 1.  Navigate to the `ai-service` directory:
     ```bash
-    cd ai-service
+    cd ../ai-service
     ```
-2.  **Create Virtual Environment**:
-    To avoid path issues (like `pyvenv.cfg` errors), always create a local virtual environment:
+2.  **Create & Activate Virtual Environment**:
     ```bash
+    # Windows
     python -m venv venv
+    .\venv\Scripts\activate
+
+    # Mac/Linux
+    source venv/bin/activate
     ```
-3.  **Activate Virtual Environment**:
-    *   **Windows**:
-        ```bash
-        .\venv\Scripts\activate
-        ```
-    *   **Mac/Linux**:
-        ```bash
-        source venv/bin/activate
-        ```
-4.  **Install Dependencies**:
+3.  **Install Dependencies**:
     ```bash
     pip install -r requirements.txt
     ```
-5.  **Configure Environment**:
+4.  **Configure Environment**:
     Create a `.env` file in `ai-service/`:
     ```ini
     GEMINI_API_KEY=your_gemini_api_key
@@ -239,12 +209,11 @@ The platform includes an intelligent chatbot powered by **Google Gemini AI**.
     DB_PASSWORD=
     DB_NAME=blue_db
     ```
-6.  **Run the Service**:
+5.  **Run the Service**:
     ```bash
     uvicorn main:app --reload --port 8001
     ```
     *AI Service runs at: `http://localhost:8001`*
-*Frontend runs at: `http://localhost:5173`*
 
 ---
 
@@ -253,5 +222,7 @@ The platform includes an intelligent chatbot powered by **Google Gemini AI**.
 If you ran database seeders, you can use these default accounts:
 
 *   **Admin**: `admin@gmail.com` / `password`
+*   **Store/Seller**: (Create via register or check seeders)
+*   **Buyer**: (Create via register)
 
 Happy Coding! 🚀
