@@ -48,7 +48,6 @@ const applyFilters = () => {
     max_price: priceMax.value,
     condition: selectedConditions.value,
     min_rating: minRating.value,
-    min_rating: minRating.value,
     created_since: createdSince.value
   })
 }
@@ -66,7 +65,6 @@ watch([priceMin, priceMax, selectedConditions, minRating, createdSince], () => {
 const openSections = ref({
   price: true,
   condition: true,
-  rating: true,
   rating: true,
   added: true
 })

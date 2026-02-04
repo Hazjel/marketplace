@@ -6,7 +6,7 @@ import { ref, onMounted } from 'vue'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 
 const authStore = useAuthStore()
-const { loading, error } = storeToRefs(authStore)
+const { error } = storeToRefs(authStore)
 const { register } = authStore
 
 const form = ref({

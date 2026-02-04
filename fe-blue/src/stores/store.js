@@ -1,6 +1,7 @@
 import { handleError } from '@/helpers/errorHelper'
 import { axiosInstance } from '@/plugins/axios'
 import { defineStore } from 'pinia'
+import router from '@/router'
 
 export const useStoreStore = defineStore('store', {
   state: () => ({
@@ -209,7 +210,7 @@ export const useStoreStore = defineStore('store', {
       try {
         const response = await axiosInstance.get(`store/${id}/follow-status`)
         return response.data.data.is_following
-      } catch (error) {
+      } catch (_) {
         // If not logged in or other error, return false
         return false
       }

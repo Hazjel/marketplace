@@ -154,17 +154,17 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
               <div class="flex size-6 overflow-hidden relative">
                 <img
                   src="@/assets/images/icons/checkbox-unchecked.svg"
-                  class="size-full object-contain absolute group-has-[:checked]:opacity-0 transition-300"
+                  class="size-full object-contain absolute group-has-checked:opacity-0 transition-300"
                   alt="icon"
                 />
                 <img
                   src="@/assets/images/icons/checkbox.svg"
-                  class="size-full object-contain absolute opacity-0 group-has-[:checked]:opacity-100 transition-300"
+                  class="size-full object-contain absolute opacity-0 group-has-checked:opacity-100 transition-300"
                   alt="icon"
                 />
               </div>
               <span
-                class="font-semibold text-custom-grey leading-none group-has-[:checked]:text-custom-blue transition-300"
+                class="font-semibold text-custom-grey leading-none group-has-checked:text-custom-blue transition-300"
                 >Remember me</span
               >
             </label>

@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router'
 import { onMounted, watch } from 'vue'
 
 const productStore = useProductStore()
-const { products, loading } = storeToRefs(productStore)
+const { products } = storeToRefs(productStore)
 const { fetchProducts } = productStore
 const route = useRoute()
 import { useHead } from '@vueuse/head'

@@ -29,6 +29,33 @@
   --color-text-main: #000926;
   --color-text-muted: #64748b;
   --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #0f52ba;
+
+  /* ----------------------------------
+       Design System Standard Tokens
+       ---------------------------------- */
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-primary-dark);
+
+  --color-card: var(--color-surface-card);
+  --color-card-foreground: var(--color-primary-dark);
+
+  --color-popover: var(--color-surface-card);
+  --color-popover-foreground: var(--color-primary-dark);
+
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary-foreground: var(--color-primary);
+
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+
+  --color-accent: #d6e6f3;
+  --color-accent-foreground: #0f52ba;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
 
   /* ----------------------------------
        Legacy / Custom Mapping
@@ -83,6 +110,30 @@
   --color-text-muted: #94a3b8;
   --color-border: #334155;
 
+  --color-background: #0b1120;
+  --color-foreground: #f1f5f9;
+
+  --color-card: #151e32;
+  --color-card-foreground: #f1f5f9;
+
+  --color-popover: #151e32;
+  --color-popover-foreground: #f1f5f9;
+
+  --color-primary-foreground: #f1f5f9;
+  --color-secondary-foreground: #f1f5f9;
+
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+
+  --color-accent: #1e293b;
+  --color-accent-foreground: #f1f5f9;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #f1f5f9;
+
+  --color-input: #334155;
+  --color-ring: #334155;
+
   --color-custom-black: #f1f5f9;
   /* Invert black to white for text */
   --color-custom-background: #0b1120;
@@ -115,6 +166,7 @@ body {
    COMPONENTS
    ========================================= */
 @layer components {
+
   /* --- Form Elements --- */
   .custom-input {
     @apply h-[76px] w-full border-[1.5px] border-custom-stroke rounded-[18px] pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-semibold transition-all duration-300 appearance-none outline-none;
@@ -168,12 +220,10 @@ body {
   }
 
   .gradient-black-transparent {
-    background: linear-gradient(
-      180deg,
-      rgba(14, 22, 38, 0) 0%,
-      rgba(14, 22, 38, 0.75) 50%,
-      #0e1626 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(14, 22, 38, 0) 0%,
+        rgba(14, 22, 38, 0.75) 50%,
+        #0e1626 100%);
   }
 
   /* --- Search --- */
@@ -235,6 +285,7 @@ body {
    UTILITIES & ANIMATIONS
    ========================================= */
 @layer utilities {
+
   /* --- Transitions --- */
   .transition-300 {
     transition: all 300ms ease-in-out;
@@ -275,18 +326,14 @@ body {
   @keyframes enter {
     from {
       opacity: var(--tw-enter-opacity, 1);
-      transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0)
-        scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), 1)
-        rotate(var(--tw-enter-rotate, 0));
+      transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), 1) rotate(var(--tw-enter-rotate, 0));
     }
   }
 
   @keyframes exit {
     to {
       opacity: var(--tw-exit-opacity, 1);
-      transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0)
-        scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), 1)
-        rotate(var(--tw-exit-rotate, 0));
+      transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), 1) rotate(var(--tw-exit-rotate, 0));
     }
   }
 

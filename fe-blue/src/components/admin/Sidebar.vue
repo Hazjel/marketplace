@@ -69,8 +69,7 @@ watch(
 <template>
   <!-- Desktop Sidebar (Hidden on Mobile) -->
   <aside
-    class="hidden md:flex flex-col w-[280px] bg-white border-r border-custom-stroke h-screen sticky top-0 overflow-hidden"
-  >
+    class="hidden md:flex flex-col w-[280px] bg-white dark:bg-surface-card border-r border-custom-stroke dark:border-white/10 h-screen sticky top-0 overflow-hidden">
     <SidebarContent />
   </aside>
 
@@ -78,9 +77,7 @@ watch(
   <Sheet v-model:open="sheetOpen">
     <SheetContent side="left" class="p-0 border-r-0 w-[85%] sm:max-w-[300px] [&>button]:hidden">
       <SheetTitle class="sr-only">Navigation Menu</SheetTitle>
-      <SheetDescription class="sr-only"
-        >Main sidebar navigation for the application</SheetDescription
-      >
+      <SheetDescription class="sr-only">Main sidebar navigation for the application</SheetDescription>
       <SidebarContent>
         <template #close-button>
           <!-- Close Button already handled by Sheet but we can add extra if needed -->

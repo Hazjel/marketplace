@@ -219,7 +219,7 @@ onMounted(fetchData)
           :class="{ invalid: error?.about }"
         >
           <label
-            class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red"
+            class="group flex py-4 px-6 rounded-3xl border-2 border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red"
           >
             <div class="flex h-full pr-4 pt-2 border-r-[1.5px] border-custom-border">
               <img
@@ -287,7 +287,7 @@ onMounted(fetchData)
           :class="{ invalid: error?.address }"
         >
           <label
-            class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red"
+            class="group flex py-4 px-6 rounded-3xl border-2 border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red"
           >
             <div class="flex h-full pr-4 pt-2 border-r-[1.5px] border-custom-border">
               <img

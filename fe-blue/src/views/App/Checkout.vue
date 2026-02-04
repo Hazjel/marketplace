@@ -1,5 +1,6 @@
 <script setup>
 import { formatRupiah } from '@/helpers/format'
+import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useTransactionStore } from '@/stores/transaction'
 import { useAuthStore } from '@/stores/auth'
@@ -17,6 +18,7 @@ const authStore = useAuthStore()
 const cart = useCartStore()
 const transactionStore = useTransactionStore()
 const toast = useToast()
+const router = useRouter()
 
 // Store refs
 const { user } = storeToRefs(authStore)
@@ -25,10 +27,8 @@ const {
   totalSelectedItems,
   totalSelectedQuantity,
   subtotalSelected,
-  ppnSelected,
   discountSelected
 } = storeToRefs(cart)
-const { error } = storeToRefs(transactionStore)
 const { createTransaction } = transactionStore
 
 const isMidtransLoaded = ref(false)
@@ -169,7 +169,7 @@ const handleAddressInput = debounce(async (search) => {
     const data = await response.json()
     addressOptions.value = data.data
     showAddressOptions.value = true
-  } catch (err) {
+  } catch {
     addressOptions.value = []
   } finally {
     loadingAddress.value = false
@@ -216,7 +216,7 @@ const handleDeliveryModal = async () => {
     const data = await response.json()
     couriers.value = data.data.calculate_reguler
     showDeliveryModal.value = true
-  } catch (error) {
+  } catch {
     toast.error('Gagal menghitung ongkir. Silakan coba lagi.')
   }
 }
@@ -259,12 +259,12 @@ const handleSubmit = async () => {
 
     // 2. Open Snap Popup
     window.snap.pay(response.snap_token, {
-      onSuccess: function (result) {
+      onSuccess: function () {
         showSuccessModal.value = true
         isProcessingPayment.value = false
         toast.success('Pembayaran berhasil!')
       },
-      onPending: function (result) {
+      onPending: function () {
         isProcessingPayment.value = false
         toast.info('Menunggu pembayaran...')
         // Redirect to My Transactions with username param
@@ -274,7 +274,7 @@ const handleSubmit = async () => {
           window.location.href = '/my-transactions' // Fallback
         }
       },
-      onError: function (result) {
+      onError: function () {
         toast.error('Pembayaran gagal. Silakan coba lagi.')
         isProcessingPayment.value = false
       },
@@ -289,7 +289,7 @@ const handleSubmit = async () => {
         }
       }
     })
-  } catch (error) {
+  } catch {
     toast.error('Gagal memproses transaksi. Silakan coba lagi.')
     isProcessingPayment.value = false // ✅ Stop loading
   }
@@ -328,64 +328,45 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto pt-4">
+  <section class="flex flex-col gap-6 w-full max-w-[1240px] px-4 md:px-8 mx-auto pt-4">
     <CheckoutStepper :current-step="2" />
 
     <div class="flex flex-col md:flex-row gap-5">
       <!-- Cart Items Section -->
-      <section
-        id="Carts-Container"
-        class="flex flex-col gap-5 w-full h-fit rounded-[20px] p-5 bg-white min-w-0"
-      >
-        <p class="font-bold text-xl">Your Cart</p>
+      <section id="Carts-Container"
+        class="flex flex-col gap-5 w-full h-fit rounded-[20px] p-5 bg-white dark:bg-surface-card min-w-0">
+        <p class="font-bold text-xl dark:text-white">Your Cart</p>
 
         <!-- Empty state -->
         <div v-if="selectedCarts.length === 0" class="text-center p-8">
           <p class="text-custom-grey font-medium">No stores selected for checkout</p>
-          <RouterLink
-            :to="{ name: 'app.cart' }"
-            class="text-custom-blue font-semibold mt-2 inline-block"
-          >
+          <RouterLink :to="{ name: 'app.cart' }" class="text-custom-blue font-semibold mt-2 inline-block">
             Back to Cart
           </RouterLink>
         </div>
 
         <!-- Selected stores and products -->
-        <div
-          v-for="store in selectedCarts"
-          :key="store.storeId"
-          class="store-cart flex flex-col w-full gap-4"
-        >
+        <div v-for="store in selectedCarts" :key="store.storeId" class="store-cart flex flex-col w-full gap-4">
           <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
             <img src="@/assets/images/icons/shop-grey.svg" class="size-4" alt="icon" />
             {{ store.storeName }}
           </p>
 
-          <div class="flex flex-col gap-4 pl-4 border-l-2 border-gray-100">
-            <div
-              v-for="product in store.products"
-              :key="product.id"
-              class="flex items-start gap-4 w-full"
-            >
+          <div class="flex flex-col gap-4 pl-4 border-l-2 border-gray-100 dark:border-gray-700">
+            <div v-for="product in store.products" :key="product.id" class="flex items-start gap-4 w-full">
               <div
-                class="flex size-[64px] shrink-0 rounded-xl bg-gray-50 p-2 items-center justify-center"
-              >
-                <img
-                  :src="
-                    product.product_images?.find((i) => i.is_thumbnail)?.image || product.thumbnail
-                  "
-                  class="size-full object-contain mix-blend-multiply"
-                  alt="icon"
-                  @error="(e) => (e.target.src = '/src/assets/images/thumbnails/th-1.svg')"
-                />
+                class="flex size-[64px] shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 p-2 items-center justify-center">
+                <img :src="product.product_images?.find((i) => i.is_thumbnail)?.image || product.thumbnail
+                  " class="size-full object-contain mix-blend-multiply dark:mix-blend-normal" alt="icon"
+                  @error="(e) => (e.target.src = '/src/assets/images/thumbnails/th-1.svg')" />
               </div>
               <div class="flex flex-col flex-1 gap-1">
-                <p class="font-bold text-sm leading-tight line-clamp-2">{{ product.name }}</p>
+                <p class="font-bold text-sm leading-tight line-clamp-2 dark:text-white">{{ product.name }}</p>
                 <p class="text-xs text-custom-grey font-medium">
                   {{ product.weight }} KG • {{ product.product_category.name }}
                 </p>
                 <div class="flex items-center justify-between mt-1">
-                  <p class="font-bold text-sm text-custom-black">
+                  <p class="font-bold text-sm text-custom-black dark:text-white">
                     Rp {{ formatRupiah(product.price) }}
                   </p>
                   <p class="font-semibold text-xs text-custom-grey">x{{ product.quantity }}</p>
@@ -400,17 +381,10 @@ onMounted(async () => {
       <form class="flex flex-col gap-5 w-full md:w-[581px] shrink-0" @submit.prevent="handleSubmit">
         <!-- Security Notice -->
         <div class="relative w-full rounded-[20px] bg-custom-blue overflow-hidden">
-          <img
-            src="@/assets/images/backgrounds/round-ornament.svg"
-            class="size-full object-contain object-right opacity-55 absolute"
-            alt="icon"
-          />
+          <img src="@/assets/images/backgrounds/round-ornament.svg"
+            class="size-full object-contain object-right opacity-55 absolute" alt="icon" />
           <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
-            <img
-              src="@/assets/images/icons/shield-tick-white-fill.svg"
-              class="flex size-9 shrink-0"
-              alt="icon"
-            />
+            <img src="@/assets/images/icons/shield-tick-white-fill.svg" class="flex size-9 shrink-0" alt="icon" />
             <p class="font-bold text-lg text-white capitalize">
               Your personal data is securely protected by us
             </p>
@@ -418,55 +392,40 @@ onMounted(async () => {
         </div>
 
         <!-- Address Form -->
-        <div class="flex flex-col gap-5 rounded-[20px] p-5 bg-white">
-          <p class="font-bold text-xl">Contact & Delivery Address</p>
+        <div class="flex flex-col gap-5 rounded-[20px] p-5 bg-white dark:bg-surface-card">
+          <p class="font-bold text-xl dark:text-white">Contact & Delivery Address</p>
 
           <!-- Address Search -->
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
               <p class="font-semibold text-custom-grey">Address Details</p>
-              <button
-                v-if="savedAddresses.length > 0 && !showSavedAddresses"
-                type="button"
-                class="text-sm font-bold text-custom-blue hover:underline"
-                @click="showSavedAddresses = true"
-              >
+              <button v-if="savedAddresses.length > 0 && !showSavedAddresses" type="button"
+                class="text-sm font-bold text-custom-blue hover:underline" @click="showSavedAddresses = true">
                 Select Saved Address
               </button>
-              <button
-                v-else-if="showSavedAddresses"
-                type="button"
-                class="text-sm font-bold text-custom-red hover:underline"
-                @click="showSavedAddresses = false"
-              >
+              <button v-else-if="showSavedAddresses" type="button"
+                class="text-sm font-bold text-custom-red hover:underline" @click="showSavedAddresses = false">
                 Cancel Selection
               </button>
             </div>
 
             <!-- Saved Addresses Grid -->
             <div v-if="showSavedAddresses" class="grid grid-cols-1 gap-3 mb-2">
-              <div
-                v-for="addr in savedAddresses"
-                :key="addr.id"
-                class="cursor-pointer border border-custom-stroke rounded-xl p-4 hover:border-custom-blue hover:bg-blue-50 transition-all group"
+              <div v-for="addr in savedAddresses" :key="addr.id"
+                class="cursor-pointer border border-custom-stroke dark:border-white/10 rounded-xl p-4 hover:border-custom-blue hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all group"
                 :class="{
-                  'border-custom-blue bg-blue-50 ring-1 ring-custom-blue':
+                  'border-custom-blue bg-blue-50 dark:bg-blue-500/20 ring-1 ring-custom-blue':
                     transaction.address === addr.address
-                }"
-                @click="selectSavedAddress(addr)"
-              >
+                }" @click="selectSavedAddress(addr)">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="font-bold text-custom-black">{{ addr.label }}</span>
-                  <span
-                    v-if="addr.is_primary"
-                    class="text-[10px] font-bold bg-blue-100 text-custom-blue px-2 py-0.5 rounded-full"
-                    >PRIMARY</span
-                  >
+                  <span class="font-bold text-custom-black dark:text-white">{{ addr.label }}</span>
+                  <span v-if="addr.is_primary"
+                    class="text-xs font-bold bg-blue-100 dark:bg-blue-500/20 text-custom-blue dark:text-blue-400 px-2 py-0.5 rounded-full">PRIMARY</span>
                 </div>
-                <p class="text-sm font-semibold text-custom-black">
+                <p class="text-sm font-semibold text-custom-black dark:text-gray-300">
                   {{ addr.recipient_name }} ({{ addr.phone }})
                 </p>
-                <p class="text-xs text-custom-grey line-clamp-1 mt-1">
+                <p class="text-xs text-custom-grey dark:text-gray-400 line-clamp-1 mt-1">
                   {{ addr.address }}, {{ addr.city }}
                 </p>
               </div>
@@ -480,27 +439,14 @@ onMounted(async () => {
               <div class="group/errorState flex flex-col gap-2 relative">
                 <label class="group relative">
                   <div class="input-icon">
-                    <img
-                      src="@/assets/images/icons/global-search-grey.svg"
-                      class="flex size-6 shrink-0"
-                      alt="icon"
-                    />
+                    <img src="@/assets/images/icons/global-search-grey.svg" class="flex size-6 shrink-0" alt="icon" />
                   </div>
                   <p class="input-placeholder">Enter District / City</p>
-                  <input
-                    v-model="addressSearch"
-                    type="text"
-                    class="custom-input"
-                    placeholder=""
-                    @input="handleAddressInput(addressSearch)"
-                  />
+                  <input v-model="addressSearch" type="text" class="custom-input" placeholder=""
+                    @input="handleAddressInput(addressSearch)" />
                 </label>
                 <ul v-if="showAddressOptions" class="search-result">
-                  <li
-                    v-for="option in addressOptions"
-                    :key="option.id"
-                    @click="handleAddressSelect(option)"
-                  >
+                  <li v-for="option in addressOptions" :key="option.id" @click="handleAddressSelect(option)">
                     {{ option.label }}
                   </li>
                 </ul>
@@ -511,38 +457,24 @@ onMounted(async () => {
           <!-- Address Details -->
           <div class="flex flex-col gap-3">
             <p class="font-semibold text-custom-grey">Your Address</p>
-            <div
-              class="group/errorState flex flex-col gap-2 w-full"
-              :class="{ invalid: error?.address }"
-            >
+            <div class="group/errorState flex flex-col gap-2 w-full" :class="{ invalid: error?.address }">
               <label
-                class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red"
-              >
+                class="group flex py-4 px-6 rounded-3xl border-2 border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red">
                 <div class="flex h-full pr-4 pt-2 border-r-[1.5px] border-custom-border">
-                  <img
-                    src="@/assets/images/icons/location-grey.svg"
-                    class="flex size-6 shrink-0"
-                    alt="icon"
-                  />
+                  <img src="@/assets/images/icons/location-grey.svg" class="flex size-6 shrink-0" alt="icon" />
                 </div>
                 <div class="flex flex-col gap-[6px] pl-4 w-full">
                   <p
-                    class="placeholder font-semibold text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-bold transition-300"
-                  >
+                    class="placeholder font-semibold text-custom-grey text-sm group-has-placeholder-shown:text-base group-has-placeholder-shown:text-custom-black group-has-placeholder-shown:font-bold transition-300">
                     Enter Your Address
                   </p>
-                  <textarea
-                    v-model="transaction.address"
-                    class="appearance-none outline-none w-full font-semibold leading-[160%]"
-                    rows="3"
-                    placeholder=""
-                  ></textarea>
+                  <textarea v-model="transaction.address"
+                    class="appearance-none outline-none w-full font-semibold leading-[160%]" rows="3"
+                    placeholder=""></textarea>
                 </div>
               </label>
-              <span
-                v-if="error?.address"
-                class="font-semibold text-lg text-custom-red leading-none group-[&.invalid]/errorState:block"
-              >
+              <span v-if="error?.address"
+                class="font-semibold text-lg text-custom-red leading-none group-[&.invalid]/errorState:block">
                 {{ error?.address.join(', ') }}
               </span>
             </div>
@@ -554,11 +486,7 @@ onMounted(async () => {
             <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.city }">
               <label class="group relative">
                 <div class="input-icon">
-                  <img
-                    src="@/assets/images/icons/buildings-grey.svg"
-                    class="flex size-6 shrink-0"
-                    alt="icon"
-                  />
+                  <img src="@/assets/images/icons/buildings-grey.svg" class="flex size-6 shrink-0" alt="icon" />
                 </div>
                 <p class="input-placeholder">Enter Your City</p>
                 <input v-model="transaction.city" type="text" class="custom-input" placeholder="" />
@@ -570,25 +498,13 @@ onMounted(async () => {
           <!-- Postal Code Input -->
           <div class="flex flex-col gap-3">
             <p class="font-semibold text-custom-grey">Post Code</p>
-            <div
-              class="group/errorState flex flex-col gap-2"
-              :class="{ invalid: error?.postal_code }"
-            >
+            <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.postal_code }">
               <label class="group relative">
                 <div class="input-icon">
-                  <img
-                    src="@/assets/images/icons/keyboard-grey.svg"
-                    class="flex size-6 shrink-0"
-                    alt="icon"
-                  />
+                  <img src="@/assets/images/icons/keyboard-grey.svg" class="flex size-6 shrink-0" alt="icon" />
                 </div>
                 <p class="input-placeholder">Enter Post Code</p>
-                <input
-                  v-model="transaction.postal_code"
-                  type="number"
-                  class="custom-input"
-                  placeholder=""
-                />
+                <input v-model="transaction.postal_code" type="number" class="custom-input" placeholder="" />
               </label>
               <span v-if="error?.postal_code" class="input-error">
                 {{ error?.postal_code?.join(', ') }}
@@ -598,15 +514,11 @@ onMounted(async () => {
         </div>
 
         <!-- Courier Selection -->
-        <div class="flex flex-col gap-5 rounded-[20px] p-5 bg-white">
-          <p class="font-bold text-xl">Courier Selection</p>
+        <div class="flex flex-col gap-5 rounded-[20px] p-5 bg-white dark:bg-surface-card">
+          <p class="font-bold text-xl dark:text-white">Courier Selection</p>
           <div class="flex flex-col gap-3">
-            <div
-              class="flex items-center justify-between rounded-[20px] border border-custom-stroke p-5 gap-[14px]"
-            >
-              <div
-                class="flex rounded-full size-14 shrink-0 items-center justify-center bg-custom-background"
-              >
+            <div class="flex items-center justify-between rounded-[20px] border border-custom-stroke p-5 gap-[14px]">
+              <div class="flex rounded-full size-14 shrink-0 items-center justify-center bg-custom-background">
                 <img src="@/assets/images/icons/car-delivery-black.svg" class="size-6" alt="icon" />
               </div>
               <div v-if="!selectedCourier" class="w-full">
@@ -622,119 +534,69 @@ onMounted(async () => {
                   {{ formatRupiah(selectedCourier.shipping_cost_net) }})
                 </p>
               </div>
-              <button
-                type="button"
-                class="flex items-center gap-0.5 shrink-0"
-                @click="handleDeliveryModal"
-              >
+              <button type="button" class="flex items-center gap-0.5 shrink-0" @click="handleDeliveryModal">
                 <p class="font-bold text-custom-blue">Calculate Delivery</p>
-                <img
-                  src="@/assets/images/icons/arrow-right-no-tail-blue-thick.svg"
-                  class="size-4"
-                  alt=""
-                />
+                <img src="@/assets/images/icons/arrow-right-no-tail-blue-thick.svg" class="size-4" alt="" />
               </button>
             </div>
           </div>
         </div>
 
         <!-- Order Summary -->
-        <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white">
-          <p class="font-bold text-xl">Order Summary</p>
+        <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white dark:bg-surface-card">
+          <p class="font-bold text-xl dark:text-white">Order Summary</p>
           <div class="flex flex-col rounded-xl border border-custom-stroke p-5 gap-4">
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/shopping-cart-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Total Items:
               </p>
               <p class="font-bold text-lg leading-none">{{ totalSelectedItems }} Items</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/box-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/box-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Total Quantity:
               </p>
               <p class="font-bold text-lg leading-none">{{ totalSelectedQuantity }}x</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/car-delivery-moves-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Delivery Fee:
               </p>
               <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(deliveryFee) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/ticket-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/ticket-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Sub Total:
               </p>
               <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(finalSubtotal) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/receipt-2-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/receipt-2-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 PPN 11%
               </p>
               <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(finalPpn) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/discount-shape-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/discount-shape-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Discount
               </p>
               <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(discountSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/money-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Grand total
               </p>
               <p class="font-bold text-lg leading-none text-custom-blue">
@@ -742,28 +604,20 @@ onMounted(async () => {
               </p>
             </div>
           </div>
-          <button
-            id="Pay-Button"
-            type="submit"
+          <button id="Pay-Button" type="submit"
             :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment"
-            class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300"
-          >
+            class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300">
             <!-- Loading State -->
             <template v-if="isProcessingPayment">
-              <div
-                class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"
-              ></div>
+              <div class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               <span class="font-bold text-white">Processing Payment...</span>
             </template>
 
             <!-- Ready to Pay -->
             <template v-else-if="selectedCarts.length > 0 && selectedCourier">
               <span class="font-bold text-white">Pay With Midtrans</span>
-              <img
-                src="@/assets/images/icons/arrow-right-circle-white-thick.svg"
-                class="flex size-6 shrink-0"
-                alt="icon"
-              />
+              <img src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
+                alt="icon" />
             </template>
 
             <!-- Incomplete Form -->
@@ -779,40 +633,24 @@ onMounted(async () => {
   </section>
 
   <!-- Delivery Modal -->
-  <div
-    v-if="showDeliveryModal"
-    id="Delivery-Modal"
-    class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50"
-  >
+  <div v-if="showDeliveryModal" id="Delivery-Modal"
+    class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50">
     <div class="backdrop absolute w-full h-full bg-[#292D32B2]" @click="closeModal"></div>
-    <div
-      id="Select-Courier"
-      class="relative flex flex-col w-full max-w-[460px] mx-4 shrink-0 h-fit rounded-2xl overflow-hidden"
-    >
+    <div id="Select-Courier"
+      class="relative flex flex-col w-full max-w-[460px] mx-4 shrink-0 h-fit rounded-2xl overflow-hidden">
       <div class="header flex items-center p-5 gap-3 justify-between bg-custom-black">
         <p class="font-semibold text-lg text-white">Select Courier</p>
         <button type="button" @click="closeModal">
-          <img
-            src="@/assets/images/icons/close-circle-white.svg"
-            class="flex size-6 shrink-0"
-            alt="icon"
-          />
+          <img src="@/assets/images/icons/close-circle-white.svg" class="flex size-6 shrink-0" alt="icon" />
         </button>
       </div>
       <div class="flex flex-col p-5 gap-3 bg-white">
         <div class="flex flex-col gap-3">
           <p class="font-semibold text-custom-grey">Available Couriers</p>
-          <div
-            class="flex flex-col gap-3 h-[346px] p-0.5 overflow-y-auto hide-scrollbar overscroll-contain"
-          >
-            <label
-              v-for="courier in couriers"
-              :key="courier.shipping_name"
-              class="courier-choice flex items-center w-full rounded-[20px] ring-1 ring-custom-stroke p-5 gap-[14px] has-[:checked]:ring-2 has-[:checked]:ring-custom-blue has-[:checked]:transparent-blue-to-blue-gradient transition-300"
-            >
-              <div
-                class="flex rounded-full size-14 shrink-0 items-center justify-center bg-custom-background"
-              >
+          <div class="flex flex-col gap-3 h-[346px] p-0.5 overflow-y-auto hide-scrollbar overscroll-contain">
+            <label v-for="courier in couriers" :key="courier.shipping_name"
+              class="courier-choice flex items-center w-full rounded-[20px] ring-1 ring-custom-stroke p-5 gap-[14px] has-checked:ring-2 has-checked:ring-custom-blue has-checked:transparent-blue-to-blue-gradient transition-300">
+              <div class="flex rounded-full size-14 shrink-0 items-center justify-center bg-custom-background">
                 <img src="@/assets/images/icons/car-delivery-black.svg" class="size-6" alt="icon" />
               </div>
               <div class="w-full">
@@ -823,22 +661,14 @@ onMounted(async () => {
                   {{ courier.service_name }} (Rp {{ formatRupiah(courier.shipping_cost_net) }})
                 </p>
               </div>
-              <input
-                type="radio"
-                name="courier"
-                required
+              <input type="radio" name="courier" required
                 class="size-6 flex shrink-0 appearance-none rounded-full checked:border-[3px] checked:border-solid checked:border-white checked:bg-custom-blue ring-2 ring-custom-grey checked:ring-custom-blue transition-300"
-                :value="courier.code"
-                @change="selectedCourier = courier"
-              />
+                :value="courier.code" @change="selectedCourier = courier" />
             </label>
           </div>
-          <button
-            id="Choose-Courier"
-            type="button"
+          <button id="Choose-Courier" type="button"
             class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300"
-            @click="handleCourierSubmit"
-          >
+            @click="handleCourierSubmit">
             <span class="font-bold text-white">Choose Courier</span>
           </button>
         </div>
@@ -846,42 +676,28 @@ onMounted(async () => {
     </div>
   </div>
 
-  <div
-    v-if="showSuccessModal"
-    id="Success-Modal"
-    class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50"
-  >
+  <div v-if="showSuccessModal" id="Success-Modal"
+    class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50">
     <div class="backdrop absolute w-full h-full bg-[#292D32B2]"></div>
-    <div
-      id="Select-Courier"
-      class="relative flex flex-col w-[400px] shrink-0 h-fit rounded-2xl overflow-hidden"
-    >
+    <div id="Select-Courier" class="relative flex flex-col w-[400px] shrink-0 h-fit rounded-2xl overflow-hidden">
       <div class="header flex h-[63px] items-center p-5 gap-3 justify-center bg-custom-black">
         <p class="font-semibold text-lg text-white">Payment Successful</p>
       </div>
       <div class="flex flex-col p-5 gap-3 bg-white">
         <div class="flex flex-col items-center justify-center w-full h-[207px]">
-          <img
-            src="@/assets/images/icons/bag-tick-blue-transparent.svg"
-            class="size-[72px]"
-            alt="icon"
-          />
+          <img src="@/assets/images/icons/bag-tick-blue-transparent.svg" class="size-[72px]" alt="icon" />
           <div class="text-center">
             <p class="font-bold text-xl">Thank You!</p>
             <p class="font-semibold text-custom-grey">Your order has been placed successfully.</p>
           </div>
         </div>
         <div class="flex flex-col gap-3">
-          <RouterLink
-            :to="{ name: 'admin.my-transaction' }"
-            class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue"
-          >
+          <RouterLink :to="{ name: 'admin.my-transaction' }"
+            class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
             <span class="font-bold text-white">View Transaction</span>
           </RouterLink>
-          <RouterLink
-            :to="{ name: 'app.home' }"
-            class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue/10"
-          >
+          <RouterLink :to="{ name: 'app.home' }"
+            class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue/10">
             <span class="font-bold text-custom-blue">Back to Homepage</span>
           </RouterLink>
         </div>

@@ -31,9 +31,9 @@ const yTickFormat = (d) => {
 const triggers = {
   [Scatter.selectors.point]: (d) => {
     return `
-            <div style="background: white; padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #E5E7EB;">
-                <p style="color: #6B7280; font-size: 12px; margin-bottom: 4px;">Pendapatan</p>
-                <p style="color: #111827; font-weight: bold; font-size: 14px;">Rp ${formatRupiah(d.total_revenue)}</p>
+            <div class="bg-white dark:bg-surface-card p-2 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 dark:border-white/10">
+                <p class="text-gray-500 dark:text-gray-400 text-xs mb-1">Pendapatan</p>
+                <p class="text-gray-900 dark:text-white font-bold text-sm">Rp ${formatRupiah(d.total_revenue)}</p>
             </div>
         `
   }

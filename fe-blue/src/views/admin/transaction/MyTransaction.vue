@@ -257,17 +257,13 @@ watch(error, (value) => {
 </script>
 
 <template>
-  <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white">
+  <div class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white dark:bg-surface-card">
     <div class="header flex items-center justify-between">
       <div class="flex flex-col gap-2">
-        <p class="font-bold text-xl">My Transactions</p>
+        <p class="font-bold text-xl dark:text-white">My Transactions</p>
         <div class="flex items-center gap-1">
-          <img
-            src="@/assets/images/icons/stickynote-grey.svg"
-            class="flex size-6 shrink-0"
-            alt="icon"
-          />
-          <p class="font-semibold text-custom-grey">
+          <img src="@/assets/images/icons/stickynote-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
+          <p class="font-semibold text-custom-grey dark:text-gray-400">
             {{ displayTransactions.length }} Total Transactions
           </p>
         </div>
@@ -276,75 +272,53 @@ watch(error, (value) => {
     <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
       <form action="#" class="w-full md:w-auto">
         <label
-          class="flex items-center w-full md:w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white border border-custom-stroke focus-within:border-custom-black transition-300"
-        >
-          <img
-            src="@/assets/images/icons/receipt-search-grey.svg"
-            class="flex size-6 shrink-0"
-            alt="icon"
-          />
-          <input
-            v-model="filters.search"
-            type="text"
-            class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none"
-            placeholder="Search Transaction"
-          />
+          class="flex items-center w-full md:w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
+          <img src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0 dark:invert"
+            alt="icon" />
+          <input v-model="filters.search" type="text"
+            class="appearance-none w-full placeholder:text-custom-grey dark:placeholder:text-gray-500 font-medium focus:outline-none bg-transparent dark:text-white"
+            placeholder="Search Transaction" />
         </label>
       </form>
       <div class="flex items-center gap-4 w-full md:w-auto justify-start">
-        <p class="font-medium text-custom-grey">Show</p>
+        <p class="font-medium text-custom-grey dark:text-gray-400">Show</p>
         <label
-          class="flex items-center h-14 rounded-2xl border border-custom-stroke py-4 px-5 pl-3 bg-white focus-within:border-custom-black transition-300"
-        >
-          <select
-            id=""
-            v-model="serverOptions.row_per_page"
-            name=""
-            class="text-custom-black font-medium appearance-none focus:outline-none p-2"
-          >
-            <option value="10" class="font-medium">10 Entries</option>
-            <option value="20" class="font-medium">20 Entries</option>
-            <option value="40" class="font-medium">40 Entries</option>
+          class="flex items-center h-14 rounded-2xl border border-custom-stroke dark:border-white/10 py-4 px-5 pl-3 bg-white dark:bg-surface-card focus-within:border-custom-black dark:focus-within:border-white transition-300">
+          <select id="" v-model="serverOptions.row_per_page" name=""
+            class="text-custom-black dark:text-white dark:bg-surface-card font-medium appearance-none focus:outline-none p-2">
+            <option value="10" class="font-medium dark:bg-surface-card">10 Entries</option>
+            <option value="20" class="font-medium dark:bg-surface-card">20 Entries</option>
+            <option value="40" class="font-medium dark:bg-surface-card">40 Entries</option>
           </select>
-          <img
-            src="@/assets/images/icons/arrow-down-black.svg"
-            class="flex size-6 shrink-0 -ml-1"
-            alt="icon"
-          />
+          <img src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
+            alt="icon" />
         </label>
       </div>
     </div>
     <section id="List-Transactions" class="flex flex-col flex-1 gap-6 w-full">
       <template v-if="displayTransactions.length">
         <div class="list flex flex-col gap-5">
-          <div
-            v-for="transaction in paginatedTransactions"
-            :key="transaction.id"
-            class="card flex flex-col rounded-2xl border border-gray-100 bg-white hover:border-custom-blue/30 hover:shadow-lg transition-all duration-300 overflow-hidden group"
-          >
+          <div v-for="transaction in paginatedTransactions" :key="transaction.id"
+            class="card flex flex-col rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-surface-card hover:border-custom-blue/30 dark:hover:border-blue-500/30 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             <!-- Card Header -->
             <div
-              class="flex items-center justify-between p-4 border-b border-gray-50 bg-gray-50/50"
-            >
+              class="flex items-center justify-between p-4 border-b border-gray-50 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
               <div class="flex items-center gap-2">
                 <div
-                  class="flex size-8 rounded-full bg-white border border-gray-100 items-center justify-center shrink-0"
-                >
+                  class="flex size-8 rounded-full bg-white dark:bg-white/10 border border-gray-100 dark:border-white/5 items-center justify-center shrink-0">
                   <img :src="transaction?.store?.logo" class="size-5 object-contain" alt="store" />
                 </div>
                 <div class="flex flex-col">
-                  <p class="font-bold text-sm text-custom-black leading-tight">
+                  <p class="font-bold text-sm text-custom-black dark:text-white leading-tight">
                     {{ transaction?.store?.name }}
                   </p>
-                  <p class="text-xs text-custom-grey">
+                  <p class="text-xs text-custom-grey dark:text-gray-400">
                     {{ formatToClientTimeZone(transaction.created_at) }}
                   </p>
                 </div>
               </div>
-              <span
-                class="rounded-full px-3 py-1 text-xs font-bold capitalize"
-                :class="resolveStatusStyle(transaction)"
-              >
+              <span class="rounded-full px-3 py-1 text-xs font-bold capitalize"
+                :class="resolveStatusStyle(transaction)">
                 {{ resolveStatusLabel(transaction) }}
               </span>
             </div>
@@ -352,26 +326,20 @@ watch(error, (value) => {
             <!-- Card Body (Product Preview) -->
             <div class="p-4 flex gap-4">
               <div
-                class="size-[70px] shrink-0 rounded-xl bg-gray-50 border border-gray-100 p-1 flex items-center justify-center"
-              >
-                <img
-                  :src="transaction.transaction_details?.[0]?.product?.thumbnail"
-                  class="size-full object-contain mix-blend-multiply"
-                  alt="product"
-                />
+                class="size-[70px] shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-1 flex items-center justify-center">
+                <img :src="transaction.transaction_details?.[0]?.product?.thumbnail"
+                  class="size-full object-contain mix-blend-multiply" alt="product" />
               </div>
               <div class="flex flex-col justify-center flex-1 min-w-0">
-                <p class="font-bold text-base text-custom-black line-clamp-1">
+                <p class="font-bold text-base text-custom-black dark:text-white line-clamp-1">
                   {{ transaction.transaction_details?.[0]?.product?.name }}
                 </p>
-                <p class="text-sm text-custom-grey mt-1">
+                <p class="text-sm text-custom-grey dark:text-gray-400 mt-1">
                   {{ transaction.transaction_details?.[0]?.qty }} barang x Rp
                   {{ formatRupiah(transaction.transaction_details?.[0]?.price) }}
                 </p>
-                <p
-                  v-if="transaction.transaction_details?.length > 1"
-                  class="text-xs font-medium text-custom-blue mt-1"
-                >
+                <p v-if="transaction.transaction_details?.length > 1"
+                  class="text-xs font-medium text-custom-blue dark:text-blue-400 mt-1">
                   + {{ transaction.transaction_details.length - 1 }} produk lainnya
                 </p>
               </div>
@@ -380,15 +348,13 @@ watch(error, (value) => {
             <!-- Card Footer -->
             <div class="px-4 pb-4 pt-0 flex items-center justify-between">
               <div class="flex flex-col">
-                <p class="text-xs text-custom-grey font-medium">Total Belanja</p>
-                <p class="font-bold text-base text-custom-black">
+                <p class="text-xs text-custom-grey dark:text-gray-400 font-medium">Total Belanja</p>
+                <p class="font-bold text-base text-custom-black dark:text-white">
                   Rp {{ formatRupiah(transaction.grand_total) }}
                 </p>
               </div>
-              <RouterLink
-                :to="getDetailRoute(transaction.id)"
-                class="px-6 py-2 rounded-xl bg-white border border-custom-blue text-custom-blue font-bold text-sm hover:bg-custom-blue hover:text-white transition-colors"
-              >
+              <RouterLink :to="getDetailRoute(transaction.id)"
+                class="px-6 py-2 rounded-xl bg-white dark:bg-white/10 border border-custom-blue dark:border-blue-400 text-custom-blue dark:text-blue-400 font-bold text-sm hover:bg-custom-blue dark:hover:bg-blue-500 hover:text-white dark:hover:text-white transition-colors">
                 Lihat Detail
               </RouterLink>
             </div>
@@ -398,61 +364,41 @@ watch(error, (value) => {
           <ul class="flex items-center gap-3">
             <li class="group">
               <button
-                class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
-                disabled
-              >
-                <img
-                  src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
-                  class="size-6 group-has-[:disabled]:opacity-20 rotate-180"
-                  alt="icon"
-                />
+                class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 dark:bg-blue-500/20 text-custom-blue dark:text-blue-400 group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
+                disabled>
+                <img src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
+                  class="size-6 group-has-[:disabled]:opacity-20 rotate-180 dark:invert" alt="icon" />
               </button>
             </li>
-            <li
-              v-for="p in filters.search || clientFiltered.length
-                ? Math.ceil(displayTransactions.length / perPage)
-                : meta.last_page || 1"
-              :key="p"
-              class="group"
-              :class="{ active: p === serverOptions.page }"
-            >
+            <li v-for="p in filters.search || clientFiltered.length
+              ? Math.ceil(displayTransactions.length / perPage)
+              : meta.last_page || 1" :key="p" class="group" :class="{ active: p === serverOptions.page }">
               <button
-                class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
-                @click="serverOptions.page = p"
-              >
+                class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 dark:bg-blue-500/20 text-custom-blue dark:text-blue-400 group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
+                @click="serverOptions.page = p">
                 {{ p }}
               </button>
             </li>
             <li class="group">
               <button
-                class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
-              >
-                <img
-                  src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
-                  class="size-6 group-has-[:disabled]:opacity-20"
-                  alt="icon"
-                />
+                class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 dark:bg-blue-500/20 text-custom-blue dark:text-blue-400 group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
+                <img src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
+                  class="size-6 group-has-[:disabled]:opacity-20 dark:invert" alt="icon" />
               </button>
             </li>
           </ul>
         </nav>
       </template>
-      <div
-        v-else-if="!loading"
-        id="Empty-State"
-        class="flex flex-col flex-1 items-center justify-center gap-4"
-      >
+      <div v-else-if="!loading" id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4">
         <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon" />
         <div class="flex flex-col gap-1 items-center text-center">
-          <p class="font-semibold text-custom-grey">
+          <p class="font-semibold text-custom-grey dark:text-gray-400">
             {{ emptyStateText }}
           </p>
         </div>
       </div>
       <div v-if="loading" class="flex items-center justify-center py-10">
-        <div
-          class="size-8 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"
-        ></div>
+        <div class="size-8 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
       </div>
     </section>
   </div>
