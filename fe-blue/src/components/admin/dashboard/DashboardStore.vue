@@ -152,13 +152,13 @@ onMounted(() => {
 <template>
   <!-- Skeleton Loader -->
   <div v-if="loading" class="animate-pulse flex flex-col gap-6">
-    <div class="h-10 w-48 bg-gray-200 rounded-lg"></div>
+    <div class="h-10 w-48 bg-gray-200 dark:bg-white/10 rounded-lg"></div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-      <div v-for="i in 3" :key="i" class="h-40 rounded-[20px] bg-gray-200"></div>
+      <div v-for="i in 3" :key="i" class="h-40 rounded-[20px] bg-gray-200 dark:bg-white/10"></div>
     </div>
     <div class="flex flex-col md:flex-row gap-5">
-      <div class="flex-1 h-96 rounded-[20px] bg-gray-200"></div>
-      <div class="w-full md:w-[350px] h-96 rounded-[20px] bg-gray-200"></div>
+      <div class="flex-1 h-96 rounded-[20px] bg-gray-200 dark:bg-white/10"></div>
+      <div class="w-full md:w-[350px] h-96 rounded-[20px] bg-gray-200 dark:bg-white/10"></div>
     </div>
   </div>
 
@@ -166,31 +166,19 @@ onMounted(() => {
   <div v-else class="flex flex-col gap-8">
     <!-- Header -->
     <div class="flex flex-col gap-1">
-      <h1 class="font-bold text-2xl md:text-3xl text-custom-black">Overview</h1>
-      <p class="text-custom-grey">
+      <h1 class="font-bold text-2xl md:text-3xl text-custom-black dark:text-white">Overview</h1>
+      <p class="text-custom-grey dark:text-gray-400">
         Welcome back, {{ user?.store?.name }}! Here's what's happening today.
       </p>
     </div>
 
     <!-- 3-Column Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-      <AnalyticsCard
-        title="Total Revenue"
-        :value="`Rp ${formatRupiah(storeBalance?.balance || 0)}`"
-        icon="wallet-2-blue-fill.svg"
-        :trend="{ value: '12%', direction: 'up' }"
-      />
-      <AnalyticsCard
-        title="Total Orders"
-        :value="stats.total_transactions"
-        icon="shopping-cart-blue-fill.svg"
-        :trend="{ value: '8%', direction: 'up' }"
-      />
-      <AnalyticsCard
-        title="Product Reviews"
-        :value="stats.total_reviews"
-        icon="message-text-blue-fill.svg"
-      />
+      <AnalyticsCard title="Total Revenue" :value="`Rp ${formatRupiah(storeBalance?.balance || 0)}`"
+        icon="wallet-2-blue-fill.svg" :trend="{ value: '12%', direction: 'up' }" />
+      <AnalyticsCard title="Total Orders" :value="stats.total_transactions" icon="shopping-cart-blue-fill.svg"
+        :trend="{ value: '8%', direction: 'up' }" />
+      <AnalyticsCard title="Product Reviews" :value="stats.total_reviews" icon="message-text-blue-fill.svg" />
     </div>
 
     <!-- Main Content 2-Col Layout -->
@@ -198,14 +186,16 @@ onMounted(() => {
       <!-- Left: Charts & Tables -->
       <div class="flex flex-col flex-1 gap-6 min-w-0">
         <!-- Revenue Chart -->
-        <div class="flex flex-col w-full rounded-[20px] p-6 gap-6 bg-white border border-gray-100">
+        <div
+          class="flex flex-col w-full rounded-[20px] p-6 gap-6 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="font-bold text-xl text-custom-black">Revenue Analytics</h3>
-              <p class="text-custom-grey text-sm">Income in the last 7 days</p>
+              <h3 class="font-bold text-xl text-custom-black dark:text-white">Revenue Analytics</h3>
+              <p class="text-custom-grey dark:text-gray-400 text-sm">Income in the last 7 days</p>
             </div>
             <div class="flex gap-2">
-              <button class="px-3 py-1 text-xs font-bold bg-gray-100 rounded-lg text-custom-black">
+              <button
+                class="px-3 py-1 text-xs font-bold bg-gray-100 dark:bg-white/10 rounded-lg text-custom-black dark:text-white">
                 Weekly
               </button>
             </div>
@@ -214,60 +204,43 @@ onMounted(() => {
         </div>
 
         <!-- Recent Transactions -->
-        <div class="flex flex-col w-full rounded-[20px] p-6 gap-6 bg-white border border-gray-100">
+        <div
+          class="flex flex-col w-full rounded-[20px] p-6 gap-6 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10">
           <div class="flex items-center justify-between">
-            <h3 class="font-bold text-xl text-custom-black">Recent Orders</h3>
-            <RouterLink
-              :to="{ name: 'user.transaction', params: { username: user?.username } }"
-              class="text-sm font-bold text-custom-blue"
-              >View All</RouterLink
-            >
+            <h3 class="font-bold text-xl text-custom-black dark:text-white">Recent Orders</h3>
+            <RouterLink :to="{ name: 'user.transaction', params: { username: user?.username } }"
+              class="text-sm font-bold text-custom-blue">View All</RouterLink>
           </div>
 
-          <div
-            v-if="latestTransactions.length > 0"
-            id="List-Transactions"
-            class="flex flex-col gap-4"
-          >
-            <div
-              v-for="transaction in latestTransactions.slice(0, 3)"
-              :key="transaction.id"
-              class="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-100 gap-4"
-            >
+          <div v-if="latestTransactions.length > 0" id="List-Transactions" class="flex flex-col gap-4">
+            <div v-for="transaction in latestTransactions.slice(0, 3)" :key="transaction.id"
+              class="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 gap-4">
               <div class="flex items-center gap-4">
                 <div
-                  class="size-12 rounded-full bg-white flex items-center justify-center shrink-0 border border-gray-200"
-                >
+                  class="size-12 rounded-full bg-white dark:bg-white/10 flex items-center justify-center shrink-0 border border-gray-200 dark:border-white/5">
                   <img src="@/assets/images/icons/bag-tick-blue-transparent.svg" class="size-6" />
                 </div>
                 <div class="flex flex-col">
-                  <span class="font-bold text-custom-black"
-                    >Order #{{ transaction.code || transaction.id.substr(0, 8) }}</span
-                  >
-                  <span class="text-xs text-custom-grey"
-                    >{{ formatDate(transaction.created_at) }} •
-                    {{ transaction.buyer?.user?.name || 'Buyer' }}</span
-                  >
+                  <span class="font-bold text-custom-black dark:text-white">Order #{{ transaction.code ||
+                    transaction.id.substr(0, 8) }}</span>
+                  <span class="text-xs text-custom-grey dark:text-gray-400">{{ formatDate(transaction.created_at) }} •
+                    {{ transaction.buyer?.user?.name || 'Buyer' }}</span>
                 </div>
               </div>
               <div class="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
-                <span class="font-bold text-custom-blue"
-                  >Rp {{ formatRupiah(transaction.grand_total) }}</span
-                >
-                <div
-                  class="px-3 py-1 rounded-full text-xs font-bold capitalize"
-                  :class="{
-                    'bg-green-100 text-custom-green': transaction.status === 'success',
-                    'bg-yellow-100 text-custom-orange': transaction.status === 'pending',
-                    'bg-red-100 text-custom-red': transaction.status === 'failed'
-                  }"
-                >
+                <span class="font-bold text-custom-blue dark:text-blue-400">Rp {{ formatRupiah(transaction.grand_total)
+                }}</span>
+                <div class="px-3 py-1 rounded-full text-xs font-bold capitalize" :class="{
+                  'bg-green-100 text-custom-green': transaction.status === 'success',
+                  'bg-yellow-100 text-custom-orange': transaction.status === 'pending',
+                  'bg-red-100 text-custom-red': transaction.status === 'failed'
+                }">
                   {{ transaction.status }}
                 </div>
               </div>
             </div>
           </div>
-          <div v-else class="text-center py-8 text-custom-grey text-sm">No recent transactions</div>
+          <div v-else class="text-center py-8 text-custom-grey dark:text-gray-400 text-sm">No recent transactions</div>
         </div>
       </div>
 
@@ -277,32 +250,29 @@ onMounted(() => {
         <ActionWidget :actions="smartActions" />
 
         <!-- Top Products (Simplified) -->
-        <div class="flex flex-col w-full rounded-[20px] bg-white border border-gray-100 p-5 gap-4">
-          <h3 class="font-bold text-lg text-custom-black">Top Products</h3>
+        <div
+          class="flex flex-col w-full rounded-[20px] bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 p-5 gap-4">
+          <h3 class="font-bold text-lg text-custom-black dark:text-white">Top Products</h3>
           <!-- Mock List -->
           <div class="flex flex-col gap-4">
-            <div
-              v-for="(product, index) in topProducts"
-              v-if="topProducts.length > 0"
-              :key="product.id"
-              class="flex items-center gap-3"
-            >
-              <div
-                class="size-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-400"
-              >
-                {{ index + 1 }}
+            <template v-if="topProducts.length > 0">
+              <div v-for="(product, index) in topProducts" :key="product.id" class="flex items-center gap-3">
+                <div
+                  class="size-12 rounded-lg bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/5 flex items-center justify-center text-xs font-bold text-gray-400">
+                  {{ index + 1 }}
+                </div>
+                <div class="flex flex-col flex-1 min-w-0">
+                  <span class="font-bold text-sm truncate text-custom-black dark:text-white" :title="product.name">{{
+                    product.name }}</span>
+                  <span class="text-xs text-custom-grey dark:text-gray-400">{{ product.sold || 0 }} Sold</span>
+                </div>
+                <span class="text-xs font-bold text-custom-green dark:text-green-400">Rp {{ formatRupiah(product.price)
+                  }}</span>
               </div>
-              <div class="flex flex-col flex-1 min-w-0">
-                <span class="font-bold text-sm truncate text-custom-black" :title="product.name">{{
-                  product.name
-                }}</span>
-                <span class="text-xs text-custom-grey">{{ product.sold || 0 }} Sold</span>
-              </div>
-              <span class="text-xs font-bold text-custom-green"
-                >Rp {{ formatRupiah(product.price) }}</span
-              >
+            </template>
+            <div v-else class="text-center py-4 text-custom-grey dark:text-gray-400 text-xs">
+              No sales data yet
             </div>
-            <div v-else class="text-center py-4 text-custom-grey text-xs">No sales data yet</div>
           </div>
         </div>
       </div>

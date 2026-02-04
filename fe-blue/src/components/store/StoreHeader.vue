@@ -52,9 +52,9 @@ const handleFollowClick = () => {
       <!-- Left: Store Info -->
       <div class="flex items-start md:items-center gap-4 md:gap-6 flex-1 min-w-0 w-full">
         <!-- Logo with Ring -->
-        <div class="relative flex-shrink-0">
+        <div class="relative shrink-0">
           <div
-            class="w-16 h-16 md:w-[88px] md:h-[88px] rounded-full p-[3px] bg-gradient-to-br from-custom-blue to-purple-400 shadow-lg"
+            class="w-16 h-16 md:w-[88px] md:h-[88px] rounded-full p-[3px] bg-linear-to-br from-custom-blue to-purple-400 shadow-lg"
           >
             <div
               class="w-full h-full rounded-full border-[3px] border-white overflow-hidden bg-white"
@@ -119,15 +119,15 @@ const handleFollowClick = () => {
               }}</span>
               <span class="text-[10px] md:text-xs text-custom-grey">/ 5.0</span>
             </div>
-            <div class="w-[1px] h-3 md:h-4 bg-gray-200"></div>
+            <div class="w-px h-3 md:h-4 bg-gray-200"></div>
             <div class="flex flex-col leading-none">
               <span class="font-bold text-sm md:text-base text-custom-black">{{
                 followersCount
               }}</span>
               <span class="text-[10px] text-custom-grey uppercase tracking-wide">Followers</span>
             </div>
-            <div class="w-[1px] h-3 md:h-4 bg-gray-200"></div>
-            <div class="flex flex-col leading-none hidden sm:flex">
+            <div class="w-px h-3 md:h-4 bg-gray-200"></div>
+            <div class="hidden sm:flex flex-col leading-none">
               <span class="font-bold text-sm md:text-base text-custom-black">98%</span>
               <span class="text-[10px] text-custom-grey uppercase tracking-wide">Chat Reply</span>
             </div>
@@ -156,21 +156,21 @@ const handleFollowClick = () => {
           <RouterLink
             v-if="authStore.user"
             :to="{ name: 'user.chat', query: { userId: store?.user?.id } }"
-            class="h-10 w-10 md:h-11 md:w-11 flex-shrink-0 flex items-center justify-center rounded-full bg-white border border-gray-200 text-custom-blue hover:border-custom-blue hover:bg-blue-50 transition-all shadow-sm"
+            class="h-10 w-10 md:h-11 md:w-11 shrink-0 flex items-center justify-center rounded-full bg-white border border-gray-200 text-custom-blue hover:border-custom-blue hover:bg-blue-50 transition-all shadow-sm"
           >
             <img src="@/assets/images/icons/messages-blue.svg" class="w-5 h-5" alt="Chat" />
           </RouterLink>
           <RouterLink
             v-else
             :to="{ name: 'auth.login' }"
-            class="h-10 w-10 md:h-11 md:w-11 flex-shrink-0 flex items-center justify-center rounded-full bg-white border border-gray-200 text-custom-blue hover:border-custom-blue hover:bg-blue-50 transition-all shadow-sm"
+            class="h-10 w-10 md:h-11 md:w-11 shrink-0 flex items-center justify-center rounded-full bg-white border border-gray-200 text-custom-blue hover:border-custom-blue hover:bg-blue-50 transition-all shadow-sm"
           >
             <img src="@/assets/images/icons/messages-blue.svg" class="w-5 h-5" alt="Chat" />
           </RouterLink>
 
           <!-- Share Button -->
           <button
-            class="h-10 w-10 md:h-11 md:w-11 flex-shrink-0 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 hover:text-black hover:border-gray-300 transition-colors shadow-sm"
+            class="h-10 w-10 md:h-11 md:w-11 shrink-0 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 hover:text-black hover:border-gray-300 transition-colors shadow-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

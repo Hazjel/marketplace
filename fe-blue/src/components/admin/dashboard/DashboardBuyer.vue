@@ -47,21 +47,7 @@ const totalExpense = computed(() => {
   }, 0)
 })
 
-const totalProducts = computed(() => {
-  return buyerTransactions.value.reduce((sum, transaction) => {
-    return (
-      sum +
-      (transaction.transaction_items?.reduce(
-        (itemSum, item) => itemSum + (parseInt(item.quantity) || 0),
-        0
-      ) || 0)
-    )
-  }, 0)
-})
 
-const totalTransaction = computed(() => {
-  return buyerTransactions.value.length
-})
 
 // Status Counts
 const countUnpaid = computed(() => {
@@ -91,19 +77,14 @@ onMounted(() => {
   <div class="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-5">
     <!-- Total Expense (1 Column) -->
     <div
-      class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white border border-custom-stroke col-span-1 animate-fade-in-up"
-    >
+      class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 col-span-1 animate-fade-in-up">
       <div class="flex flex-col gap-6">
-        <div class="flex size-[56px] bg-custom-blue/10 items-center justify-center rounded-full">
-          <img
-            src="@/assets/images/icons/wallet-2-blue-fill.svg"
-            class="flex size-6 shrink-0"
-            alt="icon"
-          />
+        <div class="flex size-[56px] bg-custom-blue/10 dark:bg-blue-500/20 items-center justify-center rounded-full">
+          <img src="@/assets/images/icons/wallet-2-blue-fill.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
         </div>
         <div class="flex flex-col gap-[6px]">
-          <p class="font-bold text-2xl md:text-3xl">Rp {{ formatRupiah(totalExpense) }}</p>
-          <p class="font-medium text-sm md:text-lg text-custom-grey">Total Expense</p>
+          <p class="font-bold text-2xl md:text-3xl dark:text-white border-white">Rp {{ formatRupiah(totalExpense) }}</p>
+          <p class="font-medium text-sm md:text-lg text-custom-grey dark:text-gray-400">Total Expense</p>
         </div>
       </div>
     </div>
@@ -112,160 +93,108 @@ onMounted(() => {
     <div class="grid grid-cols-4 gap-2 md:gap-4 col-span-1 xl:col-span-3">
       <!-- Unpaid -->
       <div
-        class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white border border-custom-stroke items-center justify-center text-center animate-fade-in-up delay-100"
-      >
+        class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 items-center justify-center text-center animate-fade-in-up delay-100">
         <div
-          class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full"
-        >
-          <img
-            src="@/assets/images/icons/card-black.svg"
-            class="flex size-4 md:size-5 shrink-0"
-            alt="icon"
-          />
+          class="flex size-8 md:size-10 bg-custom-icon-background dark:bg-white/10 items-center justify-center rounded-full">
+          <img src="@/assets/images/icons/card-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
+            alt="icon" />
         </div>
         <div class="flex flex-col gap-0.5 md:gap-1">
-          <p class="font-bold text-sm md:text-xl">{{ countUnpaid }}</p>
-          <p class="font-medium text-[10px] md:text-sm text-custom-grey">Unpaid</p>
+          <p class="font-bold text-sm md:text-xl dark:text-white">{{ countUnpaid }}</p>
+          <p class="font-medium text-[10px] md:text-sm text-custom-grey dark:text-gray-400">Unpaid</p>
         </div>
       </div>
 
       <!-- Processed -->
       <div
-        class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white border border-custom-stroke items-center justify-center text-center animate-fade-in-up delay-100"
-      >
-        <div
-          class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full"
-        >
-          <img
-            src="@/assets/images/icons/box-black.svg"
-            class="flex size-4 md:size-5 shrink-0"
-            alt="icon"
-          />
+        class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 items-center justify-center text-center animate-fade-in-up delay-100">
+        <div class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full">
+          <img src="@/assets/images/icons/box-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
+            alt="icon" />
         </div>
         <div class="flex flex-col gap-0.5 md:gap-1">
-          <p class="font-bold text-sm md:text-xl">{{ countProcessed }}</p>
-          <p class="font-medium text-[10px] md:text-sm text-custom-grey">Processed</p>
+          <p class="font-bold text-sm md:text-xl dark:text-white">{{ countProcessed }}</p>
+          <p class="font-medium text-[10px] md:text-sm text-custom-grey dark:text-gray-400">Processed</p>
         </div>
       </div>
 
       <!-- Shipped -->
       <div
-        class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white border border-custom-stroke items-center justify-center text-center animate-fade-in-up delay-200"
-      >
-        <div
-          class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full"
-        >
-          <img
-            src="@/assets/images/icons/car-delivery-black.svg"
-            class="flex size-4 md:size-5 shrink-0"
-            alt="icon"
-          />
+        class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 items-center justify-center text-center animate-fade-in-up delay-200">
+        <div class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full">
+          <img src="@/assets/images/icons/car-delivery-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
+            alt="icon" />
         </div>
         <div class="flex flex-col gap-0.5 md:gap-1">
-          <p class="font-bold text-sm md:text-xl">{{ countShipped }}</p>
-          <p class="font-medium text-[10px] md:text-sm text-custom-grey">Shipped</p>
+          <p class="font-bold text-sm md:text-xl dark:text-white">{{ countShipped }}</p>
+          <p class="font-medium text-[10px] md:text-sm text-custom-grey dark:text-gray-400">Shipped</p>
         </div>
       </div>
 
       <!-- Completed -->
       <div
-        class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white border border-custom-stroke items-center justify-center text-center animate-fade-in-up delay-300"
-      >
+        class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 items-center justify-center text-center animate-fade-in-up delay-300">
         <div
-          class="flex size-8 md:size-10 bg-custom-blue/10 items-center justify-center rounded-full"
-        >
-          <img
-            src="@/assets/images/icons/clipboard-tick-blue-fill.svg"
-            class="flex size-4 md:size-5 shrink-0"
-            alt="icon"
-          />
+          class="flex size-8 md:size-10 bg-custom-blue/10 dark:bg-blue-500/20 items-center justify-center rounded-full">
+          <img src="@/assets/images/icons/clipboard-tick-blue-fill.svg"
+            class="flex size-4 md:size-5 shrink-0 dark:invert" alt="icon" />
         </div>
         <div class="flex flex-col gap-0.5 md:gap-1">
-          <p class="font-bold text-sm md:text-xl">{{ countCompleted }}</p>
-          <p class="font-medium text-[10px] md:text-sm text-custom-grey">Done</p>
+          <p class="font-bold text-sm md:text-xl dark:text-white">{{ countCompleted }}</p>
+          <p class="font-medium text-[10px] md:text-sm text-custom-grey dark:text-gray-400">Done</p>
         </div>
       </div>
     </div>
   </div>
   <div
-    class="flex flex-col flex-1 w-full rounded-[20px] p-5 gap-6 bg-white animate-fade-in-up delay-300"
-  >
+    class="flex flex-col flex-1 w-full rounded-[20px] p-5 gap-6 bg-white dark:bg-surface-card animate-fade-in-up delay-300">
     <div class="flex flex-col flex-1 gap-5">
-      <p class="font-bold text-xl">Latest Transactions</p>
-      <div
-        v-if="!loading && buyerTransactions.length > 0"
-        id="List-Transactions"
-        class="flex flex-col gap-5"
-      >
-        <div
-          v-for="transaction in buyerTransactions.slice(0, 5)"
-          :key="transaction.id"
-          class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white"
-        >
-          <div
-            class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]"
-          >
+      <p class="font-bold text-xl dark:text-white">Latest Transactions</p>
+      <div v-if="!loading && buyerTransactions.length > 0" id="List-Transactions" class="flex flex-col gap-5">
+        <div v-for="transaction in buyerTransactions.slice(0, 5)" :key="transaction.id"
+          class="card flex flex-col rounded-[20px] border border-custom-stroke dark:border-white/10 py-[18px] px-5 gap-5 bg-white dark:bg-surface-card">
+          <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]">
             <div class="flex items-center gap-[14px] w-full md:w-[320px]">
-              <div
-                class="flex size-[84px] shrink-0 rounded-[20px] bg-custom-background overflow-hidden"
-              >
-                <img
-                  :src="
-                    transaction.store?.logo ||
-                    transaction.store?.image ||
-                    '/src/assets/images/thumbnails/th-1.svg'
-                  "
-                  class="size-full object-cover"
-                  :onerror="`this.src='/src/assets/images/thumbnails/th-1.svg'`"
-                  alt="store logo"
-                />
+              <div class="flex size-[84px] shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
+                <img :src="transaction.store?.logo ||
+                  transaction.store?.image ||
+                  '/src/assets/images/thumbnails/th-1.svg'
+                  " class="size-full object-cover" :onerror="`this.src='/src/assets/images/thumbnails/th-1.svg'`"
+                  alt="store logo" />
               </div>
               <div class="flex flex-col gap-[6px] w-full overflow-hidden">
-                <p class="font-bold text-lg leading-tight w-full truncate">
+                <p class="font-bold text-lg leading-tight w-full truncate dark:text-white">
                   {{ transaction.store?.name || 'Store' }}
                 </p>
-                <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
+                <p class="flex items-center gap-1 font-semibold text-custom-grey dark:text-gray-400 leading-none">
                   <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon" />
                   {{ transaction.store?.user?.name || 'Seller' }}
                 </p>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-5 w-full md:flex md:w-auto md:gap-10">
-              <div
-                class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]"
-              >
+              <div class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]">
                 <div
-                  class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center"
-                >
-                  <img
-                    src="@/assets/images/icons/shopping-cart-black.svg"
-                    class="flex size-6 shrink-0"
-                    alt="icon"
-                  />
+                  class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                  <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
+                    alt="icon" />
                 </div>
                 <div class="flex flex-col gap-1 w-full overflow-hidden">
-                  <p class="font-bold text-lg leading-none truncate">
+                  <p class="font-bold text-lg leading-none truncate dark:text-white">
                     {{ transaction?.transaction_details?.length }}
                   </p>
-                  <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">
+                  <p class="font-semibold text-custom-grey dark:text-gray-400 text-sm sm:text-base truncate">
                     Total Products
                   </p>
                 </div>
               </div>
-              <div
-                class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]"
-              >
+              <div class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]">
                 <div
-                  class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center"
-                >
-                  <img
-                    src="@/assets/images/icons/box-black.svg"
-                    class="flex size-6 shrink-0"
-                    alt="icon"
-                  />
+                  class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
+                  <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
                 </div>
                 <div class="flex flex-col gap-1 w-full overflow-hidden">
-                  <p class="font-bold text-lg leading-none truncate">
+                  <p class="font-bold text-lg leading-none truncate dark:text-white">
                     {{
                       transaction?.transaction_details?.reduce(
                         (total, detail) => total + detail.qty,
@@ -273,61 +202,46 @@ onMounted(() => {
                       )
                     }}
                   </p>
-                  <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">
+                  <p class="font-semibold text-custom-grey dark:text-gray-400 text-sm sm:text-base truncate">
                     Total Quantity
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          <hr class="border-custom-stroke" />
+          <hr class="border-custom-stroke dark:border-white/10" />
           <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div class="flex flex-col gap-[6px]">
-              <p class="font-bold text-xl text-custom-blue">
+              <p class="font-bold text-xl text-custom-blue dark:text-blue-400">
                 Rp {{ formatRupiah(transaction.grand_total) }}
               </p>
-              <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
-                <img
-                  src="@/assets/images/icons/money-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-2 font-semibold text-custom-grey dark:text-gray-400 leading-none">
+                <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Grand Total
               </p>
             </div>
             <div class="flex items-center justify-end gap-[14px] w-full md:w-auto">
-              <RouterLink
-                :to="{
-                  name: `${user?.role === 'admin' ? 'admin' : 'user'}.transaction.detail`,
-                  params: { id: transaction.id, username: user?.username }
-                }"
-                class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue"
-              >
-                <img
-                  src="@/assets/images/icons/eye-white.svg"
-                  class="flex size-6 shrink-0"
-                  alt="icon"
-                />
+              <RouterLink :to="{
+                name: `${user?.role === 'admin' ? 'admin' : 'user'}.transaction.detail`,
+                params: { id: transaction.id, username: user?.username }
+              }"
+                class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
+                <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
                 <span class="font-semibold text-white">Details</span>
               </RouterLink>
             </div>
           </div>
         </div>
       </div>
-      <div
-        v-if="!loading && buyerTransactions.length === 0"
-        id="Empty-State"
-        class="flex flex-col flex-1 items-center justify-center gap-4"
-      >
+      <div v-if="!loading && buyerTransactions.length === 0" id="Empty-State"
+        class="flex flex-col flex-1 items-center justify-center gap-4">
         <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon" />
         <div class="flex flex-col gap-1 items-center text-center">
-          <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>
+          <p class="font-semibold text-custom-grey dark:text-gray-400">Oops, you don't have any data yet</p>
         </div>
       </div>
       <div v-if="loading" class="flex items-center justify-center py-10">
-        <div
-          class="size-8 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"
-        ></div>
+        <div class="size-8 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
       </div>
     </div>
   </div>

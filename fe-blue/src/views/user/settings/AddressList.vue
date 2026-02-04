@@ -1,12 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+
 import { axiosInstance } from '@/plugins/axios'
 import { useToast } from 'vue-toastification'
 
 const toast = useToast()
-const authStore = useAuthStore()
 const addresses = ref([])
 const loading = ref(true)
 
@@ -29,7 +28,7 @@ const deleteAddress = async (id) => {
     await axiosInstance.delete(`/address/${id}`)
     toast.success('Address deleted successfully')
     fetchAddresses()
-  } catch (error) {
+  } catch {
     toast.error('Failed to delete address')
   }
 }

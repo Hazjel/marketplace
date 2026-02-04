@@ -52,98 +52,75 @@ const handleUpdateQuantity = (storeId, productId, event) => {
 </script>
 
 <template>
-  <form
-    action="checkout.html"
-    class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto"
-  >
-    <h1 class="font-bold text-[32px]">My Shopping Cart</h1>
+  <form action="checkout.html" class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto">
+    <h1 class="font-bold text-[32px] dark:text-white">My Shopping Cart</h1>
     <div class="flex flex-col lg:flex-row gap-5">
       <section id="Carts-Container" class="flex flex-col gap-5 w-full min-w-0">
         <div
-          v-if="carts.length === 0"
-          id="Empty-Cart-State"
-          class="flex flex-col flex-1 items-center justify-center rounded-[20px] bg-white gap-9"
-        >
-          <img
-            src="@/assets/images/icons/bag-cross-blue-transparent.svg"
-            class="size-16"
-            alt="icon"
-          />
+v-if="carts.length === 0" id="Empty-Cart-State"
+          class="flex flex-col flex-1 items-center justify-center rounded-[20px] bg-white dark:bg-surface-card gap-9">
+          <img src="@/assets/images/icons/bag-cross-blue-transparent.svg" class="size-16" alt="icon" />
           <div class="text-center">
-            <p class="font-bold text-2xl">Oops! Your shopping cart is empty.</p>
-            <p class="font-semibold text-custom-grey">Time to add the things you love!</p>
+            <p class="font-bold text-2xl dark:text-white">Oops! Your shopping cart is empty.</p>
+            <p class="font-semibold text-custom-grey dark:text-gray-400">Time to add the things you love!</p>
           </div>
           <RouterLink
-            :to="{ name: 'app.home' }"
-            class="flex items-center justify-center h-14 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue"
-          >
+:to="{ name: 'app.home' }"
+            class="flex items-center justify-center h-14 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue">
             <span class="font-bold text-white">Find Product</span>
             <img
-              src="@/assets/images/icons/arrow-right-circle-white-thick.svg"
-              class="flex size-6 shrink-0"
-              alt="icon"
-            />
+src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
+              alt="icon" />
           </RouterLink>
         </div>
-        <div v-for="store in carts" class="cart flex flex-col w-full rounded-[20px] p-5 bg-white">
+        <div
+v-for="store in carts" :key="store.storeId"
+          class="cart flex flex-col w-full rounded-[20px] p-5 bg-white dark:bg-surface-card">
           <div class="cart-header flex gap-4">
             <label class="group flex items-center gap-1 relative">
               <input
-                type="checkbox"
-                :checked="selectedStores.has(store.storeId)"
-                class="-z-10 absolute"
-                @change="toggleStoreSelection(store.storeId)"
-              />
+type="checkbox" :checked="selectedStores.has(store.storeId)" class="-z-10 absolute"
+                @change="toggleStoreSelection(store.storeId)" />
               <div class="flex size-6 overflow-hidden relative">
                 <img
-                  src="@/assets/images/icons/checkbox-unchecked.svg"
-                  class="size-full object-contain absolute group-has-[:checked]:opacity-0 transition-300"
-                  alt="icon"
-                />
+src="@/assets/images/icons/checkbox-unchecked.svg"
+                  class="size-full object-contain absolute group-has-checked:opacity-0 transition-300" alt="icon" />
                 <img
-                  src="@/assets/images/icons/checkbox.svg"
-                  class="size-full object-contain absolute opacity-0 group-has-[:checked]:opacity-100 transition-300"
-                  alt="icon"
-                />
+src="@/assets/images/icons/checkbox.svg"
+                  class="size-full object-contain absolute opacity-0 group-has-checked:opacity-100 transition-300"
+                  alt="icon" />
               </div>
             </label>
-            <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
+            <p class="flex items-center gap-1 font-semibold text-custom-grey dark:text-gray-300 leading-none">
               <img src="@/assets/images/icons/shop-grey.svg" class="size-4" alt="icon" />
               {{ store.storeName }}
             </p>
           </div>
           <div class="cart-items-container flex flex-col pl-[10px]">
             <div
-              v-for="product in store.products"
-              class="items group flex w-full border-b border-gray-100 last:border-0 pb-6 mb-6 last:pb-0 last:mb-0"
-            >
+v-for="product in store.products" :key="product.id"
+              class="items group flex w-full border-b border-gray-100 dark:border-white/5 last:border-0 pb-6 mb-6 last:pb-0 last:mb-0">
               <div class="items-detail flex flex-col w-full gap-4">
                 <div class="flex items-start gap-4">
+
                   <div
-                    class="flex size-[80px] shrink-0 rounded-xl bg-gray-50 p-2 items-center justify-center"
-                  >
+                    class="flex size-[80px] shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 p-2 items-center justify-center">
                     <img
-                      :src="
-                        product.product_images.find((i) => i.is_thumbnail)?.image ||
-                        product.thumbnail
-                      "
-                      class="size-full object-contain mix-blend-multiply"
-                      alt="icon"
-                    />
+:src="product.product_images.find((i) => i.is_thumbnail)?.image ||
+                      product.thumbnail
+                      " class="size-full object-contain mix-blend-multiply dark:mix-blend-normal" alt="icon" />
                   </div>
                   <div class="flex flex-col flex-1 gap-1">
-                    <p class="font-bold text-base leading-tight line-clamp-2 w-full">
+                    <p class="font-bold text-base leading-tight line-clamp-2 w-full dark:text-white">
                       {{ product.name }}
                     </p>
                     <div class="flex items-center gap-2">
-                      <p
-                        class="text-xs font-semibold text-custom-blue bg-blue-50 px-2 py-1 rounded-md"
-                      >
+                      <p class="text-xs font-semibold text-custom-blue bg-blue-50 px-2 py-1 rounded-md">
                         {{ product.product_category.name }}
                       </p>
                       <p class="text-sm text-custom-grey">{{ product.weight }} KG</p>
                     </div>
-                    <p class="font-bold text-lg text-custom-black mt-2">
+                    <p class="font-bold text-lg text-custom-black dark:text-white mt-2">
                       Rp {{ formatRupiah(product.price) }}
                     </p>
                   </div>
@@ -151,9 +128,8 @@ const handleUpdateQuantity = (storeId, productId, event) => {
 
                 <div class="flex items-center justify-between w-full pl-[96px]">
                   <button
-                    class="flex items-center gap-1 text-custom-grey hover:text-custom-blue transition-colors"
-                    type="button"
-                  >
+class="flex items-center gap-1 text-custom-grey hover:text-custom-blue transition-colors"
+                    type="button">
                     <i class="fa-regular fa-pen-to-square text-sm"></i>
                     <span class="font-medium text-sm">Tulis Catatan</span>
                   </button>
@@ -161,34 +137,26 @@ const handleUpdateQuantity = (storeId, productId, event) => {
                   <div class="flex items-center gap-4">
                     <button
                       class="flex items-center gap-1 text-custom-grey hover:text-custom-red transition-colors mr-2"
-                      type="button"
-                      @click="removeFromCart(store.storeId, product.id)"
-                    >
+                      type="button" @click="removeFromCart(store.storeId, product.id)">
                       <i class="fa-regular fa-trash-can"></i>
                     </button>
 
                     <div
-                      class="quantity-container flex items-center shrink-0 rounded-full border border-gray-200 p-1"
-                    >
+                      class="quantity-container flex items-center shrink-0 rounded-full border border-gray-200 dark:border-white/10 p-1">
                       <button
-                        type="button"
-                        class="subtract size-7 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-50 transition-all"
-                        :disabled="product.quantity <= 1"
-                        @click="decreaseQuantity(store.storeId, product.id)"
-                      >
+type="button"
+                        class="subtract size-7 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 disabled:opacity-50 transition-all dark:text-white"
+                        :disabled="product.quantity <= 1" @click="decreaseQuantity(store.storeId, product.id)">
                         <i class="fa-solid fa-minus text-xs"></i>
                       </button>
                       <input
-                        type="number"
-                        class="amount appearance-none w-10 text-center font-bold text-sm outline-none"
-                        :value="product.quantity"
-                        @change="handleUpdateQuantity(store.storeId, product.id, $event)"
-                      />
+type="number"
+                        class="amount appearance-none w-10 text-center font-bold text-sm outline-none bg-transparent dark:text-white"
+                        :value="product.quantity" @change="handleUpdateQuantity(store.storeId, product.id, $event)" />
                       <button
-                        type="button"
-                        class="add size-7 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all"
-                        @click="handleIncreaseQuantity(store.storeId, product.id)"
-                      >
+type="button"
+                        class="add size-7 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-all dark:text-white"
+                        @click="handleIncreaseQuantity(store.storeId, product.id)">
                         <i class="fa-solid fa-plus text-xs"></i>
                       </button>
                     </div>
@@ -200,107 +168,68 @@ const handleUpdateQuantity = (storeId, productId, event) => {
         </div>
       </section>
       <section id="Order-Summary" class="flex flex-col gap-5 w-full lg:w-[444px] shrink-0">
-        <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white">
-          <p class="font-bold text-xl">Order Summary</p>
-          <div class="flex flex-col rounded-xl border border-custom-stroke p-5 gap-4">
+        <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white dark:bg-surface-card">
+          <p class="font-bold text-xl dark:text-white">Order Summary</p>
+          <div class="flex flex-col rounded-xl border border-custom-stroke dark:border-white/10 p-5 gap-4">
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/shopping-cart-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Total Items:
               </p>
-              <p class="font-bold text-lg leading-none">{{ totalSelectedItems }} Items</p>
+              <p class="font-bold text-lg leading-none dark:text-white">{{ totalSelectedItems }} Items</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/box-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/box-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Total Quantity:
               </p>
-              <p class="font-bold text-lg leading-none">{{ totalSelectedQuantity }}x</p>
+              <p class="font-bold text-lg leading-none dark:text-white">{{ totalSelectedQuantity }}x</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/ticket-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/ticket-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Sub Total:
               </p>
-              <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(subtotalSelected) }}</p>
+              <p class="font-bold text-lg leading-none dark:text-white">Rp {{ formatRupiah(subtotalSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/receipt-2-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/receipt-2-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 PPN 11%
               </p>
-              <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(ppnSelected) }}</p>
+              <p class="font-bold text-lg leading-none dark:text-white">Rp {{ formatRupiah(ppnSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/discount-shape-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/discount-shape-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Discount
               </p>
-              <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(discountSelected) }}</p>
+              <p class="font-bold text-lg leading-none dark:text-white">Rp {{ formatRupiah(discountSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p
-                class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none"
-              >
-                <img
-                  src="@/assets/images/icons/money-grey.svg"
-                  class="size-6 flex shrink-0"
-                  alt="icon"
-                />
+              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+                <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Grand total
               </p>
-              <p class="font-bold text-lg leading-none text-custom-blue">
+              <p class="font-bold text-lg leading-none text-custom-blue dark:text-blue-400">
                 Rp {{ formatRupiah(grandTotalSelected) }}
               </p>
             </div>
           </div>
           <RouterLink
-            :to="{ name: 'app.checkout' }"
-            class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300"
-          >
+:to="{ name: 'app.checkout' }"
+            class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300">
             <span class="font-bold text-white">
               {{ hasSelectedStores ? 'Continue To Checkout' : 'Select stores to checkout' }}
             </span>
             <img
-              src="@/assets/images/icons/arrow-right-circle-white-thick.svg"
-              class="flex size-6 shrink-0"
-              alt="icon"
-            />
+src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
+              alt="icon" />
           </RouterLink>
 
           <!-- Pesan ketika tidak ada toko yang dipilih -->

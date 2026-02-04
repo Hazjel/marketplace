@@ -23,16 +23,15 @@ const handleProfileClick = () => {
   <div id="Top-Bar" class="flex items-center w-full gap-4 md:gap-6 mt-5 mb-5 md:mt-8 md:mb-6">
     <!-- Sidebar Toggle (Mobile) -->
     <button
-      class="flex md:hidden items-center justify-center size-14 shrink-0 bg-white rounded-3xl"
-      @click="$emit('toggleSidebar')"
-    >
-      <img src="@/assets/images/icons/menu-grey.svg" class="size-6" alt="menu" />
+      class="flex md:hidden items-center justify-center size-14 shrink-0 bg-white dark:bg-surface-card rounded-3xl"
+      @click="$emit('toggleSidebar')">
+      <img src="@/assets/images/icons/menu-grey.svg" class="size-6 dark:invert" alt="menu" />
     </button>
 
-    <div class="flex items-center gap-6 min-h-[102px] h-auto bg-white w-full rounded-3xl p-[18px]">
+    <div class="flex items-center gap-6 min-h-[102px] h-auto bg-white dark:bg-surface-card w-full rounded-3xl p-[18px]">
       <div class="flex flex-col gap-2 w-full">
-        <h1 class="font-bold text-2xl capitalize">{{ route.meta.title }}</h1>
-        <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
+        <h1 class="font-bold text-2xl capitalize dark:text-white">{{ route.meta.title }}</h1>
+        <p class="flex items-center gap-1 font-semibold text-custom-grey dark:text-gray-400 leading-none">
           View Your {{ route.meta.title }}
         </p>
       </div>
@@ -40,23 +39,18 @@ const handleProfileClick = () => {
 
     <!-- Desktop User Profile (Flat Card - Click to Edit) -->
     <div
-      class="hidden md:flex items-center gap-3 min-h-[102px] h-auto bg-white min-w-[260px] rounded-3xl p-[18px] cursor-pointer hover:bg-slate-50 transition-colors"
-      @click="handleProfileClick"
-    >
+      class="hidden md:flex items-center gap-3 min-h-[102px] h-auto bg-white dark:bg-surface-card min-w-[260px] rounded-3xl p-[18px] cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+      @click="handleProfileClick">
       <div class="flex items-center gap-3 overflow-hidden">
-        <div class="flex rounded-full overflow-hidden size-14 shrink-0 border border-slate-100">
-          <img
-            :src="user?.profile_picture || '@/assets/images/placeholder-avatar.png'"
-            class="size-full object-cover"
-            alt="photo"
-            onerror="this.src = 'https://ui-avatars.com/api/?name=User&background=random'"
-          />
+        <div class="flex rounded-full overflow-hidden size-14 shrink-0 border border-slate-100 dark:border-white/10">
+          <img :src="user?.profile_picture || '@/assets/images/placeholder-avatar.png'" class="size-full object-cover"
+            alt="photo" onerror="this.src = 'https://ui-avatars.com/api/?name=User&background=random'" />
         </div>
         <div class="flex flex-col gap-[6px] text-left">
-          <p class="font-semibold text-lg leading-tight line-clamp-1">
+          <p class="font-semibold text-lg leading-tight line-clamp-1 dark:text-white">
             {{ user?.name || 'Loading...' }}
           </p>
-          <p class="font-bold text-custom-blue text-sm uppercase leading-none">
+          <p class="font-bold text-custom-blue dark:text-blue-400 text-sm uppercase leading-none">
             {{ user ? (user.role === 'admin' ? 'ADMIN' : authStore.currentMode) : '...' }}
           </p>
         </div>

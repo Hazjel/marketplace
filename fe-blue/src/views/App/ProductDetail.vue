@@ -64,11 +64,6 @@ const selectedOptions = ref({})
 const showVariantDrawer = ref(false)
 const drawerAction = ref('cart') // 'cart' or 'buy'
 
-const openDrawer = (action) => {
-  drawerAction.value = action
-  showVariantDrawer.value = true
-}
-
 const handleDrawerAction = () => {
   if (drawerAction.value === 'cart') {
     addToCart()
@@ -154,29 +149,6 @@ const displayedStock = computed(() => {
   }
   return product.value?.stock
 })
-
-// Helper to check if an option value is available given other CURRENT selections
-const isOptionAvailable = (key, value) => {
-  // If no other options selected, everything is available matches (roughly)
-  // But we should correct logic:
-  // We want to see if there is ANY variant that has { ...selectedOptions, [key]: value }
-  // IGNORING the current value of [key] in selectedOptions (because we are testing switching to 'value')
-
-  // Create a candidate criteria based on current selections, but override the key we are checking
-  const criteria = { ...selectedOptions.value, [key]: value }
-
-  // Remove null/undefined values from criteria just in case
-  Object.keys(criteria).forEach((k) => {
-    if (!criteria[k]) delete criteria[k]
-  })
-
-  // Check if any variant matches this criteria subset
-  return product.value?.variants?.some((variant) => {
-    const attrs = variant.variant_attributes || {}
-    // Check if variant has ALL keys from criteria matching
-    return Object.entries(criteria).every(([cKey, cVal]) => attrs[cKey] === cVal)
-  })
-}
 
 const selectOption = (key, value) => {
   // 1. Set the new value
@@ -376,23 +348,18 @@ onMounted(() => {
     <div class="flex flex-col w-full max-w-[1280px] py-4 md:py-6 px-4 md:px-[52px] gap-3 mx-auto">
       <div class="flex items-center gap-3">
         <RouterLink
-          :to="{ name: 'app.home' }"
-          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue"
-        >
+:to="{ name: 'app.home' }"
+          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           Homepage
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
         <RouterLink
-          :to="{ name: 'app.browse-category', params: { slug: product?.product_category?.slug } }"
-          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue"
-        >
+:to="{ name: 'app.browse-category', params: { slug: product?.product_category?.slug } }"
+          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           {{ product?.product_category?.name }}
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
-        <a
-          href="#"
-          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue"
-        >
+        <a href="#" class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           Product Details
         </a>
       </div>
@@ -419,13 +386,9 @@ onMounted(() => {
                 <img src="@/assets/images/icons/Star-pointy.svg" class="size-4" />
               </div>
             </div>
-            <div
-              class="flex items-center gap-1.5 pr-4 border-r border-gray-200 cursor-pointer hover:text-custom-blue"
-            >
-              <span
-                class="font-bold text-custom-black underline decoration-gray-300 underline-offset-2"
-                >{{ product?.product_reviews?.length || 0 }}</span
-              >
+            <div class="flex items-center gap-1.5 pr-4 border-r border-gray-200 cursor-pointer hover:text-custom-blue">
+              <span class="font-bold text-custom-black underline decoration-gray-300 underline-offset-2">{{
+                product?.product_reviews?.length || 0 }}</span>
               <span class="text-custom-grey">Ulasan</span>
             </div>
             <div class="flex items-center gap-1.5">
@@ -444,16 +407,11 @@ onMounted(() => {
               <h3 class="font-bold text-base mb-2 capitalize">{{ key }}</h3>
               <div class="flex flex-wrap gap-2">
                 <button
-                  v-for="value in values"
-                  :key="value"
-                  class="px-4 py-2 rounded-lg text-sm font-semibold border transition-all"
-                  :class="
-                    selectedOptions[key] === value
-                      ? 'bg-custom-black text-white border-custom-black'
-                      : 'bg-white text-custom-black border-gray-200 hover:border-custom-black'
-                  "
-                  @click="selectOption(key, value)"
-                >
+v-for="value in values" :key="value"
+                  class="px-4 py-2 rounded-lg text-sm font-semibold border transition-all" :class="selectedOptions[key] === value
+                      ? 'bg-custom-black dark:bg-white text-white dark:text-custom-background border-custom-black dark:border-white'
+                      : 'bg-white dark:bg-transparent text-custom-black dark:text-white border-gray-200 dark:border-white/20 hover:border-custom-black dark:hover:border-white'
+                    " @click="selectOption(key, value)">
                   {{ value }}
                 </button>
               </div>
@@ -492,10 +450,9 @@ onMounted(() => {
             <span class="text-xs text-custom-green font-bold">Online</span>
           </div>
           <RouterLink
-            v-if="product?.store?.username"
+v-if="product?.store?.username"
             :to="{ name: 'app.store-detail', params: { username: product?.store?.username } }"
-            class="ml-auto px-4 py-1.5 border border-custom-blue text-custom-blue rounded-lg text-sm font-bold hover:bg-blue-50"
-          >
+            class="ml-auto px-4 py-1.5 border border-custom-blue text-custom-blue rounded-lg text-sm font-bold hover:bg-blue-50">
             Follow
           </RouterLink>
         </div>
@@ -512,9 +469,8 @@ onMounted(() => {
                 <span class="text-4xl font-bold">{{ averageRating }}</span>
                 <span class="text-custom-grey text-sm mb-[-5px]">/ 5.0</span>
               </div>
-              <span class="text-sm font-semibold text-custom-black"
-                >{{ product?.product_reviews?.length || 0 }} Ulasan</span
-              >
+              <span class="text-sm font-semibold text-custom-black">{{ product?.product_reviews?.length || 0 }}
+                Ulasan</span>
             </div>
 
             <div class="flex flex-col gap-1 flex-1 w-full max-w-sm">
@@ -523,13 +479,12 @@ onMounted(() => {
                 <span class="text-sm font-bold w-3 text-custom-grey">{{ 6 - star }}</span>
                 <div class="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    class="h-full bg-custom-green rounded-full"
-                    :style="{ width: `${getRatingPercentage(6 - star)}%` }"
-                  ></div>
+class="h-full bg-custom-green rounded-full"
+                    :style="{ width: `${getRatingPercentage(6 - star)}%` }"></div>
                 </div>
                 <span class="text-xs text-custom-grey w-8 text-right">{{
                   getRatingCount(6 - star)
-                }}</span>
+                  }}</span>
               </div>
             </div>
           </div>
@@ -537,30 +492,22 @@ onMounted(() => {
           <!-- Review List -->
           <div class="flex flex-col gap-6 mt-4">
             <div
-              v-if="!product?.product_reviews || product.product_reviews.length === 0"
-              class="text-center py-8 text-custom-grey"
-            >
+v-if="!product?.product_reviews || product.product_reviews.length === 0"
+              class="text-center py-8 text-custom-grey">
               Belum ada ulasan untuk produk ini.
             </div>
             <div v-else class="flex flex-col gap-6">
               <div
-                v-for="review in product.product_reviews"
-                :key="review.id"
-                class="flex gap-4 border-b border-border pb-6 last:border-0"
-              >
+v-for="review in product.product_reviews" :key="review.id"
+                class="flex gap-4 border-b border-border pb-6 last:border-0">
                 <!-- User Avatar -->
-                <div
-                  class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden flex-shrink-0"
-                >
+                <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden shrink-0">
                   <img
-                    v-if="!review.is_anonymous && review.user?.profile_picture"
-                    :src="review.user.profile_picture"
-                    class="w-full h-full object-cover"
-                  />
+v-if="!review.is_anonymous && review.user?.profile_picture" :src="review.user.profile_picture"
+                    class="w-full h-full object-cover" />
                   <div
-                    v-else
-                    class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-white/5 text-gray-500 dark:text-gray-400 font-bold text-xs uppercase"
-                  >
+v-else
+                    class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-white/5 text-gray-500 dark:text-gray-400 font-bold text-xs uppercase">
                     {{ review.is_anonymous ? 'A' : review.user?.name?.[0] || 'U' }}
                   </div>
                 </div>
@@ -575,15 +522,12 @@ onMounted(() => {
                       <div class="flex items-center gap-1">
                         <div class="flex">
                           <img
-                            v-for="i in 5"
-                            :key="i"
-                            :src="i <= review.rating ? StarPointy : StarPointyOutline"
-                            class="w-3.5 h-3.5"
-                          />
+v-for="i in 5" :key="i" :src="i <= review.rating ? StarPointy : StarPointyOutline"
+                            class="w-3.5 h-3.5" />
                         </div>
                         <span class="text-xs text-gray-400 ml-2">{{
                           formatDate(review.created_at)
-                        }}</span>
+                          }}</span>
                       </div>
                     </div>
                   </div>
@@ -593,24 +537,15 @@ onMounted(() => {
 
                   <!-- Media Attachments -->
                   <div
-                    v-if="review.attachments && review.attachments.length > 0"
-                    class="flex gap-2 mt-2 overflow-x-auto pb-2"
-                  >
+v-if="review.attachments && review.attachments.length > 0"
+                    class="flex gap-2 mt-2 overflow-x-auto pb-2">
                     <div
-                      v-for="media in review.attachments"
-                      :key="media.id"
-                      class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200"
-                    >
+v-for="media in review.attachments" :key="media.id"
+                      class="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
                       <img
-                        v-if="media.file_type === 'image'"
-                        :src="media.file_path"
-                        class="w-full h-full object-cover cursor-pointer hover:opacity-90"
-                      />
-                      <video
-                        v-else
-                        :src="media.file_path"
-                        class="w-full h-full object-cover"
-                      ></video>
+v-if="media.file_type === 'image'" :src="media.file_path"
+                        class="w-full h-full object-cover cursor-pointer hover:opacity-90" />
+                      <video v-else :src="media.file_path" class="w-full h-full object-cover"></video>
                     </div>
                   </div>
                 </div>
@@ -623,16 +558,14 @@ onMounted(() => {
       <!-- Right Column: Sticky Action Card (Span 3) -->
       <div class="hidden lg:block lg:col-span-3">
         <div
-          class="sticky top-[160px] bg-white dark:bg-surface-card rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-border flex flex-col gap-5 transition-all duration-300"
-        >
+          class="sticky top-[160px] bg-white dark:bg-surface-card rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-border flex flex-col gap-5 transition-all duration-300">
           <h3 class="font-bold text-base">Atur jumlah dan catatan</h3>
 
           <div class="flex items-center gap-3 my-2">
             <div class="size-12 rounded bg-gray-100 dark:bg-white/10 overflow-hidden shrink-0">
               <img
-                :src="product?.product_images?.find((img) => img.is_thumbnail)?.image"
-                class="size-full object-cover"
-              />
+:src="product?.product_images?.find((img) => img.is_thumbnail)?.image"
+                class="size-full object-cover" />
             </div>
             <p class="line-clamp-2 text-sm">{{ product?.name }}</p>
           </div>
@@ -642,17 +575,12 @@ onMounted(() => {
           <!-- Variant Selector -->
           <!-- Multi-Dimensional Variant Selector -->
           <!-- Selected Variant Display (Read Only) -->
-          <div
-            v-if="product?.has_variants && Object.keys(selectedOptions).length > 0"
-            class="flex flex-col gap-1"
-          >
+          <div v-if="product?.has_variants && Object.keys(selectedOptions).length > 0" class="flex flex-col gap-1">
             <span class="text-sm font-semibold text-custom-black">Varian Dipilih:</span>
             <div class="flex flex-wrap gap-2">
               <span
-                v-for="(value, key) in selectedOptions"
-                :key="key"
-                class="px-2 py-1 bg-gray-100 rounded text-xs font-medium text-custom-black border border-gray-200 capitalize"
-              >
+v-for="(value, key) in selectedOptions" :key="key"
+                class="px-2 py-1 bg-gray-100 rounded text-xs font-medium text-custom-black border border-gray-200 capitalize">
                 {{ key }}: {{ value }}
               </span>
             </div>
@@ -660,25 +588,16 @@ onMounted(() => {
 
           <div class="flex items-center gap-2 border border-custom-stroke rounded-lg p-1 w-fit">
             <button
-              type="button"
-              :disabled="quantity <= 1"
+type="button" :disabled="quantity <= 1"
               class="size-7 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
-              @click="decrease"
-            >
+              @click="decrease">
               <i class="fa-solid fa-minus text-xs"></i>
             </button>
-            <input
-              v-model="quantity"
-              type="number"
-              readonly
-              class="w-10 text-center font-bold text-sm outline-none"
-            />
+            <input v-model="quantity" type="number" readonly class="w-10 text-center font-bold text-sm outline-none" />
             <button
-              type="button"
-              :disabled="quantity >= (displayedStock || 0)"
+type="button" :disabled="quantity >= (displayedStock || 0)"
               class="size-7 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
-              @click="increase"
-            >
+              @click="increase">
               <i class="fa-solid fa-plus text-xs"></i>
             </button>
           </div>
@@ -690,22 +609,18 @@ onMounted(() => {
 
           <div class="flex items-center justify-between mt-2">
             <span class="text-custom-grey">Subtotal</span>
-            <span class="font-bold text-lg"
-              >Rp {{ formatRupiah((displayedPrice || 0) * quantity) }}</span
-            >
+            <span class="font-bold text-lg">Rp {{ formatRupiah((displayedPrice || 0) * quantity) }}</span>
           </div>
 
           <div class="flex flex-col gap-2 mt-2">
             <button
-              :disabled="!displayedStock || displayedStock <= 0"
+:disabled="!displayedStock || displayedStock <= 0"
               class="w-full py-3 bg-custom-blue text-white rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 transition-colors flex items-center justify-center gap-2"
-              @click.prevent="addToCart"
-            >
+              @click.prevent="addToCart">
               <i class="fa-solid fa-plus"></i> Keranjang
             </button>
             <button
-              class="w-full py-3 border border-custom-blue text-custom-blue rounded-lg font-bold hover:bg-blue-50 transition-colors"
-            >
+              class="w-full py-3 border border-custom-blue text-custom-blue rounded-lg font-bold hover:bg-blue-50 transition-colors">
               Beli Langsung
             </button>
           </div>
@@ -713,14 +628,12 @@ onMounted(() => {
           <div class="flex items-center justify-center gap-4 mt-2">
             <button
               class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-red transition-colors"
-              @click="handleToggleWishlist"
-            >
+              @click="handleToggleWishlist">
               <i class="fa-solid fa-heart" :class="isInWishlist ? 'text-custom-red' : ''"></i>
               Wishlist
             </button>
             <button
-              class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-black transition-colors"
-            >
+              class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-black transition-colors">
               <i class="fa-solid fa-share-nodes"></i> Share
             </button>
           </div>
@@ -730,109 +643,69 @@ onMounted(() => {
 
     <!-- Mobile Sticky Bottom Bar -->
     <div
-      class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-custom-stroke p-4 md:hidden shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)] flex gap-3 items-center"
-    >
+      class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-custom-stroke p-4 md:hidden shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)] flex gap-3 items-center">
       <!-- Wishlist/Chat Icon Button -->
       <button
-        class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke grow-0 shrink-0"
-        :class="{ 'bg-custom-red/10 border-custom-red': isInWishlist }"
-        @click="handleToggleWishlist"
-      >
-        <img
-          v-if="isInWishlist"
-          src="@/assets/images/icons/heart-red.svg"
-          class="size-6 shrink-0"
-          alt="icon"
-        />
+class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke grow-0 shrink-0"
+        :class="{ 'bg-custom-red/10 border-custom-red': isInWishlist }" @click="handleToggleWishlist">
+        <img v-if="isInWishlist" src="@/assets/images/icons/heart-red.svg" class="size-6 shrink-0" alt="icon" />
         <img v-else src="@/assets/images/icons/heart-grey.svg" class="size-6 shrink-0" alt="icon" />
       </button>
 
       <!-- Action Buttons Container -->
       <div class="flex gap-3 grow h-12">
         <button
-          class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors"
-        >
+          class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors">
           Beli Langsung
         </button>
         <button
-          :disabled="!product?.stock || product?.stock <= 0"
+:disabled="!product?.stock || product?.stock <= 0"
           class="flex-1 rounded-xl bg-custom-blue text-white font-bold text-sm flex items-center justify-center gap-2 disabled:bg-custom-grey disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
-          @click.prevent="addToCart"
-        >
-          <img
-            src="@/assets/images/icons/shopping-cart-white.svg"
-            class="size-5 shrink-0"
-            alt="icon"
-          />
+          @click.prevent="addToCart">
+          <img src="@/assets/images/icons/shopping-cart-white.svg" class="size-5 shrink-0" alt="icon" />
           <span>+ Keranjang</span>
         </button>
       </div>
     </div>
     <section id="Recommendation" class="flex flex-col gap-9 scroll-mt-[150px]">
-      <SectionHeader
-        title="Shop Quality Picks"
-        subtitle="from Top Sellers"
-        :link="{ name: 'app.all-products' }"
-      />
+      <SectionHeader title="Shop Quality Picks" subtitle="from Top Sellers" :link="{ name: 'app.all-products' }" />
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
-        <ProductCard
-          v-for="product in products"
-          v-if="!loading"
-          :key="product.id"
-          :item="product"
-        />
+        <template v-if="!loading">
+          <ProductCard v-for="recProduct in products" :key="recProduct.id" :item="recProduct" />
+        </template>
       </div>
     </section>
   </main>
 
   <!-- Mobile Variant Drawer (Bottom Sheet) -->
   <Transition
-    enter-active-class="transition duration-300 ease-out"
-    enter-from-class="opacity-0"
-    enter-to-class="opacity-100"
-    leave-active-class="transition duration-200 ease-in"
-    leave-from-class="opacity-100"
-    leave-to-class="opacity-0"
-  >
-    <div
-      v-if="showVariantDrawer"
-      class="fixed inset-0 z-[60] bg-black/50 md:hidden"
-      @click="showVariantDrawer = false"
-    ></div>
+enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0"
+    enter-to-class="opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100"
+    leave-to-class="opacity-0">
+    <div v-if="showVariantDrawer" class="fixed inset-0 z-60 bg-black/50 md:hidden" @click="showVariantDrawer = false">
+    </div>
   </Transition>
 
   <Transition
-    enter-active-class="transition duration-300 ease-out"
-    enter-from-class="translate-y-full"
-    enter-to-class="translate-y-0"
-    leave-active-class="transition duration-200 ease-in"
-    leave-from-class="translate-y-0"
-    leave-to-class="translate-y-full"
-  >
+enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-full"
+    enter-to-class="translate-y-0" leave-active-class="transition duration-200 ease-in" leave-from-class="translate-y-0"
+    leave-to-class="translate-y-full">
     <div
-      v-if="showVariantDrawer"
-      class="fixed bottom-0 left-0 w-full z-[70] bg-white rounded-t-2xl p-4 md:hidden flex flex-col max-h-[85vh] shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]"
-    >
+v-if="showVariantDrawer"
+      class="fixed bottom-0 left-0 w-full z-70 bg-white rounded-t-2xl p-4 md:hidden flex flex-col max-h-[85vh] shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
       <!-- Handle Bar -->
       <div class="mx-auto w-12 h-1.5 bg-gray-300 rounded-full mb-4 shrink-0"></div>
 
       <!-- Header: Product Info -->
       <div class="flex gap-3 mb-4 shrink-0">
-        <div
-          class="size-24 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-custom-stroke"
-        >
+        <div class="size-24 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-custom-stroke">
           <img
-            :src="
-              selectedVariant?.image ||
-              product?.product_images?.find((img) => img.is_thumbnail)?.image
-            "
-            class="size-full object-cover"
-          />
+:src="selectedVariant?.image ||
+            product?.product_images?.find((img) => img.is_thumbnail)?.image
+            " class="size-full object-cover" />
         </div>
         <div class="flex flex-col gap-1 items-start">
-          <span class="text-custom-red font-bold text-lg"
-            >Rp {{ formatRupiah(displayedPrice) }}</span
-          >
+          <span class="text-custom-red font-bold text-lg">Rp {{ formatRupiah(displayedPrice) }}</span>
           <span class="text-xs text-custom-grey">Stok: {{ displayedStock || 0 }}</span>
         </div>
         <button class="ml-auto -mt-2 text-custom-grey p-2" @click="showVariantDrawer = false">
@@ -850,16 +723,11 @@ onMounted(() => {
             <h3 class="font-bold text-sm mb-2 capitalize">{{ key }}</h3>
             <div class="flex flex-wrap gap-2">
               <button
-                v-for="value in values"
-                :key="value"
-                class="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all"
-                :class="
-                  selectedOptions[key] === value
+v-for="value in values" :key="value"
+                class="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all" :class="selectedOptions[key] === value
                     ? 'bg-custom-black text-white border-custom-black'
                     : 'bg-white text-custom-black border-gray-200 hover:border-custom-black'
-                "
-                @click="selectOption(key, value)"
-              >
+                  " @click="selectOption(key, value)">
                 {{ value }}
               </button>
             </div>
@@ -871,25 +739,16 @@ onMounted(() => {
           <span class="font-bold text-sm">Jumlah</span>
           <div class="flex items-center gap-3 border border-custom-stroke rounded-lg p-1">
             <button
-              type="button"
-              :disabled="quantity <= 1"
+type="button" :disabled="quantity <= 1"
               class="size-8 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
-              @click="decrease"
-            >
+              @click="decrease">
               <i class="fa-solid fa-minus text-sm"></i>
             </button>
-            <input
-              v-model="quantity"
-              type="number"
-              readonly
-              class="w-10 text-center font-bold text-sm outline-none"
-            />
+            <input v-model="quantity" type="number" readonly class="w-10 text-center font-bold text-sm outline-none" />
             <button
-              type="button"
-              :disabled="quantity >= (displayedStock || 0)"
+type="button" :disabled="quantity >= (displayedStock || 0)"
               class="size-8 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
-              @click="increase"
-            >
+              @click="increase">
               <i class="fa-solid fa-plus text-sm"></i>
             </button>
           </div>
@@ -899,10 +758,9 @@ onMounted(() => {
       <!-- Sticky Bottom Action -->
       <div class="absolute bottom-0 left-0 w-full p-4 bg-white border-t border-custom-stroke">
         <button
-          :disabled="!displayedStock || displayedStock <= 0"
+:disabled="!displayedStock || displayedStock <= 0"
           class="w-full py-3 bg-custom-green text-white rounded-xl font-bold hover:bg-green-600 disabled:bg-gray-300 transition-colors shadow-lg shadow-green-100"
-          @click="handleDrawerAction"
-        >
+          @click="handleDrawerAction">
           {{ drawerAction === 'cart' ? '+ Keranjang' : 'Beli Sekarang' }}
         </button>
       </div>

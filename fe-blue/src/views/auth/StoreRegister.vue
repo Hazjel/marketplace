@@ -1,14 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+
 import { axiosInstance as axios } from '@/plugins/axios'
 import { useAuthStore } from '@/stores/auth'
 import Cookies from 'js-cookie'
 import { debounce } from 'lodash'
 
-const router = useRouter()
 const authStore = useAuthStore()
-const { checkAuth } = authStore
 
 const isLoading = ref(false)
 const errors = ref({})
@@ -368,7 +366,7 @@ const handleSubmit = async () => {
     </div>
 
     <!-- Right Side: Sticky Map -->
-    <div class="hidden lg:block relative sticky top-0 h-screen bg-gray-50">
+    <div class="hidden lg:block sticky top-0 h-screen bg-gray-50">
       <div v-if="form.city" class="w-full h-full relative">
         <iframe
           width="100%"

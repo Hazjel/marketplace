@@ -4,34 +4,34 @@ import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 import globals from 'globals'
 
 export default [
-    {
-        name: 'app/files-to-lint',
-        files: ['**/*.{js,mjs,jsx,vue}'],
-    },
+  {
+    name: 'app/files-to-lint',
+    files: ['**/*.{js,mjs,jsx,vue}']
+  },
 
-    {
-        name: 'app/ignores',
-        ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**'],
-    },
+  {
+    name: 'app/ignores',
+    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**']
+  },
 
-    {
-        languageOptions: {
-            globals: {
-                ...globals.browser,
-                ...globals.node
-            }
-        }
-    },
-
-    js.configs.recommended,
-    ...pluginVue.configs['flat/recommended'],
-
-    skipFormatting,
-
-    {
-        rules: {
-            'vue/multi-word-component-names': 'off',
-            'no-unused-vars': 'warn'
-        }
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node
+      }
     }
+  },
+
+  js.configs.recommended,
+  ...pluginVue.configs['flat/recommended'],
+
+  skipFormatting,
+
+  {
+    rules: {
+      'vue/multi-word-component-names': 'off',
+      'no-unused-vars': 'warn'
+    }
+  }
 ]

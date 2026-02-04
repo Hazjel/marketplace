@@ -7,7 +7,7 @@ const isSidebarOpen = ref(false)
 </script>
 
 <template>
-  <div id="main-container" class="flex h-screen w-full bg-custom-background overflow-hidden">
+  <div id="main-container" class="flex h-screen w-full bg-custom-background dark:bg-gray-900 overflow-hidden">
     <Sidebar :is-open="isSidebarOpen" @close="isSidebarOpen = false" />
     <div id="Content" class="flex flex-col flex-1 h-full min-w-0 overflow-hidden">
       <!-- Topbar Container with padding to match design -->

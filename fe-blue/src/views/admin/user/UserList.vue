@@ -5,11 +5,9 @@ import { useUserStore } from '@/stores/user'
 import { debounce } from 'lodash'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
-import { can } from '@/helpers/permissionHelper'
 
 const userStore = useUserStore()
-const { users, meta, loading, success, error } = storeToRefs(userStore)
+const { users, meta, loading } = storeToRefs(userStore)
 const { fetchUsersPaginated } = userStore
 
 const serverOptions = ref({
@@ -109,7 +107,9 @@ watch(
     </div>
     <section id="List-Transactions" class="flex flex-col flex-1 gap-6 w-full">
       <div class="list flex flex-col gap-5">
-        <CardList v-for="user in users" v-if="!loading && users" :key="user.id" :item="user" />
+        <template v-if="!loading && users">
+          <CardList v-for="user in users" :key="user.id" :item="user" />
+        </template>
       </div>
       <Pagination :meta="meta" :server-options="serverOptions" />
     </section>

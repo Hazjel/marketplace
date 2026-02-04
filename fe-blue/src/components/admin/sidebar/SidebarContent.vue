@@ -216,25 +216,19 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <div v-if="user" class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white">
+  <div v-if="user" class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white dark:bg-surface-card">
     <!-- original sidebar content starts here -->
-    <div class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white">
+    <div class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white dark:bg-surface-card">
       <div class="flex items-center justify-between">
-        <img
-          src="@/assets/images/logos/blukios_logo.png"
-          class="h-8 w-fit cursor-pointer"
-          alt="logo"
-          @click="router.push({ name: 'app.home' })"
-        />
+        <img src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" alt="logo"
+          @click="router.push({ name: 'app.home' })" />
         <!-- Close Button Slot (Optional) -->
         <slot name="close-button"></slot>
       </div>
 
-      <div
-        class="flex flex-col gap-5 overflow-y-scroll hide-scrollbar h-full overscroll-contain flex-1"
-      >
+      <div class="flex flex-col gap-5 overflow-y-scroll hide-scrollbar h-full overscroll-contain flex-1">
         <nav class="flex flex-col gap-4 animate-fade-in-up">
-          <p class="font-medium text-custom-grey">Main Menu</p>
+          <p class="font-medium text-custom-grey dark:text-gray-400">Main Menu</p>
           <ul class="flex flex-col gap-2">
             <SidebarItem v-for="(item, index) in items" :key="index" :item="item" />
           </ul>
@@ -244,22 +238,14 @@ const handleLogout = async () => {
       <div class="pb-8 animate-fade-in-up delay-100">
         <ul class="flex flex-col gap-2">
           <SidebarItem v-if="user?.role !== 'admin'" :item="chatLink" />
-          <SidebarItem
-            v-if="user?.role !== 'admin'"
-            :item="marketplaceLink"
-            @click="handleSwitchMode"
-          />
+          <SidebarItem v-if="user?.role !== 'admin'" :item="marketplaceLink" @click="handleSwitchMode" />
           <!-- Logout Button -->
           <li class="list-none">
             <button
-              class="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full transition-all duration-300 hover:bg-custom-background"
-              @click="handleLogout"
-            >
-              <img
-                src="@/assets/images/icons/logout.svg"
-                class="size-6 text-custom-red svg-red filter-red"
-                alt="icon"
-              />
+              class="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full transition-all duration-300 hover:bg-custom-background dark:hover:bg-white/5"
+              @click="handleLogout">
+              <img src="@/assets/images/icons/logout.svg" class="size-6 text-custom-red svg-red filter-red"
+                alt="icon" />
               <span class="font-medium text-custom-red">Logout</span>
             </button>
           </li>
@@ -269,6 +255,6 @@ const handleLogout = async () => {
     <!-- original sidebar content ends here -->
   </div>
   <div v-else class="flex items-center justify-center h-screen">
-    <span class="text-custom-grey text-xl">Loading menu...</span>
+    <span class="text-custom-grey dark:text-gray-400 text-xl">Loading menu...</span>
   </div>
 </template>

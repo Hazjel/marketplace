@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, reactive, watch } from 'vue'
+import { onMounted, ref, reactive } from 'vue'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
 import { axiosInstance } from '@/plugins/axios'
 import { useToast } from 'vue-toastification'
@@ -85,7 +85,7 @@ const fetchAddress = async () => {
       is_primary: !!data.is_primary
     })
     citySearch.value = data.city
-  } catch (error) {
+  } catch {
     toast.error('Failed to load address')
     router.push({ name: 'user.settings.address' })
   } finally {

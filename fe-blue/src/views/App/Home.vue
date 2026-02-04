@@ -1,6 +1,6 @@
 <script setup>
 import 'swiper/swiper-bundle.css'
-import { onMounted } from 'vue'
+
 import Banner from '@/components/App/home/Banner.vue'
 import Categories from '@/components/App/home/Categories.vue'
 import TopPicks from '@/components/App/home/TopPicks.vue'
