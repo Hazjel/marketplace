@@ -157,107 +157,65 @@ onMounted(async () => {
   <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background">
     <div class="flex flex-col w-full max-w-[1280px] py-4 md:py-6 px-4 md:px-[52px] gap-3 mx-auto">
       <div class="flex items-center gap-3">
-        <RouterLink
-          :to="{ name: 'app.home' }"
-          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue"
-        >
+        <RouterLink :to="{ name: 'app.home' }"
+          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           Homepage
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
-        <RouterLink
-          :to="{ name: 'app.all-stores' }"
-          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue"
-        >
+        <RouterLink :to="{ name: 'app.all-stores' }"
+          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           Stores
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
-        <a
-          href="#"
-          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue"
-        >
+        <a href="#" class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           {{ store?.name }}
         </a>
       </div>
     </div>
   </header>
   <main
-    class="flex flex-col gap-8 md:gap-[52px] w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-8 mb-20 md:mb-[100px] mx-auto"
-  >
+    class="flex flex-col gap-8 md:gap-[52px] w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-8 mb-20 md:mb-[100px] mx-auto">
     <section class="flex flex-col gap-5 w-full">
-      <StoreHeader
-        :store="store"
-        :is-following="isFollowing"
-        @follow="handleFollow"
-        @unfollow="handleUnfollow"
-      />
+      <StoreHeader :store="store" :is-following="isFollowing" @follow="handleFollow" @unfollow="handleUnfollow" />
 
       <div class="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-        <a
-          href="#"
-          class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all"
-        >
-          <img
-            src="@/assets/images/thumbnails/promo-potrait-1-small.png"
-            class="size-full object-cover"
-            alt="promo"
-          />
+        <a href="#"
+          class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all">
+          <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover" alt="promo" />
         </a>
-        <a
-          href="#"
-          class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all"
-        >
-          <img
-            src="@/assets/images/thumbnails/promo-potrait-2-small.png"
-            class="size-full object-cover"
-            alt="promo"
-          />
+        <a href="#"
+          class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all">
+          <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover" alt="promo" />
         </a>
       </div>
     </section>
     <section class="flex flex-col gap-6 md:gap-8 animate-fade-in-up delay-200">
       <!-- Tabs Navigation -->
-      <div
-        id="Tab-Buttons"
-        class="sticky top-0 z-30 bg-custom-background/95 backdrop-blur-sm pt-4 pb-2 border-b border-custom-stroke flex items-center gap-8 w-full overflow-x-auto hide-scrollbar"
-      >
-        <button
-          :class="[
-            'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
-            activeTab === 'home' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
-          ]"
-          @click="activeTab = 'home'"
-        >
+      <div id="Tab-Buttons"
+        class="sticky top-0 z-30 bg-custom-background/95 backdrop-blur-sm pt-4 pb-2 border-b border-custom-stroke flex items-center gap-8 w-full overflow-x-auto hide-scrollbar">
+        <button :class="[
+          'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
+          activeTab === 'home' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
+        ]" @click="activeTab = 'home'">
           Beranda
-          <div
-            v-if="activeTab === 'home'"
-            class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"
-          ></div>
+          <div v-if="activeTab === 'home'"
+            class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
         </button>
-        <button
-          :class="[
-            'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
-            activeTab === 'products' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
-          ]"
-          @click="activeTab = 'products'"
-        >
+        <button :class="[
+          'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
+          activeTab === 'products' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
+        ]" @click="activeTab = 'products'">
           Produk
-          <div
-            v-if="activeTab === 'products'"
-            class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"
-          ></div>
+          <div v-if="activeTab === 'products'"
+            class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
         </button>
-        <button
-          :class="[
-            'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
-            activeTab === 'reviews' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
-          ]"
-          @click="activeTab = 'reviews'"
-        >
+        <button :class="[
+          'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
+          activeTab === 'reviews' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
+        ]" @click="activeTab = 'reviews'">
           Ulasan
-          <div
-            v-if="activeTab === 'reviews'"
-            class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"
-          ></div>
+          <div v-if="activeTab === 'reviews'"
+            class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
         </button>
       </div>
 
@@ -270,11 +228,7 @@ onMounted(async () => {
               <SkeletonProductCard v-for="i in 5" :key="i" />
             </template>
             <template v-else>
-              <ProductCard
-                v-for="product in products.slice(0, 5)"
-                :key="product.id"
-                :item="product"
-              />
+              <ProductCard v-for="product in products.slice(0, 5)" :key="product.id" :item="product" />
             </template>
           </div>
         </section>
@@ -284,33 +238,24 @@ onMounted(async () => {
           <!-- Sidebar Filter (Desktop) -->
           <aside class="hidden md:flex flex-col w-64 shrink-0 gap-6">
             <div
-              class="rounded-2xl border border-custom-stroke bg-white p-5 flex flex-col gap-4 sticky top-24"
-            >
-              <h3 class="font-bold text-lg">Etalase Toko</h3>
+              class="rounded-2xl border border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card p-5 flex flex-col gap-4 sticky top-24">
+              <h3 class="font-bold text-lg dark:text-white">Etalase Toko</h3>
               <div class="flex flex-col gap-1">
-                <button
-                  :class="[
-                    'text-left px-3 py-2 rounded-lg font-medium transition-colors',
-                    !selectedCategory
-                      ? 'bg-blue-50 text-custom-blue font-semibold'
-                      : 'text-custom-grey hover:bg-gray-50 hover:text-custom-black'
-                  ]"
-                  @click="handleCategoryFilter(null)"
-                >
+                <button :class="[
+                  'text-left px-3 py-2 rounded-lg font-medium transition-colors',
+                  !selectedCategory
+                    ? 'bg-blue-50 dark:bg-custom-blue/10 text-custom-blue dark:text-blue-400 font-semibold'
+                    : 'text-custom-grey dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-custom-black dark:hover:text-white'
+                ]" @click="handleCategoryFilter(null)">
                   Semua Produk
                 </button>
-                <hr class="my-2 border-gray-100" />
-                <button
-                  v-for="category in storeCategories"
-                  :key="category.id"
-                  :class="[
-                    'text-left px-3 py-2 rounded-lg font-medium transition-colors',
-                    selectedCategory?.id === category.id
-                      ? 'bg-blue-50 text-custom-blue font-semibold'
-                      : 'text-custom-grey hover:bg-gray-50 hover:text-custom-black'
-                  ]"
-                  @click="handleCategoryFilter(category)"
-                >
+                <hr class="my-2 border-gray-100 dark:border-white/10" />
+                <button v-for="category in storeCategories" :key="category.id" :class="[
+                  'text-left px-3 py-2 rounded-lg font-medium transition-colors',
+                  selectedCategory?.id === category.id
+                    ? 'bg-blue-50 dark:bg-custom-blue/10 text-custom-blue dark:text-blue-400 font-semibold'
+                    : 'text-custom-grey dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-custom-black dark:hover:text-white'
+                ]" @click="handleCategoryFilter(category)">
                   {{ category.name }}
                   <span class="text-xs text-gray-400 ml-1">({{ category.products_count }})</span>
                 </button>
@@ -322,28 +267,20 @@ onMounted(async () => {
           <div class="flex flex-col w-full gap-6">
             <!-- Mobile Filter (Horizontal) -->
             <div class="md:hidden flex overflow-x-auto pb-2 -mx-4 px-4 gap-2 hide-scrollbar">
-              <button
-                :class="[
-                  'whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors',
-                  !selectedCategory
-                    ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold'
-                    : 'border-custom-stroke bg-white text-custom-grey font-medium'
-                ]"
-                @click="handleCategoryFilter(null)"
-              >
+              <button :class="[
+                'whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors',
+                !selectedCategory
+                  ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold'
+                  : 'border-custom-stroke bg-white text-custom-grey font-medium'
+              ]" @click="handleCategoryFilter(null)">
                 Semua
               </button>
-              <button
-                v-for="category in storeCategories"
-                :key="category.id"
-                :class="[
-                  'whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors',
-                  selectedCategory?.id === category.id
-                    ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold'
-                    : 'border-custom-stroke bg-white text-custom-grey font-medium'
-                ]"
-                @click="handleCategoryFilter(category)"
-              >
+              <button v-for="category in storeCategories" :key="category.id" :class="[
+                'whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors',
+                selectedCategory?.id === category.id
+                  ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold'
+                  : 'border-custom-stroke bg-white text-custom-grey font-medium'
+              ]" @click="handleCategoryFilter(category)">
                 {{ category.name }}
               </button>
             </div>
@@ -355,11 +292,9 @@ onMounted(async () => {
               </p>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-custom-grey font-medium">Urutkan:</span>
-                <select
-                  v-model="selectedSort"
+                <select v-model="selectedSort"
                   class="border-none bg-transparent font-bold text-custom-black focus:ring-0 cursor-pointer text-sm"
-                  @change="handleSortChange"
-                >
+                  @change="handleSortChange">
                   <option value="default">Paling Sesuai</option>
                   <option value="newest">Terbaru</option>
                   <option value="price_low">Harga Terendah</option>
@@ -375,15 +310,9 @@ onMounted(async () => {
                 <SkeletonProductCard v-for="n in 8" :key="n" />
               </template>
               <ProductCard v-for="product in products" v-else :key="product.id" :item="product" />
-              <div
-                v-if="!loadingProducts && products.length === 0"
-                class="col-span-full py-12 flex flex-col items-center justify-center text-center"
-              >
-                <img
-                  src="@/assets/images/icons/box-2-grey.svg"
-                  class="w-24 h-24 mb-4 opacity-50"
-                  alt="Empty"
-                />
+              <div v-if="!loadingProducts && products.length === 0"
+                class="col-span-full py-12 flex flex-col items-center justify-center text-center">
+                <img src="@/assets/images/icons/box-2-grey.svg" class="w-24 h-24 mb-4 opacity-50" alt="Empty" />
                 <h3 class="font-bold text-gray-400 text-lg">Belum ada produk</h3>
                 <p class="text-sm text-gray-400">Toko ini belum memiliki produk di etalase ini.</p>
               </div>
@@ -396,15 +325,9 @@ onMounted(async () => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ReviewCard v-for="review in reviews" :key="review.id" :review="review" />
 
-            <div
-              v-if="reviews.length === 0"
-              class="col-span-full py-12 flex flex-col items-center justify-center text-center"
-            >
-              <img
-                src="@/assets/images/icons/message-text-grey.svg"
-                class="w-24 h-24 mb-4 opacity-50"
-                alt="Empty"
-              />
+            <div v-if="reviews.length === 0"
+              class="col-span-full py-12 flex flex-col items-center justify-center text-center">
+              <img src="@/assets/images/icons/message-text-grey.svg" class="w-24 h-24 mb-4 opacity-50" alt="Empty" />
               <h3 class="font-bold text-gray-400 text-lg">Belum ada ulasan</h3>
               <p class="text-sm text-gray-400">Toko ini belum memiliki ulasan dari pembeli.</p>
             </div>

@@ -61,11 +61,8 @@ onMounted(async () => {
     <div class="flex flex-col gap-6 relative">
       <div class="storeSwiper w-full overflow-hidden">
         <div class="swiper-wrapper">
-          <div
-            v-for="(storeChunk, index) in storeChunks"
-            :key="index"
-            class="swiper-slide w-full !grid !grid-cols-1 sm:!grid-cols-3 !gap-3 md:!gap-6"
-          >
+          <div v-for="(storeChunk, index) in storeChunks" :key="index"
+            class="swiper-slide w-full !grid !grid-cols-1 sm:!grid-cols-3 !gap-3 md:!gap-6">
             <StoreCard v-for="store in storeChunk" :key="store.id" :item="store" />
           </div>
         </div>
@@ -73,26 +70,16 @@ onMounted(async () => {
 
       <!-- Navigation -->
       <div class="relative flex items-center justify-center gap-6 h-14 w-fit mx-auto">
-        <button
-          type="button"
-          class="store-prev flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke dark:border-white/10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-        >
-          <img
-            src="@/assets/images/icons/arrow-right-black.svg"
-            class="size-6 rotate-180 dark:brightness-0 dark:invert"
-            alt="icon"
-          />
+        <button type="button"
+          class="store-prev flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke dark:border-white/10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+          <img src="@/assets/images/icons/arrow-right-black.svg" class="size-6 rotate-180 dark:brightness-0 dark:invert"
+            alt="icon" />
         </button>
         <div class="store-pagination flex items-center gap-2"></div>
-        <button
-          type="button"
-          class="store-next flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke dark:border-white/10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-        >
-          <img
-            src="@/assets/images/icons/arrow-right-black.svg"
-            class="size-6 dark:brightness-0 dark:invert"
-            alt="icon"
-          />
+        <button type="button"
+          class="store-next flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke dark:border-white/10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+          <img src="@/assets/images/icons/arrow-right-black.svg" class="size-6 dark:brightness-0 dark:invert"
+            alt="icon" />
         </button>
       </div>
     </div>

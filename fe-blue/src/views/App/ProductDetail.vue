@@ -347,14 +347,12 @@ onMounted(() => {
   <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background">
     <div class="flex flex-col w-full max-w-[1280px] py-4 md:py-6 px-4 md:px-[52px] gap-3 mx-auto">
       <div class="flex items-center gap-3">
-        <RouterLink
-:to="{ name: 'app.home' }"
+        <RouterLink :to="{ name: 'app.home' }"
           class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           Homepage
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
-        <RouterLink
-:to="{ name: 'app.browse-category', params: { slug: product?.product_category?.slug } }"
+        <RouterLink :to="{ name: 'app.browse-category', params: { slug: product?.product_category?.slug } }"
           class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           {{ product?.product_category?.name }}
         </RouterLink>
@@ -406,11 +404,10 @@ onMounted(() => {
             <div v-for="(values, key) in uniqueAttributes" :key="key">
               <h3 class="font-bold text-base mb-2 capitalize">{{ key }}</h3>
               <div class="flex flex-wrap gap-2">
-                <button
-v-for="value in values" :key="value"
+                <button v-for="value in values" :key="value"
                   class="px-4 py-2 rounded-lg text-sm font-semibold border transition-all" :class="selectedOptions[key] === value
-                      ? 'bg-custom-black dark:bg-white text-white dark:text-custom-background border-custom-black dark:border-white'
-                      : 'bg-white dark:bg-transparent text-custom-black dark:text-white border-gray-200 dark:border-white/20 hover:border-custom-black dark:hover:border-white'
+                    ? 'bg-custom-black dark:bg-white text-white dark:text-custom-background border-custom-black dark:border-white'
+                    : 'bg-white dark:bg-transparent text-custom-black dark:text-white border-gray-200 dark:border-white/20 hover:border-custom-black dark:hover:border-white'
                     " @click="selectOption(key, value)">
                   {{ value }}
                 </button>
@@ -449,8 +446,7 @@ v-for="value in values" :key="value"
             </div>
             <span class="text-xs text-custom-green font-bold">Online</span>
           </div>
-          <RouterLink
-v-if="product?.store?.username"
+          <RouterLink v-if="product?.store?.username"
             :to="{ name: 'app.store-detail', params: { username: product?.store?.username } }"
             class="ml-auto px-4 py-1.5 border border-custom-blue text-custom-blue rounded-lg text-sm font-bold hover:bg-blue-50">
             Follow
@@ -478,35 +474,30 @@ v-if="product?.store?.username"
                 <img src="@/assets/images/icons/Star-pointy.svg" class="size-4" />
                 <span class="text-sm font-bold w-3 text-custom-grey">{{ 6 - star }}</span>
                 <div class="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-class="h-full bg-custom-green rounded-full"
+                  <div class="h-full bg-custom-green rounded-full"
                     :style="{ width: `${getRatingPercentage(6 - star)}%` }"></div>
                 </div>
                 <span class="text-xs text-custom-grey w-8 text-right">{{
                   getRatingCount(6 - star)
-                  }}</span>
+                }}</span>
               </div>
             </div>
           </div>
 
           <!-- Review List -->
           <div class="flex flex-col gap-6 mt-4">
-            <div
-v-if="!product?.product_reviews || product.product_reviews.length === 0"
+            <div v-if="!product?.product_reviews || product.product_reviews.length === 0"
               class="text-center py-8 text-custom-grey">
               Belum ada ulasan untuk produk ini.
             </div>
             <div v-else class="flex flex-col gap-6">
-              <div
-v-for="review in product.product_reviews" :key="review.id"
+              <div v-for="review in product.product_reviews" :key="review.id"
                 class="flex gap-4 border-b border-border pb-6 last:border-0">
                 <!-- User Avatar -->
                 <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden shrink-0">
-                  <img
-v-if="!review.is_anonymous && review.user?.profile_picture" :src="review.user.profile_picture"
+                  <img v-if="!review.is_anonymous && review.user?.profile_picture" :src="review.user.profile_picture"
                     class="w-full h-full object-cover" />
-                  <div
-v-else
+                  <div v-else
                     class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-white/5 text-gray-500 dark:text-gray-400 font-bold text-xs uppercase">
                     {{ review.is_anonymous ? 'A' : review.user?.name?.[0] || 'U' }}
                   </div>
@@ -521,13 +512,12 @@ v-else
                       </span>
                       <div class="flex items-center gap-1">
                         <div class="flex">
-                          <img
-v-for="i in 5" :key="i" :src="i <= review.rating ? StarPointy : StarPointyOutline"
+                          <img v-for="i in 5" :key="i" :src="i <= review.rating ? StarPointy : StarPointyOutline"
                             class="w-3.5 h-3.5" />
                         </div>
                         <span class="text-xs text-gray-400 ml-2">{{
                           formatDate(review.created_at)
-                          }}</span>
+                        }}</span>
                       </div>
                     </div>
                   </div>
@@ -536,14 +526,11 @@ v-for="i in 5" :key="i" :src="i <= review.rating ? StarPointy : StarPointyOutlin
                   <p class="text-sm text-custom-grey leading-relaxed">{{ review.review }}</p>
 
                   <!-- Media Attachments -->
-                  <div
-v-if="review.attachments && review.attachments.length > 0"
+                  <div v-if="review.attachments && review.attachments.length > 0"
                     class="flex gap-2 mt-2 overflow-x-auto pb-2">
-                    <div
-v-for="media in review.attachments" :key="media.id"
+                    <div v-for="media in review.attachments" :key="media.id"
                       class="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
-                      <img
-v-if="media.file_type === 'image'" :src="media.file_path"
+                      <img v-if="media.file_type === 'image'" :src="media.file_path"
                         class="w-full h-full object-cover cursor-pointer hover:opacity-90" />
                       <video v-else :src="media.file_path" class="w-full h-full object-cover"></video>
                     </div>
@@ -563,8 +550,7 @@ v-if="media.file_type === 'image'" :src="media.file_path"
 
           <div class="flex items-center gap-3 my-2">
             <div class="size-12 rounded bg-gray-100 dark:bg-white/10 overflow-hidden shrink-0">
-              <img
-:src="product?.product_images?.find((img) => img.is_thumbnail)?.image"
+              <img :src="product?.product_images?.find((img) => img.is_thumbnail)?.image"
                 class="size-full object-cover" />
             </div>
             <p class="line-clamp-2 text-sm">{{ product?.name }}</p>
@@ -578,24 +564,21 @@ v-if="media.file_type === 'image'" :src="media.file_path"
           <div v-if="product?.has_variants && Object.keys(selectedOptions).length > 0" class="flex flex-col gap-1">
             <span class="text-sm font-semibold text-custom-black">Varian Dipilih:</span>
             <div class="flex flex-wrap gap-2">
-              <span
-v-for="(value, key) in selectedOptions" :key="key"
-                class="px-2 py-1 bg-gray-100 rounded text-xs font-medium text-custom-black border border-gray-200 capitalize">
+              <span v-for="(value, key) in selectedOptions" :key="key"
+                class="px-2 py-1 bg-gray-100 dark:bg-white/10 rounded text-xs font-medium text-custom-black dark:text-white border border-gray-200 dark:border-white/10 capitalize">
                 {{ key }}: {{ value }}
               </span>
             </div>
           </div>
 
           <div class="flex items-center gap-2 border border-custom-stroke rounded-lg p-1 w-fit">
-            <button
-type="button" :disabled="quantity <= 1"
+            <button type="button" :disabled="quantity <= 1"
               class="size-7 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
               @click="decrease">
               <i class="fa-solid fa-minus text-xs"></i>
             </button>
             <input v-model="quantity" type="number" readonly class="w-10 text-center font-bold text-sm outline-none" />
-            <button
-type="button" :disabled="quantity >= (displayedStock || 0)"
+            <button type="button" :disabled="quantity >= (displayedStock || 0)"
               class="size-7 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
               @click="increase">
               <i class="fa-solid fa-plus text-xs"></i>
@@ -613,8 +596,7 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
           </div>
 
           <div class="flex flex-col gap-2 mt-2">
-            <button
-:disabled="!displayedStock || displayedStock <= 0"
+            <button :disabled="!displayedStock || displayedStock <= 0"
               class="w-full py-3 bg-custom-blue text-white rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 transition-colors flex items-center justify-center gap-2"
               @click.prevent="addToCart">
               <i class="fa-solid fa-plus"></i> Keranjang
@@ -645,8 +627,7 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
     <div
       class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-custom-stroke p-4 md:hidden shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)] flex gap-3 items-center">
       <!-- Wishlist/Chat Icon Button -->
-      <button
-class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke grow-0 shrink-0"
+      <button class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke grow-0 shrink-0"
         :class="{ 'bg-custom-red/10 border-custom-red': isInWishlist }" @click="handleToggleWishlist">
         <img v-if="isInWishlist" src="@/assets/images/icons/heart-red.svg" class="size-6 shrink-0" alt="icon" />
         <img v-else src="@/assets/images/icons/heart-grey.svg" class="size-6 shrink-0" alt="icon" />
@@ -658,8 +639,7 @@ class="flex items-center justify-center size-12 rounded-xl border border-custom-
           class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors">
           Beli Langsung
         </button>
-        <button
-:disabled="!product?.stock || product?.stock <= 0"
+        <button :disabled="!product?.stock || product?.stock <= 0"
           class="flex-1 rounded-xl bg-custom-blue text-white font-bold text-sm flex items-center justify-center gap-2 disabled:bg-custom-grey disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
           @click.prevent="addToCart">
           <img src="@/assets/images/icons/shopping-cart-white.svg" class="size-5 shrink-0" alt="icon" />
@@ -678,20 +658,17 @@ class="flex items-center justify-center size-12 rounded-xl border border-custom-
   </main>
 
   <!-- Mobile Variant Drawer (Bottom Sheet) -->
-  <Transition
-enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0"
+  <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0"
     enter-to-class="opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="opacity-100"
     leave-to-class="opacity-0">
     <div v-if="showVariantDrawer" class="fixed inset-0 z-60 bg-black/50 md:hidden" @click="showVariantDrawer = false">
     </div>
   </Transition>
 
-  <Transition
-enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-full"
+  <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-full"
     enter-to-class="translate-y-0" leave-active-class="transition duration-200 ease-in" leave-from-class="translate-y-0"
     leave-to-class="translate-y-full">
-    <div
-v-if="showVariantDrawer"
+    <div v-if="showVariantDrawer"
       class="fixed bottom-0 left-0 w-full z-70 bg-white rounded-t-2xl p-4 md:hidden flex flex-col max-h-[85vh] shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
       <!-- Handle Bar -->
       <div class="mx-auto w-12 h-1.5 bg-gray-300 rounded-full mb-4 shrink-0"></div>
@@ -699,8 +676,7 @@ v-if="showVariantDrawer"
       <!-- Header: Product Info -->
       <div class="flex gap-3 mb-4 shrink-0">
         <div class="size-24 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-custom-stroke">
-          <img
-:src="selectedVariant?.image ||
+          <img :src="selectedVariant?.image ||
             product?.product_images?.find((img) => img.is_thumbnail)?.image
             " class="size-full object-cover" />
         </div>
@@ -722,11 +698,10 @@ v-if="showVariantDrawer"
           <div v-for="(values, key) in uniqueAttributes" :key="key">
             <h3 class="font-bold text-sm mb-2 capitalize">{{ key }}</h3>
             <div class="flex flex-wrap gap-2">
-              <button
-v-for="value in values" :key="value"
+              <button v-for="value in values" :key="value"
                 class="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all" :class="selectedOptions[key] === value
-                    ? 'bg-custom-black text-white border-custom-black'
-                    : 'bg-white text-custom-black border-gray-200 hover:border-custom-black'
+                  ? 'bg-custom-black text-white border-custom-black'
+                  : 'bg-white text-custom-black border-gray-200 hover:border-custom-black'
                   " @click="selectOption(key, value)">
                 {{ value }}
               </button>
@@ -738,15 +713,13 @@ v-for="value in values" :key="value"
         <div class="flex items-center justify-between border-t border-gray-100 pt-4">
           <span class="font-bold text-sm">Jumlah</span>
           <div class="flex items-center gap-3 border border-custom-stroke rounded-lg p-1">
-            <button
-type="button" :disabled="quantity <= 1"
+            <button type="button" :disabled="quantity <= 1"
               class="size-8 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
               @click="decrease">
               <i class="fa-solid fa-minus text-sm"></i>
             </button>
             <input v-model="quantity" type="number" readonly class="w-10 text-center font-bold text-sm outline-none" />
-            <button
-type="button" :disabled="quantity >= (displayedStock || 0)"
+            <button type="button" :disabled="quantity >= (displayedStock || 0)"
               class="size-8 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
               @click="increase">
               <i class="fa-solid fa-plus text-sm"></i>
@@ -757,8 +730,7 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
 
       <!-- Sticky Bottom Action -->
       <div class="absolute bottom-0 left-0 w-full p-4 bg-white border-t border-custom-stroke">
-        <button
-:disabled="!displayedStock || displayedStock <= 0"
+        <button :disabled="!displayedStock || displayedStock <= 0"
           class="w-full py-3 bg-custom-green text-white rounded-xl font-bold hover:bg-green-600 disabled:bg-gray-300 transition-colors shadow-lg shadow-green-100"
           @click="handleDrawerAction">
           {{ drawerAction === 'cart' ? '+ Keranjang' : 'Beli Sekarang' }}

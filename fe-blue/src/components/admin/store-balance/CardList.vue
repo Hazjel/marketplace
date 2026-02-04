@@ -15,11 +15,8 @@ const emit = defineEmits(['delete'])
 
 <template>
   <div
-    class="card flex flex-col rounded-[20px] border border-custom-stroke py-[18px] px-5 gap-5 bg-white"
-  >
-    <div
-      class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]"
-    >
+    class="card flex flex-col rounded-[20px] border border-custom-stroke dark:border-white/10 py-[18px] px-5 gap-5 bg-white dark:bg-surface-card dark:text-white">
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]">
       <div class="flex items-center gap-[14px] w-full md:w-[320px]">
         <div class="flex size-[84px] shrink-0 rounded-full bg-custom-background overflow-hidden">
           <img :src="item.store?.logo" class="size-full object-cover" alt="photo" />
@@ -28,10 +25,8 @@ const emit = defineEmits(['delete'])
           <p class="font-bold text-base md:text-lg leading-tight w-full truncate">
             {{ item.store?.name }}
           </p>
-          <p
-            class="flex items-center gap-1 font-semibold text-sm md:text-base text-custom-grey leading-none"
-          >
-            <img src="@/assets/images/icons/user-grey.svg" class="size-5" alt="icon" />
+          <p class="flex items-center gap-1 font-semibold text-sm md:text-base text-custom-grey leading-none">
+            <img src="@/assets/images/icons/user-grey.svg" class="size-5 dark:invert" alt="icon" />
             {{ item.store?.user?.name }}
           </p>
         </div>
@@ -39,13 +34,8 @@ const emit = defineEmits(['delete'])
       <div class="grid grid-cols-2 md:flex md:items-center gap-5 w-full md:w-auto">
         <div class="flex items-center gap-[10px] w-full md:w-[260px]">
           <div
-            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center"
-          >
-            <img
-              src="@/assets/images/icons/stickynote-black.svg"
-              class="flex size-6 shrink-0"
-              alt="icon"
-            />
+            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background dark:bg-white/10 overflow-hidden items-center justify-center">
+            <img src="@/assets/images/icons/stickynote-black.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
           </div>
           <div class="flex flex-col gap-1">
             <p class="font-bold text-base md:text-lg leading-none">
@@ -56,13 +46,9 @@ const emit = defineEmits(['delete'])
         </div>
         <div class="flex items-center gap-[10px] w-full md:w-[260px]">
           <div
-            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center"
-          >
-            <img
-              src="@/assets/images/icons/shopping-cart-black.svg"
-              class="flex size-6 shrink-0"
-              alt="icon"
-            />
+            class="flex size-14 shrink-0 rounded-full bg-custom-icon-background dark:bg-white/10 overflow-hidden items-center justify-center">
+            <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
+              alt="icon" />
           </div>
           <div class="flex flex-col gap-1">
             <p class="font-bold text-base md:text-lg leading-none">
@@ -73,24 +59,18 @@ const emit = defineEmits(['delete'])
         </div>
       </div>
     </div>
-    <hr class="border-custom-stroke" />
+    <hr class="border-custom-stroke dark:border-white/10" />
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div class="flex flex-col gap-[6px]">
         <p class="font-bold text-xl text-custom-blue">Rp {{ formatRupiah(item.balance) }}</p>
         <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
-          <img
-            src="@/assets/images/icons/wallet-3-grey.svg"
-            class="size-6 flex shrink-0"
-            alt="icon"
-          />
+          <img src="@/assets/images/icons/wallet-3-grey.svg" class="size-6 flex shrink-0 dark:invert" alt="icon" />
           Total Wallet
         </p>
       </div>
       <div class="flex items-center justify-end gap-[14px] w-full md:w-auto">
-        <RouterLink
-          :to="{ name: 'admin.store-balance.detail', params: { id: item.id } }"
-          class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue"
-        >
+        <RouterLink :to="{ name: 'admin.store-balance.detail', params: { id: item.id } }"
+          class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>
         </RouterLink>

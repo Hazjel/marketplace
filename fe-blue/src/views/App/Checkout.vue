@@ -29,6 +29,7 @@ const {
   subtotalSelected,
   discountSelected
 } = storeToRefs(cart)
+const { error } = storeToRefs(transactionStore)
 const { createTransaction } = transactionStore
 
 const isMidtransLoaded = ref(false)
@@ -352,7 +353,7 @@ onMounted(async () => {
             {{ store.storeName }}
           </p>
 
-          <div class="flex flex-col gap-4 pl-4 border-l-2 border-gray-100 dark:border-gray-700">
+          <div class="flex flex-col gap-4 pl-4 border-l-2 border-gray-100 dark:border-white/10">
             <div v-for="product in store.products" :key="product.id" class="flex items-start gap-4 w-full">
               <div
                 class="flex size-[64px] shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 p-2 items-center justify-center">
@@ -605,7 +606,7 @@ onMounted(async () => {
             </div>
           </div>
           <button id="Pay-Button" type="submit"
-            :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment"
+            :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment || user?.role === 'admin'"
             class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300">
             <!-- Loading State -->
             <template v-if="isProcessingPayment">
@@ -618,6 +619,11 @@ onMounted(async () => {
               <span class="font-bold text-white">Pay With Midtrans</span>
               <img src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
                 alt="icon" />
+            </template>
+
+            <!-- Admin Warning -->
+            <template v-else-if="user?.role === 'admin'">
+              <span class="font-bold text-white">Admins cannot Checkout</span>
             </template>
 
             <!-- Incomplete Form -->
