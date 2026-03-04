@@ -38,7 +38,8 @@ onMounted(() => {
       <div class="flex items-center gap-[14px] overflow-hidden">
         <div
           class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background dark:bg-white/5 overflow-hidden items-center justify-center">
-          <img :src="product?.product_images?.find((image) => image.is_thumbnail)?.image"
+          <img
+:src="product?.product_images?.find((image) => image.is_thumbnail)?.image"
             class="size-full object-contain" alt="icon" />
         </div>
         <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
@@ -87,7 +88,8 @@ onMounted(() => {
     <section
       class="flex flex-col w-[435px] shrink-0 h-fit rounded-[20px] p-5 gap-5 bg-white dark:bg-surface-card dark:text-white">
       <div class="grid grid-cols-3 gap-4">
-        <div v-for="(image, index) in product?.product_images" :key="index" data-modal="Gallery-Modal" data-index="1"
+        <div
+v-for="(image, index) in product?.product_images" :key="index" data-modal="Gallery-Modal" data-index="1"
           data-gallery="../assets/images/thumbnails/macbook-pro-m2.png"
           class="relative flex h-[121px] rounded-2xl bg-custom-background dark:bg-white/5 overflow-hidden">
           <img :src="image.image" class="size-full object-cover" alt="thumbnail" />

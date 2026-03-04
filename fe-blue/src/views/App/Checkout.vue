@@ -334,7 +334,8 @@ onMounted(async () => {
 
     <div class="flex flex-col md:flex-row gap-5">
       <!-- Cart Items Section -->
-      <section id="Carts-Container"
+      <section
+id="Carts-Container"
         class="flex flex-col gap-5 w-full h-fit rounded-[20px] p-5 bg-white dark:bg-surface-card min-w-0">
         <p class="font-bold text-xl dark:text-white">Your Cart</p>
 
@@ -357,7 +358,8 @@ onMounted(async () => {
             <div v-for="product in store.products" :key="product.id" class="flex items-start gap-4 w-full">
               <div
                 class="flex size-[64px] shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 p-2 items-center justify-center">
-                <img :src="product.product_images?.find((i) => i.is_thumbnail)?.image || product.thumbnail
+                <img
+:src="product.product_images?.find((i) => i.is_thumbnail)?.image || product.thumbnail
                   " class="size-full object-contain mix-blend-multiply dark:mix-blend-normal" alt="icon"
                   @error="(e) => (e.target.src = '/src/assets/images/thumbnails/th-1.svg')" />
               </div>
@@ -382,7 +384,8 @@ onMounted(async () => {
       <form class="flex flex-col gap-5 w-full md:w-[581px] shrink-0" @submit.prevent="handleSubmit">
         <!-- Security Notice -->
         <div class="relative w-full rounded-[20px] bg-custom-blue overflow-hidden">
-          <img src="@/assets/images/backgrounds/round-ornament.svg"
+          <img
+src="@/assets/images/backgrounds/round-ornament.svg"
             class="size-full object-contain object-right opacity-55 absolute" alt="icon" />
           <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
             <img src="@/assets/images/icons/shield-tick-white-fill.svg" class="flex size-9 shrink-0" alt="icon" />
@@ -400,11 +403,13 @@ onMounted(async () => {
           <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
               <p class="font-semibold text-custom-grey">Address Details</p>
-              <button v-if="savedAddresses.length > 0 && !showSavedAddresses" type="button"
+              <button
+v-if="savedAddresses.length > 0 && !showSavedAddresses" type="button"
                 class="text-sm font-bold text-custom-blue hover:underline" @click="showSavedAddresses = true">
                 Select Saved Address
               </button>
-              <button v-else-if="showSavedAddresses" type="button"
+              <button
+v-else-if="showSavedAddresses" type="button"
                 class="text-sm font-bold text-custom-red hover:underline" @click="showSavedAddresses = false">
                 Cancel Selection
               </button>
@@ -412,7 +417,8 @@ onMounted(async () => {
 
             <!-- Saved Addresses Grid -->
             <div v-if="showSavedAddresses" class="grid grid-cols-1 gap-3 mb-2">
-              <div v-for="addr in savedAddresses" :key="addr.id"
+              <div
+v-for="addr in savedAddresses" :key="addr.id"
                 class="cursor-pointer border border-custom-stroke dark:border-white/10 rounded-xl p-4 hover:border-custom-blue hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all group"
                 :class="{
                   'border-custom-blue bg-blue-50 dark:bg-blue-500/20 ring-1 ring-custom-blue':
@@ -420,7 +426,8 @@ onMounted(async () => {
                 }" @click="selectSavedAddress(addr)">
                 <div class="flex items-center justify-between mb-1">
                   <span class="font-bold text-custom-black dark:text-white">{{ addr.label }}</span>
-                  <span v-if="addr.is_primary"
+                  <span
+v-if="addr.is_primary"
                     class="text-xs font-bold bg-blue-100 dark:bg-blue-500/20 text-custom-blue dark:text-blue-400 px-2 py-0.5 rounded-full">PRIMARY</span>
                 </div>
                 <p class="text-sm font-semibold text-custom-black dark:text-gray-300">
@@ -443,7 +450,8 @@ onMounted(async () => {
                     <img src="@/assets/images/icons/global-search-grey.svg" class="flex size-6 shrink-0" alt="icon" />
                   </div>
                   <p class="input-placeholder">Enter District / City</p>
-                  <input v-model="addressSearch" type="text" class="custom-input" placeholder=""
+                  <input
+v-model="addressSearch" type="text" class="custom-input" placeholder=""
                     @input="handleAddressInput(addressSearch)" />
                 </label>
                 <ul v-if="showAddressOptions" class="search-result">
@@ -469,12 +477,14 @@ onMounted(async () => {
                     class="placeholder font-semibold text-custom-grey text-sm group-has-placeholder-shown:text-base group-has-placeholder-shown:text-custom-black group-has-placeholder-shown:font-bold transition-300">
                     Enter Your Address
                   </p>
-                  <textarea v-model="transaction.address"
+                  <textarea
+v-model="transaction.address"
                     class="appearance-none outline-none w-full font-semibold leading-[160%]" rows="3"
                     placeholder=""></textarea>
                 </div>
               </label>
-              <span v-if="error?.address"
+              <span
+v-if="error?.address"
                 class="font-semibold text-lg text-custom-red leading-none group-[&.invalid]/errorState:block">
                 {{ error?.address.join(', ') }}
               </span>
@@ -605,7 +615,8 @@ onMounted(async () => {
               </p>
             </div>
           </div>
-          <button id="Pay-Button" type="submit"
+          <button
+id="Pay-Button" type="submit"
             :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment || user?.role === 'admin'"
             class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300">
             <!-- Loading State -->
@@ -617,7 +628,8 @@ onMounted(async () => {
             <!-- Ready to Pay -->
             <template v-else-if="selectedCarts.length > 0 && selectedCourier">
               <span class="font-bold text-white">Pay With Midtrans</span>
-              <img src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
+              <img
+src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
                 alt="icon" />
             </template>
 
@@ -639,10 +651,12 @@ onMounted(async () => {
   </section>
 
   <!-- Delivery Modal -->
-  <div v-if="showDeliveryModal" id="Delivery-Modal"
+  <div
+v-if="showDeliveryModal" id="Delivery-Modal"
     class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50">
     <div class="backdrop absolute w-full h-full bg-[#292D32B2]" @click="closeModal"></div>
-    <div id="Select-Courier"
+    <div
+id="Select-Courier"
       class="relative flex flex-col w-full max-w-[460px] mx-4 shrink-0 h-fit rounded-2xl overflow-hidden">
       <div class="header flex items-center p-5 gap-3 justify-between bg-custom-black">
         <p class="font-semibold text-lg text-white">Select Courier</p>
@@ -654,7 +668,8 @@ onMounted(async () => {
         <div class="flex flex-col gap-3">
           <p class="font-semibold text-custom-grey">Available Couriers</p>
           <div class="flex flex-col gap-3 h-[346px] p-0.5 overflow-y-auto hide-scrollbar overscroll-contain">
-            <label v-for="courier in couriers" :key="courier.shipping_name"
+            <label
+v-for="courier in couriers" :key="courier.shipping_name"
               class="courier-choice flex items-center w-full rounded-[20px] ring-1 ring-custom-stroke p-5 gap-[14px] has-checked:ring-2 has-checked:ring-custom-blue has-checked:transparent-blue-to-blue-gradient transition-300">
               <div class="flex rounded-full size-14 shrink-0 items-center justify-center bg-custom-background">
                 <img src="@/assets/images/icons/car-delivery-black.svg" class="size-6" alt="icon" />
@@ -667,12 +682,14 @@ onMounted(async () => {
                   {{ courier.service_name }} (Rp {{ formatRupiah(courier.shipping_cost_net) }})
                 </p>
               </div>
-              <input type="radio" name="courier" required
+              <input
+type="radio" name="courier" required
                 class="size-6 flex shrink-0 appearance-none rounded-full checked:border-[3px] checked:border-solid checked:border-white checked:bg-custom-blue ring-2 ring-custom-grey checked:ring-custom-blue transition-300"
                 :value="courier.code" @change="selectedCourier = courier" />
             </label>
           </div>
-          <button id="Choose-Courier" type="button"
+          <button
+id="Choose-Courier" type="button"
             class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300"
             @click="handleCourierSubmit">
             <span class="font-bold text-white">Choose Courier</span>
@@ -682,7 +699,8 @@ onMounted(async () => {
     </div>
   </div>
 
-  <div v-if="showSuccessModal" id="Success-Modal"
+  <div
+v-if="showSuccessModal" id="Success-Modal"
     class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50">
     <div class="backdrop absolute w-full h-full bg-[#292D32B2]"></div>
     <div id="Select-Courier" class="relative flex flex-col w-[400px] shrink-0 h-fit rounded-2xl overflow-hidden">
@@ -698,11 +716,13 @@ onMounted(async () => {
           </div>
         </div>
         <div class="flex flex-col gap-3">
-          <RouterLink :to="{ name: 'admin.my-transaction' }"
+          <RouterLink
+:to="{ name: 'admin.my-transaction' }"
             class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
             <span class="font-bold text-white">View Transaction</span>
           </RouterLink>
-          <RouterLink :to="{ name: 'app.home' }"
+          <RouterLink
+:to="{ name: 'app.home' }"
             class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue/10">
             <span class="font-bold text-custom-blue">Back to Homepage</span>
           </RouterLink>

@@ -220,7 +220,8 @@ const handleLogout = async () => {
     <!-- original sidebar content starts here -->
     <div class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white dark:bg-surface-card">
       <div class="flex items-center justify-between">
-        <img src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" alt="logo"
+        <img
+src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" alt="logo"
           @click="router.push({ name: 'app.home' })" />
         <!-- Close Button Slot (Optional) -->
         <slot name="close-button"></slot>
@@ -244,7 +245,8 @@ const handleLogout = async () => {
             <button
               class="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full transition-all duration-300 hover:bg-custom-background dark:hover:bg-white/5"
               @click="handleLogout">
-              <img src="@/assets/images/icons/logout.svg" class="size-6 text-custom-red svg-red filter-red"
+              <img
+src="@/assets/images/icons/logout.svg" class="size-6 text-custom-red svg-red filter-red"
                 alt="icon" />
               <span class="font-medium text-custom-red">Logout</span>
             </button>

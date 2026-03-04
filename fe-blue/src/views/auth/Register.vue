@@ -20,12 +20,14 @@ const form = ref({
 })
 
 const showPassword = ref(false)
+const loading = ref(false) // Added loading state
 
 const handleImageChange = (e) => {
   const file = e.target.files[0]
-
-  form.value.profile_picture = file
-  form.value.profile_picture_url = URL.createObjectURL(file)
+  if (file) {
+    form.value.profile_picture = file
+    form.value.profile_picture_url = URL.createObjectURL(file)
+  }
 }
 
 onMounted(() => {
@@ -33,6 +35,7 @@ onMounted(() => {
 })
 
 const handleSubmit = async () => {
+  loading.value = true
   const formData = new FormData()
 
   if (form.value.profile_picture) {
@@ -42,7 +45,7 @@ const handleSubmit = async () => {
   formData.append('email', form.value.email)
   formData.append('phone_number', form.value.phone_number)
   formData.append('password', form.value.password)
-  formData.append('role', 'buyer') // Force role to buyer
+  formData.append('role', 'buyer')
 
   try {
     await register(formData)
@@ -50,195 +53,149 @@ const handleSubmit = async () => {
     router.push({ name: 'app.home' })
   } catch (e) {
     console.error('Registration failed:', e)
-    // Error state is already handled by authStore and displayed in template
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <template>
-  <form
-    autocomplete="off"
-    class="flex flex-col w-full max-w-[560px] h-fit shrink-0 justify-center rounded-3xl gap-10 p-6 bg-white"
-    @submit.prevent="handleSubmit"
-  >
-    <img src="@/assets/images/logos/blukios_logo.png" class="h-12 mx-auto" alt="logo" />
-    <div class="flex flex-col gap-[30px]">
-      <div class="flex flex-col gap-3 text-center">
-        <p class="font-bold text-2xl capitalize">Hey 🙌🏻, Welcome Aboard!</p>
-        <p class="font-medium text-custom-grey">Create Account to continue!</p>
-      </div>
-      <div class="flex flex-col gap-4 w-full">
-        <div class="flex flex-col gap-3">
-          <p class="font-semibold text-custom-grey">Profile Picture</p>
-          <div class="flex items-center justify-between">
-            <div
-              class="group relative flex size-[100px] rounded-full overflow-hidden items-center justify-center bg-custom-background"
-            >
-              <img
-                id="Thumbnail"
-                :src="form.profile_picture_url"
-                data-default="@/assets/images/icons/photo-profile-default.svg"
-                class="size-full object-cover"
-                alt="icon"
-              />
-            </div>
-            <label
-              class="relative flex rounded-2xl py-4 px-6 bg-custom-black h-[56px] gap-[10px] font-medium text-white text-nowrap cursor-pointer"
-            >
-              <input
-                type="file"
-                accept="image/*"
-                class="absolute inset-0 opacity-0 cursor-pointer"
-                @change="handleImageChange"
-              />
-              <img
-                src="@/assets/images/icons/send-square-grey.svg"
-                class="flex size-6 shrink-0"
-                alt="icon"
-              />
-              Add Photo
-            </label>
-          </div>
-        </div>
-        <!-- Account Type Removed -->
+  <form autocomplete="off" class="flex flex-col w-full gap-6 lg:gap-8" @submit.prevent="handleSubmit">
+    <!-- Header -->
+    <div class="flex flex-col gap-2 text-center">
+      <img src="@/assets/images/logos/blukios_logo.png" class="h-8 lg:h-10 mx-auto mb-4" alt="Blue Marketplace" />
+      <h1 class="font-bold text-2xl lg:text-3xl text-custom-black">Create Account 🚀</h1>
+      <p class="text-custom-grey font-medium text-sm lg:text-base">Join us and start your journey!</p>
+    </div>
 
-        <div class="flex flex-col gap-3">
-          <p class="font-semibold text-custom-grey">Complete Name</p>
-          <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.name }">
-            <label class="group relative">
-              <div class="input-icon">
-                <img
-                  src="@/assets/images/icons/profile-circle-grey.svg"
-                  class="flex size-6 shrink-0"
-                  alt="icon"
-                />
-              </div>
-              <p class="input-placeholder">Enter Your Full Name</p>
-              <input
-                v-model="form.name"
-                type="text"
-                class="custom-input"
-                placeholder=""
-                autocomplete="off"
-              />
-            </label>
-            <span v-if="error?.name" class="input-error">{{ error?.name?.join(', ') }}</span>
-          </div>
-        </div>
-        <div class="flex flex-col gap-3">
-          <p class="font-semibold text-custom-grey">Email Address</p>
-          <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.email }">
-            <label class="group relative">
-              <div class="input-icon">
-                <img
-                  src="@/assets/images/icons/sms-grey.svg"
-                  class="flex size-6 shrink-0"
-                  alt="icon"
-                />
-              </div>
-              <p class="input-placeholder">Enter Your Email</p>
-              <input
-                v-model="form.email"
-                type="email"
-                class="custom-input"
-                placeholder=""
-                autocomplete="off"
-              />
-            </label>
-            <span v-if="error?.email" class="input-error">{{ error?.email?.join(', ') }}</span>
-          </div>
-        </div>
-        <div class="flex flex-col gap-3">
-          <p class="font-semibold text-custom-grey">Phone Number</p>
+    <!-- Inputs -->
+    <div class="flex flex-col gap-5">
+
+      <!-- Profile Picture Upload -->
+      <div class="flex flex-col items-center gap-4">
+        <label class="relative group cursor-pointer">
           <div
-            class="group/errorState flex flex-col gap-2"
-            :class="{ invalid: error?.phone_number }"
-          >
-            <label class="group relative">
-              <div class="input-icon">
-                <img
-                  src="@/assets/images/icons/call-grey.svg"
-                  class="flex size-6 shrink-0"
-                  alt="icon"
-                />
-              </div>
-              <p class="input-placeholder">Enter Your Phone Number</p>
-              <input
-                v-model="form.phone_number"
-                type="tel"
-                class="custom-input"
-                placeholder=""
-                autocomplete="off"
-                @input="form.phone_number = form.phone_number.replace(/[^0-9]/g, '').slice(0, 15)"
-              />
-            </label>
-            <span v-if="error?.phone_number" class="input-error">{{
-              error?.phone_number?.join(', ')
-            }}</span>
-            <span
-              v-else-if="form.phone_number && !form.phone_number.startsWith('08')"
-              class="input-error"
-              >Phone number must start with 08</span
-            >
-          </div>
-        </div>
-      </div>
-      <div class="flex flex-col gap-3">
-        <p class="font-semibold text-custom-grey">Password</p>
-        <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.password }">
-          <label class="group relative">
-            <div class="input-icon">
-              <img
-                src="@/assets/images/icons/key-grey.svg"
-                class="flex size-6 shrink-0"
-                alt="icon"
-              />
+            class="size-20 lg:size-24 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-50 group-hover:border-custom-blue transition-colors relative">
+            <img :src="form.profile_picture_url" class="size-full object-cover" alt="Profile Preview" />
+            <!-- Overlay for hover -->
+            <div
+              class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <img src="@/assets/images/icons/send-square-grey.svg" class="size-6 brightness-0 invert" alt="upload" />
             </div>
-            <p class="input-placeholder">Enter Your Password</p>
-            <input
-              id="passwordInput"
-              v-model="form.password"
-              :type="showPassword ? 'text' : 'password'"
-              class="custom-input tracking-[0.3em] pr-12"
-              placeholder=""
-              autocomplete="new-password"
-            />
-            <button
-              type="button"
-              class="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition"
-              @click="showPassword = !showPassword"
-            >
-              <img
-                :src="
-                  showPassword
-                    ? '/src/assets/images/icons/eye-blue.svg'
-                    : '/src/assets/images/icons/eye-grey.svg'
-                "
-                class="size-6"
-                alt="toggle password"
-              />
-            </button>
-          </label>
-          <span v-if="error?.password" class="input-error">{{ error?.password?.join(', ') }}</span>
+          </div>
+          <input type="file" accept="image/*" class="hidden" @change="handleImageChange" />
+          <div class="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow-md border border-gray-100">
+            <svg class="size-4 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+          </div>
+        </label>
+        <p class="text-xs text-custom-grey font-medium">Upload Profile Picture</p>
+      </div>
+
+      <!-- Name Field -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-custom-black text-sm ml-1">Full Name</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <img src="@/assets/images/icons/profile-circle-grey.svg" class="size-5 custom-icon" alt="icon" />
+          </div>
+          <input
+v-model="form.name" type="text"
+            class="w-full h-12 pl-12 pr-4 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium placeholder-gray-400 text-custom-black"
+            placeholder="Ex. John Doe" autocomplete="name" :class="{ '!border-red-500 !bg-red-50': error?.name }" />
         </div>
+        <span v-if="error?.name" class="text-red-500 text-xs font-medium ml-2">{{ error?.name?.join(', ') }}</span>
+      </div>
+
+      <!-- Email Field -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-custom-black text-sm ml-1">Email Address</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <img src="@/assets/images/icons/sms-grey.svg" class="size-5 custom-icon" alt="icon" />
+          </div>
+          <input
+v-model="form.email" type="email"
+            class="w-full h-12 pl-12 pr-4 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium placeholder-gray-400 text-custom-black"
+            placeholder="Ex. john@example.com" autocomplete="email"
+            :class="{ '!border-red-500 !bg-red-50': error?.email }" />
+        </div>
+        <span v-if="error?.email" class="text-red-500 text-xs font-medium ml-2">{{ error?.email?.join(', ') }}</span>
+      </div>
+
+      <!-- Phone Field -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-custom-black text-sm ml-1">Phone Number</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="icon" />
+          </div>
+          <input
+v-model="form.phone_number" type="tel"
+            class="w-full h-12 pl-12 pr-4 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium placeholder-gray-400 text-custom-black"
+            placeholder="Ex. 0812..." autocomplete="tel"
+            :class="{ '!border-red-500 !bg-red-50': error?.phone_number }"
+            @input="form.phone_number = form.phone_number.replace(/[^0-9]/g, '').slice(0, 15)" />
+        </div>
+        <span v-if="error?.phone_number" class="text-red-500 text-xs font-medium ml-2">{{ error?.phone_number?.join(',')
+          }}</span>
+      </div>
+
+      <!-- Password Field -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-custom-black text-sm ml-1">Password</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="icon" />
+          </div>
+          <input
+v-model="form.password" :type="showPassword ? 'text' : 'password'"
+            class="w-full h-12 pl-12 pr-12 bg-gray-50 border border-gray-200 rounded-full focus:bg-white focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium placeholder-gray-400 text-custom-black"
+            placeholder="••••••••" autocomplete="new-password"
+            :class="{ '!border-red-500 !bg-red-50': error?.password }" />
+          <button
+type="button"
+            class="absolute inset-y-0 right-4 flex items-center p-1 hover:bg-gray-200 rounded-full transition-colors"
+            @click="showPassword = !showPassword">
+            <img
+:src="showPassword ? '/src/assets/images/icons/eye-blue.svg' : '/src/assets/images/icons/eye-grey.svg'"
+              class="size-5" alt="toggle visibility" />
+          </button>
+        </div>
+        <span v-if="error?.password" class="text-red-500 text-xs font-medium ml-2">{{ error?.password?.join(', ')
+          }}</span>
       </div>
     </div>
-    <div class="flex flex-col gap-3">
+
+    <!-- Actions -->
+    <div class="flex flex-col gap-4 mt-2">
       <button
-        type="submit"
-        class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-[10px] bg-custom-blue font-semibold capitalize text-white"
-      >
-        Create Account
+type="submit"
+        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-lg hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="loading">
+        <span v-if="loading" class="animate-spin mr-2">⏳</span>
+        {{ loading ? 'Creating Account...' : 'Create Account' }}
       </button>
-      <p class="font-medium text-custom-grey text-center">
-        Already have account?
-        <RouterLink
-          :to="{ name: 'auth.login' }"
-          class="font-semibold text-custom-blue hover:underline transition-300"
-        >
+
+      <p class="text-center text-custom-grey font-medium">
+        Already have an account?
+        <RouterLink :to="{ name: 'auth.login' }" class="text-custom-blue font-bold hover:underline ml-1">
           Sign In
         </RouterLink>
       </p>
     </div>
   </form>
 </template>
+
+<style scoped>
+.custom-icon {
+  filter: grayscale(100%);
+  opacity: 0.6;
+}
+
+.group:focus-within .custom-icon {
+  filter: none;
+  opacity: 1;
+}
+</style>

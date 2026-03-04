@@ -13,3 +13,11 @@ Route::get('/test-mongo', function () {
         'php_ini' => php_ini_loaded_file(),
     ];
 });
+
+Route::get('/storage/{path}', function ($path) {
+    if (file_exists(public_path('storage/' . $path))) {
+        return response()->file(public_path('storage/' . $path));
+    }
+    abort(404);
+})->where('path', '.*');
+

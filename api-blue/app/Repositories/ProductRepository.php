@@ -71,7 +71,7 @@ class ProductRepository implements ProductRepositoryInterface
                  $days = (int) $filters['created_since'];
                  $query->where('created_at', '>=', now()->subDays($days));
             }
-        })->with('productImages');
+        })->with(['productImages', 'store', 'productCategory', 'variants']);
 
         // Removed implicit filtering by store_id for store role users to allow them to see all products in buyer mode
 

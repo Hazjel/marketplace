@@ -46,10 +46,16 @@ This document provides a reference for the REST API endpoints available in the B
 | :--- | :--- | :--- | :--- |
 | `GET` | `/product` | List all products (with filters) | No |
 | `GET` | `/product/slug/{slug}` | Get product details by slug | No |
+| `GET` | `/product/{id}` | Get product details by ID | No |
 | `POST` | `/product` | Create a new product | **Yes** |
 | `PUT` | `/product/{id}` | Update a product | **Yes** |
 | `DELETE` | `/product/{id}` | Delete a product | **Yes** |
 | `GET` | `/product-category` | List product categories | No |
+| `GET` | `/product-category/slug/{slug}` | Get category details by slug | No |
+| `GET` | `/product-category/{id}` | Get category details by ID | No |
+| `POST` | `/product-category` | Create a new category | **Yes** (Admin) |
+| `PUT` | `/product-category/{id}` | Update a category | **Yes** (Admin) |
+| `DELETE` | `/product-category/{id}` | Delete a category | **Yes** (Admin) |
 | `POST` | `/product-review` | Submit a review for a product | **Yes** |
 
 ---

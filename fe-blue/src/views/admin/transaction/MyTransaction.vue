@@ -273,9 +273,11 @@ watch(error, (value) => {
       <form action="#" class="w-full md:w-auto">
         <label
           class="flex items-center w-full md:w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
-          <img src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0 dark:invert"
+          <img
+src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0 dark:invert"
             alt="icon" />
-          <input v-model="filters.search" type="text"
+          <input
+v-model="filters.search" type="text"
             class="appearance-none w-full placeholder:text-custom-grey dark:placeholder:text-gray-500 font-medium focus:outline-none bg-transparent dark:text-white"
             placeholder="Search Transaction" />
         </label>
@@ -284,13 +286,15 @@ watch(error, (value) => {
         <p class="font-medium text-custom-grey dark:text-gray-400">Show</p>
         <label
           class="flex items-center h-14 rounded-2xl border border-custom-stroke dark:border-white/10 py-4 px-5 pl-3 bg-white dark:bg-surface-card focus-within:border-custom-black dark:focus-within:border-white transition-300">
-          <select id="" v-model="serverOptions.row_per_page" name=""
+          <select
+id="" v-model="serverOptions.row_per_page" name=""
             class="text-custom-black dark:text-white dark:bg-surface-card font-medium appearance-none focus:outline-none p-2">
             <option value="10" class="font-medium dark:bg-surface-card">10 Entries</option>
             <option value="20" class="font-medium dark:bg-surface-card">20 Entries</option>
             <option value="40" class="font-medium dark:bg-surface-card">40 Entries</option>
           </select>
-          <img src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
+          <img
+src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
             alt="icon" />
         </label>
       </div>
@@ -298,7 +302,8 @@ watch(error, (value) => {
     <section id="List-Transactions" class="flex flex-col flex-1 gap-6 w-full">
       <template v-if="displayTransactions.length">
         <div class="list flex flex-col gap-5">
-          <div v-for="transaction in paginatedTransactions" :key="transaction.id"
+          <div
+v-for="transaction in paginatedTransactions" :key="transaction.id"
             class="card flex flex-col rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-surface-card hover:border-custom-blue/30 dark:hover:border-blue-500/30 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             <!-- Card Header -->
             <div
@@ -317,7 +322,8 @@ watch(error, (value) => {
                   </p>
                 </div>
               </div>
-              <span class="rounded-full px-3 py-1 text-xs font-bold capitalize"
+              <span
+class="rounded-full px-3 py-1 text-xs font-bold capitalize"
                 :class="resolveStatusStyle(transaction)">
                 {{ resolveStatusLabel(transaction) }}
               </span>
@@ -327,7 +333,8 @@ watch(error, (value) => {
             <div class="p-4 flex gap-4">
               <div
                 class="size-[70px] shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-1 flex items-center justify-center">
-                <img :src="transaction.transaction_details?.[0]?.product?.thumbnail"
+                <img
+:src="transaction.transaction_details?.[0]?.product?.thumbnail"
                   class="size-full object-contain mix-blend-multiply" alt="product" />
               </div>
               <div class="flex flex-col justify-center flex-1 min-w-0">
@@ -338,7 +345,8 @@ watch(error, (value) => {
                   {{ transaction.transaction_details?.[0]?.qty }} barang x Rp
                   {{ formatRupiah(transaction.transaction_details?.[0]?.price) }}
                 </p>
-                <p v-if="transaction.transaction_details?.length > 1"
+                <p
+v-if="transaction.transaction_details?.length > 1"
                   class="text-xs font-medium text-custom-blue dark:text-blue-400 mt-1">
                   + {{ transaction.transaction_details.length - 1 }} produk lainnya
                 </p>
@@ -353,7 +361,8 @@ watch(error, (value) => {
                   Rp {{ formatRupiah(transaction.grand_total) }}
                 </p>
               </div>
-              <RouterLink :to="getDetailRoute(transaction.id)"
+              <RouterLink
+:to="getDetailRoute(transaction.id)"
                 class="px-6 py-2 rounded-xl bg-white dark:bg-white/10 border border-custom-blue dark:border-blue-400 text-custom-blue dark:text-blue-400 font-bold text-sm hover:bg-custom-blue dark:hover:bg-blue-500 hover:text-white dark:hover:text-white transition-colors">
                 Lihat Detail
               </RouterLink>
@@ -366,11 +375,13 @@ watch(error, (value) => {
               <button
                 class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 dark:bg-blue-500/20 text-custom-blue dark:text-blue-400 group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
                 disabled>
-                <img src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
+                <img
+src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
                   class="size-6 group-has-[:disabled]:opacity-20 rotate-180 dark:invert" alt="icon" />
               </button>
             </li>
-            <li v-for="p in filters.search || clientFiltered.length
+            <li
+v-for="p in filters.search || clientFiltered.length
               ? Math.ceil(displayTransactions.length / perPage)
               : meta.last_page || 1" :key="p" class="group" :class="{ active: p === serverOptions.page }">
               <button
@@ -382,7 +393,8 @@ watch(error, (value) => {
             <li class="group">
               <button
                 class="flex size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 dark:bg-blue-500/20 text-custom-blue dark:text-blue-400 group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold">
-                <img src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
+                <img
+src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
                   class="size-6 group-has-[:disabled]:opacity-20 dark:invert" alt="icon" />
               </button>
             </li>

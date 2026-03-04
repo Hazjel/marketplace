@@ -17,12 +17,14 @@ defineProps({
 
     <div class="flex flex-col">
       <template v-if="actions.length > 0">
-        <RouterLink v-for="(action, index) in actions" :key="index" :to="action.route || '#'"
+        <RouterLink
+v-for="(action, index) in actions" :key="index" :to="action.route || '#'"
           class="flex items-center justify-between p-4 hover:bg-blue-50 dark:hover:bg-white/5 transition-colors border-b last:border-0 border-gray-50 dark:border-white/5 group">
           <div class="flex items-center gap-3">
             <div
               class="size-10 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-custom-blue group-hover:text-custom-blue text-custom-grey transition-colors">
-              <img :src="`/src/assets/images/icons/${action.icon}`"
+              <img
+:src="`/src/assets/images/icons/${action.icon}`"
                 class="size-5 opacity-60 group-hover:opacity-100 dark:invert" />
             </div>
             <span class="font-medium text-custom-black dark:text-white text-sm">{{ action.label }}</span>

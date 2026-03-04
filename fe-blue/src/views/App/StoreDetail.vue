@@ -157,12 +157,14 @@ onMounted(async () => {
   <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background">
     <div class="flex flex-col w-full max-w-[1280px] py-4 md:py-6 px-4 md:px-[52px] gap-3 mx-auto">
       <div class="flex items-center gap-3">
-        <RouterLink :to="{ name: 'app.home' }"
+        <RouterLink
+:to="{ name: 'app.home' }"
           class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           Homepage
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
-        <RouterLink :to="{ name: 'app.all-stores' }"
+        <RouterLink
+:to="{ name: 'app.all-stores' }"
           class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
           Stores
         </RouterLink>
@@ -179,11 +181,13 @@ onMounted(async () => {
       <StoreHeader :store="store" :is-following="isFollowing" @follow="handleFollow" @unfollow="handleUnfollow" />
 
       <div class="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-        <a href="#"
+        <a
+href="#"
           class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all">
           <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover" alt="promo" />
         </a>
-        <a href="#"
+        <a
+href="#"
           class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all">
           <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover" alt="promo" />
         </a>
@@ -191,30 +195,37 @@ onMounted(async () => {
     </section>
     <section class="flex flex-col gap-6 md:gap-8 animate-fade-in-up delay-200">
       <!-- Tabs Navigation -->
-      <div id="Tab-Buttons"
+      <div
+id="Tab-Buttons"
         class="sticky top-0 z-30 bg-custom-background/95 backdrop-blur-sm pt-4 pb-2 border-b border-custom-stroke flex items-center gap-8 w-full overflow-x-auto hide-scrollbar">
-        <button :class="[
+        <button
+:class="[
           'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
           activeTab === 'home' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
         ]" @click="activeTab = 'home'">
           Beranda
-          <div v-if="activeTab === 'home'"
+          <div
+v-if="activeTab === 'home'"
             class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
         </button>
-        <button :class="[
+        <button
+:class="[
           'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
           activeTab === 'products' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
         ]" @click="activeTab = 'products'">
           Produk
-          <div v-if="activeTab === 'products'"
+          <div
+v-if="activeTab === 'products'"
             class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
         </button>
-        <button :class="[
+        <button
+:class="[
           'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
           activeTab === 'reviews' ? 'text-custom-blue' : 'text-custom-grey hover:text-gray-700'
         ]" @click="activeTab = 'reviews'">
           Ulasan
-          <div v-if="activeTab === 'reviews'"
+          <div
+v-if="activeTab === 'reviews'"
             class="absolute bottom-[-9px] left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
         </button>
       </div>
@@ -241,7 +252,8 @@ onMounted(async () => {
               class="rounded-2xl border border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card p-5 flex flex-col gap-4 sticky top-24">
               <h3 class="font-bold text-lg dark:text-white">Etalase Toko</h3>
               <div class="flex flex-col gap-1">
-                <button :class="[
+                <button
+:class="[
                   'text-left px-3 py-2 rounded-lg font-medium transition-colors',
                   !selectedCategory
                     ? 'bg-blue-50 dark:bg-custom-blue/10 text-custom-blue dark:text-blue-400 font-semibold'
@@ -250,7 +262,8 @@ onMounted(async () => {
                   Semua Produk
                 </button>
                 <hr class="my-2 border-gray-100 dark:border-white/10" />
-                <button v-for="category in storeCategories" :key="category.id" :class="[
+                <button
+v-for="category in storeCategories" :key="category.id" :class="[
                   'text-left px-3 py-2 rounded-lg font-medium transition-colors',
                   selectedCategory?.id === category.id
                     ? 'bg-blue-50 dark:bg-custom-blue/10 text-custom-blue dark:text-blue-400 font-semibold'
@@ -267,7 +280,8 @@ onMounted(async () => {
           <div class="flex flex-col w-full gap-6">
             <!-- Mobile Filter (Horizontal) -->
             <div class="md:hidden flex overflow-x-auto pb-2 -mx-4 px-4 gap-2 hide-scrollbar">
-              <button :class="[
+              <button
+:class="[
                 'whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors',
                 !selectedCategory
                   ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold'
@@ -275,7 +289,8 @@ onMounted(async () => {
               ]" @click="handleCategoryFilter(null)">
                 Semua
               </button>
-              <button v-for="category in storeCategories" :key="category.id" :class="[
+              <button
+v-for="category in storeCategories" :key="category.id" :class="[
                 'whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors',
                 selectedCategory?.id === category.id
                   ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold'
@@ -292,7 +307,8 @@ onMounted(async () => {
               </p>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-custom-grey font-medium">Urutkan:</span>
-                <select v-model="selectedSort"
+                <select
+v-model="selectedSort"
                   class="border-none bg-transparent font-bold text-custom-black focus:ring-0 cursor-pointer text-sm"
                   @change="handleSortChange">
                   <option value="default">Paling Sesuai</option>
@@ -310,7 +326,8 @@ onMounted(async () => {
                 <SkeletonProductCard v-for="n in 8" :key="n" />
               </template>
               <ProductCard v-for="product in products" v-else :key="product.id" :item="product" />
-              <div v-if="!loadingProducts && products.length === 0"
+              <div
+v-if="!loadingProducts && products.length === 0"
                 class="col-span-full py-12 flex flex-col items-center justify-center text-center">
                 <img src="@/assets/images/icons/box-2-grey.svg" class="w-24 h-24 mb-4 opacity-50" alt="Empty" />
                 <h3 class="font-bold text-gray-400 text-lg">Belum ada produk</h3>
@@ -325,7 +342,8 @@ onMounted(async () => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <ReviewCard v-for="review in reviews" :key="review.id" :review="review" />
 
-            <div v-if="reviews.length === 0"
+            <div
+v-if="reviews.length === 0"
               class="col-span-full py-12 flex flex-col items-center justify-center text-center">
               <img src="@/assets/images/icons/message-text-grey.svg" class="w-24 h-24 mb-4 opacity-50" alt="Empty" />
               <h3 class="font-bold text-gray-400 text-lg">Belum ada ulasan</h3>

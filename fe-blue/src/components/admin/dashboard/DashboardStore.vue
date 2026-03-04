@@ -174,9 +174,11 @@ onMounted(() => {
 
     <!-- 3-Column Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-      <AnalyticsCard title="Total Revenue" :value="`Rp ${formatRupiah(storeBalance?.balance || 0)}`"
+      <AnalyticsCard
+title="Total Revenue" :value="`Rp ${formatRupiah(storeBalance?.balance || 0)}`"
         icon="wallet-2-blue-fill.svg" :trend="{ value: '12%', direction: 'up' }" />
-      <AnalyticsCard title="Total Orders" :value="stats.total_transactions" icon="shopping-cart-blue-fill.svg"
+      <AnalyticsCard
+title="Total Orders" :value="stats.total_transactions" icon="shopping-cart-blue-fill.svg"
         :trend="{ value: '8%', direction: 'up' }" />
       <AnalyticsCard title="Product Reviews" :value="stats.total_reviews" icon="message-text-blue-fill.svg" />
     </div>
@@ -208,12 +210,14 @@ onMounted(() => {
           class="flex flex-col w-full rounded-[20px] p-6 gap-6 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-xl text-custom-black dark:text-white">Recent Orders</h3>
-            <RouterLink :to="{ name: 'user.transaction', params: { username: user?.username } }"
+            <RouterLink
+:to="{ name: 'user.transaction', params: { username: user?.username } }"
               class="text-sm font-bold text-custom-blue">View All</RouterLink>
           </div>
 
           <div v-if="latestTransactions.length > 0" id="List-Transactions" class="flex flex-col gap-4">
-            <div v-for="transaction in latestTransactions.slice(0, 3)" :key="transaction.id"
+            <div
+v-for="transaction in latestTransactions.slice(0, 3)" :key="transaction.id"
               class="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 gap-4">
               <div class="flex items-center gap-4">
                 <div
@@ -230,7 +234,8 @@ onMounted(() => {
               <div class="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
                 <span class="font-bold text-custom-blue dark:text-blue-400">Rp {{ formatRupiah(transaction.grand_total)
                 }}</span>
-                <div class="px-3 py-1 rounded-full text-xs font-bold capitalize" :class="{
+                <div
+class="px-3 py-1 rounded-full text-xs font-bold capitalize" :class="{
                   'bg-green-100 text-custom-green': transaction.status === 'success',
                   'bg-yellow-100 text-custom-orange': transaction.status === 'pending',
                   'bg-red-100 text-custom-red': transaction.status === 'failed'

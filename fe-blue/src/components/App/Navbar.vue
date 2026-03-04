@@ -179,14 +179,16 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section id="Navbar-Wrapper"
+  <section
+id="Navbar-Wrapper"
     class="sticky top-0 left-0 w-full bg-surface/95 backdrop-blur-md border-b border-border py-4 md:py-8 z-50 transition-all duration-300">
     <div class="w-full">
       <div class="w-full max-w-[1920px] flex flex-col gap-6 px-4 md:px-7 mx-auto">
         <div class="flex flex-wrap md:flex-nowrap items-center justify-between md:justify-start gap-2 md:gap-6 w-full">
           <!-- Logo -->
           <RouterLink :to="{ name: 'app.home' }" class="flex shrink-0">
-            <img src="@/assets/images/logos/blukios_logo.png"
+            <img
+src="@/assets/images/logos/blukios_logo.png"
               class="h-8 md:h-12 max-w-[120px] md:max-w-none object-contain dark:brightness-0 dark:invert" alt="logo" />
           </RouterLink>
 
@@ -194,9 +196,11 @@ onUnmounted(() => {
           <div class="relative order-last md:order-0 w-full md:w-auto md:flex-1 search-container">
             <label
               class="flex items-center w-full h-12 md:h-14 rounded-[18px] p-3 md:p-4 md:px-6 gap-2 bg-white dark:bg-white/5 border-[1.5px] border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
-              <img src="@/assets/images/icons/search-normal-grey.svg"
+              <img
+src="@/assets/images/icons/search-normal-grey.svg"
                 class="flex size-6 shrink-0 dark:brightness-0 dark:invert" alt="icon" />
-              <input v-model="searchQuery" type="text"
+              <input
+v-model="searchQuery" type="text"
                 class="appearance-none w-full placeholder:text-custom-grey font-semibold bg-transparent focus:outline-none text-custom-black"
                 placeholder="Search any products" @input="handleSearchInput" @keyup.enter="handleEnterSearch" />
               <div v-if="isSearching" class="flex items-center">
@@ -205,7 +209,8 @@ onUnmounted(() => {
             </label>
 
             <!-- Search Results Dropdown -->
-            <div v-show="showSearchResults || showHistory"
+            <div
+v-show="showSearchResults || showHistory"
               class="absolute top-full mt-2 w-full bg-white dark:bg-surface-card rounded-2xl shadow-[0px_6px_30px_0px_#00000017] border border-custom-stroke dark:border-white/5 overflow-hidden z-50">
               <!-- History Section -->
               <div v-if="showHistory && searchHistory.length > 0">
@@ -217,17 +222,20 @@ onUnmounted(() => {
                   </button>
                 </div>
                 <div class="flex flex-col">
-                  <div v-for="(item, index) in searchHistory" :key="index"
+                  <div
+v-for="(item, index) in searchHistory" :key="index"
                     class="flex items-center justify-between p-4 hover:bg-custom-background dark:hover:bg-white/5 transition-300 cursor-pointer group"
                     @click="applyHistorySearch(item)">
                     <div class="flex items-center gap-3">
-                      <img src="@/assets/images/icons/search-normal-grey.svg"
+                      <img
+src="@/assets/images/icons/search-normal-grey.svg"
                         class="size-5 opacity-60 dark:brightness-0 dark:invert" alt="history" />
                       <span
                         class="font-medium text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">{{
                           item }}</span>
                     </div>
-                    <button class="hidden group-hover:flex p-1 hover:bg-gray-200 rounded-full"
+                    <button
+class="hidden group-hover:flex p-1 hover:bg-gray-200 rounded-full"
                       @click.stop="removeHistoryItem(index)">
                       <img src="@/assets/images/icons/close-circle-black.svg" class="size-4" alt="remove" />
                     </button>
@@ -238,7 +246,8 @@ onUnmounted(() => {
               <!-- Product Results Section -->
               <div v-else-if="showSearchResults">
                 <div class="flex flex-col max-h-[400px] overflow-y-auto custom-scrollbar">
-                  <button v-for="product in searchResults" :key="product.id"
+                  <button
+v-for="product in searchResults" :key="product.id"
                     class="flex items-center gap-4 p-4 hover:bg-custom-background dark:hover:bg-white/5 transition-300 text-left border-b border-custom-stroke/30 dark:border-white/5 last:border-0 group"
                     @click="handleProductClick(product.slug, product.name)">
                     <div
@@ -269,7 +278,8 @@ onUnmounted(() => {
               </div>
 
               <!-- Empty State for History -->
-              <div v-else-if="!showSearchResults && showHistory && searchHistory.length === 0"
+              <div
+v-else-if="!showSearchResults && showHistory && searchHistory.length === 0"
                 class="p-8 text-center text-custom-grey">
                 <p class="text-sm">No recent searches</p>
               </div>
@@ -279,13 +289,16 @@ onUnmounted(() => {
           <div class="flex items-center gap-3 shrink-0 ml-auto md:ml-0 h-10 md:h-12">
             <!-- Cart Icon with Badge (Always Visible) -->
             <div class="relative group">
-              <RouterLink :to="{ name: 'app.cart' }"
+              <RouterLink
+:to="{ name: 'app.cart' }"
                 class="flex items-center justify-center size-10 md:size-11 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                <img src="@/assets/images/icons/shopping-cart-black.svg"
+                <img
+src="@/assets/images/icons/shopping-cart-black.svg"
                   class="size-6 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
                   alt="cart" />
               </RouterLink>
-              <div v-if="totalItems > 0"
+              <div
+v-if="totalItems > 0"
                 class="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-custom-red border-2 border-white dark:border-[#0B1120] px-1 pointer-events-none">
                 <span class="text-white text-[9px] font-bold leading-none">{{
                   cartBadgeText
@@ -297,19 +310,22 @@ onUnmounted(() => {
             <div class="w-px h-6 bg-custom-stroke dark:bg-white/10 mx-1 hidden md:block"></div>
 
             <!-- Login Button (If Guest) -->
-            <RouterLink v-if="!user" :to="{ name: 'auth.login' }"
+            <RouterLink
+v-if="!user" :to="{ name: 'auth.login' }"
               class="flex shrink-0 h-10 md:h-11 rounded-lg px-6 font-bold text-custom-blue border border-custom-blue hover:bg-blue-50 dark:hover:bg-white/5 items-center justify-center transition-all">
               Masuk
             </RouterLink>
 
             <!-- Register Button (If Guest) -->
-            <RouterLink v-if="!user" :to="{ name: 'auth.register' }"
+            <RouterLink
+v-if="!user" :to="{ name: 'auth.register' }"
               class="flex shrink-0 h-10 md:h-11 rounded-lg px-6 font-bold text-white bg-custom-blue hover:bg-blue-700 shadow-custom-blue/20 shadow-lg items-center justify-center transition-all">
               Daftar
             </RouterLink>
 
             <!-- User Profile Pill (Hover Trigger) -->
-            <div v-if="user" class="relative profile-dropdown-container z-50 h-full flex items-center"
+            <div
+v-if="user" class="relative profile-dropdown-container z-50 h-full flex items-center"
               @mouseenter="showDropdownProfile = true" @mouseleave="showDropdownProfile = false">
               <!-- Profile Trigger -->
               <button
@@ -327,13 +343,15 @@ onUnmounted(() => {
               </button>
 
               <!-- Dropdown Menu -->
-              <transition enter-active-class="transition ease-out duration-200"
+              <transition
+enter-active-class="transition ease-out duration-200"
                 enter-from-class="transform opacity-0 translate-y-2"
                 enter-to-class="transform opacity-100 translate-y-0"
                 leave-active-class="transition ease-in duration-150"
                 leave-from-class="transform opacity-100 translate-y-0"
                 leave-to-class="transform opacity-0 translate-y-2">
-                <div v-show="showDropdownProfile"
+                <div
+v-show="showDropdownProfile"
                   class="absolute top-[calc(100%-5px)] right-0 w-[280px] bg-white dark:bg-surface-card rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-custom-stroke dark:border-white/5 overflow-hidden ring-1 ring-black/5">
                   <!-- Header -->
                   <div
@@ -345,7 +363,8 @@ onUnmounted(() => {
                     <div class="flex flex-col overflow-hidden">
                       <p class="font-bold text-custom-black truncate">{{ user.name }}</p>
                       <div class="flex items-center gap-1">
-                        <img src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark:invert"
+                        <img
+src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark:invert"
                           alt="verified" />
                         <p class="text-xs text-custom-grey">Verified Account</p>
                       </div>
@@ -362,24 +381,29 @@ onUnmounted(() => {
                       </p>
 
                       <!-- Wishlist (Moved here) -->
-                      <RouterLink :to="{ name: 'app.wishlist' }"
+                      <RouterLink
+:to="{ name: 'app.wishlist' }"
                         class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group">
                         <div class="flex items-center gap-3">
-                          <img src="@/assets/images/icons/heart-black.svg"
+                          <img
+src="@/assets/images/icons/heart-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
                             alt="wishlist" />
                           <span class="text-sm font-medium text-custom-black">Wishlist</span>
                         </div>
-                        <span v-if="totalWishlistItems > 0"
+                        <span
+v-if="totalWishlistItems > 0"
                           class="text-[10px] font-bold text-white bg-custom-red px-1.5 py-0.5 rounded-full">{{
                             totalWishlistItems }}</span>
                       </RouterLink>
 
                       <!-- Transactions -->
-                      <RouterLink :to="{ name: 'user.my-transaction', params: { username: user.username } }"
+                      <RouterLink
+:to="{ name: 'user.my-transaction', params: { username: user.username } }"
                         class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group">
                         <div class="flex items-center gap-3">
-                          <img src="@/assets/images/icons/receipt-text-black.svg"
+                          <img
+src="@/assets/images/icons/receipt-text-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
                             alt="tx" />
                           <span class="text-sm font-medium text-custom-black">Transaction List</span>
@@ -394,13 +418,15 @@ onUnmounted(() => {
                         Store
                       </p>
 
-                      <RouterLink :to="{
+                      <RouterLink
+:to="{
                         name: user.role === 'store' ? 'admin.dashboard' : 'auth.open-store'
                       }"
                         class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group"
                         @click="authStore.setMode(user.role === 'store' ? 'store' : 'buyer')">
                         <div class="flex items-center gap-3">
-                          <img src="@/assets/images/icons/shop-black.svg"
+                          <img
+src="@/assets/images/icons/shop-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
                             alt="shop" />
                           <span class="text-sm font-medium text-custom-black">{{
@@ -418,10 +444,12 @@ onUnmounted(() => {
                       </p>
 
                       <!-- Edit Profile -->
-                      <RouterLink :to="{ name: 'user.edit-profile', params: { username: user.username } }"
+                      <RouterLink
+:to="{ name: 'user.edit-profile', params: { username: user.username } }"
                         class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group">
                         <div class="flex items-center gap-3">
-                          <img src="@/assets/images/icons/setting-black.svg"
+                          <img
+src="@/assets/images/icons/setting-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
                             alt="settings" />
                           <span class="text-sm font-medium text-custom-black">Account Settings</span>
@@ -434,16 +462,20 @@ onUnmounted(() => {
                         @click="toggleTheme()">
                         <div class="flex items-center gap-3">
                           <div class="size-5 flex items-center justify-center">
-                            <svg v-if="effectiveTheme === 'dark'" xmlns="http://www.w3.org/2000/svg"
+                            <svg
+v-if="effectiveTheme === 'dark'" xmlns="http://www.w3.org/2000/svg"
                               class="size-4 text-custom-black dark:text-white opacity-70 group-hover:opacity-100"
                               fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              <path
+stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                             </svg>
-                            <svg v-else xmlns="http://www.w3.org/2000/svg"
+                            <svg
+v-else xmlns="http://www.w3.org/2000/svg"
                               class="size-5 text-custom-black opacity-70 group-hover:opacity-100" fill="none"
                               viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              <path
+stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                           </div>
@@ -452,7 +484,8 @@ onUnmounted(() => {
                         <div
                           class="flex items-center text-xs font-bold text-custom-grey bg-gray-100 dark:bg-white/10 px-2 py-1 rounded gap-1">
                           {{ effectiveTheme === 'dark' ? 'Dark' : 'Light' }}
-                          <span v-if="effectiveTheme === 'dark'"
+                          <span
+v-if="effectiveTheme === 'dark'"
                             class="text-[8px] leading-none bg-custom-blue text-white px-1 py-0.5 rounded uppercase">Beta</span>
                         </div>
                       </button>
@@ -462,7 +495,8 @@ onUnmounted(() => {
                         class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors group w-full text-left mt-1"
                         @click="logout">
                         <div class="flex items-center gap-3">
-                          <img src="@/assets/images/icons/logout.svg"
+                          <img
+src="@/assets/images/icons/logout.svg"
                             class="size-5 opacity-70 dark:brightness-0 dark:invert dark:opacity-100 group-hover:opacity-100 transition-opacity"
                             alt="logout" />
                           <span class="text-sm font-bold text-custom-red">Logout</span>

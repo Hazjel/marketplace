@@ -83,7 +83,8 @@ const emit = defineEmits(['delete'])
           <span class="font-semibold text-white">Export</span>
           <img src="@/assets/images/icons/receive-square-white.svg" class="flex size-6 shrink-0" alt="icon" />
         </button>
-        <RouterLink :to="getDetailRoute(item.id)"
+        <RouterLink
+:to="getDetailRoute(item.id)"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>

@@ -187,11 +187,13 @@ onMounted(() => {
         <div class="flex flex-col flex-1 gap-5">
           <p class="font-bold text-xl">Latest Stores</p>
           <div v-if="!loading && latestStores.length > 0" id="List-Stores" class="flex flex-col gap-5">
-            <div v-for="store in latestStores" :key="store.id"
+            <div
+v-for="store in latestStores" :key="store.id"
               class="card flex flex-col rounded-[20px] border border-custom-stroke dark:border-white/10 py-[18px] px-5 gap-5 bg-white dark:bg-surface-card dark:text-white">
               <div class="flex items-center gap-[14px]">
                 <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
-                  <img :src="store.logo || defaultStoreImage" class="size-full object-cover" alt="photo"
+                  <img
+:src="store.logo || defaultStoreImage" class="size-full object-cover" alt="photo"
                     @error="$event.target.src = defaultStoreImage" />
                 </div>
                 <div class="flex flex-col gap-[6px] w-full overflow-hidden">
@@ -207,11 +209,13 @@ onMounted(() => {
               <hr class="border-custom-stroke dark:border-white/10" />
               <div class="flex items-center justify-between">
                 <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
-                  <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0 dark:invert"
+                  <img
+src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0 dark:invert"
                     alt="icon" />
                   Created on {{ formatDate(store.created_at) }}
                 </p>
-                <RouterLink v-if="store.id" :to="{ name: 'admin.store.detail', params: { id: store.id } }"
+                <RouterLink
+v-if="store.id" :to="{ name: 'admin.store.detail', params: { id: store.id } }"
                   class="flex w-[96px] h-[56px] shrink-0 rounded-2xl bg-custom-blue/10 dark:bg-custom-blue/20 hover:ring-2 hover:ring-custom-blue transition-300 font-semibold text-custom-blue leading-none items-center justify-center text-center">
                   View Details
                 </RouterLink>
@@ -221,7 +225,8 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div v-else-if="!loading && latestStores.length === 0" id="Empty-State"
+          <div
+v-else-if="!loading && latestStores.length === 0" id="Empty-State"
             class="flex flex-col flex-1 items-center justify-center gap-4">
             <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px] dark:invert" alt="icon" />
             <div class="flex flex-col gap-1 items-center text-center">
@@ -253,12 +258,14 @@ onMounted(() => {
         <div class="flex flex-col flex-1 gap-5">
           <p class="font-bold text-xl">Latest Transactions</p>
           <div v-if="!loading && latestTransactions.length > 0" id="List-Transactions" class="flex flex-col gap-5">
-            <div v-for="transaction in latestTransactions" :key="transaction.id"
+            <div
+v-for="transaction in latestTransactions" :key="transaction.id"
               class="card flex flex-col rounded-[20px] border border-custom-stroke dark:border-white/10 py-[18px] px-5 gap-5 bg-white dark:bg-surface-card dark:text-white">
               <div class="flex items-center gap-[14px] w-full overflow-hidden">
                 <div class="flex size-16 shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
                   <!-- Added more robust image handling -->
-                  <img :src="transaction.transaction_details?.[0]?.product?.product_images?.[0]?.image ||
+                  <img
+:src="transaction.transaction_details?.[0]?.product?.product_images?.[0]?.image ||
                     defaultTransactionImage
                     " class="size-full object-cover" alt="photo"
                     @error="$event.target.src = defaultTransactionImage" />
@@ -286,7 +293,8 @@ onMounted(() => {
                 <div class="flex items-center gap-[10px]">
                   <div
                     class="flex size-14 shrink-0 rounded-full bg-custom-icon-background dark:bg-white/10 overflow-hidden items-center justify-center">
-                    <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
+                    <img
+src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
                       alt="icon" />
                   </div>
                   <div class="flex flex-col gap-1">
@@ -296,7 +304,8 @@ onMounted(() => {
                     <p class="font-semibold text-custom-grey">Total Products</p>
                   </div>
                 </div>
-                <RouterLink v-if="transaction.id"
+                <RouterLink
+v-if="transaction.id"
                   :to="{ name: 'admin.transaction.detail', params: { id: transaction.id } }"
                   class="flex w-[96px] h-[56px] shrink-0 rounded-2xl bg-custom-blue/10 dark:bg-custom-blue/20 hover:ring-2 hover:ring-custom-blue transition-300 items-center justify-center text-center">
                   <span class="font-semibold text-custom-blue leading-none"> Details </span>
@@ -304,7 +313,8 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div v-else-if="!loading && latestTransactions.length === 0" id="Empty-State"
+          <div
+v-else-if="!loading && latestTransactions.length === 0" id="Empty-State"
             class="flex flex-col flex-1 items-center justify-center gap-4">
             <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px] dark:invert" alt="icon" />
             <div class="flex flex-col gap-1 items-center text-center">

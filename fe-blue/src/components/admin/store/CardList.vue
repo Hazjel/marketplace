@@ -45,7 +45,8 @@ const emit = defineEmits(['delete'])
         <div class="flex items-center gap-[10px] w-full md:w-[260px]">
           <div
             class="flex size-14 shrink-0 rounded-full bg-custom-icon-background dark:bg-white/10 overflow-hidden items-center justify-center">
-            <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
+            <img
+src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
               alt="icon" />
           </div>
           <div class="flex flex-col gap-1">
@@ -62,13 +63,15 @@ const emit = defineEmits(['delete'])
         Created on {{ formatDate(item.created_at) }}
       </p>
       <div class="flex flex-col md:flex-row items-center justify-end gap-[14px] w-full md:w-auto">
-        <button v-if="can('store-delete')"
+        <button
+v-if="can('store-delete')"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-red/10"
           @click="emit('delete', item.id)">
           <img src="@/assets/images/icons/trash-red.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-custom-red">Delete</span>
         </button>
-        <RouterLink :to="{ name: 'admin.store.detail', params: { id: item.id } }"
+        <RouterLink
+:to="{ name: 'admin.store.detail', params: { id: item.id } }"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>

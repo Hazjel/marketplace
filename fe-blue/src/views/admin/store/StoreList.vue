@@ -87,9 +87,11 @@ watch(error, (value) => {
           <p class="font-semibold text-custom-grey">{{ meta.total }} Total Stores</p>
         </div>
       </div>
-      <div id="TabButtons"
+      <div
+id="TabButtons"
         class="flex items-center gap-0.5 h-14 w-full md:w-[460px] rounded-xl bg-custom-icon-background overflow-x-auto">
-        <button type="button" class="tab-btn group w-full shrink-0" :class="{ active: filters.is_verified }"
+        <button
+type="button" class="tab-btn group w-full shrink-0" :class="{ active: filters.is_verified }"
           @click="filters.is_verified = true">
           <div
             class="flex items-center justify-center h-12 w-full shrink-0 rounded-xl py-[14px] px-3 gap-2 bg-custom-icon-background group-[&.active]:bg-custom-blue transition-300">
@@ -97,7 +99,8 @@ watch(error, (value) => {
               Store</span>
           </div>
         </button>
-        <button type="button" class="tab-btn group w-full shrink-0" :class="{ active: !filters.is_verified }"
+        <button
+type="button" class="tab-btn group w-full shrink-0" :class="{ active: !filters.is_verified }"
           @click="filters.is_verified = false">
           <div
             class="flex items-center justify-center h-12 w-full shrink-0 rounded-xl py-[14px] px-3 gap-2 bg-custom-icon-background group-[&.active]:bg-custom-blue transition-300">
@@ -112,9 +115,11 @@ watch(error, (value) => {
       <form action="#" class="w-full md:w-auto">
         <label
           class="flex items-center w-full md:w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
-          <img src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0 dark:invert"
+          <img
+src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0 dark:invert"
             alt="icon" />
-          <input v-model="filters.search" type="text"
+          <input
+v-model="filters.search" type="text"
             class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none bg-transparent"
             placeholder="Search store" />
         </label>
@@ -123,20 +128,23 @@ watch(error, (value) => {
         <p class="font-medium text-custom-grey">Show</p>
         <label
           class="flex items-center h-14 rounded-2xl border border-custom-stroke dark:border-white/10 py-4 px-5 pl-3 bg-white dark:bg-surface-card focus-within:border-custom-black transition-300">
-          <select id="" v-model="serverOptions.row_per_page" name=""
+          <select
+id="" v-model="serverOptions.row_per_page" name=""
             class="text-custom-black dark:text-white font-medium appearance-none focus:outline-none p-2 bg-transparent">
             <option value="10" class="font-medium dark:bg-surface-card">10 Entries</option>
             <option value="20" class="font-medium dark:bg-surface-card">20 Entries</option>
             <option value="40" class="font-medium dark:bg-surface-card">40 Entries</option>
           </select>
-          <img src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
+          <img
+src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
             alt="icon" />
         </label>
       </div>
     </div>
     <div id="List-Categories" class="flex flex-col gap-6">
       <div id="List" class="flex flex-col gap-5">
-        <CardList v-for="store in stores" v-if="!loading && stores" :key="store.id" :item="store"
+        <CardList
+v-for="store in stores" v-if="!loading && stores" :key="store.id" :item="store"
           @delete="handleDelete" />
       </div>
       <Pagination :meta="meta" :server-options="serverOptions" />

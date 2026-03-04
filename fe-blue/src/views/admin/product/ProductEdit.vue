@@ -192,11 +192,14 @@ onMounted(async () => {
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <p class="font-semibold text-custom-grey">Product Image</p>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-1/2">
-        <div v-for="(image, index) in product.product_images" :key="index"
+        <div
+v-for="(image, index) in product.product_images" :key="index"
           class="thumbnail-input-container group relative flex w-full aspect-square rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
-          <input type="file" accept="image/*" class="product-image-input absolute inset-0 opacity-0 cursor-pointer z-10"
+          <input
+type="file" accept="image/*" class="product-image-input absolute inset-0 opacity-0 cursor-pointer z-10"
             @change="handleImageChange($event, index)" />
-          <img :src="image.url" data-default="@/assets/images/icons/gallery-add-photo.svg"
+          <img
+:src="image.url" data-default="@/assets/images/icons/gallery-add-photo.svg"
             class="thumbnail size-full object-contain pointer-events-none" alt="icon" />
         </div>
       </div>
@@ -206,7 +209,8 @@ onMounted(async () => {
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.name }">
         <label class="group relative">
           <div class="input-icon">
-            <img src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 dark:invert"
+            <img
+src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 dark:invert"
               alt="icon" />
           </div>
           <p class="input-placeholder">Enter Product Name</p>
@@ -227,11 +231,13 @@ onMounted(async () => {
             <input v-model="product.weight" type="text" class="custom-input !pr-24" placeholder="" />
           </label>
           <div class="absolute transform -translate-y-1/2 top-1/2 right-5 w-fit h-fit">
-            <select id="" name=""
+            <select
+id="" name=""
               class="rounded-lg py-[10px] px-4 bg-custom-blue/10 text-custom-blue font-extrabold text-sm h-[38px] w-[71px] appearance-none leading-none">
               <option value="" selected>KG</option>
             </select>
-            <img src="@/assets/images/icons/arrow-up-triangle-blue.svg"
+            <img
+src="@/assets/images/icons/arrow-up-triangle-blue.svg"
               class="rotate-180 size-4 absolute transform -translate-y-1/2 top-1/2 right-[10px] dark:invert"
               alt="icon" />
           </div>
@@ -275,19 +281,23 @@ onMounted(async () => {
         </label>
 
         <!-- Option Groups Definition -->
-        <div v-if="product.has_variants"
+        <div
+v-if="product.has_variants"
           class="p-3 border rounded-xl bg-blue-50/50 dark:bg-custom-blue/10 dark:border-white/10 flex flex-col gap-2">
           <span class="text-xs font-bold text-gray-500 uppercase">1. Define Options</span>
           <div class="flex gap-2">
-            <input v-model="newOptionName" type="text" placeholder="Add Option (e.g. Color)"
+            <input
+v-model="newOptionName" type="text" placeholder="Add Option (e.g. Color)"
               class="custom-input h-9 text-sm bg-white dark:bg-surface-card" />
-            <button type="button" class="btn-primary h-9 px-4 text-xs bg-custom-black text-white rounded-lg"
+            <button
+type="button" class="btn-primary h-9 px-4 text-xs bg-custom-black text-white rounded-lg"
               @click="addOptionGroup">
               Add
             </button>
           </div>
           <div class="flex flex-wrap gap-2 mt-1">
-            <span v-for="(opt, idx) in optionGroups" :key="idx"
+            <span
+v-for="(opt, idx) in optionGroups" :key="idx"
               class="px-3 py-1 bg-white dark:bg-surface-card border dark:border-white/10 rounded-full text-xs font-bold flex items-center gap-2">
               {{ opt }}
               <button type="button" class="text-red-500 hover:text-red-700" @click="optionGroups.splice(idx, 1)">
@@ -300,11 +310,13 @@ onMounted(async () => {
         <div v-if="product.has_variants" class="flex flex-col gap-3">
           <span class="text-xs font-bold text-gray-500 uppercase mt-2">2. Set Variants</span>
 
-          <div v-for="(variant, index) in product.variants" :key="variant.id || variant._temp_id || index"
+          <div
+v-for="(variant, index) in product.variants" :key="variant.id || variant._temp_id || index"
             class="p-4 border rounded-xl bg-gray-50 dark:bg-white/5 dark:border-white/10 flex flex-col gap-3">
             <div class="flex justify-between items-center">
               <h4 class="font-bold text-sm text-gray-500">Variant #{{ index + 1 }}</h4>
-              <button type="button" class="text-red-500 text-xs font-bold hover:underline"
+              <button
+type="button" class="text-red-500 text-xs font-bold hover:underline"
                 @click="product.variants.splice(index, 1)">
                 Remove
               </button>
@@ -314,7 +326,8 @@ onMounted(async () => {
             <div v-if="optionGroups.length > 0 && variant.variant_attributes" class="grid grid-cols-2 gap-3 mb-2">
               <div v-for="opt in optionGroups" :key="opt" class="flex flex-col gap-1">
                 <label class="text-[10px] font-bold text-gray-400 uppercase">{{ opt }}</label>
-                <input v-model="variant.variant_attributes[opt]" type="text"
+                <input
+v-model="variant.variant_attributes[opt]" type="text"
                   class="h-9 w-full border border-custom-stroke dark:border-white/10 dark:bg-surface-card rounded-lg px-3 text-sm font-semibold outline-none focus:border-custom-black dark:focus:border-white transition-all"
                   :placeholder="opt + ' Value'" @input="autoGenerateName(variant)" />
               </div>
@@ -323,7 +336,8 @@ onMounted(async () => {
             <!-- Variant Name (Auto-generated or Manual) -->
             <div class="flex flex-col gap-1">
               <label class="text-xs font-semibold text-gray-400">Variant Name (Generated)</label>
-              <input v-model="variant.name" type="text"
+              <input
+v-model="variant.name" type="text"
                 class="custom-input h-10 text-sm bg-gray-100 dark:bg-surface-card" placeholder="Name" />
             </div>
 
@@ -331,19 +345,22 @@ onMounted(async () => {
               <!-- Variant Price -->
               <div class="flex flex-col gap-1 w-1/2">
                 <label class="text-xs font-semibold text-gray-400">Price</label>
-                <input v-model="variant.price" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
+                <input
+v-model="variant.price" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
                   placeholder="Price" />
               </div>
               <!-- Variant Stock -->
               <div class="flex flex-col gap-1 w-1/2">
                 <label class="text-xs font-semibold text-gray-400">Stock</label>
-                <input v-model="variant.stock" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
+                <input
+v-model="variant.stock" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
                   placeholder="Stock" />
               </div>
             </div>
           </div>
 
-          <button type="button"
+          <button
+type="button"
             class="btn-primary w-full py-2 rounded-xl text-sm border border-dashed border-custom-blue text-custom-blue bg-blue-50 hover:bg-blue-100 dark:bg-custom-blue/10 dark:hover:bg-custom-blue/20"
             @click="addVariant">
             + Add New Variant
@@ -390,12 +407,14 @@ onMounted(async () => {
               class="placeholder font-semibold text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-bold transition-300">
               Enter Product Description
             </p>
-            <textarea v-model="product.description"
+            <textarea
+v-model="product.description"
               class="appearance-none outline-none w-full font-semibold leading-[160%]" rows="3"
               placeholder=""></textarea>
           </div>
         </label>
-        <span v-if="error?.description"
+        <span
+v-if="error?.description"
           class="font-semibold text-lg text-custom-red leading-none group-[&.invalid]/errorState:block">{{
             error?.description?.join(', ') }}</span>
       </div>
@@ -412,14 +431,16 @@ onMounted(async () => {
             class="placeholder font-bold absolute -translate-y-1/2 left-[81px] top-[25px] group-has-[:invalid]:top-[38px] group-has-[:valid]:text-sm group-has-[:valid]:text-custom-grey group-has-[:valid]:font-semibold group-focus-within:top-[25px] transition-300">
             Select Category
           </p>
-          <select id="" v-model="product.parent_product_category_id" name="" required
+          <select
+id="" v-model="product.parent_product_category_id" name="" required
             class="appearance-none w-full h-[72px] font-semibold text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px]">
             <option hidden></option>
             <option v-for="category in productCategories" :key="category.id" :value="category.id">
               {{ category.name }}
             </option>
           </select>
-          <img src="@/assets/images/icons/arrow-down-black.svg"
+          <img
+src="@/assets/images/icons/arrow-down-black.svg"
             class="absolute transform -translate-y-1/2 top-1/2 right-6 size-6 dark:invert" alt="icon" />
           <span v-if="error?.parent_product_category_id" class="input-error">{{
             error?.parent_product_category_id?.join(', ')
@@ -429,26 +450,30 @@ onMounted(async () => {
     </div>
     <div class="peer-has-[:valid]:flex hidden flex-col md:flex-row justify-between gap-4">
       <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Sub Category</p>
-      <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
+      <div
+class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
         :class="{ invalid: error?.product_category_id }">
         <label
           class="group relative rounded-[18px] border-[1.5px] border-custom-stroke focus-within:border-custom-black transition-300 overflow-hidden w-full group-[&.invalid]/errorState:border-custom-red">
           <div class="input-icon">
-            <img src="@/assets/images/icons/shopping-bag-black.svg" class="flex size-6 shrink-0 dark:invert"
+            <img
+src="@/assets/images/icons/shopping-bag-black.svg" class="flex size-6 shrink-0 dark:invert"
               alt="icon" />
           </div>
           <p
             class="placeholder font-bold absolute -translate-y-1/2 left-[81px] top-[25px] group-has-[:invalid]:top-[38px] group-has-[:valid]:text-sm group-has-[:valid]:text-custom-grey group-has-[:valid]:font-semibold group-focus-within:top-[25px] transition-300">
             Select Sub Category
           </p>
-          <select id="" v-model="product.product_category_id" name="" required
+          <select
+id="" v-model="product.product_category_id" name="" required
             class="appearance-none w-full h-[72px] font-semibold text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px]">
             <option hidden></option>
             <option v-for="category in subCategories" :key="category.id" :value="category.id">
               {{ category.name }}
             </option>
           </select>
-          <img src="@/assets/images/icons/arrow-down-black.svg"
+          <img
+src="@/assets/images/icons/arrow-down-black.svg"
             class="absolute transform -translate-y-1/2 top-1/2 right-6 size-6 dark:invert" alt="icon" />
         </label>
         <span v-if="error?.product_category_id" class="input-error">{{
@@ -458,11 +483,13 @@ onMounted(async () => {
     </div>
 
     <div class="flex items-center justify-end gap-4">
-      <RouterLink :to="{ name: 'admin.product' }"
+      <RouterLink
+:to="{ name: 'admin.product' }"
         class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-gray-100 dark:bg-white/10 text-custom-grey dark:text-white font-semibold text-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-300">
         Cancel
       </RouterLink>
-      <button type="submit"
+      <button
+type="submit"
         class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-black text-white font-semibold text-lg hover:bg-black/80 transition-300">
         Update Product
       </button>

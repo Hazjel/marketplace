@@ -31,22 +31,26 @@ const selectUser = (user) => {
         No conversations yet.
       </div>
 
-      <button v-for="user in contacts" :key="user.id" :class="[
+      <button
+v-for="user in contacts" :key="user.id" :class="[
         'flex items-center gap-4 p-4 hover:bg-custom-background dark:hover:bg-white/5 transition-all text-left border-b border-custom-stroke dark:border-white/10 last:border-0 relative',
         activeUser?.id === user.id ? 'bg-custom-background dark:bg-custom-blue/10' : ''
       ]" @click="selectUser(user)">
         <div class="size-12 rounded-full overflow-hidden bg-gray-200 shrink-0 relative">
-          <img :src="user.profile_picture || 'https://ui-avatars.com/api/?name=' + user.name"
+          <img
+:src="user.profile_picture || 'https://ui-avatars.com/api/?name=' + user.name"
             class="size-full object-cover" alt="avatar" />
         </div>
         <div class="flex flex-col flex-1 min-w-0">
-          <h3 class="text-sm truncate dark:text-white" :class="{
+          <h3
+class="text-sm truncate dark:text-white" :class="{
             'font-bold': (user.unread_count || 0) > 0,
             'font-semibold': (user.unread_count || 0) === 0
           }">
             {{ user.name }}
           </h3>
-          <p class="text-xs truncate dark:text-gray-400" :class="{
+          <p
+class="text-xs truncate dark:text-gray-400" :class="{
             'text-custom-black dark:text-white font-medium': (user.unread_count || 0) > 0,
             'text-custom-grey': (user.unread_count || 0) === 0
           }">

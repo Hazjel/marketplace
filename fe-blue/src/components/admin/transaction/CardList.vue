@@ -68,7 +68,8 @@ const emit = defineEmits(['delete'])
         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]">
           <div
             class="flex size-14 shrink-0 rounded-full bg-custom-icon-background dark:bg-white/10 overflow-hidden items-center justify-center">
-            <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
+            <img
+src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
               alt="icon" />
           </div>
           <div class="flex flex-col gap-1 w-full overflow-hidden">
@@ -106,7 +107,8 @@ const emit = defineEmits(['delete'])
         </p>
       </div>
       <div class="flex items-center justify-end gap-[14px] w-full md:w-auto">
-        <RouterLink :to="getDetailRoute(item.id)"
+        <RouterLink
+:to="getDetailRoute(item.id)"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>

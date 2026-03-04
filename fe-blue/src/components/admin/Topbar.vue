@@ -43,7 +43,8 @@ const handleProfileClick = () => {
       @click="handleProfileClick">
       <div class="flex items-center gap-3 overflow-hidden">
         <div class="flex rounded-full overflow-hidden size-14 shrink-0 border border-slate-100 dark:border-white/10">
-          <img :src="user?.profile_picture || '@/assets/images/placeholder-avatar.png'" class="size-full object-cover"
+          <img
+:src="user?.profile_picture || '@/assets/images/placeholder-avatar.png'" class="size-full object-cover"
             alt="photo" onerror="this.src = 'https://ui-avatars.com/api/?name=User&background=random'" />
         </div>
         <div class="flex flex-col gap-[6px] text-left">

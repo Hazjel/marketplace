@@ -96,7 +96,8 @@ onMounted(() => {
         class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 items-center justify-center text-center animate-fade-in-up delay-100">
         <div
           class="flex size-8 md:size-10 bg-custom-icon-background dark:bg-white/10 items-center justify-center rounded-full">
-          <img src="@/assets/images/icons/card-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
+          <img
+src="@/assets/images/icons/card-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
             alt="icon" />
         </div>
         <div class="flex flex-col gap-0.5 md:gap-1">
@@ -109,7 +110,8 @@ onMounted(() => {
       <div
         class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 items-center justify-center text-center animate-fade-in-up delay-100">
         <div class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full">
-          <img src="@/assets/images/icons/box-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
+          <img
+src="@/assets/images/icons/box-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
             alt="icon" />
         </div>
         <div class="flex flex-col gap-0.5 md:gap-1">
@@ -122,7 +124,8 @@ onMounted(() => {
       <div
         class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 items-center justify-center text-center animate-fade-in-up delay-200">
         <div class="flex size-8 md:size-10 bg-custom-icon-background items-center justify-center rounded-full">
-          <img src="@/assets/images/icons/car-delivery-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
+          <img
+src="@/assets/images/icons/car-delivery-black.svg" class="flex size-4 md:size-5 shrink-0 dark:invert"
             alt="icon" />
         </div>
         <div class="flex flex-col gap-0.5 md:gap-1">
@@ -136,7 +139,8 @@ onMounted(() => {
         class="flex flex-col w-full rounded-[12px] md:rounded-[20px] p-2 md:p-4 gap-2 md:gap-3 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 items-center justify-center text-center animate-fade-in-up delay-300">
         <div
           class="flex size-8 md:size-10 bg-custom-blue/10 dark:bg-blue-500/20 items-center justify-center rounded-full">
-          <img src="@/assets/images/icons/clipboard-tick-blue-fill.svg"
+          <img
+src="@/assets/images/icons/clipboard-tick-blue-fill.svg"
             class="flex size-4 md:size-5 shrink-0 dark:invert" alt="icon" />
         </div>
         <div class="flex flex-col gap-0.5 md:gap-1">
@@ -151,12 +155,14 @@ onMounted(() => {
     <div class="flex flex-col flex-1 gap-5">
       <p class="font-bold text-xl dark:text-white">Latest Transactions</p>
       <div v-if="!loading && buyerTransactions.length > 0" id="List-Transactions" class="flex flex-col gap-5">
-        <div v-for="transaction in buyerTransactions.slice(0, 5)" :key="transaction.id"
+        <div
+v-for="transaction in buyerTransactions.slice(0, 5)" :key="transaction.id"
           class="card flex flex-col rounded-[20px] border border-custom-stroke dark:border-white/10 py-[18px] px-5 gap-5 bg-white dark:bg-surface-card">
           <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]">
             <div class="flex items-center gap-[14px] w-full md:w-[320px]">
               <div class="flex size-[84px] shrink-0 rounded-[20px] bg-custom-background overflow-hidden">
-                <img :src="transaction.store?.logo ||
+                <img
+:src="transaction.store?.logo ||
                   transaction.store?.image ||
                   '/src/assets/images/thumbnails/th-1.svg'
                   " class="size-full object-cover" :onerror="`this.src='/src/assets/images/thumbnails/th-1.svg'`"
@@ -176,7 +182,8 @@ onMounted(() => {
               <div class="flex flex-col sm:flex-row items-center sm:items-start gap-[10px] w-full md:w-[260px]">
                 <div
                   class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center">
-                  <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
+                  <img
+src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
                     alt="icon" />
                 </div>
                 <div class="flex flex-col gap-1 w-full overflow-hidden">
@@ -221,7 +228,8 @@ onMounted(() => {
               </p>
             </div>
             <div class="flex items-center justify-end gap-[14px] w-full md:w-auto">
-              <RouterLink :to="{
+              <RouterLink
+:to="{
                 name: `${user?.role === 'admin' ? 'admin' : 'user'}.transaction.detail`,
                 params: { id: transaction.id, username: user?.username }
               }"
@@ -233,7 +241,8 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <div v-if="!loading && buyerTransactions.length === 0" id="Empty-State"
+      <div
+v-if="!loading && buyerTransactions.length === 0" id="Empty-State"
         class="flex flex-col flex-1 items-center justify-center gap-4">
         <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px]" alt="icon" />
         <div class="flex flex-col gap-1 items-center text-center">

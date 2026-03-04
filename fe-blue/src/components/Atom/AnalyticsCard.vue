@@ -18,7 +18,8 @@ defineProps({
           <img :src="`/src/assets/images/icons/${icon}`" class="flex size-6 shrink-0 dark:invert" alt="icon" />
         </div>
 
-        <div v-if="trend" class="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full" :class="trend.direction === 'up'
+        <div
+v-if="trend" class="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full" :class="trend.direction === 'up'
             ? 'bg-green-100 dark:bg-green-500/20 text-custom-green dark:text-green-400'
             : 'bg-red-100 dark:bg-red-500/20 text-custom-red dark:text-red-400'
           ">

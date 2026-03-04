@@ -17,6 +17,7 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    allowedHosts: ['192.168.1.10.nip.io', 'localhost'],
     proxy: {
       '/api': {
         target: 'http://localhost:8000', // Laravel backend

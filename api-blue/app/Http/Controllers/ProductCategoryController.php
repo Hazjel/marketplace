@@ -40,7 +40,13 @@ class ProductCategoryController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         try {
-            $productCategories = $this->productCategoryRepository->getAll($request->search, $request->limit, true, $request->is_parent);
+            $limit = $request->limit;
+            $is_parent = $request->is_parent;
+            
+            $cacheKey = "product_categories_index_limit_{$limit}_parent_{$is_parent}";
+            $productCategories = \Illuminate\Support\Facades\Cache::tags(['product_categories'])->remember($cacheKey, 3600, function () use ($request) {
+                return $this->productCategoryRepository->getAll($request->search, $request->limit, true, $request->is_parent);
+            });
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', ProductCategoryResource::collection($productCategories), 200);
         } catch (\Exception $e) {
@@ -75,6 +81,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
         try {
             $productCategory = $this->productCategoryRepository->create($request);
+            \Illuminate\Support\Facades\Cache::tags(['product_categories'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Ditambahkan', new ProductCategoryResource($productCategory), 201);
         } catch (\Exception $e) {
@@ -131,6 +138,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
 
             $productCategory = $this->productCategoryRepository->update($id, $request);
+            \Illuminate\Support\Facades\Cache::tags(['product_categories'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diupdate', new ProductCategoryResource($productCategory), 200);
         } catch (\Exception $e) {
@@ -152,6 +160,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
 
             $productCategory = $this->productCategoryRepository->delete($id);
+            \Illuminate\Support\Facades\Cache::tags(['product_categories'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Dihapus', new ProductCategoryResource($productCategory), 200);
         } catch (\Exception $e) {

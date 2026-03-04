@@ -21,7 +21,7 @@ class StoreRepository implements StoreRepositoryInterface
             if ($isVerified !== null) {
                 $query->where('is_verified' ,$isVerified);
             }
-        });
+        })->with(['user', 'address']);
 
         if ($random) {
             $query->inRandomOrder();
@@ -58,7 +58,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = Store::where('id', $id)->withCount('followers');
+        $query = Store::where('id', $id)->with(['followers', 'user', 'address'])->withCount('followers');
 
         return $query->first();
     }
@@ -72,7 +72,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getByUsername(string $username)
     {
-        $query = Store::where('username', $username)->withCount('followers');
+        $query = Store::where('username', $username)->with(['followers', 'user', 'address'])->withCount('followers');
 
         return $query->first();
     }

@@ -8,13 +8,32 @@ use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
 {
     public function redirect()
     {
-        return Socialite::driver('google')->redirect();
+        Log::info('GoogleAuth: Redirect Hit', [
+            'platform' => request('platform'),
+            'session_id' => session()->getId()
+        ]);
+        
+        if (request()->has('platform')) {
+            // Use 'state' parameter to persist platform across redirects (stateless)
+            // This is more reliable than sessions for mobile deep links
+            $platform = request('platform');
+            return Socialite::driver('google')
+                ->with([
+                    'state' => "platform={$platform}",
+                    'prompt' => 'select_account' // Force account chooser
+                ])
+                ->redirect();
+        }
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account']) // Apply to web as well
+            ->redirect();
     }
 
     public function callback()
@@ -61,15 +80,34 @@ class GoogleAuthController extends Controller
 
             DB::commit();
 
-            // Return redirect to frontend with token
-            // Since this API is likely called by browser redirect, we should redirect back to Frontend App
-            // Frontend URL: http://localhost:5173/auth/google/callback?token=...
+            // Redirect Logic based on Platform
+            // Extract platform from 'state' parameter if available
+            $platform = null;
+            if (request()->has('state')) {
+                parse_str(request('state'), $stateParams);
+                if (isset($stateParams['platform'])) {
+                    $platform = $stateParams['platform'];
+                }
+            }
             
-            // However, typical API usage returns JSON. But for OAuth redirect, the browser is navigating here.
-            // So we must return a Redirect response to the Frontend.
-            
-            $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+            // Fallback to session if state is empty (for web or legacy flows)
+            if (!$platform) {
+                $platform = session('auth_platform');
+            }
+
+            Log::info('GoogleAuth: Callback Hit', [
+                 'platform' => $platform,
+                 'state_param' => request('state'),
+                 'session_id' => session()->getId()
+            ]);
+
             $token = $user->token;
+            
+            if ($platform === 'mobile') {
+                return redirect("mobileblue://callback?token={$token}&username={$user->username}");
+            }
+
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
 
             return redirect("{$frontendUrl}/auth/google/callback?token={$token}&username={$user->username}");
 

@@ -65,9 +65,11 @@ watch(
       <form action="#" class="w-full md:w-auto">
         <label
           class="flex items-center w-full md:w-[370px] h-14 rounded-2xl p-4 gap-2 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
-          <img src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0 dark:invert"
+          <img
+src="@/assets/images/icons/receipt-search-grey.svg" class="flex size-6 shrink-0 dark:invert"
             alt="icon" />
-          <input v-model="filters.search" type="text"
+          <input
+v-model="filters.search" type="text"
             class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none bg-transparent"
             placeholder="Search User" />
         </label>
@@ -76,13 +78,15 @@ watch(
         <p class="font-medium text-custom-grey">Show</p>
         <label
           class="flex items-center h-14 rounded-2xl border border-custom-stroke dark:border-white/10 py-4 px-5 pl-3 bg-white dark:bg-surface-card focus-within:border-custom-black transition-300">
-          <select id="" v-model="serverOptions.row_per_page" name=""
+          <select
+id="" v-model="serverOptions.row_per_page" name=""
             class="text-custom-black dark:text-white font-medium appearance-none focus:outline-none p-2 bg-transparent">
             <option value="10" class="font-medium dark:bg-surface-card">10 Entries</option>
             <option value="20" class="font-medium dark:bg-surface-card">20 Entries</option>
             <option value="40" class="font-medium dark:bg-surface-card">40 Entries</option>
           </select>
-          <img src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
+          <img
+src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
             alt="icon" />
         </label>
       </div>

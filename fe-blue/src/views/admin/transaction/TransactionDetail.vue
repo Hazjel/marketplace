@@ -219,7 +219,8 @@ onMounted(async () => {
     <div class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
   </div>
 
-  <div v-else-if="!transaction || !transaction.id"
+  <div
+v-else-if="!transaction || !transaction.id"
     class="flex flex-col flex-1 items-center justify-center min-h-[400px] gap-4">
     <img src="@/assets/images/icons/bag-grey.svg" class="size-20 opacity-50 dark:invert" alt="Not Found" />
     <p class="font-bold text-xl text-custom-grey">Transaction Not Found</p>
@@ -230,36 +231,44 @@ onMounted(async () => {
 
   <div v-else class="flex flex-col md:flex-row flex-1 gap-5">
     <div class="flex flex-col gap-5 w-full min-w-0 animate-fade-in-up">
-      <div v-if="transaction?.delivery_status === 'pending'"
+      <div
+v-if="transaction?.delivery_status === 'pending'"
         class="relative w-full rounded-[20px] bg-custom-yellow overflow-hidden">
-        <img src="@/assets/images/backgrounds/round-ornament.svg"
+        <img
+src="@/assets/images/backgrounds/round-ornament.svg"
           class="size-full object-contain object-right opacity-55 absolute" alt="icon" />
         <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
           <img src="@/assets/images/icons/timer-chocolate.svg" class="flex size-9 shrink-0" alt="icon" />
           <p class="font-bold text-lg text-[#544607]">Order pending. Kindly wait for review 🙌</p>
         </div>
       </div>
-      <div v-if="transaction?.delivery_status === 'processing'"
+      <div
+v-if="transaction?.delivery_status === 'processing'"
         class="relative w-full rounded-[20px] bg-custom-blue overflow-hidden">
-        <img src="@/assets/images/backgrounds/round-ornament.svg"
+        <img
+src="@/assets/images/backgrounds/round-ornament.svg"
           class="size-full object-contain object-right opacity-55 absolute" alt="icon" />
         <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
           <img src="@/assets/images/icons/truck-time-white-fill.svg" class="flex size-9 shrink-0" alt="icon" />
           <p class="font-bold text-lg text-white">Prepare the item for pickup by the courier</p>
         </div>
       </div>
-      <div v-if="transaction?.delivery_status === 'delivering'"
+      <div
+v-if="transaction?.delivery_status === 'delivering'"
         class="relative w-full rounded-[20px] bg-custom-orange overflow-hidden">
-        <img src="@/assets/images/backgrounds/round-ornament.svg"
+        <img
+src="@/assets/images/backgrounds/round-ornament.svg"
           class="size-full object-contain object-right opacity-55 absolute" alt="icon" />
         <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
           <img src="@/assets/images/icons/truck-time-white-fill.svg" class="flex size-9 shrink-0" alt="icon" />
           <p class="font-bold text-lg text-white">The order is heading to customer address</p>
         </div>
       </div>
-      <div v-if="transaction?.delivery_status === 'completed'"
+      <div
+v-if="transaction?.delivery_status === 'completed'"
         class="relative w-full rounded-[20px] bg-custom-green overflow-hidden">
-        <img src="@/assets/images/backgrounds/round-ornament.svg"
+        <img
+src="@/assets/images/backgrounds/round-ornament.svg"
           class="size-full object-contain object-right opacity-55 absolute" alt="icon" />
         <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
           <img src="@/assets/images/icons/truck-time-white-fill.svg" class="flex size-9 shrink-0" alt="icon" />
@@ -288,7 +297,8 @@ onMounted(async () => {
           <div class="flex items-center gap-[10px] w-[260px]">
             <div
               class="flex size-14 shrink-0 rounded-full bg-custom-icon-background dark:bg-white/10 overflow-hidden items-center justify-center">
-              <img src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
+              <img
+src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 dark:invert"
                 alt="icon" />
             </div>
             <div class="flex flex-col gap-1">
@@ -317,7 +327,8 @@ onMounted(async () => {
           <div class="flex items-center gap-[10px] w-[260px]">
             <div
               class="flex size-14 shrink-0 rounded-full bg-custom-icon-background dark:bg-white/10 overflow-hidden items-center justify-center">
-              <img src="@/assets/images/icons/calendar-2-black.svg" class="flex size-6 shrink-0 dark:invert"
+              <img
+src="@/assets/images/icons/calendar-2-black.svg" class="flex size-6 shrink-0 dark:invert"
                 alt="icon" />
             </div>
             <div class="flex flex-col gap-1">
@@ -336,24 +347,28 @@ onMounted(async () => {
           <div class="flex flex-col gap-2 text-left">
             <p class="font-bold text-xl dark:text-white">Product Details</p>
             <div class="flex items-center gap-1">
-              <img src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 dark:invert"
+              <img
+src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 dark:invert"
                 alt="icon" />
               <p class="font-semibold text-custom-grey">
                 {{ transaction?.transaction_details?.length }} Total Products
               </p>
             </div>
           </div>
-          <img src="@/assets/images/icons/arrow-circle-up.svg" class="size-6 flex shrink-0 transition-300 dark:invert"
+          <img
+src="@/assets/images/icons/arrow-circle-up.svg" class="size-6 flex shrink-0 transition-300 dark:invert"
             alt="icon" />
         </button>
         <div id="Products" class="flex flex-col gap-4 mt-5">
-          <div v-for="(product, index) in transaction?.transaction_details" :key="product.id || index"
+          <div
+v-for="(product, index) in transaction?.transaction_details" :key="product.id || index"
             class="card flex flex-col rounded-2xl border border-custom-stroke dark:border-white/10 p-4 gap-5">
             <div class="flex flex-col sm:flex-row w-full gap-5">
               <div class="flex items-center gap-[14px] w-full min-w-0 overflow-hidden">
                 <div
                   class="flex size-[92px] rounded-2xl bg-custom-background overflow-hidden shrink-0 border border-gray-100 dark:border-white/10">
-                  <img :src="product?.product?.product_images?.find((image) => image.is_thumbnail)
+                  <img
+:src="product?.product?.product_images?.find((image) => image.is_thumbnail)
                     ?.image ?? PlaceHolder
                     " class="size-full object-contain" alt="thumbnail" />
                 </div>
@@ -387,13 +402,16 @@ onMounted(async () => {
             </div>
 
             <!-- Review Button -->
-            <div v-if="transaction?.delivery_status === 'completed' && activeMode === 'buyer'"
+            <div
+v-if="transaction?.delivery_status === 'completed' && activeMode === 'buyer'"
               class="flex justify-end pt-2">
-              <div v-if="hasReviewed(product.product_id)"
+              <div
+v-if="hasReviewed(product.product_id)"
                 class="px-4 py-2 bg-green-50 text-green-600 rounded-full text-sm font-bold border border-green-100 flex items-center gap-2">
                 <span class="text-green-500">✓</span> Ulasan Terkirim
               </div>
-              <button v-else
+              <button
+v-else
                 class="px-5 py-2.5 rounded-full bg-custom-blue text-white text-sm font-bold hover:shadow-lg hover:shadow-custom-blue/30 transition-all"
                 @click="handleOpenReview(product)">
                 Beri Ulasan
@@ -542,7 +560,8 @@ onMounted(async () => {
             </div>
 
             <!-- Repayment Button -->
-            <button v-if="activeMode === 'buyer' && transaction?.payment_status === 'unpaid'"
+            <button
+v-if="activeMode === 'buyer' && transaction?.payment_status === 'unpaid'"
               :disabled="isProcessingPayment"
               class="flex items-center justify-center h-12 w-full rounded-2xl bg-custom-blue disabled:bg-custom-stroke transition-300"
               @click="handleRepayment">
@@ -554,11 +573,13 @@ onMounted(async () => {
           <hr class="border-custom-stroke dark:border-white/10 last:hidden" />
         </div>
       </section>
-      <section v-if="transaction?.delivery_status === 'pending'"
+      <section
+v-if="transaction?.delivery_status === 'pending'"
         class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white dark:bg-surface-card border border-transparent dark:border-white/10">
         <p class="font-bold text-xl dark:text-white">Order Status</p>
         <div class="grid grid-cols-3 relative min-h-[90px] w-full">
-          <div id="Progress-Bar"
+          <div
+id="Progress-Bar"
             class="absolute w-full top-[26px] h-3 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden">
             <div class="w-1/3 h-full bg-custom-lime-green"></div>
           </div>
@@ -594,7 +615,8 @@ onMounted(async () => {
             pending
           </p>
         </div>
-        <div v-if="
+        <div
+v-if="
           transaction?.payment_status === 'paid' &&
           activeMode === 'store' &&
           user?.store?.id == transaction?.store?.id
@@ -610,7 +632,8 @@ onMounted(async () => {
           </div>
         </div>
       </section>
-      <section v-if="transaction?.delivery_status === 'processing'"
+      <section
+v-if="transaction?.delivery_status === 'processing'"
         class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white dark:bg-surface-card border border-transparent dark:border-white/10">
         <p class="font-bold text-xl dark:text-white">Order Status</p>
         <div class="grid grid-cols-3 relative min-h-[90px] w-full">
@@ -653,10 +676,12 @@ onMounted(async () => {
           <div class="flex items-center justify-between w-full">
             <div
               class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background dark:bg-custom-background">
-              <img id="Thumbnail" :src="transaction.delivery_proof_url"
+              <img
+id="Thumbnail" :src="transaction.delivery_proof_url"
                 data-default="@/assets/images/icons/gallery-default.svg" class="size-full object-contain" alt="icon" />
             </div>
-            <button id="Add-Photo" type="button"
+            <button
+id="Add-Photo" type="button"
               class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg"
               @click="fileInput.click()">
               Add Photo
@@ -670,20 +695,23 @@ onMounted(async () => {
                   <img src="@/assets/images/icons/barcode-grey.svg" class="flex size-6 shrink-0" alt="icon" />
                 </div>
                 <p class="input-placeholder">Enter Tracking Number</p>
-                <input id="Tracking" v-model="transaction.tracking_number" type="string" class="custom-input"
+                <input
+id="Tracking" v-model="transaction.tracking_number" type="string" class="custom-input"
                   placeholder="" />
               </label>
               <span class="input-error">Lorem dolor error message here</span>
             </div>
           </div>
-          <button id="Update-Status" type="submit"
+          <button
+id="Update-Status" type="submit"
             class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300"
             @click="handleDeliverySubmit">
             <span class="font-semibold text-lg text-white">Update Status</span>
           </button>
         </template>
       </section>
-      <section v-if="transaction?.delivery_status === 'delivering'"
+      <section
+v-if="transaction?.delivery_status === 'delivering'"
         class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white dark:bg-surface-card border border-transparent dark:border-white/10">
         <p class="font-bold text-xl dark:text-white">Order Status</p>
         <div class="grid grid-cols-3 relative min-h-[90px] w-full">
@@ -713,7 +741,8 @@ onMounted(async () => {
           </div>
         </div>
         <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
-          <img :src="transaction?.delivery_proof_url || PlaceHolder" class="size-full object-cover" alt="thumbnail"
+          <img
+:src="transaction?.delivery_proof_url || PlaceHolder" class="size-full object-cover" alt="thumbnail"
             @error="(e) => (e.target.src = PlaceHolder)" />
         </div>
 
@@ -729,7 +758,8 @@ onMounted(async () => {
             </p>
           </div>
 
-          <button v-if="activeMode === 'buyer'"
+          <button
+v-if="activeMode === 'buyer'"
             class="flex items-center justify-center h-12 px-6 rounded-full bg-custom-blue text-white font-semibold shadow-lg hover:bg-blue-600 transition-300"
             @click="handleCompleteOrderClick">
             Order Received
@@ -745,11 +775,13 @@ onMounted(async () => {
           </p>
         </div>
       </section>
-      <section v-if="transaction?.delivery_status === 'completed'"
+      <section
+v-if="transaction?.delivery_status === 'completed'"
         class="flex flex-col w-full rounded-[20px] p-5 gap-5 bg-white dark:bg-surface-card border border-transparent dark:border-white/10">
         <p class="font-bold text-xl dark:text-white">Order Status</p>
         <div class="grid grid-cols-3 relative min-h-[90px] w-full">
-          <div id="Progress-Bar"
+          <div
+id="Progress-Bar"
             class="absolute w-full top-[26px] h-3 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden">
             <div class="w-full h-full bg-custom-lime-green"></div>
           </div>
@@ -776,7 +808,8 @@ onMounted(async () => {
           </div>
         </div>
         <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
-          <img :src="transaction?.delivery_proof_url || PlaceHolder" class="size-full object-cover" alt="thumbnail"
+          <img
+:src="transaction?.delivery_proof_url || PlaceHolder" class="size-full object-cover" alt="thumbnail"
             @error="(e) => (e.target.src = PlaceHolder)" />
         </div>
         <div class="flex items-center justify-between">
@@ -803,7 +836,8 @@ onMounted(async () => {
 
         <div v-if="transaction?.product_reviews?.length > 0" class="flex flex-col gap-4">
           <div v-for="detail in transaction.transaction_details" :key="detail.id">
-            <div v-for="review in getReviewsForProduct(detail.product_id)" :key="review.id"
+            <div
+v-for="review in getReviewsForProduct(detail.product_id)" :key="review.id"
               class="flex flex-col rounded-2xl border border-custom-stroke dark:border-white/10 p-4 gap-4">
               <div class="flex items-center justify-between">
                 <div class="flex flex-col">
@@ -814,9 +848,11 @@ onMounted(async () => {
                     </p>
                     <div class="flex">
                       <template v-for="i in 5" :key="i">
-                        <img v-if="i <= review.rating" src="@/assets/images/icons/Star-pointy.svg"
+                        <img
+v-if="i <= review.rating" src="@/assets/images/icons/Star-pointy.svg"
                           class="flex size-8 shrink-0 p-0.5" alt="star" />
-                        <img v-else src="@/assets/images/icons/Star-pointy-outline.svg"
+                        <img
+v-else src="@/assets/images/icons/Star-pointy-outline.svg"
                           class="flex size-8 shrink-0 p-0.5" alt="star" />
                       </template>
                     </div>
@@ -830,7 +866,8 @@ onMounted(async () => {
         </div>
 
         <div v-else class="flex flex-col items-center justify-center py-8 gap-4">
-          <p v-if="activeMode === 'buyer' && transaction?.delivery_status === 'completed'"
+          <p
+v-if="activeMode === 'buyer' && transaction?.delivery_status === 'completed'"
             class="font-medium text-custom-grey">
             You haven't reviewed this order yet.
           </p>
@@ -844,7 +881,8 @@ onMounted(async () => {
   <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleImageChange" />
 
   <Teleport to="body">
-    <ReviewModal v-if="transaction?.id && selectedProductForReview" :show="showReviewModal"
+    <ReviewModal
+v-if="transaction?.id && selectedProductForReview" :show="showReviewModal"
       :transaction-id="transaction.id" :product-id="selectedProductForReview.id"
       :product-name="selectedProductForReview.name" :product-image="selectedProductForReview.image"
       @close="showReviewModal = false" @submitted="handleReviewSubmitted" />

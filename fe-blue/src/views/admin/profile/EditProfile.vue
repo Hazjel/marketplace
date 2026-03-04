@@ -137,7 +137,8 @@ const handleSubmit = async () => {
         <div
           class="group relative flex size-[100px] shrink-0 rounded-full bg-custom-background dark:bg-white/5 overflow-hidden cursor-pointer border border-custom-stroke dark:border-white/10"
           @click="triggerFileInput">
-          <img :src="previewImage || user?.profile_picture"
+          <img
+:src="previewImage || user?.profile_picture"
             class="size-full object-cover transition-opacity duration-300 group-hover:opacity-75"
             alt="profile picture" />
 
@@ -158,7 +159,8 @@ const handleSubmit = async () => {
 
       <form class="flex flex-col gap-6 w-full max-w-[600px]" @submit.prevent="handleSubmit">
         <!-- Success Message -->
-        <div v-if="successMessage"
+        <div
+v-if="successMessage"
           class="p-4 rounded-xl bg-green-50 text-green-600 font-medium border border-green-100">
           {{ successMessage }}
         </div>
@@ -173,10 +175,12 @@ const handleSubmit = async () => {
           <div class="group/errorState flex flex-col gap-2" :class="{ invalid: errors?.name }">
             <label class="group relative">
               <div class="absolute top-1/2 -translate-y-1/2 left-4 size-6 flex items-center justify-center">
-                <img src="@/assets/images/icons/profile-circle-grey.svg" class="flex size-6 shrink-0 dark:invert"
+                <img
+src="@/assets/images/icons/profile-circle-grey.svg" class="flex size-6 shrink-0 dark:invert"
                   alt="icon" />
               </div>
-              <input v-model="form.name" type="text" autocomplete="name"
+              <input
+v-model="form.name" type="text" autocomplete="name"
                 class="w-full h-12 pl-12 pr-4 rounded-xl border border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card dark:text-white focus:border-custom-black dark:focus:border-white focus:ring-0 outline-none transition-all placeholder:text-custom-grey dark:placeholder:text-gray-500 font-semibold"
                 placeholder="Enter your full name" />
             </label>
@@ -193,7 +197,8 @@ const handleSubmit = async () => {
               <div class="absolute top-1/2 -translate-y-1/2 left-4 size-6 flex items-center justify-center">
                 <img src="@/assets/images/icons/call-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
               </div>
-              <input v-model="form.phone_number" type="tel" autocomplete="tel"
+              <input
+v-model="form.phone_number" type="tel" autocomplete="tel"
                 class="w-full h-12 pl-12 pr-4 rounded-xl border border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card dark:text-white focus:border-custom-black dark:focus:border-white focus:ring-0 outline-none transition-all placeholder:text-custom-grey dark:placeholder:text-gray-500 font-semibold"
                 placeholder="Enter your phone number"
                 @input="form.phone_number = form.phone_number.replace(/[^0-9]/g, '').slice(0, 15)" />
@@ -201,7 +206,8 @@ const handleSubmit = async () => {
             <span v-if="errors.phone_number" class="input-error text-custom-red text-sm">{{
               errors.phone_number[0]
             }}</span>
-            <span v-else-if="form.phone_number && !form.phone_number.startsWith('08')"
+            <span
+v-else-if="form.phone_number && !form.phone_number.startsWith('08')"
               class="input-error text-custom-red text-sm">Phone number must start with 08</span>
           </div>
         </div>
@@ -220,7 +226,8 @@ const handleSubmit = async () => {
               <div class="absolute top-1/2 -translate-y-1/2 left-4 size-6 flex items-center justify-center">
                 <img src="@/assets/images/icons/key-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
               </div>
-              <input v-model="form.current_password" type="password" autocomplete="current-password"
+              <input
+v-model="form.current_password" type="password" autocomplete="current-password"
                 class="w-full h-12 pl-12 pr-4 rounded-xl border border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card dark:text-white focus:border-custom-black dark:focus:border-white focus:ring-0 outline-none transition-all placeholder:text-custom-grey dark:placeholder:text-gray-500 font-semibold"
                 placeholder="Required to change password" />
             </label>
@@ -237,7 +244,8 @@ const handleSubmit = async () => {
               <div class="absolute top-1/2 -translate-y-1/2 left-4 size-6 flex items-center justify-center">
                 <img src="@/assets/images/icons/key-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
               </div>
-              <input v-model="form.password" type="password" autocomplete="new-password"
+              <input
+v-model="form.password" type="password" autocomplete="new-password"
                 class="w-full h-12 pl-12 pr-4 rounded-xl border border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card dark:text-white focus:border-custom-black dark:focus:border-white focus:ring-0 outline-none transition-all placeholder:text-custom-grey dark:placeholder:text-gray-500 font-semibold"
                 placeholder="Minimum 8 characters" />
             </label>
@@ -254,7 +262,8 @@ const handleSubmit = async () => {
               <div class="absolute top-1/2 -translate-y-1/2 left-4 size-6 flex items-center justify-center">
                 <img src="@/assets/images/icons/key-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
               </div>
-              <input v-model="form.password_confirmation" type="password" autocomplete="new-password"
+              <input
+v-model="form.password_confirmation" type="password" autocomplete="new-password"
                 class="w-full h-12 pl-12 pr-4 rounded-xl border border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card dark:text-white focus:border-custom-black dark:focus:border-white focus:ring-0 outline-none transition-all placeholder:text-custom-grey dark:placeholder:text-gray-500 font-semibold"
                 placeholder="Re-enter new password" />
             </label>
@@ -262,9 +271,11 @@ const handleSubmit = async () => {
         </div>
 
         <div class="flex justify-end pt-4">
-          <button type="submit" :disabled="isLoading"
+          <button
+type="submit" :disabled="isLoading"
             class="flex items-center justify-center h-14 px-8 rounded-full bg-custom-black dark:bg-custom-blue text-white dark:text-white font-bold hover:bg-black/80 dark:hover:bg-blue-600 transition-300 disabled:opacity-50 disabled:cursor-not-allowed">
-            <div v-if="isLoading"
+            <div
+v-if="isLoading"
               class="size-5 border-2 border-white dark:border-white border-t-transparent rounded-full animate-spin mr-2">
             </div>
             Save Changes
