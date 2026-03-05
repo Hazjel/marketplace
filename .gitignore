@@ -10,3 +10,7 @@ postman/globals/
 postman/environments/
 *.postman_globals.json
 *.postman_environment.json
+
+.agents/
+start-all.ps1
+ai-service/venv/
