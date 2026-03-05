@@ -1,14 +1,16 @@
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
-import { ref, onErrorCaptured, onMounted } from 'vue'
+import { ref, onErrorCaptured, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useThemeStore } from '@/stores/theme'
+import { useToast } from 'vue-toastification'
 
 const error = ref(null)
 const router = useRouter()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
+const toast = useToast()
 
 onErrorCaptured((err, instance, info) => {
   error.value = {
@@ -24,7 +26,16 @@ const reloadApp = () => {
   router.go(0)
 }
 
+const handleApiError = (event) => {
+  if (event.detail && event.detail.message) {
+    toast.error(event.detail.message)
+  }
+}
+
 onMounted(async () => {
+  // Catch global API errors from axios interceptor
+  window.addEventListener('api-error', handleApiError)
+
   // Initialize theme system
   const themeStore = useThemeStore()
   themeStore.initListener()
@@ -32,6 +43,10 @@ onMounted(async () => {
   if (authStore.user) {
     await wishlistStore.fetchWishlist()
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('api-error', handleApiError)
 })
 </script>
 

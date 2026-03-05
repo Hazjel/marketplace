@@ -2,19 +2,18 @@ import { handleError } from '@/helpers/errorHelper'
 import { axiosInstance } from '@/plugins/axios'
 // import router from "@/router"; // Removed to prevent circular dependency
 import Cookies from 'js-cookie'
-import { register } from 'numeral'
 import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
+    token: Cookies.get('token') || null,
     activeMode: Cookies.get('activeMode') || 'buyer', // 'buyer' or 'store'
     loading: false,
     error: null,
     success: null
   }),
   getters: {
-    token: () => Cookies.get('token'),
     isAuthenticated: (state) => !!state.user,
     currentMode: (state) => state.activeMode
   },
@@ -33,6 +32,8 @@ export const useAuthStore = defineStore('auth', {
         const token = response.data.data.token
 
         Cookies.set('token', token)
+        this.token = token // Update reactive state
+        this.user = response.data.data // Langsung set user dari respons login
 
         this.success = response.data.message
 
@@ -58,6 +59,8 @@ export const useAuthStore = defineStore('auth', {
 
         const token = response.data.data.token
         Cookies.set('token', token)
+        this.token = token
+        this.user = response.data.data // Langsung set user dari respons register
         this.success = response.data.message
 
         return response.data.data // ✅ Return data
@@ -81,6 +84,7 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         if (error.response?.status === 401) {
           Cookies.remove('token')
+          this.token = null
           this.user = null
           return null
         }
@@ -97,6 +101,7 @@ export const useAuthStore = defineStore('auth', {
         await axiosInstance.post('/logout')
 
         Cookies.remove('token')
+        this.token = null
         this.user = null
         this.error = null
 

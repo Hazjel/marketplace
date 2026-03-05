@@ -32,15 +32,42 @@ axiosInstance.interceptors.request.use(
   }
 )
 
-// Optional: Handle response errors
+// Menggunakan fallback sederhana karena useToast() dari vue-toastification hanya berjalan di dalam script setup Vue.
+// Solusi: dispatch custom event yang nanti ditangkap oleh App.vue untuk memunculkan toast.
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      Cookies.remove('token')
-      // Redirect ke login jika perlu
-      // window.location.href = '/login';
+    const status = error.response?.status
+    const message = error.response?.data?.message || 'Terjadi kesalahan pada server'
+    const originalRequest = error.config
+
+    // Jika 401 dari endpoint /login (salah password), biarkan komponen Login.vue yang handle
+    if (status === 401 && originalRequest.url && originalRequest.url.includes('/login')) {
+      return Promise.reject(error)
     }
+
+    if (status === 401) {
+      Cookies.remove('token')
+
+      // Kirim event global ke App.vue untuk memunculkan toast
+      window.dispatchEvent(new CustomEvent('api-error', {
+        detail: { message: 'Sesi Anda telah berakhir. Silakan login kembali.' }
+      }))
+
+      // Delay redirect so user can read the toast message
+      setTimeout(() => {
+        window.location.href = '/auth/login'
+      }, 1500)
+    } else if (status >= 500) {
+      window.dispatchEvent(new CustomEvent('api-error', {
+        detail: { message: 'Kesalahan Sistem (500). Silakan coba lagi nanti.' }
+      }))
+    } else if (status !== 422) {
+      window.dispatchEvent(new CustomEvent('api-error', {
+        detail: { message: message }
+      }))
+    }
+
     return Promise.reject(error)
   }
 )
