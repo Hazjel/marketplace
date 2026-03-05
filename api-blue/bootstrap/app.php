@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ]);
     $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
     $middleware->append(\App\Http\Middleware\UpdateLastSeen::class);
+    $middleware->alias([
+        'idempotent' => \App\Http\Middleware\IdempotencyMiddleware::class,
+    ]);
 })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

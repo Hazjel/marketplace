@@ -17,11 +17,19 @@ class ProductImageRepository implements ProductImageRepositoryInterface
         try {
             $productImage = new ProductImage();
             $productImage->product_id = $data['product_id'];
-            $productImage->image = $data['image']->store('assets/products', 'public');
+            // Save raw file immediately for fast API response
+            $rawPath = $data['image']->store('assets/products', 'public');
+            $productImage->image = $rawPath;
             $productImage->is_thumbnail = $data['is_thumbnail'];
             $productImage->save();
 
             DB::commit();
+
+            // Dispatch async job for resize + WebP conversion
+            \App\Jobs\ProcessProductImageJob::dispatch(
+                $productImage->id,
+                $rawPath
+            );
 
             return $productImage;
         } catch (Exception $e) {

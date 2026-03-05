@@ -30,6 +30,12 @@ class Store extends Model
 
     public function scopeSearch($query, $search)
     {
+        if (mb_strlen($search) >= 3) {
+            return $query->where(function ($q) use ($search) {
+                $q->whereRaw('MATCH(name) AGAINST(? IN BOOLEAN MODE)', ['+' . $search . '*'])
+                  ->orWhere('phone', 'like', '%' . $search . '%');
+            });
+        }
         return $query->where('name', 'like', '%' . $search . '%')->orWhere('phone', 'like', '%' . $search . '%');
     }
 

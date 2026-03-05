@@ -100,7 +100,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('transaction/{id}/complete', [TransactionController::class, 'complete']);
     Route::post('transaction/{id}/check-status', [TransactionController::class, 'checkPaymentStatus']);
     // Route::middleware(['throttle:10,1', 'verified'])->post('transaction', [TransactionController::class, 'store']);
-    Route::middleware(['throttle:10,1'])->post('transaction', [TransactionController::class, 'store']);
+    Route::middleware(['throttle:10,1', 'idempotent'])->post('transaction', [TransactionController::class, 'store']);
     Route::apiResource('transaction', TransactionController::class)->except(['store']);
 
     // Product Review
