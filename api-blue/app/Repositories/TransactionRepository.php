@@ -331,10 +331,11 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         try {
             Log::info('Start restoring stock for transaction: ' . $transaction->id);
-            $transaction->load('transactionDetails.product');
+            $transaction->load('transactionDetails');
             
             foreach ($transaction->transactionDetails as $detail) {
-                $product = $detail->product;
+                // Pessimistic lock prevents double-restore from concurrent cancel + webhook
+                $product = Product::where('id', $detail->product_id)->lockForUpdate()->first();
                 if ($product) {
                     $product->stock += $detail->qty;
                     $product->save();

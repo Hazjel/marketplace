@@ -41,7 +41,20 @@ class StoreController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         try {
-            $stores = $this->storeRepository->getAll($request->search,$request->is_verified,  $request->limit, $request->random, true);
+            $search = $request->search;
+            $is_verified = $request->is_verified;
+            $limit = $request->limit;
+            $random = $request->random;
+
+            // Don't cache random requests — each call must be unique
+            if ($random) {
+                $stores = $this->storeRepository->getAll($search, $is_verified, $limit, $random, true);
+            } else {
+                $cacheKey = "stores_index_search_{$search}_verified_{$is_verified}_limit_{$limit}";
+                $stores = \Illuminate\Support\Facades\Cache::tags(['stores'])->remember($cacheKey, 600, function () use ($search, $is_verified, $limit, $random) {
+                    return $this->storeRepository->getAll($search, $is_verified, $limit, $random, true);
+                });
+            }
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', StoreResource::collection($stores), 200);
         } catch (\Exception $e) {
@@ -85,6 +98,7 @@ class StoreController extends Controller implements HasMiddleware
 
         try {
             $store = $this->storeRepository->create($request);
+            \Illuminate\Support\Facades\Cache::tags(['stores'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Ditambahkan', new StoreResource($store), 201);
         } catch (\Exception $e) {
@@ -188,6 +202,7 @@ class StoreController extends Controller implements HasMiddleware
             }
 
             $store = $this->storeRepository->update($id, $request);
+            \Illuminate\Support\Facades\Cache::tags(['stores'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diupdate', new StoreResource($store), 200);
         } catch (\Exception $e) {
@@ -208,6 +223,7 @@ class StoreController extends Controller implements HasMiddleware
             }
 
             $store = $this->storeRepository->delete($id);
+            \Illuminate\Support\Facades\Cache::tags(['stores'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Dihapus', new StoreResource($store), 200);
         } catch (\Exception $e) {

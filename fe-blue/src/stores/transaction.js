@@ -67,14 +67,20 @@ export const useTransactionStore = defineStore('transaction', {
       this.error = null
 
       try {
-        const response = await axiosInstance.post(`transaction`, payload)
+        // Idempotency: generate unique key per checkout attempt to prevent double-charge
+        const idempotencyKey = crypto.randomUUID()
+
+        const response = await axiosInstance.post(`transaction`, payload, {
+          headers: {
+            'X-Idempotency-Key': idempotencyKey
+          }
+        })
 
         this.success = response.data.message
 
         return response.data.data
       } catch (error) {
         this.error = handleError(error)
-        // ✅ Throw error agar bisa di-catch di component
         throw error
       } finally {
         this.loading = false
@@ -102,7 +108,6 @@ export const useTransactionStore = defineStore('transaction', {
         })
 
         this.success = response.data.message
-        return response.data.data
         return response.data.data
       } catch (error) {
         this.error = handleError(error)

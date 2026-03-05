@@ -47,7 +47,9 @@ class MidtransController extends Controller
 
         $transactionStatus = $request->transaction_status;
         $transactionCode = $request->order_id;
-        $transaction = Transaction::where('code', $transactionCode)->first();
+
+        // Lock the transaction row to prevent concurrent duplicate webhook processing
+        $transaction = Transaction::where('code', $transactionCode)->lockForUpdate()->first();
         
         file_put_contents(storage_path('logs/debug.txt'), "RX CALLBACK: Status=$transactionStatus Type={$request->payment_type}\n", FILE_APPEND);
 
@@ -62,6 +64,11 @@ class MidtransController extends Controller
                     if ($request->fraud_status == 'challenge') {
                         $transaction->update(['payment_status' => 'unpaid']);
                     } else {
+                        // Guard: skip if already paid (prevents double-credit on duplicate webhook)
+                        if ($transaction->payment_status === 'paid') {
+                            Log::info('Duplicate webhook ignored for: ' . $transactionCode);
+                            break;
+                        }
                         $transaction->update(['payment_status' => 'paid']);
 
                         $store = Store::find($transaction->store_id);
@@ -113,6 +120,12 @@ class MidtransController extends Controller
 
             case 'settlement':
                 file_put_contents(storage_path('logs/debug.txt'), "STATUS: SETTLEMENT\n", FILE_APPEND);
+
+                // Guard: skip if already paid (prevents double-credit on duplicate webhook)
+                if ($transaction->payment_status === 'paid') {
+                    Log::info('Duplicate settlement webhook ignored for: ' . $transactionCode);
+                    break;
+                }
                 $transaction->update(['payment_status' => 'paid']);
 
                 $store = Store::find($transaction->store_id);

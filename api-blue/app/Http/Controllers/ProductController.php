@@ -72,7 +72,19 @@ class ProductController extends Controller implements HasMiddleware
 
         try {
             $filters = $request->only(['min_price', 'max_price', 'condition', 'city', 'min_rating', 'stock_status', 'created_since', 'sort_by', 'sort_direction']);
-            $products = $this->productRepository->getAllPaginated($validated['search'] ?? null, $validated['store_id'] ?? null, $validated['product_category_id'] ?? null, $validated['row_per_page'], $filters);
+            
+            // Only cache when there's no active search/filter to avoid pollution
+            $hasFilters = !empty(array_filter($filters)) || !empty($validated['search']) || !empty($validated['product_category_id']) || !empty($validated['store_id']);
+
+            if ($hasFilters) {
+                $products = $this->productRepository->getAllPaginated($validated['search'] ?? null, $validated['store_id'] ?? null, $validated['product_category_id'] ?? null, $validated['row_per_page'], $filters);
+            } else {
+                $cacheKey = "products_paginated_page_{$validated['row_per_page']}";
+                $products = \Illuminate\Support\Facades\Cache::tags(['products'])->remember($cacheKey, 600, function () use ($validated, $filters) {
+                    return $this->productRepository->getAllPaginated($validated['search'] ?? null, $validated['store_id'] ?? null, $validated['product_category_id'] ?? null, $validated['row_per_page'], $filters);
+                });
+            }
+
             $totalSold = $this->productRepository->getTotalSold();
             // Log::info("CONTROLLER debug totalSold: " . $totalSold);
             // Log::info("CONTROLLER debug Auth: " . (auth()->check() ? auth()->user()->id : 'Guest'));
@@ -104,6 +116,7 @@ class ProductController extends Controller implements HasMiddleware
 
         try {
             $product = $this->productRepository->create($request);
+            \Illuminate\Support\Facades\Cache::tags(['products'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Produk Berhasil Ditambahkan', new ProductResource($product), 201);
         } catch (\Exception $e) {
@@ -159,6 +172,7 @@ class ProductController extends Controller implements HasMiddleware
             }
 
             $product = $this->productRepository->update($id, $request);
+            \Illuminate\Support\Facades\Cache::tags(['products'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diupdate', new ProductResource($product), 200);
         } catch (\Exception $e) {
@@ -179,6 +193,7 @@ class ProductController extends Controller implements HasMiddleware
             }
 
             $product = $this->productRepository->delete($id);
+            \Illuminate\Support\Facades\Cache::tags(['products'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Dihapus', new ProductResource($product), 200);
         } catch (\Exception $e) {
