@@ -42,7 +42,7 @@ const emit = defineEmits(['delete', 'toggle-selection'])
           <p class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
             <span class="font-bold text-sm md:text-base text-custom-blue">{{
               item.product_category?.name
-            }}</span>
+              }}</span>
           </p>
         </div>
       </div>
@@ -90,7 +90,7 @@ const emit = defineEmits(['delete', 'toggle-selection'])
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black dark:bg-white dark:hover:bg-gray-200 transition-colors">
           <img src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0"
             alt="icon" />
-          <span class="font-semibold text-white dark:text-custom-black">Edit</span>
+          <span class="font-semibold text-white dark:text-black">Edit</span>
         </RouterLink>
         <RouterLink :to="{ name: 'admin.product.detail', params: { id: item.id } }"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
