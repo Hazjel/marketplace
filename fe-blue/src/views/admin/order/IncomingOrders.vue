@@ -149,76 +149,52 @@ watch(error, (val) => {
 <template>
   <div class="flex flex-col gap-6 animate-fade-in-up">
     <div class="flex items-center justify-between">
-      <h1 class="font-bold text-2xl">Incoming Orders</h1>
+      <h1 class="font-bold text-2xl dark:text-white">Incoming Orders</h1>
     </div>
 
     <!-- Tabs -->
     <div class="flex items-center gap-3 overflow-x-auto pb-2 hide-scrollbar">
-      <button
-        v-for="tab in tabs"
-        :key="tab.value"
-        class="px-5 py-3 rounded-full font-semibold whitespace-nowrap transition-all duration-300 border"
-        :class="
-          activeTab === tab.value
-            ? 'bg-custom-black text-white border-custom-black'
-            : 'bg-white text-custom-grey border-custom-stroke hover:border-custom-black'
-        "
-        @click="activeTab = tab.value"
-      >
+      <button v-for="tab in tabs" :key="tab.value"
+        class="px-5 py-3 rounded-full font-semibold whitespace-nowrap transition-all duration-300 border" :class="activeTab === tab.value
+            ? 'bg-custom-black text-white border-custom-black dark:bg-white dark:text-custom-black dark:border-white'
+            : 'bg-white text-custom-grey border-custom-stroke hover:border-custom-black dark:bg-surface-card dark:text-gray-400 dark:border-white/10 dark:hover:border-white/30'
+          " @click="activeTab = tab.value">
         {{ tab.label }}
       </button>
     </div>
 
     <!-- List -->
     <div class="flex flex-col gap-4">
-      <div
-        v-for="t in filteredTransactions"
-        :key="t.id"
-        class="flex flex-col md:flex-row gap-5 p-5 bg-white rounded-[20px] border border-custom-stroke"
-      >
+      <div v-for="t in filteredTransactions" :key="t.id"
+        class="flex flex-col md:flex-row gap-5 p-5 bg-white dark:bg-surface-card rounded-[20px] border border-custom-stroke dark:border-white/10">
         <!-- Product Info -->
         <div class="flex-1 flex flex-col gap-4">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="font-bold text-lg">{{ t.code }}</span>
-            <span
-              class="px-3 py-1 rounded-full text-xs font-bold uppercase"
-              :class="{
-                'bg-yellow-100 text-yellow-600': t.payment_status === 'unpaid',
-                'bg-green-100 text-green-600': t.payment_status === 'paid',
-                'bg-red-100 text-red-600': t.payment_status === 'failed'
-              }"
-            >
+            <span class="font-bold text-lg dark:text-white">{{ t.code }}</span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
+              'bg-yellow-100 text-yellow-600': t.payment_status === 'unpaid',
+              'bg-green-100 text-green-600': t.payment_status === 'paid',
+              'bg-red-100 text-red-600': t.payment_status === 'failed'
+            }">
               {{ t.payment_status }}
             </span>
-            <span
-              class="px-3 py-1 rounded-full text-xs font-bold uppercase"
-              :class="{
-                'bg-gray-100 text-gray-600': t.delivery_status === 'pending',
-                'bg-blue-100 text-blue-600': t.delivery_status === 'processing',
-                'bg-purple-100 text-purple-600': t.delivery_status === 'delivering',
-                'bg-green-100 text-green-600': t.delivery_status === 'completed',
-                'bg-red-100 text-red-600': t.delivery_status === 'cancelled'
-              }"
-            >
+            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
+              'bg-gray-100 text-gray-600': t.delivery_status === 'pending',
+              'bg-blue-100 text-blue-600': t.delivery_status === 'processing',
+              'bg-purple-100 text-purple-600': t.delivery_status === 'delivering',
+              'bg-green-100 text-green-600': t.delivery_status === 'completed',
+              'bg-red-100 text-red-600': t.delivery_status === 'cancelled'
+            }">
               {{ t.delivery_status }}
             </span>
           </div>
 
-          <div
-            v-for="detail in t.transaction_details"
-            :key="detail.id"
-            class="flex items-start gap-4"
-          >
-            <img
-              :src="
-                detail.product.product_images?.find((i) => i.is_thumbnail)?.image ||
-                detail.product.product_images?.[0]?.image
-              "
-              class="w-16 h-16 rounded-xl object-cover bg-gray-100"
-              alt=""
-            />
+          <div v-for="detail in t.transaction_details" :key="detail.id" class="flex items-start gap-4">
+            <img :src="detail.product.product_images?.find((i) => i.is_thumbnail)?.image ||
+              detail.product.product_images?.[0]?.image
+              " class="w-16 h-16 rounded-xl object-cover bg-gray-100 dark:bg-white/5" alt="" />
             <div>
-              <p class="font-bold text-custom-black line-clamp-1">{{ detail.product.name }}</p>
+              <p class="font-bold text-custom-black dark:text-white line-clamp-1">{{ detail.product.name }}</p>
               <p class="text-custom-grey text-sm">
                 {{ detail.qty }} x {{ formatRupiah(detail.product.price) }}
               </p>
@@ -229,9 +205,8 @@ watch(error, (val) => {
             <div class="flex items-center gap-2">
               <img src="@/assets/images/icons/location-grey.svg" class="w-4 h-4" alt="" />
               <div class="flex flex-col">
-                <span class="text-xs font-bold text-custom-black uppercase"
-                  >{{ t.shipping }} - {{ t.shipping_type }}</span
-                >
+                <span class="text-xs font-bold text-custom-black dark:text-white uppercase">{{ t.shipping }} - {{
+                  t.shipping_type }}</span>
                 <span class="text-xs text-custom-grey">{{ t.city }}, {{ t.postal_code }}</span>
               </div>
             </div>
@@ -240,8 +215,7 @@ watch(error, (val) => {
 
         <!-- Customer & Actions -->
         <div
-          class="flex flex-col justify-between items-start md:items-end gap-4 min-w-[200px] border-t md:border-t-0 pt-4 md:pt-0 border-dashed border-custom-stroke"
-        >
+          class="flex flex-col justify-between items-start md:items-end gap-4 min-w-[200px] border-t md:border-t-0 pt-4 md:pt-0 border-dashed border-custom-stroke dark:border-white/10">
           <div class="text-left md:text-right w-full">
             <p class="text-sm text-custom-grey">Total Belanja</p>
             <p class="font-bold text-xl text-custom-blue">{{ formatRupiah(t.grand_total) }}</p>
@@ -252,15 +226,13 @@ watch(error, (val) => {
             <!-- Actions for New Paid Orders -->
             <template v-if="t.payment_status === 'paid' && t.delivery_status === 'pending'">
               <button
-                class="px-6 py-3 rounded-full bg-custom-black text-white font-semibold text-sm hover:bg-black/80 transition-300"
-                @click="handleAccept(t.id)"
-              >
+                class="px-6 py-3 rounded-full bg-custom-black text-white font-semibold text-sm hover:bg-black/80 transition-300 dark:bg-white dark:text-custom-black dark:hover:bg-gray-200"
+                @click="handleAccept(t.id)">
                 Terima Pesanan
               </button>
               <button
-                class="px-6 py-3 rounded-full bg-gray-100 text-custom-red font-semibold text-sm hover:bg-red-50 transition-300"
-                @click="handleReject(t.id)"
-              >
+                class="px-6 py-3 rounded-full bg-gray-100 text-custom-red font-semibold text-sm hover:bg-red-50 transition-300 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+                @click="handleReject(t.id)">
                 Tolak Pesanan
               </button>
             </template>
@@ -269,79 +241,54 @@ watch(error, (val) => {
             <template v-if="t.delivery_status === 'processing'">
               <button
                 class="px-6 py-3 rounded-full bg-custom-blue text-white font-semibold text-sm hover:bg-blue-600 transition-300"
-                @click="openResiModal(t.id)"
-              >
+                @click="openResiModal(t.id)">
                 Input Resi
               </button>
             </template>
 
             <!-- Tracking Info -->
-            <div
-              v-if="t.tracking_number"
-              class="text-right bg-blue-50 p-3 rounded-xl border border-dashed border-blue-200"
-            >
+            <div v-if="t.tracking_number"
+              class="text-right bg-blue-50 dark:bg-blue-900/10 p-3 rounded-xl border border-dashed border-blue-200 dark:border-blue-900/30">
               <p class="text-xs text-custom-blue font-semibold">No. Resi</p>
-              <p class="font-bold font-mono text-custom-black">{{ t.tracking_number }}</p>
+              <p class="font-bold font-mono text-custom-black dark:text-white">{{ t.tracking_number }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div
-        v-if="filteredTransactions.length === 0"
-        class="flex flex-col items-center justify-center p-10 bg-white rounded-[20px] border border-custom-stroke"
-      >
-        <img
-          src="@/assets/images/icons/note-remove-grey.svg"
-          class="size-16 opacity-50 mb-4"
-          alt=""
-        />
+      <div v-if="filteredTransactions.length === 0"
+        class="flex flex-col items-center justify-center p-10 bg-white dark:bg-surface-card rounded-[20px] border border-custom-stroke dark:border-white/10">
+        <img src="@/assets/images/icons/note-remove-grey.svg" class="size-16 opacity-50 mb-4" alt="" />
         <p class="font-semibold text-custom-grey">No orders found.</p>
       </div>
     </div>
 
     <!-- Resi Modal -->
     <Teleport to="body">
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="opacity-0 scale-95"
-        enter-to-class="opacity-100 scale-100"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="opacity-100 scale-100"
-        leave-to-class="opacity-0 scale-95"
-      >
-        <div
-          v-if="showResiModal"
-          class="fixed inset-0 z-[999] flex items-center justify-center p-4"
-        >
-          <div
-            class="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            @click="showResiModal = false"
-          ></div>
-          <div class="relative bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="font-bold text-xl mb-4">Input Tracking Number</h3>
+      <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+        <div v-if="showResiModal" class="fixed inset-0 z-[999] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showResiModal = false"></div>
+          <div class="relative bg-white dark:bg-surface-card rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="font-bold text-xl mb-4 dark:text-white">Input Tracking Number</h3>
             <div class="flex flex-col gap-4">
               <label class="flex flex-col gap-2">
                 <span class="text-sm font-semibold text-custom-grey">Resi Number</span>
-                <input
-                  v-model="resiInput"
-                  type="text"
-                  class="custom-input h-12 pt-0 pb-0 flex items-center"
-                  placeholder="JP..."
-                />
+                <input v-model="resiInput" type="text"
+                  class="custom-input h-12 pt-0 pb-0 flex items-center dark:bg-white/5 dark:text-white dark:border-white/10"
+                  placeholder="JP..." />
               </label>
               <div class="flex gap-3 mt-2">
                 <button
-                  class="flex-1 py-3 rounded-full bg-gray-100 font-semibold text-custom-grey"
-                  @click="showResiModal = false"
-                >
+                  class="flex-1 py-3 rounded-full bg-gray-100 dark:bg-white/5 font-semibold text-custom-grey dark:text-gray-400 dark:hover:bg-white/10"
+                  @click="showResiModal = false">
                   Cancel
                 </button>
                 <button
-                  class="flex-1 py-3 rounded-full bg-custom-black text-white font-semibold"
-                  @click="submitResi"
-                >
+                  class="flex-1 py-3 rounded-full bg-custom-black dark:bg-white/10 text-white font-semibold dark:hover:bg-white/20"
+                  @click="submitResi">
                   Submit
                 </button>
               </div>
