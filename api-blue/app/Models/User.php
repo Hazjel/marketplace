@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Traits\UUID;
@@ -20,10 +21,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         if ($value) {
             // Check if it is an external URL (Google, etc.)
-            if (str_starts_with($value, 'http')) {
+            if (str_starts_with($value, "http")) {
                 return $value;
             }
-            return asset('storage/' . $value);
+            return asset("storage/" . $value);
         }
         return null;
     }
@@ -34,12 +35,12 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var list<string>
      */
     protected $fillable = [
-        'profile_picture',
-        'name',
-        'username', // Added
-        'email',
-        'password',
-        'last_seen_at',
+        "profile_picture",
+        "name",
+        "username", // Added
+        "email",
+        "password",
+        "last_seen_at",
     ];
 
     /**
@@ -47,10 +48,7 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ["password", "remember_token"];
 
     /**
      * Get the attributes that should be cast.
@@ -60,19 +58,22 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'last_seen_at' => 'datetime',
+            "email_verified_at" => "datetime",
+            "password" => "hashed",
+            "last_seen_at" => "datetime",
         ];
     }
 
     public function scopeSearch($query, $search)
-{
-    return $query->where(function($q) use ($search) {
-        $q->where('name', 'like', '%' . $search . '%')
-          ->orWhere('email', 'like', '%' . $search . '%');
-    });
-}
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where("name", "like", "%" . $search . "%")->orWhere(
+                "email",
+                "like",
+                "%" . $search . "%",
+            );
+        });
+    }
 
     public function store()
     {
@@ -86,16 +87,30 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sentMessages()
     {
-        return $this->hasMany(Message::class, 'sender_id');
+        return $this->hasMany(Message::class, "sender_id");
     }
 
     public function receivedMessages()
     {
-        return $this->hasMany(Message::class, 'receiver_id');
+        return $this->hasMany(Message::class, "receiver_id");
     }
 
     public function followingStores()
     {
-        return $this->belongsToMany(Store::class, 'store_followers', 'user_id', 'store_id')->withTimestamps();
+        return $this->belongsToMany(
+            Store::class,
+            "store_followers",
+            "user_id",
+            "store_id",
+        )->withTimestamps();
+    }
+
+    /**
+     * Override agar link reset password mengarah ke frontend (Vue),
+     * bukan ke APP_URL backend Laravel.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

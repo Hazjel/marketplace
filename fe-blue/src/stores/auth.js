@@ -113,6 +113,65 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false
       }
+    },
+
+    async forgotPassword(email) {
+      this.loading = true
+      this.error = null
+      this.success = null
+
+      try {
+        const response = await axiosInstance.post('/password/forgot', { email })
+        this.success = response.data.message
+        return { success: true, message: response.data.message }
+      } catch (error) {
+        const status = error.response?.status
+        const message = error.response?.data?.message
+
+        if (status === 422 || status === 404) {
+          this.error = { email: [message || 'Email tidak terdaftar.'] }
+        } else if (status === 429) {
+          this.error = { email: ['Terlalu banyak percobaan. Silakan tunggu sebentar.'] }
+        } else {
+          this.error = handleError(error)
+        }
+        return { success: false }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async resetPassword(payload) {
+      this.loading = true
+      this.error = null
+      this.success = null
+
+      try {
+        const response = await axiosInstance.post('/password/reset', payload)
+        this.success = response.data.message
+        return { success: true, message: response.data.message }
+      } catch (error) {
+        const status = error.response?.status
+        const message = error.response?.data?.message
+
+        if (status === 422) {
+          if (
+            message?.toLowerCase().includes('token') ||
+            message?.toLowerCase().includes('kadaluarsa')
+          ) {
+            this.error = { token: [message] }
+          } else {
+            this.error = { password: [message || 'Validasi gagal.'] }
+          }
+        } else if (status === 404) {
+          this.error = { email: [message || 'Email tidak ditemukan.'] }
+        } else {
+          this.error = handleError(error)
+        }
+        return { success: false }
+      } finally {
+        this.loading = false
+      }
     }
   }
 })

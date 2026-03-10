@@ -67,7 +67,7 @@ class AuthController extends Controller
         try {
             $user = $this->authRepository->me();
 
-            return ResponseHelper::jsonResponse(true, 'Profile Berhasll Diambil', new UserResource($user), 200);
+            return ResponseHelper::jsonResponse(true, 'Profile Berhasil Diambil', new UserResource($user), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
@@ -97,7 +97,7 @@ class AuthController extends Controller
         try {
             $user = $this->authRepository->logout();
 
-            return ResponseHelper::jsonResponse(true, 'Logout Berhasll', new UserResource($user), 200);
+            return ResponseHelper::jsonResponse(true, 'Logout Berhasil', new UserResource($user), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }

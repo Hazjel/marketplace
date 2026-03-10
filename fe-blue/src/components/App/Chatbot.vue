@@ -83,7 +83,7 @@ const sendMessage = async () => {
     >
       <div
         v-if="isOpen"
-        class="w-[85vw] max-w-[350px] h-[60vh] md:h-[450px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
+        class="w-[85vw] max-w-[350px] h-[60vh] md:h-[450px] bg-white dark:bg-surface-card rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-white/10"
       >
         <div class="bg-custom-blue p-4 flex justify-between items-center text-white shrink-0">
           <div class="flex items-center gap-2">
@@ -101,14 +101,17 @@ const sendMessage = async () => {
           </button>
         </div>
 
-        <div ref="chatContainer" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-gray-50">
+        <div
+          ref="chatContainer"
+          class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-gray-50 dark:bg-surface"
+        >
           <div
             v-for="(chat, index) in chats"
             :key="index"
             class="max-w-[90%] px-4 py-3 rounded-2xl text-[15px] leading-relaxed whitespace-pre-wrap"
             :class="
               chat.isBot
-                ? 'bg-white border border-gray-200 text-gray-700 rounded-tl-none'
+                ? 'bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 rounded-tl-none'
                 : 'bg-custom-blue text-white rounded-tr-none'
             "
             :style="chat.isBot ? 'align-self: flex-start;' : 'align-self: flex-end;'"
@@ -118,22 +121,28 @@ const sendMessage = async () => {
 
           <div
             v-if="isLoading"
-            class="bg-white border border-gray-200 self-start p-3 rounded-2xl rounded-tl-none w-fit"
+            class="bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 self-start p-3 rounded-2xl rounded-tl-none w-fit"
           >
             <div class="flex gap-1">
-              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
-              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+              <span class="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></span>
+              <span
+                class="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce delay-75"
+              ></span>
+              <span
+                class="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce delay-150"
+              ></span>
             </div>
           </div>
         </div>
 
-        <div class="p-3 bg-white border-t flex gap-2 shrink-0">
+        <div
+          class="p-3 bg-white dark:bg-surface-card border-t border-gray-200 dark:border-white/10 flex gap-2 shrink-0"
+        >
           <input
             v-model="message"
             type="text"
-            placeholder="Tanya rekomendasi makanan..."
-            class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-custom-blue/50"
+            placeholder="Tanya produk Blukios..."
+            class="flex-1 bg-gray-100 dark:bg-white/5 text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-custom-blue/50 dark:focus:ring-custom-blue/30"
             :disabled="isLoading"
             @keyup.enter="sendMessage"
           />
