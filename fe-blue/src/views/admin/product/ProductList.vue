@@ -139,8 +139,7 @@ watch(error, (value) => {
       class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white dark:bg-surface-card dark:text-white animate-fade-in-up delay-100">
       <div class="flex flex-col gap-6">
         <div class="flex size-[56px] bg-custom-blue/10 dark:bg-custom-blue/20 items-center justify-center rounded-full">
-          <img
-src="@/assets/images/icons/presention-chart-blue.svg" class="flex size-6 shrink-0 dark:invert"
+          <img src="@/assets/images/icons/presention-chart-blue.svg" class="flex size-6 shrink-0 dark:invert"
             alt="icon" />
         </div>
         <div class="flex flex-col gap-[6px]">
@@ -162,11 +161,11 @@ src="@/assets/images/icons/presention-chart-blue.svg" class="flex size-6 shrink-
           <p class="font-semibold text-custom-grey">{{ meta?.total }} Total Products</p>
         </div>
       </div>
-      <RouterLink
-v-if="user?.permissions?.includes('product-create')" :to="{ name: 'admin.product.create' }"
-        class="flex h-14 w-full md:w-auto justify-center items-center rounded-full py-4 px-6 bg-custom-black gap-[6px] hover:bg-black/80 transition-300">
-        <span class="font-semibold text-lg text-white leading-none">Add New</span>
-        <img src="@/assets/images/icons/add-circle-white.svg" class="flex size-6 shrink-0" alt="icon" />
+      <RouterLink v-if="user?.permissions?.includes('product-create')" :to="{ name: 'admin.product.create' }"
+        class="flex h-14 w-full md:w-auto justify-center items-center rounded-full py-4 px-6 bg-custom-black gap-[6px] hover:bg-black/80 transition-300 dark:bg-white dark:hover:bg-gray-200">
+        <span class="font-semibold text-lg text-white leading-none dark:text-custom-black">Add New</span>
+        <img src="@/assets/images/icons/add-circle-white.svg"
+          class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0" alt="icon" />
       </RouterLink>
     </div>
     <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -174,8 +173,7 @@ v-if="user?.permissions?.includes('product-create')" :to="{ name: 'admin.product
         <label
           class="cursor-pointer flex items-center gap-2 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 rounded-2xl h-14 px-4 hover:border-custom-black dark:hover:border-white transition-colors"
           title="Select All">
-          <input
-type="checkbox" :checked="allSelected"
+          <input type="checkbox" :checked="allSelected"
             class="checkbox checkbox-primary rounded-lg size-5 border-2 border-gray-300 checked:bg-custom-blue checked:border-custom-blue transition-all"
             @change="toggleSelectAll" />
           <span class="font-semibold text-custom-black dark:text-white hidden md:block">All</span>
@@ -185,8 +183,7 @@ type="checkbox" :checked="allSelected"
           <label
             class="flex items-center w-full md:w-[320px] h-14 rounded-2xl p-4 gap-2 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
             <img src="@/assets/images/icons/box-search-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
-            <input
-v-model="filters.search" type="text"
+            <input v-model="filters.search" type="text"
               class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none bg-transparent dark:text-white"
               placeholder="Search product" />
           </label>
@@ -197,34 +194,29 @@ v-model="filters.search" type="text"
         <p class="font-medium text-custom-grey">Show</p>
         <label
           class="flex items-center h-14 rounded-2xl border border-custom-stroke dark:border-white/10 py-4 px-5 pl-3 bg-white dark:bg-surface-card focus-within:border-custom-black transition-300">
-          <select
-id="" v-model="serverOptions.row_per_page" name=""
+          <select id="" v-model="serverOptions.row_per_page" name=""
             class="text-custom-black dark:text-white font-medium appearance-none focus:outline-none p-2 bg-transparent">
             <option value="10" class="font-medium dark:bg-surface-card">10 Entries</option>
             <option value="20" class="font-medium dark:bg-surface-card">20 Entries</option>
             <option value="40" class="font-medium dark:bg-surface-card">40 Entries</option>
           </select>
-          <img
-src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
+          <img src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
             alt="icon" />
         </label>
       </div>
     </div>
     <div id="List-Categories" class="flex flex-col gap-6 relative">
       <div v-if="!loading && products" id="List" class="flex flex-col gap-5 pb-20">
-        <CardList
-v-for="product in products" :key="product.id" :item="product"
+        <CardList v-for="product in products" :key="product.id" :item="product"
           :selected="selectedItems.includes(product.id)" @toggle-selection="toggleSelection" @delete="handleDelete" />
       </div>
 
       <!-- Floating Bulk Action Bar -->
-      <div
-v-if="selectedItems.length > 0"
+      <div v-if="selectedItems.length > 0"
         class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-surface-card dark:text-white shadow-2xl rounded-full px-6 py-3 flex items-center gap-4 border border-gray-100 dark:border-white/10 z-50 animate-fade-in-up">
         <span class="font-bold text-custom-black dark:text-white">{{ selectedItems.length }} Selected</span>
         <div class="h-6 w-[1px] bg-gray-200 dark:bg-gray-700"></div>
-        <button
-class="flex items-center gap-2 text-custom-red hover:bg-red-50 px-3 py-1 rounded-lg transition-colors"
+        <button class="flex items-center gap-2 text-custom-red hover:bg-red-50 px-3 py-1 rounded-lg transition-colors"
           @click="bulkDelete">
           <img src="@/assets/images/icons/trash-red.svg" class="size-5" />
           <span class="font-bold text-sm">Delete Selected</span>
