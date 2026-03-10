@@ -144,11 +144,13 @@ onMounted(fetchStoreBalance)
       </div>
     </section>
     <div class="flex flex-col gap-5 w-full xl:w-[470px] shrink-0">
-      <div class="relative w-full rounded-[20px] bg-custom-black overflow-hidden">
+      <div
+        class="relative w-full rounded-[20px] bg-custom-black dark:bg-white/10 dark:border dark:border-white/10 overflow-hidden">
         <img src="@/assets/images/backgrounds/round-ornament.svg"
-          class="size-full object-contain object-right opacity-55 absolute" alt="icon" />
+          class="size-full object-contain object-right opacity-55 absolute dark:opacity-20" alt="icon" />
         <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
-          <img src="@/assets/images/icons/shield-tick-white-fill.svg" class="flex size-9 shrink-0" alt="icon" />
+          <img src="@/assets/images/icons/shield-tick-white-fill.svg" class="flex size-9 shrink-0 dark:brightness-100"
+            alt="icon" />
           <p class="font-bold text-lg text-white">Your funds are safe and well protected</p>
         </div>
       </div>
