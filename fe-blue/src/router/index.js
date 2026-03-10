@@ -9,6 +9,8 @@ import Wishlist from '@/views/App/Wishlist.vue'
 import Auth from '@/layouts/Auth.vue'
 import Login from '@/views/auth/Login.vue'
 import Register from '@/views/auth/Register.vue'
+import ForgotPassword from '@/views/auth/ForgotPassword.vue'
+import ResetPassword from '@/views/auth/ResetPassword.vue'
 import Admin from '@/layouts/Admin.vue'
 import Dashboard from '@/views/admin/Dashboard.vue'
 import CategoryList from '@/views/admin/category/CategoryList.vue'
@@ -59,6 +61,18 @@ const router = createRouter({
           path: 'google/callback',
           name: 'auth.google.callback',
           component: () => import('@/views/auth/AuthCallback.vue')
+        },
+        {
+          path: 'forgot-password',
+          name: 'auth.forgot-password',
+          component: ForgotPassword,
+          meta: { guestOnly: true }
+        },
+        {
+          path: 'reset-password',
+          name: 'auth.reset-password',
+          component: ResetPassword,
+          meta: { guestOnly: true }
         }
       ]
     },

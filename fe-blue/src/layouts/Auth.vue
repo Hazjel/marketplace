@@ -36,7 +36,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="flex min-h-screen w-full font-sans text-custom-black bg-white">
+  <main
+    class="flex min-h-screen w-full font-sans text-custom-black bg-white dark:bg-surface dark:text-white"
+  >
     <!-- Left Side: Cinematic Slider (Fixed Width or 50%) -->
     <div class="hidden lg:block w-[50%] h-screen relative overflow-hidden bg-gray-900 sticky top-0">
       <div class="swiper w-full h-full">
@@ -44,25 +46,48 @@ onMounted(() => {
           <!-- Slide 1 -->
           <div class="swiper-slide relative flex w-full h-full overflow-hidden group">
             <img
-src="@/assets/images/backgrounds/login-slide-1.webp"
-              class="w-full h-full object-cover object-top ken-burns" alt="thumbnail" />
+              src="@/assets/images/backgrounds/login-slide-1.webp"
+              class="w-full h-full object-cover object-top ken-burns"
+              alt="thumbnail"
+            />
 
             <!-- Glassmorphism Testimonial Card -->
             <div
-              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl">
+              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl"
+            >
               <!-- Stars -->
               <div class="flex items-center gap-1 mb-6">
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
               </div>
 
               <!-- Quote -->
               <p class="font-serif text-2xl lg:text-3xl leading-relaxed italic opacity-95 mb-8">
-                “Since joining Blue Marketplace, managing my inventory and connecting with buyers has been seamless and
-                efficient.”
+                “Since joining Blue Marketplace, managing my inventory and connecting with buyers
+                has been seamless and efficient.”
               </p>
 
               <!-- Footer: Author & Arrows -->
@@ -79,14 +104,24 @@ src="@/assets/images/backgrounds/login-slide-1.webp"
                 <!-- Navigation Arrows (Inside Card) -->
                 <div class="flex items-center gap-3">
                   <div
-class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center justify-center transition-all bg-white/10 border border-white/20 backdrop-blur-sm shadow-md active:scale-95"
-                    @click="swiperInstance?.slidePrev()">
-                    <img src="@/assets/images/icons/arrow-right-white.svg" class="size-5 rotate-180" alt="prev" />
+                    class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center justify-center transition-all bg-white/10 border border-white/20 backdrop-blur-sm shadow-md active:scale-95"
+                    @click="swiperInstance?.slidePrev()"
+                  >
+                    <img
+                      src="@/assets/images/icons/arrow-right-white.svg"
+                      class="size-5 rotate-180"
+                      alt="prev"
+                    />
                   </div>
                   <div
-class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center justify-center transition-all bg-white/10 border border-white/20 backdrop-blur-sm shadow-md active:scale-95"
-                    @click="swiperInstance?.slideNext()">
-                    <img src="@/assets/images/icons/arrow-right-white.svg" class="size-5" alt="next" />
+                    class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center justify-center transition-all bg-white/10 border border-white/20 backdrop-blur-sm shadow-md active:scale-95"
+                    @click="swiperInstance?.slideNext()"
+                  >
+                    <img
+                      src="@/assets/images/icons/arrow-right-white.svg"
+                      class="size-5"
+                      alt="next"
+                    />
                   </div>
                 </div>
               </div>
@@ -96,16 +131,39 @@ class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center j
           <!-- Slide 2 -->
           <div class="swiper-slide relative flex w-full h-full overflow-hidden group">
             <img
-src="@/assets/images/backgrounds/login-slide-2.webp"
-              class="w-full h-full object-cover object-top ken-burns" alt="thumbnail" />
+              src="@/assets/images/backgrounds/login-slide-2.webp"
+              class="w-full h-full object-cover object-top ken-burns"
+              alt="thumbnail"
+            />
             <div
-              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl">
+              class="absolute bottom-12 left-12 right-12 flex flex-col p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md text-white shadow-2xl"
+            >
               <div class="flex items-center gap-1 mb-6">
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
-                <img src="@/assets/images/icons/Star-rounded.svg" class="size-6 shrink-0" alt="star" />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
+                <img
+                  src="@/assets/images/icons/Star-rounded.svg"
+                  class="size-6 shrink-0"
+                  alt="star"
+                />
               </div>
               <p class="font-serif text-2xl lg:text-3xl leading-relaxed italic opacity-95 mb-8">
                 “Going digital was a game changer 🎯 It simplified growth and cut out the chaos.”
@@ -130,14 +188,24 @@ src="@/assets/images/backgrounds/login-slide-2.webp"
                 <!-- I will keep the arrows inside the slide for Visuals. -->
                 <div class="flex items-center gap-3">
                   <div
-class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center justify-center transition-all bg-white/10 border border-white/20 backdrop-blur-sm shadow-md active:scale-95"
-                    @click="swiperInstance?.slidePrev()">
-                    <img src="@/assets/images/icons/arrow-right-white.svg" class="size-5 rotate-180" alt="prev" />
+                    class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center justify-center transition-all bg-white/10 border border-white/20 backdrop-blur-sm shadow-md active:scale-95"
+                    @click="swiperInstance?.slidePrev()"
+                  >
+                    <img
+                      src="@/assets/images/icons/arrow-right-white.svg"
+                      class="size-5 rotate-180"
+                      alt="prev"
+                    />
                   </div>
                   <div
-class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center justify-center transition-all bg-white/10 border border-white/20 backdrop-blur-sm shadow-md active:scale-95"
-                    @click="swiperInstance?.slideNext()">
-                    <img src="@/assets/images/icons/arrow-right-white.svg" class="size-5" alt="next" />
+                    class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center justify-center transition-all bg-white/10 border border-white/20 backdrop-blur-sm shadow-md active:scale-95"
+                    @click="swiperInstance?.slideNext()"
+                  >
+                    <img
+                      src="@/assets/images/icons/arrow-right-white.svg"
+                      class="size-5"
+                      alt="next"
+                    />
                   </div>
                 </div>
               </div>
@@ -148,7 +216,9 @@ class="flex size-10 cursor-pointer hover:bg-white/20 rounded-full items-center j
     </div>
 
     <!-- Right Side: Form Container -->
-    <div class="flex w-full lg:w-[50%] min-h-screen items-center justify-center p-6 lg:p-24 relative overflow-y-auto">
+    <div
+      class="flex w-full lg:w-[50%] min-h-screen items-center justify-center p-6 lg:p-24 relative overflow-y-auto bg-white dark:bg-surface"
+    >
       <div class="w-full max-w-[480px]">
         <RouterView />
       </div>
