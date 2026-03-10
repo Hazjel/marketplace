@@ -156,8 +156,8 @@ watch(error, (val) => {
     <div class="flex items-center gap-3 overflow-x-auto pb-2 hide-scrollbar">
       <button v-for="tab in tabs" :key="tab.value"
         class="px-5 py-3 rounded-full font-semibold whitespace-nowrap transition-all duration-300 border" :class="activeTab === tab.value
-            ? 'bg-custom-black text-white border-custom-black dark:bg-white dark:text-custom-black dark:border-white'
-            : 'bg-white text-custom-grey border-custom-stroke hover:border-custom-black dark:bg-surface-card dark:text-gray-400 dark:border-white/10 dark:hover:border-white/30'
+            ? 'bg-custom-black text-white border-custom-black dark:bg-custom-blue dark:text-white dark:border-custom-blue'
+            : 'bg-white text-custom-grey border-custom-stroke hover:text-custom-black hover:border-custom-black dark:bg-white/5 dark:text-gray-400 dark:border-white/10 dark:hover:text-white dark:hover:border-white/30'
           " @click="activeTab = tab.value">
         {{ tab.label }}
       </button>
