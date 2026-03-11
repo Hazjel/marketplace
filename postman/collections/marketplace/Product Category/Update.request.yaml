@@ -1,0 +1,18 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/product-category/90176534-fa05-4f3e-96dd-8a9f69a63d2f
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: testing
+    - type: text
+      key: description
+      value: "12345678"
+    - type: text
+      key: _method
+      value: PUT
+order: 6000

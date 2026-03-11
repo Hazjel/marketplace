@@ -1,0 +1,14 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/product-category
+method: GET
+queryParams:
+  - key: limit
+    value: "3"
+    disabled: true
+  - key: search
+    value: ""
+    disabled: true
+  - key: is_parent
+    value: "true"
+    disabled: true
+order: 1000

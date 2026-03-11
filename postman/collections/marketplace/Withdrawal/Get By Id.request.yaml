@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/withdrawal/8b199427-ab3b-4b54-9f17-267d11b82cfd
+method: GET
+order: 3000

@@ -1,0 +1,40 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/store/
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: user_id
+      value: 019a91f4-1192-719e-8eb0-d52f6fd7cefe
+    - type: text
+      key: name
+      value: test store
+    - type: file
+      key: logo
+      src: /C:/Users/ASUS/Pictures/codelogin2.png
+    - type: text
+      key: about
+      value: toko apa yh ini
+    - type: text
+      key: phone
+      value: "081234567890"
+    - type: text
+      key: address_id
+      value: "72915"
+    - type: text
+      key: city
+      value: Purwokerto
+    - type: text
+      key: address
+      value: Cilegoon
+    - type: text
+      key: postal_code
+      value: "23512"
+auth:
+  type: bearer
+  credentials:
+    token: 62ff278f-cdc9-4862-bfa9-ef59fb30d757|HuJxMJGPetFAdzX3Dm1yT5149D8x4DWKMRAcpNi694602879
+order: 5000

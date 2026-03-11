@@ -1,0 +1,7 @@
+$kind: http-request
+url: https://rajaongkir.komerce.id/api/v1/track/waybill?awb=JX3124123423&courier=jnt
+method: GET
+queryParams:
+  awb: JX3124123423
+  courier: jnt
+order: 1000

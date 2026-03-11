@@ -1,0 +1,20 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/store/4160090c-2df2-4d1a-8bd6-a4b292ff45b0
+method: DELETE
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: testing
+      disabled: true
+    - type: text
+      key: password
+      value: "12345678"
+      disabled: true
+    - type: text
+      key: _method
+      value: PUT
+order: 7000

@@ -1,0 +1,11 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/withdrawal
+method: GET
+queryParams:
+  - key: search
+    value: Persero
+    disabled: true
+  - key: limit
+    value: "0"
+    disabled: true
+order: 1000

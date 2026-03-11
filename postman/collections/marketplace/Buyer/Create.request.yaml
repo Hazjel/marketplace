@@ -1,0 +1,18 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/buyer/
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: user_id
+      value: 190f12b9-069c-4c94-bc52-430caf15ee09
+    - type: file
+      key: profile_picture
+      src: /C:/Users/ASUS/Pictures/transaction.png
+    - type: text
+      key: phone_number
+      value: "1234567"
+order: 4000

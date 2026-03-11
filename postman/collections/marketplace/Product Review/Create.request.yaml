@@ -1,0 +1,32 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/product-review
+method: POST
+headers:
+  Accept: application/json
+queryParams:
+  - key: search
+    value: TRX-54874661
+    disabled: true
+  - key: limit
+    value: "3"
+    disabled: true
+body:
+  type: formdata
+  content:
+    - type: text
+      key: transaction_id
+      value: 019a91f4-351e-7105-9b36-569600eca5c3
+    - type: text
+      key: product_id
+      value: 019a91f4-1872-727c-b1d7-4e0ad95163f
+    - type: text
+      key: rating
+      value: "5"
+    - type: text
+      key: review
+      value: apalah ini
+auth:
+  type: bearer
+  credentials:
+    token: 94991194-221a-4ec2-9dde-79480be082b2|J8RB8PQlerdfrWRtAHXR32RlnkLuPt6LOWR7hbs66c6e18ac
+order: 1000

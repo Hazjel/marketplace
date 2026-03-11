@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/buyer/8d8e1157-2fc0-4e62-862f-f17e100ffee8
+method: GET
+order: 3000

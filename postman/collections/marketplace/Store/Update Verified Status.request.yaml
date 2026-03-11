@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/store/de00513b-409c-4f87-9837-ed2af143e355/verified
+method: POST
+order: 4000

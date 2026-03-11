@@ -1,0 +1,43 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/transaction
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: buyer_id
+      value: 019ac539-ab57-7268-b1a0-f3a55e4beb7b
+    - type: text
+      key: store_id
+      value: 019ac539-ab6e-7334-9552-10da61fa4c29
+    - type: text
+      key: address_id
+      value: "21312"
+    - type: text
+      key: address
+      value: ppp
+    - type: text
+      key: city
+      value: pppp
+    - type: text
+      key: postal_code
+      value: "12423"
+    - type: text
+      key: shipping
+      value: sicepat
+    - type: text
+      key: shipping_type
+      value: regular
+    - type: text
+      key: products[0][product_id]
+      value: 019ac539-a1f1-7347-a3ad-33ff23001662
+    - type: text
+      key: products[0][qty]
+      value: "2"
+auth:
+  type: bearer
+  credentials:
+    token: e2cd057a-c326-4087-8e4f-456f775f7801|zLlIsVIiNarmfpSSDseMZMbvItHni0EQiIpkfixr7ab9b5db
+order: 5000

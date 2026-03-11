@@ -1,0 +1,14 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/user?limit=0
+method: GET
+queryParams:
+  - key: search
+    value: admin
+    disabled: true
+  - key: limit
+    value: "0"
+auth:
+  type: bearer
+  credentials:
+    token: 7b6756fc-b049-484c-b05c-fbaba380ae88|ETaWG2vPJovLsAGZ5rKARQcijM8f9y579vHqq7DA7d4a5df9
+order: 1000

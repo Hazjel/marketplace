@@ -1,0 +1,33 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/store/de00513b-409c-4f87-9837-ed2af143e355
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: test store woilah
+    - type: text
+      key: about
+      value: toko apa yh ini
+    - type: text
+      key: phone
+      value: "081234567890"
+    - type: text
+      key: address_id
+      value: "72915"
+    - type: text
+      key: city
+      value: Purwokerto
+    - type: text
+      key: address
+      value: Cilegoon
+    - type: text
+      key: postal_code
+      value: "23512"
+    - type: text
+      key: _method
+      value: PUT
+order: 6000

@@ -1,0 +1,19 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/transaction?limit=3
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: search
+    value: TRX-54874661
+    disabled: true
+  - key: limit
+    value: "3"
+body:
+  type: formdata
+  content: []
+auth:
+  type: bearer
+  credentials:
+    token: dc43e6e9-02f0-48c6-8dea-20f5d6d34d1b|UwMp0AwXvvbOgdshcCf5v6cwUliCLg4YYTd2OKbr8be8a35d
+order: 1000
