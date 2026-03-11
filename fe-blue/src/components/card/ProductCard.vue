@@ -5,7 +5,6 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { Card, CardContent } from '@/components/ui/card'
 
 const props = defineProps({
   item: {
@@ -42,7 +41,7 @@ const handleToggleWishlist = async () => {
 </script>
 
 <template>
-  <Card
+  <div
     class="group flex flex-col overflow-hidden shadow-sm hover-glow-blue h-full cursor-pointer relative w-full rounded-2xl border-transparent">
     <!-- Wishlist Overlay -->
     <button
@@ -88,7 +87,7 @@ v-if="item.stock <= 0"
       </div>
 
       <!-- Content -->
-      <CardContent class="flex flex-col p-3 md:p-4 gap-1 flex-1 min-w-0">
+      <div class="flex flex-col p-3 md:p-4 gap-1 flex-1 min-w-0">
         <!-- Store -->
         <div class="flex items-center gap-1 mb-0.5">
           <img
@@ -126,7 +125,7 @@ v-if="item.original_price && item.discount > 0"
             • {{ item.location }}
           </span>
         </div>
-      </CardContent>
+      </div>
     </RouterLink>
-  </Card>
+  </div>
 </template>
