@@ -5,12 +5,13 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { parseRupiah } from '@/helpers/format'
 
 const route = useRoute()
 
 const productStore = useProductStore()
+const router = useRouter()
 const { error } = storeToRefs(productStore)
 const { fetchProductById, updateProduct } = productStore
 
@@ -131,7 +132,7 @@ const handleSubmit = async () => {
   // If variants are disabled, clear the array before sending
   const variantsData = product.value.has_variants ? product.value.variants : []
 
-  await updateProduct({
+  const result = await updateProduct({
     ...product.value,
     variants: variantsData,
     price: parseRupiah(product.value.price),
@@ -146,6 +147,11 @@ const handleSubmit = async () => {
       }),
     deleted_product_images: deletedImages.value
   })
+
+  // This component — not the store — is responsible for post-success navigation.
+  if (result?.success) {
+    router.push({ name: 'admin.product' })
+  }
 }
 
 const handleImageChange = (event, index) => {

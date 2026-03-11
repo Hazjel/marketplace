@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { axiosInstance } from '@/plugins/axios'
 import { handleError } from '@/helpers/errorHelper'
-import router from '@/router'
 
 export const useProductStore = defineStore('product', {
   state: () => ({
@@ -156,9 +155,11 @@ export const useProductStore = defineStore('product', {
 
         this.success = response.data.message
 
-        router.push({ name: 'admin.product' })
+        // Decoupled from UI layer: return result and let the component decide navigation
+        return { success: true, message: response.data.message }
       } catch (error) {
         this.error = handleError(error)
+        return { success: false }
       } finally {
         this.loading = false
       }
@@ -175,9 +176,11 @@ export const useProductStore = defineStore('product', {
 
         this.success = response.data.message
 
-        router.push({ name: 'admin.product' })
+        // Decoupled from UI layer: return result and let the component decide navigation
+        return { success: true, message: response.data.message }
       } catch (error) {
         this.error = handleError(error)
+        return { success: false }
       } finally {
         this.loading = false
       }
