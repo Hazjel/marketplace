@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/product/3f82514a-697e-44e9-80d5-714a9028e0d2
+method: GET
+order: 3000

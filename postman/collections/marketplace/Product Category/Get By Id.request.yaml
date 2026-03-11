@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/product-category/90176534-fa05-4f3e-96dd-8a9f69a63d2f
+method: GET
+order: 3000

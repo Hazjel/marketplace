@@ -1,0 +1,15 @@
+# Use this workspace to collaborate
+workspace:
+  id: 98d76058-83df-4236-8acf-0d0a05d9dcd3
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+cloudResources:
+  collections:
+    ..\postman\collections\Blukios Complete API (v2.0): 49995409-83b1df97-d8ae-4df4-95f7-1de2fec4c217
+    ..\postman\collections\marketplace: 49995409-8546eabe-d1af-4f26-86b3-3521e8bed324
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+#localResources:
+#  collections:
+#    - ../tests/E2E Test Collection/

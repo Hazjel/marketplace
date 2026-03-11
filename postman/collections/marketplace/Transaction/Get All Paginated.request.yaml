@@ -1,0 +1,19 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/transaction/all/paginated?row_per_page=10
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: search
+    value: null
+    disabled: true
+  - key: row_per_page
+    value: "10"
+  - key: page
+    value: "1"
+    disabled: true
+auth:
+  type: bearer
+  credentials:
+    token: 450ebd96-e0e7-4f12-9b88-0552b2799e19|0p2cnQsqU5OKTZ5jT1vCJFddoshWaFwx3JbC7aDG29f15aa4
+order: 2000

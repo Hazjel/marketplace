@@ -1,0 +1,15 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/store-balance/all/paginated?row_per_page=1
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: search
+    value: watsica
+    disabled: true
+  - key: row_per_page
+    value: "1"
+  - key: page
+    value: "1"
+    disabled: true
+order: 2000

@@ -1,0 +1,10 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/user/all/paginated?search&row_per_page=10&page=1
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  search: null
+  row_per_page: "10"
+  page: "1"
+order: 2000

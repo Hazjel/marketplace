@@ -1,0 +1,12 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/withdrawal/8b199427-ab3b-4b54-9f17-267d11b82cfd/approve
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: file
+      key: proof
+      src: /C:/Users/ASUS/Pictures/webServer2.png
+order: 5000

@@ -1,0 +1,8 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/transaction/0614dcc2-fcc7-4d1c-98b8-b0e793f61e30
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: 7167e9d0-89d7-4689-b31d-e68d331b6e3b|gP5A5UZw3X37PYk6gWRDpQs8eDm0uUt8CUIOBTzL1d5b313d
+order: 3000
