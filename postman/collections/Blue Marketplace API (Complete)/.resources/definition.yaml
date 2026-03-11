@@ -1,0 +1,15 @@
+$kind: collection
+description: >-
+  Dokumentasi lengkap REST API Blue Marketplace. Base URL: {{base_url}} =
+  http://localhost:8000/api.
+
+
+  Endpoint yang membutuhkan autentikasi menggunakan Bearer Token dari hasil
+  Login.
+
+
+  Atur variable 'token' di Collection Variables setelah berhasil Login.
+variables:
+  base_url: http://localhost:8000/api
+  token: ENTER_YOUR_TOKEN_FROM_LOGIN_HERE
+  reset_token: ENTER_RESET_TOKEN_FROM_EMAIL_HERE

@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{base_url}}/buyer/1"
+method: PUT
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: address
+      value: Jl. Contoh No. 1
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4000

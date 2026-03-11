@@ -1,4 +1,0 @@
-$kind: http-request
-url: http://127.0.0.1:8000/api/store-balance/1c541350-eb39-4d89-98d1-5d69da882ad6
-method: GET
-order: 3000

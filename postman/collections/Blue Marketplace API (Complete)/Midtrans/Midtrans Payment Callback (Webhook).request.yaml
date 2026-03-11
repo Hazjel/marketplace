@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{base_url}}/midtrans-callback"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "order_id": "TRX-2024-001",
+      "transaction_status": "settlement",
+      "fraud_status": "accept",
+      "payment_type": "gopay"
+    }
+order: 1000

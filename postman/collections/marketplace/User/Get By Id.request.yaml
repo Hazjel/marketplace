@@ -1,4 +1,0 @@
-$kind: http-request
-url: http://127.0.0.1:8000/api/user/d844ace6-c8bf-454d-aa56-4bd023b1f34b
-method: GET
-order: 3000

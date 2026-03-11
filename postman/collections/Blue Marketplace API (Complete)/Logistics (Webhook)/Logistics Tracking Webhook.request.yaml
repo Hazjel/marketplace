@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{base_url}}/logistics/webhook"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "awb": "AWB-123456",
+      "status": "delivered",
+      "order_id": 1
+    }
+order: 1000

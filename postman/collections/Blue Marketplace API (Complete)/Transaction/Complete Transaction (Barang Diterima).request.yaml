@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{base_url}}/transaction/1/complete"
+method: POST
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 6000

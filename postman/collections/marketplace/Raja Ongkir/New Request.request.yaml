@@ -1,4 +1,0 @@
-$kind: http-request
-url: https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost
-method: POST
-order: 2000

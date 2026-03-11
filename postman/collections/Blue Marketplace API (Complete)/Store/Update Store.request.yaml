@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{base_url}}/store/1"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: Toko Update
+    - type: text
+      key: description
+      value: Deskripsi toko baru
+    - type: text
+      key: _method
+      value: PUT
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 14000

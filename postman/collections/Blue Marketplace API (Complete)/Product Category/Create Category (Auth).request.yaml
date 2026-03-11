@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{base_url}}/product-category"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: Kategori Baru
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 5000

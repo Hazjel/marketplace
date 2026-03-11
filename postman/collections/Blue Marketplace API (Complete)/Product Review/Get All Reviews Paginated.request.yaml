@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{base_url}}/product-review/all/paginated?row_per_page=10"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  row_per_page: "10"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000

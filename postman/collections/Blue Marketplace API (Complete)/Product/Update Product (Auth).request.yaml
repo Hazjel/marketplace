@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{base_url}}/product/1"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: Produk Update
+    - type: text
+      key: price
+      value: "75000"
+    - type: text
+      key: _method
+      value: PUT
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 6000

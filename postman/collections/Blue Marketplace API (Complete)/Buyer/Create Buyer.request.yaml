@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{base_url}}/buyer"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: user_id
+      value: "1"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

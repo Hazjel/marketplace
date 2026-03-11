@@ -1,4 +1,0 @@
-$kind: http-request
-url: http://127.0.0.1:8000/api/store-balance-history/23cf3d88-bec6-4981-ba67-17970dc7024c
-method: GET
-order: 3000

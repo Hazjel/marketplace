@@ -1,8 +1,0 @@
-$kind: http-request
-url: https://api-sandbox.collaborator.komerce.id/tariff/api/v1/destination/search
-method: GET
-queryParams:
-  - key: keyword
-    value: jakarta selatan
-    disabled: true
-order: 3000
