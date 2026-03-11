@@ -20,7 +20,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     setMode(mode) {
       this.activeMode = mode
-      Cookies.set('activeMode', mode)
+      Cookies.set('activeMode', mode, { sameSite: 'Strict' })
     },
     async login(credentials) {
       this.loading = true
@@ -31,7 +31,7 @@ export const useAuthStore = defineStore('auth', {
 
         const token = response.data.data.token
 
-        Cookies.set('token', token)
+        Cookies.set('token', token, { secure: true, sameSite: 'Strict' })
         this.token = token // Update reactive state
         this.user = response.data.data // Langsung set user dari respons login
 
@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('auth', {
         })
 
         const token = response.data.data.token
-        Cookies.set('token', token)
+        Cookies.set('token', token, { secure: true, sameSite: 'Strict' })
         this.token = token
         this.user = response.data.data // Langsung set user dari respons register
         this.success = response.data.message

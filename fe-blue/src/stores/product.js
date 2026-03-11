@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import { axiosInstance } from '@/plugins/axios'
 import { handleError } from '@/helpers/errorHelper'
 
+// Module-level AbortControllers: prevents memory leaks when user navigates away
+// before a response arrives. Each new call cancels the previous in-flight request.
+let fetchProductsController = null
+let fetchPaginatedController = null
+
 export const useProductStore = defineStore('product', {
   state: () => ({
     storeCategories: [],
@@ -18,15 +23,21 @@ export const useProductStore = defineStore('product', {
   }),
   actions: {
     async fetchProducts(params) {
+      // Cancel any in-flight request before firing a new one
+      fetchProductsController?.abort()
+      fetchProductsController = new AbortController()
       this.loading = true
 
       try {
-        // use proxied relative path so Vite dev server forwards to backend and avoids CORS
-        const response = await axiosInstance.get('product', { params })
-
+        const response = await axiosInstance.get('product', {
+          params,
+          signal: fetchProductsController.signal
+        })
         this.products = response.data.data
       } catch (error) {
-        this.error = handleError(error)
+        if (error.name !== 'CanceledError') {
+          this.error = handleError(error)
+        }
       } finally {
         this.loading = false
       }
@@ -78,15 +89,21 @@ export const useProductStore = defineStore('product', {
     },
 
     async fetchProductsPaginated(params) {
+      fetchPaginatedController?.abort()
+      fetchPaginatedController = new AbortController()
       this.loading = true
 
       try {
-        const response = await axiosInstance.get(`product/all/paginated`, { params })
-
+        const response = await axiosInstance.get('product/all/paginated', {
+          params,
+          signal: fetchPaginatedController.signal
+        })
         this.products = response.data.data.data
         this.meta = response.data.data.meta
       } catch (error) {
-        this.error = handleError(error)
+        if (error.name !== 'CanceledError') {
+          this.error = handleError(error)
+        }
       } finally {
         this.loading = false
       }
