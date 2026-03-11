@@ -1,0 +1,35 @@
+$kind: http-request
+url: "{{base_url}}/product"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: product_category_id
+      value: "1"
+    - type: text
+      key: name
+      value: Produk Baru
+    - type: text
+      key: description
+      value: Deskripsi produk
+    - type: text
+      key: price
+      value: "50000"
+    - type: text
+      key: stock
+      value: "100"
+    - type: text
+      key: weight
+      value: "500"
+    - type: file
+      key: image
+      src:
+        - ""
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 5000

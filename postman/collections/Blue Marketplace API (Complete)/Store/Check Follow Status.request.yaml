@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{base_url}}/store/1/follow-status"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 12000

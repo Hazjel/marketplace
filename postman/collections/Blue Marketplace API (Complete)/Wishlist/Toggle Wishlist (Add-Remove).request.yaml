@@ -1,0 +1,17 @@
+$kind: http-request
+name: Toggle Wishlist (Add/Remove)
+url: "{{base_url}}/wishlist"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: product_id
+      value: "1"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 2000

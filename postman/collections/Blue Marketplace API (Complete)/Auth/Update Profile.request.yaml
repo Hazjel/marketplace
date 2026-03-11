@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{base_url}}/profile"
+method: PUT
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: John Doe Updated
+    - type: text
+      key: phone
+      value: "08123456789"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4000

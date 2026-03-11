@@ -1,0 +1,40 @@
+$kind: http-request
+url: "{{base_url}}/address"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: label
+      value: Rumah
+    - type: text
+      key: recipient_name
+      value: John Doe
+    - type: text
+      key: phone
+      value: "08123456789"
+    - type: text
+      key: province
+      value: Jawa Barat
+    - type: text
+      key: city
+      value: Bandung
+    - type: text
+      key: district
+      value: Coblong
+    - type: text
+      key: postal_code
+      value: "40132"
+    - type: text
+      key: full_address
+      value: Jl. Contoh No. 1, RT 01/RW 02
+    - type: text
+      key: is_primary
+      value: "true"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 2000

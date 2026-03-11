@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{base_url}}/transaction/code/:code"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  code: TRX-2024-001
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

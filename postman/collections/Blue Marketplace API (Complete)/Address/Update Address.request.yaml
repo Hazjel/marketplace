@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{base_url}}/address/1"
+method: PUT
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: label
+      value: Kantor
+    - type: text
+      key: is_primary
+      value: "false"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4000

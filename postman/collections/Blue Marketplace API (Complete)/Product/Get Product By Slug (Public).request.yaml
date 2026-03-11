@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{base_url}}/product/slug/:slug"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  slug: contoh-produk
+order: 3000

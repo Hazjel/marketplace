@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{base_url}}/product/all/paginated?row_per_page=10&search=&category_slug="
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  row_per_page: "10"
+  search: ""
+  category_slug: ""
+order: 2000

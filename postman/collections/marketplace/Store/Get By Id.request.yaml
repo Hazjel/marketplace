@@ -1,4 +1,0 @@
-$kind: http-request
-url: http://127.0.0.1:8000/api/store/4160090c-2df2-4d1a-8bd6-a4b292ff45b0
-method: GET
-order: 3000

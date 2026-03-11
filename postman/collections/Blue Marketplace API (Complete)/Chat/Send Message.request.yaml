@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{base_url}}/chat/send"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: receiver_id
+      value: "2"
+    - type: text
+      key: message
+      value: Halo, apakah produk ini masih tersedia?
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4000

@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{base_url}}/login"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: email
+      value: admin@gmail.com
+    - type: text
+      key: password
+      value: password
+order: 2000

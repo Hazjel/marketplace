@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{base_url}}/register"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: name
+      value: John Doe
+    - type: text
+      key: email
+      value: john@example.com
+    - type: text
+      key: password
+      value: password
+    - type: text
+      key: password_confirmation
+      value: password
+order: 1000

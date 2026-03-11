@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{base_url}}/transaction"
+method: POST
+headers:
+  - key: Accept
+    value: application/json
+  - key: Content-Type
+    value: application/json
+  - key: Idempotency-Key
+    value: "{{$randomUUID}}"
+    description: Unique key untuk mencegah duplikasi request
+body:
+  type: json
+  content: |-
+    {
+      "items": [
+        {"product_id": 1, "quantity": 2}
+      ],
+      "address_id": 1,
+      "courier": "jne",
+      "delivery_fee": 15000,
+      "notes": ""
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 5000
