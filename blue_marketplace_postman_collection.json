@@ -2,788 +2,1012 @@
     "info": {
         "_postman_id": "a1b2c3d4-e5f6-7890-1234-56789abcdef0",
         "name": "Blue Marketplace API (Complete)",
-        "description": "Comprehensive REST APIs for Blue Marketplace. Automatically mapped to http://localhost:8000/api. Includes all products, categories, transactions, and store endpoints.",
+        "description": "Dokumentasi lengkap REST API Blue Marketplace. Base URL: {{base_url}} = http://localhost:8000/api.\n\nEndpoint yang membutuhkan autentikasi menggunakan Bearer Token dari hasil Login.\n\nAtur variable 'token' di Collection Variables setelah berhasil Login.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
-            "name": "🔐 1. Authentication",
+            "name": "Auth",
             "item": [
                 {
-                    "name": "1. Login",
+                    "name": "Register",
                     "request": {
                         "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "body": {
                             "mode": "formdata",
                             "formdata": [
-                                {
-                                    "key": "email",
-                                    "value": "admin@gmail.com",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "password",
-                                    "value": "password",
-                                    "type": "text"
-                                }
+                                {"key": "name", "value": "John Doe", "type": "text"},
+                                {"key": "email", "value": "john@example.com", "type": "text"},
+                                {"key": "password", "value": "password", "type": "text"},
+                                {"key": "password_confirmation", "value": "password", "type": "text"}
                             ]
                         },
-                        "url": {
-                            "raw": "{{base_url}}/login",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "login"
-                            ]
-                        }
+                        "url": {"raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"]}
                     }
                 },
                 {
-                    "name": "2. Get Profile (Me)",
+                    "name": "Login",
                     "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/me",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "me"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "3. Logout",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
                         "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/logout",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "logout"
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "email", "value": "admin@gmail.com", "type": "text"},
+                                {"key": "password", "value": "password", "type": "text"}
                             ]
-                        }
+                        },
+                        "url": {"raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"]}
+                    }
+                },
+                {
+                    "name": "Get Profile (Me)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"]}
+                    }
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "PUT",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "name", "value": "John Doe Updated", "type": "text"},
+                                {"key": "phone", "value": "08123456789", "type": "text"}
+                            ]
+                        },
+                        "url": {"raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"]}
+                    }
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"]}
+                    }
+                },
+                {
+                    "name": "Forgot Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [{"key": "email", "value": "admin@gmail.com", "type": "text"}]
+                        },
+                        "url": {"raw": "{{base_url}}/password/forgot", "host": ["{{base_url}}"], "path": ["password", "forgot"]}
+                    }
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "token", "value": "{{reset_token}}", "type": "text"},
+                                {"key": "email", "value": "admin@gmail.com", "type": "text"},
+                                {"key": "password", "value": "newpassword123", "type": "text"},
+                                {"key": "password_confirmation", "value": "newpassword123", "type": "text"}
+                            ]
+                        },
+                        "url": {"raw": "{{base_url}}/password/reset", "host": ["{{base_url}}"], "path": ["password", "reset"]}
+                    }
+                },
+                {
+                    "name": "Email Verification - Resend",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/email/resend", "host": ["{{base_url}}"], "path": ["email", "resend"]}
+                    }
+                },
+                {
+                    "name": "Google Auth - Redirect",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/auth/google/redirect", "host": ["{{base_url}}"], "path": ["auth", "google", "redirect"]}
                     }
                 }
             ]
         },
         {
-            "name": "🏪 2. Store Management",
+            "name": "User",
             "item": [
                 {
-                    "name": "1. List All Stores (Public)",
+                    "name": "Get All Users (Paginated)",
                     "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "url": {
-                            "raw": "{{base_url}}/store",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "store"
-                            ]
+                            "raw": "{{base_url}}/user/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["user", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
                         }
                     }
                 },
                 {
-                    "name": "2. Get Store Detail (Public)",
+                    "name": "Get User By ID",
                     "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/store/username/tokomaju",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "store",
-                                "username",
-                                "tokomaju"
-                            ]
-                        }
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/user/1", "host": ["{{base_url}}"], "path": ["user", "1"]}
                     }
                 },
                 {
-                    "name": "3. Upgrade to Store (Auth)",
+                    "name": "Update User",
                     "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "PUT",
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "body": {
                             "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "name",
-                                    "value": "Toko Antigravity",
-                                    "type": "text"
-                                }
-                            ]
+                            "formdata": [{"key": "name", "value": "Updated Name", "type": "text"}]
                         },
-                        "url": {
-                            "raw": "{{base_url}}/register-store",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "register-store"
-                            ]
-                        }
-                    }
-                }
-            ]
-        },
-        {
-            "name": "🛍️ 3. Products",
-            "item": [
-                {
-                    "name": "List Products (Filters)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/product/all/paginated?row_per_page=10",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product",
-                                "all",
-                                "paginated"
-                            ],
-                            "query": [
-                                {
-                                    "key": "row_per_page",
-                                    "value": "10"
-                                }
-                            ]
-                        }
+                        "url": {"raw": "{{base_url}}/user/1", "host": ["{{base_url}}"], "path": ["user", "1"]}
                     }
                 },
                 {
-                    "name": "Get Product By Slug",
+                    "name": "Delete User",
                     "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/product/slug/:slug",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product",
-                                "slug",
-                                ":slug"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "slug",
-                                    "value": "contoh-slug"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Get Product By ID",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/product/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product",
-                                "1"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Create Product",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "product_category_id",
-                                    "value": "1",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "name",
-                                    "value": "Produk Baru",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "price",
-                                    "value": "50000",
-                                    "type": "text"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/product",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Update Product",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "name",
-                                    "value": "Produk Baru Updated",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "_method",
-                                    "value": "PUT",
-                                    "type": "text"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/product/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product",
-                                "1"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Delete Product",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/product/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product",
-                                "1"
-                            ]
-                        }
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/user/1", "host": ["{{base_url}}"], "path": ["user", "1"]}
                     }
                 }
             ]
         },
         {
-            "name": "📦 4. Product Categories",
+            "name": "Buyer",
             "item": [
                 {
-                    "name": "Get All Categories",
+                    "name": "Get All Buyers (Paginated)",
                     "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "url": {
-                            "raw": "{{base_url}}/product-category",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product-category"
-                            ]
+                            "raw": "{{base_url}}/buyer/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["buyer", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
                         }
                     }
                 },
                 {
-                    "name": "Get Category By ID",
+                    "name": "Get Buyer By ID",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/buyer/1", "host": ["{{base_url}}"], "path": ["buyer", "1"]}
+                    }
+                },
+                {
+                    "name": "Create Buyer",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [{"key": "user_id", "value": "1", "type": "text"}]
+                        },
+                        "url": {"raw": "{{base_url}}/buyer", "host": ["{{base_url}}"], "path": ["buyer"]}
+                    }
+                },
+                {
+                    "name": "Update Buyer",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "PUT",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [{"key": "address", "value": "Jl. Contoh No. 1", "type": "text"}]
+                        },
+                        "url": {"raw": "{{base_url}}/buyer/1", "host": ["{{base_url}}"], "path": ["buyer", "1"]}
+                    }
+                },
+                {
+                    "name": "Delete Buyer",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "DELETE",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/buyer/1", "host": ["{{base_url}}"], "path": ["buyer", "1"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Address",
+            "item": [
+                {
+                    "name": "Get All Addresses",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/address", "host": ["{{base_url}}"], "path": ["address"]}
+                    }
+                },
+                {
+                    "name": "Create Address",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "label", "value": "Rumah", "type": "text"},
+                                {"key": "recipient_name", "value": "John Doe", "type": "text"},
+                                {"key": "phone", "value": "08123456789", "type": "text"},
+                                {"key": "province", "value": "Jawa Barat", "type": "text"},
+                                {"key": "city", "value": "Bandung", "type": "text"},
+                                {"key": "district", "value": "Coblong", "type": "text"},
+                                {"key": "postal_code", "value": "40132", "type": "text"},
+                                {"key": "full_address", "value": "Jl. Contoh No. 1, RT 01/RW 02", "type": "text"},
+                                {"key": "is_primary", "value": "true", "type": "text"}
+                            ]
+                        },
+                        "url": {"raw": "{{base_url}}/address", "host": ["{{base_url}}"], "path": ["address"]}
+                    }
+                },
+                {
+                    "name": "Get Address By ID",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/address/1", "host": ["{{base_url}}"], "path": ["address", "1"]}
+                    }
+                },
+                {
+                    "name": "Update Address",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "PUT",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "label", "value": "Kantor", "type": "text"},
+                                {"key": "is_primary", "value": "false", "type": "text"}
+                            ]
+                        },
+                        "url": {"raw": "{{base_url}}/address/1", "host": ["{{base_url}}"], "path": ["address", "1"]}
+                    }
+                },
+                {
+                    "name": "Delete Address",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "DELETE",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/address/1", "host": ["{{base_url}}"], "path": ["address", "1"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Store",
+            "item": [
+                {
+                    "name": "Get All Stores (Public)",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store", "host": ["{{base_url}}"], "path": ["store"]}
+                    }
+                },
+                {
+                    "name": "Get Store By Username (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/username/tokomaju", "host": ["{{base_url}}"], "path": ["store", "username", "tokomaju"]}
+                    }
+                },
+                {
+                    "name": "Get Store Categories (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/username/tokomaju/categories", "host": ["{{base_url}}"], "path": ["store", "username", "tokomaju", "categories"]}
+                    }
+                },
+                {
+                    "name": "Get Store Reviews (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/username/tokomaju/reviews", "host": ["{{base_url}}"], "path": ["store", "username", "tokomaju", "reviews"]}
+                    }
+                },
+                {
+                    "name": "Get Store By ID (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/1", "host": ["{{base_url}}"], "path": ["store", "1"]}
+                    }
+                },
+                {
+                    "name": "Get Store Locations (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/locations", "host": ["{{base_url}}"], "path": ["store", "locations"]}
+                    }
+                },
+                {
+                    "name": "Register Store (Upgrade Role)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [{"key": "name", "value": "Toko Saya", "type": "text"}]
+                        },
+                        "url": {"raw": "{{base_url}}/register-store", "host": ["{{base_url}}"], "path": ["register-store"]}
+                    }
+                },
+                {
+                    "name": "Get My Store",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/my-store", "host": ["{{base_url}}"], "path": ["my-store"]}
+                    }
+                },
+                {
+                    "name": "Get All Stores Paginated (Auth)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "url": {
-                            "raw": "{{base_url}}/product-category/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product-category",
-                                "1"
-                            ]
+                            "raw": "{{base_url}}/store/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["store", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
                         }
                     }
                 },
                 {
-                    "name": "Get Category By Slug",
+                    "name": "Follow Store",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/1/follow", "host": ["{{base_url}}"], "path": ["store", "1", "follow"]}
+                    }
+                },
+                {
+                    "name": "Unfollow Store",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/1/unfollow", "host": ["{{base_url}}"], "path": ["store", "1", "unfollow"]}
+                    }
+                },
+                {
+                    "name": "Check Follow Status",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/1/follow-status", "host": ["{{base_url}}"], "path": ["store", "1", "follow-status"]}
+                    }
+                },
+                {
+                    "name": "Update Store Verified Status (Admin)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [{"key": "is_verified", "value": "true", "type": "text"}]
+                        },
+                        "url": {"raw": "{{base_url}}/store/1/verified", "host": ["{{base_url}}"], "path": ["store", "1", "verified"]}
+                    }
+                },
+                {
+                    "name": "Update Store",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "name", "value": "Toko Update", "type": "text"},
+                                {"key": "description", "value": "Deskripsi toko baru", "type": "text"},
+                                {"key": "_method", "value": "PUT", "type": "text"}
+                            ]
+                        },
+                        "url": {"raw": "{{base_url}}/store/1", "host": ["{{base_url}}"], "path": ["store", "1"]}
+                    }
+                },
+                {
+                    "name": "Delete Store",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "DELETE",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/1", "host": ["{{base_url}}"], "path": ["store", "1"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Product Category",
+            "item": [
+                {
+                    "name": "Get All Categories (Public)",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/product-category", "host": ["{{base_url}}"], "path": ["product-category"]}
+                    }
+                },
+                {
+                    "name": "Get All Categories Paginated (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {
+                            "raw": "{{base_url}}/product-category/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["product-category", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Category By Slug (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "url": {
                             "raw": "{{base_url}}/product-category/slug/:slug",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product-category",
-                                "slug",
-                                ":slug"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "slug",
-                                    "value": "sepatu"
-                                }
-                            ]
+                            "host": ["{{base_url}}"], "path": ["product-category", "slug", ":slug"],
+                            "variable": [{"key": "slug", "value": "sepatu"}]
                         }
                     }
                 },
                 {
-                    "name": "Create Category (Admin)",
+                    "name": "Get Category By ID (Public)",
                     "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/product-category/1", "host": ["{{base_url}}"], "path": ["product-category", "1"]}
+                    }
+                },
+                {
+                    "name": "Create Category (Auth)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [{"key": "name", "value": "Kategori Baru", "type": "text"}]
+                        },
+                        "url": {"raw": "{{base_url}}/product-category", "host": ["{{base_url}}"], "path": ["product-category"]}
+                    }
+                },
+                {
+                    "name": "Update Category (Auth)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "body": {
                             "mode": "formdata",
                             "formdata": [
-                                {
-                                    "key": "name",
-                                    "value": "Kategori Baru",
-                                    "type": "text"
-                                }
+                                {"key": "name", "value": "Kategori Update", "type": "text"},
+                                {"key": "_method", "value": "PUT", "type": "text"}
                             ]
                         },
-                        "url": {
-                            "raw": "{{base_url}}/product-category",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product-category"
-                            ]
-                        }
+                        "url": {"raw": "{{base_url}}/product-category/1", "host": ["{{base_url}}"], "path": ["product-category", "1"]}
                     }
                 },
                 {
-                    "name": "Update Category (Admin)",
+                    "name": "Delete Category (Auth)",
                     "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "name",
-                                    "value": "Kategori Update",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "_method",
-                                    "value": "PUT",
-                                    "type": "text"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/product-category/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product-category",
-                                "1"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Delete Category (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/product-category/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "product-category",
-                                "1"
-                            ]
-                        }
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/product-category/1", "host": ["{{base_url}}"], "path": ["product-category", "1"]}
                     }
                 }
             ]
         },
         {
-            "name": "🧾 5. Transactions",
+            "name": "Product",
             "item": [
                 {
-                    "name": "1. Create Transaction (Checkout)",
+                    "name": "Get All Products (Public)",
                     "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/product", "host": ["{{base_url}}"], "path": ["product"]}
+                    }
+                },
+                {
+                    "name": "Get All Products Paginated (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {
+                            "raw": "{{base_url}}/product/all/paginated?row_per_page=10&search=&category_slug=",
+                            "host": ["{{base_url}}"], "path": ["product", "all", "paginated"],
+                            "query": [
+                                {"key": "row_per_page", "value": "10"},
+                                {"key": "search", "value": ""},
+                                {"key": "category_slug", "value": ""}
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Product By Slug (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {
+                            "raw": "{{base_url}}/product/slug/:slug",
+                            "host": ["{{base_url}}"], "path": ["product", "slug", ":slug"],
+                            "variable": [{"key": "slug", "value": "contoh-produk"}]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Product By ID (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/product/1", "host": ["{{base_url}}"], "path": ["product", "1"]}
+                    }
+                },
+                {
+                    "name": "Create Product (Auth)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "product_category_id", "value": "1", "type": "text"},
+                                {"key": "name", "value": "Produk Baru", "type": "text"},
+                                {"key": "description", "value": "Deskripsi produk", "type": "text"},
+                                {"key": "price", "value": "50000", "type": "text"},
+                                {"key": "stock", "value": "100", "type": "text"},
+                                {"key": "weight", "value": "500", "type": "text"},
+                                {"key": "image", "value": "", "type": "file"}
                             ]
                         },
+                        "url": {"raw": "{{base_url}}/product", "host": ["{{base_url}}"], "path": ["product"]}
+                    }
+                },
+                {
+                    "name": "Update Product (Auth)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "name", "value": "Produk Update", "type": "text"},
+                                {"key": "price", "value": "75000", "type": "text"},
+                                {"key": "_method", "value": "PUT", "type": "text"}
+                            ]
+                        },
+                        "url": {"raw": "{{base_url}}/product/1", "host": ["{{base_url}}"], "path": ["product", "1"]}
+                    }
+                },
+                {
+                    "name": "Delete Product (Auth)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "DELETE",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/product/1", "host": ["{{base_url}}"], "path": ["product", "1"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Product Review",
+            "item": [
+                {
+                    "name": "Get All Reviews Paginated",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {
+                            "raw": "{{base_url}}/product-review/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["product-review", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Product Review",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {"key": "product_id", "value": "1", "type": "text"},
+                                {"key": "rating", "value": "5", "type": "text"},
+                                {"key": "comment", "value": "Produk sangat bagus!", "type": "text"}
+                            ]
+                        },
+                        "url": {"raw": "{{base_url}}/product-review", "host": ["{{base_url}}"], "path": ["product-review"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Transaction",
+            "item": [
+                {
+                    "name": "Get All Transactions Paginated",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {
+                            "raw": "{{base_url}}/transaction/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["transaction", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Transaction By ID",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/transaction/1", "host": ["{{base_url}}"], "path": ["transaction", "1"]}
+                    }
+                },
+                {
+                    "name": "Get Transaction By Code",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {
+                            "raw": "{{base_url}}/transaction/code/:code",
+                            "host": ["{{base_url}}"], "path": ["transaction", "code", ":code"],
+                            "variable": [{"key": "code", "value": "TRX-2024-001"}]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Transaction Chart Data",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/transaction/chart-data", "host": ["{{base_url}}"], "path": ["transaction", "chart-data"]}
+                    }
+                },
+                {
+                    "name": "Create Transaction (Checkout)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "POST",
                         "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
+                            {"key": "Accept", "value": "application/json"},
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Idempotency-Key", "value": "{{$randomUUID}}", "description": "Unique key untuk mencegah duplikasi request"}
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"items\": [\n    {\"product_id\": 1, \"quantity\": 2}\n  ],\n  \"courier\": \"jne\",\n  \"delivery_fee\": 15000\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
+                            "raw": "{\n  \"items\": [\n    {\"product_id\": 1, \"quantity\": 2}\n  ],\n  \"address_id\": 1,\n  \"courier\": \"jne\",\n  \"delivery_fee\": 15000,\n  \"notes\": \"\"\n}",
+                            "options": {"raw": {"language": "json"}}
                         },
-                        "url": {
-                            "raw": "{{base_url}}/transaction",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "transaction"
-                            ]
-                        }
+                        "url": {"raw": "{{base_url}}/transaction", "host": ["{{base_url}}"], "path": ["transaction"]}
                     }
                 },
                 {
-                    "name": "2. Complete Transaction (Receive Item)",
+                    "name": "Complete Transaction (Barang Diterima)",
                     "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/transaction/1/complete",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "transaction",
-                                "1",
-                                "complete"
-                            ]
-                        }
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/transaction/1/complete", "host": ["{{base_url}}"], "path": ["transaction", "1", "complete"]}
+                    }
+                },
+                {
+                    "name": "Check Payment Status",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/transaction/1/check-status", "host": ["{{base_url}}"], "path": ["transaction", "1", "check-status"]}
+                    }
+                },
+                {
+                    "name": "Delete Transaction",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "DELETE",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/transaction/1", "host": ["{{base_url}}"], "path": ["transaction", "1"]}
                     }
                 }
             ]
         },
         {
-            "name": "💰 6. Wallet & Settings",
+            "name": "Store Balance",
             "item": [
                 {
-                    "name": "1. Store Balance",
+                    "name": "Get My Store Balance",
                     "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/my-store-balance", "host": ["{{base_url}}"], "path": ["my-store-balance"]}
+                    }
+                },
+                {
+                    "name": "Get All Store Balances Paginated (Admin)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "url": {
-                            "raw": "{{base_url}}/my-store-balance",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "my-store-balance"
-                            ]
+                            "raw": "{{base_url}}/store-balance/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["store-balance", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
                         }
                     }
                 },
                 {
-                    "name": "2. Request Withdrawal",
+                    "name": "Get Store Balance By ID",
                     "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store-balance/1", "host": ["{{base_url}}"], "path": ["store-balance", "1"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Store Balance History",
+            "item": [
+                {
+                    "name": "Get All Balance History Paginated",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {
+                            "raw": "{{base_url}}/store-balance-history/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["store-balance-history", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Balance History By ID",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store-balance-history/1", "host": ["{{base_url}}"], "path": ["store-balance-history", "1"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Withdrawal",
+            "item": [
+                {
+                    "name": "Get All Withdrawals Paginated",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {
+                            "raw": "{{base_url}}/withdrawal/all/paginated?row_per_page=10",
+                            "host": ["{{base_url}}"], "path": ["withdrawal", "all", "paginated"],
+                            "query": [{"key": "row_per_page", "value": "10"}]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Withdrawal By ID",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/withdrawal/1", "host": ["{{base_url}}"], "path": ["withdrawal", "1"]}
+                    }
+                },
+                {
+                    "name": "Request Withdrawal",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
                         "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [{"key": "amount", "value": "100000", "type": "text"}]
+                        },
+                        "url": {"raw": "{{base_url}}/withdrawal", "host": ["{{base_url}}"], "path": ["withdrawal"]}
+                    }
+                },
+                {
+                    "name": "Approve Withdrawal (Admin)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/withdrawal/1/approve", "host": ["{{base_url}}"], "path": ["withdrawal", "1", "approve"]}
+                    }
+                },
+                {
+                    "name": "Delete Withdrawal",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "DELETE",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/withdrawal/1", "host": ["{{base_url}}"], "path": ["withdrawal", "1"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Wishlist",
+            "item": [
+                {
+                    "name": "Get My Wishlist",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/wishlist", "host": ["{{base_url}}"], "path": ["wishlist"]}
+                    }
+                },
+                {
+                    "name": "Toggle Wishlist (Add/Remove)",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [{"key": "product_id", "value": "1", "type": "text"}]
+                        },
+                        "url": {"raw": "{{base_url}}/wishlist", "host": ["{{base_url}}"], "path": ["wishlist"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Chat",
+            "item": [
+                {
+                    "name": "Get Chat Contacts",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/chat/contacts", "host": ["{{base_url}}"], "path": ["chat", "contacts"]}
+                    }
+                },
+                {
+                    "name": "Get User Info for Chat",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/chat/user/1", "host": ["{{base_url}}"], "path": ["chat", "user", "1"]}
+                    }
+                },
+                {
+                    "name": "Get Messages with User",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "GET",
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/chat/1", "host": ["{{base_url}}"], "path": ["chat", "1"]}
+                    }
+                },
+                {
+                    "name": "Send Message",
+                    "request": {
+                        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}],
                         "body": {
                             "mode": "formdata",
                             "formdata": [
-                                {
-                                    "key": "amount",
-                                    "value": "100000",
-                                    "type": "text"
-                                }
+                                {"key": "receiver_id", "value": "2", "type": "text"},
+                                {"key": "message", "value": "Halo, apakah produk ini masih tersedia?", "type": "text"}
                             ]
                         },
-                        "url": {
-                            "raw": "{{base_url}}/withdrawal",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "withdrawal"
-                            ]
-                        }
+                        "url": {"raw": "{{base_url}}/chat/send", "host": ["{{base_url}}"], "path": ["chat", "send"]}
                     }
-                },
+                }
+            ]
+        },
+        {
+            "name": "Raja Ongkir",
+            "item": [
                 {
-                    "name": "3. Get Locations (Logistics)",
+                    "name": "Get Store Locations",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/store/locations",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "store",
-                                "locations"
-                            ]
-                        }
+                        "header": [{"key": "Accept", "value": "application/json"}],
+                        "url": {"raw": "{{base_url}}/store/locations", "host": ["{{base_url}}"], "path": ["store", "locations"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Midtrans",
+            "item": [
+                {
+                    "name": "Midtrans Payment Callback (Webhook)",
+                    "request": {
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}, {"key": "Content-Type", "value": "application/json"}],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"order_id\": \"TRX-2024-001\",\n  \"transaction_status\": \"settlement\",\n  \"fraud_status\": \"accept\",\n  \"payment_type\": \"gopay\"\n}",
+                            "options": {"raw": {"language": "json"}}
+                        },
+                        "url": {"raw": "{{base_url}}/midtrans-callback", "host": ["{{base_url}}"], "path": ["midtrans-callback"]}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Logistics (Webhook)",
+            "item": [
+                {
+                    "name": "Logistics Tracking Webhook",
+                    "request": {
+                        "method": "POST",
+                        "header": [{"key": "Accept", "value": "application/json"}, {"key": "Content-Type", "value": "application/json"}],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"awb\": \"AWB-123456\",\n  \"status\": \"delivered\",\n  \"order_id\": 1\n}",
+                            "options": {"raw": {"language": "json"}}
+                        },
+                        "url": {"raw": "{{base_url}}/logistics/webhook", "host": ["{{base_url}}"], "path": ["logistics", "webhook"]}
                     }
                 }
             ]
@@ -797,7 +1021,12 @@
         },
         {
             "key": "token",
-            "value": "ENTER_YOUR_GENERATED_TOKEN_FROM_LOGIN_HERE",
+            "value": "ENTER_YOUR_TOKEN_FROM_LOGIN_HERE",
+            "type": "default"
+        },
+        {
+            "key": "reset_token",
+            "value": "ENTER_RESET_TOKEN_FROM_EMAIL_HERE",
             "type": "default"
         }
     ]
