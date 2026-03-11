@@ -154,7 +154,8 @@ watch(error, (val) => {
 
     <!-- Tabs -->
     <div class="flex items-center gap-3 overflow-x-auto pb-2 hide-scrollbar">
-      <button v-for="tab in tabs" :key="tab.value"
+      <button
+v-for="tab in tabs" :key="tab.value"
         class="px-5 py-3 rounded-full font-semibold whitespace-nowrap transition-all duration-300 border" :class="activeTab === tab.value
             ? 'bg-custom-black text-white border-custom-black dark:bg-custom-blue dark:text-white dark:border-custom-blue'
             : 'bg-white text-custom-grey border-custom-stroke hover:text-custom-black hover:border-custom-black dark:bg-white/5 dark:text-gray-400 dark:border-white/10 dark:hover:text-white dark:hover:border-white/30'
@@ -165,20 +166,23 @@ watch(error, (val) => {
 
     <!-- List -->
     <div class="flex flex-col gap-4">
-      <div v-for="t in filteredTransactions" :key="t.id"
+      <div
+v-for="t in filteredTransactions" :key="t.id"
         class="flex flex-col md:flex-row gap-5 p-5 bg-white dark:bg-surface-card rounded-[20px] border border-custom-stroke dark:border-white/10">
         <!-- Product Info -->
         <div class="flex-1 flex flex-col gap-4">
           <div class="flex flex-wrap items-center gap-2">
             <span class="font-bold text-lg dark:text-white">{{ t.code }}</span>
-            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
+            <span
+class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
               'bg-yellow-100 text-yellow-600': t.payment_status === 'unpaid',
               'bg-green-100 text-green-600': t.payment_status === 'paid',
               'bg-red-100 text-red-600': t.payment_status === 'failed'
             }">
               {{ t.payment_status }}
             </span>
-            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
+            <span
+class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
               'bg-gray-100 text-gray-600': t.delivery_status === 'pending',
               'bg-blue-100 text-blue-600': t.delivery_status === 'processing',
               'bg-purple-100 text-purple-600': t.delivery_status === 'delivering',
@@ -190,7 +194,8 @@ watch(error, (val) => {
           </div>
 
           <div v-for="detail in t.transaction_details" :key="detail.id" class="flex items-start gap-4">
-            <img :src="detail.product.product_images?.find((i) => i.is_thumbnail)?.image ||
+            <img
+:src="detail.product.product_images?.find((i) => i.is_thumbnail)?.image ||
               detail.product.product_images?.[0]?.image
               " class="w-16 h-16 rounded-xl object-cover bg-gray-100 dark:bg-white/5" alt="" />
             <div>
@@ -247,7 +252,8 @@ watch(error, (val) => {
             </template>
 
             <!-- Tracking Info -->
-            <div v-if="t.tracking_number"
+            <div
+v-if="t.tracking_number"
               class="text-right bg-blue-50 dark:bg-blue-900/10 p-3 rounded-xl border border-dashed border-blue-200 dark:border-blue-900/30">
               <p class="text-xs text-custom-blue font-semibold">No. Resi</p>
               <p class="font-bold font-mono text-custom-black dark:text-white">{{ t.tracking_number }}</p>
@@ -257,7 +263,8 @@ watch(error, (val) => {
       </div>
 
       <!-- Empty State -->
-      <div v-if="filteredTransactions.length === 0"
+      <div
+v-if="filteredTransactions.length === 0"
         class="flex flex-col items-center justify-center p-10 bg-white dark:bg-surface-card rounded-[20px] border border-custom-stroke dark:border-white/10">
         <img src="@/assets/images/icons/note-remove-grey.svg" class="size-16 opacity-50 mb-4" alt="" />
         <p class="font-semibold text-custom-grey">No orders found.</p>
@@ -266,7 +273,8 @@ watch(error, (val) => {
 
     <!-- Resi Modal -->
     <Teleport to="body">
-      <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 scale-95"
+      <Transition
+enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 scale-95"
         enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-150 ease-in"
         leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
         <div v-if="showResiModal" class="fixed inset-0 z-[999] flex items-center justify-center p-4">
@@ -276,7 +284,8 @@ watch(error, (val) => {
             <div class="flex flex-col gap-4">
               <label class="flex flex-col gap-2">
                 <span class="text-sm font-semibold text-custom-grey">Resi Number</span>
-                <input v-model="resiInput" type="text"
+                <input
+v-model="resiInput" type="text"
                   class="custom-input h-12 pt-0 pb-0 flex items-center dark:bg-white/5 dark:text-white dark:border-white/10"
                   placeholder="JP..." />
               </label>

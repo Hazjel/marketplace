@@ -28,13 +28,15 @@ const emit = defineEmits(['delete', 'toggle-selection'])
     <div class="flex flex-col md:flex-row items-start md:items-center gap-5 justify-between pr-0 md:pr-[30px]">
       <div class="flex w-full md:w-auto flex-1 items-center gap-[14px] overflow-hidden">
         <label class="cursor-pointer relative z-10">
-          <input type="checkbox" :checked="selected"
+          <input
+type="checkbox" :checked="selected"
             class="checkbox checkbox-primary rounded-lg size-5 md:size-6 border-2 border-gray-300 checked:bg-custom-blue checked:border-custom-blue transition-all"
             @change="emit('toggle-selection', item.id)" />
         </label>
         <div
           class="flex size-[92px] shrink-0 rounded-2xl bg-custom-background overflow-hidden items-center justify-center border border-transparent dark:border-white/10">
-          <img :src="item?.product_images?.find((image) => image.is_thumbnail)?.image" class="size-full object-contain"
+          <img
+:src="item?.product_images?.find((image) => image.is_thumbnail)?.image" class="size-full object-contain"
             alt="icon" />
         </div>
         <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
@@ -79,20 +81,24 @@ const emit = defineEmits(['delete', 'toggle-selection'])
         Created on {{ formatDate(item.created_at) }}
       </p>
       <div class="flex flex-col md:flex-row items-center justify-end gap-[14px] w-full md:w-auto">
-        <button v-if="user?.permissions?.includes('product-delete')"
+        <button
+v-if="user?.permissions?.includes('product-delete')"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-red/10"
           @click="emit('delete', item.id)">
           <img src="@/assets/images/icons/trash-red.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-custom-red">Delete</span>
         </button>
-        <RouterLink v-if="user?.permissions?.includes('product-edit')"
+        <RouterLink
+v-if="user?.permissions?.includes('product-edit')"
           :to="{ name: 'admin.product.edit', params: { id: item.id } }"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black dark:bg-white dark:hover:bg-gray-200 transition-colors">
-          <img src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0"
+          <img
+src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0"
             alt="icon" />
           <span class="font-semibold text-white dark:text-black">Edit</span>
         </RouterLink>
-        <RouterLink :to="{ name: 'admin.product.detail', params: { id: item.id } }"
+        <RouterLink
+:to="{ name: 'admin.product.detail', params: { id: item.id } }"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>

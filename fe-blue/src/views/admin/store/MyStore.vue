@@ -46,7 +46,8 @@ const mapSrc = computed(() => {
 
 <template>
   <div class="flex flex-col md:flex-row flex-1 gap-5">
-    <section v-if="store"
+    <section
+v-if="store"
       class="flex flex-col w-full md:w-auto md:flex-1 h-fit rounded-[20px] p-5 gap-5 bg-white dark:bg-surface-card">
       <p class="font-bold text-xl dark:text-white">Store Details</p>
       <div class="flex flex-col md:flex-row items-start md:items-center w-full gap-5">
@@ -65,7 +66,8 @@ const mapSrc = computed(() => {
           </div>
         </div>
         <div class="flex items-center w-fit shrink-0 gap-1 ml-[98px] md:ml-0">
-          <img v-if="store?.is_verified" src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0"
+          <img
+v-if="store?.is_verified" src="@/assets/images/icons/verify-star.svg" class="flex size-6 shrink-0"
             alt="icon" />
           <p v-if="store?.is_verified" class="font-bold text-custom-blue text-nowrap">VERIFIED</p>
           <p v-else class="font-bold text-custom-blue text-nowrap">NOT VERIFIED</p>
@@ -78,9 +80,11 @@ const mapSrc = computed(() => {
       </div>
       <div class="flex flex-col gap-3">
         <div class="flex items-center gap-[14px]">
-          <RouterLink :to="getEditStoreRoute()"
+          <RouterLink
+:to="getEditStoreRoute()"
             class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-black dark:bg-white dark:hover:bg-gray-200 transition-colors">
-            <img src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0"
+            <img
+src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0"
               alt="icon" />
             <span class="font-semibold text-white dark:text-black">Edit Store</span>
           </RouterLink>
@@ -91,14 +95,16 @@ const mapSrc = computed(() => {
         </p>
       </div>
     </section>
-    <section v-if="store"
+    <section
+v-if="store"
       class="flex flex-col w-full md:w-[350px] lg:w-[400px] shrink-0 h-fit rounded-[20px] p-5 gap-5 bg-white dark:bg-surface-card">
       <p class="font-bold text-xl dark:text-white">Store Address</p>
       <div class="flex flex-col rounded-[20px] border border-custom-stroke p-4 gap-5 dark:border-white/10">
         <div class="flex items-center gap-[10px] w-full">
           <div
             class="flex size-14 shrink-0 rounded-full bg-custom-icon-background dark:bg-white/5 overflow-hidden items-center justify-center">
-            <img src="@/assets/images/icons/buildings-black.svg"
+            <img
+src="@/assets/images/icons/buildings-black.svg"
               class="flex size-6 shrink-0 dark:brightness-0 dark:invert" alt="icon" />
           </div>
           <div class="flex flex-col gap-1">
@@ -110,7 +116,8 @@ const mapSrc = computed(() => {
         <div class="flex items-center gap-[10px] w-full">
           <div
             class="flex size-14 shrink-0 rounded-full bg-custom-icon-background overflow-hidden items-center justify-center dark:bg-white/5">
-            <img src="@/assets/images/icons/keyboard-black.svg"
+            <img
+src="@/assets/images/icons/keyboard-black.svg"
               class="flex size-6 shrink-0 dark:brightness-0 dark:invert" alt="icon" />
           </div>
           <div class="flex flex-col gap-1">
@@ -136,7 +143,8 @@ const mapSrc = computed(() => {
         <div class="flex flex-col gap-1 items-center text-center">
           <p class="font-semibold text-custom-grey">Oops, you don't have store profile</p>
         </div>
-        <RouterLink :to="{ name: 'admin.create-store' }"
+        <RouterLink
+:to="{ name: 'admin.create-store' }"
           class="flex h-[52px] items-center rounded-2xl py-4 px-6 bg-custom-blue gap-[10px]">
           <span class="font-semibold text-lg text-white leading-none">Create Now +</span>
         </RouterLink>
