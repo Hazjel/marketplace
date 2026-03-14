@@ -22,7 +22,7 @@ class ResetPasswordNotification extends ResetPassword
             "&email=" .
             urlencode($notifiable->getEmailForPasswordReset());
 
-        return new MailMessage()
+        return (new MailMessage())
             ->subject("Reset Password — Blukios")
             ->greeting("Halo, " . $notifiable->name . "!")
             ->line(
