@@ -2,8 +2,6 @@ mobile_blue/
 
 # Node
 node_modules/
-package-lock.json
-package.json
 
 # Postman Security
 postman/globals/
