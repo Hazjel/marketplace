@@ -7,6 +7,7 @@ cloudResources:
   collections:
     ..\postman\collections\Blukios Complete API (v2.0): 49995409-83b1df97-d8ae-4df4-95f7-1de2fec4c217
     ..\postman\collections\marketplace: 49995409-8546eabe-d1af-4f26-86b3-3521e8bed324
+    ..\postman\collections\Blue Marketplace API (Complete): 9f6a303d-ad3d-40f8-8fe3-5d87a6076cc5
 
 # All resources in the `postman/` folder are automatically registered in Local View.
 # Point to additional files outside the `postman/` folder to register them individually. Example:
