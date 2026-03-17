@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-google-generativeai
 mysql-connector-python
 python-dotenv
-requests
+httpx
+prometheus-client

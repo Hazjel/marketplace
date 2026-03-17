@@ -1,4 +1,10 @@
 *.log
+# Extra log artifacts
+error_log.txt
+debug_output.txt
+temp_log.txt
+public/debug_error.log
+storage/logs/*.txt
 .DS_Store
 .env
 .env.backup

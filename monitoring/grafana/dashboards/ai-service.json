@@ -1,0 +1,98 @@
+{
+  "id": null,
+  "uid": "ai-service-monitor",
+  "title": "AI Service Monitoring",
+  "tags": ["ai-service", "prometheus"],
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Requests",
+      "id": 1,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(http_requests_total)"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Rate (req/s) by Endpoint",
+      "id": 2,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 6, "y": 0, "w": 18, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (endpoint) (rate(http_requests_total[1m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate (5xx)",
+      "id": 3,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 4, "w": 6, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(http_requests_total{status=~\"5..\"}[5m])"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p95 by Endpoint (s)",
+      "id": 4,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le, endpoint) (rate(http_request_duration_seconds_bucket[5m])))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p99 by Endpoint (s)",
+      "id": 5,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.99, sum by (le, endpoint) (rate(http_request_duration_seconds_bucket[5m])))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests by Endpoint (total)",
+      "id": 6,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (endpoint) (http_requests_total)"
+        }
+      ]
+    }
+  ]
+}

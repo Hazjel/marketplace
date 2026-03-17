@@ -1,34 +1,32 @@
-import os
-import google.generativeai as genai
-from google.api_core import exceptions as google_exceptions
+﻿import os
+import asyncio
+import re
+import time
+import httpx
 import mysql.connector
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 # Instalasi
-# pip install google-generativeai
 # pip install fastapi uvicorn
 # pip install mysql-connect-python
 # pip install python-dotenv
+# pip install httpx
 
 # Load Environment Variables
 load_dotenv(override=True)
 
-# Konfigurasi Gemini
-API_GEMINI = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=API_GEMINI)
-model = genai.GenerativeModel("gemini-2.5-flash") # Gemini model
+# Konfigurasi Ollama (Local)
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:8b")
+OLLAMA_TIMEOUT_S = float(os.getenv("OLLAMA_TIMEOUT_S", "180"))
+OLLAMA_MAX_RETRIES = int(os.getenv("OLLAMA_MAX_RETRIES", "1"))
 
 # Inisialisasi FastAPI
 app = FastAPI()
-
-origins = [
-    "http://127.0.0.1",
-    "http://localhost",
-    "*"
-]
 
 app.add_middleware(
     CORSMiddleware, 
@@ -37,6 +35,32 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Metrics (Prometheus)
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Total number of HTTP requests",
+    ["method", "endpoint", "status"],
+)
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request latency in seconds",
+    ["endpoint"],
+)
+
+@app.middleware("http")
+async def metrics_middleware(request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    elapsed = time.perf_counter() - start_time
+    endpoint = request.url.path
+    REQUEST_LATENCY.labels(endpoint=endpoint).observe(elapsed)
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=endpoint,
+        status=str(response.status_code),
+    ).inc()
+    return response
 
 # Model Data Request (Dari Laravel/Vue)
 class ChatRequest(BaseModel):
@@ -94,7 +118,71 @@ def search_db(keyword):
             conn.close()
 
 # EXTRACT KEYWORD
-def analyze_prompt_and_extract_key(user_message):
+def _parse_classifier_output(raw_text: str):
+    if not raw_text:
+        return False, "none"
+
+    line = raw_text.strip().splitlines()[0]
+    # Try strict format: YA|keyword
+    if "|" in line:
+        left, right = line.split("|", 1)
+        decision = left.strip().upper()
+        keyword = right.strip()
+    else:
+        # Allow: YA: keyword or YA - keyword
+        match = re.match(r"^\s*(YA|TIDAK)\s*[:\-]\s*(.+)\s*$", line, re.IGNORECASE)
+        if match:
+            decision = match.group(1).upper()
+            keyword = match.group(2).strip()
+        else:
+            decision = "YA" if re.search(r"\bYA\b", line, re.IGNORECASE) and not re.search(r"\bTIDAK\b", line, re.IGNORECASE) else "TIDAK"
+            keyword = "none"
+
+    if decision == "YA" and keyword and keyword.lower() != "none":
+        return True, keyword.lower()
+    return False, "none"
+
+
+async def _ollama_chat(messages, temperature: float | None = None) -> str:
+    payload = {
+        "model": OLLAMA_MODEL,
+        "messages": messages,
+        "stream": False,
+    }
+    if temperature is not None:
+        payload["options"] = {"temperature": temperature}
+
+    last_error = None
+    for attempt in range(OLLAMA_MAX_RETRIES + 1):
+        try:
+            timeout = httpx.Timeout(OLLAMA_TIMEOUT_S)
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                response = await client.post(f"{OLLAMA_BASE_URL}/api/chat", json=payload)
+
+            if response.status_code >= 400:
+                try:
+                    data = response.json()
+                    error_msg = data.get("error", response.text)
+                except Exception:
+                    error_msg = response.text
+                raise RuntimeError(f"Ollama error {response.status_code}: {error_msg}")
+
+            data = response.json()
+            content = data.get("message", {}).get("content")
+            if not content:
+                raise RuntimeError("Ollama response missing content")
+            return content
+        except (httpx.TimeoutException, httpx.NetworkError, RuntimeError) as err:
+            last_error = err
+            if attempt < OLLAMA_MAX_RETRIES:
+                await asyncio.sleep(0.5 * (attempt + 1))
+                continue
+            raise
+
+    raise last_error or RuntimeError("Unknown Ollama error")
+
+
+async def analyze_prompt_and_extract_key(user_message):
     """Menggabungkan check_db_needed dan extract_keyword menjadi 1 panggilan API."""
     
     instruction = (
@@ -111,27 +199,26 @@ def analyze_prompt_and_extract_key(user_message):
     )
     
     try:
-        # PANGGILAN API 1: Analisis dan Ekstraksi Kata Kunci
-        response = model.generate_content(
-            instruction + "\n\nPertanyaan: " + user_message
+        # PANGGILAN MODEL LOKAL: Analisis dan Ekstraksi Kata Kunci
+        response_text = await _ollama_chat(
+            [
+                {"role": "system", "content": instruction},
+                {"role": "user", "content": "Pertanyaan: " + user_message},
+            ],
+            temperature=0.0,
         )
-        
-        raw_text = response.text.strip().upper()
-        
-        if '|' in raw_text:
-            parts = raw_text.split('|', 1)
-            is_food = parts[0].strip() == 'YA'
-            keyword = parts[1].strip().lower()
-            return is_food, keyword
-        else:
-            return False, 'none'
-            
-    except google_exceptions.ResourceExhausted as e:
-        # Jika pemanggilan API menghabiskan kuota
-        raise e
+        return _parse_classifier_output(response_text)
     except Exception as e:
-        print(f"Error Analisis API: {e}")
-        return False, 'none'
+        print(f"Error Analisis Model Lokal: {e}")
+        return False, "none"
+
+# STATUS HELPER
+def _status_from_flags(quota_exceeded: bool, had_error: bool) -> str:
+    if quota_exceeded:
+        return "quota_exceeded"
+    if had_error:
+        return "error"
+    return "success"
 
 # ENDPOINT UTAMA
 @app.post("/predict")
@@ -139,11 +226,13 @@ async def predict_response(request: ChatRequest):
     user_msg = request.message
     context_info = ""
     reply_text = ""
+    quota_exceeded = False
+    had_error = False
 
     try:
-        # ANALISIS (PANGGILAN API 1)
-        is_db_needed, keyword = analyze_prompt_and_extract_key(user_msg) 
-        print(f"DEBUG: DB Needed={is_db_needed}, Keyword={keyword}")
+        # ANALISIS (PANGGILAN MODEL LOKAL 1)
+        _, keyword = await analyze_prompt_and_extract_key(user_msg)
+        print(f"DEBUG: Keyword={keyword}")
         
         # Proses DB 
         if keyword != "none":
@@ -159,30 +248,29 @@ async def predict_response(request: ChatRequest):
             else:
                 context_info = "\n[SISTEM: User mencari produk, tapi tidak ditemukan di database. Beritahu user dengan sopan bahwa produk tidak ada~]"
                 
-        # 3. KIRIM PESAN (PANGGILAN API 2)
-        chat = model.start_chat(history=[
-            {"role": "user", "parts": [SYSTEM_PROMPT]}
-        ])
-
-        final_prompt = f"{user_msg} {context_info}"
-        
-        response = chat.send_message(final_prompt)
-        reply_text = response.text.strip()
-        
-    except google_exceptions.ResourceExhausted:
-        # PENANGANAN ERROR QUOTA HABIS
-        print("ERROR: Kuota Gemini Habis (ResourceExhausted 429)")
-        print(f"🔑 SERVER MEMBACA KEY: {API_GEMINI}")
-        reply_text = "Maaf banget, Ri harus istirahat nih~ Coba tunggu sebentar (sekitar 1 menit) lalu coba lagi ya~ Janji deh, Ri akan bantu lagi~"
+        # 3. KIRIM PESAN (PANGGILAN MODEL LOKAL 2)
+        final_prompt = f"{user_msg} {context_info}".strip()
+        reply_text = await _ollama_chat(
+            [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": final_prompt},
+            ],
+            temperature=0.7,
+        )
         
     except Exception as e:
         # Penanganan error lain
         reply_text = "Duh, Ri lagi pusing nih karena ada error di server, coba tanya lagi nanti ya~"
         print(f"Error Umum di Predict: {e}")
+        had_error = True
 
     return {
         "reply": reply_text,
-        "status": "success" if "Maaf banget" not in reply_text else "quota_exceeded"
+        "status": _status_from_flags(quota_exceeded, had_error)
     }
+
+@app.get("/metrics")
+def metrics():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 # How to use: uvicorn main:app --reload --port 8001
