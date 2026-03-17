@@ -25,6 +25,19 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:8b")
 OLLAMA_TIMEOUT_S = float(os.getenv("OLLAMA_TIMEOUT_S", "180"))
 OLLAMA_MAX_RETRIES = int(os.getenv("OLLAMA_MAX_RETRIES", "1"))
 
+
+def _candidate_ollama_urls(primary_url: str) -> list[str]:
+    """Build fallback Ollama URLs for common local/dev setups."""
+    urls = [primary_url]
+
+    if "localhost:11435" in primary_url or "127.0.0.1:11435" in primary_url:
+        urls.append(primary_url.replace(":11435", ":11434"))
+    elif "localhost:11434" in primary_url or "127.0.0.1:11434" in primary_url:
+        urls.append(primary_url.replace(":11434", ":11435"))
+
+    # preserve order but remove duplicates
+    return list(dict.fromkeys(urls))
+
 # Inisialisasi FastAPI
 app = FastAPI()
 
@@ -152,32 +165,36 @@ async def _ollama_chat(messages, temperature: float | None = None) -> str:
     if temperature is not None:
         payload["options"] = {"temperature": temperature}
 
+    candidate_urls = _candidate_ollama_urls(OLLAMA_BASE_URL)
     last_error = None
     for attempt in range(OLLAMA_MAX_RETRIES + 1):
-        try:
-            timeout = httpx.Timeout(OLLAMA_TIMEOUT_S)
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                response = await client.post(f"{OLLAMA_BASE_URL}/api/chat", json=payload)
+        for base_url in candidate_urls:
+            try:
+                timeout = httpx.Timeout(OLLAMA_TIMEOUT_S)
+                async with httpx.AsyncClient(timeout=timeout) as client:
+                    response = await client.post(f"{base_url}/api/chat", json=payload)
 
-            if response.status_code >= 400:
-                try:
-                    data = response.json()
-                    error_msg = data.get("error", response.text)
-                except Exception:
-                    error_msg = response.text
-                raise RuntimeError(f"Ollama error {response.status_code}: {error_msg}")
+                if response.status_code >= 400:
+                    try:
+                        data = response.json()
+                        error_msg = data.get("error", response.text)
+                    except Exception:
+                        error_msg = response.text
+                    raise RuntimeError(f"Ollama error {response.status_code} ({base_url}): {error_msg}")
 
-            data = response.json()
-            content = data.get("message", {}).get("content")
-            if not content:
-                raise RuntimeError("Ollama response missing content")
-            return content
-        except (httpx.TimeoutException, httpx.NetworkError, RuntimeError) as err:
-            last_error = err
-            if attempt < OLLAMA_MAX_RETRIES:
-                await asyncio.sleep(0.5 * (attempt + 1))
+                data = response.json()
+                content = data.get("message", {}).get("content")
+                if not content:
+                    raise RuntimeError("Ollama response missing content")
+                return content
+            except (httpx.TimeoutException, httpx.NetworkError, RuntimeError) as err:
+                last_error = err
                 continue
-            raise
+
+        if attempt < OLLAMA_MAX_RETRIES:
+            await asyncio.sleep(0.5 * (attempt + 1))
+            continue
+        raise
 
     raise last_error or RuntimeError("Unknown Ollama error")
 
