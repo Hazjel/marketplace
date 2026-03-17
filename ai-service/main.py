@@ -17,7 +17,8 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 # pip install httpx
 
 # Load Environment Variables
-load_dotenv(override=True)
+# Jangan override env yang sudah diset (mis. dari Docker Compose)
+load_dotenv(override=False)
 
 # Konfigurasi Ollama (Local)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
