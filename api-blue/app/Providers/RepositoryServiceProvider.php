@@ -29,6 +29,8 @@ use App\Repositories\TransactionDetailRepository;
 use App\Repositories\TransactionRepository;
 use App\Interfaces\WishlistRepositoryInterface;
 use App\Repositories\WishlistRepository;
+use App\Interfaces\CartRepositoryInterface;
+use App\Repositories\CartRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -50,6 +52,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ProductReviewRepositoryInterface::class, ProductReviewRepository::class);
         $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);
         $this->app->bind(WishlistRepositoryInterface::class, WishlistRepository::class);
+        $this->app->bind(CartRepositoryInterface::class, CartRepository::class);
     }
 
     /**

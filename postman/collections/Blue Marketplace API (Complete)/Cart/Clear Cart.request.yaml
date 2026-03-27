@@ -1,0 +1,11 @@
+$kind: http-request
+name: Clear Cart
+url: "{{base_url}}/cart/clear"
+method: DELETE
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 5000
