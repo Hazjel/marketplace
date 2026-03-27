@@ -24,12 +24,9 @@ services:
       - ./ai-service:/app
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_MODEL: qwen3:8b
+      OLLAMA_MODEL: qwen3:1.7b
       OLLAMA_TIMEOUT_S: 180
-      DB_HOST: host.docker.internal
-      DB_USER: ${DB_USER:-root}
-      DB_PASSWORD: ${DB_PASSWORD:-}
-      DB_NAME: ${DB_NAME:-api_blue}
+      LARAVEL_API_URL: http://host.docker.internal:8000
 
   prometheus:
     image: prom/prometheus:latest

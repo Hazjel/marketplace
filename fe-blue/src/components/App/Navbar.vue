@@ -164,10 +164,12 @@ const handleFocus = () => {
   }
 }
 
-onMounted(() => {
-  checkAuth()
-  if (user.value) {
-    fetchWishlist()
+onMounted(async () => {
+  if (authStore.token) {
+    await checkAuth()
+    if (user.value) {
+      fetchWishlist()
+    }
   }
   loadHistory()
   document.addEventListener('click', handleClickOutside)

@@ -5,10 +5,10 @@
   "tags": ["ai-service", "prometheus"],
   "timezone": "browser",
   "schemaVersion": 37,
-  "version": 1,
-  "refresh": "10s",
+  "version": 2,
+  "refresh": "5s",
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "panels": [
@@ -26,7 +26,107 @@
       ],
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "orientation": "horizontal"
+        "orientation": "horizontal",
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Avg Response Time",
+      "id": 7,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(http_request_duration_seconds_sum{endpoint=\"/predict\"}[5m]) / rate(http_request_duration_seconds_count{endpoint=\"/predict\"}[5m])"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 30 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate (5xx)",
+      "id": 8,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Active Req/s",
+      "id": 9,
+      "datasource": "Prometheus",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_requests_total[1m]))"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "thresholds": {
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        }
       }
     },
     {
@@ -34,24 +134,26 @@
       "title": "Request Rate (req/s) by Endpoint",
       "id": 2,
       "datasource": "Prometheus",
-      "gridPos": { "x": 6, "y": 0, "w": 18, "h": 8 },
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (endpoint) (rate(http_requests_total[1m]))"
+          "expr": "sum by (endpoint) (rate(http_requests_total[1m]))",
+          "legendFormat": "{{endpoint}}"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "Error Rate (5xx)",
+      "title": "Requests by Status Code",
       "id": 3,
       "datasource": "Prometheus",
-      "gridPos": { "x": 0, "y": 4, "w": 6, "h": 8 },
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
           "refId": "A",
-          "expr": "rate(http_requests_total{status=~\"5..\"}[5m])"
+          "expr": "sum by (status) (rate(http_requests_total[1m]))",
+          "legendFormat": "HTTP {{status}}"
         }
       ]
     },
@@ -64,9 +166,13 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "histogram_quantile(0.95, sum by (le, endpoint) (rate(http_request_duration_seconds_bucket[5m])))"
+          "expr": "histogram_quantile(0.95, sum by (le, endpoint) (rate(http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95 {{endpoint}}"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s" }
+      }
     },
     {
       "type": "timeseries",
@@ -77,20 +183,25 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "histogram_quantile(0.99, sum by (le, endpoint) (rate(http_request_duration_seconds_bucket[5m])))"
+          "expr": "histogram_quantile(0.99, sum by (le, endpoint) (rate(http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p99 {{endpoint}}"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s" }
+      }
     },
     {
       "type": "timeseries",
-      "title": "Requests by Endpoint (total)",
+      "title": "Requests by Endpoint (cumulative)",
       "id": 6,
       "datasource": "Prometheus",
-      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 8 },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (endpoint) (http_requests_total)"
+          "expr": "sum by (endpoint) (http_requests_total)",
+          "legendFormat": "{{endpoint}}"
         }
       ]
     }

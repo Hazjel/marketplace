@@ -47,17 +47,20 @@ axiosInstance.interceptors.response.use(
     }
 
     if (status === 401) {
+      const hadToken = !!Cookies.get('token')
       Cookies.remove('token')
 
-      // Kirim event global ke App.vue untuk memunculkan toast
-      window.dispatchEvent(new CustomEvent('api-error', {
-        detail: { message: 'Sesi Anda telah berakhir. Silakan login kembali.' }
-      }))
+      // Hanya redirect jika user sebelumnya punya token (sesi expired)
+      // Guest tanpa token tidak perlu di-redirect
+      if (hadToken) {
+        window.dispatchEvent(new CustomEvent('api-error', {
+          detail: { message: 'Sesi Anda telah berakhir. Silakan login kembali.' }
+        }))
 
-      // Delay redirect so user can read the toast message
-      setTimeout(() => {
-        window.location.href = '/auth/login'
-      }, 1500)
+        setTimeout(() => {
+          window.location.href = '/auth/login'
+        }, 1500)
+      }
     } else if (status >= 500) {
       window.dispatchEvent(new CustomEvent('api-error', {
         detail: { message: 'Kesalahan Sistem (500). Silakan coba lagi nanti.' }
