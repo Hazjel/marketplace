@@ -1,0 +1,20 @@
+$kind: http-request
+name: Update Cart Quantity
+url: "{{base_url}}/cart/:productId"
+method: PUT
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: text
+      key: variant_id
+      value: ""
+    - type: text
+      key: quantity
+      value: "3"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

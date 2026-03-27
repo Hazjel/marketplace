@@ -1,0 +1,11 @@
+$kind: http-request
+name: Get Cart Items
+url: "{{base_url}}/cart"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000

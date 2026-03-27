@@ -2,6 +2,7 @@
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 
 const route = useRoute()
 const router = useRouter()
@@ -35,6 +36,10 @@ onMounted(async () => {
           query: { alert: 'complete_profile' }
         })
       } else {
+        // Sync cart after Google OAuth login
+        const cartStore = useCartStore()
+        await cartStore.syncAfterLogin()
+
         // Redirect to dashboard normally
         router.push({ name: 'user.dashboard', params: { username: username } })
       }
