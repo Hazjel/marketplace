@@ -1,117 +1,112 @@
 # Blue Marketplace
 
-Blue Marketplace is a multi-vendor e-commerce platform with a Laravel API, Vue.js frontend, and a local AI assistant ("Ri") powered by Ollama.
+Multi-vendor e-commerce platform untuk gadget dan elektronik, dibangun dengan **Laravel 12**, **Vue 3**, **FastAPI AI chatbot**, dan **Flutter mobile app**.
 
-## Repository Layout
+## Arsitektur
 
-- `api-blue/` – Laravel API (core backend)
-- `fe-blue/` – Vue.js frontend
-- `ai-service/` – FastAPI service for the AI assistant
-- `monitoring/` – Prometheus, Grafana, and k6 setup
-- `docker-compose.yml` – Docker services (Redis, Ollama, AI service, Prometheus, Grafana)
+```
+api-blue/       → Laravel 12 REST API (PHP 8.2+, Sanctum, Spatie Permission)
+fe-blue/        → Vue 3 SPA (Vite, Tailwind v4, Pinia, Radix Vue)
+ai-service/     → FastAPI chatbot "Ri" (Ollama, qwen3:1.7b)
+mobile_blue/    → Flutter mobile app
+monitoring/     → Prometheus + Grafana + k6 load test
+postman/        → Postman collection (94 endpoint)
+docker-compose  → Redis, Ollama, AI Service, Prometheus, Grafana
+```
 
-## Services and Ports
+## Tech Stack
 
-- API: `http://localhost:8000`
-- Frontend: `http://localhost:5173`
-- Reverb (WebSocket): `http://localhost:8080`
-- AI Service: `http://localhost:8001`
-- Redis: `localhost:6379`
-- Ollama (Docker mapped): `http://localhost:11435`
-- Prometheus: `http://localhost:9090`
-- Grafana: `http://localhost:3000` (admin/admin)
+| Layer | Stack |
+|-------|-------|
+| Backend | Laravel 12, MySQL, MongoDB (product variants), Redis, Sanctum, Spatie Permission |
+| Frontend | Vue 3 Composition API, Vite 7, Tailwind CSS v4, Pinia, Laravel Echo |
+| AI Service | FastAPI, Ollama (`qwen3:1.7b`), Prometheus metrics |
+| Mobile | Flutter |
+| Monitoring | Prometheus, Grafana, k6 |
+| Payment | Midtrans |
+| Real-time | Laravel Reverb (WebSocket) |
+
+## Ports
+
+| Service | URL |
+|---------|-----|
+| Laravel API | http://localhost:8000 |
+| Vue Frontend | http://localhost:5173 |
+| Reverb WS | http://localhost:8080 |
+| AI Service | http://localhost:8001 |
+| Redis | localhost:6379 |
+| Ollama | http://localhost:11435 |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
 
 ## Prerequisites
 
-- PHP 8.2+ and Composer
-- Node.js and npm
+- PHP 8.2+, Composer
+- Node.js 18+, npm
 - MySQL
 - Docker Desktop
-- Python 3.10+ (only if you run AI service outside Docker)
+- Python 3.10+ (opsional, jika AI service dijalankan di luar Docker)
 
-## Quick Start (Recommended)
+## Quick Start
 
-1. Start Docker services (Redis, Ollama, AI, Prometheus, Grafana):
-   ```bash
-   cd e:\blue
-   docker compose up -d --build
-   ```
-2. Pull the Ollama model in the container (first time only):
-   ```bash
-   docker compose exec -T ollama ollama pull qwen3:8b
-   ```
-3. Start Laravel API:
-   ```bash
-   cd e:\blue\api-blue
-   composer install
-   cp .env.example .env
-   php artisan key:generate
-   php artisan migrate:fresh --seed
-   php artisan serve
-   ```
-4. Start frontend:
-   ```bash
-   cd e:\blue\fe-blue
-   npm install
-   npm run dev
-   ```
+### 1. Docker Services
 
-## AI Service (Ollama Local)
-
-The AI assistant uses the local Ollama model `qwen3:8b`. The AI service is containerized by default.
-
-Environment variables (Docker or local):
-```
-OLLAMA_BASE_URL=http://localhost:11435
-OLLAMA_MODEL=qwen3:8b
-OLLAMA_TIMEOUT_S=180
-DB_HOST=127.0.0.1
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=api_blue
-```
-
-If you want to run the AI service outside Docker:
 ```bash
-cd e:\blue\ai-service
+docker compose up -d --build
+docker compose exec -T ollama ollama pull qwen3:1.7b   # pertama kali saja
+```
+
+### 2. Laravel API
+
+```bash
+cd api-blue
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate:fresh --seed
+php artisan serve
+php artisan queue:work        # terminal terpisah
+php artisan reverb:start      # terminal terpisah
+```
+
+### 3. Vue Frontend
+
+```bash
+cd fe-blue
+npm install
+npm run dev
+```
+
+### 4. AI Service (opsional, jika di luar Docker)
+
+```bash
+cd ai-service
 python -m venv venv
-.\venv\Scripts\activate
+venv/Scripts/activate         # Windows
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8001
 ```
 
-## Monitoring (Prometheus + Grafana)
+## Monitoring
 
-- Metrics endpoint: `http://localhost:8001/metrics`
-- Prometheus targets: `http://localhost:9090/targets`
-- Grafana: `http://localhost:3000` (admin/admin)
+AI Service mengekspos metrics Prometheus di `/metrics`. Stack monitoring berjalan otomatis via Docker Compose.
 
-Grafana dashboard is auto-provisioned:
-1. Open Grafana
-2. Go to **Dashboards → Browse**
-3. Select **AI Service Monitoring**
+- **Prometheus**: http://localhost:9090/targets — cek scrape status
+- **Grafana**: http://localhost:3000 (admin/admin) — dashboard auto-provisioned di **Dashboards → AI Service Monitoring**
 
-## Load Testing (k6)
+### Load Testing
 
-Run the built-in load test:
 ```bash
-cd e:\blue
 docker compose --profile loadtest run --rm k6
 ```
 
-## Notes
-
-- Docker Compose runs: Redis, Ollama, AI service, Prometheus, Grafana.
-- Laravel API and Vue frontend are started separately (see Quick Start).
-- If you have a local helper script `start-all.ps1`, you can use it to start services in one go.
+Menjalankan 2 skenario: health check (10 VU) dan chat predict (2 VU) selama 2 menit.
 
 ## Troubleshooting
 
-- If Grafana is not reachable, restart it:
-  ```bash
-  docker compose up -d grafana
-  ```
-- If the model is not found, pull it inside the Ollama container:
-  ```bash
-  docker compose exec -T ollama ollama pull qwen3:8b
-  ```
+| Problem | Solusi |
+|---------|--------|
+| Grafana tidak tampil | `docker compose restart grafana` |
+| Model Ollama not found | `docker compose exec -T ollama ollama pull qwen3:1.7b` |
+| AI service error koneksi Ollama | Pastikan container Ollama running: `docker compose ps` |
+| 401 redirect loop di frontend | Clear cookie `token` di browser |

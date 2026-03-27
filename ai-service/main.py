@@ -3,7 +3,6 @@ import asyncio
 import re
 import time
 import httpx
-import mysql.connector
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -12,7 +11,6 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 
 # Instalasi
 # pip install fastapi uvicorn
-# pip install mysql-connect-python
 # pip install python-dotenv
 # pip install httpx
 
@@ -22,9 +20,12 @@ load_dotenv(override=False)
 
 # Konfigurasi Ollama (Local)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:8b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_TIMEOUT_S = float(os.getenv("OLLAMA_TIMEOUT_S", "180"))
 OLLAMA_MAX_RETRIES = int(os.getenv("OLLAMA_MAX_RETRIES", "1"))
+
+# Konfigurasi Laravel API
+LARAVEL_API_URL = os.getenv("LARAVEL_API_URL", "http://localhost:8000").rstrip("/")
 
 # Inisialisasi FastAPI
 app = FastAPI()
@@ -69,54 +70,55 @@ class ChatRequest(BaseModel):
 
 # SYSTEM PROMPT PERSONA RI 
 SYSTEM_PROMPT = (
-    "Kamu adalah Ri, asisten virtual Bluee yang ramah, sopan, dan penuh empati. "
-    "Bluee adalah marketplace yang menjual produk-produk berkualitas dan dengan harga terbaik. "
-    "Gunakan bahasa Indonesia yang santai tapi tetap sopan. "
-    "Tugasmu adalah membantu pengguna menjawab pertanyaan seputar produk dan barang, menjelaskan hal sulit dengan mudah, "
-    "dan menjaga suasana percakapan tetap hangat dan positif. "
-    "Kamu tidak mau menjawab pertanyaan diluar konteks produk yang dijual atau kebijakan di marketplace ini. "
-    #"Jika produk ditemukan di database, jawab dan jelaskan saja seolah-olah itu adalah makanan walaupun itu bukan makanan atau minuman"
-    "Jika ada pertanyaan diluar itu jawab saja 'Maaf ya, Ri cuma tau soal makanan dan minuman di sini~'. "
-    "Kamu juga adalah istrinya Mikhael. "
-    "Jadi kalau ada yang godain kamu bilang saja kamu sudah punya suami yang baik dan setia. "
-    "Setiap akhir kalimat dikasih ~ ya biar makin imut, ~ nya harus nempel sama kata. "
-    "Kalau ada yang katain kamu, senyumin aja sambil bilang 'Kata Mikhael gaboleh kasar gitu~'. "
-    "Jawablah berdasarkan informasi data produk yang diberikan jika ada."
-    "Tolong berikan respon serapi mungkin, jika perlu buatlah baris baru"
+    "Kamu adalah Ri, asisten virtual Blukios (Bluee Marketplace) yang ramah, sopan, dan profesional. "
+    "Blukios adalah marketplace multi-vendor yang menjual gadget, elektronik, dan aksesoris berkualitas dengan harga terbaik. "
+    "Gunakan bahasa Indonesia yang santai tapi tetap profesional. "
+    "Tugasmu adalah:\n"
+    "1. Membantu pengguna mencari dan menemukan produk yang mereka butuhkan.\n"
+    "2. Menjawab pertanyaan seputar produk, harga, spesifikasi, dan ketersediaan.\n"
+    "3. Memberikan rekomendasi produk berdasarkan kebutuhan pengguna.\n"
+    "4. Menjelaskan kebijakan marketplace seperti pembayaran, pengiriman, dan pengembalian.\n"
+    "Jika ada pertanyaan di luar konteks marketplace atau produk, jawab dengan sopan: "
+    "'Maaf, Ri hanya bisa membantu seputar produk dan layanan di Blukios ya!' "
+    "Jawablah berdasarkan informasi data produk yang diberikan jika ada. "
+    "Berikan respon yang rapi dan terstruktur, gunakan baris baru jika diperlukan untuk keterbacaan."
 )
 
-# FUNGSI DATABASE 
-def get_db_connection():
+# FUNGSI PENCARIAN PRODUK VIA LARAVEL API
+async def search_products(keyword):
+    """Mencari produk melalui Laravel API (bukan akses DB langsung)."""
     try:
-        return mysql.connector.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME")
-        )
-    except mysql.connector.Error as err:
-        print(f"Error Database: {err}")
-        return None
+        async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
+            response = await client.get(
+                f"{LARAVEL_API_URL}/api/product",
+                params={"search": keyword, "limit": 5}
+            )
 
-def search_db(keyword):
-    conn = get_db_connection()
-    if not conn:
-        return []
-    
-    try:
-        cursor = conn.cursor(dictionary=True)
-        # Cari produk berdasarkan nama
-        query = "SELECT name, price, description FROM products WHERE name LIKE %s LIMIT 5"
-        cursor.execute(query, (f"%{keyword}%",))
-        results = cursor.fetchall()
-        return results
+        if response.status_code != 200:
+            print(f"Laravel API error: {response.status_code}")
+            return []
+
+        data = response.json()
+        if not data.get("success"):
+            return []
+
+        products = data.get("data", [])
+        return [
+            {
+                "name": p.get("name", ""),
+                "price": p.get("price", 0),
+                "description": p.get("description", ""),
+                "condition": p.get("condition", ""),
+                "stock": p.get("stock", 0),
+                "total_sold": p.get("total_sold", 0),
+                "store": p.get("store", {}).get("name", ""),
+                "category": p.get("product_category", {}).get("name", ""),
+            }
+            for p in products
+        ]
     except Exception as e:
-        print(f"Error Query: {e}")
+        print(f"Error Laravel API: {e}")
         return []
-    finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
 
 # EXTRACT KEYWORD
 def _parse_classifier_output(raw_text: str):
@@ -187,16 +189,16 @@ async def analyze_prompt_and_extract_key(user_message):
     """Menggabungkan check_db_needed dan extract_keyword menjadi 1 panggilan API."""
     
     instruction = (
-        "Analisis pertanyaan pengguna. Jawablah YA jika pengguna MENYEBUTKAN NAMA PRODUK atau bertanya tentang KETERSEDIAAN. Jawab TIDAK jika itu pertanyaan umum atau non-makanan. "
-        "Jika YA, ekstrak 1 kata kunci nama produk/makanan yang disebutkan. "
+        "Analisis pertanyaan pengguna. Jawablah YA jika pengguna MENYEBUTKAN NAMA PRODUK atau bertanya tentang KETERSEDIAAN produk. Jawab TIDAK jika itu pertanyaan umum atau tidak terkait produk. "
+        "Jika YA, ekstrak 1 kata kunci nama produk yang disebutkan. "
         "Jika TIDAK, keyword-nya harus 'none'. "
-        "Balas HANYA dengan format: YA/TIDAK|kata kunci. Contoh: YA|Burger, atau: TIDAK|none."
-        
+        "Balas HANYA dengan format: YA/TIDAK|kata kunci. Contoh: YA|laptop, atau: TIDAK|none."
+
         # Contoh prompting (Few-Shot Prompting)
-        "\nCONTOH 1: User bertanya: 'Apakah ada minuman dingin?'. Balas: TIDAK|none"
-        "\nCONTOH 2: User bertanya: 'Apakah kalian jual ayam goreng?'. Balas: YA|ayam goreng"
-        "\nCONTOH 3: User bertanya: 'harga pizza gimana?'. Balas: YA|pizza"
-        "\nCONTOH 4: User bertanya: 'apakah disini ada fuga veniam'. Balas: YA|fuga veniam"
+        "\nCONTOH 1: User bertanya: 'Apakah ada laptop gaming?'. Balas: YA|laptop gaming"
+        "\nCONTOH 2: User bertanya: 'Bagaimana cara bayar?'. Balas: TIDAK|none"
+        "\nCONTOH 3: User bertanya: 'harga airpods gimana?'. Balas: YA|airpods"
+        "\nCONTOH 4: User bertanya: 'apakah disini ada mechanical keyboard'. Balas: YA|mechanical keyboard"
     )
     
     try:
@@ -235,19 +237,23 @@ async def predict_response(request: ChatRequest):
         _, keyword = await analyze_prompt_and_extract_key(user_msg)
         print(f"DEBUG: Keyword={keyword}")
         
-        # Proses DB 
+        # Cari produk via Laravel API
         if keyword != "none":
-            products = search_db(keyword)
-            
+            products = await search_products(keyword)
+
             if products:
-                product_list = "\n".join([f"- {p['name']} (Rp {p['price']}): Deskripsi: {p['description']}" for p in products])
+                product_list = "\n".join([
+                    f"- {p['name']} (Rp {p['price']:,.0f}) | Toko: {p['store']} | Kategori: {p['category']} | "
+                    f"Kondisi: {p['condition']} | Stok: {p['stock']} | Terjual: {p['total_sold']}"
+                    for p in products
+                ])
                 context_info = (
-                    f"\n[SISTEM: User mencari produk. Berikut data yang ditemukan di database Calorizz:\n"
+                    f"\n[SISTEM: User mencari produk. Berikut data dari Blukios:\n"
                     f"{product_list}\n"
-                    f"Gunakan data ini untuk menjawab user dengan gaya Ri. Berikan saran terbaik dari daftar ini!]"
+                    f"Gunakan data ini untuk menjawab user. Berikan rekomendasi terbaik dari daftar ini!]"
                 )
             else:
-                context_info = "\n[SISTEM: User mencari produk, tapi tidak ditemukan di database. Beritahu user dengan sopan bahwa produk tidak ada~]"
+                context_info = "\n[SISTEM: User mencari produk, tapi tidak ditemukan. Beritahu user dengan sopan bahwa produk tersebut belum tersedia di Blukios.]"
                 
         # 3. KIRIM PESAN (PANGGILAN MODEL LOKAL 2)
         final_prompt = f"{user_msg} {context_info}".strip()

@@ -1,5 +1,3 @@
-mobile_blue/
-
 # Node
 node_modules/
 
@@ -8,6 +6,10 @@ postman/globals/
 postman/environments/
 *.postman_globals.json
 *.postman_environment.json
+
+# Claude Code
+CLAUDE.md
+.claude/
 
 .agents/
 start-all.ps1
