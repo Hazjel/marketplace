@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import { useChatStore } from '@/stores/chat'
 import SidebarItem from '@/components/admin/sidebar/SidebarItem.vue'
 import HomeBlackIcon from '@/assets/images/icons/home-black.svg'
@@ -210,6 +211,8 @@ const handleSwitchMode = () => {
 const handleLogout = async () => {
   const success = await authStore.logout()
   if (success) {
+    const cartStore = useCartStore()
+    cartStore.onLogout()
     router.push({ name: 'auth.login' })
   }
 }

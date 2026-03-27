@@ -1,0 +1,25 @@
+$kind: http-request
+name: Sync Cart (Merge LocalStorage)
+url: "{{base_url}}/cart/sync"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: raw
+  raw: |-
+    {
+      "items": [
+        {
+          "product_id": "uuid-product-1",
+          "variant_id": null,
+          "quantity": 2,
+          "note": null
+        }
+      ]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 6000

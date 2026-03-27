@@ -1,6 +1,7 @@
 <script setup>
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 
@@ -37,6 +38,10 @@ const handleSubmit = async () => {
     localStorage.removeItem('remembered_email')
     localStorage.removeItem('remembered_password')
   }
+
+  // Sync cart from localStorage → server after login
+  const cart = useCartStore()
+  await cart.syncAfterLogin()
 
   // Redirect based on role
   if (response.role === 'admin') {

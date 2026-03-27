@@ -213,6 +213,15 @@ Route::middleware("auth:sanctum")->group(function () {
         App\Http\Controllers\WishlistController::class,
         "store",
     ]);
+
+    // Cart Routes
+    Route::get("cart", [App\Http\Controllers\CartController::class, "index"]);
+    Route::post("cart", [App\Http\Controllers\CartController::class, "store"]);
+    Route::put("cart/{productId}", [App\Http\Controllers\CartController::class, "update"]);
+    Route::delete("cart/clear", [App\Http\Controllers\CartController::class, "clear"]);
+    Route::delete("cart/{productId}", [App\Http\Controllers\CartController::class, "destroy"]);
+    Route::post("cart/sync", [App\Http\Controllers\CartController::class, "sync"]);
+    Route::post("cart/validate-stock", [App\Http\Controllers\CartController::class, "validateStock"]);
     // Chat Routes
     Route::get("chat/contacts", [
         App\Http\Controllers\ChatController::class,

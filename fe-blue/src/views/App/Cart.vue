@@ -1,11 +1,16 @@
 <script setup>
 import { formatRupiah } from '@/helpers/format'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
+import { onMounted, ref } from 'vue'
 
 const cart = useCartStore()
+const authStore = useAuthStore()
 const toast = useToast()
+const stockChecked = ref(false)
+
 const {
   carts,
   selectedStores,
@@ -49,6 +54,20 @@ const handleUpdateQuantity = (storeId, productId, event) => {
     }
   }
 }
+
+onMounted(async () => {
+  // Fetch latest cart from server for authenticated users
+  if (authStore.token) {
+    await cart.fetchCart()
+  }
+
+  // Validate stock availability
+  const result = await cart.validateCartStock()
+  stockChecked.value = true
+  if (result && !result.all_valid) {
+    toast.warning('Beberapa produk stoknya sudah berubah. Periksa keranjang Anda.')
+  }
+})
 </script>
 
 <template>
@@ -123,6 +142,29 @@ v-for="product in store.products" :key="product.id"
                     <p class="font-bold text-lg text-custom-black dark:text-white mt-2">
                       Rp {{ formatRupiah(product.price) }}
                     </p>
+
+                    <!-- Stock Status Badges -->
+                    <div v-if="stockChecked" class="flex items-center gap-2 mt-1">
+                      <span
+                        v-if="product.stock === 0"
+                        class="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-full"
+                      >
+                        Stok Habis
+                      </span>
+                      <span
+                        v-else-if="product.stock < 5"
+                        class="text-xs font-bold text-custom-orange bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full"
+                      >
+                        Sisa {{ product.stock }} buah
+                      </span>
+                      <span
+                        v-if="product._stockValid === false"
+                        class="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full"
+                      >
+                        Stok berubah
+                      </span>
+                    </div>
+
                   </div>
                 </div>
 

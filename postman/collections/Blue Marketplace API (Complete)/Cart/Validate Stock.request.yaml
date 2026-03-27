@@ -1,0 +1,24 @@
+$kind: http-request
+name: Validate Stock
+url: "{{base_url}}/cart/validate-stock"
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: raw
+  raw: |-
+    {
+      "items": [
+        {
+          "product_id": "uuid-product-1",
+          "variant_id": null,
+          "quantity": 5
+        }
+      ]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 7000
