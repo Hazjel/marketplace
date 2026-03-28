@@ -7,14 +7,14 @@ Before installing Python deps, please follow these steps.
 3. `.\venv\Scripts\activate` (windows) / `source venv/bin/activate` (mac/linux)
 4. `pip install -r requirements.txt`
 5. Make sure Ollama is running and pull the model:
-   - `ollama pull qwen3:8b`
+   - `ollama pull qwen3:1.7b`
 6. Run API:
    - `uvicorn main:app --reload --port 8001`
 
 ## Docker Compose (Ollama + API)
 
 1. Pastikan model sudah terinstall di container Ollama:
-   - `docker compose run --rm ollama ollama pull qwen3:8b`
+   - `docker compose run --rm ollama ollama pull qwen3:1.7b`
 2. Jalankan:
    - `docker compose up --build`
 
