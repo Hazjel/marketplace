@@ -175,19 +175,19 @@ v-for="t in filteredTransactions" :key="t.id"
             <span class="font-bold text-lg dark:text-white">{{ t.code }}</span>
             <span
 class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
-              'bg-yellow-100 text-yellow-600': t.payment_status === 'unpaid',
-              'bg-green-100 text-green-600': t.payment_status === 'paid',
-              'bg-red-100 text-red-600': t.payment_status === 'failed'
+              'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400': t.payment_status === 'unpaid',
+              'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400': t.payment_status === 'paid',
+              'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400': t.payment_status === 'failed'
             }">
               {{ t.payment_status }}
             </span>
             <span
 class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
-              'bg-gray-100 text-gray-600': t.delivery_status === 'pending',
-              'bg-blue-100 text-blue-600': t.delivery_status === 'processing',
-              'bg-purple-100 text-purple-600': t.delivery_status === 'delivering',
-              'bg-green-100 text-green-600': t.delivery_status === 'completed',
-              'bg-red-100 text-red-600': t.delivery_status === 'cancelled'
+              'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300': t.delivery_status === 'pending',
+              'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400': t.delivery_status === 'processing',
+              'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400': t.delivery_status === 'delivering',
+              'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400': t.delivery_status === 'completed',
+              'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400': t.delivery_status === 'cancelled'
             }">
               {{ t.delivery_status }}
             </span>
@@ -206,7 +206,7 @@ class="px-3 py-1 rounded-full text-xs font-bold uppercase" :class="{
             </div>
           </div>
 
-          <div class="flex items-center gap-4 mt-auto pt-2 border-t border-dashed border-gray-200">
+          <div class="flex items-center gap-4 mt-auto pt-2 border-t border-dashed border-gray-200 dark:border-white/10">
             <div class="flex items-center gap-2">
               <img src="@/assets/images/icons/location-grey.svg" class="w-4 h-4" alt="" />
               <div class="flex flex-col">

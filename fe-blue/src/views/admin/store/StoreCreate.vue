@@ -300,9 +300,14 @@ const handleAddressSelect = (selected) => {
       </a>
       <button
         type="submit"
-        class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg"
+        :disabled="loading"
+        class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Create Now
+        <svg v-if="loading" class="animate-spin size-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        {{ loading ? 'Creating...' : 'Create Now' }}
       </button>
     </div>
   </form>

@@ -187,7 +187,7 @@ const resolveStatusStyle = (transaction) => {
   // Prioritize Payment Failures
   const failureStatuses = ['expire', 'cancel', 'deny', 'failure', 'failed']
   if (failureStatuses.includes(transaction.payment_status)) {
-    return 'bg-red-100 text-red-600'
+    return 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
   }
 
   // Pending Logic

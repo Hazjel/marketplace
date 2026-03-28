@@ -383,7 +383,7 @@ v-model="product.condition" type="radio" name="condition" class="absolute opacit
 
           <div class="w-full flex flex-col gap-4">
             <label
-              class="flex items-center gap-2 cursor-pointer p-4 border rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+              class="flex items-center gap-2 cursor-pointer p-4 border rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
               <input v-model="product.has_variants" type="checkbox" class="toggle toggle-primary" />
               <span class="font-bold">Enable Variants</span>
             </label>
@@ -437,7 +437,7 @@ type="button" class="text-red-500 text-xs font-bold hover:underline"
                     <label class="text-[10px] font-bold text-gray-400 uppercase">{{ opt }}</label>
                     <input
 v-model="variant.variant_attributes[opt]" type="text"
-                      class="h-10 w-full border border-gray-200 bg-gray-50 rounded-lg px-3 text-sm font-semibold outline-none focus:border-custom-black transition-all"
+                      class="h-10 w-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 rounded-lg px-3 text-sm font-semibold outline-none focus:border-custom-black dark:focus:border-white transition-all"
                       :placeholder="opt + ' Value'" @input="autoGenerateName(variant)" />
                   </div>
                 </div>
@@ -512,7 +512,7 @@ type="button"
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
             <div
 v-for="(image, index) in product.product_images" :key="index"
-              class="thumbnail-input-container group relative flex w-full aspect-square rounded-2xl overflow-hidden items-center justify-center bg-gray-50 border-2 border-dashed border-gray-200 hover:border-custom-blue transition-colors">
+              class="thumbnail-input-container group relative flex w-full aspect-square rounded-2xl overflow-hidden items-center justify-center bg-gray-50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-custom-blue transition-colors">
               <input
 type="file" accept="image/*"
                 class="product-image-input absolute inset-0 opacity-0 cursor-pointer z-10"
@@ -532,10 +532,10 @@ v-if="index === 0"
       </div>
 
       <!-- Navigation Actions -->
-      <div class="flex items-center justify-between pt-6 mt-4 border-t border-gray-100">
+      <div class="flex items-center justify-between pt-6 mt-4 border-t border-gray-100 dark:border-white/10">
         <button
 v-if="currentStep > 1" type="button"
-          class="h-12 px-6 rounded-full font-bold text-gray-500 hover:bg-gray-100 transition-colors" @click="prevStep">
+          class="h-12 px-6 rounded-full font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors" @click="prevStep">
           Back
         </button>
         <div v-else></div>

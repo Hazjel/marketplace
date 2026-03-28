@@ -104,13 +104,13 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  /* --- Premium Dark Mode Palette --- */
+  /* --- Elevated Dark Mode Palette --- */
 
-  /* Backgrounds: Richer, deeper blues (Slate 950/900) */
-  --color-surface: #020617;
-  /* Slate 950 - Main Background */
-  --color-surface-card: #0f172a;
-  /* Slate 900 - Card Background */
+  /* Backgrounds: Slate 900/800 — cards clearly separated from bg */
+  --color-surface: #0f172a;
+  /* Slate 900 - Main Background */
+  --color-surface-card: #1e293b;
+  /* Slate 800 - Card Background */
 
   /* Text: High Contrast & Legibility */
   --color-text-main: #f8fafc;
@@ -118,9 +118,9 @@
   --color-text-muted: #94a3b8;
   /* Slate 400 - Muted Text */
 
-  /* Borders: Subtle & Refined */
-  --color-border: rgba(255, 255, 255, 0.08);
-  /* White Alpha 8% */
+  /* Borders: More visible separation */
+  --color-border: rgba(255, 255, 255, 0.12);
+  /* White Alpha 12% */
 
   /* Standard Tokens Mapping */
   --color-background: var(--color-surface);
@@ -135,18 +135,19 @@
   --color-primary-foreground: #ffffff;
   --color-secondary-foreground: #ffffff;
 
-  --color-muted: #1e293b;
-  /* Slate 800 */
+  --color-muted: #334155;
+  /* Slate 700 */
   --color-muted-foreground: #94a3b8;
 
-  --color-accent: #1e293b;
-  /* Slate 800 */
-  --color-accent-foreground: #ffffff;
+  --color-accent: #334155;
+  /* Slate 700 */
+  --color-accent-foreground: #60a5fa;
+  /* Blue-400 for better contrast on Slate-700 accent bg */
 
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
 
-  --color-input: rgba(255, 255, 255, 0.08);
+  --color-input: rgba(255, 255, 255, 0.12);
   /* Matches border */
   --color-ring: #0f52ba;
   /* Keep Primary Blue for focus rings */
@@ -154,13 +155,19 @@
   /* Custom Mappings */
   --color-custom-black: #ffffff;
   /* Text is white in dark mode */
-  --color-custom-background: #020617;
+  --color-custom-blue: #60a5fa;
+  /* Blue-400: passes WCAG AA (5.8:1 on Slate-800 card, 7.0:1 on Slate-900 bg) */
+  --color-custom-background: #0f172a;
   /* Matches surface */
-  --color-custom-icon-background: #1e293b;
-  /* Slate 800 */
-  --color-custom-stroke: rgba(255, 255, 255, 0.08);
+  --color-custom-icon-background: #334155;
+  /* Slate 700 */
+  --color-custom-stroke: rgba(255, 255, 255, 0.12);
   /* Matches border */
   --color-custom-grey: #94a3b8;
+  /* Slate-400: 4.6:1 on Slate-900 bg, meets AA */
+
+  /* Ring & focus also need lighter blue */
+  --color-ring: #60a5fa;
 }
 
 /* =========================================
@@ -190,7 +197,7 @@ body {
 
   /* --- Form Elements --- */
   .custom-input {
-    @apply h-[76px] w-full border-[1.5px] border-custom-stroke rounded-[18px] pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-semibold transition-all duration-300 appearance-none outline-none;
+    @apply h-[76px] w-full border-[1.5px] border-custom-stroke rounded-[18px] pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-semibold transition-all duration-300 appearance-none outline-none bg-white dark:bg-surface-card dark:text-white dark:border-white/10;
   }
 
   /* Placeholder Logic */
@@ -219,12 +226,12 @@ body {
 
   .group:has(:placeholder-shown) .input-placeholder,
   .group:has(:-moz-placeholder-shown) .input-placeholder {
-    @apply top-[38px] text-base font-bold text-custom-black;
+    @apply top-[38px] text-base font-bold text-custom-black dark:text-white;
   }
 
   /* Input Icons */
   .input-icon {
-    @apply absolute top-1/2 left-6 flex h-7 -translate-y-1/2 items-center border-r-[1.5px] border-custom-stroke pr-4;
+    @apply absolute top-1/2 left-6 flex h-7 -translate-y-1/2 items-center border-r-[1.5px] border-custom-stroke dark:border-white/10 pr-4;
   }
 
   .input-error {
@@ -249,7 +256,7 @@ body {
 
   /* --- Search --- */
   .search-result {
-    @apply absolute bottom-[-30px] w-full z-1 bg-white border border-[#ccc] rounded-[16px] shadow-md max-h-[200px] overflow-y-auto;
+    @apply absolute bottom-[-30px] w-full z-1 bg-white dark:bg-surface-card border border-[#ccc] dark:border-white/10 rounded-[16px] shadow-md max-h-[200px] overflow-y-auto;
   }
 
   .search-result ul {
@@ -257,7 +264,7 @@ body {
   }
 
   .search-result li {
-    @apply p-2 cursor-pointer hover:bg-[#f0f0f0];
+    @apply p-2 cursor-pointer hover:bg-[#f0f0f0] dark:hover:bg-white/5 dark:text-white;
   }
 
   /* --- Sticky Tabs --- */
@@ -268,6 +275,11 @@ body {
     z-index: 40;
     background-color: white;
     border-bottom: 1px solid #e5e7eb;
+  }
+
+  :is(.dark .sticky-tabs) {
+    background-color: #1e293b;
+    border-bottom-color: rgba(255, 255, 255, 0.12);
   }
 
   .tab-link {
@@ -452,6 +464,20 @@ body {
 
   .slide-out-to-right {
     --tw-exit-translate-x: 100%;
+  }
+}
+
+/* =========================================
+   ACCESSIBILITY
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

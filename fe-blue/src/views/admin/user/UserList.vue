@@ -92,18 +92,14 @@ src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml
       </div>
     </div>
     <section id="List-Transactions" class="flex flex-col flex-1 gap-6 w-full">
-      <div class="list flex flex-col gap-5">
-        <template v-if="!loading && users">
-          <CardList v-for="user in users" :key="user.id" :item="user" />
-        </template>
+      <div v-if="!loading && users?.length > 0" class="list flex flex-col gap-5">
+        <CardList v-for="user in users" :key="user.id" :item="user" />
       </div>
-      <Pagination :meta="meta" :server-options="serverOptions" />
-    </section>
-    <div v-if="users?.length === 0" id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4">
-      <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px] dark:invert" alt="icon" />
-      <div class="flex flex-col gap-1 items-center text-center">
+      <div v-else-if="!loading && users?.length === 0" id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4 py-12">
+        <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px] dark:invert" alt="icon" />
         <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>
       </div>
-    </div>
+      <Pagination v-if="users?.length > 0" :meta="meta" :server-options="serverOptions" />
+    </section>
   </div>
 </template>

@@ -4,7 +4,7 @@ import { cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const inputVariants = cva(
-  'h-[76px] w-full border-[1.5px] rounded-[18px] pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-semibold transition-all duration-300 appearance-none outline-none placeholder-shown:pt-[14.5px] focus:border-custom-blue focus:ring-1 focus:ring-custom-blue',
+  'h-[76px] w-full border-[1.5px] rounded-[18px] pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-semibold transition-all duration-300 appearance-none outline-none bg-white dark:bg-surface-card dark:text-white placeholder-shown:pt-[14.5px] focus:border-custom-blue focus:ring-1 focus:ring-custom-blue',
   {
     variants: {
       error: {
@@ -76,13 +76,13 @@ const updateValue = (e) => {
     <label class="group relative">
       <div
         v-if="$slots.icon"
-        class="input-icon absolute top-1/2 left-6 flex h-7 -translate-y-1/2 items-center border-r-[1.5px] border-custom-stroke pr-4"
+        class="input-icon absolute top-1/2 left-6 flex h-7 -translate-y-1/2 items-center border-r-[1.5px] border-custom-stroke pr-4 dark:border-white/10"
       >
         <slot name="icon"></slot>
       </div>
 
       <p
-        class="input-placeholder absolute left-[81px] top-[25px] -translate-y-1/2 text-sm font-semibold text-custom-grey transition-all duration-300 pointer-events-none group-focus-within:top-[25px] group-has-placeholder-shown:top-[38px] group-has-placeholder-shown:text-base group-has-placeholder-shown:font-bold group-has-placeholder-shown:text-custom-black"
+        class="input-placeholder absolute left-[81px] top-[25px] -translate-y-1/2 text-sm font-semibold text-custom-grey transition-all duration-300 pointer-events-none group-focus-within:top-[25px] group-has-placeholder-shown:top-[38px] group-has-placeholder-shown:text-base group-has-placeholder-shown:font-bold group-has-placeholder-shown:text-custom-black dark:group-has-placeholder-shown:text-white"
       >
         {{ label }}
       </p>

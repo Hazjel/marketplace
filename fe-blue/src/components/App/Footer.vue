@@ -53,22 +53,22 @@ const { user } = storeToRefs(authStore)
               <nav
                 class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 hover:*:text-custom-blue dark:hover:*:text-blue-400"
               >
-                <a href="#" @click.prevent>Customer Services</a>
-                <a href="#" @click.prevent>Return & Refund</a>
-                <a href="#" @click.prevent>Shipping Info</a>
-                <a href="#" @click.prevent>Contact Us</a>
+                <span class="cursor-default opacity-60">Customer Services</span>
+                <span class="cursor-default opacity-60">Return & Refund</span>
+                <span class="cursor-default opacity-60">Shipping Info</span>
+                <span class="cursor-default opacity-60">Contact Us</span>
               </nav>
             </div>
           </div>
         </div>
         <div class="flex flex-row md:flex-col gap-4 items-center md:items-start">
           <p class="font-semibold hidden md:block dark:text-white">Download App</p>
-          <a href="#" @click.prevent>
-            <img src="@/assets/images/logos/gplay.png" class="h-10 md:h-12" alt="logo" />
-          </a>
-          <a href="#" @click.prevent>
-            <img src="@/assets/images/logos/appstore.png" class="h-10 md:h-12" alt="logo" />
-          </a>
+          <span class="cursor-default opacity-60">
+            <img src="@/assets/images/logos/gplay.png" class="h-10 md:h-12" alt="Google Play" />
+          </span>
+          <span class="cursor-default opacity-60">
+            <img src="@/assets/images/logos/appstore.png" class="h-10 md:h-12" alt="App Store" />
+          </span>
         </div>
       </div>
       <hr class="border-custom-stroke dark:border-white/10" />
@@ -79,28 +79,24 @@ const { user } = storeToRefs(authStore)
           ©2026 Blukios. All Rights Reserved
         </p>
         <div class="flex items-center gap-5">
-          <a href="#" @click.prevent>
-            <img
-              src="@/assets/images/logos/instagram.svg"
-              class="flex size-6 shrink-0"
-              alt="logo"
-            />
-          </a>
-          <a href="#" @click.prevent>
-            <img src="@/assets/images/logos/gmail.svg" class="flex size-6 shrink-0" alt="logo" />
-          </a>
-          <a href="#" @click.prevent>
-            <img src="@/assets/images/logos/facebook.svg" class="flex size-6 shrink-0" alt="logo" />
-          </a>
-          <a href="#" @click.prevent>
-            <img src="@/assets/images/logos/tiktok.svg" class="flex size-6 shrink-0" alt="logo" />
-          </a>
-          <a href="#" @click.prevent>
-            <img src="@/assets/images/logos/youtube.svg" class="flex size-6 shrink-0" alt="logo" />
-          </a>
-          <a href="#" @click.prevent>
-            <img src="@/assets/images/logos/x.svg" class="flex size-6 shrink-0" alt="logo" />
-          </a>
+          <span class="cursor-default opacity-60">
+            <img src="@/assets/images/logos/instagram.svg" class="flex size-6 shrink-0" alt="Instagram" />
+          </span>
+          <span class="cursor-default opacity-60">
+            <img src="@/assets/images/logos/gmail.svg" class="flex size-6 shrink-0" alt="Gmail" />
+          </span>
+          <span class="cursor-default opacity-60">
+            <img src="@/assets/images/logos/facebook.svg" class="flex size-6 shrink-0" alt="Facebook" />
+          </span>
+          <span class="cursor-default opacity-60">
+            <img src="@/assets/images/logos/tiktok.svg" class="flex size-6 shrink-0" alt="TikTok" />
+          </span>
+          <span class="cursor-default opacity-60">
+            <img src="@/assets/images/logos/youtube.svg" class="flex size-6 shrink-0" alt="YouTube" />
+          </span>
+          <span class="cursor-default opacity-60">
+            <img src="@/assets/images/logos/x.svg" class="flex size-6 shrink-0" alt="X" />
+          </span>
         </div>
       </div>
     </div>
