@@ -10,7 +10,6 @@ export const useChatStore = defineStore('chat', {
     loadingContacts: false,
     loadingMessages: false,
     sendingMessage: false,
-    sendingMessage: false,
     error: null,
     onlineUsers: [] // Array of user IDs or objects
   }),
@@ -74,7 +73,6 @@ export const useChatStore = defineStore('chat', {
         this.activeUser &&
         (message.sender_id === this.activeUser.id || message.receiver_id === this.activeUser.id)
       ) {
-        // Check if message already exists to prevent duplicates from optimistic update + broadcast
         // Check if message already exists to prevent duplicates from optimistic update + broadcast
         const exists = this.messages.some((m) => String(m.id) === String(message.id))
         if (!exists) {

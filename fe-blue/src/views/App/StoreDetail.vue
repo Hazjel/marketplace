@@ -169,9 +169,9 @@ onMounted(async () => {
           Stores
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
-        <a href="#" class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
+        <span class="font-semibold text-lg text-custom-blue">
           {{ store?.name }}
-        </a>
+        </span>
       </div>
     </div>
   </header>
@@ -181,23 +181,19 @@ onMounted(async () => {
       <StoreHeader :store="store" :is-following="isFollowing" @follow="handleFollow" @unfollow="handleUnfollow" />
 
       <div class="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-        <a
-href="#"
-          class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all">
-          <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover" alt="promo" />
-        </a>
-        <a
-href="#"
-          class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all">
-          <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover" alt="promo" />
-        </a>
+        <div class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm">
+          <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover" alt="Store promo banner" />
+        </div>
+        <div class="flex w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm">
+          <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover" alt="Store promo banner" />
+        </div>
       </div>
     </section>
     <section class="flex flex-col gap-6 md:gap-8 animate-fade-in-up delay-200">
       <!-- Tabs Navigation -->
       <div
 id="Tab-Buttons"
-        class="sticky top-0 z-30 bg-custom-background/95 backdrop-blur-sm pt-4 pb-2 border-b border-custom-stroke flex items-center gap-8 w-full overflow-x-auto hide-scrollbar">
+        class="sticky top-0 z-30 bg-custom-background/95 dark:bg-surface-card/95 backdrop-blur-sm pt-4 pb-2 border-b border-custom-stroke dark:border-white/10 flex items-center gap-8 w-full overflow-x-auto hide-scrollbar">
         <button
 :class="[
           'font-bold text-lg md:text-xl whitespace-nowrap transition-colors relative py-2',
@@ -284,8 +280,8 @@ v-for="category in storeCategories" :key="category.id" :class="[
 :class="[
                 'whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors',
                 !selectedCategory
-                  ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold'
-                  : 'border-custom-stroke bg-white text-custom-grey font-medium'
+                  ? 'border-custom-blue bg-blue-50 dark:bg-custom-blue/10 text-custom-blue font-semibold'
+                  : 'border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card text-custom-grey font-medium'
               ]" @click="handleCategoryFilter(null)">
                 Semua
               </button>
@@ -293,8 +289,8 @@ v-for="category in storeCategories" :key="category.id" :class="[
 v-for="category in storeCategories" :key="category.id" :class="[
                 'whitespace-nowrap px-4 py-2 rounded-full border text-sm transition-colors',
                 selectedCategory?.id === category.id
-                  ? 'border-custom-blue bg-blue-50 text-custom-blue font-semibold'
-                  : 'border-custom-stroke bg-white text-custom-grey font-medium'
+                  ? 'border-custom-blue bg-blue-50 dark:bg-custom-blue/10 text-custom-blue font-semibold'
+                  : 'border-custom-stroke dark:border-white/10 bg-white dark:bg-surface-card text-custom-grey font-medium'
               ]" @click="handleCategoryFilter(category)">
                 {{ category.name }}
               </button>
@@ -303,13 +299,13 @@ v-for="category in storeCategories" :key="category.id" :class="[
             <!-- Sorting -->
             <div class="flex items-center justify-between">
               <p class="font-semibold text-custom-grey">
-                <span class="text-custom-black font-bold">{{ products.length }}</span> Produk
+                <span class="text-custom-black dark:text-white font-bold">{{ products.length }}</span> Produk
               </p>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-custom-grey font-medium">Urutkan:</span>
                 <select
 v-model="selectedSort"
-                  class="border-none bg-transparent font-bold text-custom-black focus:ring-0 cursor-pointer text-sm"
+                  class="border-none bg-transparent font-bold text-custom-black dark:text-white focus:ring-0 cursor-pointer text-sm"
                   @change="handleSortChange">
                   <option value="default">Paling Sesuai</option>
                   <option value="newest">Terbaru</option>
@@ -329,9 +325,9 @@ v-model="selectedSort"
               <div
 v-if="!loadingProducts && products.length === 0"
                 class="col-span-full py-12 flex flex-col items-center justify-center text-center">
-                <img src="@/assets/images/icons/box-2-grey.svg" class="w-24 h-24 mb-4 opacity-50" alt="Empty" />
-                <h3 class="font-bold text-gray-400 text-lg">Belum ada produk</h3>
-                <p class="text-sm text-gray-400">Toko ini belum memiliki produk di etalase ini.</p>
+                <img src="@/assets/images/icons/box-2-grey.svg" class="w-24 h-24 mb-4 opacity-50 dark:invert" alt="Empty" />
+                <h3 class="font-bold text-gray-400 dark:text-gray-500 text-lg">Belum ada produk</h3>
+                <p class="text-sm text-gray-400 dark:text-gray-500">Toko ini belum memiliki produk di etalase ini.</p>
               </div>
             </div>
           </div>
@@ -345,9 +341,9 @@ v-if="!loadingProducts && products.length === 0"
             <div
 v-if="reviews.length === 0"
               class="col-span-full py-12 flex flex-col items-center justify-center text-center">
-              <img src="@/assets/images/icons/message-text-grey.svg" class="w-24 h-24 mb-4 opacity-50" alt="Empty" />
-              <h3 class="font-bold text-gray-400 text-lg">Belum ada ulasan</h3>
-              <p class="text-sm text-gray-400">Toko ini belum memiliki ulasan dari pembeli.</p>
+              <img src="@/assets/images/icons/message-text-grey.svg" class="w-24 h-24 mb-4 opacity-50 dark:invert" alt="Empty" />
+              <h3 class="font-bold text-gray-400 dark:text-gray-500 text-lg">Belum ada ulasan</h3>
+              <p class="text-sm text-gray-400 dark:text-gray-500">Toko ini belum memiliki ulasan dari pembeli.</p>
             </div>
           </div>
         </section>

@@ -1,5 +1,6 @@
 <script setup>
 import ProductCard from '@/components/card/ProductCard.vue'
+import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import { useWishlistStore } from '@/stores/wishlist'
 import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
@@ -34,10 +35,11 @@ onMounted(() => {
     class="flex flex-col w-full max-w-[1280px] px-4 md:px-[52px] mt-8 md:mt-[72px] mb-20 md:mb-[100px] mx-auto"
   >
     <section class="flex flex-col gap-9">
-      <div v-if="loading" class="flex items-center justify-center min-h-[200px]">
-        <div
-          class="size-10 border-4 border-custom-blue border-t-transparent rounded-full animate-spin"
-        ></div>
+      <div
+        v-if="loading"
+        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6"
+      >
+        <SkeletonProductCard v-for="i in 5" :key="i" />
       </div>
 
       <div

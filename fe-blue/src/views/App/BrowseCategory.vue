@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ProductCard from '@/components/card/ProductCard.vue'
+import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import FilterSidebar from '@/components/App/FilterSidebar.vue'
 
 const route = useRoute()
@@ -148,7 +149,10 @@ watch(
           <div class="flex items-center justify-between">
             <h2 class="font-extrabold text-[32px]">All Products</h2>
           </div>
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+          <div v-if="loadingProducts && products.length === 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+            <SkeletonProductCard v-for="i in 10" :key="i" />
+          </div>
+          <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             <ProductCard v-for="product in products" :key="product.id" :item="product" />
           </div>
         </section>

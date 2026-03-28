@@ -1,12 +1,13 @@
 <script setup>
 import ProductCard from '@/components/card/ProductCard.vue'
+import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import { useProductStore } from '@/stores/product'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { onMounted, watch } from 'vue'
 
 const productStore = useProductStore()
-const { products } = storeToRefs(productStore)
+const { products, loading } = storeToRefs(productStore)
 const { fetchProducts } = productStore
 const route = useRoute()
 import { useHead } from '@vueuse/head'
@@ -48,8 +49,24 @@ watch(
       <h1 class="font-bold text-[32px] text-custom-black">Top Picks</h1>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
+    <div v-if="loading && products.length === 0" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
+      <SkeletonProductCard v-for="i in 12" :key="i" />
+    </div>
+
+    <div v-else-if="products.length > 0" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
       <ProductCard v-for="product in products" :key="product.id" :item="product" />
+    </div>
+
+    <div v-else class="flex flex-col items-center justify-center py-20 text-center">
+      <img src="@/assets/images/icons/box-search-grey.svg" class="size-20 opacity-50 mb-4" alt="No products" />
+      <h2 class="font-bold text-2xl text-custom-grey">No products found</h2>
+      <p class="text-custom-grey mt-1">Check back later for new arrivals.</p>
+      <RouterLink
+        :to="{ name: 'app.home' }"
+        class="mt-4 px-6 py-3 bg-custom-black text-white rounded-full font-medium hover:bg-black/80 transition-colors"
+      >
+        Back to Home
+      </RouterLink>
     </div>
   </div>
 </template>
