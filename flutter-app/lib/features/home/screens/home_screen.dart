@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:blukios_marketplace/core/network/api_client.dart';
+import 'package:blukios_marketplace/core/utils/responsive.dart';
 import 'package:blukios_marketplace/features/home/data/product_repository.dart';
 import 'package:blukios_marketplace/features/home/models/product_model.dart';
 import 'package:blukios_marketplace/features/home/models/category_model.dart';
@@ -178,12 +179,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      // Products Grid
+                      // Products Grid (responsive)
                       SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: Responsive.getScreenPadding(context),
                         sliver: SliverGrid(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: Responsive.getGridCrossAxisCount(context),
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
                             childAspectRatio: 0.68,
