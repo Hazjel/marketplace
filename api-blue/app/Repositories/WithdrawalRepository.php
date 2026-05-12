@@ -60,6 +60,23 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
         DB::beginTransaction();
 
         try {
+            // Validasi: hanya bisa tarik dari saldo tersedia (balance), bukan pending_balance
+            $storeBalance = \App\Models\StoreBalance::where('id', $data['store_balance_id'])->lockForUpdate()->first();
+
+            if (!$storeBalance) {
+                throw new Exception('Store Balance tidak ditemukan');
+            }
+
+            if ($storeBalance->balance < $data['amount']) {
+                throw new Exception(
+                    'Saldo tersedia tidak mencukupi. ' .
+                    'Saldo tersedia: Rp ' . number_format($storeBalance->balance, 0, ',', '.') . '. ' .
+                    ($storeBalance->pending_balance > 0
+                        ? 'Rp ' . number_format($storeBalance->pending_balance, 0, ',', '.') . ' masih ditahan (escrow) dan belum bisa ditarik.'
+                        : '')
+                );
+            }
+
             $withdrawal = new Withdrawal;
             $withdrawal->store_balance_id = $data['store_balance_id'];
             $withdrawal->amount = $data['amount'];
@@ -70,12 +87,12 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             $withdrawal->save();
 
             $storeBalanceRepository = new StoreBalanceRepository;
-            $storeBalanceRepository->debit($withdrawal->store_balance_id, $withdrawal->amount,);
+            $storeBalanceRepository->debit($withdrawal->store_balance_id, $withdrawal->amount);
 
             $storeBalanceHistoryRepository = new StoreBalanceHistoryRepository();
             $storeBalanceHistoryRepository->create([
                 'store_balance_id' => $withdrawal->store_balance_id,
-                'type' => 'withdraw',
+                'type' => 'withdrawal',
                 'reference_id' => $withdrawal->id,
                 'reference_type' => Withdrawal::class,
                 'amount' => -$data['amount'],

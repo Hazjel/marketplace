@@ -37,7 +37,12 @@ const toast = useToast()
 const handleSubmit = async () => {
   const amount = parseRupiah(withdrawal.value.amount)
   if (amount > storeBalance.value.balance) {
-    toast.error('Saldo tidak mencukupi untuk melakukan penarikan dana.')
+    toast.error('Saldo tersedia tidak mencukupi. Dana yang masih ditahan (escrow) belum bisa ditarik.')
+    return
+  }
+
+  if (amount <= 0) {
+    toast.error('Jumlah penarikan harus lebih dari 0')
     return
   }
 
@@ -88,8 +93,22 @@ onMounted(fetchStoreBalance)
       </p>
       <div class="flex items-center gap-1">
         <img src="@/assets/images/icons/wallet-3-grey.svg" class="size-5" alt="icon" />
-        <p class="font-semibold text-custom-grey leading-none">My Balance</p>
+        <p class="font-semibold text-custom-grey leading-none">Saldo Tersedia</p>
       </div>
+    </div>
+  </div>
+  <!-- Pending Balance Warning -->
+  <div
+    v-if="storeBalance?.pending_balance > 0"
+    class="flex items-center rounded-[20px] p-4 gap-3 bg-custom-orange/10 border border-custom-orange/20">
+    <img src="@/assets/images/icons/timer-white-fill.svg" class="size-7 shrink-0 brightness-75" alt="icon" />
+    <div class="flex flex-col gap-1">
+      <p class="font-semibold text-custom-orange">
+        Rp {{ formatRupiah(storeBalance?.pending_balance) }} sedang ditahan (escrow)
+      </p>
+      <p class="text-sm text-custom-orange/80">
+        Dana ini akan tersedia setelah buyer konfirmasi terima pesanan atau auto-complete 7 hari.
+      </p>
     </div>
   </div>
   <form class="flex flex-col w-full rounded-3xl p-5 gap-5 bg-white" @submit.prevent="handleSubmit">
