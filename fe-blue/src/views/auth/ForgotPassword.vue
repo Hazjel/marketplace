@@ -69,7 +69,7 @@ const handleSubmit = async () => {
         <div
           class="shrink-0 w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center mt-0.5"
         >
-          <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -107,9 +107,7 @@ const handleSubmit = async () => {
     >
       <!-- Email Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1"
-          >Email Address</label
-        >
+        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Alamat Email</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img
@@ -128,7 +126,7 @@ const handleSubmit = async () => {
             :disabled="loading"
           />
         </div>
-        <span v-if="error?.email" class="text-red-500 text-xs font-medium ml-2">
+        <span v-if="error?.email" class="text-red-500 dark:text-red-400 text-xs font-medium ml-2">
           {{ error.email.join(', ') }}
         </span>
       </div>
@@ -136,7 +134,7 @@ const handleSubmit = async () => {
       <!-- Submit Button -->
       <button
         type="submit"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg dark:hover:shadow-blue-900/30 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         :disabled="loading || !form.email"
       >
         <span v-if="loading" class="animate-spin mr-2">⏳</span>
@@ -148,7 +146,7 @@ const handleSubmit = async () => {
     <div v-if="successMessage" class="flex flex-col gap-3 mt-2">
       <RouterLink
         :to="{ name: 'auth.login' }"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-all duration-300"
+        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300"
       >
         Kembali ke Login
       </RouterLink>
