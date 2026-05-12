@@ -196,10 +196,8 @@ class TransactionController extends Controller implements HasMiddleware
     }
 
     /**
-     * Remove the specified resource from storage.
-     */
-    /**
      * Complete the transaction (Buyer only).
+     * Releases pending_balance to available balance (escrow release).
      */
     public function complete(string $id)
     {
@@ -241,9 +239,57 @@ class TransactionController extends Controller implements HasMiddleware
                 'receiving_proof' => $receivingProof
             ]);
 
-            return ResponseHelper::jsonResponse(true, 'Pesanan Selesai', new TransactionResource($transaction), 200);
+            // ESCROW RELEASE: Pindahkan dana dari pending_balance ke available balance
+            $this->releaseEscrowBalance($transaction);
+
+            return ResponseHelper::jsonResponse(true, 'Pesanan Selesai — dana telah dirilis ke saldo toko', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    /**
+     * Release escrow: pindahkan dana dari pending_balance ke available balance.
+     * Dipanggil saat buyer konfirmasi terima atau auto-complete.
+     */
+    private function releaseEscrowBalance(Transaction $transaction): void
+    {
+        try {
+            $store = \App\Models\Store::find($transaction->store_id);
+
+            if (!$store || !$store->storeBalance) {
+                Log::error('releaseEscrowBalance: Store or StoreBalance not found', [
+                    'store_id' => $transaction->store_id,
+                ]);
+                return;
+            }
+
+            $netSales = $transaction->grand_total - $transaction->shipping_cost;
+            $adminFee = $netSales * 0.10;
+            $sellerAmount = $netSales - $adminFee;
+
+            $storeBalanceRepository = new \App\Repositories\StoreBalanceRepository;
+
+            // Pindahkan dari pending ke available
+            $storeBalanceRepository->releasePending($store->storeBalance->id, $sellerAmount);
+
+            // Catat history: dana dirilis
+            $store->storeBalance->storeBalanceHistories()->create([
+                'type' => 'released',
+                'reference_id' => $transaction->id,
+                'reference_type' => Transaction::class,
+                'amount' => $sellerAmount,
+                'remarks' => 'Dana dirilis ke saldo tersedia — pesanan ' . $transaction->code . ' selesai',
+            ]);
+
+            Log::info('Escrow released for transaction: ' . $transaction->code, [
+                'store_id' => $store->id,
+                'seller_amount' => $sellerAmount,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Error releasing escrow balance: ' . $e->getMessage(), [
+                'transaction_id' => $transaction->id,
+            ]);
         }
     }
 
@@ -308,18 +354,27 @@ class TransactionController extends Controller implements HasMiddleware
                     $transaction->payment_status = 'paid';
                     $transaction->save();
                     
-                    // Trigger Balance Updates (Copy of Callback Logic)
-                     $store = \App\Models\Store::find($transaction->store_id);
-                     if ($store) {
+                    // Credit ke pending_balance (escrow) — sama seperti Midtrans callback
+                    $store = \App\Models\Store::find($transaction->store_id);
+                    if ($store && $store->storeBalance) {
                         $netSales = $transaction->grand_total - $transaction->shipping_cost;
                         $adminFee = $netSales * 0.10;
+                        $sellerAmount = $netSales - $adminFee;
+
                         $transaction->admin_fee = $adminFee;
                         $transaction->save();
 
-                        // Balance Repo logic omit for brevity or assume already handled in Observer? 
-                        // The callback had complex logic. Ideally move to Service/Repository. 
-                        // For now, let's just update the status so user can proceed.
-                     }
+                        $storeBalanceRepository = new \App\Repositories\StoreBalanceRepository;
+                        $storeBalanceRepository->creditPending($store->storeBalance->id, $sellerAmount);
+
+                        $store->storeBalance->storeBalanceHistories()->create([
+                            'type' => 'pending_income',
+                            'reference_id' => $transaction->id,
+                            'reference_type' => Transaction::class,
+                            'amount' => $sellerAmount,
+                            'remarks' => 'Pembayaran diterima (ditahan) dari transaksi ' . $transaction->code . ' — akan dirilis setelah pesanan selesai',
+                        ]);
+                    }
                 } else if ($newStatus !== $transaction->payment_status) {
                     $transaction->payment_status = $newStatus;
                     $transaction->save();
