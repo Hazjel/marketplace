@@ -92,7 +92,7 @@ const getCategoryIcon = (name) => {
         v-for="category in productCategories"
         :key="category.id"
         :to="{ name: 'app.browse-category', params: { slug: category.slug } }"
-        class="group flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+        class="group flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-white/80 dark:hover:bg-white/5 hover:shadow-lg hover:shadow-blue-500/5 hover:backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5"
       >
         <!-- Icon Circle -->
         <div class="size-12 md:size-14 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 group-hover:scale-110 transition-all duration-200">

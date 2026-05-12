@@ -183,7 +183,7 @@ onUnmounted(() => {
 <template>
   <section
 id="Navbar-Wrapper"
-    class="sticky top-0 left-0 w-full bg-surface/95 backdrop-blur-md border-b border-border py-4 md:py-8 z-50 transition-all duration-300">
+    class="sticky top-0 left-0 w-full bg-white/80 dark:bg-surface/80 backdrop-blur-xl backdrop-saturate-150 border-b border-gray-200/60 dark:border-white/5 py-3 md:py-4 z-50 transition-all duration-300 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
     <div class="w-full">
       <div class="w-full max-w-[1920px] flex flex-col gap-6 px-4 md:px-7 mx-auto">
         <div class="flex flex-wrap md:flex-nowrap items-center justify-between md:justify-start gap-2 md:gap-6 w-full">
