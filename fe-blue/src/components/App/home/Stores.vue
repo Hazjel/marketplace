@@ -1,92 +1,66 @@
 <script setup>
-import Swiper from 'swiper'
-import { Navigation, Pagination } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
-import { onMounted, computed, nextTick } from 'vue'
-import StoreCard from '@/components/card/StoreCard.vue'
+import { onMounted } from 'vue'
 import { useStoreStore } from '@/stores/store'
 import { storeToRefs } from 'pinia'
-import { chunk } from 'lodash'
-import SectionHeader from '@/components/Molecule/SectionHeader.vue'
+import { RouterLink } from 'vue-router'
 
 const storeStore = useStoreStore()
 const { stores, loading } = storeToRefs(storeStore)
 const { fetchStores } = storeStore
 
-const storeChunks = computed(() => {
-  return chunk(stores.value, 3)
-})
-
 onMounted(async () => {
   await fetchStores({
-    limit: 9,
+    limit: 6,
     random: true
-  })
-
-  nextTick(() => {
-    if (stores.value.length > 0) {
-      new Swiper('.storeSwiper', {
-        modules: [Navigation, Pagination],
-        loop: stores.value.length > 3, // Only loop if enough slides
-        slidesPerView: 1,
-        spaceBetween: 24,
-        pagination: {
-          el: '.store-pagination',
-          clickable: true,
-          bulletActiveClass: 'swiper-pagination-bullet-active !bg-blue-600',
-          renderBullet: function (index, className) {
-            return (
-              '<span class="flex shrink-0 w-[42px] h-1 rounded-full bg-custom-stroke ' +
-              className +
-              '"></span>'
-            )
-          }
-        },
-        navigation: {
-          nextEl: '.store-next',
-          prevEl: '.store-prev'
-        }
-      })
-    }
   })
 })
 </script>
 
 <template>
-  <section id="Trusted-Seller" class="flex flex-col gap-6 md:gap-9 animate-fade-in-up delay-300">
-    <SectionHeader title="Official Stores" :link="{ name: 'app.all-stores' }" />
+  <section class="flex flex-col gap-5">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Toko Official</h2>
+      <RouterLink
+        :to="{ name: 'app.all-stores' }"
+        class="text-sm font-semibold text-custom-blue dark:text-blue-400 hover:underline"
+      >
+        Lihat Semua
+      </RouterLink>
+    </div>
 
-    <div class="flex flex-col gap-6 relative">
-      <div class="storeSwiper w-full overflow-hidden">
-        <div class="swiper-wrapper">
-          <div
-v-for="(storeChunk, index) in storeChunks" :key="index"
-            class="swiper-slide w-full !grid !grid-cols-1 sm:!grid-cols-3 !gap-3 md:!gap-6">
-            <StoreCard v-for="store in storeChunk" :key="store.id" :item="store" />
-          </div>
+    <!-- Store Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+      <RouterLink
+        v-for="store in stores"
+        :key="store.id"
+        :to="{ name: 'app.store-detail', params: { username: store.username } }"
+        class="group flex flex-col items-center gap-3 p-4 bg-white dark:bg-surface-card rounded-xl border border-gray-100 dark:border-white/5 hover:border-custom-blue/20 dark:hover:border-blue-400/30 hover:shadow-md transition-all duration-200"
+      >
+        <!-- Logo -->
+        <div class="size-14 md:size-16 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 border-2 border-gray-50 dark:border-white/5 group-hover:border-custom-blue/30 transition-colors">
+          <img
+            :src="store.logo"
+            class="w-full h-full object-cover"
+            loading="lazy"
+            :alt="store.name"
+          />
         </div>
-      </div>
 
-      <!-- Navigation -->
-      <div class="relative flex items-center justify-center gap-6 h-14 w-fit mx-auto">
-        <button
-type="button"
-          class="store-prev flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke dark:border-white/10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-          <img
-src="@/assets/images/icons/arrow-right-black.svg" class="size-6 rotate-180 dark:brightness-0 dark:invert"
-            alt="icon" />
-        </button>
-        <div class="store-pagination flex items-center gap-2"></div>
-        <button
-type="button"
-          class="store-next flex shrink-0 items-center justify-center size-14 rounded-full border border-custom-stroke dark:border-white/10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-          <img
-src="@/assets/images/icons/arrow-right-black.svg" class="size-6 dark:brightness-0 dark:invert"
-            alt="icon" />
-        </button>
-      </div>
+        <!-- Info -->
+        <div class="flex flex-col items-center gap-1 text-center w-full">
+          <h3 class="text-sm font-semibold text-gray-800 dark:text-white truncate w-full group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
+            {{ store.name }}
+          </h3>
+          <div v-if="store.is_verified" class="flex items-center gap-1">
+            <svg class="size-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-[10px] font-bold text-blue-500 uppercase">Official</span>
+          </div>
+          <span class="text-xs text-gray-400 dark:text-gray-500">{{ store.city || 'Indonesia' }}</span>
+        </div>
+      </RouterLink>
     </div>
   </section>
 </template>

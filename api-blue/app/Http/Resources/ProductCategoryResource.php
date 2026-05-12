@@ -14,6 +14,14 @@ class ProductCategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Count products in this category + all child categories
+        $productCount = $this->products->count();
+        if ($this->childrens && $this->childrens->count() > 0) {
+            foreach ($this->childrens as $child) {
+                $productCount += $child->products->count();
+            }
+        }
+
         return [
             'id' => $this->id,
             'parent_id' => $this->parent_id,
@@ -22,10 +30,9 @@ class ProductCategoryResource extends JsonResource
             'slug' => $this->slug,
             'tagline' => $this->tagline,
             'description' => $this->description,
-            'product_count' => $this->products->count() ?? 0,
+            'product_count' => $productCount,
             'children_count' => $this->childrens->count() ?? 0,
             'childrens' => ProductCategoryResource::collection($this->whenLoaded('childrens')),
-
         ];
     }
 }

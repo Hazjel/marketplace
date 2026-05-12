@@ -10,10 +10,6 @@ const props = defineProps({
   item: {
     type: Object,
     required: true
-  },
-  compact: {
-    type: Boolean,
-    default: false
   }
 })
 
@@ -35,97 +31,76 @@ const handleToggleWishlist = async () => {
     router.push({ name: 'auth.login' })
     return
   }
-  // Pass full item object so store can add it to list immediately
   await toggleWishlist(props.item)
 }
 </script>
 
 <template>
-  <div
-    class="group flex flex-col overflow-hidden shadow-sm hover-glow-blue h-full cursor-pointer relative w-full rounded-2xl border-transparent">
-    <!-- Wishlist Overlay -->
+  <RouterLink
+    :to="{ name: 'app.product-detail', params: { slug: item.slug } }"
+    class="group flex flex-col bg-white dark:bg-surface-card rounded-xl overflow-hidden border border-gray-100 dark:border-white/5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full relative"
+  >
+    <!-- Wishlist Button -->
     <button
-      class="absolute top-2 right-2 z-20 flex size-8 md:size-9 items-center justify-center rounded-full bg-black/20 hover:bg-black/30 backdrop-blur-sm transition-all duration-200 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 active:scale-95 touch-manipulation"
-      @click.prevent="handleToggleWishlist">
-      <img
-v-if="!isInWishlist" src="@/assets/images/icons/heart-white-fill.svg"
-        class="size-5 md:size-5 transition-transform" alt="wishlist" />
-      <img
-v-else src="@/assets/images/icons/heart-red.svg" class="size-5 md:size-5 transition-transform"
-        alt="wishlist" />
+      class="absolute top-2 right-2 z-20 flex size-7 items-center justify-center rounded-full bg-white/80 dark:bg-black/40 backdrop-blur-sm shadow-sm hover:bg-white dark:hover:bg-black/60 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 active:scale-90"
+      @click.prevent="handleToggleWishlist"
+    >
+      <svg v-if="!isInWishlist" class="size-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+      <svg v-else class="size-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
     </button>
 
-    <!-- Dynamic Badges (Optional) -->
-    <div v-if="item.is_new || item.discount > 0" class="absolute top-2 left-2 z-20 flex flex-col gap-1">
-      <span
-v-if="item.is_new"
-        class="px-2 py-0.5 bg-custom-green/90 backdrop-blur-sm text-white text-xs font-bold rounded-lg uppercase tracking-wider shadow-sm">
-        New
-      </span>
-      <span
-v-if="item.discount > 0"
-        class="px-2 py-0.5 bg-custom-orange/90 backdrop-blur-sm text-white text-xs font-bold rounded-lg uppercase tracking-wider shadow-sm">
-        {{ item.discount }}% OFF
-      </span>
+    <!-- Image -->
+    <div class="aspect-square w-full bg-gray-50 dark:bg-white/5 overflow-hidden relative">
+      <img
+        :src="item.thumbnail"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+        :alt="item.name"
+      />
+      <!-- Stock habis overlay -->
+      <div
+        v-if="item.stock <= 0"
+        class="absolute inset-0 bg-white/70 dark:bg-black/60 flex items-center justify-center"
+      >
+        <span class="text-xs font-bold text-gray-600 dark:text-gray-300 bg-white dark:bg-surface-card px-3 py-1 rounded-full border">Stok Habis</span>
+      </div>
     </div>
 
-    <RouterLink :to="{ name: 'app.product-detail', params: { slug: item.slug } }" class="flex flex-col h-full w-full">
-      <!-- Image -->
-      <div class="aspect-square md:aspect-4/3 w-full bg-gray-50 overflow-hidden relative">
-        <img
-:src="item.thumbnail"
-          class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 will-change-transform"
-          loading="lazy" alt="product" />
-        <div
-v-if="item.stock <= 0"
-          class="absolute inset-0 bg-white/60 dark:bg-surface-card/80 backdrop-blur-[2px] flex items-center justify-center z-10">
-          <span
-            class="text-custom-black dark:text-white font-bold text-xs uppercase tracking-widest px-3 py-1 bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 rounded-full shadow-sm">
-            Habis
-          </span>
+    <!-- Content -->
+    <div class="flex flex-col p-3 gap-1.5 flex-1">
+      <!-- Product Name -->
+      <h3 class="text-sm font-medium text-gray-800 dark:text-gray-200 leading-snug line-clamp-2 min-h-[2.5rem]">
+        {{ item.name }}
+      </h3>
+
+      <!-- Price -->
+      <p class="font-bold text-base text-custom-blue dark:text-blue-400">
+        Rp {{ formatRupiah(item.price) }}
+      </p>
+
+      <!-- Meta: Rating + Sold -->
+      <div class="flex items-center gap-2 mt-auto pt-1.5">
+        <div class="flex items-center gap-0.5">
+          <svg class="size-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+          <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">4.9</span>
         </div>
+        <span class="text-xs text-gray-400 dark:text-gray-500">|</span>
+        <span class="text-xs text-gray-500 dark:text-gray-400">{{ item.total_sold || 0 }} terjual</span>
       </div>
 
-      <!-- Content -->
-      <div class="flex flex-col p-3 md:p-4 gap-1 flex-1 min-w-0">
-        <!-- Store -->
-        <div class="flex items-center gap-1 mb-0.5">
-          <img
-v-if="item?.store?.is_official" src="@/assets/images/icons/verify-star.svg"
-            class="size-3 md:size-3.5 shrink-0 dark:brightness-0 dark:invert" alt="official" />
-          <span class="text-xs uppercase font-bold text-custom-grey tracking-wider truncate flex-1 md:flex-none">
-            {{ item?.store?.name || 'Store' }}
-          </span>
-        </div>
-
-        <!-- Title -->
-        <h3
-          class="font-medium text-custom-black dark:text-white text-sm leading-snug line-clamp-2 md:mb-1 transition-colors h-[40px] md:min-h-[40px]">
-          {{ item?.name }}
-        </h3>
-
-        <div class="mt-auto flex flex-col gap-0.5">
-          <p class="font-bold text-sm md:text-base text-custom-black dark:text-white">
-            Rp {{ formatRupiah(item?.price) }}
-          </p>
-          <p
-v-if="item.original_price && item.discount > 0"
-            class="text-xs text-custom-grey line-through decoration-custom-grey/60">
-            Rp {{ formatRupiah(item.original_price) }}
-          </p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2 text-xs text-custom-grey mt-2">
-          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 dark:bg-white/5 rounded">
-            <i class="fa-solid fa-star text-custom-orange text-xs"></i>
-            <span class="font-bold text-custom-black dark:text-white">4.9</span>
-          </div>
-          <span class="text-xs md:text-sm truncate">{{ item?.total_sold || 0 }} Sold</span>
-          <span v-if="item.location" class="text-xs text-custom-grey/60 hidden md:inline-block md:ml-auto">
-            • {{ item.location }}
-          </span>
-        </div>
+      <!-- Store info -->
+      <div class="flex items-center gap-1 pt-1 border-t border-gray-50 dark:border-white/5 mt-1">
+        <svg class="size-3 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-xs text-gray-400 dark:text-gray-500 truncate">{{ item?.store?.name || 'Store' }}</span>
       </div>
-    </RouterLink>
-  </div>
+    </div>
+  </RouterLink>
 </template>

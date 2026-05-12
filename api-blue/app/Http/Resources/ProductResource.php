@@ -31,7 +31,12 @@ class ProductResource extends JsonResource
             'product_images' => ProductImageResource::collection($this->whenLoaded('productImages')),
             'thumbnail' => $this->whenLoaded('productImages', function () {
                 $img = $this->productImages->where('is_thumbnail', 1)->first() ?? $this->productImages->first();
-                return $img ? asset('storage/' . $img->image) : null;
+                if (!$img) return null;
+                // Support both full URLs (placeholder) and local storage paths
+                if (str_starts_with($img->image, 'http')) {
+                    return $img->image;
+                }
+                return asset('storage/' . $img->image);
             }),
             'product_reviews' => ProductReviewResource::collection($this->whenLoaded('productReviews')),
             'has_variants' => $this->has_variants,
