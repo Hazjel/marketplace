@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Route;
 
 Broadcast::routes(["middleware" => ["auth:sanctum"]]);
 
+// Health Check
+Route::get('health', \App\Http\Controllers\HealthController::class);
+
 // Public Routes that must take precedence
 Route::get("store/locations", [StoreController::class, "getLocations"]);
 
