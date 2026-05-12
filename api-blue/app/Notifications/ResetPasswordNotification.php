@@ -26,7 +26,7 @@ class ResetPasswordNotification extends ResetPassword
             ->subject("Reset Password — Blukios")
             ->greeting("Halo, " . $notifiable->name . "!")
             ->line(
-                "Kami menerima permintaan untuk mereset password akun Blukios Anda.",
+                "Kami menerima permintaan untuk mereset password akun Blukios kamu.",
             )
             ->line(
                 "Klik tombol di bawah untuk membuat password baru. Link ini hanya berlaku selama **60 menit**.",
@@ -35,6 +35,6 @@ class ResetPasswordNotification extends ResetPassword
             ->line(
                 "Jika Anda tidak merasa meminta reset password, abaikan email ini. Akun Anda tetap aman.",
             )
-            ->salutation("Salam, Tim Blukios 💙");
+            ->salutation("Salam hangat, Tim Blukios");
     }
 }

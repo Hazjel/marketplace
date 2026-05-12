@@ -63,7 +63,7 @@ const handleSubmit = async () => {
   <form autocomplete="off" class="flex flex-col w-full gap-6 lg:gap-8" @submit.prevent="handleSubmit">
     <!-- Header -->
     <div class="flex flex-col gap-2 text-center">
-      <img src="@/assets/images/logos/blukios_logo.png" class="h-8 lg:h-10 mx-auto mb-4" alt="Blue Marketplace" />
+      <img src="@/assets/images/logos/blukios_logo.png" class="h-8 lg:h-10 mx-auto mb-4" alt="Blukios" />
       <h1 class="font-bold text-2xl lg:text-3xl text-custom-black">Create Account 🚀</h1>
       <p class="text-custom-grey font-medium text-sm lg:text-base">Join us and start your journey!</p>
     </div>

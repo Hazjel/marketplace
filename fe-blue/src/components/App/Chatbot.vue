@@ -14,7 +14,7 @@ const chatContainer = ref(null)
 // Pesan awal
 const chats = ref([
   {
-    text: 'Halo! Aku Ri, asisten virtual disini~ Ada yang bisa dibantu soal produk di Bluee?',
+    text: 'Halo! Aku Ri, asisten virtual Blukios~ Ada yang bisa dibantu soal produk?',
     isBot: true
   }
 ])

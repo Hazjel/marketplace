@@ -11,7 +11,7 @@ class DesignSystemGalleryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mobile Blue DS'),
+        title: const Text('Blukios Design System'),
         backgroundColor: AppColors.surfaceLight,
         elevation: 0,
         foregroundColor: AppColors.midnight,

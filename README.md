@@ -1,4 +1,4 @@
-# Blue Marketplace
+# Blukios Marketplace
 
 Multi-vendor e-commerce platform untuk gadget dan elektronik, dibangun dengan **Laravel 12**, **Vue 3**, **FastAPI AI chatbot**, dan **Flutter mobile app**.
 
