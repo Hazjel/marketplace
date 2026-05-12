@@ -58,16 +58,19 @@ class ProductCard extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Product name
-                    Text(
-                      product.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        height: 1.3,
+                    Flexible(
+                      child: Text(
+                        product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -75,6 +78,8 @@ class ProductCard extends StatelessWidget {
                     // Price
                     Text(
                       CurrencyFormatter.formatRupiah(product.price),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -89,7 +94,7 @@ class ProductCard extends StatelessWidget {
                         if (product.store != null) ...[
                           const Icon(Icons.store_outlined, size: 11, color: Color(0xFF9CA3AF)),
                           const SizedBox(width: 3),
-                          Expanded(
+                          Flexible(
                             child: Text(
                               product.store!.name,
                               maxLines: 1,
@@ -97,10 +102,15 @@ class ProductCard extends StatelessWidget {
                               style: const TextStyle(fontSize: 10, color: Color(0xFF6B7280)),
                             ),
                           ),
+                          const SizedBox(width: 4),
                         ],
-                        Text(
-                          '${product.totalSold} terjual',
-                          style: const TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)),
+                        Flexible(
+                          child: Text(
+                            '${product.totalSold} terjual',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)),
+                          ),
                         ),
                       ],
                     ),
