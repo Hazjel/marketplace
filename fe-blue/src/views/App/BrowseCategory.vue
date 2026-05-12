@@ -102,12 +102,12 @@ watch(
           {{ productCategory?.name }}
         </RouterLink>
       </div>
-      <h1 class="font-extrabold text-[32px] capitalize">Explore based on Gadget Category</h1>
+      <h1 class="font-extrabold text-[32px] capitalize">{{ productCategory?.name || 'Kategori' }}</h1>
       <div class="flex items-center gap-4">
         <div class="group flex items-center gap-2">
           <img src="@/assets/images/icons/box-grey.svg" class="flex size-5 shrink-0" alt="icon" />
           <span class="font-semibold text-custom-grey"
-            >{{ productCategory?.product_count }} Total Products</span
+            >{{ productCategory?.product_count }} Total Produk</span
           >
         </div>
         <div class="group flex items-center gap-2">
@@ -116,7 +116,7 @@ watch(
             class="flex size-5 shrink-0"
             alt="icon"
           />
-          <span class="font-semibold text-custom-grey">Authenticity Guaranteed</span>
+          <span class="font-semibold text-custom-grey">Keaslian Terjamin</span>
         </div>
       </div>
     </div>
@@ -147,7 +147,7 @@ watch(
       <template v-if="loadingProducts || products.length > 0">
         <section id="Popular" class="flex flex-col gap-9">
           <div class="flex items-center justify-between">
-            <h2 class="font-extrabold text-[32px]">All Products</h2>
+            <h2 class="font-extrabold text-[32px]">Semua Produk</h2>
           </div>
           <div v-if="loadingProducts && products.length === 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             <SkeletonProductCard v-for="i in 10" :key="i" />
