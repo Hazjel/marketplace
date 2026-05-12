@@ -38,7 +38,7 @@ const handleToggleWishlist = async () => {
 <template>
   <RouterLink
     :to="{ name: 'app.product-detail', params: { slug: item.slug } }"
-    class="group flex flex-col bg-white dark:bg-surface-card rounded-xl overflow-hidden border border-gray-100 dark:border-white/5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full relative"
+    class="group flex flex-col bg-white dark:bg-surface-card rounded-2xl overflow-hidden border border-gray-100 dark:border-white/5 hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-300 ease-out h-full relative"
   >
     <!-- Wishlist Button -->
     <button
