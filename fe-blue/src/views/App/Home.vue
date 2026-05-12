@@ -11,26 +11,36 @@ import Chatbot from '@/components/App/Chatbot.vue'
 import { useHead } from '@vueuse/head'
 
 useHead({
-  title: 'Blukios | #1 Gadget Marketplace',
+  title: 'Blukios — Belanja Semua Kebutuhanmu',
   meta: [
     {
       name: 'description',
       content:
-        'Blukios is the best place to buy gadgets, electronics, and accessories. Official Stores, Quality Guaranteed.'
+        'Blukios adalah marketplace multi-vendor terpercaya. Belanja gadget, fashion, skincare, dan semua kebutuhanmu dari seller terpercaya.'
     }
   ]
 })
 </script>
 
 <template>
+  <!-- Hero Banner -->
   <Banner />
-  <main
-    class="flex flex-col gap-8 md:gap-12 w-full max-w-[1208px] px-4 md:px-0 mt-8 md:mt-12 mb-20 md:mb-24 mx-auto"
-  >
-    <Recommended />
+
+  <!-- Main Content -->
+  <main class="flex flex-col w-full max-w-[1280px] px-4 lg:px-6 mx-auto mt-6 md:mt-10 mb-20 md:mb-24 gap-10 md:gap-14">
+    <!-- Categories Section -->
     <Categories />
+
+    <!-- Recommended Section -->
+    <Recommended />
+
+    <!-- Top Picks Section -->
     <TopPicks />
+
+    <!-- Official Stores Section -->
     <Stores />
-    <Chatbot />
   </main>
+
+  <!-- Chatbot -->
+  <Chatbot />
 </template>

@@ -1,33 +1,14 @@
 <template>
-  <div class="flex flex-col rounded-t-[20px] overflow-hidden h-full">
-    <!-- Thumbnail -->
-    <div class="w-full aspect-square bg-gray-200 dark:bg-white/10 animate-pulse"></div>
+  <div class="flex flex-col bg-white dark:bg-surface-card rounded-xl overflow-hidden border border-gray-100 dark:border-white/5 h-full">
+    <!-- Image -->
+    <div class="aspect-square w-full bg-gray-100 dark:bg-white/10 animate-pulse"></div>
 
     <!-- Content -->
-    <div
-      class="flex flex-col flex-1 p-[14px] pt-4 gap-[14px] bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 border-t-0 rounded-b-[20px]"
-    >
-      <!-- Category & Rating -->
-      <div class="flex items-center justify-between">
-        <div class="h-4 w-16 bg-gray-200 dark:bg-white/10 rounded animate-pulse"></div>
-        <div class="flex items-center gap-[2px]">
-          <div class="h-4 w-4 bg-gray-200 dark:bg-white/10 rounded-full animate-pulse"></div>
-          <div class="h-4 w-6 bg-gray-200 dark:bg-white/10 rounded animate-pulse"></div>
-        </div>
-      </div>
-
-      <!-- Title -->
-      <div class="h-5 w-full bg-gray-200 dark:bg-white/10 rounded animate-pulse"></div>
-      <div class="h-5 w-3/4 bg-gray-200 dark:bg-white/10 rounded animate-pulse"></div>
-
-      <!-- Price -->
-      <div class="h-6 w-1/2 bg-gray-200 dark:bg-white/10 rounded mt-1 animate-pulse"></div>
-
-      <!-- Footer -->
-      <div class="flex items-center justify-between mt-auto">
-        <div class="h-10 w-10 bg-gray-200 dark:bg-white/10 rounded-full animate-pulse"></div>
-        <div class="h-10 w-24 bg-gray-200 dark:bg-white/10 rounded-full animate-pulse"></div>
-      </div>
+    <div class="flex flex-col p-3 gap-2">
+      <div class="h-4 w-full bg-gray-100 dark:bg-white/10 rounded animate-pulse"></div>
+      <div class="h-4 w-3/4 bg-gray-100 dark:bg-white/10 rounded animate-pulse"></div>
+      <div class="h-5 w-1/2 bg-gray-100 dark:bg-white/10 rounded animate-pulse mt-1"></div>
+      <div class="h-3 w-2/3 bg-gray-100 dark:bg-white/10 rounded animate-pulse mt-2"></div>
     </div>
   </div>
 </template>

@@ -19,7 +19,7 @@ class StoreResource extends JsonResource
             'user' => new UserResource($this->user),
             'name' => $this->name,
             'username' => $this->username,
-            'logo' => asset('storage/' . $this->logo),
+            'logo' => str_starts_with($this->logo ?? '', 'http') ? $this->logo : asset('storage/' . $this->logo),
             'about' => $this->about,
             'phone' => $this->phone,
             'address_id' => $this->address_id,

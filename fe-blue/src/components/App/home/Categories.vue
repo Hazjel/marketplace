@@ -3,7 +3,6 @@ import { useProductCategoryStore } from '@/stores/productCategory'
 import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import SectionHeader from '@/components/Molecule/SectionHeader.vue'
 
 const productCategoryStore = useProductCategoryStore()
 const { productCategories } = storeToRefs(productCategoryStore)
@@ -11,40 +10,69 @@ const { fetchProductCategories } = productCategoryStore
 
 onMounted(() => {
   fetchProductCategories({
-    limit: 6
+    limit: 8,
+    is_parent: true
   })
 })
+
+// Category emoji icons based on name
+const getCategoryIcon = (name) => {
+  const icons = {
+    'Elektronik': '📱',
+    'Fashion': '👕',
+    'Kesehatan & Kecantikan': '💄',
+    'Smartphone': '📱',
+    'Laptop': '💻',
+    'Aksesoris gadget': '🎧',
+    'Pakaian pria': '👔',
+    'Pakaian wanita': '👗',
+    'Skincare': '🧴',
+    'Suplemen': '💊',
+  }
+  return icons[name] || '🛍️'
+}
 </script>
 
 <template>
-  <section id="Categories" class="flex flex-col gap-6 md:gap-9 animate-fade-in-up delay-100">
-    <SectionHeader title="Explore Categories" subtitle="Curated for You" :link="{ name: 'app.all-categories' }" />
+  <section class="flex flex-col gap-5">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Kategori</h2>
+      <RouterLink
+        :to="{ name: 'app.all-categories' }"
+        class="text-sm font-semibold text-custom-blue dark:text-blue-400 hover:underline"
+      >
+        Lihat Semua
+      </RouterLink>
+    </div>
 
-    <!-- Mobile: Horizontal Scroll | Desktop: Grid -->
-    <div
-      class="flex md:grid md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 px-1 hide-scrollbar snap-x snap-mandatory">
-      <template v-for="category in productCategories" :key="category.id">
-        <RouterLink
-:to="{ name: 'app.browse-category', params: { slug: category.slug } }"
-          class="group shrink-0 w-24 md:w-auto snap-start">
-          <div
-            class="flex flex-col rounded-2xl bg-white dark:bg-surface-card shadow-soft p-4 md:p-6 items-center gap-3 md:gap-4 hover:shadow-floating hover:-translate-y-1 transition-all duration-300 h-full border border-transparent hover:border-custom-blue/10 dark:hover:border-blue-400/50">
-            <div
-              class="size-12 md:size-14 rounded-full bg-custom-icon-background flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
-              <img :src="category.image" class="size-6 md:size-8 object-contain" alt="icon" />
-            </div>
-            <div class="flex flex-col items-center gap-1 text-center">
-              <p
-                class="font-bold text-xs md:text-sm capitalize text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
-                {{ category.name }}
-              </p>
-              <span
-                class="text-xs bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full text-custom-grey dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">{{
-                  category.product_count }} items</span>
-            </div>
-          </div>
-        </RouterLink>
-      </template>
+    <!-- Category Grid -->
+    <div class="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
+      <RouterLink
+        v-for="category in productCategories"
+        :key="category.id"
+        :to="{ name: 'app.browse-category', params: { slug: category.slug } }"
+        class="group flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+      >
+        <!-- Icon Circle -->
+        <div class="size-12 md:size-14 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-xl md:text-2xl group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:scale-110 transition-all duration-200">
+          <img
+            v-if="category.image"
+            :src="category.image"
+            class="size-7 md:size-8 object-contain rounded-full"
+            :alt="category.name"
+          />
+          <span v-else>{{ getCategoryIcon(category.name) }}</span>
+        </div>
+        <!-- Name -->
+        <span class="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 text-center leading-tight line-clamp-2 group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
+          {{ category.name }}
+        </span>
+        <!-- Count -->
+        <span class="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 font-medium">
+          {{ category.product_count }} produk
+        </span>
+      </RouterLink>
     </div>
   </section>
 </template>
