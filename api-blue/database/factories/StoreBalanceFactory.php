@@ -21,7 +21,8 @@ class StoreBalanceFactory extends Factory
     {
         return [
             'store_id' => Store::factory(),
-            'balance' => $this->faker->randomFloat(2, 0, 1000000)
+            'balance' => $this->faker->randomFloat(2, 0, 1000000),
+            'pending_balance' => $this->faker->randomFloat(2, 0, 500000),
         ];
     }
 }
