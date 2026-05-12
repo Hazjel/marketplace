@@ -72,7 +72,7 @@ onMounted(async () => {
 
 <template>
   <form action="checkout.html" class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto">
-    <h1 class="font-bold text-[32px] dark:text-white">My Shopping Cart</h1>
+    <h1 class="font-bold text-[32px] dark:text-white">Keranjang Belanja</h1>
     <div class="flex flex-col lg:flex-row gap-5">
       <section id="Carts-Container" class="flex flex-col gap-5 w-full min-w-0">
         <div
@@ -80,13 +80,13 @@ v-if="carts.length === 0" id="Empty-Cart-State"
           class="flex flex-col flex-1 items-center justify-center rounded-[20px] bg-white dark:bg-surface-card gap-9">
           <img src="@/assets/images/icons/bag-cross-blue-transparent.svg" class="size-16" alt="icon" />
           <div class="text-center">
-            <p class="font-bold text-2xl dark:text-white">Oops! Your shopping cart is empty.</p>
-            <p class="font-semibold text-custom-grey dark:text-gray-400">Time to add the things you love!</p>
+            <p class="font-bold text-2xl dark:text-white">Keranjang kamu masih kosong</p>
+            <p class="font-semibold text-custom-grey dark:text-gray-400">Yuk, mulai belanja dan temukan produk favoritmu!</p>
           </div>
           <RouterLink
 :to="{ name: 'app.home' }"
             class="flex items-center justify-center h-14 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue">
-            <span class="font-bold text-white">Find Product</span>
+            <span class="font-bold text-white">Cari Produk</span>
             <img
 src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
               alt="icon" />
@@ -211,20 +211,20 @@ type="button"
       </section>
       <section id="Order-Summary" class="flex flex-col gap-5 w-full lg:w-[444px] shrink-0">
         <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white dark:bg-surface-card">
-          <p class="font-bold text-xl dark:text-white">Order Summary</p>
+          <p class="font-bold text-xl dark:text-white">Ringkasan Pesanan</p>
           <div class="flex flex-col rounded-xl border border-custom-stroke dark:border-white/10 p-5 gap-4">
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Total Items:
+                Total Item:
               </p>
-              <p class="font-bold text-lg leading-none dark:text-white">{{ totalSelectedItems }} Items</p>
+              <p class="font-bold text-lg leading-none dark:text-white">{{ totalSelectedItems }} Produk</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/box-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Total Quantity:
+                Total Kuantitas:
               </p>
               <p class="font-bold text-lg leading-none dark:text-white">{{ totalSelectedQuantity }}x</p>
             </div>
@@ -267,7 +267,7 @@ type="button"
 :to="{ name: 'app.checkout' }"
             class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300">
             <span class="font-bold text-white">
-              {{ hasSelectedStores ? 'Continue To Checkout' : 'Select stores to checkout' }}
+              {{ hasSelectedStores ? 'Lanjut ke Pembayaran' : 'Pilih toko untuk checkout' }}
             </span>
             <img
 src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
@@ -276,7 +276,7 @@ src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-
 
           <!-- Pesan ketika tidak ada toko yang dipilih -->
           <div v-if="!hasSelectedStores && carts.length > 0" class="text-center p-4">
-            <p class="text-custom-grey font-medium">Please select at least one store to continue</p>
+            <p class="text-custom-grey font-medium">Pilih minimal satu toko untuk melanjutkan</p>
           </div>
         </div>
       </section>
