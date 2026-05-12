@@ -87,13 +87,25 @@ const handleAddressSelect = (selected) => {
 </script>
 
 <template>
-  <form class="flex flex-col w-full rounded-3xl p-5 gap-5 bg-white" @submit.prevent="handleSubmit">
-    <h2 class="font-bold text-xl capitalize">Complete the form</h2>
-    <div class="flex items-center justify-between">
-      <p class="font-semibold text-custom-grey">Store Image</p>
-      <div class="flex items-center justify-between w-1/2">
+  <form class="flex flex-col w-full rounded-2xl p-6 gap-5 bg-white dark:bg-surface-card dark:text-white border border-gray-100 dark:border-white/10 shadow-sm" @submit.prevent="handleSubmit">
+    <!-- Page Header -->
+    <div class="flex items-center gap-4 pb-4 border-b border-gray-100 dark:border-white/10">
+      <div class="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-gray-900 dark:text-white">Buat Toko Baru</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Lengkapi informasi toko Anda</p>
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Foto Toko</p>
+      <div class="flex items-center justify-between w-full md:w-1/2">
         <div
-          class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background"
+          class="group relative flex size-20 rounded-2xl overflow-hidden items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10"
         >
           <img
             id="Thumbnail"
@@ -113,15 +125,15 @@ const handleAddressSelect = (selected) => {
         <button
           id="Add-Photo"
           type="button"
-          class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg"
+          class="flex items-center justify-center rounded-xl py-2.5 px-5 bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
         >
-          Add Photo
+          Tambah Foto
         </button>
       </div>
     </div>
-    <div class="flex items-center justify-between">
-      <p class="font-semibold text-custom-grey">Store Name</p>
-      <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ invalid: error?.name }">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Nama Toko</p>
+      <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.name }">
         <label class="group relative">
           <div class="input-icon">
             <img
@@ -136,9 +148,9 @@ const handleAddressSelect = (selected) => {
         <span v-if="error?.name" class="input-error">{{ error?.name?.join(', ') }}</span>
       </div>
     </div>
-    <div class="flex items-center justify-between">
-      <p class="font-semibold text-custom-grey">Store Phone</p>
-      <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ invalid: error?.phone }">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Telepon Toko</p>
+      <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.phone }">
         <label class="group relative">
           <div class="input-icon">
             <img
@@ -153,9 +165,9 @@ const handleAddressSelect = (selected) => {
         <span v-if="error?.phone" class="input-error">{{ error?.phone?.join(', ') }}</span>
       </div>
     </div>
-    <div class="flex justify-between">
-      <p class="font-semibold text-custom-grey mt-5">Store Description</p>
-      <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ invalid: error?.about }">
+    <div class="flex flex-col md:flex-row justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Deskripsi Toko</p>
+      <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.about }">
         <label
           class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red"
         >
@@ -187,9 +199,9 @@ const handleAddressSelect = (selected) => {
         >
       </div>
     </div>
-    <div class="flex items-center justify-between">
-      <p class="font-semibold text-custom-grey">Address Searching</p>
-      <div class="group/errorState flex flex-col gap-2 w-1/2">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Pencarian Alamat</p>
+      <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2">
         <label class="group relative">
           <div class="input-icon">
             <img
@@ -218,9 +230,9 @@ const handleAddressSelect = (selected) => {
         </ul>
       </div>
     </div>
-    <div class="flex justify-between">
-      <p class="font-semibold text-custom-grey mt-5">Store Address</p>
-      <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ invalid: error?.address }">
+    <div class="flex flex-col md:flex-row justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Alamat Toko</p>
+      <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.address }">
         <label
           class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red"
         >
@@ -252,9 +264,9 @@ const handleAddressSelect = (selected) => {
         >
       </div>
     </div>
-    <div class="flex items-center justify-between">
-      <p class="font-semibold text-custom-grey">City</p>
-      <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ invalid: error?.city }">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Kota</p>
+      <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.city }">
         <label class="group relative">
           <div class="input-icon">
             <img
@@ -269,10 +281,10 @@ const handleAddressSelect = (selected) => {
         <span v-if="error?.city" class="input-error">{{ error?.city?.join(', ') }}</span>
       </div>
     </div>
-    <div class="flex items-center justify-between">
-      <p class="font-semibold text-custom-grey">Postal Code</p>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Kode Pos</p>
       <div
-        class="group/errorState flex flex-col gap-2 w-1/2"
+        class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
         :class="{ invalid: error?.postal_code }"
       >
         <label class="group relative">
@@ -291,23 +303,23 @@ const handleAddressSelect = (selected) => {
         }}</span>
       </div>
     </div>
-    <div class="flex items-center justify-end gap-4">
+    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
       <a
         href="my-store.html"
-        class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg"
+        class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
       >
-        Cancel
+        Batal
       </a>
       <button
         type="submit"
         :disabled="loading"
-        class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <svg v-if="loading" class="animate-spin size-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg v-if="loading" class="animate-spin size-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
-        {{ loading ? 'Creating...' : 'Create Now' }}
+        {{ loading ? 'Membuat...' : 'Buat Toko' }}
       </button>
     </div>
   </form>

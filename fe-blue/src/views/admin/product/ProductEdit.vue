@@ -192,26 +192,41 @@ onMounted(async () => {
 
 <template>
   <form
-    class="flex flex-col w-full rounded-3xl p-5 gap-5 bg-white dark:bg-surface-card dark:text-white border border-transparent dark:border-white/10"
+    class="flex flex-col w-full rounded-2xl p-6 gap-5 bg-white dark:bg-surface-card dark:text-white border border-gray-100 dark:border-white/10 shadow-sm"
     @submit.prevent="handleSubmit">
-    <h2 class="font-bold text-xl capitalize">Complete the form</h2>
+    <!-- Page Header -->
+    <div class="flex items-center gap-4 pb-4 border-b border-gray-100 dark:border-white/10">
+      <div class="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-gray-900 dark:text-white">Edit Produk</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Perbarui informasi produk Anda</p>
+      </div>
+    </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p class="font-semibold text-custom-grey">Product Image</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Gambar Produk</p>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-1/2">
         <div
-v-for="(image, index) in product.product_images" :key="index"
-          class="thumbnail-input-container group relative flex w-full aspect-square rounded-2xl overflow-hidden items-center justify-center bg-custom-background">
+          v-for="(image, index) in product.product_images"
+          :key="index"
+          class="thumbnail-input-container group relative flex w-full aspect-square rounded-2xl overflow-hidden items-center justify-center bg-gray-50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-400/50 transition-all">
           <input
-type="file" accept="image/*" class="product-image-input absolute inset-0 opacity-0 cursor-pointer z-10"
+            type="file"
+            accept="image/*"
+            class="product-image-input absolute inset-0 opacity-0 cursor-pointer z-10"
             @change="handleImageChange($event, index)" />
           <img
-:src="image.url" data-default="@/assets/images/icons/gallery-add-photo.svg"
+            :src="image.url"
+            data-default="@/assets/images/icons/gallery-add-photo.svg"
             class="thumbnail size-full object-contain pointer-events-none" alt="icon" />
         </div>
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p class="font-semibold text-custom-grey">Product Name</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Nama Produk</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.name }">
         <label class="group relative">
           <div class="input-icon">
@@ -226,7 +241,7 @@ src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 d
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p class="font-semibold text-custom-grey">Product Weight</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Berat Produk</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.weight }">
         <div class="relative">
           <label class="group relative h-full block">
@@ -252,7 +267,7 @@ src="@/assets/images/icons/arrow-up-triangle-blue.svg"
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p class="font-semibold text-custom-grey">Product Type</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300">Kondisi Produk</p>
       <div class="grid grid-cols-2 gap-6 h-[76px] w-full md:w-1/2">
         <label
           class="group relative flex items-center h-full py-4 px-5 gap-4 rounded-[18px] border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full">
@@ -279,7 +294,7 @@ src="@/assets/images/icons/arrow-up-triangle-blue.svg"
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
-      <p class="font-semibold text-custom-grey pt-2">Product Variants</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300 pt-2">Varian Produk</p>
       <div class="w-full md:w-1/2 flex flex-col gap-4">
         <label class="flex items-center gap-2 cursor-pointer">
           <input v-model="product.has_variants" type="checkbox" class="toggle toggle-primary" />
@@ -376,7 +391,7 @@ type="button"
     </div>
 
     <div v-if="!product.has_variants" class="flex flex-col md:flex-row justify-between gap-4">
-      <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Price & Stock</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Harga & Stok</p>
       <div class="flex gap-6 w-full md:w-1/2">
         <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ invalid: error?.price }">
           <label class="group relative">
@@ -401,7 +416,7 @@ type="button"
       </div>
     </div>
     <div class="flex flex-col md:flex-row justify-between gap-4">
-      <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Description</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Deskripsi Produk</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.description }">
         <label
           class="group flex py-4 px-6 rounded-3xl border-2 border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red">
@@ -426,7 +441,7 @@ v-if="error?.description"
       </div>
     </div>
     <div class="peer flex flex-col md:flex-row justify-between gap-4">
-      <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Category</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Kategori Produk</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2">
         <label
           class="group relative rounded-[18px] border-[1.5px] border-custom-stroke focus-within:border-custom-black transition-300 overflow-hidden w-full group-[&.invalid]/errorState:border-custom-red">
@@ -455,7 +470,7 @@ src="@/assets/images/icons/arrow-down-black.svg"
       </div>
     </div>
     <div class="peer-has-[:valid]:flex hidden flex-col md:flex-row justify-between gap-4">
-      <p class="font-semibold text-custom-grey mt-2 md:mt-5">Product Sub Category</p>
+      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Sub Kategori</p>
       <div
 class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
         :class="{ invalid: error?.product_category_id }">
@@ -488,16 +503,16 @@ src="@/assets/images/icons/arrow-down-black.svg"
       </div>
     </div>
 
-    <div class="flex items-center justify-end gap-4">
+    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
       <RouterLink
-:to="{ name: 'admin.product' }"
-        class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-gray-100 dark:bg-white/10 text-custom-grey dark:text-white font-semibold text-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-300">
-        Cancel
+        :to="{ name: 'admin.product' }"
+        class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
+        Batal
       </RouterLink>
       <button
-type="submit"
-        class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-black text-white font-semibold text-lg hover:bg-black/80 transition-300">
-        Update Product
+        type="submit"
+        class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
+        Simpan Perubahan
       </button>
     </div>
   </form>

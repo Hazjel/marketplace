@@ -54,9 +54,6 @@ const bulkDelete = async () => {
   if (!confirm(`Are you sure you want to delete ${selectedItems.value.length} items?`)) return
 
   try {
-    // Run specific delete requests in parallel (mocked bulk delete since API might not support array)
-    // Ideally backend has DELETE /products/bulk { ids: [...] }
-    // For now, loop delete (not optimal but works for small batches)
     await Promise.all(selectedItems.value.map((id) => deleteProduct(id)))
 
     toast.success(`Deleted ${selectedItems.value.length} items successfully`)
@@ -68,14 +65,13 @@ const bulkDelete = async () => {
 }
 
 const fetchData = async () => {
-  loading.value = true // Ensure loading state is accurate
+  loading.value = true
   await fetchProductsPaginated({
     ...serverOptions.value,
     ...filters,
     store_id: user.value?.store?.id
   })
 
-  // Reset selection on page change
   selectedItems.value = []
 
   if (!filters.search) {
@@ -122,124 +118,165 @@ watch(error, (value) => {
 </script>
 
 <template>
-  <div class="flex flex-col md:flex-row w-full gap-4 md:gap-5">
-    <div
-      class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white dark:bg-surface-card dark:text-white animate-fade-in-up">
-      <div class="flex flex-col gap-6">
-        <div class="flex size-[56px] bg-custom-blue/10 dark:bg-custom-blue/20 items-center justify-center rounded-full">
-          <img src="@/assets/images/icons/shopping-cart-blue.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
+  <!-- Page Header -->
+  <div class="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-6 shadow-sm">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="flex size-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
         </div>
-        <div class="flex flex-col gap-[6px]">
-          <p class="font-bold text-2xl md:text-4xl">{{ totalProductsSummary }}</p>
-          <p class="font-medium text-sm md:text-lg text-custom-grey">Total Products</p>
+        <div>
+          <h1 class="text-2xl font-bold text-white">Produk Saya</h1>
+          <p class="text-blue-100 text-sm mt-0.5">Kelola semua produk toko Anda</p>
+        </div>
+      </div>
+      <RouterLink
+        v-if="user?.permissions?.includes('product-create')"
+        :to="{ name: 'admin.product.create' }"
+        class="flex h-11 items-center justify-center rounded-xl px-5 gap-2 bg-white text-blue-700 font-semibold text-sm hover:bg-blue-50 transition-colors shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Tambah Produk</span>
+      </RouterLink>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="flex flex-col md:flex-row w-full gap-4">
+    <div class="flex flex-col w-full rounded-2xl p-5 gap-4 bg-white dark:bg-surface-card dark:text-white border border-gray-100 dark:border-white/10 shadow-sm animate-fade-in-up">
+      <div class="flex items-center gap-4">
+        <div class="flex size-12 bg-blue-50 dark:bg-custom-blue/20 items-center justify-center rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <p class="font-bold text-2xl">{{ totalProductsSummary }}</p>
+          <p class="font-medium text-sm text-custom-grey">Total Produk</p>
         </div>
       </div>
     </div>
-    <div
-      class="flex flex-col w-full rounded-[20px] p-5 gap-6 bg-white dark:bg-surface-card dark:text-white animate-fade-in-up delay-100">
-      <div class="flex flex-col gap-6">
-        <div class="flex size-[56px] bg-custom-blue/10 dark:bg-custom-blue/20 items-center justify-center rounded-full">
-          <img
-src="@/assets/images/icons/presention-chart-blue.svg" class="flex size-6 shrink-0 dark:invert"
-            alt="icon" />
+    <div class="flex flex-col w-full rounded-2xl p-5 gap-4 bg-white dark:bg-surface-card dark:text-white border border-gray-100 dark:border-white/10 shadow-sm animate-fade-in-up delay-100">
+      <div class="flex items-center gap-4">
+        <div class="flex size-12 bg-green-50 dark:bg-green-500/20 items-center justify-center rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
         </div>
-        <div class="flex flex-col gap-[6px]">
-          <p class="font-bold text-2xl md:text-4xl">
+        <div class="flex flex-col gap-0.5">
+          <p class="font-bold text-2xl">
             {{ meta?.total_sold ? meta.total_sold.toLocaleString() : 0 }}
           </p>
-          <p class="font-medium text-sm md:text-lg text-custom-grey">Total Sold</p>
+          <p class="font-medium text-sm text-custom-grey">Total Terjual</p>
         </div>
       </div>
     </div>
   </div>
-  <div
-    class="flex flex-col flex-1 rounded-[20px] p-5 gap-6 bg-white dark:bg-surface-card dark:text-white animate-fade-in-up delay-200">
-    <div class="header flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
-      <div class="flex flex-col gap-2 w-full md:w-auto items-start">
-        <p class="font-bold text-xl">All Products</p>
-        <div class="flex items-center gap-1">
-          <img src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
-          <p class="font-semibold text-custom-grey">{{ meta?.total }} Total Products</p>
-        </div>
-      </div>
-      <RouterLink
-v-if="user?.permissions?.includes('product-create')" :to="{ name: 'admin.product.create' }"
-        class="flex h-14 w-full md:w-auto justify-center items-center rounded-full py-4 px-6 bg-custom-black gap-[6px] hover:bg-black/80 transition-300 dark:bg-white dark:hover:bg-gray-200">
-        <span class="font-semibold text-lg text-white leading-none dark:text-black">Add New</span>
-        <img
-src="@/assets/images/icons/add-circle-white.svg"
-          class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0" alt="icon" />
-      </RouterLink>
-    </div>
+
+  <!-- Main Content Card -->
+  <div class="flex flex-col flex-1 rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card dark:text-white border border-gray-100 dark:border-white/10 shadow-sm animate-fade-in-up delay-200">
+    <!-- Filter Bar -->
     <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-4 w-full md:w-auto">
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <!-- Select All Checkbox -->
         <label
-          class="cursor-pointer flex items-center gap-2 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 rounded-2xl h-14 px-4 hover:border-custom-black dark:hover:border-white transition-colors"
+          class="cursor-pointer flex items-center gap-2 border border-gray-200 dark:border-white/10 rounded-xl h-11 px-3 hover:border-blue-300 dark:hover:border-white/20 transition-colors"
           title="Select All">
           <input
-type="checkbox" :checked="allSelected"
-            class="checkbox checkbox-primary rounded-lg size-5 border-2 border-gray-300 checked:bg-custom-blue checked:border-custom-blue transition-all"
+            type="checkbox"
+            :checked="allSelected"
+            class="checkbox checkbox-primary rounded-lg size-4 border-2 border-gray-300 checked:bg-custom-blue checked:border-custom-blue transition-all"
             @change="toggleSelectAll" />
-          <span class="font-semibold text-custom-black dark:text-white hidden md:block">All</span>
+          <span class="font-medium text-sm text-gray-600 dark:text-gray-300 hidden md:block">Semua</span>
         </label>
 
+        <!-- Search Input -->
         <form action="#" class="w-full md:w-auto">
-          <label
-            class="flex items-center w-full md:w-[320px] h-14 rounded-2xl p-4 gap-2 bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
-            <img src="@/assets/images/icons/box-search-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
+          <label class="flex items-center w-full md:w-[320px] h-11 rounded-xl px-3 gap-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 focus-within:border-blue-400 dark:focus-within:border-blue-400 focus-within:bg-white dark:focus-within:bg-surface-card transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
             <input
-v-model="filters.search" type="text"
-              class="appearance-none w-full placeholder:text-custom-grey font-medium focus:outline-none bg-transparent dark:text-white"
-              placeholder="Search product" />
+              v-model="filters.search"
+              type="text"
+              class="appearance-none w-full placeholder:text-gray-400 font-medium text-sm focus:outline-none bg-transparent dark:text-white"
+              placeholder="Cari produk..." />
           </label>
         </form>
       </div>
 
-      <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-        <p class="font-medium text-custom-grey">Show</p>
-        <label
-          class="flex items-center h-14 rounded-2xl border border-custom-stroke dark:border-white/10 py-4 px-5 pl-3 bg-white dark:bg-surface-card focus-within:border-custom-black transition-300">
+      <!-- Entries Selector -->
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <p class="font-medium text-sm text-custom-grey">Tampilkan</p>
+        <label class="flex items-center h-11 rounded-xl border border-gray-200 dark:border-white/10 py-2 px-3 bg-white dark:bg-surface-card focus-within:border-blue-400 transition-colors">
           <select
-id="" v-model="serverOptions.row_per_page" name=""
-            class="text-custom-black dark:text-white font-medium appearance-none focus:outline-none p-2 bg-transparent">
-            <option value="10" class="font-medium dark:bg-surface-card">10 Entries</option>
-            <option value="20" class="font-medium dark:bg-surface-card">20 Entries</option>
-            <option value="40" class="font-medium dark:bg-surface-card">40 Entries</option>
+            v-model="serverOptions.row_per_page"
+            class="text-gray-700 dark:text-white font-medium text-sm appearance-none focus:outline-none pr-6 bg-transparent">
+            <option value="10" class="font-medium dark:bg-surface-card">10 Data</option>
+            <option value="20" class="font-medium dark:bg-surface-card">20 Data</option>
+            <option value="40" class="font-medium dark:bg-surface-card">40 Data</option>
           </select>
-          <img
-src="@/assets/images/icons/arrow-down-black.svg" class="flex size-6 shrink-0 -ml-1 dark:invert"
-            alt="icon" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-gray-400 -ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
         </label>
       </div>
     </div>
-    <div id="List-Categories" class="flex flex-col gap-6 relative">
-      <div v-if="!loading && products" id="List" class="flex flex-col gap-5 pb-20">
+
+    <!-- Product List -->
+    <div id="List-Categories" class="flex flex-col gap-4 relative">
+      <div v-if="!loading && products" id="List" class="flex flex-col gap-3 pb-20">
         <CardList
-v-for="product in products" :key="product.id" :item="product"
-          :selected="selectedItems.includes(product.id)" @toggle-selection="toggleSelection" @delete="handleDelete" />
+          v-for="product in products"
+          :key="product.id"
+          :item="product"
+          :selected="selectedItems.includes(product.id)"
+          @toggle-selection="toggleSelection"
+          @delete="handleDelete" />
       </div>
 
       <!-- Floating Bulk Action Bar -->
       <div
-v-if="selectedItems.length > 0"
-        class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-surface-card dark:text-white shadow-2xl rounded-full px-6 py-3 flex items-center gap-4 border border-gray-100 dark:border-white/10 z-50 animate-fade-in-up">
-        <span class="font-bold text-custom-black dark:text-white">{{ selectedItems.length }} Selected</span>
-        <div class="h-6 w-[1px] bg-gray-200 dark:bg-gray-700"></div>
+        v-if="selectedItems.length > 0"
+        class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-surface-card dark:text-white shadow-2xl rounded-2xl px-6 py-3 flex items-center gap-4 border border-gray-100 dark:border-white/10 z-50 animate-fade-in-up">
+        <span class="font-bold text-sm text-gray-700 dark:text-white">{{ selectedItems.length }} Dipilih</span>
+        <div class="h-5 w-px bg-gray-200 dark:bg-gray-700"></div>
         <button
-class="flex items-center gap-2 text-custom-red hover:bg-red-50 px-3 py-1 rounded-lg transition-colors"
+          class="flex items-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors"
           @click="bulkDelete">
-          <img src="@/assets/images/icons/trash-red.svg" class="size-5" />
-          <span class="font-bold text-sm">Delete Selected</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          <span class="font-semibold text-sm">Hapus</span>
         </button>
       </div>
 
       <Pagination :meta="meta" :server-options="serverOptions" />
     </div>
-    <div v-if="products?.length === 0" id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4">
-      <img src="@/assets/images/icons/note-remove-grey.svg" class="size-[52px] dark:invert" alt="icon" />
-      <div class="flex flex-col gap-1 items-center text-center">
-        <p class="font-semibold text-custom-grey">Oops, you don't have any data yet</p>
+
+    <!-- Empty State -->
+    <div v-if="products?.length === 0" id="Empty-State" class="flex flex-col flex-1 items-center justify-center gap-4 py-16">
+      <div class="flex size-20 items-center justify-center rounded-2xl bg-gray-50 dark:bg-white/5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-10 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
       </div>
+      <div class="flex flex-col gap-1 items-center text-center">
+        <p class="font-semibold text-gray-700 dark:text-gray-300">Belum ada produk</p>
+        <p class="text-sm text-custom-grey">Mulai tambahkan produk pertama Anda</p>
+      </div>
+      <RouterLink
+        v-if="user?.permissions?.includes('product-create')"
+        :to="{ name: 'admin.product.create' }"
+        class="flex h-10 items-center rounded-xl px-5 gap-2 bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors mt-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Tambah Produk
+      </RouterLink>
     </div>
   </div>
 </template>

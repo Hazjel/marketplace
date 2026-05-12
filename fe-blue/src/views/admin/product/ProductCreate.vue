@@ -216,17 +216,28 @@ onMounted(async () => {
 
 <template>
   <div
-    class="flex flex-col w-full rounded-3xl p-6 gap-6 bg-white dark:bg-surface-card dark:text-white border border-transparent dark:border-white/10 min-h-[600px]">
+    class="flex flex-col w-full rounded-2xl p-6 gap-6 bg-white dark:bg-surface-card dark:text-white border border-gray-100 dark:border-white/10 shadow-sm min-h-[600px]">
+    <!-- Page Header -->
+    <div class="flex items-center gap-4 pb-4 border-b border-gray-100 dark:border-white/10">
+      <div class="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-xl text-gray-900 dark:text-white">Tambah Produk Baru</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Lengkapi informasi produk Anda</p>
+      </div>
+    </div>
+
     <StepWizard
-:steps="steps" :current-step="currentStep" @change-step="
-      (s) => {
-        if (validateStep(currentStep)) currentStep = s
-      }
-    " />
+      :steps="steps"
+      :current-step="currentStep"
+      @change-step="(s) => { if (validateStep(currentStep)) currentStep = s }" />
 
     <form class="flex flex-col gap-6 flex-1" @submit.prevent="handleSubmit">
       <!-- STEP 1: General Info -->
-      <div v-show="currentStep === 1" class="flex flex-col gap-6 animate-fade-in-up">
+      <div v-show="currentStep === 1" class="flex flex-col gap-5 animate-fade-in-up">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <p class="font-semibold text-custom-grey w-full md:w-1/3">Product Name</p>
           <div class="group/errorState flex flex-col gap-2 w-full" :class="{ invalid: error?.name }">
@@ -359,7 +370,7 @@ v-model="product.condition" type="radio" name="condition" class="absolute opacit
       </div>
 
       <!-- STEP 2: Stock & Price -->
-      <div v-show="currentStep === 2" class="flex flex-col gap-6 animate-fade-in-up">
+      <div v-show="currentStep === 2" class="flex flex-col gap-5 animate-fade-in-up">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <p class="font-semibold text-custom-grey w-full md:w-1/3">Weight (grams)</p>
           <div class="group/errorState flex flex-col gap-2 w-full" :class="{ invalid: error?.weight }">
@@ -502,28 +513,31 @@ type="button"
       </div>
 
       <!-- STEP 3: Visuals -->
-      <div v-show="currentStep === 3" class="flex flex-col gap-6 animate-fade-in-up">
+      <div v-show="currentStep === 3" class="flex flex-col gap-5 animate-fade-in-up">
         <div class="flex flex-col justify-between gap-4">
           <div class="flex flex-col gap-1">
-            <p class="font-semibold text-custom-black">Product Gallery</p>
-            <p class="text-sm text-custom-grey">Upload clear images of your product.</p>
+            <p class="font-semibold text-gray-900 dark:text-white">Galeri Produk</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Unggah gambar produk dengan kualitas tinggi.</p>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
             <div
-v-for="(image, index) in product.product_images" :key="index"
-              class="thumbnail-input-container group relative flex w-full aspect-square rounded-2xl overflow-hidden items-center justify-center bg-gray-50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-custom-blue transition-colors">
+              v-for="(image, index) in product.product_images"
+              :key="index"
+              class="thumbnail-input-container group relative flex w-full aspect-square rounded-2xl overflow-hidden items-center justify-center bg-gray-50 dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-400/50 transition-all">
               <input
-type="file" accept="image/*"
+                type="file"
+                accept="image/*"
                 class="product-image-input absolute inset-0 opacity-0 cursor-pointer z-10"
                 @change="handleImageChange($event, index)" />
               <img
-:src="image.url" :class="image.url === PlaceHolder ? 'w-8 h-8 opacity-40' : 'size-full object-cover'"
+                :src="image.url"
+                :class="image.url === PlaceHolder ? 'w-8 h-8 opacity-30' : 'size-full object-cover'"
                 class="thumbnail pointer-events-none" alt="icon" />
 
               <div
-v-if="index === 0"
-                class="absolute bottom-0 left-0 w-full p-2 bg-black/50 text-white text-[10px] text-center backdrop-blur-sm">
+                v-if="index === 0"
+                class="absolute bottom-0 left-0 w-full py-1.5 bg-blue-600/90 text-white text-[10px] font-semibold text-center backdrop-blur-sm">
                 Thumbnail
               </div>
             </div>
@@ -532,25 +546,28 @@ v-if="index === 0"
       </div>
 
       <!-- Navigation Actions -->
-      <div class="flex items-center justify-between pt-6 mt-4 border-t border-gray-100 dark:border-white/10">
+      <div class="flex items-center justify-between pt-5 mt-4 border-t border-gray-100 dark:border-white/10">
         <button
-v-if="currentStep > 1" type="button"
-          class="h-12 px-6 rounded-full font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors" @click="prevStep">
-          Back
+          v-if="currentStep > 1"
+          type="button"
+          class="h-11 px-5 rounded-xl font-semibold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+          @click="prevStep">
+          Kembali
         </button>
         <div v-else></div>
-        <!-- Spacer -->
 
         <button
-v-if="currentStep < 3" type="button"
-          class="h-12 px-8 rounded-full bg-custom-black text-white font-bold hover:bg-gray-800 transition-colors shadow-lg"
+          v-if="currentStep < 3"
+          type="button"
+          class="h-11 px-6 rounded-xl bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
           @click="nextStep">
-          Next Step
+          Lanjut
         </button>
         <button
-v-else type="submit"
-          class="h-12 px-8 rounded-full bg-custom-blue text-white font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-200">
-          Create Product
+          v-else
+          type="submit"
+          class="h-11 px-6 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200 dark:shadow-none">
+          Buat Produk
         </button>
       </div>
     </form>

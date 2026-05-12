@@ -127,15 +127,26 @@ onMounted(fetchData)
 <template>
   <div class="flex flex-col gap-5">
     <form
-      class="flex flex-col w-full rounded-3xl p-5 gap-5 bg-white"
+      class="flex flex-col w-full rounded-2xl p-6 gap-5 bg-white dark:bg-surface-card dark:text-white border border-gray-100 dark:border-white/10 shadow-sm"
       @submit.prevent="handleSubmit"
     >
-      <h2 class="font-bold text-xl capitalize">Edit Store Information</h2>
+      <!-- Page Header -->
+      <div class="flex items-center gap-4 pb-4 border-b border-gray-100 dark:border-white/10">
+        <div class="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-xl text-gray-900 dark:text-white">Edit Toko</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Perbarui informasi toko Anda</p>
+        </div>
+      </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-custom-grey">Store Image</p>
+        <p class="font-semibold text-gray-600 dark:text-gray-300">Foto Toko</p>
         <div class="flex items-center justify-between w-full md:w-1/2">
           <div
-            class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-custom-background"
+            class="group relative flex size-20 rounded-2xl overflow-hidden items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10"
           >
             <img
               id="Thumbnail"
@@ -143,7 +154,6 @@ onMounted(fetchData)
               class="size-full object-contain"
               alt="icon"
             />
-            <!-- Input moved/hidden so it doesn't overlay image -->
             <input
               id="File-Input"
               ref="fileInput"
@@ -156,15 +166,15 @@ onMounted(fetchData)
           <button
             id="Change-Photo"
             type="button"
-            class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg"
+            class="flex items-center justify-center rounded-xl py-2.5 px-5 bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
             @click="$refs.fileInput.click()"
           >
-            Change Photo
+            Ubah Foto
           </button>
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-custom-grey">Store Name</p>
+        <p class="font-semibold text-gray-600 dark:text-gray-300">Nama Toko</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.name }"
@@ -184,7 +194,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-custom-grey">Store Phone</p>
+        <p class="font-semibold text-gray-600 dark:text-gray-300">Telepon Toko</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.phone }"
@@ -213,7 +223,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row justify-between gap-4">
-        <p class="font-semibold text-custom-grey mt-2 md:mt-5">Store Description</p>
+        <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Deskripsi Toko</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.about }"
@@ -250,7 +260,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-custom-grey">Address Searching</p>
+        <p class="font-semibold text-gray-600 dark:text-gray-300">Pencarian Alamat</p>
         <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2 relative">
           <label class="group relative">
             <div class="input-icon">
@@ -281,7 +291,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row justify-between gap-4">
-        <p class="font-semibold text-custom-grey mt-2 md:mt-5">Store Address</p>
+        <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Alamat Toko</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.address }"
@@ -318,7 +328,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-custom-grey">Store City</p>
+        <p class="font-semibold text-gray-600 dark:text-gray-300">Kota</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.city }"
@@ -338,7 +348,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-custom-grey">Post Code</p>
+        <p class="font-semibold text-gray-600 dark:text-gray-300">Kode Pos</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.postal_code }"
@@ -359,19 +369,19 @@ onMounted(fetchData)
           }}</span>
         </div>
       </div>
-      <div class="flex items-center justify-end gap-4">
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
         <RouterLink
           :to="{ name: 'admin.my-store' }"
-          class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-red text-white font-semibold text-lg"
+          class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
         >
-          Cancel
+          Batal
         </RouterLink>
         <button
           type="submit"
           :disabled="loading"
-          class="flex items-center justify-center h-14 rounded-full py-4 px-6 gap-2 bg-custom-blue text-white font-semibold text-lg disabled:opacity-50"
+          class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ loading ? 'Saving...' : 'Save Changes' }}
+          {{ loading ? 'Menyimpan...' : 'Simpan' }}
         </button>
       </div>
     </form>
