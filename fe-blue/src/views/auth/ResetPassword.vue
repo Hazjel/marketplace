@@ -101,11 +101,11 @@ const handleSubmit = async () => {
     </div>
 
     <!-- Token Invalid State -->
-    <div v-if="tokenInvalid" class="flex flex-col items-center gap-5 py-4">
+    <div v-if="tokenInvalid" class="flex flex-col items-center gap-5 py-6">
       <div
-        class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+        class="w-16 h-16 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center"
       >
-        <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-8 h-8 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -123,7 +123,7 @@ const handleSubmit = async () => {
       </div>
       <RouterLink
         :to="{ name: 'auth.forgot-password' }"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-all duration-300"
+        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300"
       >
         Minta Link Baru
       </RouterLink>
@@ -135,11 +135,11 @@ const handleSubmit = async () => {
       enter-from-class="opacity-0 -translate-y-2"
       enter-to-class="opacity-100 translate-y-0"
     >
-      <div v-if="successMessage" class="flex flex-col items-center gap-5 py-4">
+      <div v-if="successMessage" class="flex flex-col items-center gap-5 py-6">
         <div
-          class="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+          class="w-16 h-16 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center"
         >
-          <svg class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-8 h-8 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -159,7 +159,7 @@ const handleSubmit = async () => {
         </div>
         <RouterLink
           :to="{ name: 'auth.login' }"
-          class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-all duration-300"
+          class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300"
         >
           Login Sekarang
         </RouterLink>
@@ -184,7 +184,7 @@ const handleSubmit = async () => {
           class="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl"
         >
           <svg
-            class="shrink-0 w-5 h-5 text-red-500 mt-0.5"
+            class="shrink-0 w-5 h-5 text-red-500 dark:text-red-400 mt-0.5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -202,7 +202,7 @@ const handleSubmit = async () => {
             </p>
             <RouterLink
               :to="{ name: 'auth.forgot-password' }"
-              class="text-red-600 text-xs font-semibold underline hover:text-red-800 transition-colors"
+              class="text-red-600 dark:text-red-400 text-xs font-semibold underline hover:text-red-800 dark:hover:text-red-300 transition-colors"
             >
               Minta link reset baru →
             </RouterLink>
@@ -212,9 +212,7 @@ const handleSubmit = async () => {
 
       <!-- New Password Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1"
-          >Password Baru</label
-        >
+        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Password Baru</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img
@@ -234,7 +232,7 @@ const handleSubmit = async () => {
           />
           <button
             type="button"
-            class="absolute inset-y-0 right-4 flex items-center p-1 hover:bg-gray-200 rounded-full transition-colors"
+            class="absolute inset-y-0 right-4 flex items-center p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors"
             @click="showPassword = !showPassword"
           >
             <img
@@ -258,9 +256,7 @@ const handleSubmit = async () => {
 
       <!-- Confirm Password Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1"
-          >Konfirmasi Password</label
-        >
+        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Konfirmasi Password</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img
@@ -276,15 +272,15 @@ const handleSubmit = async () => {
             placeholder="Ulangi password baru"
             autocomplete="new-password"
             :class="{
-              '!border-red-500 !bg-red-50': error?.password_confirmation,
-              '!border-green-400':
+              '!border-red-500 !bg-red-50 dark:!bg-red-900/20': error?.password_confirmation,
+              '!border-green-400 dark:!border-green-500':
                 form.password_confirmation && form.password === form.password_confirmation
             }"
             :disabled="loading"
           />
           <button
             type="button"
-            class="absolute inset-y-0 right-4 flex items-center p-1 hover:bg-gray-200 rounded-full transition-colors"
+            class="absolute inset-y-0 right-4 flex items-center p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors"
             @click="showConfirmPassword = !showConfirmPassword"
           >
             <img
@@ -324,7 +320,7 @@ const handleSubmit = async () => {
       <!-- Submit Button -->
       <button
         type="submit"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         :disabled="
           loading ||
           !form.password ||
