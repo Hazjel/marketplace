@@ -32,10 +32,10 @@
 ### Neutrals
 | Token | Light | Dark |
 |-------|-------|------|
-| Background | `#F8FAFC` | `#0F172A` |
-| Card/Surface | `#FFFFFF` | `#1E293B` |
-| Border | `#E2E8F0` | `rgba(255,255,255,0.1)` |
-| Muted Text | `#64748B` | `#94A3B8` |
+| Background | `#F9FAFB` | `#0A0A0A` |
+| Card/Surface | `#FFFFFF` | `#171717` |
+| Border | `#E5E7EB` | `rgba(255,255,255,0.08)` |
+| Muted Text | `#6B7280` | `#A1A1AA` |
 
 ---
 
@@ -104,10 +104,10 @@
 Activated via `.dark` class on `<html>`. All custom properties auto-switch.
 
 Key differences:
-- Background shifts to deep navy (`#0F172A`)
-- Cards use slate-800 (`#1E293B`)  
+- Background shifts to deep charcoal (`#0A0A0A`)
+- Cards use neutral dark (`#171717`)  
 - Primary blue lightens to `#60A5FA` for better contrast
-- Borders use white alpha (`rgba(255,255,255,0.1)`)
+- Borders use white alpha (`rgba(255,255,255,0.08)`)
 
 ---
 
