@@ -668,7 +668,7 @@ class="flex items-center justify-center size-12 rounded-xl border border-custom-
       </div>
     </div>
     <section id="Recommendation" class="flex flex-col gap-9 scroll-mt-[150px]">
-      <SectionHeader title="Shop Quality Picks" subtitle="from Top Sellers" :link="{ name: 'app.all-products' }" />
+      <SectionHeader title="Produk Serupa" subtitle="" :link="{ name: 'app.all-products' }" />
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
         <template v-if="!loading">
           <ProductCard v-for="recProduct in products" :key="recProduct.id" :item="recProduct" />

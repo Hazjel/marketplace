@@ -104,11 +104,11 @@ watch(
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
         <span class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
-          Search Results
+          Hasil Pencarian
         </span>
       </div>
       <h1 class="font-extrabold text-[32px] capitalize text-custom-black dark:text-white">
-        Results for "{{ searchQuery }}"
+        Hasil pencarian "{{ searchQuery }}"
       </h1>
     </div>
   </header>
@@ -139,7 +139,7 @@ watch(
       <section v-if="loadingProducts || products.length > 0" class="flex flex-col gap-9">
         <div class="flex items-center justify-between">
           <h2 class="font-extrabold text-[32px] text-custom-black dark:text-white">
-            Products Found
+            Produk Ditemukan
           </h2>
         </div>
         <div
@@ -169,16 +169,16 @@ watch(
             alt="No results"
           />
           <h2 class="font-bold text-2xl text-custom-grey">
-            No results found for "{{ searchQuery }}"
+            Tidak ada hasil untuk "{{ searchQuery }}"
           </h2>
-          <p class="text-custom-grey">Try refreshing the page or check your spelling.</p>
+          <p class="text-custom-grey">Coba periksa ejaan atau gunakan kata kunci lain.</p>
         </div>
       </section>
 
       <!-- Stores Section -->
       <section v-if="loadingStores || stores.length > 0" class="flex flex-col gap-9">
         <div class="flex items-center justify-between">
-          <h2 class="font-extrabold text-[32px] text-custom-black dark:text-white">Stores Found</h2>
+          <h2 class="font-extrabold text-[32px] text-custom-black dark:text-white">Toko Ditemukan</h2>
         </div>
         <div
           v-if="loadingStores"
