@@ -1,105 +1,141 @@
-# Design System: Blue Marketplace
-**Version:** 1.0.0
-**Style:** Modern, Clean, Trustworthy
-**Base:** Tailwind CSS v4
+# Design System: Blukios
+**Version:** 2.0.0  
+**Style:** Modern, Trusted, Approachable  
+**Base:** Tailwind CSS v4  
+**Brand Origin:** "Blue" + "Kios" (Indonesian: booth/kiosk) — a trusted digital marketplace
 
 ---
 
 ## 1. Color Palette
-Using CSS Variables defined in `src/assets/style.css` for runtime flexibility and Dark Mode support.
 
-### Primary (Trust & Professionalism)
-*   **Blue**: `#0F52BA` (Primary Brand) -> `bg-custom-blue` / `text-custom-blue`
-*   **Midnight**: `#000926` (Text/Dark Background) -> `bg-custom-black` / `text-custom-black`
-*   **Soft Blue**: `#D6E6F3` (Accents/Backgrounds) -> `bg-custom-icon-background`
+### Primary: Electric Cobalt
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--color-primary` | `#2563EB` | Buttons, links, active states |
+| `--color-primary-dark` | `#0A1628` | Dark text, dark backgrounds |
+| `--color-primary-light` | `#DBEAFE` | Icon backgrounds, hover tints |
+
+### Secondary: Warm Amber (Accent)
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--color-secondary` | `#F59E0B` | CTA highlights, badges, promo |
+| `--color-secondary-dark` | `#D97706` | Hover/active state of accent |
 
 ### Semantic (Functional)
-*   **Success**: `#10B981` (Emerald-500) - For completed states, verified badges.
-*   **Warning**: `#EAB308` (Yellow-500) - For awaiting payment, reviews.
-*   **Destructive**: `#EF4444` (Red-500) - For errors, deletion, favorite (heart).
-*   **Info**: `#3B82F6` (Blue-500) - For information alerts.
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Success | `#10B981` | Completed, verified, available |
+| Warning | `#EAB308` | Pending, awaiting action |
+| Destructive | `#EF4444` | Errors, delete, cancel |
+| Info | `#3B82F6` | Information, neutral actions |
 
-### Neutrals (Structure)
-*   **Background**: `#F8FAFC` (Slate-50) (Light) / `#0B1120` (Dark)
-*   **Surface/Card**: `#FFFFFF` (White) (Light) / `#151E32` (Dark)
-*   **Border**: `#E2E8F0` (Slate-200) (Light) / `#334155` (Slate-700) (Dark)
-*   **Muted Text**: `#64748B` (Slate-500) (Light) / `#94A3B8` (Slate-400) (Dark)
+### Neutrals
+| Token | Light | Dark |
+|-------|-------|------|
+| Background | `#F8FAFC` | `#0F172A` |
+| Card/Surface | `#FFFFFF` | `#1E293B` |
+| Border | `#E2E8F0` | `rgba(255,255,255,0.1)` |
+| Muted Text | `#64748B` | `#94A3B8` |
 
 ---
 
 ## 2. Typography
-**Font Family:** 'Lexend Deca', sans-serif (Geometric, legible, friendly)
 
-### Scale
-| Role | Class | Size | Weight | Line Height |
-|------|-------|------|--------|-------------|
-| **H1** | `text-4xl` | 36px | Bold (700) | 1.1 |
-| **H2** | `text-3xl` | 30px | Bold (700) | 1.2 |
-| **H3** | `text-2xl` | 24px | Semibold (600) | 1.2 |
-| **H4** | `text-xl` | 20px | Semibold (600) | 1.3 |
-| **Body L**| `text-lg` | 18px | Regular (400) | 1.6 |
-| **Body M**| `text-base` | 16px | Regular (400) | 1.5 |
-| **Body S**| `text-sm` | 14px | Regular (400) | 1.5 |
-| **Caption**| `text-xs` | 12px | Medium (500) | 1.4 |
+**Font Family:** `'Plus Jakarta Sans'`, `'Inter'`, system-ui, sans-serif
 
----
+| Level | Size | Weight | Usage |
+|-------|------|--------|-------|
+| H1 | 36px | Bold (700) | Page titles |
+| H2 | 30px | Bold (700) | Section headers |
+| H3 | 24px | Semibold (600) | Card titles |
+| H4 | 20px | Semibold (600) | Sub-section |
+| Body L | 18px | Regular (400) | Content large |
+| Body M | 16px | Regular (400) | Default body |
+| Body S | 14px | Regular (400) | Secondary info |
+| Caption | 12px | Medium (500) | Labels, meta |
 
-## 3. Spacing & Layout
-**Grid Base:** 4px (Tailwind standard)
-
-### Container
-*   **Max Width**: `max-w-[1240px]` (Standard Desktop)
-*   **Padding**: `px-4` (Mobile), `px-6` (Tablet), `px-8` (Desktop)
-
-### Spacing
-*   **Section Gap**: `gap-8` (32px) or `gap-12` (48px)
-*   **Card Gap**: `gap-4` (16px) or `gap-6` (24px)
-*   **Internal Padding**: `p-4` or `p-6` for cards.
-
-### Radius
-*   **Small**: `rounded-lg` (8px) - Buttons, Inputs
-*   **Medium**: `rounded-xl` (12px) - internal cards
-*   **Large**: `rounded-2xl` (16px) - Main Cards (Product, Store)
-*   **Full**: `rounded-full` - Avatars, Badges, Pills
+**Why Plus Jakarta Sans?**
+- Geometric, modern feel — matches tech/marketplace identity
+- Excellent readability at small sizes (product cards, prices)
+- Wide weight range (200-800) for strong visual hierarchy
+- Open source, fast loading via Google Fonts
 
 ---
 
-## 4. Shadows & Effects
-**Goal:** Elevation without clutter.
+## 3. Gradients
 
-*   **Soft Shadow**: `shadow-sm` (`0 1px 2px 0 rgb(0 0 0 / 0.05)`) - Cards default.
-*   **Float**: `shadow-floating` (Custom) - Hover states.
-*   **Glow**: `hover-glow-blue` (Custom class) - Blue border + slight lift on hover.
-*   **Glass**: `backdrop-blur-sm bg-white/60` - Overlays (Stock habis, badges).
+```css
+/* Primary Gradient — Hero sections, auth backgrounds */
+.blukios-gradient {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #60a5fa 100%);
+}
 
----
-
-## 5. Components & UX Patterns
-
-### Buttons (`Button.vue`)
-*   **Primary**: Solid Blue. Used for "Buy Now", "Checkout", specific CTAs.
-*   **Secondary**: Outline or Ghost. Used for "Cancel", "View Detail".
-*   **States**: Must have `:hover`, `:active` (scale-95), and `:disabled` (opacity-50 cursor-not-allowed).
-
-### Cards (`Card.vue`)
-Use the `Card` primitive.
-*   **Interactive**: Add `cursor-pointer hover-glow-blue transition-all duration-300`.
-*   **Static**: Simple `border border-border`.
-
-### Forms (`Input.vue`)
-*   **Style**: Floating Label or Top Label.
-*   **Height**: Large (`h-[50px]+`) for touch targets.
-*   **Feedback**: Invalid state shows Red border + Error message below input.
-
-### Navigation
-*   **Mobile**: Bottom Tab Bar (Sticky).
-*   **Desktop**: Top Navbar (Sticky preferred or static).
+/* Legacy gradient alias */
+.blue-gradient {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+}
+```
 
 ---
 
-## 6. Accessibility (A11y) Checklist
-*   [ ] **Contrast**: Text ratio > 4.5:1.
-*   [ ] **Focus**: All interactive elements must have visible focus rings (`focus-visible:ring-2`).
-*   [ ] **Labels**: Inputs must have labels (visible or `sr-only`).
-*   [ ] **Alt Text**: Images must have meaningful `alt` attributes.
-*   [ ] **Touch Targets**: Min 44x44px for buttons/links on mobile.
+## 4. Spacing & Radius
+
+| Element | Radius | Notes |
+|---------|--------|-------|
+| Cards | `20px` | Main content cards |
+| Buttons | `full` (pill) | Primary actions |
+| Input fields | `18px` | Form elements |
+| Icons background | `14px-full` | Depending on size |
+| Modal/Dialog | `20px` | Popover & sheets |
+
+---
+
+## 5. Shadows
+
+```css
+--shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+--shadow-floating: 0 20px 25px -5px rgb(0 0 0 / 0.08);
+```
+
+---
+
+## 6. Dark Mode
+
+Activated via `.dark` class on `<html>`. All custom properties auto-switch.
+
+Key differences:
+- Background shifts to deep navy (`#0F172A`)
+- Cards use slate-800 (`#1E293B`)  
+- Primary blue lightens to `#60A5FA` for better contrast
+- Borders use white alpha (`rgba(255,255,255,0.1)`)
+
+---
+
+## 7. Component Patterns
+
+### Interactive Cards
+```html
+<div class="hover-glow-blue">...</div>
+```
+Adds hover: border glow, float up, text color change.
+
+### Form Inputs
+```html
+<label class="group relative">
+  <div class="input-icon">...</div>
+  <p class="input-placeholder">Label</p>
+  <input class="custom-input" />
+</label>
+```
+76px tall, floating label, icon prefix with border separator.
+
+---
+
+## 8. Brand Voice (for copy/UI text)
+
+| Attribute | Style |
+|-----------|-------|
+| Tone | Ramah, profesional, terpercaya |
+| Language | Bahasa Indonesia (primary), English (technical/labels) |
+| Personality | Helpful, modern, efficient |
+| Chatbot persona | "Ri" — friendly virtual assistant |

@@ -86,8 +86,8 @@ onMounted(() => {
 
               <!-- Quote -->
               <p class="font-serif text-2xl lg:text-3xl leading-relaxed italic opacity-95 mb-8">
-                “Since joining Blue Marketplace, managing my inventory and connecting with buyers
-                has been seamless and efficient.”
+                “Sejak bergabung di Blukios, mengelola inventaris dan terhubung dengan pembeli
+                jadi lebih mudah dan efisien.”
               </p>
 
               <!-- Footer: Author & Arrows -->

@@ -17,8 +17,8 @@ const { user } = storeToRefs(authStore)
             <img src="@/assets/images/logos/blukios_logo.png" class="h-12" alt="logo" />
           </RouterLink>
           <p class="font-medium text-custom-grey dark:text-gray-400">
-            Blukios is your one-stop marketplace for quality products. We connect buyers and sellers
-            to create a seamless shopping experience.
+            Blukios adalah marketplace multi-vendor untuk gadget, elektronik, dan aksesoris berkualitas.
+            Menghubungkan pembeli dan penjual dalam pengalaman belanja yang seamless.
           </p>
         </div>
         <div class="flex flex-col md:flex-row gap-8 lg:gap-[52px] w-full lg:w-fit">
