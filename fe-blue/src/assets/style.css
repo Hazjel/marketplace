@@ -10,26 +10,26 @@
        Identity: Trusted digital marketplace, modern, approachable
        ---------------------------------- */
 
-  /* Primary: Electric Cobalt — vibrant, tech-forward */
+  /* Primary: Vibrant Blue — modern, trustworthy */
   --color-primary: #2563eb;
-  --color-primary-dark: #0a1628;
-  --color-primary-light: #dbeafe;
+  --color-primary-dark: #111827;
+  --color-primary-light: #eff6ff;
 
   /* Secondary: Warm Amber — contrast accent for CTAs & highlights */
   --color-secondary: #f59e0b;
   --color-secondary-dark: #d97706;
 
-  /* Neutral: Balanced greys for text hierarchy */
-  --color-neutral: #64748b;
-  --color-neutral-dark: #0f172a;
+  /* Neutral: Warm greys for text hierarchy */
+  --color-neutral: #6b7280;
+  --color-neutral-dark: #111827;
 
-  /* Surfaces */
-  --color-surface: #f8fafc;
+  /* Surfaces — Warm White */
+  --color-surface: #f9fafb;
   --color-surface-card: #ffffff;
-  --color-text-main: #0f172a;
-  --color-text-muted: #64748b;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
+  --color-text-main: #111827;
+  --color-text-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-input: #e5e7eb;
   --color-ring: #2563eb;
 
   /* ----------------------------------
@@ -48,10 +48,10 @@
 
   --color-secondary-foreground: #ffffff;
 
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
+  --color-muted: #f3f4f6;
+  --color-muted-foreground: #6b7280;
 
-  --color-accent: #dbeafe;
+  --color-accent: #eff6ff;
   --color-accent-foreground: #1d4ed8;
 
   --color-destructive: #ef4444;
@@ -60,20 +60,21 @@
   /* ----------------------------------
        Legacy / Custom Mapping
        ---------------------------------- */
-  --color-custom-black: #0f172a;
+  /* Custom Mappings — Light Mode */
+  --color-custom-black: #111827;
   --color-custom-blue: var(--color-primary);
   --color-custom-red: #ef4444;
-  --color-custom-grey: #64748b;
-  --color-custom-stroke: #cbd5e1;
+  --color-custom-grey: #6b7280;
+  --color-custom-stroke: #e5e7eb;
 
   --color-custom-green: #10b981;
-  --color-custom-yellow: #eab308;
+  --color-custom-yellow: #fbbf24;
   --color-custom-orange: #f59e0b;
 
   --color-custom-lime-green-char: #deff6e;
   --color-custom-lime-green: #84cc16;
-  --color-custom-background: #f8fafc;
-  --color-custom-icon-background: #dbeafe;
+  --color-custom-background: #f9fafb;
+  --color-custom-icon-background: #eff6ff;
 
   /* ----------------------------------
        Typography
@@ -99,18 +100,19 @@
 
 .dark {
   /* --- Blukios Dark Mode ---
-     Deep navy backgrounds, electric blue accents, high contrast */
+     Deep charcoal backgrounds, vibrant blue accents, high contrast
+     Modern & universal dark theme (Material You inspired) */
 
-  /* Backgrounds */
-  --color-surface: #0f172a;
-  --color-surface-card: #1e293b;
+  /* Backgrounds — Deep Charcoal instead of Navy */
+  --color-surface: #0a0a0a;
+  --color-surface-card: #171717;
 
-  /* Text */
-  --color-text-main: #f8fafc;
-  --color-text-muted: #94a3b8;
+  /* Text — High contrast */
+  --color-text-main: #fafafa;
+  --color-text-muted: #a1a1aa;
 
-  /* Borders */
-  --color-border: rgba(255, 255, 255, 0.1);
+  /* Borders — Subtle white alpha */
+  --color-border: rgba(255, 255, 255, 0.08);
 
   /* Token Mappings */
   --color-background: var(--color-surface);
@@ -125,8 +127,8 @@
   --color-primary-foreground: #ffffff;
   --color-secondary-foreground: #ffffff;
 
-  --color-muted: #334155;
-  --color-muted-foreground: #94a3b8;
+  --color-muted: #262626;
+  --color-muted-foreground: #a1a1aa;
 
   --color-accent: #1e3a5f;
   --color-accent-foreground: #60a5fa;
@@ -134,16 +136,16 @@
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
 
-  --color-input: rgba(255, 255, 255, 0.1);
+  --color-input: rgba(255, 255, 255, 0.08);
   --color-ring: #3b82f6;
 
-  /* Custom Mappings */
-  --color-custom-black: #f8fafc;
+  /* Custom Mappings — Dark Mode */
+  --color-custom-black: #fafafa;
   --color-custom-blue: #60a5fa;
-  --color-custom-background: #0f172a;
-  --color-custom-icon-background: #1e3a5f;
-  --color-custom-stroke: rgba(255, 255, 255, 0.1);
-  --color-custom-grey: #94a3b8;
+  --color-custom-background: #0a0a0a;
+  --color-custom-icon-background: #1e293b;
+  --color-custom-stroke: rgba(255, 255, 255, 0.08);
+  --color-custom-grey: #a1a1aa;
   --color-custom-orange: #fbbf24;
 
   --color-ring: #60a5fa;
@@ -153,7 +155,7 @@
    BASE STYLES & RESETS
    ========================================= */
 body {
-  @apply font-sans flex flex-col min-h-screen text-[#292D32] bg-custom-background dark:text-white transition-colors duration-300;
+  @apply font-sans flex flex-col min-h-screen text-gray-900 bg-custom-background dark:text-white transition-colors duration-300;
 }
 
 #root {
@@ -261,8 +263,8 @@ body {
   }
 
   :is(.dark .sticky-tabs) {
-    background-color: #1e293b;
-    border-bottom-color: rgba(255, 255, 255, 0.12);
+    background-color: #171717;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   .tab-link {
@@ -502,7 +504,7 @@ html {
 }
 
 :is(.dark .glass) {
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(23, 23, 23, 0.8);
 }
 
 /* Product card stagger animation on scroll */
