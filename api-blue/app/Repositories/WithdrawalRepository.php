@@ -83,6 +83,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             $withdrawal->bank_account_name = $data['bank_account_name'];
             $withdrawal->bank_account_number = $data['bank_account_number'];
             $withdrawal->bank_name = $data['bank_name'];
+            $withdrawal->status = 'pending';
 
             $withdrawal->save();
 

@@ -9,6 +9,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // FULLTEXT indexes are MySQL-only; skip for SQLite (testing)
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         // FULLTEXT index on products.name + products.description
         DB::statement('ALTER TABLE products ADD FULLTEXT INDEX ft_products_search (name, description)');
 
@@ -18,6 +23,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement('ALTER TABLE products DROP INDEX ft_products_search');
         DB::statement('ALTER TABLE stores DROP INDEX ft_stores_search');
     }
