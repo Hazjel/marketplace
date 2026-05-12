@@ -81,6 +81,10 @@ const toggleBalanceValue = computed(() => {
   return isBalanceHidden.value ? 'Rp **********' : `Rp ${formatRupiah(storeBalance.value?.balance)}`
 })
 
+const pendingBalanceValue = computed(() => {
+  return isBalanceHidden.value ? 'Rp **********' : `Rp ${formatRupiah(storeBalance.value?.pending_balance)}`
+})
+
 const toggleBalance = () => {
   isBalanceHidden.value = !isBalanceHidden.value
 }
@@ -161,7 +165,7 @@ src="@/assets/images/icons/shield-tick-white-fill.svg" class="flex size-9 shrink
         <img src="@/assets/images/backgrounds/wallet.png" class="size-full object-cover" alt="wallet" />
         <div
           class="flex flex-col items-center justify-center gap-2 text-center min-w-0 w-full px-4 absolute transform -translate-x-1/2 left-1/2 top-[15%] sm:top-[51px]">
-          <p class="font-medium text-[#BFC6E9] leading-none">Seller Balance:</p>
+          <p class="font-medium text-[#BFC6E9] leading-none">Saldo Tersedia:</p>
           <p class="w-full font-extrabold text-3xl sm:text-[40px] text-white leading-none break-all">
             <span id="balanceText">{{ toggleBalanceValue }}</span>
           </p>
@@ -175,6 +179,18 @@ id="toggleBalance"
             {{ isBalanceHidden ? 'Show Balance' : 'Hide Balance' }}
           </p>
         </button>
+      </div>
+      <!-- Pending Balance Info -->
+      <div
+        v-if="storeBalance?.pending_balance > 0"
+        class="relative w-full rounded-[20px] bg-custom-orange/10 dark:bg-orange-500/10 border border-custom-orange/20 dark:border-orange-500/20 overflow-hidden">
+        <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
+          <img src="@/assets/images/icons/timer-white-fill.svg" class="flex size-9 shrink-0 brightness-75" alt="icon" />
+          <div class="flex flex-col gap-1">
+            <p class="font-bold text-lg text-custom-orange">{{ pendingBalanceValue }}</p>
+            <p class="font-medium text-custom-orange/80 text-sm">Saldo ditahan (escrow) — akan dirilis setelah buyer konfirmasi terima pesanan</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
