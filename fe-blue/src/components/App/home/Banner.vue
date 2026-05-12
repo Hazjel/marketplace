@@ -8,22 +8,22 @@ import 'swiper/css/pagination'
 import { onMounted } from 'vue'
 
 onMounted(() => {
-  new Swiper('.swiper', {
+  new Swiper('.heroSwiper', {
     modules: [Navigation, Autoplay, Pagination],
     loop: true,
     spaceBetween: 0,
     autoplay: {
-      delay: 3000,
+      delay: 4000,
       disableOnInteraction: false
     },
-    speed: 800,
+    speed: 600,
     slidesPerView: 1,
     navigation: {
-      nextEl: '.swiper-button-next-custom',
-      prevEl: '.swiper-button-prev-custom'
+      nextEl: '.hero-next',
+      prevEl: '.hero-prev'
     },
     pagination: {
-      el: '.swiper-pagination',
+      el: '.hero-pagination',
       clickable: true
     }
   })
@@ -31,114 +31,59 @@ onMounted(() => {
 </script>
 
 <template>
-  <section
-    id="Promo"
-    class="group relative w-full max-w-[1208px] mx-auto px-4 md:px-0 mt-6 md:mt-8 animate-fade-in-up"
-  >
-    <div class="swiper w-full rounded-xl md:rounded-3xl overflow-hidden shadow-sm">
-      <!-- Slides with Responsive Aspect Ratio -->
+  <section class="group relative w-full max-w-[1280px] mx-auto px-4 lg:px-6 mt-4 md:mt-6">
+    <div class="heroSwiper w-full rounded-2xl overflow-hidden">
       <div class="swiper-wrapper">
-        <div class="swiper-slide w-full">
-          <a
-            href=""
-            class="block w-full aspect-4/5 md:aspect-21/9 relative bg-custom-icon-background overflow-hidden group/slide"
-          >
+        <!-- Slide 1 -->
+        <div class="swiper-slide">
+          <div class="relative w-full aspect-[2.5/1] md:aspect-[3/1] bg-gradient-to-r from-blue-600 to-indigo-700 overflow-hidden">
             <img
               src="@/assets/images/banners/banner_mega_sale.png"
-              class="size-full object-cover group-hover/slide:scale-105 transition-transform duration-700"
-              alt="Mega Sale"
+              class="w-full h-full object-cover"
+              alt="Promo"
             />
-            <!-- Cinematic Overlay -->
-            <div
-              class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60"
-            ></div>
-          </a>
+          </div>
         </div>
-        <div class="swiper-slide w-full">
-          <a
-            href=""
-            class="block w-full aspect-4/5 md:aspect-21/9 relative bg-custom-icon-background overflow-hidden group/slide"
-          >
+        <!-- Slide 2 -->
+        <div class="swiper-slide">
+          <div class="relative w-full aspect-[2.5/1] md:aspect-[3/1] bg-gradient-to-r from-purple-600 to-pink-600 overflow-hidden">
             <img
               src="@/assets/images/banners/banner_gadgets.png"
-              class="size-full object-cover group-hover/slide:scale-105 transition-transform duration-700"
+              class="w-full h-full object-cover"
               alt="Gadgets"
             />
-            <div
-              class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60"
-            ></div>
-          </a>
+          </div>
         </div>
-        <div class="swiper-slide w-full">
-          <a
-            href=""
-            class="block w-full aspect-4/5 md:aspect-21/9 relative bg-custom-icon-background overflow-hidden group/slide"
-          >
+        <!-- Slide 3 -->
+        <div class="swiper-slide">
+          <div class="relative w-full aspect-[2.5/1] md:aspect-[3/1] bg-gradient-to-r from-emerald-600 to-teal-600 overflow-hidden">
             <img
               src="@/assets/images/banners/banner_mega_sale.png"
-              class="size-full object-cover group-hover/slide:scale-105 transition-transform duration-700"
-              alt="Special Offer"
+              class="w-full h-full object-cover"
+              alt="Sale"
             />
-            <div
-              class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60"
-            ></div>
-          </a>
+          </div>
         </div>
       </div>
+
       <!-- Pagination -->
-      <div class="swiper-pagination !bottom-4 !left-8 !w-fit"></div>
+      <div class="hero-pagination absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5"></div>
     </div>
 
-    <!-- Custom Navigation Buttons -->
-    <!-- Prev Button -->
+    <!-- Navigation Arrows (hover reveal) -->
     <button
-      class="swiper-button-prev-custom absolute left-6 top-1/2 -translate-y-1/2 z-20 flex size-8 md:size-10 items-center justify-center rounded-full bg-white/90 dark:bg-surface-card shadow-lg text-custom-black dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-white dark:hover:bg-custom-blue disabled:opacity-0 cursor-pointer"
+      class="hero-prev absolute left-6 lg:left-8 top-1/2 -translate-y-1/2 z-20 size-9 md:size-10 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="2.5"
-        stroke="currentColor"
-        class="size-4 md:size-5"
-      >
+      <svg class="size-4 md:size-5 text-gray-700 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
       </svg>
     </button>
-    <!-- Next Button -->
     <button
-      class="swiper-button-next-custom absolute right-6 top-1/2 -translate-y-1/2 z-20 flex size-8 md:size-10 items-center justify-center rounded-full bg-white/90 dark:bg-surface-card shadow-lg text-custom-black dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:bg-white dark:hover:bg-custom-blue disabled:opacity-0 cursor-pointer"
+      class="hero-next absolute right-6 lg:right-8 top-1/2 -translate-y-1/2 z-20 size-9 md:size-10 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="2.5"
-        stroke="currentColor"
-        class="size-4 md:size-5"
-      >
+      <svg class="size-4 md:size-5 text-gray-700 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
       </svg>
     </button>
   </section>
 </template>
-
-<style>
-.swiper-pagination-bullet {
-  background-color: rgba(255, 255, 255, 0.5);
-  opacity: 1;
-  width: 0.5rem;
-  /* size-2 */
-  height: 0.5rem;
-  /* size-2 */
-  transition: all 300ms;
-}
-
-.swiper-pagination-bullet-active {
-  background-color: #ffffff;
-  width: 1rem;
-  /* w-4 */
-  border-radius: 9999px;
-  /* rounded-full */
-}
-</style>

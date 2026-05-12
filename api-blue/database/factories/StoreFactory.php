@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Helpers\ImageHelper\ImageHelper;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +21,6 @@ class StoreFactory extends Factory
      */
     public function definition(): array
     {
-        $imageHelper = new ImageHelper;
         $name = $this->faker->company();
 
         return [
@@ -33,12 +31,7 @@ class StoreFactory extends Factory
             ),
             'name' => $name,
             'username' => Str::slug($name) . '-s' . rand(100000, 999999),
-            'logo' => $imageHelper->storeAndResizeImage(
-                $imageHelper->createDummyImageWithTextSizeAndPosition(250, 250, 'center', 'center', 'random', 'medium'),
-                'store',
-                250,
-                250
-            ),
+            'logo' => 'https://picsum.photos/seed/store' . rand(1, 50) . '/250/250',
             'about' => $this->faker->paragraph(),
             'phone' => $this->faker->phoneNumber(),
             'address_id' => $this->faker->numberBetween(1,100),
