@@ -369,6 +369,11 @@ class TransactionRepository implements TransactionRepositoryInterface
                 !in_array($transaction->delivery_status, ['cancelled', 'failed'])) {
                 
                 $this->restoreStock($transaction);
+
+                // Refund escrow: kembalikan pending_balance jika payment sudah paid
+                if ($transaction->payment_status === 'paid') {
+                    $this->refundEscrow($transaction);
+                }
             }
 
             if (isset($data['delivery_status'])) {
@@ -543,5 +548,46 @@ class TransactionRepository implements TransactionRepositoryInterface
         }
     }
 
+    /**
+     * Refund escrow: kembalikan pending_balance saat transaksi yang sudah paid dibatalkan.
+     * Dana dikembalikan ke buyer (di luar sistem), pending_balance seller dikurangi.
+     */
+    private function refundEscrow(Transaction $transaction): void
+    {
+        try {
+            $store = Store::find($transaction->store_id);
 
+            if (!$store || !$store->storeBalance) {
+                Log::error('refundEscrow: Store or StoreBalance not found', [
+                    'store_id' => $transaction->store_id,
+                ]);
+                return;
+            }
+
+            $netSales = $transaction->grand_total - $transaction->shipping_cost;
+            $adminFee = $netSales * 0.10;
+            $sellerAmount = $netSales - $adminFee;
+
+            $storeBalanceRepository = new StoreBalanceRepository;
+            $storeBalanceRepository->refundPending($store->storeBalance->id, $sellerAmount);
+
+            // Catat history refund
+            $store->storeBalance->storeBalanceHistories()->create([
+                'type' => 'refunded',
+                'reference_id' => $transaction->id,
+                'reference_type' => Transaction::class,
+                'amount' => -$sellerAmount,
+                'remarks' => 'Escrow dibatalkan (refund) — pesanan ' . $transaction->code . ' dibatalkan',
+            ]);
+
+            Log::info('Escrow refunded for transaction: ' . $transaction->code, [
+                'store_id' => $store->id,
+                'refunded_amount' => $sellerAmount,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Error refunding escrow: ' . $e->getMessage(), [
+                'transaction_id' => $transaction->id,
+            ]);
+        }
+    }
 }

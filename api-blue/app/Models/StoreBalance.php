@@ -14,10 +14,12 @@ class StoreBalance extends Model
     protected $fillable = [
         'store_id',
         'balance',
+        'pending_balance',
     ];
 
     protected $casts = [
         'balance' => 'decimal:2',
+        'pending_balance' => 'decimal:2',
     ];
 
     public function scopeSearch($query, $search)

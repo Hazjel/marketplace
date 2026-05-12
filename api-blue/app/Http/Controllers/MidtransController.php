@@ -50,8 +50,6 @@ class MidtransController extends Controller
 
         // Lock the transaction row to prevent concurrent duplicate webhook processing
         $transaction = Transaction::where('code', $transactionCode)->lockForUpdate()->first();
-        
-        file_put_contents(storage_path('logs/debug.txt'), "RX CALLBACK: Status=$transactionStatus Type={$request->payment_type}\n", FILE_APPEND);
 
         if (!$transaction) {
             return response()->json(['message' => 'Transaction not found'], 404);
@@ -59,7 +57,6 @@ class MidtransController extends Controller
 
         switch ($transactionStatus) {
             case 'capture':
-                file_put_contents(storage_path('logs/debug.txt'), "STATUS: CAPTURE\n", FILE_APPEND);
                 if ($request->payment_type == 'credit_card') {
                     if ($request->fraud_status == 'challenge') {
                         $transaction->update(['payment_status' => 'unpaid']);
@@ -70,120 +67,32 @@ class MidtransController extends Controller
                             break;
                         }
                         $transaction->update(['payment_status' => 'paid']);
-
-                        $store = Store::find($transaction->store_id);
-
-                        $netSales = $transaction->grand_total - $transaction->shipping_cost;
-                        $adminFee = $netSales * 0.10; // 10% fee
-                        
-                        $transaction->admin_fee = $adminFee;
-                        $transaction->save();
-                        
-                        // Explicitly load relationships to ensure loop works
-                        $transaction->load('transactionDetails.product');
-                        
-                        try {
-                            $storeBalanceRepository = new StoreBalanceRepository;
-                        
-                            if ($store && $store->storeBalance) {
-                                // 1. Credit Full Amount (Income)
-                                $storeBalanceRepository->credit($store->storeBalance->id, $netSales);
-                                
-                                $storeBalance = $store->storeBalance;
-                                $storeBalance->storeBalanceHistories()->create([
-                                    'type' => 'income',
-                                    'reference_id' => $transaction->id,
-                                    'reference_type' => Transaction::class,
-                                    'amount' => $netSales,
-                                    'remarks' => 'Payment received from transaction ' . $transaction->code,
-                                ]);
-
-                                // 2. Debit Admin Fee (Expense)
-                                $storeBalanceRepository->debit($store->storeBalance->id, $adminFee);
-                                
-                                $storeBalance->storeBalanceHistories()->create([
-                                    'type' => 'expense',
-                                    'reference_id' => $transaction->id,
-                                    'reference_type' => Transaction::class,
-                                    'amount' => -$adminFee,
-                                    'remarks' => 'Admin Fee (10%) for transaction ' . $transaction->code,
-                                ]);
-                            } else {
-                                Log::error('Store Balance not found for store: ' . ($store->id ?? 'unknown'));
-                            }
-                        } catch (\Throwable $e) {
-                            Log::error('Error updating store balance: ' . $e->getMessage());
-                        }
+                        $this->creditPendingBalance($transaction);
                     }
                 }
                 break;
 
             case 'settlement':
-                file_put_contents(storage_path('logs/debug.txt'), "STATUS: SETTLEMENT\n", FILE_APPEND);
-
                 // Guard: skip if already paid (prevents double-credit on duplicate webhook)
                 if ($transaction->payment_status === 'paid') {
                     Log::info('Duplicate settlement webhook ignored for: ' . $transactionCode);
                     break;
                 }
                 $transaction->update(['payment_status' => 'paid']);
-
-                $store = Store::find($transaction->store_id);
-
-                $netSales = $transaction->grand_total - $transaction->shipping_cost;
-                $adminFee = $netSales * 0.10; // 10% fee
-                
-                $transaction->admin_fee = $adminFee;
-                $transaction->save();
-                
-                $transaction->load('transactionDetails.product');
-                
-                try {
-                    $storeBalanceRepository = new StoreBalanceRepository;
-                    
-                    if ($store && $store->storeBalance) {
-                        $storeBalanceRepository->credit($store->storeBalance->id, $netSales);
-                        
-                        $storeBalance = $store->storeBalance;
-                        $storeBalance->storeBalanceHistories()->create([
-                            'type' => 'income',
-                            'reference_id' => $transaction->id,
-                            'reference_type' => Transaction::class,
-                            'amount' => $netSales,
-                            'remarks' => 'Payment received from transaction ' . $transaction->code,
-                        ]);
-
-                        $storeBalanceRepository->debit($store->storeBalance->id, $adminFee);
-                        
-                        $storeBalance->storeBalanceHistories()->create([
-                            'type' => 'expense',
-                            'reference_id' => $transaction->id,
-                            'reference_type' => Transaction::class,
-                            'amount' => -$adminFee,
-                            'remarks' => 'Admin Fee (10%) for transaction ' . $transaction->code,
-                        ]);
-                    } else {
-                        Log::error('Store Balance not found for store: ' . ($store->id ?? 'unknown'));
-                    }
-                } catch (\Throwable $e) {
-                    Log::error('Error updating store balance: ' . $e->getMessage());
-                }
+                $this->creditPendingBalance($transaction);
                 break;
+
             case 'pending':
                 $transaction->update(['payment_status' => 'unpaid']);
                 break;
+
             case 'deny':
-                $transaction->update(['payment_status' => 'failed']);
-                $this->transactionRepository->restoreStock($transaction);
-                break;
             case 'expire':
-                $transaction->update(['payment_status' => 'failed']);
-                $this->transactionRepository->restoreStock($transaction);
-                break;
             case 'cancel':
                 $transaction->update(['payment_status' => 'failed']);
                 $this->transactionRepository->restoreStock($transaction);
                 break;
+
             default:
                 $transaction->update(['payment_status' => 'failed']);
                 $this->transactionRepository->restoreStock($transaction);
@@ -192,7 +101,53 @@ class MidtransController extends Controller
 
         // always return 200 after processing so Midtrans considers callback successful
         return response()->json(['message' => 'Payment Status updated successfully'], 200);
-        
+    }
+
+    /**
+     * Credit ke pending_balance (ESCROW) — dana ditahan sampai buyer konfirmasi terima.
+     * Saldo baru pindah ke available balance setelah pesanan selesai (completed).
+     */
+    private function creditPendingBalance(Transaction $transaction): void
+    {
+        $store = Store::find($transaction->store_id);
+
+        $netSales = $transaction->grand_total - $transaction->shipping_cost;
+        $adminFee = $netSales * 0.10; // 10% platform fee
+        $sellerAmount = $netSales - $adminFee;
+
+        $transaction->admin_fee = $adminFee;
+        $transaction->save();
+
+        $transaction->load('transactionDetails.product');
+
+        try {
+            $storeBalanceRepository = new StoreBalanceRepository;
+
+            if ($store && $store->storeBalance) {
+                // Credit ke PENDING balance (bukan available balance)
+                // Dana ditahan sampai buyer konfirmasi terima barang
+                $storeBalanceRepository->creditPending($store->storeBalance->id, $sellerAmount);
+
+                $storeBalance = $store->storeBalance;
+                $storeBalance->storeBalanceHistories()->create([
+                    'type' => 'pending_income',
+                    'reference_id' => $transaction->id,
+                    'reference_type' => Transaction::class,
+                    'amount' => $sellerAmount,
+                    'remarks' => 'Pembayaran diterima (ditahan) dari transaksi ' . $transaction->code . ' — akan dirilis setelah pesanan selesai',
+                ]);
+
+                Log::info('Pending balance credited for store: ' . $store->id, [
+                    'net_sales' => $netSales,
+                    'admin_fee' => $adminFee,
+                    'seller_amount' => $sellerAmount,
+                    'transaction_code' => $transaction->code,
+                ]);
+            } else {
+                Log::error('Store Balance not found for store: ' . ($store->id ?? 'unknown'));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error crediting pending balance: ' . $e->getMessage());
+        }
     }
 }
-

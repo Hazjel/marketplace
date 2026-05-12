@@ -22,5 +22,9 @@ interface StoreBalanceRepositoryInterface
         string $amount
     );
 
-    
+    public function creditPending(string $id, float $amount): StoreBalance;
+
+    public function releasePending(string $id, float $amount): StoreBalance;
+
+    public function refundPending(string $id, float $amount): StoreBalance;
 }
