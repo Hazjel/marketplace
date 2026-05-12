@@ -123,7 +123,7 @@ watch(error, (value) => {
         <div
           class="flex flex-col items-center justify-center gap-2 text-center min-w-0 w-full px-4 absolute transform -translate-x-1/2 left-1/2 top-[51px]"
         >
-          <p class="font-medium text-[#BFC6E9] leading-none">Seller Balance:</p>
+          <p class="font-medium text-[#BFC6E9] leading-none">Saldo Tersedia:</p>
           <p class="w-full font-extrabold text-[40px] text-white leading-none">
             <span v-if="isShowBalance">Rp {{ formatRupiah(storeBalance.balance) }}</span>
             <span v-else>Rp xxx.xxx.xxx</span>
@@ -155,6 +155,21 @@ watch(error, (value) => {
           />
           <p id="toggleText" class="font-medium text-white">Hide Balance</p>
         </button>
+      </div>
+      <!-- Pending Balance Info -->
+      <div
+        v-if="storeBalance?.pending_balance > 0"
+        class="relative w-full rounded-[20px] bg-custom-orange/10 border border-custom-orange/20 overflow-hidden">
+        <div class="relative flex items-center min-h-[56px] gap-[10px] p-4">
+          <div class="flex flex-col gap-1">
+            <p class="font-bold text-lg text-custom-orange">
+              <span v-if="isShowBalance">Rp {{ formatRupiah(storeBalance.pending_balance) }}</span>
+              <span v-else>Rp xxx.xxx</span>
+              <span class="font-medium text-sm ml-2">ditahan (escrow)</span>
+            </p>
+            <p class="font-medium text-custom-orange/70 text-sm">Akan dirilis setelah pesanan selesai</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
