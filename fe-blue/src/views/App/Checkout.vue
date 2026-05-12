@@ -55,11 +55,11 @@ const fetchSavedAddresses = async () => {
 }
 
 const selectSavedAddress = (addr) => {
-  transaction.value.address_id = addr.city_id // Set City ID for shipping calc
+  transaction.value.address_id = addr.city_id
   transaction.value.city = addr.city
   transaction.value.address = addr.address
   transaction.value.postal_code = addr.postal_code
-  addressSearch.value = addr.city // Sync search input visual
+  addressSearch.value = addr.city
   toast.success('Address applied: ' + addr.label)
 }
 
@@ -100,32 +100,26 @@ const showSuccessModal = ref(false)
 
 const loadMidtransScript = () => {
   return new Promise((resolve, reject) => {
-    // Cek jika sudah ada
     if (window.snap) {
       resolve()
       return
     }
 
-    // Hapus script lama jika ada
     const oldScripts = document.querySelectorAll('script[src*="snap.js"]')
     oldScripts.forEach((s) => s.remove())
 
     const script = document.createElement('script')
     script.type = 'text/javascript'
-    // ✅ GANTI dengan Client Key Midtrans Anda
     const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY
     if (!clientKey) {
-      console.error('❌ Midtrans Client Key is missing in .env')
+      console.error('Midtrans Client Key is missing in .env')
       reject(new Error('Midtrans configuration error'))
       return
     }
     script.setAttribute('data-client-key', clientKey)
 
-    // Use explicit environment variable, fallback to key detection if not set
     const isProductionEnv = import.meta.env.VITE_MIDTRANS_IS_PRODUCTION === 'true'
     const isKeyProduction = !clientKey.startsWith('SB-')
-
-    // Prioritize explicit config, otherwise guess based on key
     const isProduction =
       import.meta.env.VITE_MIDTRANS_IS_PRODUCTION !== undefined ? isProductionEnv : isKeyProduction
 
@@ -134,14 +128,13 @@ const loadMidtransScript = () => {
       : 'https://app.sandbox.midtrans.com/snap/snap.js'
 
     script.src = snapUrl
-
     script.async = true
     script.onload = () => {
       isMidtransLoaded.value = true
       resolve()
     }
     script.onerror = (error) => {
-      console.error('❌ Failed to load Midtrans:', error)
+      console.error('Failed to load Midtrans:', error)
       reject(new Error('Failed to load Midtrans payment system'))
     }
 
@@ -244,21 +237,19 @@ const handleSubmit = async () => {
     return
   }
 
-  isProcessingPayment.value = true // ✅ Start loading
+  isProcessingPayment.value = true
 
   try {
     const response = await createTransaction(transaction.value)
 
     if (!response || !response.snap_token) {
       toast.error('Gagal membuat transaksi. Silakan coba lagi.')
-      isProcessingPayment.value = false // ✅ Stop loading
+      isProcessingPayment.value = false
       return
     }
 
-    // 1. Clear cart immediately to prevent duplicate orders
     cart.clearSelectedItems()
 
-    // 2. Open Snap Popup
     window.snap.pay(response.snap_token, {
       onSuccess: function () {
         showSuccessModal.value = true
@@ -268,11 +259,10 @@ const handleSubmit = async () => {
       onPending: function () {
         isProcessingPayment.value = false
         toast.info('Menunggu pembayaran...')
-        // Redirect to My Transactions with username param
         if (user.value?.username) {
           router.push({ name: 'user.my-transaction', params: { username: user.value.username } })
         } else {
-          window.location.href = '/my-transactions' // Fallback
+          window.location.href = '/my-transactions'
         }
       },
       onError: function () {
@@ -282,29 +272,25 @@ const handleSubmit = async () => {
       onClose: function () {
         isProcessingPayment.value = false
         toast.warning('Pembayaran tertunda. Silakan cek menu Transaksi.')
-        // Redirect to My Transactions with username param
         if (user.value?.username) {
           router.push({ name: 'user.my-transaction', params: { username: user.value.username } })
         } else {
-          window.location.href = '/my-transactions' // Fallback
+          window.location.href = '/my-transactions'
         }
       }
     })
   } catch {
     toast.error('Gagal memproses transaksi. Silakan coba lagi.')
-    isProcessingPayment.value = false // ✅ Stop loading
+    isProcessingPayment.value = false
   }
 }
 
-// Close modal functionality
 const closeModal = () => {
   showDeliveryModal.value = false
   selectedCourier.value = null
 }
 
-// Initialize transaction data
 onMounted(async () => {
-  // Load Midtrans script
   try {
     await loadMidtransScript()
   } catch (error) {
@@ -312,7 +298,6 @@ onMounted(async () => {
     toast.error('Gagal memuat sistem pembayaran. Silakan refresh halaman.')
   }
 
-  // Initialize transaction
   if (selectedCarts.value.length > 0) {
     const store = selectedCarts.value[0]
     transaction.value.store_id = store.storeId
@@ -323,411 +308,401 @@ onMounted(async () => {
     }))
   }
 
-  // Fetch user saved addresses
   fetchSavedAddresses()
 })
 </script>
 
+
 <template>
-  <section class="flex flex-col gap-6 w-full max-w-[1240px] px-4 md:px-8 mx-auto pt-4">
-    <CheckoutStepper :current-step="2" />
+  <section class="min-h-screen bg-gray-50 dark:bg-surface-dark pb-10">
+    <!-- Header with Stepper -->
+    <div class="bg-white dark:bg-surface-card border-b border-gray-100 dark:border-white/10 py-6">
+      <div class="w-full max-w-[1240px] px-4 md:px-8 mx-auto">
+        <CheckoutStepper :current-step="2" />
+      </div>
+    </div>
 
-    <div class="flex flex-col md:flex-row gap-5">
-      <!-- Cart Items Section -->
-      <section
-id="Carts-Container"
-        class="flex flex-col gap-5 w-full h-fit rounded-[20px] p-5 bg-white dark:bg-surface-card min-w-0">
-        <p class="font-bold text-xl dark:text-white">Your Cart</p>
-
-        <!-- Empty state -->
-        <div v-if="selectedCarts.length === 0" class="text-center p-8">
-          <p class="text-custom-grey font-medium">No stores selected for checkout</p>
-          <RouterLink :to="{ name: 'app.cart' }" class="text-custom-blue font-semibold mt-2 inline-block">
-            Back to Cart
-          </RouterLink>
-        </div>
-
-        <!-- Selected stores and products -->
-        <div v-for="store in selectedCarts" :key="store.storeId" class="store-cart flex flex-col w-full gap-4">
-          <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
-            <img src="@/assets/images/icons/shop-grey.svg" class="size-4" alt="icon" />
-            {{ store.storeName }}
-          </p>
-
-          <div class="flex flex-col gap-4 pl-4 border-l-2 border-gray-100 dark:border-white/10">
-            <div v-for="product in store.products" :key="product.id" class="flex items-start gap-4 w-full">
-              <div
-                class="flex size-[64px] shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 p-2 items-center justify-center">
-                <img
-:src="product.product_images?.find((i) => i.is_thumbnail)?.image || product.thumbnail
-                  " class="size-full object-contain mix-blend-multiply dark:mix-blend-normal" alt="icon"
-                  @error="(e) => (e.target.src = '/src/assets/images/thumbnails/th-1.svg')" />
+    <div class="w-full max-w-[1240px] px-4 md:px-8 mx-auto pt-6">
+      <div class="flex flex-col lg:flex-row gap-6">
+        <!-- LEFT COLUMN: Address + Items -->
+        <div class="flex flex-col gap-5 flex-1 min-w-0">
+          <!-- Shipping Address Card -->
+          <div class="bg-white dark:bg-surface-card rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden">
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-50 dark:border-white/5 bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent">
+              <div class="size-9 rounded-full bg-custom-blue/10 flex items-center justify-center shrink-0">
+                <svg class="size-5 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
               </div>
-              <div class="flex flex-col flex-1 gap-1">
-                <p class="font-bold text-sm leading-tight line-clamp-2 dark:text-white">{{ product.name }}</p>
-                <p class="text-xs text-custom-grey font-medium">
-                  {{ product.weight }} KG • {{ product.product_category.name }}
-                </p>
-                <div class="flex items-center justify-between mt-1">
-                  <p class="font-bold text-sm text-custom-black dark:text-white">
-                    Rp {{ formatRupiah(product.price) }}
-                  </p>
-                  <p class="font-semibold text-xs text-custom-grey">x{{ product.quantity }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Checkout Form Section -->
-      <form class="flex flex-col gap-5 w-full md:w-[581px] shrink-0" @submit.prevent="handleSubmit">
-        <!-- Security Notice -->
-        <div class="relative w-full rounded-[20px] bg-custom-blue overflow-hidden">
-          <img
-src="@/assets/images/backgrounds/round-ornament.svg"
-            class="size-full object-contain object-right opacity-55 absolute" alt="icon" />
-          <div class="relative flex items-center min-h-[68px] gap-[10px] p-4">
-            <img src="@/assets/images/icons/shield-tick-white-fill.svg" class="flex size-9 shrink-0" alt="icon" />
-            <p class="font-bold text-lg text-white capitalize">
-              Your personal data is securely protected by us
-            </p>
-          </div>
-        </div>
-
-        <!-- Address Form -->
-        <div class="flex flex-col gap-5 rounded-[20px] p-5 bg-white dark:bg-surface-card">
-          <p class="font-bold text-xl dark:text-white">Contact & Delivery Address</p>
-
-          <!-- Address Search -->
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <p class="font-semibold text-custom-grey">Address Details</p>
-              <button
-v-if="savedAddresses.length > 0 && !showSavedAddresses" type="button"
-                class="text-sm font-bold text-custom-blue hover:underline" @click="showSavedAddresses = true">
-                Select Saved Address
-              </button>
-              <button
-v-else-if="showSavedAddresses" type="button"
-                class="text-sm font-bold text-custom-red hover:underline" @click="showSavedAddresses = false">
-                Cancel Selection
-              </button>
-            </div>
-
-            <!-- Saved Addresses Grid -->
-            <div v-if="showSavedAddresses" class="grid grid-cols-1 gap-3 mb-2">
-              <div
-v-for="addr in savedAddresses" :key="addr.id"
-                class="cursor-pointer border border-custom-stroke dark:border-white/10 rounded-xl p-4 hover:border-custom-blue hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all group"
-                :class="{
-                  'border-custom-blue bg-blue-50 dark:bg-blue-500/20 ring-1 ring-custom-blue':
-                    transaction.address === addr.address
-                }" @click="selectSavedAddress(addr)">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-bold text-custom-black dark:text-white">{{ addr.label }}</span>
-                  <span
-v-if="addr.is_primary"
-                    class="text-xs font-bold bg-blue-100 dark:bg-blue-500/20 text-custom-blue dark:text-blue-400 px-2 py-0.5 rounded-full">PRIMARY</span>
-                </div>
-                <p class="text-sm font-semibold text-custom-black dark:text-gray-300">
-                  {{ addr.recipient_name }} ({{ addr.phone }})
-                </p>
-                <p class="text-xs text-custom-grey dark:text-gray-400 line-clamp-1 mt-1">
-                  {{ addr.address }}, {{ addr.city }}
-                </p>
+              <div>
+                <h2 class="font-bold text-base text-custom-black dark:text-white">Alamat Pengiriman</h2>
+                <p class="text-xs text-custom-grey dark:text-gray-400">Pilih atau masukkan alamat tujuan</p>
               </div>
             </div>
 
-            <!-- Manual Search (Fallback) -->
-            <div v-if="!showSavedAddresses || savedAddresses.length === 0">
-              <p class="font-semibold text-custom-grey text-xs uppercase tracking-wider mb-1">
-                Or search manually
-              </p>
-              <div class="group/errorState flex flex-col gap-2 relative">
-                <label class="group relative">
-                  <div class="input-icon">
-                    <img src="@/assets/images/icons/global-search-grey.svg" class="flex size-6 shrink-0" alt="icon" />
+            <div class="p-5 flex flex-col gap-4">
+              <!-- Toggle Buttons -->
+              <div class="flex gap-2">
+                <button v-if="savedAddresses.length > 0" type="button"
+                  class="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                  :class="showSavedAddresses ? 'bg-custom-blue text-white shadow-md shadow-blue-500/20' : 'bg-gray-100 dark:bg-white/10 text-custom-grey dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'"
+                  @click="showSavedAddresses = true">
+                  Alamat Tersimpan
+                </button>
+                <button type="button"
+                  class="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                  :class="!showSavedAddresses ? 'bg-custom-blue text-white shadow-md shadow-blue-500/20' : 'bg-gray-100 dark:bg-white/10 text-custom-grey dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'"
+                  @click="showSavedAddresses = false">
+                  Cari Manual
+                </button>
+              </div>
+
+              <!-- Saved Addresses -->
+              <div v-if="showSavedAddresses && savedAddresses.length > 0" class="flex flex-col gap-3">
+                <div v-for="addr in savedAddresses" :key="addr.id"
+                  class="cursor-pointer border-2 rounded-xl p-4 transition-all hover:shadow-md"
+                  :class="transaction.address === addr.address ? 'border-custom-blue bg-blue-50/50 dark:bg-blue-500/10' : 'border-gray-100 dark:border-white/10 hover:border-custom-blue/50'"
+                  @click="selectSavedAddress(addr)">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-sm text-custom-black dark:text-white">{{ addr.label }}</span>
+                      <span v-if="addr.is_primary" class="text-[10px] font-bold bg-custom-blue/10 text-custom-blue px-2 py-0.5 rounded-full">UTAMA</span>
+                    </div>
+                    <div class="size-5 rounded-full border-2 flex items-center justify-center transition-all"
+                      :class="transaction.address === addr.address ? 'border-custom-blue bg-custom-blue' : 'border-gray-300 dark:border-gray-600'">
+                      <svg v-if="transaction.address === addr.address" class="size-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
                   </div>
-                  <p class="input-placeholder">Enter District / City</p>
-                  <input
-v-model="addressSearch" type="text" class="custom-input" placeholder=""
-                    @input="handleAddressInput(addressSearch)" />
-                </label>
-                <ul v-if="showAddressOptions" class="search-result">
-                  <li v-for="option in addressOptions" :key="option.id" @click="handleAddressSelect(option)">
-                    {{ option.label }}
-                  </li>
-                </ul>
+                  <p class="text-sm font-medium text-custom-black dark:text-gray-200">{{ addr.recipient_name }} <span class="text-custom-grey">({{ addr.phone }})</span></p>
+                  <p class="text-xs text-custom-grey dark:text-gray-400 mt-1 line-clamp-2">{{ addr.address }}, {{ addr.city }}</p>
+                </div>
+              </div>
+
+              <!-- Manual Search -->
+              <div v-if="!showSavedAddresses || savedAddresses.length === 0" class="flex flex-col gap-4">
+                <div class="relative">
+                  <label class="group relative">
+                    <div class="input-icon">
+                      <svg class="size-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <p class="input-placeholder">Cari Kecamatan / Kota</p>
+                    <input v-model="addressSearch" type="text" class="custom-input" placeholder=""
+                      @input="handleAddressInput(addressSearch)" />
+                  </label>
+                  <ul v-if="showAddressOptions" class="search-result">
+                    <li v-for="option in addressOptions" :key="option.id" @click="handleAddressSelect(option)">
+                      {{ option.label }}
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Detail Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.city }">
+                    <label class="group relative">
+                      <div class="input-icon">
+                        <svg class="size-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                      <p class="input-placeholder">Kota</p>
+                      <input v-model="transaction.city" type="text" class="custom-input" placeholder="" />
+                    </label>
+                    <span v-if="error?.city" class="text-xs font-medium text-red-500">{{ error?.city?.join(', ') }}</span>
+                  </div>
+                  <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.postal_code }">
+                    <label class="group relative">
+                      <div class="input-icon">
+                        <svg class="size-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                        </svg>
+                      </div>
+                      <p class="input-placeholder">Kode Pos</p>
+                      <input v-model="transaction.postal_code" type="number" class="custom-input" placeholder="" />
+                    </label>
+                    <span v-if="error?.postal_code" class="text-xs font-medium text-red-500">{{ error?.postal_code?.join(', ') }}</span>
+                  </div>
+                </div>
+
+                <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.address }">
+                  <label class="flex flex-col gap-2 rounded-2xl border-2 border-gray-100 dark:border-white/10 focus-within:border-custom-blue p-4 transition-all">
+                    <span class="text-xs font-semibold text-custom-grey uppercase tracking-wider">Alamat Lengkap</span>
+                    <textarea v-model="transaction.address"
+                      class="appearance-none outline-none w-full font-medium text-sm text-custom-black dark:text-white bg-transparent resize-none leading-relaxed"
+                      rows="3" placeholder="Masukkan detail alamat lengkap..."></textarea>
+                  </label>
+                  <span v-if="error?.address" class="text-xs font-medium text-red-500">{{ error?.address.join(', ') }}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Address Details -->
-          <div class="flex flex-col gap-3">
-            <p class="font-semibold text-custom-grey">Your Address</p>
-            <div class="group/errorState flex flex-col gap-2 w-full" :class="{ invalid: error?.address }">
-              <label
-                class="group flex py-4 px-6 rounded-3xl border-2 border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red">
-                <div class="flex h-full pr-4 pt-2 border-r-[1.5px] border-custom-border">
-                  <img src="@/assets/images/icons/location-grey.svg" class="flex size-6 shrink-0" alt="icon" />
+          <!-- Cart Items Card -->
+          <div class="bg-white dark:bg-surface-card rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden">
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-50 dark:border-white/5">
+              <div class="size-9 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                <svg class="size-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <div>
+                <h2 class="font-bold text-base text-custom-black dark:text-white">Pesanan Kamu</h2>
+                <p class="text-xs text-custom-grey dark:text-gray-400">{{ totalSelectedItems }} item dari {{ selectedCarts.length }} toko</p>
+              </div>
+            </div>
+
+            <!-- Empty state -->
+            <div v-if="selectedCarts.length === 0" class="p-8 text-center">
+              <div class="size-16 mx-auto rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-4">
+                <svg class="size-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+              </div>
+              <p class="text-custom-grey font-medium">Belum ada toko yang dipilih</p>
+              <RouterLink :to="{ name: 'app.cart' }" class="text-custom-blue font-bold text-sm mt-2 inline-flex items-center gap-1 hover:underline">
+                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Kembali ke Keranjang
+              </RouterLink>
+            </div>
+
+            <!-- Store groups -->
+            <div v-for="(store, storeIdx) in selectedCarts" :key="store.storeId" class="border-b border-gray-50 dark:border-white/5 last:border-b-0">
+              <!-- Store Header -->
+              <div class="flex items-center gap-2 px-5 py-3 bg-gray-50/50 dark:bg-white/[0.02]">
+                <div class="size-6 rounded-full bg-custom-blue/10 flex items-center justify-center">
+                  <svg class="size-3.5 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <div class="flex flex-col gap-[6px] pl-4 w-full">
-                  <p
-                    class="placeholder font-semibold text-custom-grey text-sm group-has-placeholder-shown:text-base group-has-placeholder-shown:text-custom-black group-has-placeholder-shown:font-bold transition-300">
-                    Enter Your Address
-                  </p>
-                  <textarea
-v-model="transaction.address"
-                    class="appearance-none outline-none w-full font-semibold leading-[160%]" rows="3"
-                    placeholder=""></textarea>
+                <span class="font-bold text-sm text-custom-black dark:text-white">{{ store.storeName }}</span>
+              </div>
+
+              <!-- Products -->
+              <div class="px-5 py-3 flex flex-col gap-3">
+                <div v-for="product in store.products" :key="product.id" class="flex items-center gap-3">
+                  <div class="size-14 shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-1.5 flex items-center justify-center">
+                    <img :src="product.product_images?.find((i) => i.is_thumbnail)?.image || product.thumbnail"
+                      class="size-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-lg" alt=""
+                      @error="(e) => (e.target.src = '/src/assets/images/thumbnails/th-1.svg')" />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-sm text-custom-black dark:text-white line-clamp-1">{{ product.name }}</p>
+                    <p class="text-xs text-custom-grey dark:text-gray-400 mt-0.5">{{ product.weight }}kg &middot; {{ product.product_category?.name }}</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <p class="font-bold text-sm text-custom-black dark:text-white">Rp {{ formatRupiah(product.price) }}</p>
+                    <p class="text-xs text-custom-grey dark:text-gray-400">x{{ product.quantity }}</p>
+                  </div>
                 </div>
-              </label>
-              <span
-v-if="error?.address"
-                class="font-semibold text-lg text-custom-red leading-none group-[&.invalid]/errorState:block">
-                {{ error?.address.join(', ') }}
-              </span>
+              </div>
             </div>
           </div>
 
-          <!-- City Input -->
-          <div class="flex flex-col gap-3">
-            <p class="font-semibold text-custom-grey">Your City</p>
-            <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.city }">
-              <label class="group relative">
-                <div class="input-icon">
-                  <img src="@/assets/images/icons/buildings-grey.svg" class="flex size-6 shrink-0" alt="icon" />
-                </div>
-                <p class="input-placeholder">Enter Your City</p>
-                <input v-model="transaction.city" type="text" class="custom-input" placeholder="" />
-              </label>
-              <span v-if="error?.city" class="input-error">{{ error?.city?.join(', ') }}</span>
+          <!-- Courier Selection Card -->
+          <div class="bg-white dark:bg-surface-card rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden">
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-50 dark:border-white/5">
+              <div class="size-9 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center shrink-0">
+                <svg class="size-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h2 class="font-bold text-base text-custom-black dark:text-white">Pilih Pengiriman</h2>
+                <p class="text-xs text-custom-grey dark:text-gray-400">Estimasi ongkir berdasarkan berat & lokasi</p>
+              </div>
             </div>
-          </div>
 
-          <!-- Postal Code Input -->
-          <div class="flex flex-col gap-3">
-            <p class="font-semibold text-custom-grey">Post Code</p>
-            <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.postal_code }">
-              <label class="group relative">
-                <div class="input-icon">
-                  <img src="@/assets/images/icons/keyboard-grey.svg" class="flex size-6 shrink-0" alt="icon" />
+            <div class="p-5">
+              <div v-if="!selectedCourier"
+                class="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] cursor-pointer hover:border-custom-blue/50 hover:bg-blue-50/30 transition-all"
+                @click="handleDeliveryModal">
+                <div class="size-12 rounded-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 flex items-center justify-center shrink-0">
+                  <svg class="size-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
                 </div>
-                <p class="input-placeholder">Enter Post Code</p>
-                <input v-model="transaction.postal_code" type="number" class="custom-input" placeholder="" />
-              </label>
-              <span v-if="error?.postal_code" class="input-error">
-                {{ error?.postal_code?.join(', ') }}
-              </span>
+                <div class="flex-1">
+                  <p class="font-bold text-sm text-custom-black dark:text-white">Pilih Kurir</p>
+                  <p class="text-xs text-custom-grey dark:text-gray-400">Klik untuk cek ongkir & pilih layanan pengiriman</p>
+                </div>
+                <svg class="size-5 text-custom-blue shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+
+              <div v-else
+                class="flex items-center gap-4 p-4 rounded-xl border-2 border-custom-blue/30 bg-blue-50/50 dark:bg-blue-900/10 cursor-pointer hover:shadow-md transition-all"
+                @click="handleDeliveryModal">
+                <div class="size-12 rounded-full bg-custom-blue/10 flex items-center justify-center shrink-0">
+                  <svg class="size-6 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="font-bold text-sm text-custom-black dark:text-white">{{ selectedCourier.shipping_name }}</p>
+                  <p class="text-xs text-custom-grey dark:text-gray-400">{{ selectedCourier.service_name }} &middot; Rp {{ formatRupiah(selectedCourier.shipping_cost_net) }}</p>
+                </div>
+                <span class="text-xs font-bold text-custom-blue hover:underline">Ubah</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Courier Selection -->
-        <div class="flex flex-col gap-5 rounded-[20px] p-5 bg-white dark:bg-surface-card">
-          <p class="font-bold text-xl dark:text-white">Courier Selection</p>
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between rounded-[20px] border border-custom-stroke p-5 gap-[14px]">
-              <div class="flex rounded-full size-14 shrink-0 items-center justify-center bg-custom-background">
-                <img src="@/assets/images/icons/car-delivery-black.svg" class="size-6" alt="icon" />
+        <!-- RIGHT COLUMN: Order Summary (Sticky) -->
+        <div class="w-full lg:w-[380px] shrink-0">
+          <form class="lg:sticky lg:top-6 flex flex-col gap-5" @submit.prevent="handleSubmit">
+            <!-- Summary Card -->
+            <div class="bg-white dark:bg-surface-card rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden">
+              <div class="px-5 py-4 border-b border-gray-50 dark:border-white/5">
+                <h2 class="font-bold text-base text-custom-black dark:text-white">Ringkasan Belanja</h2>
               </div>
-              <div v-if="!selectedCourier" class="w-full">
-                <p class="font-bold text-lg leading-none">No Courier Selected</p>
-                <p class="font-semibold text-custom-grey mt-[6px] leading-none">
-                  Calculate to select courier
-                </p>
+
+              <div class="p-5 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-custom-grey dark:text-gray-400">Total Harga ({{ totalSelectedQuantity }} barang)</span>
+                  <span class="text-sm font-semibold text-custom-black dark:text-white">Rp {{ formatRupiah(subtotalSelected) }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-custom-grey dark:text-gray-400">Ongkos Kirim</span>
+                  <span class="text-sm font-semibold text-custom-black dark:text-white">
+                    <template v-if="deliveryFee > 0">Rp {{ formatRupiah(deliveryFee) }}</template>
+                    <template v-else>-</template>
+                  </span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-custom-grey dark:text-gray-400">PPN 11%</span>
+                  <span class="text-sm font-semibold text-custom-black dark:text-white">Rp {{ formatRupiah(finalPpn) }}</span>
+                </div>
+                <div v-if="discountSelected > 0" class="flex items-center justify-between">
+                  <span class="text-sm text-green-600">Diskon</span>
+                  <span class="text-sm font-semibold text-green-600">-Rp {{ formatRupiah(discountSelected) }}</span>
+                </div>
+
+                <hr class="border-gray-100 dark:border-white/10 my-1" />
+
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-base text-custom-black dark:text-white">Total Tagihan</span>
+                  <span class="font-bold text-lg text-custom-blue">Rp {{ formatRupiah(finalGrandTotal) }}</span>
+                </div>
               </div>
-              <div v-else class="w-full">
-                <p class="font-bold text-lg leading-none">{{ selectedCourier.shipping_name }}</p>
-                <p class="font-semibold text-custom-grey mt-[6px] leading-none">
-                  {{ selectedCourier.shipping_type }} (Rp
-                  {{ formatRupiah(selectedCourier.shipping_cost_net) }})
-                </p>
+
+              <!-- Pay Button -->
+              <div class="px-5 pb-5">
+                <button id="Pay-Button" type="submit"
+                  :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment || user?.role === 'admin'"
+                  class="flex items-center justify-center w-full h-14 rounded-2xl font-bold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  :class="selectedCarts.length > 0 && selectedCourier && !isProcessingPayment ? 'bg-custom-blue hover:bg-blue-700 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5' : 'bg-gray-300 dark:bg-gray-700'">
+                  <template v-if="isProcessingPayment">
+                    <div class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Memproses...
+                  </template>
+                  <template v-else-if="selectedCarts.length > 0 && selectedCourier">
+                    <svg class="size-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Bayar Sekarang
+                  </template>
+                  <template v-else-if="user?.role === 'admin'">Admin tidak bisa Checkout</template>
+                  <template v-else>Lengkapi data untuk checkout</template>
+                </button>
               </div>
-              <button type="button" class="flex items-center gap-0.5 shrink-0" @click="handleDeliveryModal">
-                <p class="font-bold text-custom-blue">Calculate Delivery</p>
-                <img src="@/assets/images/icons/arrow-right-no-tail-blue-thick.svg" class="size-4" alt="" />
-              </button>
             </div>
-          </div>
+
+            <!-- Trust Badges -->
+            <TrustBadges />
+          </form>
         </div>
-
-        <!-- Order Summary -->
-        <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white dark:bg-surface-card">
-          <p class="font-bold text-xl dark:text-white">Order Summary</p>
-          <div class="flex flex-col rounded-xl border border-custom-stroke p-5 gap-4">
-            <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Total Items:
-              </p>
-              <p class="font-bold text-lg leading-none">{{ totalSelectedItems }} Items</p>
-            </div>
-            <hr class="border-custom-stroke" />
-            <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/box-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Total Quantity:
-              </p>
-              <p class="font-bold text-lg leading-none">{{ totalSelectedQuantity }}x</p>
-            </div>
-            <hr class="border-custom-stroke" />
-            <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Delivery Fee:
-              </p>
-              <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(deliveryFee) }}</p>
-            </div>
-            <hr class="border-custom-stroke" />
-            <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/ticket-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Sub Total:
-              </p>
-              <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(finalSubtotal) }}</p>
-            </div>
-            <hr class="border-custom-stroke" />
-            <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/receipt-2-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                PPN 11%
-              </p>
-              <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(finalPpn) }}</p>
-            </div>
-            <hr class="border-custom-stroke" />
-            <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/discount-shape-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Discount
-              </p>
-              <p class="font-bold text-lg leading-none">Rp {{ formatRupiah(discountSelected) }}</p>
-            </div>
-            <hr class="border-custom-stroke" />
-            <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Grand total
-              </p>
-              <p class="font-bold text-lg leading-none text-custom-blue">
-                Rp {{ formatRupiah(finalGrandTotal) }}
-              </p>
-            </div>
-          </div>
-          <button
-id="Pay-Button" type="submit"
-            :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment || user?.role === 'admin'"
-            class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300">
-            <!-- Loading State -->
-            <template v-if="isProcessingPayment">
-              <div class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span class="font-bold text-white">Processing Payment...</span>
-            </template>
-
-            <!-- Ready to Pay -->
-            <template v-else-if="selectedCarts.length > 0 && selectedCourier">
-              <span class="font-bold text-white">Pay With Midtrans</span>
-              <img
-src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
-                alt="icon" />
-            </template>
-
-            <!-- Admin Warning -->
-            <template v-else-if="user?.role === 'admin'">
-              <span class="font-bold text-white">Admins cannot Checkout</span>
-            </template>
-
-            <!-- Incomplete Form -->
-            <template v-else>
-              <span class="font-bold text-white">Complete form to checkout</span>
-            </template>
-          </button>
-
-          <TrustBadges />
-        </div>
-      </form>
+      </div>
     </div>
   </section>
 
+
   <!-- Delivery Modal -->
-  <div
-v-if="showDeliveryModal" id="Delivery-Modal"
-    class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50">
-    <div class="backdrop absolute w-full h-full bg-[#292D32B2]" @click="closeModal"></div>
-    <div
-id="Select-Courier"
-      class="relative flex flex-col w-full max-w-[460px] mx-4 shrink-0 h-fit rounded-2xl overflow-hidden">
-      <div class="header flex items-center p-5 gap-3 justify-between bg-custom-black">
-        <p class="font-semibold text-lg text-white">Select Courier</p>
-        <button type="button" @click="closeModal">
-          <img src="@/assets/images/icons/close-circle-white.svg" class="flex size-6 shrink-0" alt="icon" />
-        </button>
-      </div>
-      <div class="flex flex-col p-5 gap-3 bg-white">
-        <div class="flex flex-col gap-3">
-          <p class="font-semibold text-custom-grey">Available Couriers</p>
-          <div class="flex flex-col gap-3 h-[346px] p-0.5 overflow-y-auto hide-scrollbar overscroll-contain">
-            <label
-v-for="courier in couriers" :key="courier.shipping_name"
-              class="courier-choice flex items-center w-full rounded-[20px] ring-1 ring-custom-stroke p-5 gap-[14px] has-checked:ring-2 has-checked:ring-custom-blue has-checked:transparent-blue-to-blue-gradient transition-300">
-              <div class="flex rounded-full size-14 shrink-0 items-center justify-center bg-custom-background">
-                <img src="@/assets/images/icons/car-delivery-black.svg" class="size-6" alt="icon" />
-              </div>
-              <div class="w-full">
-                <p class="courier-name font-bold text-lg leading-none">
-                  {{ courier.shipping_name }}
-                </p>
-                <p class="courier-fee font-semibold text-custom-grey mt-[6px] leading-none">
-                  {{ courier.service_name }} (Rp {{ formatRupiah(courier.shipping_cost_net) }})
-                </p>
-              </div>
-              <input
-type="radio" name="courier" required
-                class="size-6 flex shrink-0 appearance-none rounded-full checked:border-[3px] checked:border-solid checked:border-white checked:bg-custom-blue ring-2 ring-custom-grey checked:ring-custom-blue transition-300"
-                :value="courier.code" @change="selectedCourier = courier" />
-            </label>
+  <Teleport to="body">
+    <div v-if="showDeliveryModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeModal"></div>
+      <div class="relative w-full max-w-md bg-white dark:bg-surface-card rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/10">
+          <div>
+            <h3 class="font-bold text-lg text-custom-black dark:text-white">Pilih Kurir</h3>
+            <p class="text-xs text-custom-grey dark:text-gray-400">Pilih layanan pengiriman yang tersedia</p>
           </div>
-          <button
-id="Choose-Courier" type="button"
-            class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300"
+          <button type="button" class="size-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors" @click="closeModal">
+            <svg class="size-4 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Courier List -->
+        <div class="p-5 max-h-[50vh] overflow-y-auto flex flex-col gap-3">
+          <label v-for="courier in couriers" :key="courier.shipping_name"
+            class="flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md"
+            :class="selectedCourier?.shipping_name === courier.shipping_name ? 'border-custom-blue bg-blue-50/50 dark:bg-blue-900/10' : 'border-gray-100 dark:border-white/10 hover:border-custom-blue/40'">
+            <div class="size-10 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center shrink-0">
+              <svg class="size-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="font-bold text-sm text-custom-black dark:text-white">{{ courier.shipping_name }}</p>
+              <p class="text-xs text-custom-grey dark:text-gray-400">{{ courier.service_name }}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-sm text-custom-blue">Rp {{ formatRupiah(courier.shipping_cost_net) }}</p>
+            </div>
+            <input type="radio" name="courier" class="sr-only" :value="courier.code" @change="selectedCourier = courier" />
+          </label>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-5 border-t border-gray-100 dark:border-white/10">
+          <button type="button"
+            class="w-full h-12 rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="!selectedCourier"
             @click="handleCourierSubmit">
-            <span class="font-bold text-white">Choose Courier</span>
+            Konfirmasi Kurir
           </button>
         </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 
-  <div
-v-if="showSuccessModal" id="Success-Modal"
-    class="modal flex flex-1 items-center justify-center h-full fixed top-0 w-full z-50">
-    <div class="backdrop absolute w-full h-full bg-[#292D32B2]"></div>
-    <div id="Select-Courier" class="relative flex flex-col w-[400px] shrink-0 h-fit rounded-2xl overflow-hidden">
-      <div class="header flex h-[63px] items-center p-5 gap-3 justify-center bg-custom-black">
-        <p class="font-semibold text-lg text-white">Payment Successful</p>
-      </div>
-      <div class="flex flex-col p-5 gap-3 bg-white">
-        <div class="flex flex-col items-center justify-center w-full h-[207px]">
-          <img src="@/assets/images/icons/bag-tick-blue-transparent.svg" class="size-[72px]" alt="icon" />
-          <div class="text-center">
-            <p class="font-bold text-xl">Thank You!</p>
-            <p class="font-semibold text-custom-grey">Your order has been placed successfully.</p>
+  <!-- Success Modal -->
+  <Teleport to="body">
+    <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      <div class="relative w-full max-w-sm bg-white dark:bg-surface-card rounded-2xl shadow-2xl overflow-hidden text-center">
+        <div class="p-8 flex flex-col items-center gap-4">
+          <div class="size-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <svg class="size-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-xl text-custom-black dark:text-white">Pembayaran Berhasil!</h3>
+            <p class="text-sm text-custom-grey dark:text-gray-400 mt-1">Pesanan kamu sedang diproses</p>
           </div>
         </div>
-        <div class="flex flex-col gap-3">
-          <RouterLink
-:to="{ name: 'admin.my-transaction' }"
-            class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue">
-            <span class="font-bold text-white">View Transaction</span>
+        <div class="px-6 pb-6 flex flex-col gap-3">
+          <RouterLink :to="{ name: 'admin.my-transaction' }"
+            class="flex items-center justify-center h-12 w-full rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors">
+            Lihat Transaksi
           </RouterLink>
-          <RouterLink
-:to="{ name: 'app.home' }"
-            class="flex items-center justify-center h-14 w-full rounded-2xl p-4 gap-2 bg-custom-blue/10">
-            <span class="font-bold text-custom-blue">Back to Homepage</span>
+          <RouterLink :to="{ name: 'app.home' }"
+            class="flex items-center justify-center h-12 w-full rounded-xl bg-gray-100 dark:bg-white/10 text-custom-black dark:text-white font-bold text-sm hover:bg-gray-200 dark:hover:bg-white/15 transition-colors">
+            Kembali ke Beranda
           </RouterLink>
         </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
