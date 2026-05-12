@@ -46,7 +46,7 @@ const handleSubmit = async () => {
       <img
         src="@/assets/images/logos/blukios_logo.png"
         class="h-8 lg:h-10 mx-auto mb-4 dark:brightness-0 dark:invert"
-        alt="Blue Marketplace"
+        alt="Blukios"
       />
       <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">
         Lupa Password? 🔑

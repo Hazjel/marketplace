@@ -169,7 +169,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             $transaction = new Transaction;
 
-            $transaction->code = 'BLUE' . now()->format('dmYHis') . mt_rand(10, 99);
+            $transaction->code = 'BLK' . now()->format('dmYHis') . mt_rand(10, 99);
             $transaction->buyer_id = $data['buyer_id'];
             $transaction->store_id = $data['store_id'];
             $transaction->address_id = $data['address_id'];

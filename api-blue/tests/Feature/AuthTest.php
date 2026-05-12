@@ -20,7 +20,7 @@ class AuthTest extends TestCase
         $payload = [
             'name' => 'Tester Blue',
             'username' => 'testerblue',
-            'email' => 'test@bluee.com',
+            'email' => 'test@blukios.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
             'phone_number' => '081234567890',
@@ -33,7 +33,7 @@ class AuthTest extends TestCase
         $response->assertStatus(200)
                  ->assertJsonStructure(['data' => ['token', 'id', 'name', 'email']]);
         
-        $this->assertDatabaseHas('users', ['email' => 'test@bluee.com']);
+        $this->assertDatabaseHas('users', ['email' => 'test@blukios.com']);
     }
 
     public function test_user_can_login()
@@ -42,14 +42,14 @@ class AuthTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $user = User::factory()->create([
-            'email' => 'login@bluee.com',
+            'email' => 'login@blukios.com',
             'password' => bcrypt('password123')
         ]);
         $user->guard_name = 'sanctum';
         $user->assignRole('buyer');
 
         $response = $this->postJson('/api/login', [
-            'email' => 'login@bluee.com',
+            'email' => 'login@blukios.com',
             'password' => 'password123'
         ]);
 

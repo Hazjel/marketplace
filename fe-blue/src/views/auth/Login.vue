@@ -81,7 +81,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
       <img
         src="@/assets/images/logos/blukios_logo.png"
         class="h-8 lg:h-10 mx-auto mb-4"
-        alt="Blue Marketplace"
+        alt="Blukios"
       />
       <h1 class="font-bold text-2xl lg:text-3xl text-custom-black">Welcome Back! 👋</h1>
       <p class="text-custom-grey font-medium text-sm lg:text-base">

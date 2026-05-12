@@ -5,32 +5,32 @@
    ========================================= */
 @theme {
   /* ----------------------------------
-       Semantic Palette
+       BLUKIOS BRAND PALETTE
+       Derived from: "Blue" + "Kios" (Indonesian: booth/kiosk)
+       Identity: Trusted digital marketplace, modern, approachable
        ---------------------------------- */
-  --color-primary: #0f52ba;
-  /* Main Blue */
-  --color-primary-dark: #000926;
-  /* Midnight Blue */
-  --color-primary-light: #d6e6f3;
-  /* Light Blue */
 
-  --color-secondary: #a6c5d7;
-  /* Greyish Blue */
-  --color-secondary-dark: #0f52ba;
-  /* Darker Accents */
+  /* Primary: Electric Cobalt — vibrant, tech-forward */
+  --color-primary: #2563eb;
+  --color-primary-dark: #0a1628;
+  --color-primary-light: #dbeafe;
 
+  /* Secondary: Warm Amber — contrast accent for CTAs & highlights */
+  --color-secondary: #f59e0b;
+  --color-secondary-dark: #d97706;
+
+  /* Neutral: Balanced greys for text hierarchy */
   --color-neutral: #64748b;
-  /* Keep Slate-500 for text readability if needed, or use A6C5D7 if intended */
-  --color-neutral-dark: #000926;
-  /* Main Text */
+  --color-neutral-dark: #0f172a;
+
+  /* Surfaces */
   --color-surface: #f8fafc;
-  /* White/Slate-50 */
   --color-surface-card: #ffffff;
-  --color-text-main: #000926;
+  --color-text-main: #0f172a;
   --color-text-muted: #64748b;
   --color-border: #e2e8f0;
   --color-input: #e2e8f0;
-  --color-ring: #0f52ba;
+  --color-ring: #2563eb;
 
   /* ----------------------------------
        Design System Standard Tokens
@@ -46,13 +46,13 @@
 
   --color-primary-foreground: #ffffff;
 
-  --color-secondary-foreground: var(--color-primary);
+  --color-secondary-foreground: #ffffff;
 
   --color-muted: #f1f5f9;
   --color-muted-foreground: #64748b;
 
-  --color-accent: #d6e6f3;
-  --color-accent-foreground: #0f52ba;
+  --color-accent: #dbeafe;
+  --color-accent-foreground: #1d4ed8;
 
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
@@ -60,40 +60,34 @@
   /* ----------------------------------
        Legacy / Custom Mapping
        ---------------------------------- */
-  --color-custom-black: #000926;
-  /* Mapped to Darkest */
+  --color-custom-black: #0f172a;
   --color-custom-blue: var(--color-primary);
   --color-custom-red: #ef4444;
-  /* Red-500 */
   --color-custom-grey: #64748b;
-  /* Keeping text grey readable for now, A6C5D7 might be too low contrast for small text. 
-       Use A6C5D7 for borders/icons via a new var if needed, or stick to neutral. */
-  --color-custom-stroke: #a6c5d7;
-  /* Using the Mid Blue for borders */
+  --color-custom-stroke: #cbd5e1;
 
   --color-custom-green: #10b981;
-  /* Emerald-500 */
   --color-custom-yellow: #eab308;
-  /* Yellow-500 */
-  --color-custom-orange: var(--color-secondary);
+  --color-custom-orange: #f59e0b;
 
   --color-custom-lime-green-char: #deff6e;
   --color-custom-lime-green: #84cc16;
   --color-custom-background: #f8fafc;
-  /* Keep white-ish background for content, use D6E6F3 for sections */
-  --color-custom-icon-background: #d6e6f3;
-  /* Use Light Blue for icon backgrounds */
+  --color-custom-icon-background: #dbeafe;
 
   /* ----------------------------------
        Typography
+       "Plus Jakarta Sans" — geometric, modern, friendly
+       Perfect for marketplace: readable at small sizes, 
+       bold weights have strong presence for headings
        ---------------------------------- */
-  --font-sans: 'Lexend Deca', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
   /* ----------------------------------
        Shadows & Effects
        ---------------------------------- */
-  --shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-floating: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-floating: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
 
   /* ----------------------------------
        Animations (Shadcn/Radix)
@@ -104,25 +98,21 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  /* --- Elevated Dark Mode Palette --- */
+  /* --- Blukios Dark Mode ---
+     Deep navy backgrounds, electric blue accents, high contrast */
 
-  /* Backgrounds: Slate 900/800 — cards clearly separated from bg */
+  /* Backgrounds */
   --color-surface: #0f172a;
-  /* Slate 900 - Main Background */
   --color-surface-card: #1e293b;
-  /* Slate 800 - Card Background */
 
-  /* Text: High Contrast & Legibility */
+  /* Text */
   --color-text-main: #f8fafc;
-  /* Slate 50 - Primary Text */
   --color-text-muted: #94a3b8;
-  /* Slate 400 - Muted Text */
 
-  /* Borders: More visible separation */
-  --color-border: rgba(255, 255, 255, 0.12);
-  /* White Alpha 12% */
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.1);
 
-  /* Standard Tokens Mapping */
+  /* Token Mappings */
   --color-background: var(--color-surface);
   --color-foreground: var(--color-text-main);
 
@@ -136,37 +126,26 @@
   --color-secondary-foreground: #ffffff;
 
   --color-muted: #334155;
-  /* Slate 700 */
   --color-muted-foreground: #94a3b8;
 
-  --color-accent: #334155;
-  /* Slate 700 */
+  --color-accent: #1e3a5f;
   --color-accent-foreground: #60a5fa;
-  /* Blue-400 for better contrast on Slate-700 accent bg */
 
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
 
-  --color-input: rgba(255, 255, 255, 0.12);
-  /* Matches border */
-  --color-ring: #0f52ba;
-  /* Keep Primary Blue for focus rings */
+  --color-input: rgba(255, 255, 255, 0.1);
+  --color-ring: #3b82f6;
 
   /* Custom Mappings */
-  --color-custom-black: #ffffff;
-  /* Text is white in dark mode */
+  --color-custom-black: #f8fafc;
   --color-custom-blue: #60a5fa;
-  /* Blue-400: passes WCAG AA (5.8:1 on Slate-800 card, 7.0:1 on Slate-900 bg) */
   --color-custom-background: #0f172a;
-  /* Matches surface */
-  --color-custom-icon-background: #334155;
-  /* Slate 700 */
-  --color-custom-stroke: rgba(255, 255, 255, 0.12);
-  /* Matches border */
+  --color-custom-icon-background: #1e3a5f;
+  --color-custom-stroke: rgba(255, 255, 255, 0.1);
   --color-custom-grey: #94a3b8;
-  /* Slate-400: 4.6:1 on Slate-900 bg, meets AA */
+  --color-custom-orange: #fbbf24;
 
-  /* Ring & focus also need lighter blue */
   --color-ring: #60a5fa;
 }
 
@@ -244,7 +223,11 @@ body {
 
   /* --- Visual Utilities --- */
   .blue-gradient {
-    background: linear-gradient(336.99deg, #0a3a89 0%, #1053d5 100%);
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+  }
+
+  .blukios-gradient {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #60a5fa 100%);
   }
 
   .gradient-black-transparent {
