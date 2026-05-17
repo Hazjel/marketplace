@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static const Color primaryBlue = Color(0xFF2563EB);
@@ -30,7 +31,9 @@ class AppTheme {
     ),
     scaffoldBackgroundColor: surface,
     cardColor: cardWhite,
-    fontFamily: 'PlusJakartaSans',
+    textTheme: GoogleFonts.plusJakartaSansTextTheme(
+      ThemeData.light().textTheme,
+    ),
     appBarTheme: const AppBarTheme(
       backgroundColor: cardWhite,
       foregroundColor: textPrimary,
@@ -44,7 +47,10 @@ class AppTheme {
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        textStyle: GoogleFonts.plusJakartaSans(
+          fontWeight: FontWeight.w700,
+          fontSize: 14,
+        ),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -60,7 +66,7 @@ class AppTheme {
         borderSide: const BorderSide(color: primaryBlue, width: 1.5),
       ),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: cardWhite,
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -81,7 +87,9 @@ class AppTheme {
     ),
     scaffoldBackgroundColor: darkSurface,
     cardColor: darkCard,
-    fontFamily: 'PlusJakartaSans',
+    textTheme: GoogleFonts.plusJakartaSansTextTheme(
+      ThemeData.dark().textTheme,
+    ),
     appBarTheme: const AppBarTheme(
       backgroundColor: darkCard,
       foregroundColor: darkTextPrimary,
@@ -95,7 +103,10 @@ class AppTheme {
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+        textStyle: GoogleFonts.plusJakartaSans(
+          fontWeight: FontWeight.w700,
+          fontSize: 14,
+        ),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -111,7 +122,7 @@ class AppTheme {
         borderSide: const BorderSide(color: Color(0xFF60A5FA), width: 1.5),
       ),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: darkCard,
       elevation: 0,
       shape: RoundedRectangleBorder(

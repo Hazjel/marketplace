@@ -59,7 +59,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     } on ApiException catch (e) {
-      setState(() => _errorMessage = e.message);
+      String errorMsg = e.message;
+      if (e.errors is Map) {
+        final fieldErrors = (e.errors as Map).values
+            .expand((v) => v is List ? v : [v])
+            .join('\n');
+        if (fieldErrors.isNotEmpty) errorMsg = fieldErrors;
+      }
+      setState(() => _errorMessage = errorMsg);
     } catch (e) {
       setState(() => _errorMessage = 'Terjadi kesalahan, coba lagi');
     } finally {
@@ -176,7 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Expanded(
                         child: RadioListTile<String>(
                           title: const Text('Penjual', style: TextStyle(fontSize: 14)),
-                          value: 'seller',
+                          value: 'store',
                           groupValue: _selectedRole,
                           onChanged: (v) => setState(() => _selectedRole = v!),
                           dense: true,

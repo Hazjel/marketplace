@@ -1,6 +1,12 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:blukios_marketplace/config/api_config.dart';
 import 'package:blukios_marketplace/core/network/api_client.dart';
 import 'package:blukios_marketplace/core/network/api_exceptions.dart';
+import 'package:blukios_marketplace/core/storage/secure_storage.dart';
 import 'package:blukios_marketplace/features/auth/data/auth_repository.dart';
 import 'package:blukios_marketplace/features/auth/screens/register_screen.dart';
 import 'package:blukios_marketplace/features/home/screens/home_screen.dart';
@@ -17,13 +23,60 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
 
   final _authRepository = AuthRepository(ApiClient());
+  late final AppLinks _appLinks;
+  StreamSubscription? _linkSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _appLinks = AppLinks();
+    _listenForDeepLinks();
+  }
+
+  void _listenForDeepLinks() {
+    _linkSub = _appLinks.uriLinkStream.listen((Uri uri) {
+      if (uri.scheme == 'mobileblue' && uri.host == 'callback') {
+        _handleOAuthCallback(uri);
+      }
+    });
+  }
+
+  Future<void> _handleOAuthCallback(Uri uri) async {
+    final token = uri.queryParameters['token'];
+    if (token == null || token.isEmpty) {
+      setState(() => _errorMessage = 'Login Google gagal: token tidak ditemukan');
+      setState(() => _isGoogleLoading = false);
+      return;
+    }
+
+    setState(() {
+      _isGoogleLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await SecureStorage.saveToken(token);
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      setState(() => _errorMessage = 'Gagal menyimpan sesi login');
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
 
   @override
   void dispose() {
+    _linkSub?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -57,8 +110,31 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleGoogleLogin() async {
+    setState(() {
+      _isGoogleLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final baseUrl = ApiConfig.baseUrl.replaceAll('/api', '');
+      final googleUrl = Uri.parse(
+        '$baseUrl/api/auth/google/redirect?platform=mobile',
+      );
+
+      await launchUrl(googleUrl, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Gagal membuka Google Login';
+        _isGoogleLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -92,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -120,6 +196,63 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
                   ],
+
+                  // Google Sign-In button
+                  SizedBox(
+                    height: 50,
+                    child: OutlinedButton.icon(
+                      onPressed: (_isGoogleLoading || _isLoading) ? null : _handleGoogleLogin,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: theme.dividerColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: _isGoogleLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Image.network(
+                              'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                              width: 20,
+                              height: 20,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.g_mobiledata,
+                                size: 24,
+                                color: Color(0xFF4285F4),
+                              ),
+                            ),
+                      label: const Text(
+                        'Masuk dengan Google',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Divider
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: theme.dividerColor)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'atau',
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface.withOpacity(0.4),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: theme.dividerColor)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
 
                   // Email field
                   TextFormField(
@@ -164,7 +297,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
+                      onPressed: (_isLoading || _isGoogleLoading) ? null : _handleLogin,
                       child: _isLoading
                           ? const SizedBox(
                               width: 20,
@@ -186,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Belum punya akun? ',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                       GestureDetector(

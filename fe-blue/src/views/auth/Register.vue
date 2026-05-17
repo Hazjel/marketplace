@@ -90,7 +90,7 @@ const handleSubmit = async () => {
             </svg>
           </div>
         </label>
-        <p class="text-xs text-custom-grey dark:text-gray-500 font-medium">Unggah Foto Profil</p>
+        <p class="text-xs text-custom-grey dark:text-gray-500 font-medium">Unggah Foto Profil <span class="text-gray-400">(Opsional)</span></p>
       </div>
 
       <!-- Name Field -->

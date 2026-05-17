@@ -1,5 +1,5 @@
 class TransactionModel {
-  final int id;
+  final String id;
   final String code;
   final String status;
   final int totalPrice;
@@ -25,11 +25,11 @@ class TransactionModel {
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
     return TransactionModel(
-      id: json['id'],
+      id: json['id'].toString(),
       code: json['code'] ?? '',
       status: json['status'] ?? 'pending',
-      totalPrice: json['total_price'] ?? 0,
-      shippingCost: json['shipping_cost'] ?? 0,
+      totalPrice: (json['total_price'] ?? 0) is int ? json['total_price'] ?? 0 : (json['total_price'] as num).toInt(),
+      shippingCost: (json['shipping_cost'] ?? 0) is int ? json['shipping_cost'] ?? 0 : (json['shipping_cost'] as num).toInt(),
       paymentUrl: json['payment_url'],
       shippingMethod: json['shipping_method'],
       trackingNumber: json['tracking_number'],
@@ -69,8 +69,8 @@ class TransactionModel {
 }
 
 class TransactionDetailModel {
-  final int id;
-  final int productId;
+  final String id;
+  final String productId;
   final String productName;
   final String? productThumbnail;
   final int price;
@@ -87,12 +87,12 @@ class TransactionDetailModel {
 
   factory TransactionDetailModel.fromJson(Map<String, dynamic> json) {
     return TransactionDetailModel(
-      id: json['id'],
-      productId: json['product_id'] ?? 0,
+      id: json['id'].toString(),
+      productId: (json['product_id'] ?? '').toString(),
       productName: json['product']?['name'] ?? json['product_name'] ?? '',
       productThumbnail: json['product']?['thumbnail'],
-      price: json['price'] ?? 0,
-      quantity: json['quantity'] ?? 1,
+      price: (json['price'] ?? 0) is int ? json['price'] ?? 0 : (json['price'] as num).toInt(),
+      quantity: (json['quantity'] ?? 1) is int ? json['quantity'] ?? 1 : (json['quantity'] as num).toInt(),
     );
   }
 

@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         SliverToBoxAdapter(
                           child: SizedBox(
-                            height: 100,
+                            height: 110,
                             child: ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                               scrollDirection: Axis.horizontal,
@@ -138,6 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   width: 80,
                                   margin: const EdgeInsets.symmetric(horizontal: 4),
                                   child: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Container(
                                         width: 48,
@@ -152,12 +153,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 6),
-                                      Text(
-                                        cat.name,
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 11),
+                                      Flexible(
+                                        child: Text(
+                                          cat.name,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 11),
+                                        ),
                                       ),
                                     ],
                                   ),

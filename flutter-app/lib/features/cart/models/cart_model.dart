@@ -1,6 +1,6 @@
 class CartModel {
-  final int id;
-  final int productId;
+  final String id;
+  final String productId;
   final String productName;
   final String? productThumbnail;
   final int price;
@@ -22,13 +22,13 @@ class CartModel {
   factory CartModel.fromJson(Map<String, dynamic> json) {
     final product = json['product'] ?? {};
     return CartModel(
-      id: json['id'],
-      productId: json['product_id'] ?? product['id'] ?? 0,
+      id: json['id'].toString(),
+      productId: (json['product_id'] ?? product['id'] ?? '').toString(),
       productName: product['name'] ?? '',
       productThumbnail: product['thumbnail'],
-      price: product['price'] ?? 0,
-      quantity: json['quantity'] ?? 1,
-      stock: product['stock'] ?? 0,
+      price: (product['price'] ?? 0) is int ? product['price'] ?? 0 : (product['price'] as num).toInt(),
+      quantity: (json['quantity'] ?? 1) is int ? json['quantity'] ?? 1 : (json['quantity'] as num).toInt(),
+      stock: (product['stock'] ?? 0) is int ? product['stock'] ?? 0 : (product['stock'] as num).toInt(),
       storeName: product['store']?['name'],
     );
   }

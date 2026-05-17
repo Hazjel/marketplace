@@ -19,7 +19,11 @@ class AuthRepository implements AuthRepositoryInterface
 
         try {
             $user = new User;
-            $user->profile_picture = $data['profile_picture']->store('assets/user', 'public');
+
+            if (isset($data['profile_picture'])) {
+                $user->profile_picture = $data['profile_picture']->store('assets/user', 'public');
+            }
+
             $user->name = $data['name'];
             
             // Auto-generate username
@@ -35,7 +39,8 @@ class AuthRepository implements AuthRepositoryInterface
             $user->password = bcrypt($data['password']);
             $user->save();
 
-            $user->assignRole('buyer');
+            $role = $data['role'] ?? 'buyer';
+            $user->assignRole($role);
 
             // Always create buyer profile
             $user->buyer()->create([
