@@ -31,7 +31,7 @@ class AdaptiveScaffold extends StatelessWidget {
                 onDestinationSelected: onIndexChanged,
                 labelType: NavigationRailLabelType.all,
                 backgroundColor: Theme.of(context).cardColor,
-                indicatorColor: AppTheme.primaryBlue.withOpacity(0.1),
+                indicatorColor: AppTheme.primary.withOpacity(0.1),
                 destinations: destinations
                     .map((d) => NavigationRailDestination(
                           icon: Icon(d.icon),

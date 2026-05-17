@@ -40,8 +40,8 @@ onMounted(async () => {
         const cartStore = useCartStore()
         await cartStore.syncAfterLogin()
 
-        // Redirect to dashboard normally
-        router.push({ name: 'user.dashboard', params: { username: username } })
+        // Redirect to homepage
+        router.push({ name: 'app.home' })
       }
     } catch (e) {
       console.error('Auth Check Failed', e)

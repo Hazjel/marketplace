@@ -234,7 +234,35 @@ src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" al
         <nav class="flex flex-col gap-4 animate-fade-in-up">
           <p class="font-medium text-custom-grey dark:text-gray-400">Main Menu</p>
           <ul class="flex flex-col gap-2">
-            <SidebarItem v-for="(item, index) in items" :key="index" :item="item" />
+          <SidebarItem v-for="(item, index) in items" :key="index" :item="item" />
+          </ul>
+        </nav>
+
+        <!-- Settings Section (non-admin only) -->
+        <nav v-if="user?.role !== 'admin'" class="flex flex-col gap-4 animate-fade-in-up">
+          <p class="font-medium text-custom-grey dark:text-gray-400">Settings</p>
+          <ul class="flex flex-col gap-2">
+            <SidebarItem :item="{
+              label: 'Edit Profil',
+              path: `${prefix}/edit-profile`,
+              iconDefault: LocationGreyIcon,
+              iconActive: LocationGreyIcon,
+              permission: 'dashboard-menu'
+            }" />
+            <SidebarItem :item="{
+              label: 'Notifikasi',
+              path: `${prefix}/settings/notifications`,
+              iconDefault: LocationGreyIcon,
+              iconActive: LocationGreyIcon,
+              permission: 'dashboard-menu'
+            }" />
+            <SidebarItem :item="{
+              label: 'Privasi',
+              path: `${prefix}/settings/privacy`,
+              iconDefault: LocationGreyIcon,
+              iconActive: LocationGreyIcon,
+              permission: 'dashboard-menu'
+            }" />
           </ul>
         </nav>
       </div>
@@ -248,9 +276,7 @@ src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" al
             <button
               class="flex items-center gap-3 px-4 py-3 rounded-[10px] w-full transition-all duration-300 hover:bg-custom-background dark:hover:bg-white/5"
               @click="handleLogout">
-              <img
-src="@/assets/images/icons/logout.svg" class="size-6 text-custom-red svg-red filter-red"
-                alt="icon" />
+              <img src="@/assets/images/icons/logout.svg" class="size-6 text-custom-red svg-red filter-red" alt="icon" />
               <span class="font-medium text-custom-red">Logout</span>
             </button>
           </li>
