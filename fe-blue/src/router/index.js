@@ -570,6 +570,24 @@ const router = createRouter({
           meta: { title: 'Edit Address', requiresAuth: true }
         },
         {
+          path: 'settings/notifications',
+          name: 'user.settings.notifications',
+          component: () => import('@/views/user/settings/NotificationSettings.vue'),
+          meta: { title: 'Notifikasi', requiresAuth: true }
+        },
+        {
+          path: 'settings/privacy',
+          name: 'user.settings.privacy',
+          component: () => import('@/views/user/settings/PrivacySettings.vue'),
+          meta: { title: 'Privasi', requiresAuth: true }
+        },
+        {
+          path: 'settings/delete-account',
+          name: 'user.settings.delete-account',
+          component: () => import('@/views/user/settings/DeleteAccount.vue'),
+          meta: { title: 'Hapus Akun', requiresAuth: true }
+        },
+        {
           path: 'store/:id',
           name: 'user.store.detail',
           component: StoreDetail,

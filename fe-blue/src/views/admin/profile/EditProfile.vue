@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
 
 import { axiosInstance as axios } from '@/plugins/axios'
 
@@ -12,6 +13,8 @@ const { checkAuth } = authStore
 const isLoading = ref(false)
 const errors = ref({})
 const successMessage = ref(null)
+const showProfileAlert = ref(false)
+const route = useRoute()
 
 const fileInput = ref(null)
 const previewImage = ref(null)
@@ -47,6 +50,11 @@ onMounted(async () => {
     await checkAuth()
   }
   populateForm()
+
+  // Show alert if redirected from Google OAuth with incomplete profile
+  if (route.query.alert === 'complete_profile') {
+    showProfileAlert.value = true
+  }
 })
 
 watch(user, () => {
@@ -99,7 +107,7 @@ const handleSubmit = async () => {
       }
     })
 
-    successMessage.value = 'Profile updated successfully'
+    successMessage.value = 'Profil berhasil diperbarui!'
 
     // Refresh auth user data
     await checkAuth()
@@ -136,6 +144,36 @@ const handleSubmit = async () => {
       <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">Profil Saya</h1>
       <p class="text-custom-grey dark:text-gray-400 font-medium">Kelola informasi profil dan keamanan akunmu.</p>
     </div>
+
+    <!-- Complete Profile Alert (Google OAuth redirect) -->
+    <Transition
+      enter-active-class="transition-all duration-500 ease-out"
+      enter-from-class="opacity-0 -translate-y-2 scale-95"
+      enter-to-class="opacity-100 translate-y-0 scale-100"
+      leave-active-class="transition-all duration-300 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div
+        v-if="showProfileAlert"
+        class="flex items-start gap-4 p-5 rounded-2xl bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/40"
+      >
+        <div class="shrink-0 w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+          <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="font-bold text-amber-800 dark:text-amber-300 text-sm">Lengkapi Profil Kamu</p>
+          <p class="text-amber-700 dark:text-amber-400/80 text-sm mt-1">Kamu baru saja login via Google. Silakan lengkapi nomor telepon untuk pengalaman belanja yang lebih baik.</p>
+        </div>
+        <button @click="showProfileAlert = false" class="shrink-0 p-1 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </Transition>
 
     <!-- Profile Card -->
     <div class="flex flex-col w-full bg-white dark:bg-white/[0.02] rounded-2xl p-6 md:p-8 border border-gray-100 dark:border-white/10 shadow-sm gap-8">
@@ -221,6 +259,33 @@ const handleSubmit = async () => {
             />
           </div>
           <span v-if="errors.name" class="text-red-500 dark:text-red-400 text-xs font-medium ml-2">{{ errors.name[0] }}</span>
+        </div>
+
+        <!-- Email (Read-only) -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Email</label>
+          <div class="group relative">
+            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <svg class="size-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <input
+              :value="user?.email"
+              type="email"
+              readonly
+              disabled
+              class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-full font-medium text-gray-500 dark:text-gray-400 cursor-not-allowed"
+            />
+            <div v-if="user?.email_verified_at" class="absolute inset-y-0 right-4 flex items-center">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold rounded-full">
+                <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+                Terverifikasi
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Phone Number -->
