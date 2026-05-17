@@ -14,3 +14,6 @@ CLAUDE.md
 .agents/
 start-all.ps1
 ai-service/venv/
+
+# Environment secrets
+.env

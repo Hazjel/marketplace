@@ -1,5 +1,5 @@
 class CategoryModel {
-  final int id;
+  final String id;
   final String name;
   final String slug;
   final String? image;
@@ -15,11 +15,11 @@ class CategoryModel {
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      id: json['id'],
+      id: json['id'].toString(),
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
       image: json['image'],
-      productCount: json['product_count'] ?? 0,
+      productCount: (json['product_count'] ?? 0) is int ? json['product_count'] ?? 0 : (json['product_count'] as num).toInt(),
     );
   }
 }

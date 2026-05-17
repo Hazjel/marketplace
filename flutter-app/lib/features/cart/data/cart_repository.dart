@@ -13,20 +13,20 @@ class CartRepository {
     return data.map((e) => CartModel.fromJson(e)).toList();
   }
 
-  Future<void> addToCart({required int productId, int quantity = 1}) async {
+  Future<void> addToCart({required String productId, int quantity = 1}) async {
     await _apiClient.post(ApiConfig.cart, data: {
       'product_id': productId,
       'quantity': quantity,
     });
   }
 
-  Future<void> updateQuantity({required int cartId, required int quantity}) async {
+  Future<void> updateQuantity({required String cartId, required int quantity}) async {
     await _apiClient.put('${ApiConfig.cart}/$cartId', data: {
       'quantity': quantity,
     });
   }
 
-  Future<void> removeFromCart(int cartId) async {
+  Future<void> removeFromCart(String cartId) async {
     await _apiClient.delete('${ApiConfig.cart}/$cartId');
   }
 

@@ -1,5 +1,5 @@
 class ProductModel {
-  final int id;
+  final String id;
   final String name;
   final String slug;
   final String? description;
@@ -27,23 +27,23 @@ class ProductModel {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json['id'],
+      id: json['id'].toString(),
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
       description: json['description'],
-      price: json['price'] ?? 0,
-      stock: json['stock'] ?? 0,
+      price: (json['price'] ?? 0) is int ? json['price'] : (json['price'] as num).toInt(),
+      stock: (json['stock'] ?? 0) is int ? json['stock'] : (json['stock'] as num).toInt(),
       weight: (json['weight'] ?? 0).toDouble(),
       condition: json['condition'] ?? 'new',
       thumbnail: json['thumbnail'],
-      totalSold: json['total_sold'] ?? 0,
+      totalSold: (json['total_sold'] ?? 0) is int ? json['total_sold'] ?? 0 : (json['total_sold'] as num).toInt(),
       store: json['store'] != null ? StoreMini.fromJson(json['store']) : null,
     );
   }
 }
 
 class StoreMini {
-  final int id;
+  final String id;
   final String name;
   final String? logo;
 
@@ -51,7 +51,7 @@ class StoreMini {
 
   factory StoreMini.fromJson(Map<String, dynamic> json) {
     return StoreMini(
-      id: json['id'],
+      id: json['id'].toString(),
       name: json['name'] ?? '',
       logo: json['logo'],
     );
