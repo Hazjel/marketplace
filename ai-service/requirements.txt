@@ -3,3 +3,6 @@ uvicorn
 python-dotenv
 httpx
 prometheus-client
+slowapi
+redis>=4.2.0
+chromadb>=0.5.0
