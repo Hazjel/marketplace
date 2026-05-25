@@ -217,6 +217,7 @@ services:
     volumes:
       - ./ai-service:/app
       - chroma_data:/app/chroma_db        # RAG vector index
+      - chroma_cache:/root/.cache/chroma  # ONNX model cache — hindari re-download 79MB
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_MODEL: qwen3:1.7b
@@ -281,5 +282,6 @@ volumes:
   grafana:
   prometheus_data:   # Prometheus histori metrics
   chroma_data:       # ChromaDB RAG vector index
+  chroma_cache:      # ONNX model all-MiniLM-L6-v2 cache (79MB)
   api_vendor:
   fe_node_modules:
