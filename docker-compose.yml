@@ -127,6 +127,8 @@ services:
     restart: unless-stopped
     depends_on:
       - api
+    ports:
+      - "80:80"
     volumes:
       - ./api-blue:/var/www
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -205,17 +207,28 @@ services:
     container_name: blue-ai
     restart: unless-stopped
     depends_on:
-      - ollama
-    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+      ollama:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload --reload-delay 1
     ports:
       - "8001:8001"
     volumes:
       - ./ai-service:/app
+      - chroma_data:/app/chroma_db        # RAG vector index
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_MODEL: qwen3:1.7b
       OLLAMA_TIMEOUT_S: 180
+      OLLAMA_MAX_RETRIES: 1
       LARAVEL_API_URL: http://nginx:80
+      # Allow requests from frontend container
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+      RATE_LIMIT_PER_MINUTE: 20
+      SESSION_TTL_MINUTES: 60
+      # Tier 3 — Redis persistent session
+      REDIS_URL: redis://redis:6379/0
 
   # ─────────────────────────────────────────
   # Monitoring (optional profile)
@@ -224,10 +237,14 @@ services:
     image: prom/prometheus:latest
     container_name: blue-prometheus
     profiles: ["monitoring"]
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"   # simpan 15 hari histori
     ports:
       - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus               # persist data antar restart
     depends_on:
       - ai-service
 
@@ -262,5 +279,7 @@ volumes:
   mongo_data:
   ollama:
   grafana:
+  prometheus_data:   # Prometheus histori metrics
+  chroma_data:       # ChromaDB RAG vector index
   api_vendor:
   fe_node_modules:

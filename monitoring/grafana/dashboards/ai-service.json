@@ -16,7 +16,7 @@
       "type": "stat",
       "title": "Total Requests",
       "id": 1,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
@@ -44,12 +44,12 @@
       "type": "stat",
       "title": "Avg Response Time",
       "id": 7,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
           "refId": "A",
-          "expr": "rate(http_request_duration_seconds_sum{endpoint=\"/predict\"}[5m]) / rate(http_request_duration_seconds_count{endpoint=\"/predict\"}[5m])"
+          "expr": "sum(rate(http_request_duration_seconds_sum{endpoint=~\"/predict.*\"}[5m])) / sum(rate(http_request_duration_seconds_count{endpoint=~\"/predict.*\"}[5m]))"
         }
       ],
       "options": {
@@ -74,12 +74,12 @@
       "type": "stat",
       "title": "Error Rate (5xx)",
       "id": 8,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100"
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100 or vector(0)"
         }
       ],
       "options": {
@@ -90,6 +90,10 @@
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
+          "noValue": "0",
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "0%", "color": "green" } } }
+          ],
           "thresholds": {
             "steps": [
               { "color": "green", "value": null },
@@ -104,7 +108,7 @@
       "type": "stat",
       "title": "Active Req/s",
       "id": 9,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
@@ -133,7 +137,7 @@
       "type": "timeseries",
       "title": "Request Rate (req/s) by Endpoint",
       "id": 2,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
@@ -147,7 +151,7 @@
       "type": "timeseries",
       "title": "Requests by Status Code",
       "id": 3,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
@@ -161,7 +165,7 @@
       "type": "timeseries",
       "title": "Latency p95 by Endpoint (s)",
       "id": 4,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
       "targets": [
         {
@@ -178,7 +182,7 @@
       "type": "timeseries",
       "title": "Latency p99 by Endpoint (s)",
       "id": 5,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
       "targets": [
         {
@@ -195,7 +199,7 @@
       "type": "timeseries",
       "title": "Requests by Endpoint (cumulative)",
       "id": 6,
-      "datasource": "Prometheus",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "gridPos": { "x": 0, "y": 20, "w": 24, "h": 8 },
       "targets": [
         {
@@ -204,6 +208,126 @@
           "legendFormat": "{{endpoint}}"
         }
       ]
+    },
+    {
+      "type": "row",
+      "title": "RAG & Feedback Evaluation",
+      "id": 20,
+      "gridPos": { "x": 0, "y": 28, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "RAG Products Indexed",
+      "id": 10,
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": { "x": 0, "y": 29, "w": 6, "h": 4 },
+      "targets": [{ "refId": "A", "expr": "rag_products_indexed" }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "RAG Hit Rate",
+      "id": 11,
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": { "x": 6, "y": 29, "w": 6, "h": 4 },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(rate(rag_search_hits_total[5m])) / (sum(rate(rag_search_hits_total[5m])) + sum(rate(rag_search_misses_total[5m]))) * 100 or vector(0)"
+      }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "noValue": "0",
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 30 }, { "color": "green", "value": 60 }] }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Avg Feedback Rating",
+      "id": 12,
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": { "x": 12, "y": 29, "w": 6, "h": 4 },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(chatbot_feedback_rating_sum) / sum(chatbot_feedback_rating_count) or vector(0)"
+      }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "N/A",
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 3 }, { "color": "green", "value": 4 }] }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Total Feedbacks",
+      "id": 13,
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": { "x": 18, "y": 29, "w": 6, "h": 4 },
+      "targets": [{ "refId": "A", "expr": "sum(chatbot_feedback_total) or vector(0)" }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "thresholds": { "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "RAG Search: Hits vs Misses",
+      "id": 14,
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": { "x": 0, "y": 33, "w": 12, "h": 8 },
+      "targets": [
+        { "refId": "A", "expr": "rate(rag_search_hits_total[5m])",   "legendFormat": "Hits (produk ditemukan)" },
+        { "refId": "B", "expr": "rate(rag_search_misses_total[5m])", "legendFormat": "Misses (pertanyaan umum)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Avg Feedback Rating Over Time",
+      "id": 15,
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": { "x": 12, "y": 33, "w": 12, "h": 8 },
+      "targets": [{
+        "refId": "A",
+        "expr": "sum(chatbot_feedback_rating_sum) / sum(chatbot_feedback_rating_count)",
+        "legendFormat": "Avg Rating"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "min": 1, "max": 5,
+          "unit": "short",
+          "thresholds": { "steps": [{ "color": "red", "value": 1 }, { "color": "yellow", "value": 3 }, { "color": "green", "value": 4 }] }
+        }
+      }
     }
   ]
 }
