@@ -58,12 +58,35 @@ _SESSION_KEY  = "chat:session:"
 _LLM_CACHE_KEY = "chat:llmcache:"
 _FEEDBACK_KEY = "chat:feedback:"
 
-# Kata kunci yang menandakan query NON-PRODUK (skip RAG, jawab langsung)
-_INTENT_GENERAL_PATTERNS = re.compile(
-    r"^(halo|hai|hi|hey|selamat|pagi|siang|malam|sore|apa kabar|makasih|terima kasih"
-    r"|thanks|oke|ok|baik|siap|mantap|keren|lanjut|done|selesai)[\s!?.]*$",
+# Layer 1: Sapaan/closing eksplisit — match exact, langsung skip RAG
+_GREETING_PATTERN = re.compile(
+    r"^(halo|hai|hi|hey|hello|selamat|pagi|siang|malam|sore|apa kabar|makasih|terima kasih"
+    r"|thanks|thank you|oke|ok|baik|siap|mantap|keren|lanjut|done|selesai|noted|sip)[\s!?.]*$",
     re.IGNORECASE,
 )
+
+# Layer 2: Token-based product intent scoring
+# Jika query mengandung >= 1 kata ini, PASTI butuh RAG
+_PRODUCT_INTENT_TOKENS = {
+    # Aksi belanja
+    "beli", "pesan", "order", "bayar", "checkout", "keranjang", "cart",
+    # Atribut produk
+    "harga", "price", "diskon", "promo", "murah", "mahal", "stok", "stock",
+    "spesifikasi", "spek", "spec", "garansi", "warranty",
+    # Query produk
+    "produk", "barang", "item", "cari", "rekomendasi", "saran", "pilih",
+    "laptop", "hp", "handphone", "smartphone", "tablet", "headset", "earphone",
+    "mouse", "keyboard", "monitor", "kamera", "camera", "charger", "kabel",
+    "gaming", "wireless", "bluetooth", "ram", "ssd", "processor", "gpu",
+    # Toko & pengiriman
+    "toko", "seller", "pengiriman", "ongkir", "kirim", "ekspedisi",
+    # Kondisi
+    "baru", "bekas", "second", "refurbished",
+    # Brand umum (lowercase)
+    "asus", "samsung", "apple", "xiaomi", "oppo", "vivo", "realme",
+    "logitech", "sony", "jbl", "anker", "baseus", "razer", "acer", "lenovo",
+    "lg", "huawei", "nokia", "google", "dell", "hp", "msi", "corsair",
+}
 
 # ---------------------------------------------------------------------------
 # REDIS
@@ -125,8 +148,30 @@ async def set_llm_cache(cache_key: str, response: str) -> None:
 
 
 def _is_general_query(msg: str) -> bool:
-    """Deteksi apakah query adalah sapaan/chat umum yang tidak butuh RAG product search."""
-    return bool(_INTENT_GENERAL_PATTERNS.match(msg.strip()))
+    """
+    Dua lapis intent detection:
+    1. Regex layer: tangkap sapaan/closing eksplisit secara exact
+    2. Token scoring: jika tidak ada satu pun product-intent token → skip RAG
+
+    Contoh skip RAG:
+      'halo!'              → layer 1 match
+      'apakah blukios aman?' → layer 2: tidak ada token produk
+      'bagaimana cara pembayaran?' → layer 2: tidak ada token produk
+
+    Contoh TIDAK skip (tetap jalankan RAG):
+      'cari laptop gaming'  → layer 2: ada 'cari', 'laptop', 'gaming'
+      'harga ASUS ROG berapa?' → layer 2: ada 'harga', 'asus'
+    """
+    msg_clean = msg.strip()
+
+    # Layer 1: sapaan eksplisit (paling cepat)
+    if _GREETING_PATTERN.match(msg_clean):
+        return True
+
+    # Layer 2: tidak ada product-intent token sama sekali → general query
+    tokens = set(re.sub(r"[^\w\s]", "", msg_clean.lower()).split())
+    has_product_intent = bool(tokens & _PRODUCT_INTENT_TOKENS)
+    return not has_product_intent
 
 
 def _make_cache_key(msg: str, session_id: str) -> str:
