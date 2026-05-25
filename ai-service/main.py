@@ -1,4 +1,5 @@
 import os
+import re
 import asyncio
 import json
 import time
@@ -51,9 +52,18 @@ RAG_SIMILARITY_THRESHOLD = float(os.getenv("RAG_SIMILARITY_THRESHOLD", "0.55"))
 RAG_TOP_K               = int(os.getenv("RAG_TOP_K", "5"))
 RAG_REFRESH_HOURS       = int(os.getenv("RAG_REFRESH_HOURS", "2"))
 
-MAX_HISTORY_MESSAGES = 10
+MAX_HISTORY_MESSAGES  = 20          # sliding window — 20 messages = 10 turn
+LLM_CACHE_TTL_SECONDS = 300         # cache response LLM selama 5 menit
 _SESSION_KEY  = "chat:session:"
+_LLM_CACHE_KEY = "chat:llmcache:"
 _FEEDBACK_KEY = "chat:feedback:"
+
+# Kata kunci yang menandakan query NON-PRODUK (skip RAG, jawab langsung)
+_INTENT_GENERAL_PATTERNS = re.compile(
+    r"^(halo|hai|hi|hey|selamat|pagi|siang|malam|sore|apa kabar|makasih|terima kasih"
+    r"|thanks|oke|ok|baik|siap|mantap|keren|lanjut|done|selesai)[\s!?.]*$",
+    re.IGNORECASE,
+)
 
 # ---------------------------------------------------------------------------
 # REDIS
@@ -70,7 +80,9 @@ def _get_redis() -> aioredis.Redis:
 async def get_session_history(session_id: str) -> list[dict]:
     try:
         raw = await _get_redis().get(f"{_SESSION_KEY}{session_id}")
-        return json.loads(raw) if raw else []
+        history: list[dict] = json.loads(raw) if raw else []
+        # Sliding window — jaga maksimum MAX_HISTORY_MESSAGES pesan
+        return history[-MAX_HISTORY_MESSAGES:] if len(history) > MAX_HISTORY_MESSAGES else history
     except Exception as e:
         print(f"[Redis] get error: {e}")
         return []
@@ -78,17 +90,51 @@ async def get_session_history(session_id: str) -> list[dict]:
 
 async def append_session_history(session_id: str, user_msg: str, reply: str) -> None:
     try:
-        r = _get_redis()
+        r   = _get_redis()
         key = f"{_SESSION_KEY}{session_id}"
         raw = await r.get(key)
         history: list[dict] = json.loads(raw) if raw else []
         history.append({"role": "user",      "content": user_msg})
         history.append({"role": "assistant", "content": reply})
+        # Trim ke sliding window sebelum simpan
         if len(history) > MAX_HISTORY_MESSAGES:
             history = history[-MAX_HISTORY_MESSAGES:]
         await r.setex(key, SESSION_TTL_SECONDS, json.dumps(history, ensure_ascii=False))
     except Exception as e:
         print(f"[Redis] append error: {e}")
+
+
+async def get_llm_cache(cache_key: str) -> str | None:
+    """Ambil response LLM dari Redis cache jika ada."""
+    try:
+        return await _get_redis().get(f"{_LLM_CACHE_KEY}{cache_key}")
+    except Exception:
+        return None
+
+
+async def set_llm_cache(cache_key: str, response: str) -> None:
+    """Simpan response LLM ke Redis cache dengan TTL 5 menit."""
+    try:
+        await _get_redis().setex(
+            f"{_LLM_CACHE_KEY}{cache_key}",
+            LLM_CACHE_TTL_SECONDS,
+            response,
+        )
+    except Exception as e:
+        print(f"[Cache] set error: {e}")
+
+
+def _is_general_query(msg: str) -> bool:
+    """Deteksi apakah query adalah sapaan/chat umum yang tidak butuh RAG product search."""
+    return bool(_INTENT_GENERAL_PATTERNS.match(msg.strip()))
+
+
+def _make_cache_key(msg: str, session_id: str) -> str:
+    """Buat cache key unik berdasarkan pesan + session (untuk isolasi per user)."""
+    import hashlib
+    payload = f"{session_id}:{msg.lower().strip()}"
+    return hashlib.sha256(payload.encode()).hexdigest()[:24]
+
 
 
 # ---------------------------------------------------------------------------
@@ -209,10 +255,9 @@ class ProductVectorStore:
             "please", "show", "find", "search", "get", "list",
         }
         # Strip tanda baca, ambil token >= 3 karakter, bukan stopword, bukan pure digit
-        import re as _re
         clean_tokens: list[str] = []
         for raw in query.split():
-            t = _re.sub(r"[^\w]", "", raw)        # hapus semua non-alphanumeric
+            t = re.sub(r"[^\w]", "", raw)        # hapus semua non-alphanumeric
             if len(t) >= 3 and t.lower() not in stopwords and not t.isdigit():
                 clean_tokens.append(t)
 
@@ -229,6 +274,7 @@ class ProductVectorStore:
                     None,
                     lambda t=token: self._collection.get(
                         where_document={"$contains": t},
+                        limit=n_results,          # ← TIER 1 FIX: batasi hasil per token
                         include=["metadatas"],
                     ),
                 )
@@ -317,7 +363,7 @@ async def lifespan(application: FastAPI):
     # Redis
     _redis = aioredis.from_url(REDIS_URL, decode_responses=True)
     try:
-        await _redis.ping()
+        await _redis.ping()  # type: ignore[misc]  # redis-py 7.x stubs incorrectly typed
         print(f"[Startup] Redis connected: {REDIS_URL}")
     except Exception as e:
         print(f"[Startup] WARNING: Redis tidak bisa dikoneksi: {e}")
@@ -529,20 +575,26 @@ def _build_product_context(products: list[dict]) -> str:
 async def _prepare_context(session_id: str, user_msg: str) -> tuple[list[dict], list[dict]]:
     """
     Hybrid RAG + session history — dijalankan PARALEL via asyncio.gather.
-    1. Semantic search: temukan produk berdasarkan makna (vector similarity)
-    2. Keyword search: temukan produk berdasarkan nama/merek (substring match)
-    3. Merge kedua hasil — keyword hits diprioritaskan
-    4. Ambil history percakapan (Redis)
+    1. Intent detection: skip RAG jika query adalah sapaan/chat umum
+    2. Semantic search: temukan produk berdasarkan makna (vector similarity)
+    3. Keyword search: temukan produk berdasarkan nama/merek (substring match)
+    4. Merge kedua hasil — keyword hits diprioritaskan
+    5. Ambil history percakapan (Redis)
     """
     async def _empty() -> list[dict]:
         return []
 
-    if _vector_store:
+    # Tier 2: Intent detection — skip RAG untuk sapaan/query umum
+    is_general = _is_general_query(user_msg)
+
+    if _vector_store and not is_general:
         semantic_task = _vector_store.search(user_msg)
         keyword_task  = _vector_store.keyword_search(user_msg)
     else:
         semantic_task = _empty()
         keyword_task  = _empty()
+        if is_general:
+            print(f"[RAG] Skipping product search — detected general query: '{user_msg[:40]}'")
 
     semantic_results, keyword_results, history = await asyncio.gather(
         semantic_task, keyword_task, get_session_history(session_id)
@@ -604,7 +656,17 @@ async def predict_response(request: Request, body: ChatRequest) -> ChatResponse:
 
     try:
         found_products, messages = await _prepare_context(session_id, body.message)
-        reply_text = await _ollama_chat(messages, temperature=0.7)
+
+        # Tier 2: LLM Cache — cek Redis sebelum hit Ollama
+        cache_key  = _make_cache_key(body.message, session_id)
+        cached_reply = await get_llm_cache(cache_key)
+        if cached_reply:
+            print(f"[Cache] HIT session={session_id}")
+            reply_text = cached_reply
+        else:
+            reply_text = await _ollama_chat(messages, temperature=0.7)
+            await set_llm_cache(cache_key, reply_text)
+
         await append_session_history(session_id, body.message, reply_text)
     except Exception as e:
         reply_text = "Duh, Ri lagi pusing nih karena ada error di server, coba tanya lagi nanti ya~"
@@ -639,6 +701,23 @@ async def predict_stream(request: Request, body: ChatRequest) -> StreamingRespon
         try:
             found_products, messages = await _prepare_context(session_id, body.message)
 
+            # Tier 2: LLM Cache — jika cache hit, stream kata per kata tanpa hit Ollama
+            cache_key    = _make_cache_key(body.message, session_id)
+            cached_reply = await get_llm_cache(cache_key)
+            if cached_reply:
+                print(f"[Cache] STREAM HIT session={session_id}")
+                # Simulasi streaming dari cache — kirim token per ~5 kata
+                words = cached_reply.split()
+                chunk_size = 5
+                for i in range(0, len(words), chunk_size):
+                    token = " ".join(words[i:i + chunk_size]) + (" " if i + chunk_size < len(words) else "")
+                    yield f"data: {json.dumps({'token': token, 'done': False, 'session_id': session_id})}\n\n"
+                # Done event dengan products
+                clean = [{k: v for k, v in p.items() if k != "_sim"} for p in found_products]
+                yield f"data: {json.dumps({'token': '', 'done': True, 'session_id': session_id, 'products': clean})}\n\n"
+                return
+
+            # Cache miss — stream dari Ollama
             async for token, done in _ollama_stream(messages, temperature=0.7):
                 if token:
                     full_reply_parts.append(token)
@@ -663,6 +742,8 @@ async def predict_stream(request: Request, body: ChatRequest) -> StreamingRespon
                         {"token": "", "done": True, "session_id": session_id, "products": clean},
                         ensure_ascii=False,
                     )
+                    # Simpan ke cache setelah stream selesai
+                    await set_llm_cache(cache_key, "".join(full_reply_parts))
                     yield f"data: {event_data}\n\n"
                     break
                 elif token:
