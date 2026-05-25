@@ -202,64 +202,74 @@ def _rewrite_query(query: str) -> str:
     return " ".join(tokens) if tokens else query
 
 
-def _extract_price_filter(query: str) -> dict | None:
-    """
-    Ekstrak filter harga dari natural language → ChromaDB where clause.
+# Mapping natural language → nama kategori di database
+_CATEGORY_MAP: dict[str, str] = {
+    "laptop": "Laptop",     "notebook": "Laptop",     "komputer": "Laptop",
+    "smartphone": "Smartphone", "handphone": "Smartphone", "ponsel": "Smartphone",
+    "headset": "Aksesoris gadget", "earphone": "Aksesoris gadget", "tws": "Aksesoris gadget",
+    "mouse": "Aksesoris gadget", "keyboard": "Aksesoris gadget",
+    "monitor": "Aksesoris gadget", "aksesoris": "Aksesoris gadget",
+    "smartwatch": "Aksesoris gadget", "wearable": "Aksesoris gadget",
+    "elektronik": "Elektronik",  "electronic": "Elektronik",
+    "skincare": "Skincare",      "perawatan": "Skincare",
+}
 
-    Pattern yang didukung:
-      'di bawah 5 juta'       → {"price": {"$lte": 5000000}}
-      'kurang dari 500 ribu'  → {"price": {"$lte": 500000}}
-      'di atas 2 juta'        → {"price": {"$gte": 2000000}}
-      '2-5 juta'              → {$and: [{$gte: 2jt}, {$lte: 5jt}]}
-      'sekitar 1 juta'        → ±20% range
+
+def _extract_metadata_filters(query: str) -> dict | None:
     """
-    q = query.lower()
+    Ekstrak semua filter metadata dari natural language → ChromaDB where clause.
+    Menggabungkan: price + condition + category dalam satu $and clause.
+
+    'laptop bekas di bawah 5 juta'
+      → {"$and": [{"price": {"$lte": 5000000}}, {"condition": {"$eq": "second"}}, {"category": {"$eq": "Laptop"}}]}
+    """
+    q       = query.lower()
+    clauses: list[dict] = []
 
     def _to_rupiah(value: str, unit: str) -> int:
         v = float(value.replace(",", "."))
-        if "juta" in unit:
-            return int(v * 1_000_000)
-        if any(u in unit for u in ("ribu", "rb", "k")):
-            return int(v * 1_000)
+        if "juta" in unit:    return int(v * 1_000_000)
+        if any(u in unit for u in ("ribu", "rb", "k")): return int(v * 1_000)
         return int(v)
 
-    # Bawah / kurang dari
-    m = re.search(
-        r"(?:di bawah|kurang dari|max|maksimal|under)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?",
-        q,
-    )
-    if m:
-        return {"price": {"$lte": _to_rupiah(m.group(1), m.group(2) or "juta")}}
+    # Price — bawah/kurang
+    m = re.search(r"(?:di bawah|kurang dari|max|maksimal|under)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?", q)
+    if m: clauses.append({"price": {"$lte": _to_rupiah(m.group(1), m.group(2) or "juta")}})
 
-    # Atas / lebih dari
-    m = re.search(
-        r"(?:di atas|lebih dari|min|minimal|above|over)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?",
-        q,
-    )
-    if m:
-        return {"price": {"$gte": _to_rupiah(m.group(1), m.group(2) or "juta")}}
+    # Price — atas/lebih
+    m = re.search(r"(?:di atas|lebih dari|min|minimal|above|over)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?", q)
+    if m: clauses.append({"price": {"$gte": _to_rupiah(m.group(1), m.group(2) or "juta")}})
 
-    # Range: X-Y juta / X sampai Y juta
-    m = re.search(
-        r"(\d+(?:[.,]\d+)?)\s*(?:-|sampai|hingga|s/d)\s*(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?",
-        q,
-    )
+    # Price — range X-Y
+    m = re.search(r"(\d+(?:[.,]\d+)?)\s*(?:-|sampai|hingga|s/d)\s*(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?", q)
     if m:
         unit = m.group(3) or "juta"
-        lo   = _to_rupiah(m.group(1), unit)
-        hi   = _to_rupiah(m.group(2), unit)
-        return {"$and": [{"price": {"$gte": lo}}, {"price": {"$lte": hi}}]}
+        clauses.append({"price": {"$gte": _to_rupiah(m.group(1), unit)}})
+        clauses.append({"price": {"$lte": _to_rupiah(m.group(2), unit)}})
 
-    # Sekitar / around (±20%)
-    m = re.search(
-        r"(?:sekitar|around|kira-kira|kisaran)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?",
-        q,
-    )
+    # Price — sekitar (±20%)
+    m = re.search(r"(?:sekitar|around|kira-kira|kisaran)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?", q)
     if m:
         mid = _to_rupiah(m.group(1), m.group(2) or "juta")
-        return {"$and": [{"price": {"$gte": int(mid * 0.8)}}, {"price": {"$lte": int(mid * 1.2)}}]}
+        clauses.append({"price": {"$gte": int(mid * 0.8)}})
+        clauses.append({"price": {"$lte": int(mid * 1.2)}})
 
-    return None
+    # Condition filter
+    if re.search(r"\b(bekas|second|seken|eks|refurbished)\b", q):
+        clauses.append({"condition": {"$eq": "second"}})
+    elif re.search(r"\b(baru|new|brand new)\b", q):
+        clauses.append({"condition": {"$eq": "new"}})
+
+    # Category filter
+    for keyword, category in _CATEGORY_MAP.items():
+        if keyword in q:
+            clauses.append({"category": {"$eq": category}})
+            break
+
+    if not clauses:    return None
+    if len(clauses) == 1: return clauses[0]
+    return {"$and": clauses}
+
 
 
 def _make_cache_key(msg: str, session_id: str) -> str:
@@ -286,14 +296,35 @@ class ProductVectorStore:
             metadata={"hnsw:space": "cosine"},
         )
 
+    # Brand keywords yang perlu di-boost dalam embedding
+    _KNOWN_BRANDS: frozenset[str] = frozenset({
+        "asus", "samsung", "apple", "xiaomi", "oppo", "vivo", "realme",
+        "logitech", "sony", "jbl", "anker", "baseus", "razer", "acer",
+        "lenovo", "lg", "huawei", "nokia", "dell", "msi", "corsair",
+        "keychron", "rexus", "sennheiser", "bose", "nintendo", "cosrx",
+    })
+
     @staticmethod
     def _product_to_text(p: dict) -> str:
-        parts = [
-            p.get("name", ""),
-            p.get("category", ""),
-            str(p.get("description", ""))[:300],
-            f"kondisi {p.get('condition', '')}",
-        ]
+        """
+        Bangun teks representasi produk untuk embedding.
+        Brand name di-boost dengan pengulangan agar similarity lebih kuat.
+        """
+        name     = p.get("name", "")
+        category = p.get("category", "")
+        desc     = str(p.get("description", ""))[:300]
+        condition = p.get("condition", "")
+
+        # Ekstrak brand dari kata pertama nama produk (jika dikenal atau huruf besar)
+        first_word = name.split()[0] if name.split() else ""
+        is_brand   = (
+            first_word.lower() in ProductVectorStore._KNOWN_BRANDS
+            or (len(first_word) >= 2 and first_word.isupper())
+        )
+        # Brand boost: ulangi nama lengkap sekali lagi agar bobot embedding lebih tinggi
+        brand_boost = name if is_brand else ""
+
+        parts = [name, brand_boost, category, desc, f"kondisi {condition}"]
         return " ".join(part for part in parts if part and part.strip())
 
     async def build_index(self) -> int:
@@ -378,6 +409,15 @@ class ProductVectorStore:
                 similarity = max(0.0, 1.0 - dist / 2.0)
                 if similarity >= threshold:
                     products.append({**meta, "_sim": round(similarity, 3)})
+
+        # Popularity boosting: re-rank dengan weighted score
+        # 75% similarity + 25% popularitas (normalized total_sold)
+        if products:
+            max_sold = max(int(p.get("total_sold", 0)) for p in products) or 1
+            for p in products:
+                pop_score   = int(p.get("total_sold", 0)) / max_sold
+                p["_score"] = round(p["_sim"] * 0.75 + pop_score * 0.25, 4)
+            products.sort(key=lambda x: x["_score"], reverse=True)
 
         return products
 
@@ -733,16 +773,15 @@ async def _prepare_context(session_id: str, user_msg: str) -> tuple[list[dict], 
 
     if _vector_store and not is_general:
         # Query rewriting: bersihkan noise sebelum masuk embedding
-        rewritten = _rewrite_query(user_msg)
-        # Price filter: ekstrak constraint harga dari natural language
-        price_filter = _extract_price_filter(user_msg)
+        rewritten    = _rewrite_query(user_msg)
+        meta_filter  = _extract_metadata_filters(user_msg)
 
         if rewritten != user_msg:
             print(f"[RAG] Rewrite: '{user_msg[:40]}' → '{rewritten}'")
-        if price_filter:
-            print(f"[RAG] Price filter: {price_filter}")
+        if meta_filter:
+            print(f"[RAG] Metadata filter: {meta_filter}")
 
-        semantic_task = _vector_store.search(rewritten, where=price_filter)
+        semantic_task = _vector_store.search(rewritten, where=meta_filter)
         keyword_task  = _vector_store.keyword_search(user_msg)  # keyword pakai query asli
     else:
         semantic_task = _empty()
