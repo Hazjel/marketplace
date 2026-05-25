@@ -174,12 +174,99 @@ def _is_general_query(msg: str) -> bool:
     return not has_product_intent
 
 
+def _rewrite_query(query: str) -> str:
+    """
+    Query rewriting: hapus kata-kata framing/noise sebelum masuk ke embedding.
+    Meningkatkan kualitas cosine similarity karena model fokus ke kata kunci produk.
+
+    Contoh:
+      'apakah ada produk bernama ROG?' → 'ROG'
+      'cari laptop gaming murah'       → 'laptop gaming murah'
+      'rekomendasikan headset wireless' → 'headset wireless'
+    """
+    noise = {
+        "apakah", "adakah", "ada", "tolong", "boleh", "bisa", "minta",
+        "carikan", "coba", "bantu", "tampilkan", "lihat", "lihatkan",
+        "produk", "barang", "item", "bernama", "namanya", "nama",
+        "yang", "dengan", "untuk", "dari", "ke", "di", "dan", "atau",
+        "apa", "gimana", "bagaimana", "berapa", "dimana", "apakah",
+        "saya", "aku", "gue", "kamu", "kalian",
+        "ingin", "mau", "butuh", "perlu", "pengen",
+        "rekomendasi", "rekomendasikan", "saran", "sarankan",
+        "dong", "deh", "ya", "yuk", "nih", "lah", "sih",
+    }
+    tokens = [
+        t for t in re.sub(r"[^\w\s]", "", query.lower()).split()
+        if t not in noise and len(t) >= 2
+    ]
+    return " ".join(tokens) if tokens else query
+
+
+def _extract_price_filter(query: str) -> dict | None:
+    """
+    Ekstrak filter harga dari natural language → ChromaDB where clause.
+
+    Pattern yang didukung:
+      'di bawah 5 juta'       → {"price": {"$lte": 5000000}}
+      'kurang dari 500 ribu'  → {"price": {"$lte": 500000}}
+      'di atas 2 juta'        → {"price": {"$gte": 2000000}}
+      '2-5 juta'              → {$and: [{$gte: 2jt}, {$lte: 5jt}]}
+      'sekitar 1 juta'        → ±20% range
+    """
+    q = query.lower()
+
+    def _to_rupiah(value: str, unit: str) -> int:
+        v = float(value.replace(",", "."))
+        if "juta" in unit:
+            return int(v * 1_000_000)
+        if any(u in unit for u in ("ribu", "rb", "k")):
+            return int(v * 1_000)
+        return int(v)
+
+    # Bawah / kurang dari
+    m = re.search(
+        r"(?:di bawah|kurang dari|max|maksimal|under)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?",
+        q,
+    )
+    if m:
+        return {"price": {"$lte": _to_rupiah(m.group(1), m.group(2) or "juta")}}
+
+    # Atas / lebih dari
+    m = re.search(
+        r"(?:di atas|lebih dari|min|minimal|above|over)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?",
+        q,
+    )
+    if m:
+        return {"price": {"$gte": _to_rupiah(m.group(1), m.group(2) or "juta")}}
+
+    # Range: X-Y juta / X sampai Y juta
+    m = re.search(
+        r"(\d+(?:[.,]\d+)?)\s*(?:-|sampai|hingga|s/d)\s*(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?",
+        q,
+    )
+    if m:
+        unit = m.group(3) or "juta"
+        lo   = _to_rupiah(m.group(1), unit)
+        hi   = _to_rupiah(m.group(2), unit)
+        return {"$and": [{"price": {"$gte": lo}}, {"price": {"$lte": hi}}]}
+
+    # Sekitar / around (±20%)
+    m = re.search(
+        r"(?:sekitar|around|kira-kira|kisaran)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?",
+        q,
+    )
+    if m:
+        mid = _to_rupiah(m.group(1), m.group(2) or "juta")
+        return {"$and": [{"price": {"$gte": int(mid * 0.8)}}, {"price": {"$lte": int(mid * 1.2)}}]}
+
+    return None
+
+
 def _make_cache_key(msg: str, session_id: str) -> str:
     """Buat cache key unik berdasarkan pesan + session (untuk isolasi per user)."""
     import hashlib
     payload = f"{session_id}:{msg.lower().strip()}"
     return hashlib.sha256(payload.encode()).hexdigest()[:24]
-
 
 
 # ---------------------------------------------------------------------------
@@ -255,27 +342,39 @@ class ProductVectorStore:
     async def search(
         self,
         query:     str,
-        n_results: int   = RAG_TOP_K,
-        threshold: float = RAG_SIMILARITY_THRESHOLD,
+        n_results: int        = RAG_TOP_K,
+        threshold: float      = RAG_SIMILARITY_THRESHOLD,
+        where:     dict | None = None,   # price/metadata filter (ChromaDB where clause)
     ) -> list[dict]:
         """Cari produk yang maknanya paling mirip dengan query (semantic search)."""
         count = self._collection.count()
         if count == 0:
             return []
 
-        loop    = asyncio.get_event_loop()
-        results = await loop.run_in_executor(
-            None,
-            lambda: self._collection.query(
-                query_texts=[query],   # ChromaDB auto-embed query
-                n_results=min(n_results, count),
-            ),
-        )
+        loop = asyncio.get_event_loop()
+        try:
+            results = await loop.run_in_executor(
+                None,
+                lambda: self._collection.query(
+                    query_texts=[query],
+                    n_results=min(n_results, count),
+                    where=where or None,   # None = no filter
+                ),
+            )
+        except Exception as e:
+            # where filter bisa fail jika tidak ada produk yang match — fallback ke tanpa filter
+            print(f"[RAG] search with where failed ({e}), retrying without filter")
+            results = await loop.run_in_executor(
+                None,
+                lambda: self._collection.query(
+                    query_texts=[query],
+                    n_results=min(n_results, count),
+                ),
+            )
 
         products: list[dict] = []
         if results["metadatas"] and results["distances"]:
             for meta, dist in zip(results["metadatas"][0], results["distances"][0]):
-                # Cosine distance [0, 2] → similarity [0, 1]
                 similarity = max(0.0, 1.0 - dist / 2.0)
                 if similarity >= threshold:
                     products.append({**meta, "_sim": round(similarity, 3)})
@@ -633,8 +732,18 @@ async def _prepare_context(session_id: str, user_msg: str) -> tuple[list[dict], 
     is_general = _is_general_query(user_msg)
 
     if _vector_store and not is_general:
-        semantic_task = _vector_store.search(user_msg)
-        keyword_task  = _vector_store.keyword_search(user_msg)
+        # Query rewriting: bersihkan noise sebelum masuk embedding
+        rewritten = _rewrite_query(user_msg)
+        # Price filter: ekstrak constraint harga dari natural language
+        price_filter = _extract_price_filter(user_msg)
+
+        if rewritten != user_msg:
+            print(f"[RAG] Rewrite: '{user_msg[:40]}' → '{rewritten}'")
+        if price_filter:
+            print(f"[RAG] Price filter: {price_filter}")
+
+        semantic_task = _vector_store.search(rewritten, where=price_filter)
+        keyword_task  = _vector_store.keyword_search(user_msg)  # keyword pakai query asli
     else:
         semantic_task = _empty()
         keyword_task  = _empty()
@@ -840,6 +949,39 @@ async def submit_feedback(request: Request, body: FeedbackRequest) -> dict:
         print(f"[Feedback] Error: {e}")
         return {"status": "error", "message": "Gagal menyimpan feedback"}
     return {"status": "received"}
+
+
+# ---------------------------------------------------------------------------
+# ENDPOINT: /admin/reindex  — Trigger manual RAG re-index tanpa restart
+# ---------------------------------------------------------------------------
+@app.post("/admin/reindex")
+async def admin_reindex() -> dict:
+    """Trigger re-indexing semua produk dari Laravel API ke ChromaDB."""
+    if _vector_store is None:
+        return {"status": "error", "message": "Vector store belum diinisialisasi"}
+    try:
+        count = await _vector_store.build_index()
+        print(f"[Admin] Manual reindex: {count} produk")
+        return {"status": "ok", "indexed": count}
+    except Exception as e:
+        print(f"[Admin] Reindex error: {e}")
+        return {"status": "error", "message": str(e)}
+
+
+# ---------------------------------------------------------------------------
+# ENDPOINT: /chat/reset  — Flush session history user dari Redis
+# ---------------------------------------------------------------------------
+@app.delete("/chat/reset/{session_id}")
+async def chat_reset(session_id: str) -> dict:
+    """Hapus history percakapan untuk session tertentu."""
+    try:
+        key = f"{_SESSION_KEY}{session_id}"
+        await _get_redis().delete(key)
+        print(f"[Chat] Reset session: {session_id}")
+        return {"status": "ok", "session_id": session_id}
+    except Exception as e:
+        print(f"[Chat] Reset error: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 # ---------------------------------------------------------------------------
