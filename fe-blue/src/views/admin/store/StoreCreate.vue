@@ -57,7 +57,7 @@ const handleAddressInput = debounce(async (search) => {
       `/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`,
       {
         headers: {
-          'x-api-key': import.meta.env.VITE_RAJAONGKIR_API_KEY
+          'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
         }
       }
     )

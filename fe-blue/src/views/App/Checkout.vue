@@ -155,7 +155,7 @@ const handleAddressInput = debounce(async (search) => {
       `/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`,
       {
         headers: {
-          'x-api-key': import.meta.env.VITE_RAJAONGKIR_API_KEY
+          'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
         }
       }
     )
@@ -248,7 +248,12 @@ const handleSubmit = async () => {
       return
     }
 
-    cart.clearSelectedItems()
+    /**
+     * Enterprise pattern: clear cart IMMEDIATELY after transaction is committed to server.
+     * At this point the order exists in DB — keeping items in cart risks double-order.
+     * If payment fails/cancelled, user can re-add items from transaction history.
+     */
+    await cart.clearSelectedItems()
 
     window.snap.pay(response.snap_token, {
       onSuccess: function () {
@@ -257,8 +262,9 @@ const handleSubmit = async () => {
         toast.success('Pembayaran berhasil!')
       },
       onPending: function () {
+        // Transaction exists, payment pending (e.g. bank transfer) — redirect to monitor it
         isProcessingPayment.value = false
-        toast.info('Menunggu pembayaran...')
+        toast.info('Pesanan dibuat. Selesaikan pembayaran sebelum batas waktu.')
         if (user.value?.username) {
           router.push({ name: 'user.my-transaction', params: { username: user.value.username } })
         } else {
@@ -266,12 +272,19 @@ const handleSubmit = async () => {
         }
       },
       onError: function () {
-        toast.error('Pembayaran gagal. Silakan coba lagi.')
+        // Payment failed — transaction may be auto-cancelled by payment gateway
         isProcessingPayment.value = false
+        toast.error('Pembayaran gagal. Cek status di menu Transaksi untuk mencoba lagi.')
+        if (user.value?.username) {
+          router.push({ name: 'user.my-transaction', params: { username: user.value.username } })
+        } else {
+          window.location.href = '/my-transactions'
+        }
       },
       onClose: function () {
+        // User closed popup — transaction is pending, redirect to transaction list
         isProcessingPayment.value = false
-        toast.warning('Pembayaran tertunda. Silakan cek menu Transaksi.')
+        toast.warning('Popup ditutup. Pesanan tetap aktif — selesaikan pembayaran di menu Transaksi.')
         if (user.value?.username) {
           router.push({ name: 'user.my-transaction', params: { username: user.value.username } })
         } else {
@@ -314,7 +327,7 @@ onMounted(async () => {
 
 
 <template>
-  <section class="min-h-screen bg-gray-50 dark:bg-surface-dark pb-10">
+  <section class="min-h-screen bg-gray-50 dark:bg-custom-background pb-10">
     <!-- Header with Stepper -->
     <div class="bg-white dark:bg-surface-card border-b border-gray-100 dark:border-white/10 py-6">
       <div class="w-full max-w-[1240px] px-4 md:px-8 mx-auto">
@@ -383,8 +396,8 @@ onMounted(async () => {
 
               <!-- Manual Search -->
               <div v-if="!showSavedAddresses || savedAddresses.length === 0" class="flex flex-col gap-4">
-                <div class="relative">
-                  <label class="group relative">
+                <div class="relative flex flex-col gap-2">
+                  <label class="group relative block">
                     <div class="input-icon">
                       <svg class="size-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

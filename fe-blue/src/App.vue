@@ -4,12 +4,15 @@ import { ref, onErrorCaptured, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useThemeStore } from '@/stores/theme'
+import { useChatStore } from '@/stores/chat'
 import { useToast } from 'vue-toastification'
+import FloatingChatWidget from '@/components/App/chat/FloatingChatWidget.vue'
 
 const error = ref(null)
 const router = useRouter()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
+const chatStore = useChatStore()
 const toast = useToast()
 
 onErrorCaptured((err, instance, info) => {
@@ -32,9 +35,23 @@ const handleApiError = (event) => {
   }
 }
 
+/**
+ * Global real-time chat notification handler.
+ * Fired by chat.js store when a message arrives from a non-active conversation.
+ */
+const handleChatNotification = (event) => {
+  const { senderName, preview } = event.detail
+  toast.info(`💬 ${senderName}: ${preview}`, {
+    timeout: 5000,
+    closeOnClick: true,
+    pauseOnHover: true
+  })
+}
+
 onMounted(async () => {
   // Catch global API errors from axios interceptor
   window.addEventListener('api-error', handleApiError)
+  window.addEventListener('chat-message-received', handleChatNotification)
 
   // Initialize theme system
   const themeStore = useThemeStore()
@@ -42,11 +59,22 @@ onMounted(async () => {
 
   if (authStore.user) {
     await wishlistStore.fetchWishlist()
+
+    // Initialize real-time chat globally — notif muncul di semua halaman
+    chatStore.fetchContacts()
+    chatStore.initializeChatListener(authStore.user.id)
+    chatStore.joinPresenceChannel()
   }
 })
 
 onUnmounted(() => {
   window.removeEventListener('api-error', handleApiError)
+  window.removeEventListener('chat-message-received', handleChatNotification)
+
+  if (authStore.user) {
+    chatStore.cleanupChatListener(authStore.user.id)
+    chatStore.leavePresenceChannel()
+  }
 })
 </script>
 
@@ -78,4 +106,7 @@ onUnmounted(() => {
   </div>
 
   <RouterView />
+
+  <!-- Global floating chat widget — visible di semua halaman untuk user login -->
+  <FloatingChatWidget />
 </template>

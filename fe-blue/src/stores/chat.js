@@ -84,9 +84,21 @@ export const useChatStore = defineStore('chat', {
         if (contact) {
           contact.unread_count = (contact.unread_count || 0) + 1
         } else {
-          // Fetch contacts again if new user?
+          // Fetch contacts again if new user
           this.fetchContacts()
         }
+
+        // Dispatch global real-time notification toast
+        // Listened by App.vue or any component via window event
+        window.dispatchEvent(
+          new CustomEvent('chat-message-received', {
+            detail: {
+              senderName: contact?.name || 'Seseorang',
+              preview: message.message?.slice(0, 60) + (message.message?.length > 60 ? '…' : ''),
+              senderId: message.sender_id
+            }
+          })
+        )
       }
     },
 
