@@ -13,6 +13,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
+import { useChatStore } from '@/stores/chat'
+import { axiosInstance } from '@/plugins/axios'
 import { useHead } from '@vueuse/head'
 import { useToast } from 'vue-toastification'
 
@@ -58,19 +60,20 @@ const authStore = useAuthStore()
 const cart = useCartStore()
 const wishlistStore = useWishlistStore()
 const { toggleWishlist, fetchWishlist } = wishlistStore
+const chatStore = useChatStore()
 
 const quantity = ref(1)
 const selectedOptions = ref({})
 const showVariantDrawer = ref(false)
-const drawerAction = ref('cart') // 'cart' or 'buy'
+const drawerAction = ref('cart') // 'cart' | 'buy'
+const isFollowing = ref(false)
+const followLoading = ref(false)
 
 const handleDrawerAction = () => {
   if (drawerAction.value === 'cart') {
     addToCart()
   } else {
-    // Implement Buy Direct logic here (e.g., push to checkout with query params)
-    addToCart() // For now just add to cart, usually redirects to checkout
-    router.push({ name: 'app.cart' }) // Redirect example
+    handleBuyNow()
   }
   showVariantDrawer.value = false
 }
@@ -240,6 +243,38 @@ const handleToggleWishlist = async () => {
   await toggleWishlist(product.value)
 }
 
+/**
+ * Enterprise pattern: context-aware chat initiation.
+ * Prevents user from chatting with their own store.
+ * Deep-links directly to the specific seller conversation.
+ */
+const handleChatSeller = () => {
+  if (!authStore.token) {
+    router.push({ name: 'auth.login' })
+    return
+  }
+
+  const storeOwnerId = product.value?.store?.user_id
+
+  // Prevent seller from chatting with themselves
+  if (authStore.user?.id === storeOwnerId) {
+    toast.warning('Ini adalah toko Anda sendiri.')
+    return
+  }
+
+  if (!storeOwnerId) {
+    toast.error('Info seller tidak ditemukan.')
+    return
+  }
+
+  // Deep-link to chat page with seller pre-selected via query param
+  router.push({
+    name: 'user.chat',
+    params: { username: authStore.user.username },
+    query: { userId: storeOwnerId }
+  })
+}
+
 const fetchProduct = async () => {
   const response = await fetchProductBySlug(route.params.slug)
 
@@ -341,6 +376,77 @@ onMounted(() => {
     fetchWishlist()
   }
 })
+
+/**
+ * Beli Langsung: tambah ke cart lalu langsung redirect ke cart.
+ * User akan memilih checkout dari halaman cart — ini enterprise standard
+ * (Tokopedia/Shopee pola: cart → checkout, bukan direct-to-payment).
+ */
+const handleBuyNow = () => {
+  if (!authStore.token) {
+    router.push({ name: 'auth.login' })
+    return
+  }
+  addToCart()
+  router.push({ name: 'app.cart' })
+}
+
+/**
+ * Follow/unfollow store toggle.
+ * Optimistic UI: update state dulu, rollback jika API gagal.
+ */
+const handleFollowStore = async () => {
+  if (!authStore.token) {
+    router.push({ name: 'auth.login' })
+    return
+  }
+
+  const storeUsername = product.value?.store?.username
+  if (!storeUsername || followLoading.value) return
+
+  followLoading.value = true
+  const prev = isFollowing.value
+  isFollowing.value = !prev // Optimistic update
+
+  try {
+    await axiosInstance.post(`/store/${storeUsername}/follow`)
+    toast.success(isFollowing.value ? 'Mengikuti toko ini!' : 'Berhenti mengikuti toko.')
+  } catch {
+    isFollowing.value = prev // Rollback on failure
+    toast.error('Gagal memperbarui status follow.')
+  } finally {
+    followLoading.value = false
+  }
+}
+
+/**
+ * Share product: gunakan Web Share API jika tersedia (mobile-first),
+ * fallback ke clipboard copy untuk desktop.
+ */
+const handleShare = async () => {
+  const shareData = {
+    title: product.value?.name,
+    text: `Lihat produk ini di Blukios: ${product.value?.name}`,
+    url: window.location.href
+  }
+
+  if (navigator.share && navigator.canShare(shareData)) {
+    try {
+      await navigator.share(shareData)
+    } catch (err) {
+      // User cancelled share — no error needed
+      if (err.name !== 'AbortError') console.error(err)
+    }
+  } else {
+    // Fallback: copy URL to clipboard
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      toast.success('Link produk disalin ke clipboard!')
+    } catch {
+      toast.error('Gagal menyalin link.')
+    }
+  }
+}
 </script>
 
 <template>
@@ -452,9 +558,18 @@ v-for="value in values" :key="value"
           <RouterLink
 v-if="product?.store?.username"
             :to="{ name: 'app.store-detail', params: { username: product?.store?.username } }"
-            class="ml-auto px-4 py-1.5 border border-custom-blue text-custom-blue rounded-lg text-sm font-bold hover:bg-blue-50">
-            Follow
+            class="ml-auto px-4 py-1.5 border border-custom-blue text-custom-blue rounded-lg text-sm font-bold hover:bg-blue-50 transition-colors">
+            Kunjungi
           </RouterLink>
+          <button
+            :disabled="followLoading"
+            class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all"
+            :class="isFollowing
+              ? 'bg-gray-100 dark:bg-white/10 text-custom-grey border border-custom-stroke dark:border-white/10 hover:bg-red-50 hover:text-custom-red'
+              : 'border border-custom-blue text-custom-blue hover:bg-blue-50'"
+            @click="handleFollowStore">
+            {{ followLoading ? '...' : isFollowing ? 'Mengikuti' : 'Follow' }}
+          </button>
         </div>
 
         <hr class="border-custom-stroke" />
@@ -620,7 +735,9 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
               <i class="fa-solid fa-plus"></i> Keranjang
             </button>
             <button
-              class="w-full py-3 border border-custom-blue text-custom-blue rounded-lg font-bold hover:bg-blue-50 transition-colors">
+ :disabled="!displayedStock || displayedStock <= 0"
+              class="w-full py-3 border border-custom-blue text-custom-blue rounded-lg font-bold hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="handleBuyNow">
               Beli Langsung
             </button>
           </div>
@@ -632,8 +749,20 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
               <i class="fa-solid fa-heart" :class="isInWishlist ? 'text-custom-red' : ''"></i>
               Wishlist
             </button>
+            <!-- Chat Seller: enterprise pattern — deep-link to seller conversation -->
             <button
-              class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-black transition-colors">
+              class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-blue transition-colors"
+              @click="handleChatSeller">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              Tanya Seller
+            </button>
+            <button
+              class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-black transition-colors"
+              @click="handleShare">
               <i class="fa-solid fa-share-nodes"></i> Share
             </button>
           </div>
@@ -644,18 +773,31 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
     <!-- Mobile Sticky Bottom Bar -->
     <div
       class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-custom-stroke p-4 md:hidden shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)] flex gap-3 items-center">
-      <!-- Wishlist/Chat Icon Button -->
-      <button
-class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke grow-0 shrink-0"
-        :class="{ 'bg-custom-red/10 border-custom-red': isInWishlist }" @click="handleToggleWishlist">
-        <img v-if="isInWishlist" src="@/assets/images/icons/heart-red.svg" class="size-6 shrink-0" alt="icon" />
-        <img v-else src="@/assets/images/icons/heart-grey.svg" class="size-6 shrink-0" alt="icon" />
-      </button>
+      <!-- Wishlist + Chat Icon Buttons -->
+      <div class="flex flex-col gap-1 shrink-0">
+        <button
+          class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke"
+          :class="{ 'bg-custom-red/10 border-custom-red': isInWishlist }"
+          @click="handleToggleWishlist">
+          <img v-if="isInWishlist" src="@/assets/images/icons/heart-red.svg" class="size-5 shrink-0" alt="wishlist" />
+          <img v-else src="@/assets/images/icons/heart-grey.svg" class="size-5 shrink-0" alt="wishlist" />
+        </button>
+        <button
+          class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke hover:border-custom-blue hover:bg-blue-50 transition-colors"
+          @click="handleChatSeller">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-custom-grey" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+      </div>
 
       <!-- Action Buttons Container -->
       <div class="flex gap-3 grow h-12">
         <button
-          class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors">
+          class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors"
+          @click="handleBuyNow">
           Beli Langsung
         </button>
         <button

@@ -36,7 +36,7 @@ const steps = [
         class="flex flex-col items-center gap-2 group relative"
       >
         <div
-          class="flex items-center justify-center size-8 md:size-10 rounded-full border-[3px] transition-all duration-300 relative bg-white z-10"
+          class="flex items-center justify-center size-8 md:size-10 rounded-full border-[3px] transition-all duration-300 relative z-10"
           :class="[
             currentStep > step.number
               ? 'bg-custom-blue border-custom-blue'

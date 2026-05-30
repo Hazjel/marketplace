@@ -4,6 +4,7 @@ import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useThemeStore } from '@/stores/theme'
+import { useChatStore } from '@/stores/chat'
 import { storeToRefs } from 'pinia'
 import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
@@ -29,6 +30,13 @@ const { searchProducts } = productStore
 const themeStore = useThemeStore()
 const { effectiveTheme } = storeToRefs(themeStore)
 const { toggleTheme } = themeStore
+
+const chatStore = useChatStore()
+const { totalUnreadCount } = storeToRefs(chatStore)
+
+const chatBadgeText = computed(() =>
+  totalUnreadCount.value > 99 ? '99+' : totalUnreadCount.value
+)
 
 // Computed properties for template logic safety
 const sellerDashboardLabel = computed(() => {
@@ -169,6 +177,9 @@ onMounted(async () => {
     await checkAuth()
     if (user.value) {
       fetchWishlist()
+      // Initialize global chat listener for real-time unread badge
+      chatStore.fetchContacts()
+      chatStore.initializeChatListener(user.value.id)
     }
   }
   loadHistory()
@@ -176,6 +187,10 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  if (user.value) {
+    // Cleanup WebSocket listener to prevent memory leak
+    chatStore.cleanupChatListener(user.value.id)
+  }
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
@@ -307,6 +322,66 @@ v-if="totalItems > 0"
                 }}</span>
               </div>
             </div>
+
+            <!-- Chat Icon with Unread Badge (Logged-in only) -->
+            <div v-if="user" class="relative group">
+              <RouterLink
+                id="Navbar-Chat"
+                :to="{ name: 'user.chat', params: { username: user.username } }"
+                class="flex items-center justify-center size-10 md:size-11 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="size-6 dark:text-white text-custom-black opacity-70 group-hover:opacity-100 transition-opacity"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </RouterLink>
+              <!-- Unread badge: pulse animation to draw attention -->
+              <transition
+                enter-active-class="transition-all duration-300"
+                enter-from-class="scale-0 opacity-0"
+                enter-to-class="scale-100 opacity-100"
+                leave-active-class="transition-all duration-200"
+                leave-from-class="scale-100 opacity-100"
+                leave-to-class="scale-0 opacity-0"
+              >
+                <div
+                  v-if="totalUnreadCount > 0"
+                  class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-custom-blue border-2 border-white dark:border-[#0B1120] px-1 pointer-events-none"
+                >
+                  <span class="text-white text-[9px] font-bold leading-none">{{ chatBadgeText }}</span>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Vertical Divider -->
+            <div class="w-px h-6 bg-custom-stroke dark:bg-white/10 mx-1 hidden md:block"></div>
+
+            <!-- Theme Toggle (Always Visible — guest & logged-in) -->
+            <button
+              id="Theme-Toggle"
+              class="flex items-center justify-center size-10 md:size-11 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
+              :title="effectiveTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+              @click="toggleTheme()"
+            >
+              <!-- Moon icon: shown in dark mode → click to go light -->
+              <svg v-if="effectiveTheme === 'dark'" xmlns="http://www.w3.org/2000/svg"
+                class="size-5 text-custom-black dark:text-white opacity-60 group-hover:opacity-100 transition-opacity"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              <!-- Sun icon: shown in light mode → click to go dark -->
+              <svg v-else xmlns="http://www.w3.org/2000/svg"
+                class="size-5 text-custom-black opacity-60 group-hover:opacity-100 transition-opacity"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </button>
 
             <!-- Vertical Divider -->
             <div class="w-px h-6 bg-custom-stroke dark:bg-white/10 mx-1 hidden md:block"></div>

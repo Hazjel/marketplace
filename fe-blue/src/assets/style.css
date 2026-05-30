@@ -184,7 +184,7 @@ body {
   /* Placeholder Logic */
   .custom-input:placeholder-shown,
   .custom-input:-moz-placeholder-shown {
-    @apply pt-[14.5px];
+    @apply pt-[26px];
   }
 
   .custom-input:focus {
@@ -241,7 +241,9 @@ body {
 
   /* --- Search --- */
   .search-result {
-    @apply absolute bottom-[-30px] w-full z-1 bg-white dark:bg-surface-card border border-[#ccc] dark:border-white/10 rounded-[16px] shadow-md max-h-[200px] overflow-y-auto;
+    /* top-full ensures dropdown renders below the input, not overlapping fields above */
+    @apply absolute top-full left-0 mt-2 w-full bg-white dark:bg-surface-card border border-[#ccc] dark:border-white/10 rounded-[16px] shadow-md max-h-[200px] overflow-y-auto;
+    z-index: 50;
   }
 
   .search-result ul {
