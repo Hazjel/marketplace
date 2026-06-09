@@ -17,7 +17,7 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
-    allowedHosts: ['192.168.1.10.nip.io', 'localhost'],
+    allowedHosts: ['192.168.1.29', '192.168.1.10.nip.io', 'localhost'],
     watch: {
       // Diperlukan di Docker/WSL2 — Windows fs events tidak propagate ke container
       usePolling: true,

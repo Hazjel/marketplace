@@ -298,22 +298,22 @@ src="@/assets/images/icons/arrow-up-triangle-blue.svg"
       <div class="w-full md:w-1/2 flex flex-col gap-4">
         <label class="flex items-center gap-2 cursor-pointer">
           <input v-model="product.has_variants" type="checkbox" class="toggle toggle-primary" />
-          <span class="font-semibold">Enable Variants (Size, Color, etc.)</span>
+          <span class="font-semibold">Aktifkan Varian (Ukuran, Warna, RAM, dll)</span>
         </label>
 
         <!-- Option Groups Definition -->
         <div
 v-if="product.has_variants"
           class="p-3 border rounded-xl bg-blue-50/50 dark:bg-custom-blue/10 dark:border-white/10 flex flex-col gap-2">
-          <span class="text-xs font-bold text-gray-500 uppercase">1. Define Options</span>
+          <span class="text-xs font-bold text-gray-500 uppercase">1. Tentukan Tipe Varian</span>
           <div class="flex gap-2">
             <input
-v-model="newOptionName" type="text" placeholder="Add Option (e.g. Color)"
+v-model="newOptionName" type="text" placeholder="Tambah opsi (contoh: RAM, Warna)"
               class="custom-input h-9 text-sm bg-white dark:bg-surface-card" />
             <button
 type="button" class="btn-primary h-9 px-4 text-xs bg-custom-black text-white rounded-lg"
               @click="addOptionGroup">
-              Add
+              Tambah
             </button>
           </div>
           <div class="flex flex-wrap gap-2 mt-1">
@@ -329,17 +329,17 @@ v-for="(opt, idx) in optionGroups" :key="idx"
         </div>
 
         <div v-if="product.has_variants" class="flex flex-col gap-3">
-          <span class="text-xs font-bold text-gray-500 uppercase mt-2">2. Set Variants</span>
+          <span class="text-xs font-bold text-gray-500 uppercase mt-2">2. Kelola Varian</span>
 
           <div
 v-for="(variant, index) in product.variants" :key="variant.id || variant._temp_id || index"
             class="p-4 border rounded-xl bg-gray-50 dark:bg-white/5 dark:border-white/10 flex flex-col gap-3">
             <div class="flex justify-between items-center">
-              <h4 class="font-bold text-sm text-gray-500">Variant #{{ index + 1 }}</h4>
+              <h4 class="font-bold text-sm text-gray-500">Varian #{{ index + 1 }}</h4>
               <button
 type="button" class="text-red-500 text-xs font-bold hover:underline"
                 @click="product.variants.splice(index, 1)">
-                Remove
+                Hapus
               </button>
             </div>
 
@@ -350,32 +350,32 @@ type="button" class="text-red-500 text-xs font-bold hover:underline"
                 <input
 v-model="variant.variant_attributes[opt]" type="text"
                   class="h-9 w-full border border-custom-stroke dark:border-white/10 dark:bg-surface-card rounded-lg px-3 text-sm font-semibold outline-none focus:border-custom-black dark:focus:border-white transition-all"
-                  :placeholder="opt + ' Value'" @input="autoGenerateName(variant)" />
+                  :placeholder="'Nilai ' + opt" @input="autoGenerateName(variant)" />
               </div>
             </div>
 
             <!-- Variant Name (Auto-generated or Manual) -->
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-gray-400">Variant Name (Generated)</label>
+              <label class="text-xs font-semibold text-gray-400">Nama Varian (otomatis)</label>
               <input
 v-model="variant.name" type="text"
-                class="custom-input h-10 text-sm bg-gray-100 dark:bg-surface-card" placeholder="Name" />
+                class="custom-input h-10 text-sm bg-gray-100 dark:bg-surface-card" placeholder="Nama varian" />
             </div>
 
             <div class="flex gap-3">
               <!-- Variant Price -->
               <div class="flex flex-col gap-1 w-1/2">
-                <label class="text-xs font-semibold text-gray-400">Price</label>
+                <label class="text-xs font-semibold text-gray-400">Harga (Rp)</label>
                 <input
 v-model="variant.price" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
-                  placeholder="Price" />
+                  placeholder="Harga" />
               </div>
               <!-- Variant Stock -->
               <div class="flex flex-col gap-1 w-1/2">
-                <label class="text-xs font-semibold text-gray-400">Stock</label>
+                <label class="text-xs font-semibold text-gray-400">Stok</label>
                 <input
 v-model="variant.stock" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
-                  placeholder="Stock" />
+                  placeholder="Stok" />
               </div>
             </div>
           </div>
@@ -384,7 +384,7 @@ v-model="variant.stock" type="number" class="custom-input h-10 text-sm dark:bg-s
 type="button"
             class="btn-primary w-full py-2 rounded-xl text-sm border border-dashed border-custom-blue text-custom-blue bg-blue-50 hover:bg-blue-100 dark:bg-custom-blue/10 dark:hover:bg-custom-blue/20"
             @click="addVariant">
-            + Add New Variant
+            + Tambah Varian Baru
           </button>
         </div>
       </div>

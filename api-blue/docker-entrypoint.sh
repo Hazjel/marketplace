@@ -2,15 +2,18 @@
 set -e
 
 # Merge Docker-specific env overrides into .env
+# Uses a temp file + cp to preserve the bind-mount inode (sed -i would break it)
 if [ -f /var/www/.env.docker ]; then
+    cp /var/www/.env /tmp/.env.merged
     while IFS='=' read -r key value; do
         [[ -z "$key" || "$key" =~ ^# ]] && continue
-        if grep -q "^${key}=" /var/www/.env 2>/dev/null; then
-            sed -i "s|^${key}=.*|${key}=${value}|" /var/www/.env
+        if grep -q "^${key}=" /tmp/.env.merged 2>/dev/null; then
+            sed -i "s|^${key}=.*|${key}=${value}|" /tmp/.env.merged
         else
-            echo "${key}=${value}" >> /var/www/.env
+            echo "${key}=${value}" >> /tmp/.env.merged
         fi
     done < /var/www/.env.docker
+    cp /tmp/.env.merged /var/www/.env
     echo "✅ Docker env overrides applied"
 fi
 

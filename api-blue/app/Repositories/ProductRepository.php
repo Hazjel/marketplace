@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\ProductRepositoryInterface;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\ProductVariantMongo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -27,7 +28,12 @@ class ProductRepository implements ProductRepositoryInterface
             }
 
             if ($ProductCategoryId !== null) {
-                $query->where('product_category_id', $ProductCategoryId);
+                $childIds = ProductCategory::where('parent_id', $ProductCategoryId)->pluck('id');
+                if ($childIds->isNotEmpty()) {
+                    $query->whereIn('product_category_id', $childIds);
+                } else {
+                    $query->where('product_category_id', $ProductCategoryId);
+                }
             }
 
             // Filters
