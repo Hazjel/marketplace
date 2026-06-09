@@ -139,6 +139,12 @@ watch(
   { immediate: true }
 )
 
+const allVariantsSelected = computed(() => {
+  if (!product.value?.variants?.length) return true
+  const keys = Object.keys(uniqueAttributes.value)
+  return keys.length > 0 && keys.every((key) => selectedOptions.value[key] !== undefined)
+})
+
 const displayedPrice = computed(() => {
   if (selectedVariant.value) {
     return selectedVariant.value.price
@@ -510,7 +516,10 @@ const handleShare = async () => {
           <!-- Variant Options -->
           <div v-if="product?.variants?.length > 0" class="flex flex-col gap-4 mt-6">
             <div v-for="(values, key) in uniqueAttributes" :key="key">
-              <h3 class="font-bold text-base mb-2 capitalize">{{ key }}</h3>
+              <h3 class="font-bold text-base mb-2 capitalize flex items-center gap-1">
+                {{ key }}
+                <span v-if="!selectedOptions[key]" class="text-custom-red text-xs font-normal">(wajib dipilih)</span>
+              </h3>
               <div class="flex flex-wrap gap-2">
                 <button
 v-for="value in values" :key="value"
@@ -728,14 +737,17 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
           </div>
 
           <div class="flex flex-col gap-2 mt-2">
+            <p v-if="product?.variants?.length > 0 && !allVariantsSelected" class="text-xs text-custom-red font-semibold -mb-1">
+              Pilih semua varian terlebih dahulu
+            </p>
             <button
-:disabled="!displayedStock || displayedStock <= 0"
-              class="w-full py-3 bg-custom-blue text-white rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 transition-colors flex items-center justify-center gap-2"
+              :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
+              class="w-full py-3 bg-custom-blue text-white rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               @click.prevent="addToCart">
               <i class="fa-solid fa-plus"></i> Keranjang
             </button>
             <button
- :disabled="!displayedStock || displayedStock <= 0"
+              :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
               class="w-full py-3 border border-custom-blue text-custom-blue rounded-lg font-bold hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               @click="handleBuyNow">
               Beli Langsung
@@ -796,12 +808,13 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
       <!-- Action Buttons Container -->
       <div class="flex gap-3 grow h-12">
         <button
-          class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors"
+          :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
+          class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           @click="handleBuyNow">
           Beli Langsung
         </button>
         <button
-:disabled="!product?.stock || product?.stock <= 0"
+          :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
           class="flex-1 rounded-xl bg-custom-blue text-white font-bold text-sm flex items-center justify-center gap-2 disabled:bg-custom-grey disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
           @click.prevent="addToCart">
           <img src="@/assets/images/icons/shopping-cart-white.svg" class="size-5 shrink-0" alt="icon" />
