@@ -44,6 +44,10 @@ async def lifespan(application: FastAPI):
 
     yield
 
+    try:
+        await asyncio.wait_for(asyncio.shield(refresh_task), timeout=5.0)
+    except (asyncio.TimeoutError, asyncio.CancelledError):
+        pass
     refresh_task.cancel()
     await r.aclose()
     print("[Shutdown] Cleanup selesai.")

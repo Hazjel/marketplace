@@ -82,7 +82,8 @@ async def ollama_stream(messages: list[dict], temperature: float = 0.7):
     async with client.stream("POST", f"{OLLAMA_BASE_URL}/api/chat", json=payload) as r:
             if r.status_code >= 400:
                 body = await r.aread()
-                raise RuntimeError(f"Ollama stream error {r.status_code}: {body.decode()}")
+                print(f"[Ollama] Stream error {r.status_code}: {body.decode()[:200]}")
+                raise RuntimeError(f"Ollama stream error {r.status_code}: {body.decode()[:200]}")
             async for line in r.aiter_lines():
                 if not line.strip():
                     continue

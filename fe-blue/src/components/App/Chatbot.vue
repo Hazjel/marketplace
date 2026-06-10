@@ -140,7 +140,9 @@ const sendMessage = async () => {
     }
   } catch (err) {
     console.error('[Chatbot] Stream error:', err)
-    botMsg.text = 'Duh, koneksi putus.. coba lagi ya~ 🙏'
+    botMsg.text = sessionId.value
+      ? 'Duh, koneksi putus.. coba kirim ulang pertanyaan ya~ 🙏'
+      : 'Duh, sesi bermasalah.. coba mulai percakapan baru ya~ 🙏'
   } finally {
     // Flush sisa queue sebelum selesai
     if (rafId) cancelAnimationFrame(rafId)
