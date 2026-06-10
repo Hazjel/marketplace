@@ -7,7 +7,7 @@ load_dotenv(override=False)
 # OLLAMA
 # ---------------------------------------------------------------------------
 OLLAMA_BASE_URL    = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
-OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "qwen3:0.6b")
+OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_TIMEOUT_S   = float(os.getenv("OLLAMA_TIMEOUT_S", "180"))
 OLLAMA_MAX_RETRIES = int(os.getenv("OLLAMA_MAX_RETRIES", "1"))
 
@@ -39,14 +39,14 @@ REDIS_URL             = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 # CHROMA / RAG
 # ---------------------------------------------------------------------------
 CHROMA_DB_PATH           = os.getenv("CHROMA_DB_PATH", "/app/chroma_db")
-RAG_SIMILARITY_THRESHOLD = float(os.getenv("RAG_SIMILARITY_THRESHOLD", "0.55"))
-RAG_TOP_K                = int(os.getenv("RAG_TOP_K", "3"))
+RAG_SIMILARITY_THRESHOLD = float(os.getenv("RAG_SIMILARITY_THRESHOLD", "0.72"))
+RAG_TOP_K                = int(os.getenv("RAG_TOP_K", "5"))
 RAG_REFRESH_HOURS        = int(os.getenv("RAG_REFRESH_HOURS", "2"))
 
 # ---------------------------------------------------------------------------
 # REDIS KEY PREFIXES & CACHE
 # ---------------------------------------------------------------------------
-MAX_HISTORY_MESSAGES  = 6     # sliding window — 6 messages = 3 turn
+MAX_HISTORY_MESSAGES  = 10    # sliding window — 10 messages = 5 turn
 LLM_CACHE_TTL_SECONDS = 300   # cache response LLM 5 menit
 SESSION_KEY   = "chat:session:"
 LLM_CACHE_KEY = "chat:llmcache:"
