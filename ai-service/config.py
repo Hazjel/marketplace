@@ -6,10 +6,11 @@ load_dotenv(override=False)
 # ---------------------------------------------------------------------------
 # OLLAMA
 # ---------------------------------------------------------------------------
-OLLAMA_BASE_URL    = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
-OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
-OLLAMA_TIMEOUT_S   = float(os.getenv("OLLAMA_TIMEOUT_S", "180"))
-OLLAMA_MAX_RETRIES = int(os.getenv("OLLAMA_MAX_RETRIES", "1"))
+OLLAMA_BASE_URL      = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+OLLAMA_MODEL         = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
+OLLAMA_TIMEOUT_S     = float(os.getenv("OLLAMA_TIMEOUT_S", "180"))
+OLLAMA_MAX_RETRIES   = int(os.getenv("OLLAMA_MAX_RETRIES", "1"))
+OLLAMA_CONTEXT_LENGTH = int(os.getenv("OLLAMA_CONTEXT_LENGTH", "2048"))
 
 # ---------------------------------------------------------------------------
 # LARAVEL API

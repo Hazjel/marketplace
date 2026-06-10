@@ -23,9 +23,11 @@ _PRODUCT_INTENT_TOKENS = {
     "spesifikasi", "spek", "spec", "garansi", "warranty",
     # Query produk
     "produk", "barang", "item", "cari", "rekomendasi", "saran", "pilih",
-    "laptop", "hp", "handphone", "smartphone", "tablet", "headset", "earphone",
+    "laptop", "hp", "handphone", "smartphone", "tablet", "ipad", "iphone",
+    "macbook", "airpods", "headset", "earphone",
     "mouse", "keyboard", "monitor", "kamera", "camera", "charger", "kabel",
     "gaming", "wireless", "bluetooth", "ram", "ssd", "processor", "gpu",
+    "tersedia",
     # Toko & pengiriman
     "toko", "seller", "pengiriman", "ongkir", "kirim", "ekspedisi",
     # Kondisi
@@ -173,4 +175,4 @@ def extract_metadata_filters(query: str) -> dict | None:
 # ---------------------------------------------------------------------------
 def make_cache_key(msg: str) -> str:
     """Buat cache key global berdasarkan pesan saja, agar hit lintas sesi."""
-    return hashlib.sha256(msg.lower().strip().encode()).hexdigest()[:24]
+    return hashlib.sha256(msg.lower().strip().encode()).hexdigest()

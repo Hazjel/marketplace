@@ -237,7 +237,7 @@ services:
       - chroma_cache:/root/.cache/chroma  # ONNX model cache — hindari re-download 79MB
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_MODEL: qwen3:0.6b
+      OLLAMA_MODEL: qwen3:1.7b
       OLLAMA_TIMEOUT_S: 180
       OLLAMA_MAX_RETRIES: 1
       LARAVEL_API_URL: http://nginx:80

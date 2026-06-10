@@ -51,6 +51,8 @@ async def prepare_context(session_id: str, user_msg: str) -> tuple[list[dict], l
 
     if vs and not is_general:
         rewritten   = rewrite_query(user_msg)
+        if len(rewritten.strip()) < 3:
+            rewritten = user_msg
         meta_filter = extract_metadata_filters(user_msg)
 
         if rewritten != user_msg:
