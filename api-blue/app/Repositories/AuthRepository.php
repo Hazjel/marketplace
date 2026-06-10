@@ -6,6 +6,7 @@ use App\Interfaces\AuthRepositoryInterface;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -63,12 +64,27 @@ class AuthRepository implements AuthRepositoryInterface
 
     public function login(array $data)
     {
+        $lockKey = 'login_locked_' . md5(strtolower($data['email'] ?? ''));
+        $attemptsKey = 'login_attempts_' . md5(strtolower($data['email'] ?? ''));
+
+        if (Cache::get($lockKey)) {
+            throw new Exception('Akun dikunci sementara karena terlalu banyak percobaan login gagal.', 429);
+        }
+
         DB::beginTransaction();
 
         try {
             if (!Auth::guard('web')->attempt($data)) {
+                $attempts = (int) Cache::get($attemptsKey, 0) + 1;
+                Cache::put($attemptsKey, $attempts, now()->addMinutes(15));
+                if ($attempts >= 5) {
+                    Cache::put($lockKey, true, now()->addMinutes(15));
+                }
                 throw new Exception('Unauthorized', 401);
             }
+
+            Cache::forget($attemptsKey);
+            Cache::forget($lockKey);
 
             $user = Auth::user();
             $user->token = $user->createToken('auth_token')->plainTextToken;

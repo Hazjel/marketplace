@@ -41,4 +41,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URL'),
     ],
 
+    'komerce' => [
+        'api_key' => env('KOMERCE_API_KEY', ''),
+    ],
+
 ];

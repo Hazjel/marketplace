@@ -89,6 +89,15 @@ class WithdrawalController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Data Withdrawal Tidak Ditemukan', null, 404);
             }
 
+            $user = auth()->user();
+            if (!$user->hasRole('admin')) {
+                $withdrawal->loadMissing('storeBalance');
+                $storeId = $user->store?->id;
+                if (!$storeId || $withdrawal->storeBalance?->store_id !== $storeId) {
+                    return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+                }
+            }
+
             return ResponseHelper::jsonResponse(true, 'Data Withdrawal Berhasil Diambil', new WithdrawalResource($withdrawal), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
@@ -97,6 +106,10 @@ class WithdrawalController extends Controller implements HasMiddleware
 
     public function approve(WithdrawalApproveRequest $request, string $id)
     {
+        if (!auth()->user()->hasRole('admin')) {
+            return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+        }
+
         $request = $request->validated();
 
         try {

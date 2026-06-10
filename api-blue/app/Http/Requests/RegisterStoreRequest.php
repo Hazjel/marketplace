@@ -17,7 +17,7 @@ class RegisterStoreRequest extends FormRequest
             'profile_picture' => 'nullable|image',
             'name' => 'required',
             'email' => 'required|email|unique:users',
-            'password' => 'required',
+            'password' => ['required', 'string', 'min:8', 'regex:/^(?=.*[A-Z])(?=.*[0-9]).+$/'],
             'role' => 'required|in:buyer,store',
             'phone_number' => 'required|numeric|regex:/^08[0-9]{8,13}$/'
         ];

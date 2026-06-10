@@ -32,10 +32,6 @@ const googleMapsUrl = computed(() => {
   return `https://maps.google.com/maps?q=${query}&t=&z=13&ie=UTF8&iwloc=&output=embed`
 })
 
-import axiosRaw from 'axios'
-
-// ... other imports
-
 const handleAddressInput = debounce(async (search) => {
   if (!search.trim()) {
     showAddressOptions.value = false
@@ -46,15 +42,9 @@ const handleAddressInput = debounce(async (search) => {
 
   loadingAddress.value = true
   try {
-    // Use clean axios instance to bypass baseURL and hit Vite proxy
-    const response = await axiosRaw.get(
-      `/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`,
-      {
-        headers: {
-          'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
-        }
-      }
-    )
+    const response = await axios.get('/shipment/destination', {
+      params: { keyword: search }
+    })
     addressOptions.value = response.data.data
     showAddressOptions.value = true
   } catch (err) {

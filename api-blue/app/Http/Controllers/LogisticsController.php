@@ -21,8 +21,14 @@ class LogisticsController extends Controller
      */ 
     public function webhook(Request $request)
     {
-        // 1. Log Payload (For Debugging)
-        Log::info('LOGISTICS WEBHOOK RECEIVED:', $request->all());
+        // Authenticate webhook caller via pre-shared secret
+        $secret = config('app.logistics_webhook_secret');
+        if ($secret && $request->header('X-Webhook-Secret') !== $secret) {
+            Log::warning('Logistics webhook unauthorized', ['ip' => $request->ip()]);
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        Log::info('Logistics webhook received', ['awb' => $request->awb, 'status' => $request->status]);
 
         $request->validate([
             'awb' => 'required|string',

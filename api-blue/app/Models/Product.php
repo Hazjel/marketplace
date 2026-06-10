@@ -34,9 +34,11 @@ class Product extends Model
 
     public function scopeSearch($query, $search)
     {
-        // FULLTEXT search with LIKE fallback for short keywords (< 3 chars = MySQL ft_min_word_len)
         if (mb_strlen($search) >= 3) {
-            return $query->whereRaw('MATCH(name, description) AGAINST(? IN BOOLEAN MODE)', ['+' . $search . '*']);
+            $safeTerm = preg_replace('/[+\-*"<>()~@]+/', '', $search);
+            if (mb_strlen(trim($safeTerm)) >= 3) {
+                return $query->whereRaw('MATCH(name, description) AGAINST(? IN BOOLEAN MODE)', ['+' . $safeTerm . '*']);
+            }
         }
         return $query->where('name', 'like', '%' . $search . '%');
     }

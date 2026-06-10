@@ -152,16 +152,11 @@ const handleAddressInput = debounce(async (search) => {
 
   loadingAddress.value = true
   try {
-    const response = await fetch(
-      `/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`,
-      {
-        headers: {
-          'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
-        }
-      }
-    )
+    const response = await axiosInstance.get('/shipment/destination', {
+      params: { keyword: search }
+    })
 
-    const data = await response.json()
+    const data = response.data
     addressOptions.value = data.data
     showAddressOptions.value = true
   } catch {
@@ -199,16 +194,16 @@ const handleDeliveryModal = async () => {
     const totalWeight = store.products.reduce((sum, p) => sum + p.weight * p.quantity, 0)
     const totalValue = finalSubtotal.value
 
-    const response = await fetch(
-      `/tariff/api/v1/calculate?shipper_destination_id=${store.storeAddressId}&receiver_destination_id=${transaction.value.address_id}&item_value=${totalValue}&weight=${totalWeight}`,
-      {
-        headers: {
-          'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
-        }
+    const response = await axiosInstance.get('/shipment/calculate', {
+      params: {
+        shipper_destination_id: store.storeAddressId,
+        receiver_destination_id: transaction.value.address_id,
+        item_value: totalValue,
+        weight: totalWeight
       }
-    )
+    })
 
-    const data = await response.json()
+    const data = response.data
     couriers.value = data.data.calculate_reguler
     showDeliveryModal.value = true
   } catch {

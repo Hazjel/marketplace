@@ -31,7 +31,7 @@ class TransactionStoreRequest extends FormRequest
             'shipping' => 'required|string',
             'shipping_type' => 'required|string',
             'shipping_cost' => 'required|numeric|min:0',
-            'products' => 'required|array',
+            'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.qty' => 'required|integer|min:1'
         ];
