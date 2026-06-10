@@ -5,10 +5,10 @@ from contextlib import asynccontextmanager
 import redis.asyncio as aioredis
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
+from _limiter import limiter
 from config import CORS_ALLOWED_ORIGINS, REDIS_URL
 from metrics import REQUEST_COUNT, REQUEST_LATENCY
 from rag import ProductVectorStore, init_vector_store, rag_refresh_loop
@@ -52,8 +52,6 @@ async def lifespan(application: FastAPI):
 # ---------------------------------------------------------------------------
 # APP FACTORY
 # ---------------------------------------------------------------------------
-limiter = Limiter(key_func=get_remote_address)
-
 app = FastAPI(
     title="Blukios AI Service",
     description="RAG-powered chatbot API untuk marketplace Blukios",
@@ -69,12 +67,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Inject limiter ke routers
-from routes import chat as chat_module
-from routes import admin as admin_module
-chat_module.limiter  = limiter
-admin_module.limiter = limiter   # type: ignore[attr-defined]
 
 app.include_router(chat_router)
 app.include_router(admin_router)

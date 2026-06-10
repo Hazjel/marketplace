@@ -11,13 +11,9 @@ from nlp import make_cache_key
 from ollama import ollama_chat, ollama_stream
 from redis_helper import append_session_history, get_llm_cache, set_llm_cache
 
-router = APIRouter()
+from _limiter import limiter
 
-# limiter diimport dari main agar tidak terjadi duplikasi instance
-# Diset oleh main.py via app.state setelah router di-include
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-limiter = Limiter(key_func=get_remote_address)
+router = APIRouter()
 
 
 # ---------------------------------------------------------------------------
