@@ -6,6 +6,15 @@ import httpx
 
 from config import OLLAMA_BASE_URL, OLLAMA_MODEL, OLLAMA_TIMEOUT_S, OLLAMA_MAX_RETRIES
 
+_client: httpx.AsyncClient | None = None
+
+
+def get_client() -> httpx.AsyncClient:
+    global _client
+    if _client is None or _client.is_closed:
+        _client = httpx.AsyncClient(timeout=httpx.Timeout(OLLAMA_TIMEOUT_S))
+    return _client
+
 # ---------------------------------------------------------------------------
 # System Prompt
 # ---------------------------------------------------------------------------
@@ -35,15 +44,15 @@ async def ollama_chat(messages: list[dict], temperature: float | None = None) ->
         "model":    OLLAMA_MODEL,
         "messages": messages,
         "stream":   False,
+        "think":    False,
+        "options":  {"temperature": temperature if temperature is not None else 0.7, "num_ctx": 1024},
     }
-    if temperature is not None:
-        payload["options"] = {"temperature": temperature}
 
     last_error: Exception | None = None
     for attempt in range(OLLAMA_MAX_RETRIES + 1):
         try:
-            async with httpx.AsyncClient(timeout=httpx.Timeout(OLLAMA_TIMEOUT_S)) as client:
-                r = await client.post(f"{OLLAMA_BASE_URL}/api/chat", json=payload)
+            client = get_client()
+            r = await client.post(f"{OLLAMA_BASE_URL}/api/chat", json=payload)
             if r.status_code >= 400:
                 raise RuntimeError(f"Ollama error {r.status_code}: {r.text[:200]}")
             content = r.json().get("message", {}).get("content")
@@ -65,10 +74,11 @@ async def ollama_stream(messages: list[dict], temperature: float = 0.7):
         "model":    OLLAMA_MODEL,
         "messages": messages,
         "stream":   True,
-        "options":  {"temperature": temperature},
+        "think":    False,
+        "options":  {"temperature": temperature, "num_ctx": 1024},
     }
-    async with httpx.AsyncClient(timeout=httpx.Timeout(OLLAMA_TIMEOUT_S)) as client:
-        async with client.stream("POST", f"{OLLAMA_BASE_URL}/api/chat", json=payload) as r:
+    client = get_client()
+    async with client.stream("POST", f"{OLLAMA_BASE_URL}/api/chat", json=payload) as r:
             if r.status_code >= 400:
                 body = await r.aread()
                 raise RuntimeError(f"Ollama stream error {r.status_code}: {body.decode()}")
