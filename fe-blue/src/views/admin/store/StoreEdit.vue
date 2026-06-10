@@ -2,7 +2,7 @@
 import { useStoreStore } from '@/stores/store'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { debounce } from 'lodash'
 import { useToast } from 'vue-toastification'
@@ -75,14 +75,22 @@ const handleSubmit = async () => {
   }
 }
 
+let logoObjectUrl = null
+
 const handleImageChange = (e) => {
   const file = e.target.files[0]
 
   if (file) {
+    if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl)
     store.value.logo = file
-    store.value.logo_url = URL.createObjectURL(file)
+    logoObjectUrl = URL.createObjectURL(file)
+    store.value.logo_url = logoObjectUrl
   }
 }
+
+onUnmounted(() => {
+  if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl)
+})
 
 const handleAddressInput = debounce(async (search) => {
   if (!search.trim()) {

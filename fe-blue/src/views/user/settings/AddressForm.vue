@@ -1,4 +1,5 @@
 <script setup>
+import { logger } from '@/utils/logger'
 import { onMounted, ref, reactive } from 'vue'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
 import { axiosInstance } from '@/plugins/axios'
@@ -54,7 +55,7 @@ const handleCityInput = debounce(async (search) => {
     cityOptions.value = data.data
     showCityOptions.value = true
   } catch (err) {
-    console.error(err)
+    logger.error(err)
   } finally {
     loadingCities.value = false
   }

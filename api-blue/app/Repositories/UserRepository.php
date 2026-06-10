@@ -11,7 +11,7 @@ class UserRepository implements UserRepositoryInterface
 {
     public function getAll(?string $search, ?int $limit, bool $execute, ?string $roles = null)
     {
-        $query = User::where(function ($query) use ($search) {
+        $query = User::with(['roles'])->where(function ($query) use ($search) {
             if ($search) {
                 $query->search($search);
             }
