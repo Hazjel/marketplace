@@ -171,7 +171,6 @@ def extract_metadata_filters(query: str) -> dict | None:
 # ---------------------------------------------------------------------------
 # LLM Cache Key
 # ---------------------------------------------------------------------------
-def make_cache_key(msg: str, session_id: str) -> str:
-    """Buat cache key unik berdasarkan pesan + session (untuk isolasi per user)."""
-    payload = f"{session_id}:{msg.lower().strip()}"
-    return hashlib.sha256(payload.encode()).hexdigest()[:24]
+def make_cache_key(msg: str) -> str:
+    """Buat cache key global berdasarkan pesan saja, agar hit lintas sesi."""
+    return hashlib.sha256(msg.lower().strip().encode()).hexdigest()[:24]

@@ -34,7 +34,7 @@ async def predict_response(request: Request, body: ChatRequest) -> ChatResponse:
         found_products, messages = await prepare_context(session_id, body.message)
 
         # LLM Cache — cek Redis sebelum hit Ollama
-        cache_key    = make_cache_key(body.message, session_id)
+        cache_key    = make_cache_key(body.message)
         cached_reply = await get_llm_cache(cache_key)
         if cached_reply:
             print(f"[Cache] HIT session={session_id}")
@@ -78,7 +78,7 @@ async def predict_stream(request: Request, body: ChatRequest) -> StreamingRespon
             found_products, messages = await prepare_context(session_id, body.message)
 
             # LLM Cache — jika cache hit, stream kata per kata tanpa hit Ollama
-            cache_key    = make_cache_key(body.message, session_id)
+            cache_key    = make_cache_key(body.message)
             cached_reply = await get_llm_cache(cache_key)
             if cached_reply:
                 print(f"[Cache] STREAM HIT session={session_id}")

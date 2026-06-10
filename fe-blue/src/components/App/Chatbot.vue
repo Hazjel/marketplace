@@ -66,6 +66,22 @@ const sendMessage = async () => {
   isWaiting.value  = true
   isStreaming.value = true
 
+  // Token queue — diisi oleh network loop, dikosongkan oleh RAF loop
+  const tokenQueue = []
+  let rafId = null
+
+  const drainQueue = () => {
+    if (tokenQueue.length > 0) {
+      botMsg.text += tokenQueue.shift()
+      scrollToBottom()
+    }
+    if (tokenQueue.length > 0) {
+      rafId = requestAnimationFrame(drainQueue)
+    } else {
+      rafId = null
+    }
+  }
+
   try {
     const res = await fetch(`${AI_URL}/predict/stream`, {
       method:  'POST',
@@ -84,12 +100,9 @@ const sendMessage = async () => {
       const { done, value } = await reader.read()
       if (done) break
 
-      // Akumulasi chunk ke buffer, decode stream-mode agar multi-byte aman
       buffer += decoder.decode(value, { stream: true })
 
-      // Proses setiap baris yang sudah lengkap (diakhiri \n)
       const lines = buffer.split('\n')
-      // Simpan baris terakhir yang mungkin belum lengkap
       buffer = lines.pop() ?? ''
 
       for (const line of lines) {
@@ -101,7 +114,6 @@ const sendMessage = async () => {
         try {
           event = JSON.parse(rawJson)
         } catch (e) {
-          // Bisa terjadi jika data: sangat besar terpotong — buffer sampai baris berikutnya
           console.warn('[Chatbot] Incomplete JSON chunk, skip:', rawJson.substring(0, 50))
           continue
         }
@@ -110,8 +122,8 @@ const sendMessage = async () => {
 
         if (event.token) {
           isWaiting.value = false
-          botMsg.text += event.token
-          scrollToBottom()
+          tokenQueue.push(event.token)
+          if (!rafId) rafId = requestAnimationFrame(drainQueue)
         }
 
         if (event.done) {
@@ -130,6 +142,9 @@ const sendMessage = async () => {
     console.error('[Chatbot] Stream error:', err)
     botMsg.text = 'Duh, koneksi putus.. coba lagi ya~ 🙏'
   } finally {
+    // Flush sisa queue sebelum selesai
+    if (rafId) cancelAnimationFrame(rafId)
+    if (tokenQueue.length > 0) botMsg.text += tokenQueue.join('')
     botMsg.streaming  = false
     isStreaming.value  = false
     isWaiting.value   = false
