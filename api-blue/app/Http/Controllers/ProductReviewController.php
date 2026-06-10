@@ -91,15 +91,16 @@ class ProductReviewController extends Controller implements HasMiddleware
 
             // Handle Attachments
             if ($request->hasFile('attachments')) {
+                $allowedMimes = [
+                    'image/jpeg' => 'jpg', 'image/png' => 'png',
+                    'video/mp4' => 'mp4', 'video/quicktime' => 'mov',
+                ];
                 foreach ($request->file('attachments') as $file) {
-                    $filename = time() . '_' . uniqid() . '.' . $file->extension();
-                    
-                    // Determine type based on mime
                     $mime = $file->getMimeType();
+                    if (!array_key_exists($mime, $allowedMimes)) continue;
                     $type = str_starts_with($mime, 'video') ? 'video' : 'image';
-                    
+                    $filename = time() . '_' . \Illuminate\Support\Str::random(16) . '.' . $allowedMimes[$mime];
                     $file->move(public_path('upload/reviews'), $filename);
-                    
                     \App\Models\ProductReviewAttachment::create([
                         'product_review_id' => $productReview->id,
                         'file_path' => 'upload/reviews/' . $filename,

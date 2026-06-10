@@ -20,7 +20,12 @@ class ChatController extends Controller
                 return ResponseHelper::jsonResponse(false, 'User not found', null, 404);
             }
 
-            return ResponseHelper::jsonResponse(true, 'User info fetched successfully', $user, 200);
+            return ResponseHelper::jsonResponse(true, 'User info fetched successfully', [
+                'id' => $user->id,
+                'name' => $user->name,
+                'profile_picture' => $user->profile_picture ? asset('storage/' . $user->profile_picture) : null,
+                'last_seen_at' => $user->last_seen_at,
+            ], 200);
 
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);

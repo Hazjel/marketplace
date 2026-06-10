@@ -90,8 +90,8 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', $resource, 200);
         } catch (\Throwable $e) {
-            Log::error("TRANSACTION LIST ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            Log::error('Transaction list error', ['error' => $e->getMessage()]);
+            return ResponseHelper::jsonResponse(false, 'Terjadi kesalahan pada server.', null, 500);
         }
     }
 
@@ -110,7 +110,7 @@ class TransactionController extends Controller implements HasMiddleware
      */
     public function store(TransactionStoreRequest $request)
     {
-        Log::error("CONTROLLER: Store START. Payload: " . json_encode($request->all()));
+        Log::info('Transaction creation started', ['user_id' => auth()->id()]);
 
         // Security: Prevent Admin from creating transactions
         if ($request->user()->hasRole('admin')) {
@@ -229,7 +229,12 @@ class TransactionController extends Controller implements HasMiddleware
             $receivingProof = null;
             if (request()->hasFile('receiving_proof')) {
                 $file = request()->file('receiving_proof');
-                $filename = time() . '_' . uniqid() . '.' . $file->extension();
+                $allowedMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+                $mime = $file->getMimeType();
+                if (!array_key_exists($mime, $allowedMimes)) {
+                    return ResponseHelper::jsonResponse(false, 'Tipe file tidak diizinkan.', null, 422);
+                }
+                $filename = time() . '_' . \Illuminate\Support\Str::random(16) . '.' . $allowedMimes[$mime];
                 $file->move(public_path('upload/transactions'), $filename);
                 $receivingProof = 'upload/transactions/' . $filename;
             }

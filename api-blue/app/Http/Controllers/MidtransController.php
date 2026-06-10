@@ -27,13 +27,10 @@ class MidtransController extends Controller
         // compute signature using Midtrans formula: order_id + status_code + gross_amount + server_key
         $hashedKey = hash('sha512', ($request->order_id ?? '') . ($request->status_code ?? '') . ($request->gross_amount ?? '') . ($serverKey ?? ''));
 
-        // log incoming callback for debugging
         Log::info('Midtrans callback received', [
             'order_id' => $request->order_id ?? null,
             'status_code' => $request->status_code ?? null,
-            'gross_amount' => $request->gross_amount ?? null,
-            'signature_key' => $request->signature_key ?? null,
-            'computed_signature' => $hashedKey,
+            'transaction_status' => $request->transaction_status ?? null,
         ]);
 
         if ($hashedKey !== ($request->signature_key ?? '')) {
@@ -53,6 +50,18 @@ class MidtransController extends Controller
 
         if (!$transaction) {
             return response()->json(['message' => 'Transaction not found'], 404);
+        }
+
+        // Defense-in-depth: verify amount matches DB (signature already covers this)
+        $expectedAmount = (int) round((float) $transaction->grand_total);
+        $receivedAmount = (int) round((float) ($request->gross_amount ?? 0));
+        if ($expectedAmount !== $receivedAmount) {
+            Log::error('Midtrans amount mismatch', [
+                'expected' => $expectedAmount,
+                'received' => $receivedAmount,
+                'transaction' => $transactionCode,
+            ]);
+            return response()->json(['message' => 'Amount mismatch'], 403);
         }
 
         switch ($transactionStatus) {

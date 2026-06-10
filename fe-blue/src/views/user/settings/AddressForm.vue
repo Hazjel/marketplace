@@ -38,20 +38,10 @@ const handleCityInput = debounce(async (search) => {
   }
   loadingCities.value = true
   try {
-    // Using the same endpoint as checkout (proxy in vite config or direct call if configured)
-    // Assuming we have a proxy or direct route. Since checkout used /tariff/api... let's try to verify if we need a backend endpoint wrapper.
-    // For consistent CORS handling, it's safer to use our own backend if available, but Checkout used direct proxy.
-    // We will use the same proxy path: /tariff/api/v1/destination/search
-
-    const response = await fetch(
-      `/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`,
-      {
-        headers: {
-          'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
-        }
-      }
-    )
-    const data = await response.json()
+    const response = await axiosInstance.get('/shipment/destination', {
+      params: { keyword: search }
+    })
+    const data = response.data
     cityOptions.value = data.data
     showCityOptions.value = true
   } catch (err) {

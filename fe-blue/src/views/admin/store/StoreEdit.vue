@@ -6,6 +6,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { debounce } from 'lodash'
 import { useToast } from 'vue-toastification'
+import { axiosInstance } from '@/plugins/axios'
 
 const router = useRouter()
 const toast = useToast()
@@ -100,16 +101,11 @@ const handleAddressInput = debounce(async (search) => {
 
   loadingAddress.value = true
   try {
-    const response = await fetch(
-      `/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`,
-      {
-        headers: {
-          'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
-        }
-      }
-    )
+    const response = await axiosInstance.get('/shipment/destination', {
+      params: { keyword: search }
+    })
 
-    const data = await response.json()
+    const data = response.data
     addressOptions.value = data.data
     showAddressOptions.value = true
   } catch (err) {

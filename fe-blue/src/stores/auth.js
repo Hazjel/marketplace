@@ -20,7 +20,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     setMode(mode) {
       this.activeMode = mode
-      Cookies.set('activeMode', mode, { sameSite: 'Strict' })
+      Cookies.set('activeMode', mode, { secure: true, sameSite: 'Strict' })
     },
     async login(credentials) {
       this.loading = true

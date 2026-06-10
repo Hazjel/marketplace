@@ -19,11 +19,18 @@ class WithdrawalResource extends JsonResource
             'store_balance' => new StoreBalanceResource($this->storeBalance),
             'amount' => (float)(string) $this->amount,
             'bank_account_name' => $this->bank_account_name,
-            'bank_account_number' => $this->bank_account_number,
+            'bank_account_number' => $this->maskAccountNumber($this->bank_account_number ?? ''),
             'bank_name' => $this->bank_name,
             'proof' => $this->proof ? asset('storage/' . $this->proof) : null,
             'status' => $this->status,
             'created_at' => $this->created_at
         ];
+    }
+
+    private function maskAccountNumber(string $number): string
+    {
+        $len = strlen($number);
+        if ($len <= 4) return $number;
+        return str_repeat('*', $len - 4) . substr($number, -4);
     }
 }

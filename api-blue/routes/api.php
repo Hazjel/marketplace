@@ -8,6 +8,7 @@ use App\Http\Controllers\StoreBalanceHistoryController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\MidtransController;
+use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductReviewController;
@@ -287,6 +288,12 @@ Route::middleware("throttle:5,1")->group(function () {
         \App\Http\Controllers\ForgotPasswordController::class,
         "resetPassword",
     ]);
+});
+
+// Shipment proxy — hides Komerce API key from frontend
+Route::middleware(['auth:sanctum', 'throttle:30,1'])->group(function () {
+    Route::get('/shipment/destination', [ShipmentController::class, 'destination']);
+    Route::get('/shipment/calculate', [ShipmentController::class, 'calculate']);
 });
 
 // Midtrans callback

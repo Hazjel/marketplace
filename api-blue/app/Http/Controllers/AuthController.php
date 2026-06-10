@@ -26,21 +26,12 @@ class AuthController extends Controller
 
             event(new \Illuminate\Auth\Events\Registered($user));
 
-            \Illuminate\Support\Facades\Log::info('Register Debug: Environment is ' . app()->environment());
-
             if (app()->isLocal()) {
-                \Illuminate\Support\Facades\Log::info('Register Debug: Attempting to verify email for ' . $user->email);
-                
-                // Fix: Unset token to avoid "Unknown column 'token'" error during save
-                $token = $user->token; 
-                unset($user->token); 
-
+                // Auto-verify email on local environment only
+                $token = $user->token;
+                unset($user->token);
                 $user->markEmailAsVerified();
-                
-                // Restore token for response
-                $user->token = $token; 
-
-                \Illuminate\Support\Facades\Log::info('Register Debug: Verification called. Verified at: ' . $user->email_verified_at);
+                $user->token = $token;
             }
 
             return ResponseHelper::jsonResponse(true, 'Registrasi Berhasil', new UserResource($user), 200);
@@ -79,7 +70,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'phone_number' => 'nullable|numeric|regex:/^08[0-9]{8,13}$/', // Added phone validation
             'profile_picture' => 'nullable|image|max:2048', // Max 2MB
-            'password' => 'nullable|min:8|string',
+            'password' => ['nullable', 'string', 'min:8', 'regex:/^(?=.*[A-Z])(?=.*[0-9]).+$/'],
             'current_password' => 'required_with:password|current_password'
         ]);
 

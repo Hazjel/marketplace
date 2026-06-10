@@ -6,6 +6,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { debounce } from 'lodash'
+import { axiosInstance } from '@/plugins/axios'
 
 const route = useRoute()
 
@@ -53,16 +54,11 @@ const handleAddressInput = debounce(async (search) => {
 
   loadingAddress.value = true
   try {
-    const response = await fetch(
-      `/tariff/api/v1/destination/search?keyword=${encodeURIComponent(search)}`,
-      {
-        headers: {
-          'x-api-key': import.meta.env.VITE_KOMERCE_API_KEY
-        }
-      }
-    )
+    const response = await axiosInstance.get('/shipment/destination', {
+      params: { keyword: search }
+    })
 
-    const data = await response.json()
+    const data = response.data
 
     if (data.data) {
       addressOptions.value = data.data
