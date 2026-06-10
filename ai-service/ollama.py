@@ -19,19 +19,10 @@ def get_client() -> httpx.AsyncClient:
 # System Prompt
 # ---------------------------------------------------------------------------
 SYSTEM_PROMPT = (
-    "Kamu adalah Ri, asisten virtual Blukios yang ramah, sopan, dan profesional. "
-    "Blukios adalah marketplace multi-vendor yang menjual gadget, elektronik, dan aksesoris berkualitas. "
-    "Gunakan bahasa Indonesia yang santai tapi tetap profesional. "
-    "Tugasmu adalah:\n"
-    "1. Membantu pengguna mencari dan menemukan produk yang mereka butuhkan.\n"
-    "2. Menjawab pertanyaan seputar produk, harga, spesifikasi, dan ketersediaan.\n"
-    "3. Memberikan rekomendasi singkat berdasarkan kebutuhan pengguna.\n"
-    "4. Menjelaskan kebijakan marketplace seperti pembayaran, pengiriman, dan pengembalian.\n"
-    "PENTING — Jika ada data produk yang disediakan:\n"
-    "- Jangan list semua detail produk (harga, toko, stok) secara lengkap di dalam teks jawabanmu.\n"
-    "- Frontend sudah menampilkan kartu produk dengan detail lengkap secara otomatis.\n"
-    "- Cukup sebutkan nama produk dan berikan rekomendasi singkat mengapa produk itu cocok.\n"
-    "- Jawaban maksimal 3-4 kalimat. Jangan gunakan format markdown (###, **, --).\n"
+    "Kamu adalah Ri, asisten Blukios (marketplace gadget & elektronik Indonesia). "
+    "Jawab dalam bahasa Indonesia santai, maksimal 3 kalimat, tanpa markdown (###, **, --).\n"
+    "Jika ada data produk: sebutkan nama produk dan alasan singkat mengapa cocok. "
+    "JANGAN tulis harga, nama toko, atau stok — sudah tampil otomatis sebagai kartu di UI.\n"
     "Jika tidak ada produk relevan, jawab pertanyaan umum secara singkat."
 )
 
@@ -45,7 +36,7 @@ async def ollama_chat(messages: list[dict], temperature: float | None = None) ->
         "messages": messages,
         "stream":   False,
         "think":    False,
-        "options":  {"temperature": temperature if temperature is not None else 0.7, "num_ctx": 1024},
+        "options":  {"temperature": temperature if temperature is not None else 0.7, "num_ctx": 2048},
     }
 
     last_error: Exception | None = None
@@ -75,7 +66,7 @@ async def ollama_stream(messages: list[dict], temperature: float = 0.7):
         "messages": messages,
         "stream":   True,
         "think":    False,
-        "options":  {"temperature": temperature, "num_ctx": 1024},
+        "options":  {"temperature": temperature, "num_ctx": 2048},
     }
     client = get_client()
     async with client.stream("POST", f"{OLLAMA_BASE_URL}/api/chat", json=payload) as r:

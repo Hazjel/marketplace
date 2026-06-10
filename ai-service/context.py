@@ -21,11 +21,11 @@ def build_product_context(products: list[dict]) -> str:
         for p in products
     ])
     return (
-        f"\n[SISTEM: Produk yang tersedia di Blukios sesuai pertanyaan user "
-        f"(detail harga & toko sudah ditampilkan sebagai kartu di UI):\n"
+        f"Produk yang TERSEDIA di Blukios untuk pertanyaan ini:\n"
         f"{lines}\n"
-        f"Berikan rekomendasi SINGKAT — sebutkan nama produk dan alasan singkat mengapa cocok. "
-        f"Jangan ulangi harga atau detail toko karena sudah ada di kartu produk.]"
+        f"HANYA sebut produk dari daftar di atas. "
+        f"JANGAN menyebut produk lain yang tidak ada di daftar. "
+        f"Harga dan detail toko sudah tampil otomatis sebagai kartu di UI, tidak perlu diulang."
     )
 
 
@@ -71,31 +71,30 @@ async def prepare_context(session_id: str, user_msg: str) -> tuple[list[dict], l
     )
 
     # Merge: keyword hits lebih reliable untuk name queries
-    seen_ids: set[str] = set()
+    # Deduplikasi berdasarkan nama produk — produk sama dari beda toko tidak ditampilkan double
+    seen_ids:   set[str] = set()
+    seen_names: set[str] = set()
     products: list[dict] = []
 
-    for p in keyword_results:
-        pid = p.get("id", "")
-        if pid not in seen_ids:
+    for p in (*keyword_results, *semantic_results):
+        pid   = p.get("id", "")
+        pname = p.get("name", "").strip().lower()
+        if pid not in seen_ids and pname not in seen_names:
             seen_ids.add(pid)
-            products.append(p)
-
-    for p in semantic_results:
-        pid = p.get("id", "")
-        if pid not in seen_ids:
-            seen_ids.add(pid)
+            seen_names.add(pname)
             products.append(p)
 
     products = products[:RAG_TOP_K]
 
-    context_info       = build_product_context(products)
-    final_user_content = f"{user_msg} {context_info}".strip()
+    context_info = build_product_context(products)
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         *history,
-        {"role": "user", "content": final_user_content},
     ]
+    if context_info:
+        messages.append({"role": "system", "content": context_info.strip()})
+    messages.append({"role": "user", "content": user_msg})
 
     sim_scores = [p.get("_sim", 0) for p in products]
     kw_count   = len(keyword_results)

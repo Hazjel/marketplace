@@ -228,6 +228,10 @@ class ProductVectorStore:
             "produk", "bernama", "nama", "beli", "mau", "cari", "tolong",
             "boleh", "bisa", "minta", "butuh", "perlu", "ingin", "want",
             "please", "show", "find", "search", "get", "list",
+            "saja", "tersedia", "marketplace", "semua", "berapa",
+            "harga", "aja", "kira", "sekitar", "gimana", "bagaimana",
+            "toko", "blukios", "sini", "sana", "dimana", "siapa",
+            "kapan", "kenapa", "mengapa", "mohon", "dong", "deh",
         }
         clean_tokens: list[str] = []
         for raw in query.split():
@@ -239,28 +243,33 @@ class ProductVectorStore:
             return []
 
         loop = asyncio.get_event_loop()
-        seen_ids: set[str] = set()
-        merged:   list[dict] = []
 
-        for token in clean_tokens:
+        async def _search_token(t: str) -> list[dict]:
             try:
                 r = await loop.run_in_executor(
                     None,
-                    lambda t=token: self._collection.get(
+                    lambda: self._collection.get(
                         where_document={"$contains": t},
                         limit=n_results,
                         include=["metadatas"],
                     ),
                 )
-                for meta in (r.get("metadatas") or []):
-                    pid = str(meta.get("id", ""))
-                    if pid and pid not in seen_ids:
-                        seen_ids.add(pid)
-                        merged.append(meta)
-                        if len(merged) >= n_results:
-                            return merged
+                return r.get("metadatas") or []
             except Exception:
-                continue
+                return []
+
+        all_results = await asyncio.gather(*[_search_token(t) for t in clean_tokens])
+
+        seen_ids: set[str] = set()
+        merged:   list[dict] = []
+        for metas in all_results:
+            for meta in metas:
+                pid = str(meta.get("id", ""))
+                if pid and pid not in seen_ids:
+                    seen_ids.add(pid)
+                    merged.append(meta)
+                    if len(merged) >= n_results:
+                        return merged
 
         return merged
 
