@@ -99,6 +99,7 @@ watch(
 watch(
   filters,
   () => {
+    serverOptions.value.page = 1
     debounceFetchData()
   },
   { deep: true }

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { axiosInstance } from '@/plugins/axios'
 import Cookies from 'js-cookie'
+import { logger } from '@/utils/logger'
 
 const STORAGE_KEY = 'grouped_cart'
 const SELECTED_STORES_KEY = 'selected_stores'
@@ -11,12 +12,26 @@ const SELECTED_STORES_KEY = 'selected_stores'
  * - Authenticated: API-first with localStorage as fallback cache
  */
 export const useCartStore = defineStore('cart', {
-  state: () => ({
-    carts: JSON.parse(localStorage.getItem(STORAGE_KEY)) || [],
-    selectedStores: new Set(JSON.parse(localStorage.getItem(SELECTED_STORES_KEY)) || []),
-    stockValidation: null,
-    syncLoading: false
-  }),
+  state: () => {
+    let carts = []
+    let selectedStores = new Set()
+    try {
+      carts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
+    } catch {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+    try {
+      selectedStores = new Set(JSON.parse(localStorage.getItem(SELECTED_STORES_KEY)) || [])
+    } catch {
+      localStorage.removeItem(SELECTED_STORES_KEY)
+    }
+    return {
+      carts,
+      selectedStores,
+      stockValidation: null,
+      syncLoading: false
+    }
+  },
 
   getters: {
     isAuthenticated: () => !!Cookies.get('token'),
@@ -114,7 +129,7 @@ export const useCartStore = defineStore('cart', {
           })
         } catch {
           // Server sync failed — local state already updated, will sync later
-          console.warn('Cart server sync failed, will retry on next fetch')
+          logger.warn('Cart server sync failed, will retry on next fetch')
         }
       }
     },
@@ -169,7 +184,7 @@ export const useCartStore = defineStore('cart', {
           const params = variantId ? `?variant_id=${variantId}` : ''
           await axiosInstance.delete(`/cart/${productId}${params}`)
         } catch {
-          console.warn('Cart server remove failed')
+          logger.warn('Cart server remove failed')
         }
       }
     },
@@ -215,7 +230,7 @@ export const useCartStore = defineStore('cart', {
           quantity
         })
       } catch {
-        console.warn('Cart server quantity sync failed')
+        logger.warn('Cart server quantity sync failed')
       }
     },
 
@@ -237,7 +252,7 @@ export const useCartStore = defineStore('cart', {
         try {
           await axiosInstance.delete('/cart/clear')
         } catch {
-          console.warn('Cart server clear failed')
+          logger.warn('Cart server clear failed')
         }
       }
     },
@@ -263,7 +278,7 @@ export const useCartStore = defineStore('cart', {
           await this.fetchCart()
         }
       } catch {
-        console.warn('Cart sync after login failed')
+        logger.warn('Cart sync after login failed')
       } finally {
         this.syncLoading = false
       }
@@ -279,7 +294,7 @@ export const useCartStore = defineStore('cart', {
         const response = await axiosInstance.get('/cart')
         this._applyServerCart(response.data.data)
       } catch {
-        console.warn('Cart fetch from server failed')
+        logger.warn('Cart fetch from server failed')
       }
     },
 
@@ -370,7 +385,7 @@ export const useCartStore = defineStore('cart', {
 
         return this.stockValidation
       } catch {
-        console.warn('Stock validation failed')
+        logger.warn('Stock validation failed')
         return null
       }
     },

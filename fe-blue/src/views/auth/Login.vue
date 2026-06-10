@@ -33,11 +33,10 @@ const handleSubmit = async () => {
 
   if (rememberMe.value) {
     localStorage.setItem('remembered_email', form.value.email)
-    localStorage.setItem('remembered_password', form.value.password)
   } else {
     localStorage.removeItem('remembered_email')
-    localStorage.removeItem('remembered_password')
   }
+  localStorage.removeItem('remembered_password') // hapus password lama jika ada
 
   // Sync cart from localStorage → server after login
   const cart = useCartStore()
@@ -57,12 +56,10 @@ const handleSubmit = async () => {
 onMounted(() => {
   authStore.error = null // Reset error state
 
+  localStorage.removeItem('remembered_password') // bersihkan password lama (security fix)
   const savedEmail = localStorage.getItem('remembered_email')
-  const savedPassword = localStorage.getItem('remembered_password')
-
-  if (savedEmail && savedPassword) {
+  if (savedEmail) {
     form.value.email = savedEmail
-    form.value.password = savedPassword
     rememberMe.value = true
   }
 })

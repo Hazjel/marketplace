@@ -62,7 +62,7 @@ class AutoCompleteTransaction extends Command
 
                 if ($store && $store->storeBalance) {
                     $netSales = $transaction->grand_total - $transaction->shipping_cost;
-                    $adminFee = $netSales * 0.10;
+                    $adminFee = $netSales * config('marketplace.admin_fee_percentage');
                     $sellerAmount = $netSales - $adminFee;
 
                     $storeBalanceRepository->releasePending($store->storeBalance->id, $sellerAmount);
