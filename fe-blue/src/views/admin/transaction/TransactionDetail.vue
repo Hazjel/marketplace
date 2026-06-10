@@ -4,11 +4,12 @@ import { formatRupiah, formatToClientTimeZone } from '@/helpers/format'
 import { useTransactionStore } from '@/stores/transaction'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductReviewStore } from '@/stores/productReview'
 import { useToast } from 'vue-toastification'
 import ReviewModal from '@/components/ReviewModal.vue'
+import { logger } from '@/utils/logger'
 
 const route = useRoute()
 const toast = useToast()
@@ -50,7 +51,7 @@ const fetchData = async () => {
       ? getImageUrl(response.delivery_proof)
       : PlaceHolder
   } catch (error) {
-    console.error('Error fetching transaction:', error)
+    logger.error('Error fetching transaction:', error)
     toast.error('Gagal memuat data transaksi. Terjadi kesalahan atau data tidak ditemukan.')
   }
 }
@@ -74,7 +75,7 @@ const handleUpdateData = async () => {
     await fetchData()
     toast.success('Status transaksi berhasil diperbarui')
   } catch (err) {
-    console.error('Update failed:', err)
+    logger.error('Update failed:', err)
     toast.error('Gagal memperbarui transaksi')
   }
 }
@@ -93,13 +94,21 @@ const handleDeliverySubmit = () => {
   handleUpdateData()
 }
 
+let deliveryProofObjectUrl = null
+
+onUnmounted(() => {
+  if (deliveryProofObjectUrl) URL.revokeObjectURL(deliveryProofObjectUrl)
+})
+
 const handleImageChange = (e) => {
   if (!e.target.files || !e.target.files[0]) return
 
   const file = e.target.files[0]
 
   transaction.value.delivery_proof = file
-  transaction.value.delivery_proof_url = URL.createObjectURL(file)
+  if (deliveryProofObjectUrl) URL.revokeObjectURL(deliveryProofObjectUrl)
+  deliveryProofObjectUrl = URL.createObjectURL(file)
+  transaction.value.delivery_proof_url = deliveryProofObjectUrl
 }
 
 const getImageUrl = (path) => {
@@ -150,7 +159,7 @@ const handleReceivingProofChange = async (event) => {
     await fetchData()
     toast.success('Pesanan diterima & diselesaikan')
   } catch (error) {
-    console.error('Failed to complete order', error)
+    logger.error('Failed to complete order', error)
     toast.error('Gagal menyelesaikan pesanan')
   }
 }

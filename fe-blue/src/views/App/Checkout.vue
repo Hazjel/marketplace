@@ -12,6 +12,7 @@ import { useToast } from 'vue-toastification'
 import { axiosInstance } from '@/plugins/axios'
 import CheckoutStepper from '@/components/Molecule/CheckoutStepper.vue'
 import TrustBadges from '@/components/Molecule/TrustBadges.vue'
+import { logger } from '@/utils/logger'
 
 // Store imports
 const authStore = useAuthStore()
@@ -50,7 +51,7 @@ const fetchSavedAddresses = async () => {
       showSavedAddresses.value = true
     }
   } catch (error) {
-    console.error('Failed to fetch addresses', error)
+    logger.error('Failed to fetch addresses', error)
   }
 }
 
@@ -112,7 +113,7 @@ const loadMidtransScript = () => {
     script.type = 'text/javascript'
     const clientKey = import.meta.env.VITE_MIDTRANS_CLIENT_KEY
     if (!clientKey) {
-      console.error('Midtrans Client Key is missing in .env')
+      logger.error('Midtrans Client Key is missing in .env')
       reject(new Error('Midtrans configuration error'))
       return
     }
@@ -134,7 +135,7 @@ const loadMidtransScript = () => {
       resolve()
     }
     script.onerror = (error) => {
-      console.error('Failed to load Midtrans:', error)
+      logger.error('Failed to load Midtrans:', error)
       reject(new Error('Failed to load Midtrans payment system'))
     }
 
@@ -232,6 +233,7 @@ const handleCourierSubmit = () => {
 const isProcessingPayment = ref(false)
 
 const handleSubmit = async () => {
+  if (isProcessingPayment.value) return
   if (!selectedCourier.value) {
     toast.error('Silakan pilih kurir terlebih dahulu')
     return
@@ -307,7 +309,7 @@ onMounted(async () => {
   try {
     await loadMidtransScript()
   } catch (error) {
-    console.error('Midtrans load error:', error)
+    logger.error('Midtrans load error:', error)
     toast.error('Gagal memuat sistem pembayaran. Silakan refresh halaman.')
   }
 

@@ -27,13 +27,15 @@ class Transaction extends Model
         'tax',
         'grand_total',
         'payment_status',
-        'receiving_proof'
+        'receiving_proof',
+        'admin_fee'
     ];
 
     protected $casts = [
         'shipping_cost' => 'decimal:2',
         'tax' => 'decimal:2',
-        'grand_total' => 'decimal:2'
+        'grand_total' => 'decimal:2',
+        'admin_fee' => 'decimal:2'
     ];
 
     public function scopeSearch($query, $search)

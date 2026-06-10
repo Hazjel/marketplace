@@ -49,7 +49,7 @@ class UserController extends Controller implements HasMiddleware
     {
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer',
+            'row_per_page' => 'required|integer|min:1|max:100',
             'roles' => 'nullable|string'
         ]);
 

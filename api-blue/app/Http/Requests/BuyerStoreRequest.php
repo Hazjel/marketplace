@@ -16,7 +16,7 @@ class BuyerStoreRequest extends FormRequest
     {
         return [
             'user_id' => 'required|exists:users,id',
-            'phone_number' => 'required|string',
+            'phone_number' => 'required|string|regex:/^08[0-9]{8,13}$/',
         ];
     }
 

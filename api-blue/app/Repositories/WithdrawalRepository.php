@@ -15,7 +15,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
 {
     public function getAll(?string $search, ?int $limit, bool $execute)
     {
-        $query = Withdrawal::where(function ($query) use ($search) {
+        $query = Withdrawal::with(['storeBalance.store'])->where(function ($query) use ($search) {
             if ($search) {
                 $query->search($search);
             }

@@ -42,52 +42,50 @@ class LogisticsController extends Controller
         // 3. Update Status Logic
         try {
             $previousStatus = $transaction->delivery_status;
-            
+            $newStatus = $previousStatus;
+
             switch ($status) {
                 case 'ON_PROCESS':
                 case 'MANIFESTED':
                 case 'ON_DELIVERY':
-                    $transaction->delivery_status = 'delivering';
+                    $newStatus = 'delivering';
                     break;
 
                 case 'DELIVERED':
-                    $transaction->delivery_status = 'completed';
+                    $newStatus = 'completed';
                     break;
 
                 case 'RETURNED':
                     // Optional: Handle return logic
                     break;
-                
+
                 default:
-                    // Unknown status, ignore or log
                     Log::warning("Unknown logistics status: $status for AWB: $awb");
                     return response()->json(['message' => "Status '$status' ignored"], 200);
             }
 
             // Save only if status changed
-            if ($previousStatus !== $transaction->delivery_status) {
-                if ($status === 'DELIVERED') {
-                    // Save Delivery Proof info if available in webhook
-                     if ($request->has('pod_receiver')) {
-                        // We might store this in a 'notes' column or 'delivery_proof' if it was a text field, 
-                        // but 'delivery_proof' is currently widely used for images. 
-                        // For now, let's just log it or maybe assume we don't save text proof yet.
+            if ($previousStatus !== $newStatus) {
+                \Illuminate\Support\Facades\DB::transaction(function () use ($transaction, $newStatus, $status, $request) {
+                    $transaction->delivery_status = $newStatus;
+
+                    if ($status === 'DELIVERED' && $request->has('pod_receiver')) {
                         Log::info("Recipient: " . $request->pod_receiver);
                     }
-                }
-                
-                $transaction->save();
-                Log::info("Transaction {$transaction->code} updated to {$transaction->delivery_status}");
+
+                    $transaction->save();
+                    Log::info("Transaction {$transaction->code} updated to {$transaction->delivery_status}");
+                });
             }
 
             return ResponseHelper::jsonResponse(true, 'Webhook Processed Successfully', [
                 'transaction_code' => $transaction->code,
-                'new_status' => $transaction->delivery_status
+                'new_status' => $newStatus
             ], 200);
 
         } catch (\Exception $e) {
-             Log::error('Error processing logistics webhook: ' . $e->getMessage());
-             return response()->json(['message' => 'Internal Server Error'], 500);
+            Log::error('Error processing logistics webhook: ' . $e->getMessage());
+            return response()->json(['message' => 'Internal Server Error'], 500);
         }
     }
 }

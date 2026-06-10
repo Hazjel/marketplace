@@ -1,4 +1,5 @@
 <script setup>
+import { logger } from '@/utils/logger'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
@@ -15,7 +16,7 @@ const fetchAddresses = async () => {
     const response = await axiosInstance.get('/address')
     addresses.value = response.data.data
   } catch (error) {
-    console.error('Error fetching addresses:', error)
+    logger.error('Error fetching addresses:', error)
   } finally {
     loading.value = false
   }

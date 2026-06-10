@@ -19,7 +19,7 @@ class WithdrawalStoreRequest extends FormRequest
             'amount' => [
                 'required',
                 'numeric',
-                'min:50000',
+                'min:' . config('marketplace.min_withdrawal_amount'),
                 function ($attribute, $value, $fail) {
                     $storeBalance = StoreBalance::find($this->store_balance_id);
 

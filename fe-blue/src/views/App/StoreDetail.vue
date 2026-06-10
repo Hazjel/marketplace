@@ -1,4 +1,5 @@
 <script setup>
+import { logger } from '@/utils/logger'
 import ProductCard from '@/components/card/ProductCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import ReviewCard from '@/components/card/ReviewCard.vue'
@@ -95,7 +96,7 @@ const handleFollow = async () => {
     isFollowing.value = true
     store.value.followers_count = (store.value.followers_count || 0) + 1
   } catch (error) {
-    console.error('Follow failed', error)
+    logger.error('Follow failed', error)
   }
 }
 
@@ -105,7 +106,7 @@ const handleUnfollow = async () => {
     isFollowing.value = false
     store.value.followers_count = Math.max(0, (store.value.followers_count || 0) - 1)
   } catch (error) {
-    console.error('Unfollow failed', error)
+    logger.error('Unfollow failed', error)
   }
 }
 

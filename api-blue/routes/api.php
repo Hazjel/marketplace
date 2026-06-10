@@ -136,7 +136,9 @@ Route::middleware("auth:sanctum")->group(function () {
         WithdrawalController::class,
         "approve",
     ]);
+    Route::middleware('throttle:5,1')->post("withdrawal", [WithdrawalController::class, "store"]);
     Route::apiResource("withdrawal", WithdrawalController::class)->except(
+        "store",
         "update",
         "delete",
     );
