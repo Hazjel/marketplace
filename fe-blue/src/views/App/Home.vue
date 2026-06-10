@@ -10,6 +10,7 @@ import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import { useHead } from '@vueuse/head'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useProductStore } from '@/stores/product'
+import { logger } from '@/utils/logger'
 
 useHead({
   title: 'Blukios — Belanja Semua Kebutuhanmu',
@@ -52,7 +53,7 @@ const loadProducts = async () => {
       page.value++
     }
   } catch (e) {
-    console.error('Failed to load products', e)
+    logger.error('Failed to load products', e)
   } finally {
     loading.value = false
     initialLoading.value = false

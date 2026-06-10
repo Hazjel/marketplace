@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { logger } from '@/utils/logger'
 import { axiosInstance } from '@/plugins/axios'
 import { handleError } from '@/helpers/errorHelper'
 
@@ -49,7 +50,7 @@ export const useProductStore = defineStore('product', {
         const response = await axiosInstance.get(`store/username/${username}/categories`)
         this.storeCategories = response.data.data
       } catch (error) {
-        console.error('Fetch Store Categories Error', error)
+        logger.error('Fetch Store Categories Error', error)
         this.error = handleError(error)
       } finally {
         this.loading = false
@@ -68,7 +69,7 @@ export const useProductStore = defineStore('product', {
         // Return langsung tanpa simpan ke state
         return response.data.data
       } catch (error) {
-        console.error('Search error:', error)
+        logger.error('Search error:', error)
         return []
       }
     },

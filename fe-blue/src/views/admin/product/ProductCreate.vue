@@ -124,9 +124,6 @@ const validateStep = (step) => {
     const hasThumbnail = product.value.product_images.some(
       (img) => img.is_thumbnail && (img.image || img.url !== PlaceHolder)
     )
-    console.log(hasThumbnail) // Use variable to silence linter or remove logic if unnecessary (keeping logic for safety but fixing unused)
-    // Actually, just remove the assignment if it's truly unused logic or keep it if it was intended used.
-    // Linter says unused, so it's not used in if check below.
     // However, maybe it SHOULD be used?
     // "Also check if at least one real image exists" - next check.
     // I will check lines 123-134.

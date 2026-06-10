@@ -17,6 +17,7 @@ import { useChatStore } from '@/stores/chat'
 import { axiosInstance } from '@/plugins/axios'
 import { useHead } from '@vueuse/head'
 import { useToast } from 'vue-toastification'
+import { logger } from '@/utils/logger'
 
 const route = useRoute()
 const router = useRouter()
@@ -441,7 +442,7 @@ const handleShare = async () => {
       await navigator.share(shareData)
     } catch (err) {
       // User cancelled share — no error needed
-      if (err.name !== 'AbortError') console.error(err)
+      if (err.name !== 'AbortError') logger.error(err)
     }
   } else {
     // Fallback: copy URL to clipboard

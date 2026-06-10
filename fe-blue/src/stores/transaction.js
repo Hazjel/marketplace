@@ -1,4 +1,5 @@
 import { handleError } from '@/helpers/errorHelper'
+import { logger } from '@/utils/logger'
 import { axiosInstance } from '@/plugins/axios'
 import { useAuthStore } from '@/stores/auth'
 import { defineStore } from 'pinia'
@@ -43,7 +44,7 @@ export const useTransactionStore = defineStore('transaction', {
         const response = await axiosInstance.get('transaction/chart-data')
         return response.data.data
       } catch (error) {
-        console.error('Failed to fetch chart data:', error)
+        logger.error('Failed to fetch chart data:', error)
         return []
       }
     },

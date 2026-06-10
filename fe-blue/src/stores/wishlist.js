@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { logger } from '@/utils/logger'
 import { ref, computed } from 'vue'
 import { axiosInstance } from '@/plugins/axios'
 import { useToast } from 'vue-toastification'
@@ -17,7 +18,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
       const response = await axiosInstance.get('/wishlist')
       items.value = response.data.data
     } catch (error) {
-      console.error('Failed to fetch wishlist', error)
+      logger.error('Failed to fetch wishlist', error)
     } finally {
       loading.value = false
     }

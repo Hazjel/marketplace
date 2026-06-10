@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { logger } from '@/utils/logger'
 import { axiosInstance } from '@/plugins/axios'
 import { handleError } from '@/helpers/errorHelper'
 
@@ -111,7 +112,7 @@ export const useChatStore = defineStore('chat', {
         const response = await axiosInstance.get(`/chat/user/${userId}`)
         return response.data.data
       } catch (error) {
-        console.error('Failed to fetch user info', error)
+        logger.error('Failed to fetch user info', error)
         return null
       }
     },

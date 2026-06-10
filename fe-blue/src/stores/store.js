@@ -1,4 +1,5 @@
 import { handleError } from '@/helpers/errorHelper'
+import { logger } from '@/utils/logger'
 import { axiosInstance } from '@/plugins/axios'
 import { defineStore } from 'pinia'
 import router from '@/router'
@@ -151,7 +152,7 @@ export const useStoreStore = defineStore('store', {
 
         return response.data.data
       } catch (error) {
-        console.error('Update store error:', error.response?.data)
+        logger.error('Update store error:', error.response?.data)
         this.error = handleError(error)
         throw error
       } finally {
@@ -235,7 +236,7 @@ export const useStoreStore = defineStore('store', {
         const response = await axiosInstance.get('store/locations')
         return response.data.data
       } catch (error) {
-        console.error('Error fetching locations:', error)
+        logger.error('Error fetching locations:', error)
         return []
       }
     }

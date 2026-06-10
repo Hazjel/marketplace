@@ -12,7 +12,7 @@ class BuyerRepository implements BuyerRepositoryInterface
 {
     public function getAll(?string $search, ?int $limit, bool $execute)
     {
-        $query = Buyer::where(function ($query) use ($search) {
+        $query = Buyer::with(['user'])->where(function ($query) use ($search) {
             if ($search) {
                 $query->search($search);
             }
