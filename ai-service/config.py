@@ -33,7 +33,7 @@ CORS_ALLOWED_ORIGINS: list[str] = [
 # RATE LIMIT & SESSION
 # ---------------------------------------------------------------------------
 RATE_LIMIT_PER_MINUTE = int(os.getenv("RATE_LIMIT_PER_MINUTE", "20"))
-SESSION_TTL_SECONDS   = int(os.getenv("SESSION_TTL_MINUTES", "60")) * 60
+SESSION_TTL_SECONDS   = int(os.getenv("SESSION_TTL_SECONDS", "3600"))
 REDIS_URL             = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # ---------------------------------------------------------------------------

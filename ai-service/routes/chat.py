@@ -46,8 +46,8 @@ async def predict_response(request: Request, body: ChatRequest) -> ChatResponse:
         had_error = True
         found_products = []
 
-    # Strip internal field _sim sebelum dikirim ke frontend
-    clean_products = [{k: v for k, v in p.items() if k != "_sim"} for p in found_products]
+    # Strip internal fields sebelum dikirim ke frontend
+    clean_products = [{k: v for k, v in p.items() if k not in ("_sim", "_score")} for p in found_products]
 
     return ChatResponse(
         reply=reply_text,
@@ -83,7 +83,7 @@ async def predict_stream(request: Request, body: ChatRequest) -> StreamingRespon
                 for i in range(0, len(words), chunk_size):
                     token = " ".join(words[i:i + chunk_size]) + (" " if i + chunk_size < len(words) else "")
                     yield f"data: {json.dumps({'token': token, 'done': False, 'session_id': session_id})}\n\n"
-                clean = [{k: v for k, v in p.items() if k != "_sim"} for p in found_products]
+                clean = [{k: v for k, v in p.items() if k not in ("_sim", "_score")} for p in found_products]
                 yield f"data: {json.dumps({'token': '', 'done': True, 'session_id': session_id, 'products': clean})}\n\n"
                 return
 

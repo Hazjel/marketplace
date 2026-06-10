@@ -96,7 +96,7 @@ async def eval_stats() -> dict:
 
         ratings: list[int] = []
         if feedback_keys:
-            raw_values = await redis_client.mget(*feedback_keys)
+            raw_values = await redis_client.mget(*feedback_keys[:500])
             for raw in raw_values:
                 if raw:
                     fb     = json.loads(raw)
@@ -172,7 +172,7 @@ async def debug_search(q: str, n: int = 10, show_vectors: bool = False) -> dict:
         embeddings = raw_results.get("embeddings", [[]])[0] if show_vectors else []
 
         for rank, (meta, dist, doc) in enumerate(zip(metadatas, distances, documents), start=1):
-            similarity = max(0.0, round(1.0 - dist / 2.0, 6))
+            similarity = round(max(0.0, min(1.0, 1.0 - dist / 2.0)), 6)
             entry: dict = {
                 "rank":            rank,
                 "name":            meta.get("name", ""),
