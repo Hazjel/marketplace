@@ -111,7 +111,7 @@ class TransactionService
     public function calculateSellerAmount(Transaction $transaction): array
     {
         $netSales = $transaction->grand_total - $transaction->shipping_cost;
-        $adminFee = $netSales * 0.10;
+        $adminFee = $netSales * config('marketplace.admin_fee_percentage');
         $sellerAmount = $netSales - $adminFee;
 
         return [

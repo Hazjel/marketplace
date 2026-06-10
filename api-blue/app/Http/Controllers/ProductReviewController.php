@@ -92,7 +92,7 @@ class ProductReviewController extends Controller implements HasMiddleware
             // Handle Attachments
             if ($request->hasFile('attachments')) {
                 foreach ($request->file('attachments') as $file) {
-                    $filename = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+                    $filename = time() . '_' . uniqid() . '.' . $file->extension();
                     
                     // Determine type based on mime
                     $mime = $file->getMimeType();

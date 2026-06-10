@@ -60,6 +60,7 @@ const handleToggleWishlist = async () => {
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         loading="lazy"
         :alt="item.name"
+        @error="$event.target.src = '/images/placeholder.png'"
       />
       <!-- Stock habis overlay -->
       <div

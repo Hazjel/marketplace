@@ -108,8 +108,8 @@ class TransactionRepository implements TransactionRepositoryInterface
         if (!$storeId) return [];
 
         // Generate last 7 days period ending today (inclusive)
-        $endDate = now()->endOfDay();
-        $startDate = now()->subDays(6)->startOfDay();
+        $endDate = now('Asia/Jakarta')->endOfDay();
+        $startDate = now('Asia/Jakarta')->subDays(6)->startOfDay();
         $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
 
         // Fetch data based on date range
@@ -565,7 +565,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             }
 
             $netSales = $transaction->grand_total - $transaction->shipping_cost;
-            $adminFee = $netSales * 0.10;
+            $adminFee = $netSales * config('marketplace.admin_fee_percentage');
             $sellerAmount = $netSales - $adminFee;
 
             $storeBalanceRepository = new StoreBalanceRepository;

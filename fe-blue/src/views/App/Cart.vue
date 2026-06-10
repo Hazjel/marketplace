@@ -194,7 +194,7 @@ type="button"
                       <input
 type="number"
                         class="amount appearance-none w-10 text-center font-bold text-sm outline-none bg-transparent dark:text-white"
-                        :value="product.quantity" @change="handleUpdateQuantity(store.storeId, product.id, $event)" />
+                        :value="product.quantity" min="1" :max="product.stock" @change="handleUpdateQuantity(store.storeId, product.id, $event)" />
                       <button
 type="button"
                         class="add size-7 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-all dark:text-white"

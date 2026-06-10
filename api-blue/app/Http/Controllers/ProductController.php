@@ -58,7 +58,7 @@ class ProductController extends Controller implements HasMiddleware
             'search' => 'nullable|string',
             'store_id' => 'nullable|exists:stores,id',
             'product_category_id' => 'nullable|exists:product_categories,id',
-            'row_per_page' => 'required|integer',
+            'row_per_page' => 'required|integer|min:1|max:100',
             'min_price' => 'nullable|numeric',
             'max_price' => 'nullable|numeric',
             'condition' => 'nullable',
@@ -171,6 +171,10 @@ class ProductController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 
+            if (!auth()->user()->hasRole('admin') && $product->store_id !== auth()->user()->store?->id) {
+                return ResponseHelper::jsonResponse(false, 'Tidak diizinkan mengubah produk toko lain', null, 403);
+            }
+
             $product = $this->productRepository->update($id, $request);
             \Illuminate\Support\Facades\Cache::tags(['products'])->flush();
 
@@ -190,6 +194,10 @@ class ProductController extends Controller implements HasMiddleware
 
             if (!$product) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
+            }
+
+            if (!auth()->user()->hasRole('admin') && $product->store_id !== auth()->user()->store?->id) {
+                return ResponseHelper::jsonResponse(false, 'Tidak diizinkan menghapus produk toko lain', null, 403);
             }
 
             $product = $this->productRepository->delete($id);

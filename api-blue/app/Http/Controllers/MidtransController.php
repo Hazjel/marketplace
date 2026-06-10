@@ -89,13 +89,17 @@ class MidtransController extends Controller
             case 'deny':
             case 'expire':
             case 'cancel':
-                $transaction->update(['payment_status' => 'failed']);
-                $this->transactionRepository->restoreStock($transaction);
+                \Illuminate\Support\Facades\DB::transaction(function () use ($transaction) {
+                    $transaction->update(['payment_status' => 'failed']);
+                    $this->transactionRepository->restoreStock($transaction);
+                });
                 break;
 
             default:
-                $transaction->update(['payment_status' => 'failed']);
-                $this->transactionRepository->restoreStock($transaction);
+                \Illuminate\Support\Facades\DB::transaction(function () use ($transaction) {
+                    $transaction->update(['payment_status' => 'failed']);
+                    $this->transactionRepository->restoreStock($transaction);
+                });
                 break;
         }
 
@@ -112,7 +116,7 @@ class MidtransController extends Controller
         $store = Store::find($transaction->store_id);
 
         $netSales = $transaction->grand_total - $transaction->shipping_cost;
-        $adminFee = $netSales * 0.10; // 10% platform fee
+        $adminFee = $netSales * config('marketplace.admin_fee_percentage'); // 10% platform fee
         $sellerAmount = $netSales - $adminFee;
 
         $transaction->admin_fee = $adminFee;

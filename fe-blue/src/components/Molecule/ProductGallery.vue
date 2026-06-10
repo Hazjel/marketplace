@@ -116,7 +116,7 @@ onMounted(() => {
           :class="{ active: image.image === activeImage?.image }"
           @click="setActiveImage(image)"
         >
-          <img :src="image.image" class="size-full object-contain p-2" alt="thumbnail" />
+          <img :src="image.image" class="size-full object-contain p-2" alt="thumbnail" @error="$event.target.src = '/images/placeholder.png'" />
         </button>
       </div>
     </div>
@@ -131,7 +131,7 @@ onMounted(() => {
             class="swiper-slide flex items-center justify-center"
             @click="showLightbox = true"
           >
-            <img :src="image.image" class="size-full object-contain" alt="product image" />
+            <img :src="image.image" class="size-full object-contain" alt="product image" @error="$event.target.src = '/images/placeholder.png'" />
           </div>
         </div>
       </div>

@@ -229,7 +229,7 @@ class TransactionController extends Controller implements HasMiddleware
             $receivingProof = null;
             if (request()->hasFile('receiving_proof')) {
                 $file = request()->file('receiving_proof');
-                $filename = time() . '_' . $file->getClientOriginalName();
+                $filename = time() . '_' . uniqid() . '.' . $file->extension();
                 $file->move(public_path('upload/transactions'), $filename);
                 $receivingProof = 'upload/transactions/' . $filename;
             }
@@ -265,7 +265,7 @@ class TransactionController extends Controller implements HasMiddleware
             }
 
             $netSales = $transaction->grand_total - $transaction->shipping_cost;
-            $adminFee = $netSales * 0.10;
+            $adminFee = $netSales * config('marketplace.admin_fee_percentage');
             $sellerAmount = $netSales - $adminFee;
 
             $storeBalanceRepository = new \App\Repositories\StoreBalanceRepository;
@@ -358,7 +358,7 @@ class TransactionController extends Controller implements HasMiddleware
                     $store = \App\Models\Store::find($transaction->store_id);
                     if ($store && $store->storeBalance) {
                         $netSales = $transaction->grand_total - $transaction->shipping_cost;
-                        $adminFee = $netSales * 0.10;
+                        $adminFee = $netSales * config('marketplace.admin_fee_percentage');
                         $sellerAmount = $netSales - $adminFee;
 
                         $transaction->admin_fee = $adminFee;

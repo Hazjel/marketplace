@@ -288,10 +288,10 @@ Route::middleware("throttle:5,1")->group(function () {
 });
 
 // Midtrans callback
-Route::post("/midtrans-callback", [MidtransController::class, "callback"]);
+Route::post("/midtrans-callback", [MidtransController::class, "callback"])->middleware('throttle:60,1');
 
 // Logistics Webhook (Simulation - RajaOngkir/Komerce)
 Route::post("/logistics/webhook", [
     \App\Http\Controllers\LogisticsController::class,
     "webhook",
-]);
+])->middleware('throttle:60,1');

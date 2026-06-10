@@ -105,6 +105,9 @@ export const useAuthStore = defineStore('auth', {
         this.user = null
         this.error = null
 
+        localStorage.removeItem('grouped_cart')
+        localStorage.removeItem('selected_stores')
+
         // Return true to indicate success, let component handle redirect
         return true
       } catch (error) {
