@@ -32,6 +32,9 @@ axiosInstance.interceptors.request.use(
   }
 )
 
+// Flag to prevent multiple concurrent 401 responses from triggering multiple redirects
+let isHandling401 = false
+
 // Menggunakan fallback sederhana karena useToast() dari vue-toastification hanya berjalan di dalam script setup Vue.
 // Solusi: dispatch custom event yang nanti ditangkap oleh App.vue untuk memunculkan toast.
 axiosInstance.interceptors.response.use(
@@ -46,18 +49,20 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    if (status === 401) {
+    if (status === 401 && !isHandling401) {
       const hadToken = !!Cookies.get('token')
       Cookies.remove('token')
 
       // Hanya redirect jika user sebelumnya punya token (sesi expired)
       // Guest tanpa token tidak perlu di-redirect
       if (hadToken) {
+        isHandling401 = true
         window.dispatchEvent(new CustomEvent('api-error', {
           detail: { message: 'Sesi Anda telah berakhir. Silakan login kembali.' }
         }))
 
         setTimeout(() => {
+          isHandling401 = false
           window.location.href = '/auth/login'
         }, 1500)
       }

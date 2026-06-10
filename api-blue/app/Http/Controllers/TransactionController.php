@@ -62,7 +62,7 @@ class TransactionController extends Controller implements HasMiddleware
 
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer'
+            'row_per_page' => 'required|integer|min:1|max:100'
         ]);
 
         try {
@@ -306,6 +306,15 @@ class TransactionController extends Controller implements HasMiddleware
 
             if (!$transaction) {
                 return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            // Authorization: prevent IDOR — only the buyer, the seller, or admin can check
+            $user = auth()->user();
+            if ($user->hasRole('buyer') && $transaction->buyer_id !== $user->buyer?->id) {
+                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
+            }
+            if ($user->hasRole('store') && $transaction->store_id !== $user->store?->id) {
+                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
             // Configure Midtrans

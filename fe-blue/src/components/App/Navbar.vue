@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia'
 import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { formatRupiah } from '@/helpers/format'
+import { logger } from '@/utils/logger'
 
 const router = useRouter()
 const showDropdownProfile = ref(false)
@@ -126,7 +127,7 @@ const handleSearchInput = () => {
       searchResults.value = results || []
       showSearchResults.value = searchResults.value.length > 0
     } catch (error) {
-      console.error('Search error:', error)
+      logger.error('Search error:', error)
       searchResults.value = []
       showSearchResults.value = false
     } finally {
