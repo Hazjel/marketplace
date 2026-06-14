@@ -9,6 +9,7 @@ import { useRoute } from 'vue-router'
 import { useProductReviewStore } from '@/stores/productReview'
 import { useToast } from 'vue-toastification'
 import ReviewModal from '@/components/ReviewModal.vue'
+import TrackingMap from '@/components/TrackingMap.vue'
 import { logger } from '@/utils/logger'
 
 const route = useRoute()
@@ -752,9 +753,15 @@ v-if="activeMode === 'buyer'"
             Tracking Number
           </p>
           <p class="font-semibold text-lg leading-none dark:text-white">
-            {{ transaction?.tracking_number }}({{ transaction?.shipping }})
+            {{ transaction?.tracking_number }} ({{ transaction?.shipping }})
           </p>
         </div>
+        <TrackingMap
+          :store-city="transaction?.store?.city"
+          :buyer-city="transaction?.city"
+          :tracking-number="transaction?.tracking_number"
+          :shipping="transaction?.shipping"
+        />
       </section>
       <section
 v-if="transaction?.delivery_status === 'completed'"
@@ -810,6 +817,12 @@ id="Progress-Bar"
           </p>
           <p class="font-semibold text-lg leading-none dark:text-white">{{ transaction?.tracking_number }}</p>
         </div>
+        <TrackingMap
+          :store-city="transaction?.store?.city"
+          :buyer-city="transaction?.city"
+          :tracking-number="transaction?.tracking_number"
+          :shipping="transaction?.shipping"
+        />
       </section>
       <section
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">

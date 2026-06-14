@@ -294,6 +294,8 @@ Route::middleware("throttle:5,1")->group(function () {
 Route::middleware(['auth:sanctum', 'throttle:30,1'])->group(function () {
     Route::get('/shipment/destination', [ShipmentController::class, 'destination']);
     Route::get('/shipment/calculate', [ShipmentController::class, 'calculate']);
+    Route::get('/shipment/tracking', [ShipmentController::class, 'track']);
+    Route::get('/shipment/geocode', [ShipmentController::class, 'geocode']);
 });
 
 // Midtrans callback
