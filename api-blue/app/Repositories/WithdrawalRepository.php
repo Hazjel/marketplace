@@ -115,6 +115,10 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
         try {
             $withdrawal = Withdrawal::find($id);
 
+            if (!$withdrawal) {
+                throw new Exception('Withdrawal not found');
+            }
+
             $withdrawal->status = 'approved';
             $withdrawal->proof = $proof->store('assets/withdrawal', 'public');
 

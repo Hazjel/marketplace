@@ -62,6 +62,11 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         try {
             // Pessimistic lock prevents double-credit from concurrent webhooks
             $storeBalance = StoreBalance::where('id', $id)->lockForUpdate()->first();
+
+            if (!$storeBalance) {
+                throw new Exception('Store Balance not found');
+            }
+
             $storeBalance->balance = $storeBalance->balance + $amount;
             $storeBalance->save();
 
@@ -83,6 +88,10 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         try {
             // Pessimistic lock prevents concurrent over-debit (withdrawal race)
             $storeBalance = StoreBalance::where('id', $id)->lockForUpdate()->first();
+
+            if (!$storeBalance) {
+                throw new Exception('Store Balance not found');
+            }
 
             if($storeBalance->balance < $amount) {
                 throw new Exception('Saldo Tidak Mencukupi');

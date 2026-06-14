@@ -139,7 +139,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             if (!$transactions) {
                 Log::error("SHOW TX: Not Found for ID " . $id);
-                return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
             // Security: Prevent IDOR (Only Buyer, Seller, or Admin can view)
@@ -163,7 +163,7 @@ class TransactionController extends Controller implements HasMiddleware
             $transactions = $this->transactionRepository->getByCode($code);
 
             if (!$transactions) {
-                return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', new TransactionResource($transactions), 200);
@@ -181,15 +181,15 @@ class TransactionController extends Controller implements HasMiddleware
         $request = $request->validated();
 
         try {
-            $transactions = $this->transactionRepository->getByid($id);
+            $transactions = $this->transactionRepository->getById($id);
 
             if (!$transactions) {
-                return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
             $transaction = $this->transactionRepository->updateStatus($id, $request);
 
-            return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diupdate', new TransactionResource($transactions), 200);
+            return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diupdate', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
@@ -414,10 +414,10 @@ class TransactionController extends Controller implements HasMiddleware
     public function destroy(string $id)
     {
         try {
-            $transactions = $this->transactionRepository->getByid($id);
+            $transactions = $this->transactionRepository->getById($id);
 
             if (!$transactions) {
-                return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
             $transaction = $this->transactionRepository->delete($id);
