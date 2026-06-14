@@ -49,4 +49,8 @@ return [
         'api_key' => env('BINDERBYTE_API_KEY', ''),
     ],
 
+    'rajaongkir' => [
+        'api_key' => env('RAJAONGKIR_API_KEY', ''),
+    ],
+
 ];
