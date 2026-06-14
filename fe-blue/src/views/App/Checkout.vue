@@ -150,6 +150,11 @@ const handleAddressInput = debounce(async (search) => {
     showAddressOptions.value = false
     return
   }
+  if (search.trim().length < 4) {
+    addressOptions.value = []
+    showAddressOptions.value = false
+    return
+  }
 
   loadingAddress.value = true
   try {
@@ -405,6 +410,7 @@ onMounted(async () => {
                     <input v-model="addressSearch" type="text" class="custom-input" placeholder=""
                       @input="handleAddressInput(addressSearch)" />
                   </label>
+                  <p v-if="addressSearch.length > 0 && addressSearch.length < 4" class="text-xs text-gray-400 mt-1 px-1">Ketik minimal 4 huruf untuk mencari</p>
                   <ul v-if="showAddressOptions" class="search-result">
                     <li v-for="option in addressOptions" :key="option.id" @click="handleAddressSelect(option)">
                       {{ option.label }}

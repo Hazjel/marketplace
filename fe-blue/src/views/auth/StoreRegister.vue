@@ -39,6 +39,11 @@ const handleAddressInput = debounce(async (search) => {
     form.value.postal_code = ''
     return
   }
+  if (search.trim().length < 4) {
+    addressOptions.value = []
+    showAddressOptions.value = false
+    return
+  }
 
   loadingAddress.value = true
   try {

@@ -99,7 +99,7 @@ services:
       APP_NAME: Blukios
       APP_ENV: local
       APP_DEBUG: "true"
-      APP_URL: http://192.168.1.29
+      APP_URL: https://lab-hajel.tail03faae.ts.net
       APP_KEY: ${APP_KEY:-base64:CHANGE_ME_GENERATE_WITH_ARTISAN}
       DB_CONNECTION: mysql
       DB_HOST: mysql
@@ -128,12 +128,16 @@ services:
       MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
       MIDTRANS_IS_PRODUCTION: "false"
       KEY_RAJA_ONGKIR: ${KEY_RAJA_ONGKIR:-}
-      FRONTEND_URL: http://192.168.1.29
+      FRONTEND_URL: https://lab-hajel.tail03faae.ts.net
       REVERB_APP_ID: "543210123"
       REVERB_APP_KEY: ${REVERB_APP_KEY:-reverbkey}
       REVERB_APP_SECRET: ${REVERB_APP_SECRET:-reverbsecret}
       REVERB_HOST: "0.0.0.0"
       REVERB_PORT: 8080
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL:-}
+      KOMERCE_API_KEY: ${KOMERCE_API_KEY:-}
 
   nginx:
     image: nginx:alpine

@@ -51,6 +51,11 @@ const handleAddressInput = debounce(async (search) => {
     showAddressOptions.value = false
     return
   }
+  if (search.trim().length < 4) {
+    addressOptions.value = []
+    showAddressOptions.value = false
+    return
+  }
 
   loadingAddress.value = true
   try {

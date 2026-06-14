@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import LogoBlue from '@/assets/images/logos/logo-blue.png'
+import LogoBlue from '@/assets/images/logos/logo-notext.png'
 
 const props = defineProps({
   store: {
