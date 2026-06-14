@@ -51,47 +51,6 @@ class ShipmentController extends Controller
         }
     }
 
-    public function track(Request $request)
-    {
-        $request->validate([
-            'awb'     => 'required|string|max:100',
-            'courier' => 'required|string|max:50',
-        ]);
-
-        try {
-            $response = Http::withHeaders(['key' => config('services.rajaongkir.api_key')])
-                ->post('https://api.rajaongkir.com/starter/waybill', [
-                    'waybill' => $request->awb,
-                    'courier' => $request->courier,
-                ]);
-
-            $data = $response->json();
-
-            // Normalize to consistent format for frontend
-            if (isset($data['rajaongkir']['result'])) {
-                $result = $data['rajaongkir']['result'];
-                $history = collect($result['manifest'] ?? [])->map(fn($m) => [
-                    'date' => ($m['manifest_date'] ?? '') . ' ' . ($m['manifest_time'] ?? ''),
-                    'desc' => $m['manifest_description'] ?? '',
-                ])->values()->all();
-
-                return response()->json([
-                    'status'  => 200,
-                    'message' => 'OK',
-                    'data'    => [
-                        'summary' => ['status' => $result['delivery_status']['status'] ?? ''],
-                        'history' => $history,
-                    ],
-                ]);
-            }
-
-            return response()->json($data, $response->status());
-        } catch (\Exception $e) {
-            Log::error('Shipment tracking failed', ['error' => $e->getMessage()]);
-            return ResponseHelper::jsonResponse(false, 'Gagal mengambil data tracking.', null, 500);
-        }
-    }
-
     public function geocode(Request $request)
     {
         $request->validate(['city' => 'required|string|max:100']);
