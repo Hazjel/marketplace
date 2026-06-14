@@ -50,4 +50,50 @@ class ShipmentController extends Controller
             return ResponseHelper::jsonResponse(false, 'Gagal menghitung ongkir.', null, 500);
         }
     }
+
+    public function track(Request $request)
+    {
+        $request->validate([
+            'awb'     => 'required|string|max:100',
+            'courier' => 'required|string|max:50',
+        ]);
+
+        try {
+            $response = Http::get('https://api.binderbyte.com/v1/track', [
+                'api_key' => config('services.binderbyte.api_key'),
+                'courier' => $request->courier,
+                'awb'     => $request->awb,
+            ]);
+
+            return response()->json($response->json(), $response->status());
+        } catch (\Exception $e) {
+            Log::error('Shipment tracking failed', ['error' => $e->getMessage()]);
+            return ResponseHelper::jsonResponse(false, 'Gagal mengambil data tracking.', null, 500);
+        }
+    }
+
+    public function geocode(Request $request)
+    {
+        $request->validate(['city' => 'required|string|max:100']);
+
+        try {
+            $response = Http::withHeaders(['User-Agent' => 'Marketplace/1.0 (contact@marketplace.id)'])
+                ->get('https://nominatim.openstreetmap.org/search', [
+                    'q'      => $request->city . ', Indonesia',
+                    'format' => 'json',
+                    'limit'  => 1,
+                ]);
+
+            $data = $response->json();
+
+            if (empty($data)) {
+                return response()->json(['lat' => null, 'lon' => null]);
+            }
+
+            return response()->json(['lat' => $data[0]['lat'], 'lon' => $data[0]['lon']]);
+        } catch (\Exception $e) {
+            Log::error('Geocoding failed', ['error' => $e->getMessage()]);
+            return response()->json(['lat' => null, 'lon' => null]);
+        }
+    }
 }

@@ -45,4 +45,8 @@ return [
         'api_key' => env('KOMERCE_API_KEY', ''),
     ],
 
+    'binderbyte' => [
+        'api_key' => env('BINDERBYTE_API_KEY', ''),
+    ],
+
 ];
