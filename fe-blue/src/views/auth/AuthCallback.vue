@@ -16,10 +16,8 @@ onMounted(async () => {
 
   if (token && username) {
     // Set token in Cookies (required by axios instance)
-    Cookies.set('token', token)
-
-    // Remove read-only assignment to store
-    // authStore.token = token
+    Cookies.set('token', token, { secure: true, sameSite: 'Strict' })
+    authStore.token = token
 
     try {
       // Fetch full user profile to populate pinia state correctly

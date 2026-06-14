@@ -9,17 +9,28 @@ use Illuminate\Support\Facades\Log;
 
 class ShipmentController extends Controller
 {
-    private string $baseUrl = 'https://api-sandbox.collaborator.komerce.id/tariff/api/v1';
+    private string $baseUrl = 'https://rajaongkir.komerce.id/api/v1';
 
     public function destination(Request $request)
     {
         $request->validate(['keyword' => 'required|string|max:100']);
 
         try {
-            $response = Http::withHeaders(['x-api-key' => config('services.komerce.api_key')])
-                ->get($this->baseUrl . '/destination/search', ['keyword' => $request->keyword]);
+            $response = Http::withHeaders(['key' => config('services.komerce.api_key')])
+                ->get($this->baseUrl . '/destination/domestic-destination', [
+                    'search'  => $request->keyword,
+                    'limit'   => 50,
+                    'offset'  => 0,
+                ]);
 
-            return response()->json($response->json(), $response->status());
+            $status = $response->status();
+            if ($status === 401 || $status === 403) {
+                return ResponseHelper::jsonResponse(false, 'Layanan pengiriman tidak tersedia saat ini.', null, 503);
+            }
+            if ($status === 404) {
+                return response()->json(['meta' => ['code' => 200, 'status' => 'success'], 'data' => []]);
+            }
+            return response()->json($response->json(), $status);
         } catch (\Exception $e) {
             Log::error('Shipment destination search failed', ['error' => $e->getMessage()]);
             return ResponseHelper::jsonResponse(false, 'Gagal mencari destinasi pengiriman.', null, 500);
@@ -36,7 +47,7 @@ class ShipmentController extends Controller
         ]);
 
         try {
-            $response = Http::withHeaders(['x-api-key' => config('services.komerce.api_key')])
+            $response = Http::withHeaders(['key' => config('services.komerce.api_key')])
                 ->get($this->baseUrl . '/calculate', $request->only([
                     'shipper_destination_id',
                     'receiver_destination_id',
@@ -44,7 +55,11 @@ class ShipmentController extends Controller
                     'weight',
                 ]));
 
-            return response()->json($response->json(), $response->status());
+            $status = $response->status();
+            if ($status === 401 || $status === 403) {
+                return ResponseHelper::jsonResponse(false, 'Layanan pengiriman tidak tersedia saat ini.', null, 503);
+            }
+            return response()->json($response->json(), $status);
         } catch (\Exception $e) {
             Log::error('Shipment calculate failed', ['error' => $e->getMessage()]);
             return ResponseHelper::jsonResponse(false, 'Gagal menghitung ongkir.', null, 500);

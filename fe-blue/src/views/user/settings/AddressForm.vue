@@ -36,6 +36,11 @@ const handleCityInput = debounce(async (search) => {
     showCityOptions.value = false
     return
   }
+  if (search.trim().length < 4) {
+    cityOptions.value = []
+    showCityOptions.value = false
+    return
+  }
   loadingCities.value = true
   try {
     const response = await axiosInstance.get('/shipment/destination', {

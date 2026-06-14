@@ -20,20 +20,18 @@ class GoogleAuthController extends Controller
             'session_id' => session()->getId()
         ]);
         
-        if (request()->has('platform')) {
-            // Use 'state' parameter to persist platform across redirects (stateless)
-            // This is more reliable than sessions for mobile deep links
-            $platform = request('platform');
-            return Socialite::driver('google')
-                ->with([
-                    'state' => "platform={$platform}",
-                    'prompt' => 'select_account' // Force account chooser
-                ])
-                ->redirect();
+        $redirectUrl = config('services.google.redirect');
+        Log::info('GoogleAuth: Using redirect URL', ['redirect' => $redirectUrl]);
+
+        try {
+            $provider = Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->with(['prompt' => 'select_account']);
+            $response = $provider->redirect();
+            Log::info('GoogleAuth: Generated URL', ['url' => $response->getTargetUrl()]);
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('GoogleAuth: Redirect Error', ['error' => $e->getMessage()]);
+            throw $e;
         }
-        return Socialite::driver('google')
-            ->with(['prompt' => 'select_account']) // Apply to web as well
-            ->redirect();
     }
 
     public function callback()

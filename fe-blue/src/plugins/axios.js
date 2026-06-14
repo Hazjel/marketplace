@@ -44,8 +44,9 @@ axiosInstance.interceptors.response.use(
     const message = error.response?.data?.message || 'Terjadi kesalahan pada server'
     const originalRequest = error.config
 
-    // Jika 401 dari endpoint /login (salah password), biarkan komponen Login.vue yang handle
-    if (status === 401 && originalRequest.url && originalRequest.url.includes('/login')) {
+    // Jika 401 dari endpoint tertentu, biarkan komponen yang handle
+    const ignoredEndpoints = ['/login', '/broadcasting/auth']
+    if (status === 401 && originalRequest.url && ignoredEndpoints.some(e => originalRequest.url.includes(e))) {
       return Promise.reject(error)
     }
 
