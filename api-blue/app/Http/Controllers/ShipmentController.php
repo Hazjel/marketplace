@@ -59,14 +59,33 @@ class ShipmentController extends Controller
         ]);
 
         try {
-            $response = Http::get('https://api.binderbyte.com/v1/track', [
-                'api_key' => config('services.binderbyte.api_key'),
-                'courier' => $request->courier,
-                'awb'     => $request->awb,
-                'number'  => $request->awb,
-            ]);
+            $response = Http::withHeaders(['key' => config('services.rajaongkir.api_key')])
+                ->post('https://api.rajaongkir.com/starter/waybill', [
+                    'waybill' => $request->awb,
+                    'courier' => $request->courier,
+                ]);
 
-            return response()->json($response->json(), $response->status());
+            $data = $response->json();
+
+            // Normalize to consistent format for frontend
+            if (isset($data['rajaongkir']['result'])) {
+                $result = $data['rajaongkir']['result'];
+                $history = collect($result['manifest'] ?? [])->map(fn($m) => [
+                    'date' => ($m['manifest_date'] ?? '') . ' ' . ($m['manifest_time'] ?? ''),
+                    'desc' => $m['manifest_description'] ?? '',
+                ])->values()->all();
+
+                return response()->json([
+                    'status'  => 200,
+                    'message' => 'OK',
+                    'data'    => [
+                        'summary' => ['status' => $result['delivery_status']['status'] ?? ''],
+                        'history' => $history,
+                    ],
+                ]);
+            }
+
+            return response()->json($data, $response->status());
         } catch (\Exception $e) {
             Log::error('Shipment tracking failed', ['error' => $e->getMessage()]);
             return ResponseHelper::jsonResponse(false, 'Gagal mengambil data tracking.', null, 500);
