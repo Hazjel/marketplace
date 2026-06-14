@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { LMap, LTileLayer, LMarker, LTooltip, LPolyline } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
@@ -13,51 +13,52 @@ L.Icon.Default.mergeOptions({
   shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
 })
 
-// RajaOngkir courier codes
-const COURIER_MAP = {
-  'JNE': 'jne',
-  'J&T': 'jnt',
-  'J&T Express': 'jnt',
-  'SiCepat': 'sicepat',
-  'SICEPAT': 'sicepat',
-  'TIKI': 'tiki',
-  'AnterAja': 'anteraja',
-  'Pos Indonesia': 'pos',
-  'Pos': 'pos',
-  'Ninja Express': 'ninja',
-  'Lion Parcel': 'lion',
-  'ID Express': 'ide',
-  'SAP Express': 'sap',
-  'Wahana': 'wahana',
-  'RPX': 'rpx',
+const COURIER_TRACKING_URLS = {
+  'jne':       { url: 'https://www.jne.co.id/id/tracking/trace/', suffix: false },
+  'j&t':       { url: 'https://jet.co.id/track/', suffix: false },
+  'sicepat':   { url: 'https://www.sicepat.com/checkAwb/', suffix: false },
+  'tiki':      { url: 'https://www.tiki.id/id/tracking?awb=', suffix: false },
+  'anteraja':  { url: 'https://anteraja.id/tracking/', suffix: false },
+  'pos':       { url: 'https://www.posindonesia.co.id/en/tracking/', suffix: false },
+  'ninja':     { url: 'https://www.ninjaxpress.co/id-id/tracking?awb=', suffix: false },
+  'lion':      { url: 'https://lionparcel.com/tracking?resi=', suffix: false },
+  'wahana':    { url: 'https://www.wahana.com/tracking?no_resi=', suffix: false },
+  'ide':       { url: 'https://idexpress.com/tracking?awb=', suffix: false },
+  'sap':       { url: 'https://www.sap-express.id/cek-resi?awb=', suffix: false },
+}
+
+const STATUS_LABELS = {
+  'pending':    { label: 'Menunggu Konfirmasi', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  'processing': { label: 'Diproses Penjual',    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  'delivering': { label: 'Dalam Pengiriman',    color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  'completed':  { label: 'Terkirim',            color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
 }
 
 const props = defineProps({
-  storeCity: { type: String, default: '' },
-  buyerCity: { type: String, default: '' },
+  storeCity:      { type: String, default: '' },
+  buyerCity:      { type: String, default: '' },
   trackingNumber: { type: String, default: '' },
-  shipping: { type: String, default: '' },
+  shipping:       { type: String, default: '' },
+  deliveryStatus: { type: String, default: '' },
 })
 
 const zoom = ref(5)
 const center = ref([-2.5, 118.0])
-
 const originCoords = ref(null)
 const destCoords = ref(null)
 const polylineLatLngs = ref([])
-
-const trackingEvents = ref([])
-const loadingTracking = ref(false)
 const loadingMap = ref(false)
-const trackingError = ref('')
 
-const courierCode = () => {
-  if (!props.shipping) return ''
-  for (const [key, code] of Object.entries(COURIER_MAP)) {
-    if (props.shipping.toLowerCase().includes(key.toLowerCase())) return code
-  }
-  return props.shipping.toLowerCase().replace(/\s+/g, '')
-}
+const courierTrackingUrl = computed(() => {
+  if (!props.trackingNumber || !props.shipping) return null
+  const key = Object.keys(COURIER_TRACKING_URLS).find(k =>
+    props.shipping.toLowerCase().includes(k)
+  )
+  if (!key) return null
+  return COURIER_TRACKING_URLS[key].url + props.trackingNumber
+})
+
+const statusInfo = computed(() => STATUS_LABELS[props.deliveryStatus] || null)
 
 const geocodeCity = async (city) => {
   if (!city) return null
@@ -67,33 +68,9 @@ const geocodeCity = async (city) => {
       return [parseFloat(res.data.lat), parseFloat(res.data.lon)]
     }
   } catch {
-    // geocoding failed, map shows without pin
+    // geocoding failed silently
   }
   return null
-}
-
-const fetchTracking = async () => {
-  if (!props.trackingNumber) return
-  const courier = courierCode()
-  if (!courier) return
-
-  loadingTracking.value = true
-  trackingError.value = ''
-  try {
-    const res = await axiosInstance.get('/shipment/tracking', {
-      params: { awb: props.trackingNumber, courier },
-    })
-    const data = res.data
-    if (data?.data?.history) {
-      trackingEvents.value = data.data.history
-    } else {
-      trackingError.value = 'Data tracking belum tersedia.'
-    }
-  } catch {
-    trackingError.value = 'Gagal memuat data tracking. Coba lagi nanti.'
-  } finally {
-    loadingTracking.value = false
-  }
 }
 
 const loadMap = async () => {
@@ -108,9 +85,7 @@ const loadMap = async () => {
 
   if (origin && dest) {
     polylineLatLngs.value = [origin, dest]
-    const midLat = (origin[0] + dest[0]) / 2
-    const midLon = (origin[1] + dest[1]) / 2
-    center.value = [midLat, midLon]
+    center.value = [(origin[0] + dest[0]) / 2, (origin[1] + dest[1]) / 2]
     zoom.value = 6
   } else if (origin) {
     center.value = origin
@@ -122,24 +97,19 @@ const loadMap = async () => {
   loadingMap.value = false
 }
 
-onMounted(() => {
-  loadMap()
-  fetchTracking()
-})
-
-watch(() => props.trackingNumber, fetchTracking)
+onMounted(loadMap)
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
     <!-- Map -->
-    <div class="rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-      <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-white/10">
-        <svg class="size-4 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <div class="rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10">
+      <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-white/10">
+        <svg class="size-4 text-custom-blue shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
         <span class="text-sm font-semibold text-custom-black dark:text-white">Peta Pengiriman</span>
-        <span v-if="storeCity || buyerCity" class="ml-auto text-xs text-custom-grey dark:text-gray-400">
+        <span v-if="storeCity || buyerCity" class="ml-auto text-xs text-custom-grey dark:text-gray-400 truncate">
           {{ storeCity }} → {{ buyerCity }}
         </span>
       </div>
@@ -148,7 +118,6 @@ watch(() => props.trackingNumber, fetchTracking)
         <div v-if="loadingMap" class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-white/5 z-10">
           <div class="size-6 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
         </div>
-
         <LMap
           v-if="!loadingMap"
           :zoom="zoom"
@@ -181,52 +150,50 @@ watch(() => props.trackingNumber, fetchTracking)
       </div>
     </div>
 
-    <!-- Tracking Timeline -->
+    <!-- Status + Tracking Link -->
     <div class="rounded-2xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 overflow-hidden">
       <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-white/10">
-        <svg class="size-4 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        <svg class="size-4 text-custom-blue shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
-        <span class="text-sm font-semibold text-custom-black dark:text-white">Riwayat Pengiriman</span>
-        <span v-if="trackingNumber" class="ml-auto text-xs font-mono text-custom-grey dark:text-gray-400">{{ trackingNumber }}</span>
+        <span class="text-sm font-semibold text-custom-black dark:text-white">Info Pengiriman</span>
       </div>
 
-      <div class="px-4 py-3">
-        <!-- Loading -->
-        <div v-if="loadingTracking" class="flex items-center gap-2 text-sm text-custom-grey dark:text-gray-400 py-2">
-          <div class="size-4 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
-          Memuat data tracking...
+      <div class="px-4 py-4 flex flex-col gap-3">
+        <!-- Delivery status -->
+        <div v-if="statusInfo" class="flex items-center justify-between">
+          <span class="text-sm text-custom-grey dark:text-gray-400">Status</span>
+          <span class="text-xs font-bold px-3 py-1.5 rounded-full" :class="statusInfo.color">
+            {{ statusInfo.label }}
+          </span>
         </div>
 
-        <!-- Error / empty -->
-        <div v-else-if="trackingError || !trackingEvents.length" class="text-sm text-custom-grey dark:text-gray-400 py-2">
-          {{ trackingError || 'Belum ada riwayat pengiriman.' }}
+        <!-- Courier & AWB -->
+        <div v-if="shipping" class="flex items-center justify-between">
+          <span class="text-sm text-custom-grey dark:text-gray-400">Kurir</span>
+          <span class="text-sm font-semibold text-custom-black dark:text-white">{{ shipping }}</span>
+        </div>
+        <div v-if="trackingNumber" class="flex items-center justify-between">
+          <span class="text-sm text-custom-grey dark:text-gray-400">No. Resi</span>
+          <span class="text-sm font-mono font-semibold text-custom-black dark:text-white">{{ trackingNumber }}</span>
         </div>
 
-        <!-- Timeline events -->
-        <div v-else class="flex flex-col gap-0">
-          <div
-            v-for="(event, index) in trackingEvents"
-            :key="index"
-            class="flex gap-3 relative"
-          >
-            <!-- Line -->
-            <div class="flex flex-col items-center">
-              <div
-                class="size-2.5 rounded-full mt-1 shrink-0 z-10"
-                :class="index === 0 ? 'bg-custom-blue' : 'bg-gray-300 dark:bg-white/20'"
-              ></div>
-              <div v-if="index < trackingEvents.length - 1" class="w-px flex-1 bg-gray-200 dark:bg-white/10 my-1"></div>
-            </div>
-            <!-- Content -->
-            <div class="pb-3 flex-1 min-w-0">
-              <p class="text-sm font-semibold text-custom-black dark:text-white leading-snug" :class="index === 0 ? 'text-custom-blue' : ''">
-                {{ event.desc || event.description }}
-              </p>
-              <p class="text-xs text-custom-grey dark:text-gray-400 mt-0.5">{{ event.date }}</p>
-            </div>
-          </div>
-        </div>
+        <!-- Tracking link -->
+        <a
+          v-if="courierTrackingUrl"
+          :href="courierTrackingUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-1 flex items-center justify-center gap-2 h-10 w-full rounded-xl bg-custom-blue text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+        >
+          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          Lacak di Website {{ shipping }}
+        </a>
+        <p v-else-if="trackingNumber" class="text-xs text-custom-grey dark:text-gray-400 text-center">
+          Salin nomor resi dan lacak di website kurir secara manual.
+        </p>
       </div>
     </div>
   </div>

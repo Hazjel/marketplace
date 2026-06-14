@@ -6,7 +6,6 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useProductReviewStore } from '@/stores/productReview'
 import { useToast } from 'vue-toastification'
 import ReviewModal from '@/components/ReviewModal.vue'
 import TrackingMap from '@/components/TrackingMap.vue'
@@ -761,6 +760,7 @@ v-if="activeMode === 'buyer'"
           :buyer-city="transaction?.city"
           :tracking-number="transaction?.tracking_number"
           :shipping="transaction?.shipping"
+          :delivery-status="transaction?.delivery_status"
         />
       </section>
       <section
@@ -822,6 +822,7 @@ id="Progress-Bar"
           :buyer-city="transaction?.city"
           :tracking-number="transaction?.tracking_number"
           :shipping="transaction?.shipping"
+          :delivery-status="transaction?.delivery_status"
         />
       </section>
       <section
