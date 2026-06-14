@@ -63,6 +63,7 @@ class ShipmentController extends Controller
                 'api_key' => config('services.binderbyte.api_key'),
                 'courier' => $request->courier,
                 'awb'     => $request->awb,
+                'number'  => $request->awb,
             ]);
 
             return response()->json($response->json(), $response->status());

@@ -13,6 +13,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
 })
 
+// RajaOngkir courier codes
 const COURIER_MAP = {
   'JNE': 'jne',
   'J&T': 'jnt',
@@ -22,10 +23,13 @@ const COURIER_MAP = {
   'TIKI': 'tiki',
   'AnterAja': 'anteraja',
   'Pos Indonesia': 'pos',
+  'Pos': 'pos',
   'Ninja Express': 'ninja',
   'Lion Parcel': 'lion',
-  'ID Express': 'idexpress',
+  'ID Express': 'ide',
   'SAP Express': 'sap',
+  'Wahana': 'wahana',
+  'RPX': 'rpx',
 }
 
 const props = defineProps({
