@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import LogoBlue from '@/assets/images/logos/logo-blue.png'
 
 const props = defineProps({
   store: {
@@ -60,7 +61,7 @@ const handleFollowClick = () => {
               class="w-full h-full rounded-full border-[3px] border-white overflow-hidden bg-white"
             >
               <img
-                :src="storeLogo || '/src/assets/images/logos/logo-blue.png'"
+                :src="storeLogo || LogoBlue"
                 class="w-full h-full object-cover"
                 alt="Store Logo"
               />

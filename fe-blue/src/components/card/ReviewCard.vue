@@ -1,6 +1,9 @@
 <script setup>
 import { computed } from 'vue'
 import { Card, CardContent } from '@/components/ui/card'
+import StarFull from '@/assets/images/icons/Star-pointy.svg'
+import StarEmpty from '@/assets/images/icons/Star-pointy-outline.svg'
+import PlaceHolder from '@/assets/images/photos/photo-1.png'
 
 const props = defineProps({
   review: {
@@ -53,11 +56,7 @@ const formattedDate = computed(() => {
           <img
             v-for="i in 5"
             :key="i"
-            :src="
-              i <= review.rating
-                ? '/src/assets/images/icons/Star-pointy.svg'
-                : '/src/assets/images/icons/Star-pointy-outline.svg'
-            "
+            :src="i <= review.rating ? StarFull : StarEmpty"
             class="w-4 h-4"
             :alt="i <= review.rating ? 'Full Star' : 'Empty Star'"
           />
@@ -92,7 +91,7 @@ const formattedDate = computed(() => {
       <div v-if="review.product" class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mt-1">
         <img
           :src="
-            review.product.product_images?.[0]?.image || '/src/assets/images/photos/photo-1.png'
+            review.product.product_images?.[0]?.image || PlaceHolder
           "
           class="w-10 h-10 rounded-lg object-cover bg-white border border-gray-100"
           alt="Product"

@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { axiosInstance } from '@/plugins/axios'
 import { useToast } from 'vue-toastification'
+import PlaceHolder from '@/assets/images/photos/photo-1.png'
 
 const props = defineProps({
   show: {
@@ -149,7 +150,7 @@ const setRating = (r) => {
         <!-- Product Info -->
         <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
           <img
-            :src="productImage || '/src/assets/images/photos/photo-1.png'"
+            :src="productImage || PlaceHolder"
             class="w-16 h-16 rounded-lg object-cover bg-white"
             alt="Product"
           />

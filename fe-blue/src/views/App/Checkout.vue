@@ -13,6 +13,7 @@ import { axiosInstance } from '@/plugins/axios'
 import CheckoutStepper from '@/components/Molecule/CheckoutStepper.vue'
 import TrustBadges from '@/components/Molecule/TrustBadges.vue'
 import { logger } from '@/utils/logger'
+import ThumbnailFallback from '@/assets/images/thumbnails/th-1.svg'
 
 // Store imports
 const authStore = useAuthStore()
@@ -500,7 +501,7 @@ onMounted(async () => {
                   <div class="size-14 shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 p-1.5 flex items-center justify-center">
                     <img :src="product.product_images?.find((i) => i.is_thumbnail)?.image || product.thumbnail"
                       class="size-full object-contain mix-blend-multiply dark:mix-blend-normal rounded-lg" alt=""
-                      @error="(e) => (e.target.src = '/src/assets/images/thumbnails/th-1.svg')" />
+                      @error="(e) => (e.target.src = ThumbnailFallback)" />
                   </div>
                   <div class="flex-1 min-w-0">
                     <p class="font-semibold text-sm text-custom-black dark:text-white line-clamp-1">{{ product.name }}</p>
