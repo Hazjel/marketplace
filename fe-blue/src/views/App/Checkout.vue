@@ -446,7 +446,7 @@ onMounted(async () => {
                       class="appearance-none outline-none w-full font-medium text-sm text-custom-black dark:text-white bg-transparent resize-none leading-relaxed"
                       rows="3" placeholder="Masukkan detail alamat lengkap..."></textarea>
                   </label>
-                  <span v-if="error?.address" class="text-xs font-medium text-red-500">{{ error?.address.join(', ') }}</span>
+                  <span v-if="error?.address" class="text-xs font-medium text-red-500">{{ error?.address?.join(', ') }}</span>
                 </div>
               </div>
             </div>
@@ -703,7 +703,9 @@ onMounted(async () => {
           </div>
         </div>
         <div class="px-6 pb-6 flex flex-col gap-3">
-          <RouterLink :to="{ name: 'admin.my-transaction' }"
+          <RouterLink :to="user?.activeMode === 'store'
+              ? { name: 'admin.my-transaction' }
+              : { name: 'user.my-transaction', params: { username: user?.username } }"
             class="flex items-center justify-center h-12 w-full rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors">
             Lihat Transaksi
           </RouterLink>
