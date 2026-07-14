@@ -48,9 +48,13 @@ const handleSubmit = async () => {
   formData.append('role', 'buyer')
 
   try {
-    await register(formData)
-    // Only redirect on success
-    router.push({ name: 'app.home' })
+    const data = await register(formData)
+    // Arahkan ke halaman verifikasi kalau email belum terverifikasi
+    if (data && !data.email_verified_at) {
+      router.push({ name: 'auth.verify-email' })
+    } else {
+      router.push({ name: 'app.home' })
+    }
   } catch (e) {
     console.error('Registration failed:', e)
   } finally {
