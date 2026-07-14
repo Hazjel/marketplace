@@ -11,10 +11,17 @@ export const options = {
       exec: "hitMetrics",
     },
     // Skenario 2: Chat predict (berat, sedikit request karena LLM inference)
+    // NOTE: AI service rate-limit 20 req/menit PER IP (lihat ai-service/config.py
+    // RATE_LIMIT_PER_MINUTE). k6 mengirim semua VU dari 1 IP container, jadi
+    // request/menit skenario ini harus tetap di bawah itu — kalau tidak, hasilnya
+    // 429 bukan mengukur performa AI service yang sesungguhnya.
     chat_predict: {
-      executor: "constant-vus",
-      vus: 2,
+      executor: "constant-arrival-rate",
+      rate: 15, // req/menit, di bawah limit 20/menit per IP
+      timeUnit: "1m",
       duration: "2m",
+      preAllocatedVUs: 2,
+      maxVUs: 5,
       exec: "hitPredict",
     },
   },

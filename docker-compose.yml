@@ -83,8 +83,8 @@ services:
     container_name: blue-api
     restart: unless-stopped
     entrypoint: ["bash", "/var/www/docker-entrypoint.sh"]
-    ports:
-      - "8000:8000"
+    expose:
+      - "9000"
     depends_on:
       mysql:
         condition: service_healthy

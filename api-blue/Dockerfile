@@ -20,6 +20,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
 COPY . .
+COPY docker/php-fpm-pool.conf /usr/local/etc/php-fpm.d/www.conf
 
 RUN composer dump-autoload --optimize \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
