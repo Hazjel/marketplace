@@ -91,30 +91,69 @@ class ShipmentController extends Controller
         });
     }
 
+    private const COURIERS = 'jne:sicepat:jnt:anteraja:pos:tiki';
+
     public function calculate(Request $request)
     {
         $request->validate([
             'shipper_destination_id' => 'required|integer',
             'receiver_destination_id' => 'required|integer',
             'item_value' => 'required|numeric|min:0',
-            'weight' => 'required|numeric|min:1',
+            'weight' => 'required|numeric|min:0.01',
         ]);
 
+        // Berat produk tersimpan dalam kg; Komerce butuh gram
+        $grams = max(100, (int) round($request->weight * 1000));
+
+        $cacheKey = sprintf(
+            'komerce_cost:%s:%s:%d',
+            $request->shipper_destination_id,
+            $request->receiver_destination_id,
+            $grams
+        );
+
         try {
-            $response = Http::withHeaders(['key' => config('services.komerce.api_key')])
-                ->get($this->baseUrl.'/calculate', $request->only([
-                    'shipper_destination_id',
-                    'receiver_destination_id',
-                    'item_value',
-                    'weight',
-                ]));
+            $couriers = Cache::remember($cacheKey, now()->addHour(), function () use ($request, $grams) {
+                $response = Http::timeout(15)
+                    ->asForm()
+                    ->withHeaders(['key' => config('services.komerce.api_key')])
+                    ->post($this->baseUrl.'/calculate/district/domestic-cost', [
+                        'origin' => $request->shipper_destination_id,
+                        'destination' => $request->receiver_destination_id,
+                        'weight' => $grams,
+                        'courier' => self::COURIERS,
+                    ]);
 
-            $status = $response->status();
-            if ($status === 401 || $status === 403) {
-                return ResponseHelper::jsonResponse(false, 'Layanan pengiriman tidak tersedia saat ini.', null, 503);
-            }
+                $status = $response->status();
+                if ($status === 401 || $status === 403) {
+                    throw new \RuntimeException('Komerce unauthorized');
+                }
+                if (! $response->successful()) {
+                    Log::warning('Komerce calculate non-200', ['status' => $status, 'body' => $response->body()]);
 
-            return response()->json($response->json(), $status);
+                    return [];
+                }
+
+                // Map ke format lama yang dipakai frontend (calculate_reguler)
+                return collect($response->json('data') ?? [])
+                    ->map(fn ($row) => [
+                        'shipping_name' => $row['name'] ?? $row['code'] ?? '-',
+                        'service_name' => $row['service'] ?? '-',
+                        'shipping_cost' => $row['cost'] ?? 0,
+                        'shipping_cost_net' => $row['cost'] ?? 0,
+                        'etd' => $row['etd'] ?? null,
+                    ])
+                    ->sortBy('shipping_cost_net')
+                    ->values()
+                    ->all();
+            });
+
+            return response()->json([
+                'meta' => ['code' => 200, 'status' => 'success'],
+                'data' => ['calculate_reguler' => $couriers],
+            ]);
+        } catch (\RuntimeException $e) {
+            return ResponseHelper::jsonResponse(false, 'Layanan pengiriman tidak tersedia saat ini.', null, 503);
         } catch (\Exception $e) {
             Log::error('Shipment calculate failed', ['error' => $e->getMessage()]);
 
