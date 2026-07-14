@@ -11,6 +11,34 @@ const { fetchStores } = storeStore
 
 const searchQuery = ref('')
 const sortBy = ref('default')
+const geoError = ref('')
+const locating = ref(false)
+
+const handleSortChange = () => {
+  geoError.value = ''
+  if (sortBy.value !== 'nearest') {
+    fetchStores({ limit: 100 })
+    return
+  }
+  if (!navigator.geolocation) {
+    geoError.value = 'Browser tidak mendukung geolokasi.'
+    sortBy.value = 'default'
+    return
+  }
+  locating.value = true
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      locating.value = false
+      fetchStores({ limit: 100, lat: pos.coords.latitude, lng: pos.coords.longitude })
+    },
+    () => {
+      locating.value = false
+      geoError.value = 'Izin lokasi ditolak — tidak bisa mengurutkan berdasarkan jarak.'
+      sortBy.value = 'default'
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  )
+}
 
 const filteredStores = computed(() => {
   let result = [...(stores.value || [])]
@@ -24,6 +52,9 @@ const filteredStores = computed(() => {
   }
 
   switch (sortBy.value) {
+    case 'nearest':
+      // Server sudah mengurutkan berdasarkan jarak
+      break
     case 'name':
       result.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
       break
@@ -88,13 +119,21 @@ onMounted(() => {
 
       <!-- Sort -->
       <select v-model="sortBy"
-        class="h-12 px-4 rounded-xl bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 text-sm font-medium text-custom-black dark:text-white focus:outline-none focus:border-custom-blue appearance-none cursor-pointer min-w-[160px]">
+        class="h-12 px-4 rounded-xl bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 text-sm font-medium text-custom-black dark:text-white focus:outline-none focus:border-custom-blue appearance-none cursor-pointer min-w-[160px]"
+        @change="handleSortChange">
         <option value="default">Default</option>
+        <option value="nearest">Terdekat</option>
         <option value="name">Nama A-Z</option>
         <option value="followers">Followers Terbanyak</option>
         <option value="products">Produk Terbanyak</option>
       </select>
     </div>
+
+    <div v-if="locating" class="flex items-center gap-2 mb-4 text-sm text-custom-grey dark:text-gray-400">
+      <div class="size-4 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
+      Mencari lokasimu...
+    </div>
+    <p v-else-if="geoError" class="mb-4 text-sm font-medium text-red-500">{{ geoError }}</p>
 
     <!-- Loading -->
     <div v-if="loading && stores.length === 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">

@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 class StoreRepository implements StoreRepositoryInterface
 {
-    public function getAll(?string $search, ?bool $isVerified, ?int $limit, ?bool $random, bool $execute)
+    public function getAll(?string $search, ?bool $isVerified, ?int $limit, ?bool $random, bool $execute, ?float $nearLat = null, ?float $nearLng = null)
     {
         $query = Store::where(function ($query) use ($search, $isVerified) {
             if ($search) {
@@ -23,7 +23,15 @@ class StoreRepository implements StoreRepositoryInterface
             }
         })->with(['user']);
 
-        if ($random) {
+        if ($nearLat !== null && $nearLng !== null) {
+            // Urutkan berdasarkan jarak; toko tanpa koordinat tampil paling akhir
+            $query->select('stores.*')
+                ->selectRaw(
+                    'ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) as distance_m',
+                    [$nearLng, $nearLat]
+                )
+                ->orderByRaw('distance_m IS NULL, distance_m ASC');
+        } elseif ($random) {
             $query->inRandomOrder();
         } else {
             $query->orderBy('created_at', 'desc');
