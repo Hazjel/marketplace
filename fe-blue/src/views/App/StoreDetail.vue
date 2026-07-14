@@ -4,6 +4,7 @@ import ProductCard from '@/components/card/ProductCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import ReviewCard from '@/components/card/ReviewCard.vue'
 import StoreHeader from '@/components/store/StoreHeader.vue'
+import MapPreview from '@/components/Molecule/MapPreview.vue'
 import { useProductStore } from '@/stores/product'
 import { useStoreStore } from '@/stores/store'
 import { storeToRefs } from 'pinia'
@@ -216,6 +217,13 @@ onMounted(async () => {
           </div>
           <p class="font-bold text-lg text-custom-black dark:text-white">Belum ada produk</p>
           <p class="text-sm text-custom-grey dark:text-gray-400">Toko ini belum menambahkan produk</p>
+        </div>
+
+        <!-- Store Location -->
+        <div v-if="store?.latitude != null && store?.longitude != null" class="flex flex-col gap-4">
+          <h2 class="font-bold text-xl text-custom-black dark:text-white">Lokasi Toko</h2>
+          <MapPreview :latitude="store.latitude" :longitude="store.longitude" height="h-56" />
+          <p class="text-sm text-custom-grey dark:text-gray-400">{{ store.address }}, {{ store.city }}</p>
         </div>
       </section>
 

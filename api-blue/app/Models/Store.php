@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Store extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
 
     protected $fillable = [
         'user_id',
@@ -21,11 +21,15 @@ class Store extends Model
         'city',
         'address',
         'postal_code',
-        'is_verified'
+        'latitude',
+        'longitude',
+        'is_verified',
     ];
 
     protected $casts = [
-        'is_verified' => 'boolean'
+        'is_verified' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function scopeSearch($query, $search)
@@ -34,12 +38,13 @@ class Store extends Model
             $safeTerm = preg_replace('/[+\-*"<>()~@]+/', '', $search);
             if (mb_strlen(trim($safeTerm)) >= 3) {
                 return $query->where(function ($q) use ($safeTerm, $search) {
-                    $q->whereRaw('MATCH(name) AGAINST(? IN BOOLEAN MODE)', ['+' . $safeTerm . '*'])
-                      ->orWhere('phone', 'like', '%' . $search . '%');
+                    $q->whereRaw('MATCH(name) AGAINST(? IN BOOLEAN MODE)', ['+'.$safeTerm.'*'])
+                        ->orWhere('phone', 'like', '%'.$search.'%');
                 });
             }
         }
-        return $query->where('name', 'like', '%' . $search . '%')->orWhere('phone', 'like', '%' . $search . '%');
+
+        return $query->where('name', 'like', '%'.$search.'%')->orWhere('phone', 'like', '%'.$search.'%');
     }
 
     public function user()

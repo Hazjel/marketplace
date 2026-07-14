@@ -5,9 +5,9 @@ namespace App\Repositories;
 use App\Interfaces\StoreRepositoryInterface;
 use App\Models\Store;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
 
 class StoreRepository implements StoreRepositoryInterface
 {
@@ -19,7 +19,7 @@ class StoreRepository implements StoreRepositoryInterface
             }
 
             if ($isVerified !== null) {
-                $query->where('is_verified' ,$isVerified);
+                $query->where('is_verified', $isVerified);
             }
         })->with(['user']);
 
@@ -49,7 +49,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getLocations()
     {
-         return Store::select('city')
+        return Store::select('city')
             ->whereNotNull('city')
             ->where('city', '!=', '')
             ->distinct()
@@ -95,7 +95,7 @@ class StoreRepository implements StoreRepositoryInterface
 
             $store->user_id = $data['user_id'];
             $store->name = $data['name'];
-            $store->username = Str::slug($data['name']) . '-s' . rand(100000, 999999);
+            $store->username = Str::slug($data['name']).'-s'.rand(100000, 999999);
             $store->logo = $data['logo']->store('assets/store', 'public');
             $store->about = $data['about'];
             $store->phone = $data['phone'];
@@ -103,11 +103,13 @@ class StoreRepository implements StoreRepositoryInterface
             $store->city = $data['city'];
             $store->address = $data['address'];
             $store->postal_code = $data['postal_code'];
+            $store->latitude = $data['latitude'] ?? null;
+            $store->longitude = $data['longitude'] ?? null;
 
             $store->save();
 
             $store->storeBalance()->create([
-                'balance' => 0
+                'balance' => 0,
             ]);
 
             DB::commit();
@@ -146,9 +148,8 @@ class StoreRepository implements StoreRepositoryInterface
             $store->name = $data['name'];
 
             if ($data['name'] != $store->name) {
-                $store->username = Str::slug($data['name']) . '-s' . rand(100000, 999999);
+                $store->username = Str::slug($data['name']).'-s'.rand(100000, 999999);
             }
-
 
             if (isset($data['logo'])) {
                 $store->logo = $data['logo']->store('assets/store', 'public');
@@ -160,6 +161,8 @@ class StoreRepository implements StoreRepositoryInterface
             $store->city = $data['city'];
             $store->address = $data['address'];
             $store->postal_code = $data['postal_code'];
+            $store->latitude = $data['latitude'] ?? $store->latitude;
+            $store->longitude = $data['longitude'] ?? $store->longitude;
 
             $store->save();
 
@@ -192,25 +195,33 @@ class StoreRepository implements StoreRepositoryInterface
     public function follow(string $storeId, string $userId)
     {
         $store = Store::find($storeId);
-        if (!$store) throw new Exception("Store not found");
+        if (! $store) {
+            throw new Exception('Store not found');
+        }
 
         $store->followers()->syncWithoutDetaching([$userId]);
+
         return true;
     }
 
     public function unfollow(string $storeId, string $userId)
     {
         $store = Store::find($storeId);
-        if (!$store) throw new Exception("Store not found");
+        if (! $store) {
+            throw new Exception('Store not found');
+        }
 
         $store->followers()->detach($userId);
+
         return true;
     }
 
     public function checkFollowStatus(string $storeId, string $userId)
     {
         $store = Store::find($storeId);
-        if (!$store) return false;
+        if (! $store) {
+            return false;
+        }
 
         return $store->followers()->where('user_id', $userId)->exists();
     }
@@ -220,8 +231,8 @@ class StoreRepository implements StoreRepositoryInterface
         return \App\Models\ProductReview::whereHas('product', function ($query) use ($storeId) {
             $query->where('store_id', $storeId);
         })
-        ->with(['user', 'product', 'attachments'])
-        ->orderBy('created_at', 'desc')
-        ->paginate($limit);
+            ->with(['user', 'product', 'attachments'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($limit);
     }
 }

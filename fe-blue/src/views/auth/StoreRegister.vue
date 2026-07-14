@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 import { axiosInstance as axios } from '@/plugins/axios'
 import { useAuthStore } from '@/stores/auth'
 import Cookies from 'js-cookie'
 import { debounce } from 'lodash'
+import MapPicker from '@/components/Molecule/MapPicker.vue'
 
 const authStore = useAuthStore()
 
@@ -26,11 +27,27 @@ const form = ref({
   postal_code: ''
 })
 
-const googleMapsUrl = computed(() => {
-  if (!form.value.city) return ''
-  const query = encodeURIComponent(`${form.value.address} ${form.value.city}`)
-  return `https://maps.google.com/maps?q=${query}&t=&z=13&ie=UTF8&iwloc=&output=embed`
-})
+const coords = ref({ latitude: null, longitude: null })
+
+const handleCoordsUpdate = (value) => {
+  coords.value = value
+}
+
+// Saat kota dipilih, arahkan peta ke pusat kota kalau pin belum ditaruh
+const centerMapOnCity = async (city) => {
+  if (coords.value.latitude != null) return
+  try {
+    const res = await axios.get('/shipment/geocode', { params: { city } })
+    if (res.data?.lat && res.data?.lon) {
+      coords.value = {
+        latitude: parseFloat(res.data.lat),
+        longitude: parseFloat(res.data.lon)
+      }
+    }
+  } catch {
+    // abaikan — user tetap bisa klik peta manual
+  }
+}
 
 const handleAddressInput = debounce(async (search) => {
   if (!search.trim()) {
@@ -67,6 +84,7 @@ const handleAddressSelect = (selected) => {
   form.value.address = selected.label
   addressSearch.value = selected.label
   showAddressOptions.value = false
+  centerMapOnCity(selected.city_name)
 }
 
 const handleSubmit = async () => {
@@ -80,7 +98,9 @@ const handleSubmit = async () => {
       phone: form.value.phone,
       city: form.value.city,
       address: form.value.address,
-      postal_code: form.value.postal_code
+      postal_code: form.value.postal_code,
+      latitude: coords.value.latitude,
+      longitude: coords.value.longitude
     }
 
     const response = await axios.post('/register-store', payload)
@@ -305,21 +325,14 @@ const handleSubmit = async () => {
               <span v-if="errors.address" class="text-red-500 dark:text-red-400 text-xs font-medium ml-2">{{ errors.address[0] }}</span>
             </div>
 
-            <!-- Mobile/Tablet Map Preview -->
+            <!-- Mobile/Tablet Map Picker -->
             <div v-if="form.city" class="flex flex-col gap-2 lg:hidden">
-              <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Preview Lokasi Toko</label>
-              <div class="w-full h-[200px] rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  frameborder="0"
-                  scrolling="no"
-                  marginheight="0"
-                  marginwidth="0"
-                  :src="googleMapsUrl"
-                >
-                </iframe>
-              </div>
+              <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Titik Lokasi Toko</label>
+              <MapPicker
+                :model-value="coords"
+                height="h-[200px]"
+                @update:model-value="handleCoordsUpdate"
+              />
             </div>
           </div>
 
@@ -346,18 +359,13 @@ const handleSubmit = async () => {
 
     <!-- Right Side: Sticky Map / Illustration -->
     <div class="hidden lg:block sticky top-0 h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900">
-      <div v-if="form.city" class="w-full h-full relative">
-        <iframe
-          width="100%"
-          height="100%"
-          frameborder="0"
-          scrolling="no"
-          marginheight="0"
-          marginwidth="0"
-          :src="googleMapsUrl"
-          class="absolute inset-0 w-full h-full object-cover"
-        >
-        </iframe>
+      <div v-if="form.city" class="w-full h-full relative p-6 flex flex-col">
+        <MapPicker
+          :model-value="coords"
+          height="h-full flex-1"
+          class="h-full"
+          @update:model-value="handleCoordsUpdate"
+        />
         <!-- Floating Info Card -->
         <div
           class="absolute top-8 left-8 z-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-5 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/20 dark:border-white/10 flex flex-col gap-4 min-w-[260px] max-w-[320px]"

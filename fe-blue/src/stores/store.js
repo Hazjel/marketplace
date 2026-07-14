@@ -135,6 +135,8 @@ export const useStoreStore = defineStore('store', {
         formData.append('city', payload.city || '')
         formData.append('address', payload.address || '')
         formData.append('postal_code', payload.postal_code || '')
+        if (payload.latitude != null) formData.append('latitude', payload.latitude)
+        if (payload.longitude != null) formData.append('longitude', payload.longitude)
         formData.append('_method', 'PUT') // ✅ Laravel method spoofing
 
         // Append file hanya jika ada file baru
