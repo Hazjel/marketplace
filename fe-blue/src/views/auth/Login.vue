@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
 const { loading, error } = storeToRefs(authStore)
@@ -53,8 +54,12 @@ const handleSubmit = async () => {
   }
 }
 
+const route = useRoute()
+const justVerified = ref(false)
+
 onMounted(() => {
   authStore.error = null // Reset error state
+  justVerified.value = route.query.verified === '1'
 
   localStorage.removeItem('remembered_password') // bersihkan password lama (security fix)
   const savedEmail = localStorage.getItem('remembered_email')
@@ -86,6 +91,14 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
       <p class="text-custom-grey dark:text-gray-400 font-medium text-sm lg:text-base">
         Masukkan detail akunmu untuk melanjutkan.
       </p>
+    </div>
+
+    <!-- Email verified banner -->
+    <div
+      v-if="justVerified"
+      class="p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-medium text-sm border border-green-200 dark:border-green-800 text-center"
+    >
+      ✅ Email berhasil diverifikasi! Silakan masuk.
     </div>
 
     <!-- Inputs Section -->

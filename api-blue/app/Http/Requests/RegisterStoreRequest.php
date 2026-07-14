@@ -18,8 +18,8 @@ class RegisterStoreRequest extends FormRequest
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => ['required', 'string', 'min:8', 'regex:/^(?=.*[A-Z])(?=.*[0-9]).+$/'],
-            'role' => 'required|in:buyer,store',
-            'phone_number' => 'required|numeric|regex:/^08[0-9]{8,13}$/'
+            'role' => 'sometimes|in:buyer',
+            'phone_number' => 'required|numeric|regex:/^08[0-9]{8,13}$/',
         ];
     }
 
@@ -31,7 +31,7 @@ class RegisterStoreRequest extends FormRequest
             'email' => 'Email',
             'password' => 'Kata Sandi',
             'role' => 'Peran',
-            'phone_number' => 'Nomor Telepon'
+            'phone_number' => 'Nomor Telepon',
         ];
     }
 }

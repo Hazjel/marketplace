@@ -8,9 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Contracts\Auth\Authenticatable;
 
 class AuthRepository implements AuthRepositoryInterface
 {
@@ -26,12 +24,12 @@ class AuthRepository implements AuthRepositoryInterface
             }
 
             $user->name = $data['name'];
-            
+
             // Auto-generate username
             $slug = Str::slug($data['name']);
             $count = 1;
             while (User::where('username', $slug)->exists()) {
-                $slug = Str::slug($data['name']) . '-' . $count;
+                $slug = Str::slug($data['name']).'-'.$count;
                 $count++;
             }
             $user->username = $slug;
@@ -40,14 +38,13 @@ class AuthRepository implements AuthRepositoryInterface
             $user->password = bcrypt($data['password']);
             $user->save();
 
-            $role = $data['role'] ?? 'buyer';
-            $user->assignRole($role);
+            // Role store hanya lewat alur register-store (butuh email verified)
+            $user->assignRole('buyer');
 
             // Always create buyer profile
             $user->buyer()->create([
-                'phone_number' => $data['phone_number']
+                'phone_number' => $data['phone_number'],
             ]);
-
 
             $user->token = $user->createToken('auth_token')->plainTextToken;
 
@@ -61,11 +58,10 @@ class AuthRepository implements AuthRepositoryInterface
         }
     }
 
-
     public function login(array $data)
     {
-        $lockKey = 'login_locked_' . md5(strtolower($data['email'] ?? ''));
-        $attemptsKey = 'login_attempts_' . md5(strtolower($data['email'] ?? ''));
+        $lockKey = 'login_locked_'.md5(strtolower($data['email'] ?? ''));
+        $attemptsKey = 'login_attempts_'.md5(strtolower($data['email'] ?? ''));
 
         if (Cache::get($lockKey)) {
             throw new Exception('Akun dikunci sementara karena terlalu banyak percobaan login gagal.', 429);
@@ -74,13 +70,13 @@ class AuthRepository implements AuthRepositoryInterface
         DB::beginTransaction();
 
         try {
-            if (!Auth::guard('web')->attempt($data)) {
+            if (! Auth::guard('web')->attempt($data)) {
                 $attempts = (int) Cache::get($attemptsKey, 0) + 1;
                 Cache::put($attemptsKey, $attempts, now()->addMinutes(15));
                 if ($attempts >= 5) {
                     Cache::put($lockKey, true, now()->addMinutes(15));
                 }
-                throw new Exception('Unauthorized', 401);
+                throw new Exception('Email atau password salah.', 401);
             }
 
             Cache::forget($attemptsKey);
@@ -100,14 +96,12 @@ class AuthRepository implements AuthRepositoryInterface
         }
     }
 
-
-
     public function updateProfile(array $data)
     {
         DB::beginTransaction();
 
         try {
-            if (!Auth::check()) {
+            if (! Auth::check()) {
                 throw new Exception('Unauthorized', 401);
             }
 
@@ -126,7 +120,7 @@ class AuthRepository implements AuthRepositoryInterface
                 $user->profile_picture = $path;
             }
 
-            if (isset($data['password']) && !empty($data['password'])) {
+            if (isset($data['password']) && ! empty($data['password'])) {
                 $user->password = bcrypt($data['password']);
             }
 
@@ -140,7 +134,7 @@ class AuthRepository implements AuthRepositoryInterface
                         ['phone_number' => $data['phone_number']]
                     );
                 } elseif ($user->hasRole('store')) {
-                     $user->store()->updateOrCreate(
+                    $user->store()->updateOrCreate(
                         ['user_id' => $user->id],
                         ['phone' => $data['phone_number']]
                     );
@@ -162,7 +156,7 @@ class AuthRepository implements AuthRepositoryInterface
         DB::beginTransaction();
 
         try {
-            if (!Auth::check()) {
+            if (! Auth::check()) {
                 throw new Exception('Unauthorized');
             }
 
@@ -185,7 +179,7 @@ class AuthRepository implements AuthRepositoryInterface
         DB::beginTransaction();
 
         try {
-            if (!Auth::check()) {
+            if (! Auth::check()) {
                 throw new Exception('Unauthorized');
             }
 

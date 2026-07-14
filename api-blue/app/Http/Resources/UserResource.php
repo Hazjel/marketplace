@@ -23,11 +23,12 @@ class UserResource extends JsonResource
             'username' => $this->username, // Added
             'email' => $this->email,
             'role' => $role,
+            'email_verified_at' => $this->email_verified_at,
             'permissions' => $this->permissions,
             'token' => $this->token,
             'store' => $this->store, // Return store if exists
             'buyer' => $this->buyer,  // Return buyer if exists (Even if role is store)
-            'last_seen_at' => $this->last_seen_at // Added
+            'last_seen_at' => $this->last_seen_at, // Added
         ];
     }
 }

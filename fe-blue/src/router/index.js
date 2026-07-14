@@ -63,6 +63,12 @@ const router = createRouter({
           component: () => import('@/views/auth/AuthCallback.vue')
         },
         {
+          path: 'verify-email',
+          name: 'auth.verify-email',
+          component: () => import('@/views/auth/VerifyEmail.vue'),
+          meta: { requiresAuth: true, title: 'Verifikasi Email' }
+        },
+        {
           path: 'forgot-password',
           name: 'auth.forgot-password',
           component: ForgotPassword,
