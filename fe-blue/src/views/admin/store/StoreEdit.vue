@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router'
 import { debounce } from 'lodash'
 import { useToast } from 'vue-toastification'
 import { axiosInstance } from '@/plugins/axios'
+import MapPicker from '@/components/Molecule/MapPicker.vue'
 
 const router = useRouter()
 const toast = useToast()
@@ -32,6 +33,14 @@ const store = ref({
   postal_code: ''
 })
 
+const storeCoords = ref({ latitude: null, longitude: null })
+
+const handleCoordsUpdate = (value) => {
+  storeCoords.value = value
+  store.value.latitude = value.latitude
+  store.value.longitude = value.longitude
+}
+
 const addressSearch = ref('')
 const addressOptions = ref([])
 const showAddressOptions = ref(false)
@@ -51,6 +60,10 @@ const fetchData = async () => {
       }
 
       addressSearch.value = response.address || ''
+      storeCoords.value = {
+        latitude: response.latitude ?? null,
+        longitude: response.longitude ?? null
+      }
     }
   } catch (err) {
     console.error('Error loading store:', err)
@@ -334,6 +347,12 @@ onMounted(fetchData)
             class="font-semibold text-lg text-custom-red hidden leading-none group-[&.invalid]/errorState:block"
             >{{ error?.address?.join(', ') }}</span
           >
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row justify-between gap-4">
+        <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Titik Lokasi Toko</p>
+        <div class="flex flex-col gap-2 w-full md:w-1/2">
+          <MapPicker :model-value="storeCoords" @update:model-value="handleCoordsUpdate" />
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">

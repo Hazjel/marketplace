@@ -13,14 +13,15 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Middleware\PermissionMiddleware;
 use Illuminate\Support\Str;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class StoreController extends Controller implements HasMiddleware
 {
     private StoreRepositoryInterface $storeRepository;
 
-    public function __construct(StoreRepositoryInterface $storeRepository) {
+    public function __construct(StoreRepositoryInterface $storeRepository)
+    {
         $this->storeRepository = $storeRepository;
     }
 
@@ -67,7 +68,7 @@ class StoreController extends Controller implements HasMiddleware
         $request = $request->validate([
             'search' => 'nullable|string',
             'is_verified' => 'nullable|boolean',
-            'row_per_page' => 'required|integer|min:1|max:100'
+            'row_per_page' => 'required|integer|min:1|max:100',
         ]);
 
         try {
@@ -83,9 +84,10 @@ class StoreController extends Controller implements HasMiddleware
     {
         try {
             $locations = $this->storeRepository->getLocations();
+
             return ResponseHelper::jsonResponse(true, 'Data Lokasi Berhasil Diambil', $locations, 200);
         } catch (\Exception $e) {
-             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 
@@ -114,7 +116,7 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getById($id);
 
-            if (!$store) {
+            if (! $store) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
@@ -129,7 +131,7 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getByUsername($username);
 
-            if (!$store) {
+            if (! $store) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
@@ -144,7 +146,7 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getByUser();
 
-            if (!$store) {
+            if (! $store) {
                 return ResponseHelper::jsonResponse(true, 'Toko Belum Dibuat', null, 200);
             }
 
@@ -159,11 +161,12 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getByUsername($username);
 
-            if (!$store) {
+            if (! $store) {
                 return ResponseHelper::jsonResponse(false, 'Store not found', null, 404);
             }
 
             $categories = $this->storeRepository->getCategories($store->id);
+
             return ResponseHelper::jsonResponse(true, 'Store Categories Fetched', \App\Http\Resources\ProductCategoryResource::collection($categories), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
@@ -175,7 +178,7 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getById($id);
 
-            if (!$store) {
+            if (! $store) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
@@ -197,7 +200,7 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getById($id);
 
-            if (!$store) {
+            if (! $store) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
@@ -218,7 +221,7 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getById($id);
 
-            if (!$store) {
+            if (! $store) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
@@ -230,6 +233,7 @@ class StoreController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
+
     public function registerStore(Request $request)
     {
         $request->validate([
@@ -238,6 +242,8 @@ class StoreController extends Controller implements HasMiddleware
             'city' => 'nullable|string',
             'address' => 'nullable|string',
             'postal_code' => 'nullable|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         try {
@@ -251,11 +257,13 @@ class StoreController extends Controller implements HasMiddleware
             // Create Store
             $store = $user->store()->create([
                 'name' => $request->name,
-                'username' => Str::slug($request->name) . '-' . Str::random(5),
+                'username' => Str::slug($request->name).'-'.Str::random(5),
                 'phone' => $request->phone ?? $user->buyer?->phone_number,
                 'city' => $request->city,
                 'address' => $request->address,
                 'postal_code' => $request->postal_code,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
                 'is_verified' => false,
                 'logo' => 'default-store.png',
                 'about' => '-',
@@ -264,7 +272,7 @@ class StoreController extends Controller implements HasMiddleware
 
             // Create Store Balance
             $store->storeBalance()->create([
-                'balance' => 0
+                'balance' => 0,
             ]);
 
             // Change Role: Remove 'buyer', Assign 'store'
@@ -283,30 +291,32 @@ class StoreController extends Controller implements HasMiddleware
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
-
 
     public function followStore(string $id)
     {
         try {
             $user = Auth::user();
             $this->storeRepository->follow($id, $user->id);
+
             return ResponseHelper::jsonResponse(true, 'Berhasil mengikuti toko', null, 200);
         } catch (\Exception $e) {
-             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 
     public function unfollowStore(string $id)
     {
-         try {
+        try {
             $user = Auth::user();
             $this->storeRepository->unfollow($id, $user->id);
+
             return ResponseHelper::jsonResponse(true, 'Berhasil berhenti mengikuti toko', null, 200);
         } catch (\Exception $e) {
-             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 
@@ -314,13 +324,14 @@ class StoreController extends Controller implements HasMiddleware
     {
         try {
             $user = Auth::user();
-            if (!$user) {
-                 return ResponseHelper::jsonResponse(true, 'Not Logged In', ['is_following' => false], 200);
+            if (! $user) {
+                return ResponseHelper::jsonResponse(true, 'Not Logged In', ['is_following' => false], 200);
             }
             $status = $this->storeRepository->checkFollowStatus($id, $user->id);
+
             return ResponseHelper::jsonResponse(true, 'Check Success', ['is_following' => $status], 200);
         } catch (\Exception $e) {
-             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 
@@ -328,15 +339,16 @@ class StoreController extends Controller implements HasMiddleware
     {
         try {
             $store = $this->storeRepository->getByUsername($username);
-            if (!$store) {
-                 return ResponseHelper::jsonResponse(false, 'Store not found', null, 404);
+            if (! $store) {
+                return ResponseHelper::jsonResponse(false, 'Store not found', null, 404);
             }
 
             $reviews = $this->storeRepository->getReviews($store->id);
+
             return ResponseHelper::jsonResponse(true, 'Review Toko Berhasil Diambil', \App\Http\Resources\PaginateResource::make($reviews, \App\Http\Resources\ProductReviewResource::class), 200);
 
         } catch (\Exception $e) {
-             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
 }

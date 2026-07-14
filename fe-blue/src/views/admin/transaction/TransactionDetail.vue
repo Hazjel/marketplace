@@ -757,6 +757,8 @@ v-if="activeMode === 'buyer'"
         </div>
         <TrackingMap
           :store-city="transaction?.store?.city"
+          :store-lat="transaction?.store?.latitude"
+          :store-lng="transaction?.store?.longitude"
           :buyer-city="transaction?.city"
           :tracking-number="transaction?.tracking_number"
           :shipping="transaction?.shipping"
@@ -819,6 +821,8 @@ id="Progress-Bar"
         </div>
         <TrackingMap
           :store-city="transaction?.store?.city"
+          :store-lat="transaction?.store?.latitude"
+          :store-lng="transaction?.store?.longitude"
           :buyer-city="transaction?.city"
           :tracking-number="transaction?.tracking_number"
           :shipping="transaction?.shipping"

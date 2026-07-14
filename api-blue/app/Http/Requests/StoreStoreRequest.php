@@ -22,7 +22,9 @@ class StoreStoreRequest extends FormRequest
             'address_id' => 'required',
             'city' => 'required|string',
             'address' => 'required|string',
-            'postal_code' => 'required|string'
+            'postal_code' => 'required|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ];
     }
 
@@ -37,7 +39,7 @@ class StoreStoreRequest extends FormRequest
             'address_id' => 'Alamat Toko',
             'city' => 'Kota',
             'address' => 'Alamat',
-            'postal_code' => 'Kode Pos'
+            'postal_code' => 'Kode Pos',
         ];
     }
 }
