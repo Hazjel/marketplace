@@ -192,8 +192,9 @@ services:
       context: ./fe-blue
       args:
         VITE_APP_NAME: Blue
-        VITE_API_BASE_URL: https://lab-hajel.tail03faae.ts.net/api
-        VITE_AI_SERVICE_URL: https://lab-hajel.tail03faae.ts.net/ai
+        # Relative — nginx proxy /api & /ai, jalan di localhost/LAN/Tailscale sekaligus
+        VITE_API_BASE_URL: /api
+        VITE_AI_SERVICE_URL: /ai
         VITE_MIDTRANS_CLIENT_KEY: Mid-client-xjQUjCcbhOHl68O3
         VITE_MIDTRANS_IS_PRODUCTION: "false"
         VITE_REVERB_APP_KEY: reverbkey
