@@ -42,14 +42,21 @@ class StoreController extends Controller implements HasMiddleware
     public function index(Request $request)
     {
         try {
+            $request->validate([
+                'lat' => 'nullable|numeric|between:-90,90|required_with:lng',
+                'lng' => 'nullable|numeric|between:-180,180|required_with:lat',
+            ]);
+
             $search = $request->search;
             $is_verified = $request->is_verified;
             $limit = $request->limit;
             $random = $request->random;
+            $nearLat = $request->lat !== null ? (float) $request->lat : null;
+            $nearLng = $request->lng !== null ? (float) $request->lng : null;
 
-            // Don't cache random requests — each call must be unique
-            if ($random) {
-                $stores = $this->storeRepository->getAll($search, $is_verified, $limit, $random, true);
+            // Don't cache random/nearby requests — each call must be unique
+            if ($random || $nearLat !== null) {
+                $stores = $this->storeRepository->getAll($search, $is_verified, $limit, $random, true, $nearLat, $nearLng);
             } else {
                 $cacheKey = "stores_index_search_{$search}_verified_{$is_verified}_limit_{$limit}";
                 $stores = \Illuminate\Support\Facades\Cache::tags(['stores'])->remember($cacheKey, 600, function () use ($search, $is_verified, $limit, $random) {

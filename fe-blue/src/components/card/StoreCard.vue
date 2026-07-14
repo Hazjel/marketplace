@@ -8,6 +8,8 @@ defineProps({
     required: true
   }
 })
+
+const formatDistance = (m) => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`)
 </script>
 
 <template>
@@ -54,6 +56,13 @@ src="@/assets/images/icons/verify-star.svg" class="size-3.5 shrink-0 dark:bright
           <i class="fa-solid fa-location-dot text-xs"></i>
           <span class="truncate">{{ item.city || 'Jakarta' }}</span>
         </div>
+        <template v-if="item.distance_m != null">
+          <div class="w-1 h-1 rounded-full bg-gray-300 shrink-0"></div>
+          <div class="flex items-center gap-1 shrink-0 text-custom-blue font-semibold">
+            <i class="fa-solid fa-route text-xs"></i>
+            <span>{{ formatDistance(item.distance_m) }}</span>
+          </div>
+        </template>
         <div class="w-1 h-1 rounded-full bg-gray-300 shrink-0"></div>
         <div class="flex items-center gap-1">
           <i class="fa-solid fa-star text-custom-orange text-xs"></i>

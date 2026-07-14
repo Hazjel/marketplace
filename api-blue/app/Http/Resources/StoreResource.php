@@ -28,6 +28,7 @@ class StoreResource extends JsonResource
             'postal_code' => $this->postal_code,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
+            'distance_m' => $this->when(isset($this->distance_m), fn () => round((float) $this->distance_m)),
             'is_verified' => $this->is_verified,
             'product_count' => $this->products->count(),
             'transaction_count' => $this->transaction->count(),
