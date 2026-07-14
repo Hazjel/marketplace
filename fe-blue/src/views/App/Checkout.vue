@@ -11,6 +11,7 @@ import { useToast } from 'vue-toastification'
 
 import { axiosInstance } from '@/plugins/axios'
 import CheckoutStepper from '@/components/Molecule/CheckoutStepper.vue'
+import MapPreview from '@/components/Molecule/MapPreview.vue'
 import TrustBadges from '@/components/Molecule/TrustBadges.vue'
 import { logger } from '@/utils/logger'
 import ThumbnailFallback from '@/assets/images/thumbnails/th-1.svg'
@@ -56,12 +57,18 @@ const fetchSavedAddresses = async () => {
   }
 }
 
+const selectedAddressCoords = ref(null)
+
 const selectSavedAddress = (addr) => {
   transaction.value.address_id = addr.city_id
   transaction.value.city = addr.city
   transaction.value.address = addr.address
   transaction.value.postal_code = addr.postal_code
   addressSearch.value = addr.city
+  selectedAddressCoords.value =
+    addr.latitude != null && addr.longitude != null
+      ? { latitude: addr.latitude, longitude: addr.longitude }
+      : null
   toast.success('Address applied: ' + addr.label)
 }
 
@@ -395,6 +402,13 @@ onMounted(async () => {
                   <p class="text-sm font-medium text-custom-black dark:text-gray-200">{{ addr.recipient_name }} <span class="text-custom-grey">({{ addr.phone }})</span></p>
                   <p class="text-xs text-custom-grey dark:text-gray-400 mt-1 line-clamp-2">{{ addr.address }}, {{ addr.city }}</p>
                 </div>
+
+                <!-- Mini map lokasi alamat terpilih -->
+                <MapPreview
+                  v-if="selectedAddressCoords"
+                  :latitude="selectedAddressCoords.latitude"
+                  :longitude="selectedAddressCoords.longitude"
+                />
               </div>
 
               <!-- Manual Search -->
@@ -490,7 +504,7 @@ onMounted(async () => {
             </div>
 
             <!-- Store groups -->
-            <div v-for="(store, storeIdx) in selectedCarts" :key="store.storeId" class="border-b border-gray-50 dark:border-white/5 last:border-b-0">
+            <div v-for="store in selectedCarts" :key="store.storeId" class="border-b border-gray-50 dark:border-white/5 last:border-b-0">
               <!-- Store Header -->
               <div class="flex items-center gap-2 px-5 py-3 bg-gray-50/50 dark:bg-white/[0.02]">
                 <div class="size-6 rounded-full bg-custom-blue/10 flex items-center justify-center">

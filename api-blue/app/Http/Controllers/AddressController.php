@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Exception;
 use Illuminate\Support\Facades\DB;
 
 class AddressController extends Controller
@@ -19,7 +19,7 @@ class AddressController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $addresses
+            'data' => $addresses,
         ]);
     }
 
@@ -33,7 +33,9 @@ class AddressController extends Controller
             'city' => 'required|string',
             'city_id' => 'required|string',
             'postal_code' => 'required|string',
-            'is_primary' => 'boolean'
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'is_primary' => 'boolean',
         ]);
 
         DB::beginTransaction();
@@ -51,6 +53,8 @@ class AddressController extends Controller
                 'city' => $request->city,
                 'city_id' => $request->city_id,
                 'postal_code' => $request->postal_code,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
                 'is_primary' => $request->is_primary ?? false,
             ]);
 
@@ -63,10 +67,11 @@ class AddressController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data' => $address
+                'data' => $address,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
+
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -83,7 +88,9 @@ class AddressController extends Controller
             'city' => 'required|string',
             'city_id' => 'required|string',
             'postal_code' => 'required|string',
-            'is_primary' => 'boolean'
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'is_primary' => 'boolean',
         ]);
 
         DB::beginTransaction();
@@ -98,10 +105,11 @@ class AddressController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data' => $address
+                'data' => $address,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
+
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -113,17 +121,17 @@ class AddressController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Address deleted successfully'
+            'message' => 'Address deleted successfully',
         ]);
     }
 
     public function show(string $id)
     {
         $address = Address::where('user_id', Auth::id())->findOrFail($id);
-        
+
         return response()->json([
             'status' => 'success',
-            'data' => $address
+            'data' => $address,
         ]);
     }
 }

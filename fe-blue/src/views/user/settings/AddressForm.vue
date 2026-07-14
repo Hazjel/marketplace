@@ -5,6 +5,7 @@ import { RouterLink, useRouter, useRoute } from 'vue-router'
 import { axiosInstance } from '@/plugins/axios'
 import { useToast } from 'vue-toastification'
 import { debounce } from 'lodash'
+import MapPicker from '@/components/Molecule/MapPicker.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -22,8 +23,29 @@ const form = reactive({
   city: '',
   city_id: '',
   postal_code: '',
+  latitude: null,
+  longitude: null,
   is_primary: false
 })
+
+const coords = reactive({ latitude: null, longitude: null })
+
+const handleCoordsUpdate = (value) => {
+  coords.latitude = value.latitude
+  coords.longitude = value.longitude
+  form.latitude = value.latitude
+  form.longitude = value.longitude
+}
+
+// Auto-isi field yang masih kosong dari hasil reverse geocode
+const handleResolvedAddress = (info) => {
+  if (!form.address && info.display_name) {
+    form.address = [info.road, info.suburb].filter(Boolean).join(', ') || info.display_name
+  }
+  if (!form.postal_code && info.postal_code) {
+    form.postal_code = info.postal_code
+  }
+}
 
 // City Search Logic
 const citySearch = ref('')
@@ -78,8 +100,12 @@ const fetchAddress = async () => {
       city: data.city,
       city_id: data.city_id,
       postal_code: data.postal_code,
+      latitude: data.latitude,
+      longitude: data.longitude,
       is_primary: !!data.is_primary
     })
+    coords.latitude = data.latitude
+    coords.longitude = data.longitude
     citySearch.value = data.city
   } catch {
     toast.error('Failed to load address')
@@ -243,6 +269,18 @@ onMounted(() => {
             </div>
           </div>
         </Transition>
+      </div>
+
+      <!-- Map Picker -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">
+          Titik Lokasi <span class="font-normal text-custom-grey dark:text-gray-400">(opsional, untuk akurasi pengiriman)</span>
+        </label>
+        <MapPicker
+          :model-value="coords"
+          @update:model-value="handleCoordsUpdate"
+          @address="handleResolvedAddress"
+        />
       </div>
 
       <!-- Address & Postal Code Grid -->
