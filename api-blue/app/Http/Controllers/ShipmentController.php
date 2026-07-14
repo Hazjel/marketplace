@@ -19,28 +19,76 @@ class ShipmentController extends Controller
             ['keyword.min' => 'Kata kunci pencarian minimal 2 huruf.']
         );
 
+        $keyword = trim($request->keyword);
+
         try {
-            $response = Http::withHeaders(['key' => config('services.komerce.api_key')])
+            $results = $this->searchDestinations($keyword);
+
+            // Komerce hanya match kata utuh — keyword pendek sering kosong.
+            // Ekspansi: cocokkan sebagai prefix nama kota, gabungkan hasilnya
+            // supaya "ban" mengeluarkan Bandung + Banjarmasin + Banyuwangi dst.
+            if (count($results) < 10) {
+                foreach (\App\Support\IndonesianCities::matchPrefix($keyword, 5) as $city) {
+                    if (mb_strtolower($city) === mb_strtolower($keyword)) {
+                        continue; // sudah dicari langsung
+                    }
+                    // Maks 12 baris per kota supaya hasil beragam, tidak
+                    // didominasi kota pertama yang cocok
+                    $results = array_merge($results, array_slice($this->searchDestinations($city), 0, 12));
+                }
+
+                // Dedup berdasarkan id, batasi 50
+                $seen = [];
+                $results = array_values(array_filter($results, function ($row) use (&$seen) {
+                    $id = $row['id'] ?? null;
+                    if ($id === null || isset($seen[$id])) {
+                        return false;
+                    }
+                    $seen[$id] = true;
+
+                    return true;
+                }));
+                $results = array_slice($results, 0, 50);
+            }
+
+            return response()->json(['meta' => ['code' => 200, 'status' => 'success'], 'data' => $results]);
+        } catch (\RuntimeException $e) {
+            return ResponseHelper::jsonResponse(false, 'Layanan pengiriman tidak tersedia saat ini.', null, 503);
+        } catch (\Exception $e) {
+            Log::error('Shipment destination search failed', ['error' => $e->getMessage()]);
+
+            return ResponseHelper::jsonResponse(false, 'Gagal mencari destinasi pengiriman.', null, 500);
+        }
+    }
+
+    /**
+     * Query destinasi ke Komerce dengan cache 24 jam (data wilayah statis).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function searchDestinations(string $search): array
+    {
+        $cacheKey = 'komerce_dest:'.md5(mb_strtolower($search));
+
+        return Cache::remember($cacheKey, now()->addHours(24), function () use ($search) {
+            $response = Http::timeout(10)
+                ->withHeaders(['key' => config('services.komerce.api_key')])
                 ->get($this->baseUrl.'/destination/domestic-destination', [
-                    'search' => $request->keyword,
+                    'search' => $search,
                     'limit' => 50,
                     'offset' => 0,
                 ]);
 
             $status = $response->status();
             if ($status === 401 || $status === 403) {
-                return ResponseHelper::jsonResponse(false, 'Layanan pengiriman tidak tersedia saat ini.', null, 503);
+                throw new \RuntimeException('Komerce unauthorized');
             }
             if ($status === 404) {
-                return response()->json(['meta' => ['code' => 200, 'status' => 'success'], 'data' => []]);
+                return [];
             }
 
-            return response()->json($response->json(), $status);
-        } catch (\Exception $e) {
-            Log::error('Shipment destination search failed', ['error' => $e->getMessage()]);
-
-            return ResponseHelper::jsonResponse(false, 'Gagal mencari destinasi pengiriman.', null, 500);
-        }
+            return $response->json('data') ?? [];
+        });
     }
 
     public function calculate(Request $request)
