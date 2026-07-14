@@ -109,7 +109,10 @@ const handleSubmit = async () => {
 
     // Update Auth Store directly from response
     const newUser = response.data.data.user
-    Cookies.set('token', newUser.token)
+    Cookies.set('token', newUser.token, {
+      secure: window.location.protocol === 'https:',
+      sameSite: 'Strict'
+    })
     authStore.user = newUser
 
     setTimeout(() => {

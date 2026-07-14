@@ -16,7 +16,10 @@ onMounted(async () => {
 
   if (token && username) {
     // Set token in Cookies (required by axios instance)
-    Cookies.set('token', token, { secure: true, sameSite: 'Strict' })
+    Cookies.set('token', token, {
+      secure: window.location.protocol === 'https:',
+      sameSite: 'Strict'
+    })
     authStore.token = token
 
     try {

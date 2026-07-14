@@ -31,7 +31,10 @@ export const useAuthStore = defineStore('auth', {
 
         const token = response.data.data.token
 
-        Cookies.set('token', token, { secure: true, sameSite: 'Strict' })
+        Cookies.set('token', token, {
+          secure: window.location.protocol === 'https:',
+          sameSite: 'Strict'
+        })
         this.token = token // Update reactive state
         this.user = response.data.data // Langsung set user dari respons login
 
@@ -58,7 +61,10 @@ export const useAuthStore = defineStore('auth', {
         })
 
         const token = response.data.data.token
-        Cookies.set('token', token, { secure: true, sameSite: 'Strict' })
+        Cookies.set('token', token, {
+          secure: window.location.protocol === 'https:',
+          sameSite: 'Strict'
+        })
         this.token = token
         this.user = response.data.data // Langsung set user dari respons register
         this.success = response.data.message
