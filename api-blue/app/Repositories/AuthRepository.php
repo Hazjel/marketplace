@@ -43,7 +43,7 @@ class AuthRepository implements AuthRepositoryInterface
 
             // Always create buyer profile
             $user->buyer()->create([
-                'phone_number' => $data['phone_number'],
+                'phone_number' => $data['phone_number'] ?? null,
             ]);
 
             $user->token = $user->createToken('auth_token')->plainTextToken;
