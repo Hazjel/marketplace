@@ -14,7 +14,10 @@ class ShipmentController extends Controller
 
     public function destination(Request $request)
     {
-        $request->validate(['keyword' => 'required|string|max:100']);
+        $request->validate(
+            ['keyword' => 'required|string|min:2|max:100'],
+            ['keyword.min' => 'Kata kunci pencarian minimal 2 huruf.']
+        );
 
         try {
             $response = Http::withHeaders(['key' => config('services.komerce.api_key')])

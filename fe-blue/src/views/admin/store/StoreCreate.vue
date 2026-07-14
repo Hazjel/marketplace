@@ -51,7 +51,7 @@ const handleAddressInput = debounce(async (search) => {
     showAddressOptions.value = false
     return
   }
-  if (search.trim().length < 4) {
+  if (search.trim().length < 2) {
     addressOptions.value = []
     showAddressOptions.value = false
     return

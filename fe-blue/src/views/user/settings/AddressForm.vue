@@ -58,7 +58,7 @@ const handleCityInput = debounce(async (search) => {
     showCityOptions.value = false
     return
   }
-  if (search.trim().length < 4) {
+  if (search.trim().length < 2) {
     cityOptions.value = []
     showCityOptions.value = false
     return

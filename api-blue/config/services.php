@@ -42,7 +42,7 @@ return [
     ],
 
     'komerce' => [
-        'api_key' => env('KOMERCE_API_KEY', ''),
+        'api_key' => env('KOMERCE_API_KEY', env('KEY_RAJA_ONGKIR', '')),
     ],
 
     'binderbyte' => [
