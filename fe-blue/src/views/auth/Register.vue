@@ -43,7 +43,9 @@ const handleSubmit = async () => {
   }
   formData.append('name', form.value.name)
   formData.append('email', form.value.email)
-  formData.append('phone_number', form.value.phone_number)
+  if (form.value.phone_number) {
+    formData.append('phone_number', form.value.phone_number)
+  }
   formData.append('password', form.value.password)
   formData.append('role', 'buyer')
 
@@ -131,7 +133,9 @@ const handleSubmit = async () => {
 
       <!-- Phone Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Nomor Telepon</label>
+        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">
+          Nomor Telepon <span class="font-normal text-custom-grey dark:text-gray-400">(opsional)</span>
+        </label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="icon" />
