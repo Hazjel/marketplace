@@ -17,3 +17,6 @@ ai-service/venv/
 
 # Environment secrets
 .env
+
+# Mobile app — pindah ke repo terpisah (Hazjel/marketplace-mobile)
+flutter-app/
