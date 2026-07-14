@@ -42,5 +42,8 @@ fi
 php artisan config:clear
 php artisan route:clear
 
-echo "🚀 Starting Laravel dev server..."
-exec php artisan serve --host=0.0.0.0 --port=8000
+php artisan config:cache
+php artisan route:cache
+
+echo "🚀 Starting PHP-FPM..."
+exec php-fpm -F
