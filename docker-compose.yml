@@ -190,25 +190,22 @@ services:
   frontend:
     build:
       context: ./fe-blue
+      args:
+        VITE_APP_NAME: Blue
+        VITE_API_BASE_URL: https://lab-hajel.tail03faae.ts.net/api
+        VITE_AI_SERVICE_URL: https://lab-hajel.tail03faae.ts.net/ai
+        VITE_MIDTRANS_CLIENT_KEY: Mid-client-xjQUjCcbhOHl68O3
+        VITE_MIDTRANS_IS_PRODUCTION: "false"
+        VITE_REVERB_APP_KEY: reverbkey
+        VITE_REVERB_HOST: lab-hajel.tail03faae.ts.net
+        VITE_REVERB_PORT: 443
+        VITE_REVERB_SCHEME: https
     container_name: blue-frontend
     restart: unless-stopped
     depends_on:
       - api
     volumes:
-      - ./fe-blue:/app
-      - fe_node_modules:/app/node_modules
       - fe_dist:/app/dist
-    environment:
-      VITE_APP_NAME: Blue
-      VITE_API_BASE_URL: https://lab-hajel.tail03faae.ts.net/api
-      VITE_AI_SERVICE_URL: https://lab-hajel.tail03faae.ts.net/ai
-      VITE_MIDTRANS_CLIENT_KEY: Mid-client-xjQUjCcbhOHl68O3
-      VITE_MIDTRANS_IS_PRODUCTION: "false"
-      VITE_REVERB_APP_KEY: reverbkey
-      VITE_REVERB_HOST: lab-hajel.tail03faae.ts.net
-      VITE_REVERB_PORT: 443
-      VITE_REVERB_SCHEME: https
-    command: sh -c "npm run build && echo '✅ Vue build done' && tail -f /dev/null"
 
   # ─────────────────────────────────────────
   # AI Service (FastAPI + Ollama)
