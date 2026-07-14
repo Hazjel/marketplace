@@ -1,159 +1,159 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\StoreController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\StoreBalanceController;
-use App\Http\Controllers\StoreBalanceHistoryController;
-use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\MidtransController;
-use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\StoreBalanceController;
+use App\Http\Controllers\StoreBalanceHistoryController;
+use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
-Broadcast::routes(["middleware" => ["auth:sanctum"]]);
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // Health Check
 Route::get('health', \App\Http\Controllers\HealthController::class);
 
 // Public Routes that must take precedence
-Route::get("store/locations", [StoreController::class, "getLocations"]);
+Route::get('store/locations', [StoreController::class, 'getLocations']);
 
 // Public routes (no authentication required)
-Route::get("product-category", [ProductCategoryController::class, "index"]);
-Route::get("product-category/all/paginated", [
+Route::get('product-category', [ProductCategoryController::class, 'index']);
+Route::get('product-category/all/paginated', [
     ProductCategoryController::class,
-    "getAllPaginated",
+    'getAllPaginated',
 ]);
-Route::get("product-category/slug/{slug}", [
+Route::get('product-category/slug/{slug}', [
     ProductCategoryController::class,
-    "showBySlug",
+    'showBySlug',
 ]);
-Route::get("product-category/{id}", [ProductCategoryController::class, "show"]);
+Route::get('product-category/{id}', [ProductCategoryController::class, 'show']);
 
-Route::get("product", [ProductController::class, "index"]);
-Route::get("product/all/paginated", [
+Route::get('product', [ProductController::class, 'index']);
+Route::get('product/all/paginated', [
     ProductController::class,
-    "getAllPaginated",
+    'getAllPaginated',
 ]);
-Route::get("product/slug/{slug}", [ProductController::class, "showBySlug"]);
-Route::get("product/{id}", [ProductController::class, "show"]);
+Route::get('product/slug/{slug}', [ProductController::class, 'showBySlug']);
+Route::get('product/{id}', [ProductController::class, 'show']);
 
-Route::get("store", [StoreController::class, "index"]);
-Route::get("store/username/{store}", [
+Route::get('store', [StoreController::class, 'index']);
+Route::get('store/username/{store}', [
     StoreController::class,
-    "showByUsername",
+    'showByUsername',
 ]);
-Route::get("store/username/{username}/categories", [
+Route::get('store/username/{username}/categories', [
     StoreController::class,
-    "getCategories",
+    'getCategories',
 ]);
-Route::get("store/username/{username}/reviews", [
+Route::get('store/username/{username}/reviews', [
     StoreController::class,
-    "getReviews",
+    'getReviews',
 ]);
-Route::get("store/{id}", [StoreController::class, "show"]);
+Route::get('store/{id}', [StoreController::class, 'show']);
 
-Route::middleware("auth:sanctum")->group(function () {
-    Route::get("me", [AuthController::class, "me"]);
-    Route::put("profile", [AuthController::class, "updateProfile"]);
-    Route::post("logout", [AuthController::class, "logout"]);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('me', [AuthController::class, 'me']);
+    Route::put('profile', [AuthController::class, 'updateProfile']);
+    Route::post('logout', [AuthController::class, 'logout']);
 
     // Register Store (Upgrade Role)
-    Route::post("register-store", [
+    Route::post('register-store', [
         StoreController::class,
-        "registerStore",
-    ])->middleware("verified");
+        'registerStore',
+    ])->middleware('verified');
 
     // User routes - custom routes BEFORE resource
-    Route::get("user/all/paginated", [
+    Route::get('user/all/paginated', [
         UserController::class,
-        "getAllPaginated",
+        'getAllPaginated',
     ]);
-    Route::apiResource("user", UserController::class);
+    Route::apiResource('user', UserController::class);
 
     // Store routes - custom routes BEFORE resource
     // Route::get('store/all/paginated', [StoreController::class, 'getAllPaginated']); // Commented out to potentially avoid conflict or keep inside auth if intended for admin
-    Route::get("store/all/paginated", [
+    Route::get('store/all/paginated', [
         StoreController::class,
-        "getAllPaginated",
+        'getAllPaginated',
     ]);
-    Route::post("store/{id}/verified", [
+    Route::post('store/{id}/verified', [
         StoreController::class,
-        "updateVerifiedStatus",
+        'updateVerifiedStatus',
     ]);
     // Route::get('store/username/{store}', [StoreController::class, 'showByUsername']); // Moved to public
-    Route::get("my-store", [StoreController::class, "showByUser"]);
-    Route::post("store/{id}/follow", [StoreController::class, "followStore"]);
-    Route::post("store/{id}/unfollow", [
+    Route::get('my-store', [StoreController::class, 'showByUser']);
+    Route::post('store/{id}/follow', [StoreController::class, 'followStore']);
+    Route::post('store/{id}/unfollow', [
         StoreController::class,
-        "unfollowStore",
+        'unfollowStore',
     ]);
-    Route::get("store/{id}/follow-status", [
+    Route::get('store/{id}/follow-status', [
         StoreController::class,
-        "checkFollowStatus",
+        'checkFollowStatus',
     ]);
-    Route::apiResource("store", StoreController::class)->except([
-        "index",
-        "show",
+    Route::apiResource('store', StoreController::class)->except([
+        'index',
+        'show',
     ]);
 
     // Store Balance routes - custom routes BEFORE resource
-    Route::get("store-balance/all/paginated", [
+    Route::get('store-balance/all/paginated', [
         StoreBalanceController::class,
-        "getAllPaginated",
+        'getAllPaginated',
     ]);
-    Route::get("my-store-balance", [
+    Route::get('my-store-balance', [
         StoreBalanceController::class,
-        "showByStore",
+        'showByStore',
     ]);
-    Route::apiResource("store-balance", StoreBalanceController::class)->except([
-        "store",
-        "update",
-        "delete",
+    Route::apiResource('store-balance', StoreBalanceController::class)->except([
+        'store',
+        'update',
+        'delete',
     ]);
 
     // Store Balance History routes - custom routes BEFORE resource
-    Route::get("store-balance-history/all/paginated", [
+    Route::get('store-balance-history/all/paginated', [
         StoreBalanceHistoryController::class,
-        "getAllPaginated",
+        'getAllPaginated',
     ]);
     Route::apiResource(
-        "store-balance-history",
+        'store-balance-history',
         StoreBalanceHistoryController::class,
-    )->except(["store", "update", "delete"]);
+    )->except(['store', 'update', 'delete']);
 
     // Withdrawal routes - custom routes BEFORE resource
-    Route::get("withdrawal/all/paginated", [
+    Route::get('withdrawal/all/paginated', [
         WithdrawalController::class,
-        "getAllPaginated",
+        'getAllPaginated',
     ]);
-    Route::post("withdrawal/{id}/approve", [
+    Route::post('withdrawal/{id}/approve', [
         WithdrawalController::class,
-        "approve",
+        'approve',
     ]);
-    Route::middleware('throttle:5,1')->post("withdrawal", [WithdrawalController::class, "store"]);
-    Route::apiResource("withdrawal", WithdrawalController::class)->except(
-        "store",
-        "update",
-        "delete",
+    Route::middleware('throttle:5,1')->post('withdrawal', [WithdrawalController::class, 'store']);
+    Route::apiResource('withdrawal', WithdrawalController::class)->except(
+        'store',
+        'update',
+        'delete',
     );
 
     // Buyer routes - custom routes BEFORE resource
-    Route::get("buyer/all/paginated", [
+    Route::get('buyer/all/paginated', [
         BuyerController::class,
-        "getAllPaginated",
+        'getAllPaginated',
     ]);
-    Route::apiResource("buyer", BuyerController::class);
+    Route::apiResource('buyer', BuyerController::class);
 
     // Address routes
     Route::apiResource(
-        "address",
+        'address',
         \App\Http\Controllers\AddressController::class,
     );
 
@@ -161,132 +161,132 @@ Route::middleware("auth:sanctum")->group(function () {
     // Route::get('product-category/all/paginated', [ProductCategoryController::class, 'getAllPaginated']); // Moved to public
     // Route::get('product-category/slug/{slug}', [ProductCategoryController::class, 'showBySlug']); // Moved to public
     Route::apiResource(
-        "product-category",
+        'product-category',
         ProductCategoryController::class,
-    )->except(["index", "show"]);
+    )->except(['index', 'show']);
 
     // Product routes - custom routes BEFORE resource
     // Route::get('product/all/paginated', [ProductController::class, 'getAllPaginated']); // Moved to public
     // Route::get('product/slug/{slug}', [ProductController::class, 'showBySlug']); // Moved to public
-    Route::apiResource("product", ProductController::class)->except([
-        "index",
-        "show",
+    Route::apiResource('product', ProductController::class)->except([
+        'index',
+        'show',
     ]);
 
     // Transaction routes - custom routes BEFORE resource
-    Route::get("transaction/chart-data", [
+    Route::get('transaction/chart-data', [
         TransactionController::class,
-        "getChartData",
+        'getChartData',
     ]);
-    Route::get("transaction/all/paginated", [
+    Route::get('transaction/all/paginated', [
         TransactionController::class,
-        "getAllPaginated",
+        'getAllPaginated',
     ]);
-    Route::get("transaction/code/{code}", [
+    Route::get('transaction/code/{code}', [
         TransactionController::class,
-        "showByCode",
+        'showByCode',
     ]);
-    Route::post("transaction/{id}/complete", [
+    Route::post('transaction/{id}/complete', [
         TransactionController::class,
-        "complete",
+        'complete',
     ]);
-    Route::post("transaction/{id}/check-status", [
+    Route::post('transaction/{id}/check-status', [
         TransactionController::class,
-        "checkPaymentStatus",
+        'checkPaymentStatus',
     ]);
     // Route::middleware(['throttle:10,1', 'verified'])->post('transaction', [TransactionController::class, 'store']);
-    Route::middleware(["throttle:10,1", "idempotent"])->post("transaction", [
+    Route::middleware(['throttle:10,1', 'idempotent'])->post('transaction', [
         TransactionController::class,
-        "store",
+        'store',
     ]);
-    Route::apiResource("transaction", TransactionController::class)->except([
-        "store",
+    Route::apiResource('transaction', TransactionController::class)->except([
+        'store',
     ]);
 
     // Product Review
-    Route::get("product-review/all/paginated", [
+    Route::get('product-review/all/paginated', [
         ProductReviewController::class,
-        "getAllPaginated",
+        'getAllPaginated',
     ]);
-    Route::post("product-review", [ProductReviewController::class, "store"]);
+    Route::post('product-review', [ProductReviewController::class, 'store']);
 
     // Wishlist
-    Route::get("wishlist", [
+    Route::get('wishlist', [
         App\Http\Controllers\WishlistController::class,
-        "index",
+        'index',
     ]);
-    Route::post("wishlist", [
+    Route::post('wishlist', [
         App\Http\Controllers\WishlistController::class,
-        "store",
+        'store',
     ]);
 
     // Cart Routes
-    Route::get("cart", [App\Http\Controllers\CartController::class, "index"]);
-    Route::post("cart", [App\Http\Controllers\CartController::class, "store"]);
-    Route::put("cart/{productId}", [App\Http\Controllers\CartController::class, "update"]);
-    Route::delete("cart/clear", [App\Http\Controllers\CartController::class, "clear"]);
-    Route::delete("cart/{productId}", [App\Http\Controllers\CartController::class, "destroy"]);
-    Route::post("cart/sync", [App\Http\Controllers\CartController::class, "sync"]);
-    Route::post("cart/validate-stock", [App\Http\Controllers\CartController::class, "validateStock"]);
+    Route::get('cart', [App\Http\Controllers\CartController::class, 'index']);
+    Route::post('cart', [App\Http\Controllers\CartController::class, 'store']);
+    Route::put('cart/{productId}', [App\Http\Controllers\CartController::class, 'update']);
+    Route::delete('cart/clear', [App\Http\Controllers\CartController::class, 'clear']);
+    Route::delete('cart/{productId}', [App\Http\Controllers\CartController::class, 'destroy']);
+    Route::post('cart/sync', [App\Http\Controllers\CartController::class, 'sync']);
+    Route::post('cart/validate-stock', [App\Http\Controllers\CartController::class, 'validateStock']);
     // Chat Routes
-    Route::get("chat/contacts", [
+    Route::get('chat/contacts', [
         App\Http\Controllers\ChatController::class,
-        "getContacts",
+        'getContacts',
     ]);
-    Route::get("chat/user/{id}", [
+    Route::get('chat/user/{id}', [
         App\Http\Controllers\ChatController::class,
-        "getUserInfo",
+        'getUserInfo',
     ]);
-    Route::get("chat/{user}", [
+    Route::get('chat/{user}', [
         App\Http\Controllers\ChatController::class,
-        "getMessages",
+        'getMessages',
     ]);
-    Route::post("chat/send", [
+    Route::post('chat/send', [
         App\Http\Controllers\ChatController::class,
-        "sendMessage",
+        'sendMessage',
     ]);
 });
 
 // Auth routes
-Route::middleware("throttle:6,1")->group(function () {
-    Route::post("register", [AuthController::class, "register"]);
-    Route::post("login", [AuthController::class, "login"]);
+Route::middleware('throttle:6,1')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
 });
 
 // Verification Routes
-Route::get("/email/verify/{id}/{hash}", [
+Route::get('/email/verify/{id}/{hash}', [
     \App\Http\Controllers\VerificationController::class,
-    "verify",
+    'verify',
 ])
-    ->middleware(["signed", "throttle:6,1"])
-    ->name("verification.verify");
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
 
-Route::post("/email/resend", [
+Route::post('/email/resend', [
     \App\Http\Controllers\VerificationController::class,
-    "resend",
+    'resend',
 ])
-    ->middleware(["auth:sanctum", "throttle:6,1"])
-    ->name("verification.send");
-Route::middleware(["web"])->group(function () {
-    Route::get("auth/google/redirect", [
+    ->middleware(['auth:sanctum', 'throttle:6,1'])
+    ->name('verification.send');
+Route::middleware(['web'])->group(function () {
+    Route::get('auth/google/redirect', [
         \App\Http\Controllers\GoogleAuthController::class,
-        "redirect",
+        'redirect',
     ]);
-    Route::get("auth/google/callback", [
+    Route::get('auth/google/callback', [
         \App\Http\Controllers\GoogleAuthController::class,
-        "callback",
+        'callback',
     ]);
 });
 
 // Password Reset Routes (Public, throttled)
-Route::middleware("throttle:5,1")->group(function () {
-    Route::post("password/forgot", [
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('password/forgot', [
         \App\Http\Controllers\ForgotPasswordController::class,
-        "sendResetLink",
+        'sendResetLink',
     ]);
-    Route::post("password/reset", [
+    Route::post('password/reset', [
         \App\Http\Controllers\ForgotPasswordController::class,
-        "resetPassword",
+        'resetPassword',
     ]);
 });
 
@@ -295,13 +295,14 @@ Route::middleware(['auth:sanctum', 'throttle:30,1'])->group(function () {
     Route::get('/shipment/destination', [ShipmentController::class, 'destination']);
     Route::get('/shipment/calculate', [ShipmentController::class, 'calculate']);
     Route::get('/shipment/geocode', [ShipmentController::class, 'geocode']);
+    Route::get('/shipment/reverse-geocode', [ShipmentController::class, 'reverseGeocode']);
 });
 
 // Midtrans callback
-Route::post("/midtrans-callback", [MidtransController::class, "callback"])->middleware('throttle:60,1');
+Route::post('/midtrans-callback', [MidtransController::class, 'callback'])->middleware('throttle:60,1');
 
 // Logistics Webhook (Simulation - RajaOngkir/Komerce)
-Route::post("/logistics/webhook", [
+Route::post('/logistics/webhook', [
     \App\Http\Controllers\LogisticsController::class,
-    "webhook",
+    'webhook',
 ])->middleware('throttle:60,1');

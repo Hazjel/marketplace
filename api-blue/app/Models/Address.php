@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
 class Address extends Model
 {
@@ -16,11 +15,15 @@ class Address extends Model
         'city',
         'city_id',
         'postal_code',
+        'latitude',
+        'longitude',
         'is_primary',
     ];
 
     protected $casts = [
         'is_primary' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function user()
