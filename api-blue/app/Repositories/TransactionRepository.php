@@ -182,6 +182,8 @@ class TransactionRepository implements TransactionRepositoryInterface
             $transaction->address = $data['address'];
             $transaction->city = $data['city'];
             $transaction->postal_code = $data['postal_code'];
+            $transaction->dest_latitude = $data['dest_latitude'] ?? null;
+            $transaction->dest_longitude = $data['dest_longitude'] ?? null;
             $transaction->shipping = $data['shipping'];
             $transaction->shipping_type = $data['shipping_type'];
 

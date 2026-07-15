@@ -29,6 +29,8 @@ class TransactionStoreRequest extends FormRequest
             'address' => 'required|string',
             'city' => 'required|string',
             'postal_code' => 'required|string',
+            'dest_latitude' => 'nullable|numeric|between:-90,90',
+            'dest_longitude' => 'nullable|numeric|between:-180,180',
             'shipping' => 'required|string',
             'shipping_type' => 'required|string',
             'shipping_cost' => 'required|numeric|min:0',

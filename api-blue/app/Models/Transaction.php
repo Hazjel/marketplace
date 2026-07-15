@@ -18,6 +18,8 @@ class Transaction extends Model
         'address_id',
         'city',
         'postal_code',
+        'dest_latitude',
+        'dest_longitude',
         'shipping',
         'shipping_type',
         'shipping_cost',
