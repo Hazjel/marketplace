@@ -151,7 +151,7 @@ const filteredByStatus = computed(() => {
       </div>
 
       <!-- Pagination -->
-      <Pagination v-if="!loading && filteredByStatus.length > 0" :meta="meta" :server-options="serverOptions" />
+      <Pagination v-if="!loading && filteredByStatus.length > 0" :meta="meta" v-model:server-options="serverOptions" />
 
       <!-- Empty State -->
       <div v-if="!loading && filteredByStatus.length === 0"

@@ -155,12 +155,12 @@ watch(error, (value) => {
 
       <!-- List -->
       <div id="List-Categories" class="flex flex-col gap-6">
-        <div id="List" class="flex flex-col gap-4">
+        <div v-if="!loading && productCategories" id="List" class="flex flex-col gap-4">
           <CardList
-            v-for="category in productCategories" v-if="!loading && productCategories" :key="category.id"
+            v-for="category in productCategories" :key="category.id"
             :item="category" @delete="handleDelete" />
         </div>
-        <Pagination :meta="meta" :server-options="serverOptions" />
+        <Pagination :meta="meta" v-model:server-options="serverOptions" />
       </div>
 
       <!-- Empty State -->

@@ -66,8 +66,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint (report only, pre-existing issues not yet fixed)
-        run: npx eslint . || true
+      - name: Lint
+        run: npx eslint . --max-warnings=200
 
       - name: Run tests
         run: npm run test -- --run

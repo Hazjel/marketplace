@@ -1,5 +1,5 @@
 <script setup>
-defineProps({
+const props = defineProps({
   meta: {
     type: Object,
     required: true
@@ -9,6 +9,13 @@ defineProps({
     required: true
   }
 })
+
+const emit = defineEmits(['update:serverOptions'])
+
+// Jangan mutasi prop langsung — emit salinan baru (v-model:server-options)
+const goToPage = (page) => {
+  emit('update:serverOptions', { ...props.serverOptions, page })
+}
 
 // Function to generate page numbers with ellipsis
 const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
@@ -65,7 +72,7 @@ const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
         <button
           :disabled="meta.current_page === 1"
           class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
-          @click="serverOptions.page = meta.current_page - 1"
+          @click="goToPage(meta.current_page - 1)"
         >
           <img
             src="@/assets/images/icons/arrow-right-no-tail-blue.svg"
@@ -84,7 +91,7 @@ const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
         <button
           v-if="page !== '...'"
           class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold text-sm md:text-base"
-          @click="serverOptions.page = page"
+          @click="goToPage(page)"
         >
           {{ page }}
         </button>
@@ -100,7 +107,7 @@ const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
         <button
           :disabled="meta.current_page === meta.last_page"
           class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
-          @click="serverOptions.page = meta.current_page + 1"
+          @click="goToPage(meta.current_page + 1)"
         >
           <img
             src="@/assets/images/icons/arrow-right-no-tail-blue.svg"

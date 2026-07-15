@@ -121,12 +121,12 @@ watch(error, (value) => {
 
       <!-- List -->
       <section id="List-Transactions" class="flex flex-col flex-1 gap-6 w-full">
-        <div class="list flex flex-col gap-4">
+        <div v-if="!loading && withdrawals" class="list flex flex-col gap-4">
           <CardList
-            v-for="withdrawal in withdrawals" v-if="!loading && withdrawals" :key="withdrawal.id"
+            v-for="withdrawal in withdrawals" :key="withdrawal.id"
             :item="withdrawal" />
         </div>
-        <Pagination :meta="meta" :server-options="serverOptions" />
+        <Pagination :meta="meta" v-model:server-options="serverOptions" />
       </section>
 
       <!-- Empty State -->
