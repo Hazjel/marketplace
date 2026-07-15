@@ -15,7 +15,9 @@ class CartTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Product $product;
+
     private Store $store;
 
     protected function setUp(): void
@@ -26,7 +28,6 @@ class CartTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $storeOwner = User::factory()->create();
-        $storeOwner->guard_name = 'sanctum';
         $storeOwner->assignRole('store');
         $storeOwner->refresh();
 
@@ -62,7 +63,6 @@ class CartTest extends TestCase
         ]);
 
         $this->user = User::factory()->create();
-        $this->user->guard_name = 'sanctum';
         $this->user->assignRole('buyer');
         $this->user->refresh();
     }
@@ -74,8 +74,6 @@ class CartTest extends TestCase
                 'product_id' => $this->product->id,
                 'quantity' => 2,
             ]);
-
-
 
         $response->assertStatus(201)
             ->assertJson(['success' => true])

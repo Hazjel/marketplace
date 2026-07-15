@@ -18,10 +18,15 @@ class EscrowPaymentTest extends TestCase
     use RefreshDatabase;
 
     private User $sellerUser;
+
     private User $buyerUser;
+
     private Store $store;
+
     private StoreBalance $storeBalance;
+
     private Buyer $buyer;
+
     private Product $product;
 
     protected function setUp(): void
@@ -117,7 +122,7 @@ class EscrowPaymentTest extends TestCase
 
         // Simulate Midtrans callback
         $serverKey = config('midtrans.serverKey');
-        $signatureKey = hash('sha512', 'BLUE_TEST_001' . '200' . '126000.00' . $serverKey);
+        $signatureKey = hash('sha512', 'BLUE_TEST_001'.'200'.'126000.00'.$serverKey);
 
         $response = $this->postJson('/api/midtrans-callback', [
             'order_id' => 'BLUE_TEST_001',
@@ -169,7 +174,7 @@ class EscrowPaymentTest extends TestCase
         ]);
 
         $serverKey = config('midtrans.serverKey');
-        $signatureKey = hash('sha512', 'BLUE_TEST_002' . '202' . '126000.00' . $serverKey);
+        $signatureKey = hash('sha512', 'BLUE_TEST_002'.'202'.'126000.00'.$serverKey);
 
         $response = $this->postJson('/api/midtrans-callback', [
             'order_id' => 'BLUE_TEST_002',

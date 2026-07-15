@@ -4,9 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-
 use Illuminate\Http\UploadedFile;
+use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
@@ -21,18 +20,18 @@ class AuthTest extends TestCase
             'name' => 'Tester Blue',
             'username' => 'testerblue',
             'email' => 'test@blukios.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
             'phone_number' => '081234567890',
             'role' => 'buyer',
-            'profile_picture' => UploadedFile::fake()->image('avatar.jpg')
+            'profile_picture' => UploadedFile::fake()->image('avatar.jpg'),
         ];
 
         $response = $this->postJson('/api/register', $payload);
-        
+
         $response->assertStatus(200)
-                 ->assertJsonStructure(['data' => ['token', 'id', 'name', 'email']]);
-        
+            ->assertJsonStructure(['data' => ['token', 'id', 'name', 'email']]);
+
         $this->assertDatabaseHas('users', ['email' => 'test@blukios.com']);
     }
 
@@ -43,17 +42,16 @@ class AuthTest extends TestCase
 
         $user = User::factory()->create([
             'email' => 'login@blukios.com',
-            'password' => bcrypt('password123')
+            'password' => bcrypt('Password123'),
         ]);
-        $user->guard_name = 'sanctum';
         $user->assignRole('buyer');
 
         $response = $this->postJson('/api/login', [
             'email' => 'login@blukios.com',
-            'password' => 'password123'
+            'password' => 'Password123',
         ]);
 
         $response->assertStatus(200)
-                 ->assertJsonStructure(['data' => ['token']]);
+            ->assertJsonStructure(['data' => ['token']]);
     }
 }
