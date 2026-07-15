@@ -9,6 +9,7 @@ use App\Http\Resources\PaginateResource;
 use App\Http\Resources\ProductCategoryResource;
 use App\Http\Resources\ProductReviewResource;
 use App\Http\Resources\StoreResource;
+use App\Http\Resources\UserResource;
 use App\Interfaces\StoreRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -297,6 +298,8 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Toko Berhasil Dibuat!', [
                 'store' => new StoreResource($store),
+                // FE butuh user + token baru (role & permissions berubah ke store)
+                'user' => new UserResource($user),
             ], 201);
 
         } catch (\Exception $e) {

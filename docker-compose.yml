@@ -98,6 +98,10 @@ services:
     environment:
       APP_NAME: Blukios
       APP_ENV: local
+      # Cache config/route container ke luar bind mount — kalau tidak, cache
+      # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
+      APP_CONFIG_CACHE: /tmp/laravel-config.php
+      APP_ROUTES_CACHE: /tmp/laravel-routes.php
       APP_DEBUG: "true"
       APP_URL: ${APP_URL:-http://localhost}
       APP_KEY: ${APP_KEY:-base64:CHANGE_ME_GENERATE_WITH_ARTISAN}
@@ -139,7 +143,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL:-}
-      KOMERCE_API_KEY: ${KOMERCE_API_KEY:-}
+      # Fallback ke KEY_RAJA_ONGKIR — string kosong akan menimpa fallback di config
+      KOMERCE_API_KEY: ${KOMERCE_API_KEY:-${KEY_RAJA_ONGKIR:-}}
 
   nginx:
     image: nginx:alpine
@@ -173,6 +178,10 @@ services:
     environment:
       APP_NAME: Blukios
       APP_ENV: local
+      # Cache config/route container ke luar bind mount — kalau tidak, cache
+      # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
+      APP_CONFIG_CACHE: /tmp/laravel-config.php
+      APP_ROUTES_CACHE: /tmp/laravel-routes.php
       APP_KEY: base64:mzp8+4+f+GYdZuiqdL528buQXoyjZDXKMHrgk4+Q85o=
       DB_CONNECTION: mysql
       DB_HOST: mysql
@@ -211,6 +220,10 @@ services:
     environment:
       APP_NAME: Blukios
       APP_ENV: local
+      # Cache config/route container ke luar bind mount — kalau tidak, cache
+      # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
+      APP_CONFIG_CACHE: /tmp/laravel-config.php
+      APP_ROUTES_CACHE: /tmp/laravel-routes.php
       APP_KEY: base64:mzp8+4+f+GYdZuiqdL528buQXoyjZDXKMHrgk4+Q85o=
       REVERB_APP_ID: "543210123"
       REVERB_APP_KEY: ${REVERB_APP_KEY:-reverbkey}
