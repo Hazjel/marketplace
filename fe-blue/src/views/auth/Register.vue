@@ -63,6 +63,8 @@ const handleSubmit = async () => {
     loading.value = false
   }
 }
+
+const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/$/, '')
 </script>
 
 <template>
@@ -194,6 +196,21 @@ const handleSubmit = async () => {
         <span v-if="loading" class="animate-spin mr-2">⏳</span>
         {{ loading ? 'Memproses...' : 'Daftar Sekarang' }}
       </button>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-4">
+        <div class="h-px flex-1 bg-gray-200 dark:bg-white/10"></div>
+        <span class="text-sm text-custom-grey dark:text-gray-400 font-medium">atau</span>
+        <div class="h-px flex-1 bg-gray-200 dark:bg-white/10"></div>
+      </div>
+
+      <!-- Google Button -->
+      <a
+        :href="`${apiUrl}/auth/google/redirect`"
+        class="w-full h-12 flex items-center justify-center rounded-full border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-custom-black dark:text-white font-semibold hover:bg-gray-50 dark:hover:bg-white/10 hover:border-gray-300 hover:shadow-sm transition-all duration-300">
+        <img src="@/assets/images/icons/google.svg" class="size-5 mr-3" alt="Google" />
+        Daftar dengan Google
+      </a>
 
       <p class="text-center text-custom-grey dark:text-gray-400 font-medium">
         Sudah punya akun?

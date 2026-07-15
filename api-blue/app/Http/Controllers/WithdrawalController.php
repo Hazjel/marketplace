@@ -127,4 +127,31 @@ class WithdrawalController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
+
+    /**
+     * Tolak penarikan (admin). Dana yang sudah didebit saat request
+     * dikembalikan ke saldo tersedia toko.
+     */
+    public function reject(Request $request, string $id)
+    {
+        if (! auth()->user()->hasRole('admin')) {
+            return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+        }
+
+        $request->validate(['reason' => 'nullable|string|max:500']);
+
+        try {
+            $withdrawal = $this->withdrawalRepository->getById($id);
+
+            if (! $withdrawal) {
+                return ResponseHelper::jsonResponse(false, 'Data Withdrawal Tidak Ditemukan', null, 404);
+            }
+
+            $withdrawal = $this->withdrawalRepository->reject($id, $request->reason);
+
+            return ResponseHelper::jsonResponse(true, 'Penarikan ditolak — dana dikembalikan ke saldo toko', new WithdrawalResource($withdrawal), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
 }
