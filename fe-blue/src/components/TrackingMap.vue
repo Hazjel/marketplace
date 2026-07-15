@@ -39,6 +39,8 @@ const props = defineProps({
   buyerCity:      { type: String, default: '' },
   storeLat:       { type: [Number, String], default: null },
   storeLng:       { type: [Number, String], default: null },
+  destLat:        { type: [Number, String], default: null },
+  destLng:        { type: [Number, String], default: null },
   trackingNumber: { type: String, default: '' },
   shipping:       { type: String, default: '' },
   deliveryStatus: { type: String, default: '' },
@@ -78,13 +80,16 @@ const geocodeCity = async (city) => {
 const loadMap = async () => {
   if (!props.storeCity && !props.buyerCity && props.storeLat == null) return
   loadingMap.value = true
-  // Pakai koordinat persis toko kalau tersedia, fallback geocode nama kota
+  // Pakai koordinat persis (toko/alamat) kalau tersedia, fallback geocode nama kota
   const hasStoreCoords = props.storeLat != null && props.storeLng != null
+  const hasDestCoords = props.destLat != null && props.destLng != null
   const [origin, dest] = await Promise.all([
     hasStoreCoords
       ? Promise.resolve([Number(props.storeLat), Number(props.storeLng)])
       : geocodeCity(props.storeCity),
-    geocodeCity(props.buyerCity),
+    hasDestCoords
+      ? Promise.resolve([Number(props.destLat), Number(props.destLng)])
+      : geocodeCity(props.buyerCity),
   ])
   originCoords.value = origin
   destCoords.value = dest

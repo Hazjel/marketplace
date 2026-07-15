@@ -64,6 +64,8 @@ const selectSavedAddress = (addr) => {
   transaction.value.city = addr.city
   transaction.value.address = addr.address
   transaction.value.postal_code = addr.postal_code
+  transaction.value.dest_latitude = addr.latitude ?? null
+  transaction.value.dest_longitude = addr.longitude ?? null
   addressSearch.value = addr.city
   selectedAddressCoords.value =
     addr.latitude != null && addr.longitude != null
@@ -80,6 +82,8 @@ const transaction = ref({
   address: null,
   city: null,
   postal_code: null,
+  dest_latitude: null,
+  dest_longitude: null,
   shipping: null,
   shipping_type: null,
   shipping_cost: 0,

@@ -23,6 +23,8 @@ class TransactionResource extends JsonResource
             'address' => $this->address,
             'city' => $this->city,
             'postal_code' => $this->postal_code,
+            'dest_latitude' => $this->dest_latitude,
+            'dest_longitude' => $this->dest_longitude,
             'shipping' => $this->shipping,
             'shipping_type' => $this->shipping_type,
             'shipping_cost' => (float) (string) $this->shipping_cost,
