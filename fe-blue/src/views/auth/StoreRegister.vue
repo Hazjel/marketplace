@@ -33,6 +33,19 @@ const handleCoordsUpdate = (value) => {
   coords.value = value
 }
 
+// Auto-isi alamat dari reverse geocode saat pin digeser / "Gunakan Lokasi Saya"
+const handleResolvedAddress = (info) => {
+  if (info.display_name) {
+    form.value.address = [info.road, info.suburb].filter(Boolean).join(', ') || info.display_name
+  }
+  if (info.postal_code) {
+    form.value.postal_code = info.postal_code
+  }
+  if (!form.value.city && info.city) {
+    form.value.city = info.city
+  }
+}
+
 // Saat kota dipilih, arahkan peta ke pusat kota kalau pin belum ditaruh
 const centerMapOnCity = async (city) => {
   if (coords.value.latitude != null) return
@@ -335,6 +348,7 @@ const handleSubmit = async () => {
                 :model-value="coords"
                 height="h-[200px]"
                 @update:model-value="handleCoordsUpdate"
+                @address="handleResolvedAddress"
               />
             </div>
           </div>
@@ -368,6 +382,7 @@ const handleSubmit = async () => {
           height="h-full flex-1"
           class="h-full"
           @update:model-value="handleCoordsUpdate"
+          @address="handleResolvedAddress"
         />
         <!-- Floating Info Card -->
         <div

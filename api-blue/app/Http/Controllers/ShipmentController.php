@@ -71,25 +71,40 @@ class ShipmentController extends Controller
     {
         $cacheKey = 'komerce_dest:'.md5(mb_strtolower($search));
 
-        return Cache::remember($cacheKey, now()->addHours(24), function () use ($search) {
-            $response = Http::timeout(10)
-                ->withHeaders(['key' => config('services.komerce.api_key')])
-                ->get($this->baseUrl.'/destination/domestic-destination', [
-                    'search' => $search,
-                    'limit' => 50,
-                    'offset' => 0,
-                ]);
+        $cached = Cache::get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
 
-            $status = $response->status();
-            if ($status === 401 || $status === 403) {
-                throw new \RuntimeException('Komerce unauthorized');
-            }
-            if ($status === 404) {
-                return [];
-            }
+        $response = Http::timeout(10)
+            ->withHeaders(['key' => config('services.komerce.api_key')])
+            ->get($this->baseUrl.'/destination/domestic-destination', [
+                'search' => $search,
+                'limit' => 50,
+                'offset' => 0,
+            ]);
 
-            return $response->json('data') ?? [];
-        });
+        $status = $response->status();
+        if ($status === 401 || $status === 403) {
+            throw new \RuntimeException('Komerce unauthorized');
+        }
+        if ($status === 404) {
+            Cache::put($cacheKey, [], now()->addHours(24));
+
+            return [];
+        }
+        // Error sementara upstream (429/5xx): jangan di-cache — kalau tidak,
+        // keyword yang dicoba saat gangguan akan kosong 24 jam ke depan
+        if (! $response->successful()) {
+            Log::warning('Komerce destination non-200', ['status' => $status, 'search' => $search]);
+
+            return [];
+        }
+
+        $results = $response->json('data') ?? [];
+        Cache::put($cacheKey, $results, now()->addHours(24));
+
+        return $results;
     }
 
     private const COURIERS = 'jne:sicepat:jnt:anteraja:pos:tiki';

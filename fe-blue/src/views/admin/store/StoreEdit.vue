@@ -41,6 +41,20 @@ const handleCoordsUpdate = (value) => {
   store.value.longitude = value.longitude
 }
 
+// Auto-isi alamat dari reverse geocode saat pin digeser / "Gunakan Lokasi Saya"
+const handleResolvedAddress = (info) => {
+  if (info.display_name) {
+    store.value.address = [info.road, info.suburb].filter(Boolean).join(', ') || info.display_name
+    addressSearch.value = store.value.address
+  }
+  if (info.postal_code) {
+    store.value.postal_code = info.postal_code
+  }
+  if (info.city) {
+    store.value.city = info.city
+  }
+}
+
 const addressSearch = ref('')
 const addressOptions = ref([])
 const showAddressOptions = ref(false)
@@ -352,7 +366,11 @@ onMounted(fetchData)
       <div class="flex flex-col md:flex-row justify-between gap-4">
         <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Titik Lokasi Toko</p>
         <div class="flex flex-col gap-2 w-full md:w-1/2">
-          <MapPicker :model-value="storeCoords" @update:model-value="handleCoordsUpdate" />
+          <MapPicker
+            :model-value="storeCoords"
+            @update:model-value="handleCoordsUpdate"
+            @address="handleResolvedAddress"
+          />
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
