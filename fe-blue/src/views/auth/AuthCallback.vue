@@ -24,26 +24,14 @@ onMounted(async () => {
 
     try {
       // Fetch full user profile to populate pinia state correctly
-      const user = await authStore.checkAuth()
+      await authStore.checkAuth()
 
-      // Check for missing profile info (e.g. phone number)
-      const buyerProfile = user.buyer
-      if (buyerProfile && !buyerProfile.phone_number) {
-        // Redirect to edit profile with a notification query param or state
-        // Assuming 'user.edit-profile' exists
-        router.push({
-          name: 'user.edit-profile',
-          params: { username: username },
-          query: { alert: 'complete_profile' }
-        })
-      } else {
-        // Sync cart after Google OAuth login
-        const cartStore = useCartStore()
-        await cartStore.syncAfterLogin()
+      // Nomor HP opsional (konsisten dengan register biasa) — jangan paksa
+      // lengkapi profil; nomor penerima diminta saat buat alamat/checkout
+      const cartStore = useCartStore()
+      await cartStore.syncAfterLogin()
 
-        // Redirect to homepage
-        router.push({ name: 'app.home' })
-      }
+      router.push({ name: 'app.home' })
     } catch (e) {
       console.error('Auth Check Failed', e)
       router.push({ name: 'auth.login' })
