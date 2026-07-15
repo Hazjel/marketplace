@@ -14,6 +14,7 @@ class StoreBalanceRepositoryTest extends TestCase
     use RefreshDatabase;
 
     private StoreBalanceRepository $repository;
+
     private StoreBalance $storeBalance;
 
     protected function setUp(): void

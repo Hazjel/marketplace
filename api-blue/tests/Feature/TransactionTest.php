@@ -7,7 +7,6 @@ use App\Models\ProductCategory;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class TransactionTest extends TestCase
@@ -19,7 +18,7 @@ class TransactionTest extends TestCase
         parent::setUp();
         // Reset cache permission
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        
+
         $this->seed(\Database\Seeders\PermissionSeeder::class);
         $this->seed(\Database\Seeders\RoleSeeder::class);
     }
@@ -33,10 +32,12 @@ class TransactionTest extends TestCase
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
-        $response = $this->actingAs($admin, 'sanctum')->postJson('/api/transaction', []);
+        $response = $this->actingAs($admin, 'sanctum')
+            ->withHeaders(['X-Idempotency-Key' => (string) \Illuminate\Support\Str::uuid()])
+            ->postJson('/api/transaction', []);
 
         // Node 4: Return 403 Forbidden
-        $response->assertStatus(403); 
+        $response->assertStatus(403);
     }
 
     /**
@@ -49,11 +50,13 @@ class TransactionTest extends TestCase
         $user->assignRole('buyer');
 
         // Payload kosong
-        $response = $this->actingAs($user, 'sanctum')->postJson('/api/transaction', []);
+        $response = $this->actingAs($user, 'sanctum')
+            ->withHeaders(['X-Idempotency-Key' => (string) \Illuminate\Support\Str::uuid()])
+            ->postJson('/api/transaction', []);
 
         // Node 7: Return 422 Unprocessable Entity
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['buyer_id', 'store_id', 'products']);
+            ->assertJsonValidationErrors(['buyer_id', 'store_id', 'products']);
     }
 
     /**
@@ -77,17 +80,17 @@ class TransactionTest extends TestCase
             'city' => 'Jakarta',
             'address' => 'Jl. Seller',
             'postal_code' => '12345',
-            'is_verified' => true
+            'is_verified' => true,
         ]);
-        
+
         // Init Store Balance
         $store->storeBalance()->create(['balance' => 0]);
 
         // 2. Setup Product
         $category = ProductCategory::create([
-            'name' => 'General', 'slug' => 'general', 'description' => 'General'
+            'name' => 'General', 'slug' => 'general', 'description' => 'General',
         ]);
-        
+
         $product = Product::create([
             'store_id' => $store->id,
             'product_category_id' => $category->id,
@@ -97,18 +100,18 @@ class TransactionTest extends TestCase
             'price' => 10000,
             'stock' => 10,
             'weight' => 1,
-            'condition' => 'new'
+            'condition' => 'new',
         ]);
 
         // 3. Setup Buyer
         $buyerUser = User::factory()->create();
         $buyerUser->assignRole('buyer');
-        
+
         // Ensure Buyer profile exists
         $buyerProfile = $buyerUser->buyer()->create([
             'phone_number' => '08987654321',
             'city' => 'Bandung',
-            'address' => 'Jl. Buyer'
+            'address' => 'Jl. Buyer',
         ]);
 
         // 4. Prepare Payload
@@ -125,22 +128,24 @@ class TransactionTest extends TestCase
             'products' => [
                 [
                     'product_id' => $product->id,
-                    'qty' => 2
-                ]
-            ]
+                    'qty' => 2,
+                ],
+            ],
         ];
 
         // 5. Execute API
-        $response = $this->actingAs($buyerUser, 'sanctum')->postJson('/api/transaction', $payload);
+        $response = $this->actingAs($buyerUser, 'sanctum')
+            ->withHeaders(['X-Idempotency-Key' => (string) \Illuminate\Support\Str::uuid()])
+            ->postJson('/api/transaction', $payload);
 
         // Node 10: Return 201 Created
         $response->assertStatus(201)
-                 ->assertJsonStructure(['data' => ['id', 'grand_total', 'delivery_status']]);
-        
+            ->assertJsonStructure(['data' => ['id', 'grand_total', 'delivery_status']]);
+
         // Optional Database Check
         $this->assertDatabaseHas('transactions', [
             'buyer_id' => $buyerProfile->id,
-            'store_id' => $store->id
+            'store_id' => $store->id,
         ]);
     }
 }

@@ -5,10 +5,7 @@ namespace Tests\Feature;
 use App\Models\ProductCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class ProductCategoryTest extends TestCase
 {
@@ -18,7 +15,7 @@ class ProductCategoryTest extends TestCase
     {
         $this->seed(\Database\Seeders\PermissionSeeder::class);
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        
+
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
@@ -26,7 +23,7 @@ class ProductCategoryTest extends TestCase
             'name' => 'Elektronik',
             'slug' => 'elektronik',
             'description' => 'Kategori Elektronik',
-            'image' => null
+            'image' => null,
         ];
 
         $response = $this->actingAs($admin)->postJson('/api/product-category', $payload);
@@ -39,28 +36,28 @@ class ProductCategoryTest extends TestCase
     {
         $this->seed(\Database\Seeders\PermissionSeeder::class);
         $this->seed(\Database\Seeders\RoleSeeder::class);
-        
+
         $admin = User::factory()->create();
         $admin->assignRole('admin');
 
         $parent = ProductCategory::create([
-            'name' => 'Elektronik', 
+            'name' => 'Elektronik',
             'slug' => 'elektronik',
-            'description' => 'Induk Kategori'
+            'description' => 'Induk Kategori',
         ]);
 
         $response = $this->actingAs($admin)->postJson('/api/product-category', [
             'name' => 'Laptop',
             'slug' => 'laptop',
             'description' => 'Laptop Gaming dan Kerja',
-            'parent_id' => $parent->id
+            'parent_id' => $parent->id,
         ]);
 
         $response->assertStatus(201);
-        
+
         $this->assertDatabaseHas('product_categories', [
             'name' => 'Laptop',
-            'parent_id' => $parent->id
+            'parent_id' => $parent->id,
         ]);
     }
 }

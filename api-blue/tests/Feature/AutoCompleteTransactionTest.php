@@ -18,8 +18,11 @@ class AutoCompleteTransactionTest extends TestCase
     use RefreshDatabase;
 
     private Store $store;
+
     private StoreBalance $storeBalance;
+
     private Buyer $buyer;
+
     private Product $product;
 
     protected function setUp(): void

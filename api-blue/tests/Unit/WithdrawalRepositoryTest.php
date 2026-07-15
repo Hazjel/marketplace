@@ -14,7 +14,9 @@ class WithdrawalRepositoryTest extends TestCase
     use RefreshDatabase;
 
     private WithdrawalRepository $repository;
+
     private StoreBalance $storeBalance;
+
     private User $storeUser;
 
     protected function setUp(): void
