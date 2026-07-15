@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{base_url}}/shipment/geocode?city=Bandung"
+method: GET
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+description: Geocode nama kota via Nominatim (cache 7 hari).
+order: 1003

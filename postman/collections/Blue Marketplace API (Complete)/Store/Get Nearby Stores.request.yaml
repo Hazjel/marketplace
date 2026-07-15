@@ -1,0 +1,9 @@
+$kind: http-request
+url: "{{base_url}}/store?limit=10&lat=-6.2&lng=106.8"
+method: GET
+headers:
+  Accept: application/json
+description: >-
+  Daftar toko terurut jarak dari koordinat (ST_Distance_Sphere).
+  Response menyertakan distance_m; toko tanpa koordinat di urutan akhir.
+order: 1005

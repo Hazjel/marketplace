@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{base_url}}/shipment/reverse-geocode?lat=-6.9147&lon=107.6098"
+method: GET
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+description: Koordinat -> alamat (dipakai MapPicker saat pin digeser).
+order: 1004
