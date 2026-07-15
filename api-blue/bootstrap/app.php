@@ -1,12 +1,12 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Illuminate\Auth\AuthenticationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,17 +17,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-    $middleware->validateCsrfTokens(except: [
-        'midtrans-callback',
-        'logistics/webhook',
-    ]);
-    $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
-    $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
-    $middleware->append(\App\Http\Middleware\UpdateLastSeen::class);
-    $middleware->alias([
-        'idempotent' => \App\Http\Middleware\IdempotencyMiddleware::class,
-    ]);
-})
+        $middleware->validateCsrfTokens(except: [
+            'midtrans-callback',
+            'logistics/webhook',
+        ]);
+        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        $middleware->append(\App\Http\Middleware\UpdateLastSeen::class);
+        $middleware->alias([
+            'idempotent' => \App\Http\Middleware\IdempotencyMiddleware::class,
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (ValidationException $e, $request) {
             if ($request->expectsJson()) {
@@ -68,8 +68,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Generic fallback for production — hide internal errors
         $exceptions->render(function (\Throwable $e, $request) {
-            if ($request->expectsJson() && !app()->hasDebugModeEnabled()) {
+            if ($request->expectsJson() && ! app()->hasDebugModeEnabled()) {
                 $code = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Terjadi kesalahan pada server',

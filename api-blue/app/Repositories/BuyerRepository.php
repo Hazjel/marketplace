@@ -7,7 +7,6 @@ use App\Models\Buyer;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-
 class BuyerRepository implements BuyerRepositoryInterface
 {
     public function getAll(?string $search, ?int $limit, bool $execute)
@@ -69,7 +68,6 @@ class BuyerRepository implements BuyerRepositoryInterface
 
         try {
             $buyer = Buyer::find($id);
-   
 
             $buyer->phone_number = $data['phone_number'];
             $buyer->save();

@@ -3,20 +3,20 @@
 namespace App\Models;
 
 use App\Traits\UUID;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Testing\Fluent\Concerns\Has;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class ProductCategory extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
+
     protected $fillable = [
         'parent_id',
         'image',
         'name',
         'slug',
         'tagline',
-        'description'
+        'description',
     ];
 
     protected $appends = [];
@@ -32,7 +32,7 @@ class ProductCategory extends Model
 
     public function scopeSearch($query, $search)
     {
-        return $query->where('name', 'like', '%' . $search . '%');
+        return $query->where('name', 'like', '%'.$search.'%');
     }
 
     public function parent()

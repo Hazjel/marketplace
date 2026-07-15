@@ -16,14 +16,14 @@ class ChatController extends Controller
         try {
             $user = User::find($id);
 
-            if (!$user) {
+            if (! $user) {
                 return ResponseHelper::jsonResponse(false, 'User not found', null, 404);
             }
 
             return ResponseHelper::jsonResponse(true, 'User info fetched successfully', [
                 'id' => $user->id,
                 'name' => $user->name,
-                'profile_picture' => $user->profile_picture ? asset('storage/' . $user->profile_picture) : null,
+                'profile_picture' => $user->profile_picture ? asset('storage/'.$user->profile_picture) : null,
                 'last_seen_at' => $user->last_seen_at,
             ], 200);
 
@@ -56,16 +56,16 @@ class ChatController extends Controller
                     ->where('receiver_id', $userId)
                     ->where('is_read', false)
                     ->count();
-                
-                $contact->last_message = Message::where(function($q) use ($userId, $contact) {
+
+                $contact->last_message = Message::where(function ($q) use ($userId, $contact) {
                     $q->where('sender_id', $userId)->where('receiver_id', $contact->id);
-                })->orWhere(function($q) use ($userId, $contact) {
+                })->orWhere(function ($q) use ($userId, $contact) {
                     $q->where('sender_id', $contact->id)->where('receiver_id', $userId);
                 })->latest()->first();
             }
-            
+
             // Sort by latest message
-            $contacts = $contacts->sortByDesc(function($contact) {
+            $contacts = $contacts->sortByDesc(function ($contact) {
                 return $contact->last_message ? $contact->last_message->created_at : $contact->created_at;
             })->values();
 
@@ -87,16 +87,16 @@ class ChatController extends Controller
                 ->where('is_read', false)
                 ->update(['is_read' => true]);
 
-            $messages = Message::where(function($q) use ($userId, $otherUserId) {
+            $messages = Message::where(function ($q) use ($userId, $otherUserId) {
                 $q->where('sender_id', $userId)
-                  ->where('receiver_id', $otherUserId);
-            })->orWhere(function($q) use ($userId, $otherUserId) {
+                    ->where('receiver_id', $otherUserId);
+            })->orWhere(function ($q) use ($userId, $otherUserId) {
                 $q->where('sender_id', $otherUserId)
-                  ->where('receiver_id', $userId);
+                    ->where('receiver_id', $userId);
             })
-            ->with(['sender', 'receiver'])
-            ->orderBy('created_at', 'asc')
-            ->get();
+                ->with(['sender', 'receiver'])
+                ->orderBy('created_at', 'asc')
+                ->get();
 
             return ResponseHelper::jsonResponse(true, 'Messages fetched successfully', $messages, 200);
 
@@ -109,14 +109,14 @@ class ChatController extends Controller
     {
         $request->validate([
             'receiver_id' => 'required|exists:users,id',
-            'message' => 'required|string'
+            'message' => 'required|string',
         ]);
 
         try {
             $message = Message::create([
                 'sender_id' => Auth::id(),
                 'receiver_id' => $request->receiver_id,
-                'message' => $request->message
+                'message' => $request->message,
             ]);
 
             // Broadcast event

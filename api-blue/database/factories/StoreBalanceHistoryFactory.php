@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class StoreBalanceHistoryFactory extends Factory
 {
     protected $model = StoreBalanceHistory::class;
+
     /**
      * Define the model's default state.
      *
@@ -24,8 +25,8 @@ class StoreBalanceHistoryFactory extends Factory
             'type' => 'initial',
             'reference_id' => null,
             'reference_type' => null,
-            'amount' => $this->faker->randomFloat(2,0, 1000000),
-            'remarks' => 'Pembuatan toko baru'
+            'amount' => $this->faker->randomFloat(2, 0, 1000000),
+            'remarks' => 'Pembuatan toko baru',
         ];
     }
 }

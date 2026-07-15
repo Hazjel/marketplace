@@ -2,11 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Helpers\ImageHelper\ImageHelper;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Helpers\ImageHelper\ImageHelper;
-use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>

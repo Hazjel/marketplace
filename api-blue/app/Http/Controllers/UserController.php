@@ -17,7 +17,8 @@ class UserController extends Controller implements HasMiddleware
 {
     private UserRepositoryInterface $userRepository;
 
-    public function __construct(UserRepositoryInterface $userRepository) {
+    public function __construct(UserRepositoryInterface $userRepository)
+    {
         $this->userRepository = $userRepository;
     }
 
@@ -50,7 +51,7 @@ class UserController extends Controller implements HasMiddleware
         $request = $request->validate([
             'search' => 'nullable|string',
             'row_per_page' => 'required|integer|min:1|max:100',
-            'roles' => 'nullable|string'
+            'roles' => 'nullable|string',
         ]);
 
         try {
@@ -86,7 +87,7 @@ class UserController extends Controller implements HasMiddleware
         try {
             $user = $this->userRepository->getById($id);
 
-            if (!$user) {
+            if (! $user) {
                 return ResponseHelper::jsonResponse(true, 'Data User Tidak Ditemukan', null, 404);
             }
 
@@ -106,7 +107,7 @@ class UserController extends Controller implements HasMiddleware
         try {
             $user = $this->userRepository->getById($id);
 
-            if (!$user) {
+            if (! $user) {
                 return ResponseHelper::jsonResponse(true, 'Data User Tidak Ditemukan', null, 404);
             }
 
@@ -126,7 +127,7 @@ class UserController extends Controller implements HasMiddleware
         try {
             $user = $this->userRepository->getById($id);
 
-            if (!$user) {
+            if (! $user) {
                 return ResponseHelper::jsonResponse(true, 'Data User Tidak Ditemukan', null, 404);
             }
 

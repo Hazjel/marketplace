@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Interfaces\TransactionRepositoryInterface;
-use App\Models\Transaction;
-use App\Repositories\TransactionRepository;
-use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\TransactionStoreRequest;
 use App\Http\Requests\TransactionUpdateRequest;
-use App\Http\Resources\TransactionResource;
-use App\Http\Resources\UserResource;
 use App\Http\Resources\PaginateResource;
+use App\Http\Resources\TransactionResource;
+use App\Interfaces\TransactionRepositoryInterface;
+use App\Models\Transaction;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Spatie\Permission\Middleware\PermissionMiddleware;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class TransactionController extends Controller implements HasMiddleware
 {
     private TransactionRepositoryInterface $transactionRepository;
 
-    public function __construct(TransactionRepositoryInterface $transactionRepository) {
+    public function __construct(TransactionRepositoryInterface $transactionRepository)
+    {
         $this->transactionRepository = $transactionRepository;
     }
 
@@ -54,15 +53,13 @@ class TransactionController extends Controller implements HasMiddleware
     public function getAllPaginated(Request $request)
     {
         // Manual Authorization: Allow Admin (permission), or Buyer, or Store
-        if (!auth()->user()->can('transaction-list') && !auth()->user()->hasRole('buyer') && !auth()->user()->hasRole('store')) {
+        if (! auth()->user()->can('transaction-list') && ! auth()->user()->hasRole('buyer') && ! auth()->user()->hasRole('store')) {
             return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
         }
 
-
-
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer|min:1|max:100'
+            'row_per_page' => 'required|integer|min:1|max:100',
         ]);
 
         try {
@@ -70,27 +67,26 @@ class TransactionController extends Controller implements HasMiddleware
             $totalRevenue = $this->transactionRepository->getTotalRevenue();
             $totalAdminFee = $this->transactionRepository->getTotalAdminFee();
 
-
-
-            // Manual wrapping because using getData(true) returns the array structure directly 
+            // Manual wrapping because using getData(true) returns the array structure directly
             // but ResponseHelper expects to wrap it in 'data'
             // Wait, ResponseHelper::jsonResponse wraps existing data in 'data'.
             // If I pass $responseData (which has data, meta), ResponseHelper will wrap it AGAIN in 'data'.
             // Making it response.data.data.data...
             // PaginateResource::make returns a resource. JsonResponse helper handles resource.
             // Let's modify the resource using additional()
-            
+
             // Use 'new' because 'make' static method often only accepts one arg, causing resourceClass to be null
             $resource = (new PaginateResource($transactions, TransactionResource::class))->additional([
                 'meta' => [
                     'total_revenue' => $totalRevenue,
-                    'total_admin_fee' => $totalAdminFee
-                ]
+                    'total_admin_fee' => $totalAdminFee,
+                ],
             ]);
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', $resource, 200);
         } catch (\Throwable $e) {
             Log::error('Transaction list error', ['error' => $e->getMessage()]);
+
             return ResponseHelper::jsonResponse(false, 'Terjadi kesalahan pada server.', null, 500);
         }
     }
@@ -99,6 +95,7 @@ class TransactionController extends Controller implements HasMiddleware
     {
         try {
             $data = $this->transactionRepository->getChartData();
+
             return ResponseHelper::jsonResponse(true, 'success', $data, 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
@@ -134,21 +131,22 @@ class TransactionController extends Controller implements HasMiddleware
     public function show(string $id)
     {
         try {
-            Log::info("SHOW TX ID: " . $id);
+            Log::info('SHOW TX ID: '.$id);
             $transactions = $this->transactionRepository->getById($id);
 
-            if (!$transactions) {
-                Log::error("SHOW TX: Not Found for ID " . $id);
+            if (! $transactions) {
+                Log::error('SHOW TX: Not Found for ID '.$id);
+
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
             // Security: Prevent IDOR (Only Buyer, Seller, or Admin can view)
             $user = auth()->user();
             if ($user->hasRole('buyer') && $transactions->buyer_id !== $user->buyer?->id) {
-                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
+                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
             if ($user->hasRole('store') && $transactions->store_id !== $user->store?->id) {
-                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
+                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', new TransactionResource($transactions), 200);
@@ -162,7 +160,7 @@ class TransactionController extends Controller implements HasMiddleware
         try {
             $transactions = $this->transactionRepository->getByCode($code);
 
-            if (!$transactions) {
+            if (! $transactions) {
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
@@ -171,7 +169,6 @@ class TransactionController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -183,7 +180,7 @@ class TransactionController extends Controller implements HasMiddleware
         try {
             $transactions = $this->transactionRepository->getById($id);
 
-            if (!$transactions) {
+            if (! $transactions) {
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
@@ -204,13 +201,13 @@ class TransactionController extends Controller implements HasMiddleware
         try {
             $transaction = $this->transactionRepository->getById($id);
 
-            if (!$transaction) {
+            if (! $transaction) {
                 return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
             // Authorization: Ensure user is the buyer
             $user = auth()->user();
-            if (!$user->buyer || $transaction->buyer_id !== $user->buyer->id) {
+            if (! $user->buyer || $transaction->buyer_id !== $user->buyer->id) {
                 return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
             }
 
@@ -219,7 +216,7 @@ class TransactionController extends Controller implements HasMiddleware
             }
 
             $validation = \Illuminate\Support\Facades\Validator::make(request()->all(), [
-                'receiving_proof' => 'required|image|max:2048'
+                'receiving_proof' => 'required|image|max:2048',
             ]);
 
             if ($validation->fails()) {
@@ -231,17 +228,17 @@ class TransactionController extends Controller implements HasMiddleware
                 $file = request()->file('receiving_proof');
                 $allowedMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
                 $mime = $file->getMimeType();
-                if (!array_key_exists($mime, $allowedMimes)) {
+                if (! array_key_exists($mime, $allowedMimes)) {
                     return ResponseHelper::jsonResponse(false, 'Tipe file tidak diizinkan.', null, 422);
                 }
-                $filename = time() . '_' . \Illuminate\Support\Str::random(16) . '.' . $allowedMimes[$mime];
+                $filename = time().'_'.\Illuminate\Support\Str::random(16).'.'.$allowedMimes[$mime];
                 $file->move(public_path('upload/transactions'), $filename);
-                $receivingProof = 'upload/transactions/' . $filename;
+                $receivingProof = 'upload/transactions/'.$filename;
             }
 
             $transaction = $this->transactionRepository->updateStatus($id, [
                 'delivery_status' => 'completed',
-                'receiving_proof' => $receivingProof
+                'receiving_proof' => $receivingProof,
             ]);
 
             // ESCROW RELEASE: Pindahkan dana dari pending_balance ke available balance
@@ -262,10 +259,11 @@ class TransactionController extends Controller implements HasMiddleware
         try {
             $store = \App\Models\Store::find($transaction->store_id);
 
-            if (!$store || !$store->storeBalance) {
+            if (! $store || ! $store->storeBalance) {
                 Log::error('releaseEscrowBalance: Store or StoreBalance not found', [
                     'store_id' => $transaction->store_id,
                 ]);
+
                 return;
             }
 
@@ -284,15 +282,15 @@ class TransactionController extends Controller implements HasMiddleware
                 'reference_id' => $transaction->id,
                 'reference_type' => Transaction::class,
                 'amount' => $sellerAmount,
-                'remarks' => 'Dana dirilis ke saldo tersedia — pesanan ' . $transaction->code . ' selesai',
+                'remarks' => 'Dana dirilis ke saldo tersedia — pesanan '.$transaction->code.' selesai',
             ]);
 
-            Log::info('Escrow released for transaction: ' . $transaction->code, [
+            Log::info('Escrow released for transaction: '.$transaction->code, [
                 'store_id' => $store->id,
                 'seller_amount' => $sellerAmount,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Error releasing escrow balance: ' . $e->getMessage(), [
+            Log::error('Error releasing escrow balance: '.$e->getMessage(), [
                 'transaction_id' => $transaction->id,
             ]);
         }
@@ -309,7 +307,7 @@ class TransactionController extends Controller implements HasMiddleware
         try {
             $transaction = $this->transactionRepository->getById($id);
 
-            if (!$transaction) {
+            if (! $transaction) {
                 return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
@@ -331,7 +329,7 @@ class TransactionController extends Controller implements HasMiddleware
             try {
                 // Fetch status from Midtrans
                 $midtransStatus = \Midtrans\Transaction::status($transaction->code);
-                
+
                 $transactionStatus = $midtransStatus->transaction_status;
                 $paymentType = $midtransStatus->payment_type;
                 $fraudStatus = $midtransStatus->fraud_status;
@@ -351,15 +349,15 @@ class TransactionController extends Controller implements HasMiddleware
                             $newStatus = 'paid';
                         }
                     }
-                } else if ($transactionStatus == 'settlement') {
+                } elseif ($transactionStatus == 'settlement') {
                     $newStatus = 'paid';
-                } else if ($transactionStatus == 'pending') {
+                } elseif ($transactionStatus == 'pending') {
                     $newStatus = 'unpaid';
-                } else if ($transactionStatus == 'deny') {
+                } elseif ($transactionStatus == 'deny') {
                     $newStatus = 'failed';
-                } else if ($transactionStatus == 'expire') {
+                } elseif ($transactionStatus == 'expire') {
                     $newStatus = 'failed';
-                } else if ($transactionStatus == 'cancel') {
+                } elseif ($transactionStatus == 'cancel') {
                     $newStatus = 'failed';
                 }
 
@@ -367,7 +365,7 @@ class TransactionController extends Controller implements HasMiddleware
                     // Update to Paid
                     $transaction->payment_status = 'paid';
                     $transaction->save();
-                    
+
                     // Credit ke pending_balance (escrow) — sama seperti Midtrans callback
                     $store = \App\Models\Store::find($transaction->store_id);
                     if ($store && $store->storeBalance) {
@@ -386,13 +384,13 @@ class TransactionController extends Controller implements HasMiddleware
                             'reference_id' => $transaction->id,
                             'reference_type' => Transaction::class,
                             'amount' => $sellerAmount,
-                            'remarks' => 'Pembayaran diterima (ditahan) dari transaksi ' . $transaction->code . ' — akan dirilis setelah pesanan selesai',
+                            'remarks' => 'Pembayaran diterima (ditahan) dari transaksi '.$transaction->code.' — akan dirilis setelah pesanan selesai',
                         ]);
                     }
-                } else if ($newStatus !== $transaction->payment_status) {
+                } elseif ($newStatus !== $transaction->payment_status) {
                     $transaction->payment_status = $newStatus;
                     $transaction->save();
-                    
+
                     // Restore stock if payment failed/expired/cancelled
                     if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
                         $this->transactionRepository->restoreStock($transaction);
@@ -403,7 +401,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             } catch (\Exception $e) {
                 // If Midtrans throws error (e.g. transaction not found there yet), Just return current.
-                return ResponseHelper::jsonResponse(true, 'Gagal cek Midtrans: ' . $e->getMessage(), new TransactionResource($transaction), 200);
+                return ResponseHelper::jsonResponse(true, 'Gagal cek Midtrans: '.$e->getMessage(), new TransactionResource($transaction), 200);
             }
 
         } catch (\Exception $e) {
@@ -416,7 +414,7 @@ class TransactionController extends Controller implements HasMiddleware
         try {
             $transactions = $this->transactionRepository->getById($id);
 
-            if (!$transactions) {
+            if (! $transactions) {
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
@@ -427,5 +425,4 @@ class TransactionController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
-
 }

@@ -6,13 +6,9 @@ use App\Interfaces\ProductRepositoryInterface;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductVariantMongo;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use App\Interfaces\ProductImageRepositoryInterface;
-use App\Repositories\ProductImageRepository;
-use Exception;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class ProductRepository implements ProductRepositoryInterface
 {
@@ -37,20 +33,20 @@ class ProductRepository implements ProductRepositoryInterface
             }
 
             // Filters
-            if (!empty($filters['min_price'])) {
+            if (! empty($filters['min_price'])) {
                 $query->where('price', '>=', $filters['min_price']);
             }
-            if (!empty($filters['max_price'])) {
+            if (! empty($filters['max_price'])) {
                 $query->where('price', '<=', $filters['max_price']);
             }
-            if (!empty($filters['condition'])) {
+            if (! empty($filters['condition'])) {
                 // Ensure array
                 $conditions = is_array($filters['condition']) ? $filters['condition'] : [$filters['condition']];
                 $query->whereIn('condition', $conditions);
             }
-            if (!empty($filters['city'])) {
+            if (! empty($filters['city'])) {
                 $city = $filters['city'];
-                $query->whereHas('store', function($q) use ($city) {
+                $query->whereHas('store', function ($q) use ($city) {
                     if (is_array($city)) {
                         $q->whereIn('city', array_filter($city)); // array_filter to remove nulls
                     } else {
@@ -58,29 +54,28 @@ class ProductRepository implements ProductRepositoryInterface
                     }
                 });
             }
-            if (!empty($filters['min_rating'])) {
+            if (! empty($filters['min_rating'])) {
                 $minRating = $filters['min_rating'];
                 // Check if has review >= minRating
-                $query->whereHas('productReviews', function($q) use ($minRating) {
-                     $q->where('rating', '>=', $minRating);
+                $query->whereHas('productReviews', function ($q) use ($minRating) {
+                    $q->where('rating', '>=', $minRating);
                 });
             }
 
             // New Filters
-            if (!empty($filters['stock_status'])) {
-                 if ($filters['stock_status'] == 'ready_stock') {
-                     $query->where('stock', '>', 0);
-                 }
+            if (! empty($filters['stock_status'])) {
+                if ($filters['stock_status'] == 'ready_stock') {
+                    $query->where('stock', '>', 0);
+                }
             }
 
-            if (!empty($filters['created_since'])) { // days
-                 $days = (int) $filters['created_since'];
-                 $query->where('created_at', '>=', now()->subDays($days));
+            if (! empty($filters['created_since'])) { // days
+                $days = (int) $filters['created_since'];
+                $query->where('created_at', '>=', now()->subDays($days));
             }
         })->with(['productImages', 'store', 'productCategory', 'variants']);
 
         // Removed implicit filtering by store_id for store role users to allow them to see all products in buyer mode
-
 
         if ($limit) {
             $query->take($limit);
@@ -88,9 +83,9 @@ class ProductRepository implements ProductRepositoryInterface
 
         if ($random) {
             $query->inRandomOrder();
-        } elseif (!empty($filters['sort_by'])) {
+        } elseif (! empty($filters['sort_by'])) {
             $sortDirection = $filters['sort_direction'] ?? 'desc';
-            
+
             if ($filters['sort_by'] === 'price') {
                 $query->orderBy('price', $sortDirection);
             } elseif ($filters['sort_by'] === 'created_at') {
@@ -113,7 +108,7 @@ class ProductRepository implements ProductRepositoryInterface
         return $query;
     }
 
-    public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId = null, ?int $rowPerPage, array $filters = [])
+    public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $rowPerPage, array $filters = [])
     {
         $query = $this->getAll($search, $storeId, $ProductCategoryId, null, false, false, $filters);
 
@@ -149,22 +144,24 @@ class ProductRepository implements ProductRepositoryInterface
     public function getBySlug(string $slug)
     {
         $query = Product::where('slug', $slug)->with(['productImages', 'variants', 'productReviews.user', 'productReviews.attachments']);
+
         return $query->first();
     }
+
     public function create(array $data)
     {
         DB::beginTransaction();
 
         try {
-            $product = new Product();
+            $product = new Product;
             $product->store_id = $data['store_id'];
             $product->product_category_id = $data['product_category_id'];
             $product->name = $data['name'];
-            $product->slug = Str::slug($data['name']) . '-i' . rand(100000, 999999) . '.' . rand(10000000, 9999999);
+            $product->slug = Str::slug($data['name']).'-i'.rand(100000, 999999).'.'.rand(10000000, 9999999);
             $product->description = $data['description'];
             $product->condition = $data['condition'];
             $product->weight = $data['weight'];
-            if (!empty($data['variants'])) {
+            if (! empty($data['variants'])) {
                 $product->has_variants = true;
                 $product->price = collect($data['variants'])->min('price');
                 $product->stock = collect($data['variants'])->sum('stock');
@@ -201,7 +198,6 @@ class ProductRepository implements ProductRepositoryInterface
 
             return $product;
 
-
         } catch (\Throwable $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
@@ -217,24 +213,24 @@ class ProductRepository implements ProductRepositoryInterface
             $product->store_id = $data['store_id'];
             $product->product_category_id = $data['product_category_id'];
             $product->name = $data['name'];
-            $product->slug = Str::slug($data['name']) . '-i' . rand(100000, 999999) . '.' . rand(10000000, 9999999);
+            $product->slug = Str::slug($data['name']).'-i'.rand(100000, 999999).'.'.rand(10000000, 9999999);
             $product->description = $data['description'];
             $product->condition = $data['condition'];
             $product->price = $data['price'];
             $product->weight = $data['weight'];
             $product->stock = $data['stock'];
-            
+
             // Sync Variants (Mongo)
             if (isset($data['variants'])) {
                 // Get existing IDs from request (if any)
                 $sentIds = array_filter(array_column($data['variants'], 'id'));
 
                 // Delete variants not in request
-                if (!empty($sentIds)) {
-                     $product->variants()->whereNotIn('id', $sentIds)->delete();
+                if (! empty($sentIds)) {
+                    $product->variants()->whereNotIn('id', $sentIds)->delete();
                 } else {
-                     // If no IDs sent (all new, or empty list), delete ALL existing variants to prevent orphans
-                     $product->variants()->delete();
+                    // If no IDs sent (all new, or empty list), delete ALL existing variants to prevent orphans
+                    $product->variants()->delete();
                 }
 
                 foreach ($data['variants'] as $variant) {
@@ -250,30 +246,30 @@ class ProductRepository implements ProductRepositoryInterface
                             ]);
                         }
                     } else {
-                         // Only create if valid data present
-                         if ($variant['name']) {
+                        // Only create if valid data present
+                        if ($variant['name']) {
                             $product->variants()->create([
-                                'product_id' => (string) $product->id, 
+                                'product_id' => (string) $product->id,
                                 'name' => $variant['name'],
                                 'price' => $variant['price'],
                                 'stock' => $variant['stock'],
                                 'sku' => $variant['sku'] ?? null,
                                 'variant_attributes' => $variant['variant_attributes'] ?? [],
                             ]);
-                         }
+                        }
                     }
                 }
-                
+
                 // Update has_variants flag based on actual data presence
                 $product->has_variants = count($data['variants']) > 0;
 
                 // Auto-calculate price and stock from variants if they exist
-                 if ($product->has_variants) {
+                if ($product->has_variants) {
                     $product->price = collect($data['variants'])->min('price');
                     $product->stock = collect($data['variants'])->sum('stock');
-                 }
+                }
             }
-            
+
             $product->save();
 
             $productImageRepository = new ProductImageRepository;
@@ -286,7 +282,7 @@ class ProductRepository implements ProductRepositoryInterface
 
             if (isset($data['product_images'])) {
                 foreach ($data['product_images'] as $productImage) {
-                    if (!isset($productImage['id'])) {
+                    if (! isset($productImage['id'])) {
                         $productImageRepository->create([
                             'product_id' => $product->id,
                             'image' => $productImage['image'],
@@ -299,7 +295,6 @@ class ProductRepository implements ProductRepositoryInterface
             DB::commit();
 
             return $product;
-
 
         } catch (\Throwable $e) {
             DB::rollBack();

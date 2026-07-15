@@ -18,7 +18,8 @@ class ProductCategoryController extends Controller implements HasMiddleware
 {
     private ProductCategoryRepositoryInterface $productCategoryRepository;
 
-    public function __construct(ProductCategoryRepositoryInterface $productCategoryRepository) {
+    public function __construct(ProductCategoryRepositoryInterface $productCategoryRepository)
+    {
         $this->productCategoryRepository = $productCategoryRepository;
 
     }
@@ -42,7 +43,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
         try {
             $limit = $request->limit;
             $is_parent = $request->is_parent;
-            
+
             $cacheKey = "product_categories_index_limit_{$limit}_parent_{$is_parent}";
             $productCategories = \Illuminate\Support\Facades\Cache::tags(['product_categories'])->remember($cacheKey, 3600, function () use ($request) {
                 return $this->productCategoryRepository->getAll($request->search, $request->limit, true, $request->is_parent);
@@ -59,12 +60,12 @@ class ProductCategoryController extends Controller implements HasMiddleware
         $request = $request->validate([
             'search' => 'nullable|string',
             'is_parent' => 'nullable|boolean',
-            'row_per_page' => 'required|integer'
+            'row_per_page' => 'required|integer',
         ]);
 
         try {
             $productCategories = $this->productCategoryRepository->getAllPaginated($request['search'] ?? null, $request['row_per_page'], $request['is_parent'] ?? null
-        );
+            );
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', PaginateResource::make($productCategories, ProductCategoryResource::class), 200);
         } catch (\Exception $e) {
@@ -97,7 +98,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
         try {
             $productCategory = $this->productCategoryRepository->getById($id);
 
-            if (!$productCategory) {
+            if (! $productCategory) {
                 return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Tidak Ditemukan', null, 404);
             }
 
@@ -112,7 +113,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
         try {
             $productCategory = $this->productCategoryRepository->getBySlug($slug);
 
-            if (!$productCategory) {
+            if (! $productCategory) {
                 return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Tidak Ditemukan', null, 404);
             }
 
@@ -132,10 +133,9 @@ class ProductCategoryController extends Controller implements HasMiddleware
         try {
             $productCategory = $this->productCategoryRepository->getById($id);
 
-            if (!$productCategory) {
+            if (! $productCategory) {
                 return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Tidak Ditemukan', null, 404);
             }
-
 
             $productCategory = $this->productCategoryRepository->update($id, $request);
             \Illuminate\Support\Facades\Cache::tags(['product_categories'])->flush();
@@ -154,10 +154,9 @@ class ProductCategoryController extends Controller implements HasMiddleware
         try {
             $productCategory = $this->productCategoryRepository->getById($id);
 
-            if (!$productCategory) {
+            if (! $productCategory) {
                 return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Tidak Ditemukan', null, 404);
             }
-
 
             $productCategory = $this->productCategoryRepository->delete($id);
             \Illuminate\Support\Facades\Cache::tags(['product_categories'])->flush();

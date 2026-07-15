@@ -15,7 +15,7 @@ class LoginStoreRequest extends FormRequest
     {
         return [
             'email' => 'required|string|email',
-            'password' => 'required|string'
+            'password' => 'required|string',
         ];
     }
 
@@ -23,7 +23,7 @@ class LoginStoreRequest extends FormRequest
     {
         return [
             'email' => 'Email',
-            'password' => 'Kata Sandi'
+            'password' => 'Kata Sandi',
         ];
     }
 }

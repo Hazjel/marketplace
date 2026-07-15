@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Product;
-use App\Models\ProductVariantMongo;
 use App\Models\ProductCategory;
+use App\Models\ProductVariantMongo;
+use Illuminate\Database\Seeder;
 
 class ProductVariantSeeder extends Seeder
 {
@@ -14,7 +14,7 @@ class ProductVariantSeeder extends Seeder
         ProductVariantMongo::truncate();
 
         $smartphoneCat = ProductCategory::where('slug', 'smartphone')->first();
-        $laptopCat     = ProductCategory::where('slug', 'laptop')->first();
+        $laptopCat = ProductCategory::where('slug', 'laptop')->first();
 
         $variants = [
             // ── Smartphone variants ──────────────────────────────────────────
@@ -84,10 +84,10 @@ class ProductVariantSeeder extends Seeder
             '128GB' => 1.0,
             '256GB' => 1.0,
             '512GB' => 1.15,
-            '1TB'   => 1.35,
+            '1TB' => 1.35,
         ];
         $ramMultiplier = [
-            '8GB'  => 1.0,
+            '8GB' => 1.0,
             '12GB' => 1.05,
             '16GB' => 1.12,
             '18GB' => 1.0,
@@ -105,25 +105,27 @@ class ProductVariantSeeder extends Seeder
         $inserted = 0;
         foreach ($products as $product) {
             $attrList = $variants[$product->name] ?? null;
-            if (!$attrList) continue;
+            if (! $attrList) {
+                continue;
+            }
 
             $basePrice = (float) $product->price;
 
             foreach ($attrList as $attrs) {
                 $sm = $storageMultiplier[$attrs['Storage'] ?? '256GB'] ?? 1.0;
-                $rm = $ramMultiplier[$attrs['RAM'] ?? '8GB']           ?? 1.0;
+                $rm = $ramMultiplier[$attrs['RAM'] ?? '8GB'] ?? 1.0;
                 $price = round($basePrice * $sm * $rm, -3); // round to nearest 1000
 
                 $name = implode(' / ', array_values($attrs));
 
                 ProductVariantMongo::create([
-                    'product_id'        => $product->id,
-                    'name'              => $name,
-                    'variant_attributes'=> $attrs,
-                    'price'             => $price,
-                    'stock'             => rand(5, 30),
-                    'sku'               => strtoupper(substr(preg_replace('/\s+/', '', $product->name), 0, 8)) . '-' . strtoupper(implode('-', array_values($attrs))),
-                    'image'             => null,
+                    'product_id' => $product->id,
+                    'name' => $name,
+                    'variant_attributes' => $attrs,
+                    'price' => $price,
+                    'stock' => rand(5, 30),
+                    'sku' => strtoupper(substr(preg_replace('/\s+/', '', $product->name), 0, 8)).'-'.strtoupper(implode('-', array_values($attrs))),
+                    'image' => null,
                 ]);
                 $inserted++;
             }

@@ -20,7 +20,7 @@ class StoreBalanceHistoryResource extends JsonResource
             'type' => $this->type,
             'reference_id' => $this->reference_id,
             'reference_type' => $this->reference_type,
-            'amount' => (float)(string)$this->amount,
+            'amount' => (float) (string) $this->amount,
             'remarks' => $this->remarks,
         ];
     }

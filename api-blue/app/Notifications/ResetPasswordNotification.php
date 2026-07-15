@@ -13,28 +13,28 @@ class ResetPasswordNotification extends ResetPassword
      */
     public function toMail($notifiable): MailMessage
     {
-        $frontendUrl = env("FRONTEND_URL", "http://localhost:5173");
+        $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
 
         $url =
-            $frontendUrl .
-            "/auth/reset-password?token=" .
-            $this->token .
-            "&email=" .
+            $frontendUrl.
+            '/auth/reset-password?token='.
+            $this->token.
+            '&email='.
             urlencode($notifiable->getEmailForPasswordReset());
 
-        return (new MailMessage())
-            ->subject("Reset Password — Blukios")
-            ->greeting("Halo, " . $notifiable->name . "!")
+        return (new MailMessage)
+            ->subject('Reset Password — Blukios')
+            ->greeting('Halo, '.$notifiable->name.'!')
             ->line(
-                "Kami menerima permintaan untuk mereset password akun Blukios kamu.",
+                'Kami menerima permintaan untuk mereset password akun Blukios kamu.',
             )
             ->line(
-                "Klik tombol di bawah untuk membuat password baru. Link ini hanya berlaku selama **60 menit**.",
+                'Klik tombol di bawah untuk membuat password baru. Link ini hanya berlaku selama **60 menit**.',
             )
-            ->action("Reset Password Sekarang", $url)
+            ->action('Reset Password Sekarang', $url)
             ->line(
-                "Jika Anda tidak merasa meminta reset password, abaikan email ini. Akun Anda tetap aman.",
+                'Jika Anda tidak merasa meminta reset password, abaikan email ini. Akun Anda tetap aman.',
             )
-            ->salutation("Salam hangat, Tim Blukios");
+            ->salutation('Salam hangat, Tim Blukios');
     }
 }

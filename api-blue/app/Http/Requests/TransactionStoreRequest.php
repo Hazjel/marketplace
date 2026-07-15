@@ -33,9 +33,10 @@ class TransactionStoreRequest extends FormRequest
             'shipping_cost' => 'required|numeric|min:0',
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
-            'products.*.qty' => 'required|integer|min:1'
+            'products.*.qty' => 'required|integer|min:1',
         ];
     }
+
     public function attributes()
     {
         return [

@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Transaction;
 use App\Models\Store;
-use App\Models\StoreBalance;
+use App\Models\Transaction;
 use App\Repositories\StoreBalanceRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -41,6 +40,7 @@ class AutoCompleteTransaction extends Command
 
         if ($transactions->isEmpty()) {
             $this->info('No transactions to auto-complete.');
+
             return;
         }
 
@@ -73,10 +73,10 @@ class AutoCompleteTransaction extends Command
                         'reference_id' => $transaction->id,
                         'reference_type' => Transaction::class,
                         'amount' => $sellerAmount,
-                        'remarks' => 'Dana dirilis otomatis (auto-complete 7 hari) — pesanan ' . $transaction->code,
+                        'remarks' => 'Dana dirilis otomatis (auto-complete 7 hari) — pesanan '.$transaction->code,
                     ]);
 
-                    $this->info("Escrow released for {$transaction->code}: Rp " . number_format($sellerAmount));
+                    $this->info("Escrow released for {$transaction->code}: Rp ".number_format($sellerAmount));
                     Log::info("SCHEDULER: Escrow released for {$transaction->code}", [
                         'seller_amount' => $sellerAmount,
                         'store_id' => $store->id,
@@ -86,8 +86,8 @@ class AutoCompleteTransaction extends Command
                     $this->error("Store balance not found for transaction {$transaction->code}");
                 }
             } catch (\Exception $e) {
-                Log::error("SCHEDULER ERROR auto-completing {$transaction->code}: " . $e->getMessage());
-                $this->error("Error processing {$transaction->code}: " . $e->getMessage());
+                Log::error("SCHEDULER ERROR auto-completing {$transaction->code}: ".$e->getMessage());
+                $this->error("Error processing {$transaction->code}: ".$e->getMessage());
             }
         }
 

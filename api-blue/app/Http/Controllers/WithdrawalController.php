@@ -17,7 +17,8 @@ class WithdrawalController extends Controller implements HasMiddleware
 {
     private WithdrawalRepositoryInterface $withdrawalRepository;
 
-    public function __construct(WithdrawalRepositoryInterface $withdrawalRepository) {
+    public function __construct(WithdrawalRepositoryInterface $withdrawalRepository)
+    {
         $this->withdrawalRepository = $withdrawalRepository;
     }
 
@@ -49,7 +50,7 @@ class WithdrawalController extends Controller implements HasMiddleware
     {
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer|min:1|max:100'
+            'row_per_page' => 'required|integer|min:1|max:100',
         ]);
 
         try {
@@ -85,15 +86,15 @@ class WithdrawalController extends Controller implements HasMiddleware
         try {
             $withdrawal = $this->withdrawalRepository->getById($id);
 
-            if (!$withdrawal) {
+            if (! $withdrawal) {
                 return ResponseHelper::jsonResponse(true, 'Data Withdrawal Tidak Ditemukan', null, 404);
             }
 
             $user = auth()->user();
-            if (!$user->hasRole('admin')) {
+            if (! $user->hasRole('admin')) {
                 $withdrawal->loadMissing('storeBalance');
                 $storeId = $user->store?->id;
-                if (!$storeId || $withdrawal->storeBalance?->store_id !== $storeId) {
+                if (! $storeId || $withdrawal->storeBalance?->store_id !== $storeId) {
                     return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
                 }
             }
@@ -106,7 +107,7 @@ class WithdrawalController extends Controller implements HasMiddleware
 
     public function approve(WithdrawalApproveRequest $request, string $id)
     {
-        if (!auth()->user()->hasRole('admin')) {
+        if (! auth()->user()->hasRole('admin')) {
             return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
         }
 
@@ -115,7 +116,7 @@ class WithdrawalController extends Controller implements HasMiddleware
         try {
             $withdrawal = $this->withdrawalRepository->getById($id);
 
-            if (!$withdrawal) {
+            if (! $withdrawal) {
                 return ResponseHelper::jsonResponse(true, 'Data Withdrawal Tidak Ditemukan', null, 404);
             }
 

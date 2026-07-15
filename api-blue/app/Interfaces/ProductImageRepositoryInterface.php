@@ -2,7 +2,8 @@
 
 namespace App\Interfaces;
 
-interface ProductImageRepositoryInterface{
+interface ProductImageRepositoryInterface
+{
     public function create(
         array $data
     );
@@ -10,4 +11,4 @@ interface ProductImageRepositoryInterface{
     public function delete(
         string $id
     );
-};
+}

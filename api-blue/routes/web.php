@@ -15,9 +15,8 @@ Route::get('/test-mongo', function () {
 });
 
 Route::get('/storage/{path}', function ($path) {
-    if (file_exists(public_path('storage/' . $path))) {
-        return response()->file(public_path('storage/' . $path));
+    if (file_exists(public_path('storage/'.$path))) {
+        return response()->file(public_path('storage/'.$path));
     }
     abort(404);
 })->where('path', '.*');
-

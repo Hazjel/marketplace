@@ -37,6 +37,7 @@ class CheckTransactionExpiry extends Command
 
         if ($expiredTransactions->isEmpty()) {
             $this->info('No expired transactions found.');
+
             return;
         }
 
@@ -54,8 +55,8 @@ class CheckTransactionExpiry extends Command
 
                 $this->info("Transaction {$transaction->code} expired and stock restored.");
             } catch (\Exception $e) {
-                Log::error("SCHEDULER ERROR processing {$transaction->code}: " . $e->getMessage());
-                $this->error("Error processing {$transaction->code}: " . $e->getMessage());
+                Log::error("SCHEDULER ERROR processing {$transaction->code}: ".$e->getMessage());
+                $this->error("Error processing {$transaction->code}: ".$e->getMessage());
             }
         }
 

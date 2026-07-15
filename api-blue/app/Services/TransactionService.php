@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Transaction;
 use App\Models\Store;
+use App\Models\Transaction;
 use App\Repositories\StoreBalanceRepository;
 use Illuminate\Support\Facades\Log;
 
@@ -25,10 +25,11 @@ class TransactionService
         try {
             $store = Store::find($transaction->store_id);
 
-            if (!$store || !$store->storeBalance) {
+            if (! $store || ! $store->storeBalance) {
                 Log::error('releaseEscrow: Store or StoreBalance not found', [
                     'store_id' => $transaction->store_id,
                 ]);
+
                 return;
             }
 
@@ -44,15 +45,15 @@ class TransactionService
                 'reference_id' => $transaction->id,
                 'reference_type' => Transaction::class,
                 'amount' => $sellerAmount,
-                'remarks' => 'Dana dirilis ke saldo tersedia — pesanan ' . $transaction->code . ' selesai',
+                'remarks' => 'Dana dirilis ke saldo tersedia — pesanan '.$transaction->code.' selesai',
             ]);
 
-            Log::info('Escrow released for transaction: ' . $transaction->code, [
+            Log::info('Escrow released for transaction: '.$transaction->code, [
                 'store_id' => $store->id,
                 'seller_amount' => $sellerAmount,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Error releasing escrow balance: ' . $e->getMessage(), [
+            Log::error('Error releasing escrow balance: '.$e->getMessage(), [
                 'transaction_id' => $transaction->id,
             ]);
         }
@@ -66,10 +67,11 @@ class TransactionService
         try {
             $store = Store::find($transaction->store_id);
 
-            if (!$store || !$store->storeBalance) {
+            if (! $store || ! $store->storeBalance) {
                 Log::error('creditEscrow: Store or StoreBalance not found', [
                     'store_id' => $transaction->store_id,
                 ]);
+
                 return;
             }
 
@@ -90,16 +92,16 @@ class TransactionService
                 'reference_id' => $transaction->id,
                 'reference_type' => Transaction::class,
                 'amount' => $sellerAmount,
-                'remarks' => 'Pembayaran diterima (ditahan) dari transaksi ' . $transaction->code . ' — akan dirilis setelah pesanan selesai',
+                'remarks' => 'Pembayaran diterima (ditahan) dari transaksi '.$transaction->code.' — akan dirilis setelah pesanan selesai',
             ]);
 
-            Log::info('Escrow credited for transaction: ' . $transaction->code, [
+            Log::info('Escrow credited for transaction: '.$transaction->code, [
                 'store_id' => $store->id,
                 'seller_amount' => $sellerAmount,
                 'admin_fee' => $adminFee,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Error crediting escrow balance: ' . $e->getMessage(), [
+            Log::error('Error crediting escrow balance: '.$e->getMessage(), [
                 'transaction_id' => $transaction->id,
             ]);
         }

@@ -15,7 +15,7 @@ class ProductVariantResource extends JsonResource
             'price' => $this->price,
             'stock' => $this->stock,
             'sku' => $this->sku,
-            'image' => $this->image ? asset('storage/' . $this->image) : null,
+            'image' => $this->image ? asset('storage/'.$this->image) : null,
             'variant_attributes' => $this->variant_attributes,
         ];
     }

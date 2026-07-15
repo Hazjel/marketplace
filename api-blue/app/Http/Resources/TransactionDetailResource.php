@@ -19,7 +19,7 @@ class TransactionDetailResource extends JsonResource
             'product_id' => $this->product_id,
             'product' => $this->product ? new ProductResource($this->product) : null,
             'qty' => $this->qty,
-            'subtotal' => (float)(string)$this->subtotal,
+            'subtotal' => (float) (string) $this->subtotal,
         ];
     }
 }

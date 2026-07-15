@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductReviewAttachment extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
 
     protected $fillable = [
         'product_review_id',
         'file_path',
-        'file_type'
+        'file_type',
     ];
 
     public function productReview()

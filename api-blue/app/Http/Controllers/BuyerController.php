@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Interfaces\BuyerRepositoryInterface;
-use App\Models\Buyer;
 use App\Helpers\ResponseHelper;
-use App\Http\Resources\BuyerResource;
-use App\Http\Resources\PaginateResource;
-use App\Http\Resources\UserResource;
 use App\Http\Requests\BuyerStoreRequest;
 use App\Http\Requests\BuyerUpdateRequest;
+use App\Http\Resources\BuyerResource;
+use App\Http\Resources\PaginateResource;
+use App\Interfaces\BuyerRepositoryInterface;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -19,7 +17,8 @@ class BuyerController extends Controller implements HasMiddleware
 {
     private BuyerRepositoryInterface $buyerRepository;
 
-    public function __construct(BuyerRepositoryInterface $buyerRepository) {
+    public function __construct(BuyerRepositoryInterface $buyerRepository)
+    {
         $this->buyerRepository = $buyerRepository;
     }
 
@@ -51,7 +50,7 @@ class BuyerController extends Controller implements HasMiddleware
     {
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer|min:1|max:100'
+            'row_per_page' => 'required|integer|min:1|max:100',
         ]);
 
         try {
@@ -68,15 +67,15 @@ class BuyerController extends Controller implements HasMiddleware
      */
     public function store(BuyerStoreRequest $request)
     {
-       $request = $request->validated();
+        $request = $request->validated();
 
-       try {
-           $buyer = $this->buyerRepository->create($request);
+        try {
+            $buyer = $this->buyerRepository->create($request);
 
-           return ResponseHelper::jsonResponse(true, 'Data Pembeli Berhasil Ditambahkan', new BuyerResource($buyer), 201);
-       } catch (\Exception $e) {
-           return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
-       }
+            return ResponseHelper::jsonResponse(true, 'Data Pembeli Berhasil Ditambahkan', new BuyerResource($buyer), 201);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
     }
 
     /**
@@ -87,7 +86,7 @@ class BuyerController extends Controller implements HasMiddleware
         try {
             $buyer = $this->buyerRepository->getById($id);
 
-            if (!$buyer) {
+            if (! $buyer) {
                 return ResponseHelper::jsonResponse(true, 'Data Pembeli Tidak Ditemukan', null, 404);
             }
 
@@ -107,7 +106,7 @@ class BuyerController extends Controller implements HasMiddleware
         try {
             $buyer = $this->buyerRepository->getById($id);
 
-            if (!$buyer) {
+            if (! $buyer) {
                 return ResponseHelper::jsonResponse(true, 'Data Pembeli Tidak Ditemukan', null, 404);
             }
 
@@ -127,7 +126,7 @@ class BuyerController extends Controller implements HasMiddleware
         try {
             $buyer = $this->buyerRepository->getById($id);
 
-            if (!$buyer) {
+            if (! $buyer) {
                 return ResponseHelper::jsonResponse(true, 'Data Pembeli Tidak Ditemukan', null, 404);
             }
 

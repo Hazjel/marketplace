@@ -29,21 +29,22 @@ class FixBuyerPermission extends Command
     {
         $role = Role::where('name', 'buyer')->where('guard_name', 'sanctum')->first();
 
-        if (!$role) {
+        if (! $role) {
             $this->error('Buyer role not found for sanctum guard.');
+
             return;
         }
 
         $permissions = [
             'product-review-list',
             'product-review-create',
-            'transaction-list' // ensuring this exists too as I saw checks for it
+            'transaction-list', // ensuring this exists too as I saw checks for it
         ];
 
         foreach ($permissions as $permissionName) {
             $permission = Permission::firstOrCreate([
                 'name' => $permissionName,
-                'guard_name' => 'sanctum'
+                'guard_name' => 'sanctum',
             ]);
             $role->givePermissionTo($permission);
         }

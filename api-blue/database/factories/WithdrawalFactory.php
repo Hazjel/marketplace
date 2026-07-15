@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class WithdrawalFactory extends Factory
 {
     protected $model = Withdrawal::class;
+
     /**
      * Define the model's default state.
      *
@@ -23,6 +24,7 @@ class WithdrawalFactory extends Factory
             'store_balance_id' => StoreBalance::factory(),
             'amount' => function (array $attributes) {
                 $storeBalance = StoreBalance::find($attributes['store_balance_id']);
+
                 return $this->faker->randomFloat(2, 0, $storeBalance->balance);
             },
             'bank_account_name' => $this->faker->name,
@@ -41,7 +43,7 @@ class WithdrawalFactory extends Factory
                 'reference_id' => $withdrawal->id,
                 'reference_type' => Withdrawal::class,
                 'amount' => -$withdrawal->amount,
-                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number}"
+                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number}",
             ]);
 
             // Penarikan dana
@@ -50,15 +52,15 @@ class WithdrawalFactory extends Factory
                 'reference_id' => $withdrawal->id,
                 'reference_type' => Withdrawal::class,
                 'amount' => -$withdrawal->amount,
-                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number} telah di proses"
+                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number} telah di proses",
             ]);
 
             $withdrawal->update([
-                'status' => 'approved'
+                'status' => 'approved',
             ]);
 
             $withdrawal->storeBalance->update([
-                'balance' => $withdrawal->storeBalance->balance - $withdrawal->amount
+                'balance' => $withdrawal->storeBalance->balance - $withdrawal->amount,
             ]);
         });
     }

@@ -2,23 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Interfaces\ProductRepositoryInterface;
-use App\Models\Product;
-use App\Repositories\ProductRepository;
-use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
-use App\Http\Resources\ProductResource;
 use App\Http\Resources\PaginateResource;
+use App\Http\Resources\ProductResource;
+use App\Interfaces\ProductRepositoryInterface;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Spatie\Permission\Middleware\PermissionMiddleware;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class ProductController extends Controller implements HasMiddleware
 {
-
     private ProductRepositoryInterface $productRepository;
 
     public function __construct(ProductRepositoryInterface $productRepository)
@@ -52,7 +49,7 @@ class ProductController extends Controller implements HasMiddleware
         }
     }
 
-    public function getAllPaginated(Request $request)   
+    public function getAllPaginated(Request $request)
     {
         $validated = $request->validate([
             'search' => 'nullable|string',
@@ -64,17 +61,17 @@ class ProductController extends Controller implements HasMiddleware
             'condition' => 'nullable',
             'city' => 'nullable|string',
             'min_rating' => 'nullable|numeric|min:0|max:5',
-            'stock_status' => 'nullable|string', 
-            'created_since' => 'nullable|integer', 
+            'stock_status' => 'nullable|string',
+            'created_since' => 'nullable|integer',
             'sort_by' => 'nullable|string|in:price,created_at,sold',
             'sort_direction' => 'nullable|string|in:asc,desc',
         ]);
 
         try {
             $filters = $request->only(['min_price', 'max_price', 'condition', 'city', 'min_rating', 'stock_status', 'created_since', 'sort_by', 'sort_direction']);
-            
+
             // Only cache when there's no active search/filter to avoid pollution
-            $hasFilters = !empty(array_filter($filters)) || !empty($validated['search']) || !empty($validated['product_category_id']) || !empty($validated['store_id']);
+            $hasFilters = ! empty(array_filter($filters)) || ! empty($validated['search']) || ! empty($validated['product_category_id']) || ! empty($validated['store_id']);
 
             if ($hasFilters) {
                 $products = $this->productRepository->getAllPaginated($validated['search'] ?? null, $validated['store_id'] ?? null, $validated['product_category_id'] ?? null, $validated['row_per_page'], $filters);
@@ -90,15 +87,15 @@ class ProductController extends Controller implements HasMiddleware
             // Log::info("CONTROLLER debug Auth: " . (auth()->check() ? auth()->user()->id : 'Guest'));
 
             $resource = (new PaginateResource($products, ProductResource::class));
-            
+
             // Resolve resource to array to ensure we can modify structure reliably
             $data = $resource->resolve(request());
-            
+
             // Append total_sold to meta
             if (isset($data['meta'])) {
                 $data['meta']['total_sold'] = (int) $totalSold;
             } else {
-                 $data['meta'] = ['total_sold' => (int) $totalSold];
+                $data['meta'] = ['total_sold' => (int) $totalSold];
             }
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', $data, 200);
@@ -132,7 +129,7 @@ class ProductController extends Controller implements HasMiddleware
         try {
             $product = $this->productRepository->getById($id);
 
-            if (!$product) {
+            if (! $product) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 
@@ -142,12 +139,12 @@ class ProductController extends Controller implements HasMiddleware
         }
     }
 
-     public function showBySlug(string $slug)
+    public function showBySlug(string $slug)
     {
         try {
             $product = $this->productRepository->getBySlug($slug);
 
-            if (!$product) {
+            if (! $product) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 
@@ -167,11 +164,11 @@ class ProductController extends Controller implements HasMiddleware
         try {
             $product = $this->productRepository->getById($id);
 
-            if (!$product) {
+            if (! $product) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 
-            if (!auth()->user()->hasRole('admin') && $product->store_id !== auth()->user()->store?->id) {
+            if (! auth()->user()->hasRole('admin') && $product->store_id !== auth()->user()->store?->id) {
                 return ResponseHelper::jsonResponse(false, 'Tidak diizinkan mengubah produk toko lain', null, 403);
             }
 
@@ -192,11 +189,11 @@ class ProductController extends Controller implements HasMiddleware
         try {
             $product = $this->productRepository->getById($id);
 
-            if (!$product) {
+            if (! $product) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 
-            if (!auth()->user()->hasRole('admin') && $product->store_id !== auth()->user()->store?->id) {
+            if (! auth()->user()->hasRole('admin') && $product->store_id !== auth()->user()->store?->id) {
                 return ResponseHelper::jsonResponse(false, 'Tidak diizinkan menghapus produk toko lain', null, 403);
             }
 

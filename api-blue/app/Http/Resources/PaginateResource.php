@@ -8,12 +8,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class PaginateResource extends JsonResource
 {
     /**
-     *
-     *
-     * @param mixed $resource
+     * @param  mixed  $resource
      * @return void
-    */
-
+     */
     public function __construct($resource, public $resourceClass = null)
     {
         parent::__construct($resource);
@@ -27,10 +24,8 @@ class PaginateResource extends JsonResource
     /**
      * Trnasform the resource into an array.
      *
-     * @param \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
-
     public function toArray(Request $request)
     {
         return [

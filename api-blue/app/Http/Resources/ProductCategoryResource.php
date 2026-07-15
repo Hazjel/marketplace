@@ -25,7 +25,7 @@ class ProductCategoryResource extends JsonResource
         return [
             'id' => $this->id,
             'parent_id' => $this->parent_id,
-            'image' => $this->image ? asset('storage/' . $this->image) : null,
+            'image' => $this->image ? asset('storage/'.$this->image) : null,
             'name' => $this->name,
             'slug' => $this->slug,
             'tagline' => $this->tagline,

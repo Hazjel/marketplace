@@ -22,6 +22,7 @@ class WishlistController extends Controller
             $wishlists = $this->wishlistRepository->getByUserId(auth()->id());
             // Extract products from wishlist items
             $products = $wishlists->pluck('product');
+
             return ResponseHelper::jsonResponse(true, 'Data Wishlist Berhasil Diambil', ProductResource::collection($products), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
@@ -31,12 +32,13 @@ class WishlistController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id'
+            'product_id' => 'required|exists:products,id',
         ]);
 
         try {
             $status = $this->wishlistRepository->toggle(auth()->id(), $request->product_id);
             $message = $status === 'added' ? 'Produk berhasil ditambahkan ke wishlist' : 'Produk berhasil dihapus dari wishlist';
+
             return ResponseHelper::jsonResponse(true, $message, ['status' => $status], 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);

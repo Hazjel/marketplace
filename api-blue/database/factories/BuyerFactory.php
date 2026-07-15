@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Buyer;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Helpers\ImageHelper\ImageHelper;
+use App\Models\Buyer;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Buyer>
@@ -29,7 +29,7 @@ class BuyerFactory extends Factory
                 [],
                 'roles'
             ),
-            
+
             'phone_number' => $this->faker->phoneNumber(),
         ];
     }

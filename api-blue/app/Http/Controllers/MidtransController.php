@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
-use Illuminate\Http\Request;
-use App\Models\Store;
-use App\Repositories\StoreBalanceRepository;
-use Illuminate\Support\Facades\Log;
-
 use App\Interfaces\TransactionRepositoryInterface;
+use App\Models\Store;
+use App\Models\Transaction;
+use App\Repositories\StoreBalanceRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MidtransController extends Controller
 {
@@ -25,7 +24,7 @@ class MidtransController extends Controller
         $serverKey = config('midtrans.serverKey');
 
         // compute signature using Midtrans formula: order_id + status_code + gross_amount + server_key
-        $hashedKey = hash('sha512', ($request->order_id ?? '') . ($request->status_code ?? '') . ($request->gross_amount ?? '') . ($serverKey ?? ''));
+        $hashedKey = hash('sha512', ($request->order_id ?? '').($request->status_code ?? '').($request->gross_amount ?? '').($serverKey ?? ''));
 
         Log::info('Midtrans callback received', [
             'order_id' => $request->order_id ?? null,
@@ -48,7 +47,7 @@ class MidtransController extends Controller
         // Lock the transaction row to prevent concurrent duplicate webhook processing
         $transaction = Transaction::where('code', $transactionCode)->lockForUpdate()->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 
@@ -61,6 +60,7 @@ class MidtransController extends Controller
                 'received' => $receivedAmount,
                 'transaction' => $transactionCode,
             ]);
+
             return response()->json(['message' => 'Amount mismatch'], 403);
         }
 
@@ -72,7 +72,7 @@ class MidtransController extends Controller
                     } else {
                         // Guard: skip if already paid (prevents double-credit on duplicate webhook)
                         if ($transaction->payment_status === 'paid') {
-                            Log::info('Duplicate webhook ignored for: ' . $transactionCode);
+                            Log::info('Duplicate webhook ignored for: '.$transactionCode);
                             break;
                         }
                         $transaction->update(['payment_status' => 'paid']);
@@ -84,7 +84,7 @@ class MidtransController extends Controller
             case 'settlement':
                 // Guard: skip if already paid (prevents double-credit on duplicate webhook)
                 if ($transaction->payment_status === 'paid') {
-                    Log::info('Duplicate settlement webhook ignored for: ' . $transactionCode);
+                    Log::info('Duplicate settlement webhook ignored for: '.$transactionCode);
                     break;
                 }
                 $transaction->update(['payment_status' => 'paid']);
@@ -147,20 +147,20 @@ class MidtransController extends Controller
                     'reference_id' => $transaction->id,
                     'reference_type' => Transaction::class,
                     'amount' => $sellerAmount,
-                    'remarks' => 'Pembayaran diterima (ditahan) dari transaksi ' . $transaction->code . ' — akan dirilis setelah pesanan selesai',
+                    'remarks' => 'Pembayaran diterima (ditahan) dari transaksi '.$transaction->code.' — akan dirilis setelah pesanan selesai',
                 ]);
 
-                Log::info('Pending balance credited for store: ' . $store->id, [
+                Log::info('Pending balance credited for store: '.$store->id, [
                     'net_sales' => $netSales,
                     'admin_fee' => $adminFee,
                     'seller_amount' => $sellerAmount,
                     'transaction_code' => $transaction->code,
                 ]);
             } else {
-                Log::error('Store Balance not found for store: ' . ($store->id ?? 'unknown'));
+                Log::error('Store Balance not found for store: '.($store->id ?? 'unknown'));
             }
         } catch (\Throwable $e) {
-            Log::error('Error crediting pending balance: ' . $e->getMessage());
+            Log::error('Error crediting pending balance: '.$e->getMessage());
         }
     }
 }

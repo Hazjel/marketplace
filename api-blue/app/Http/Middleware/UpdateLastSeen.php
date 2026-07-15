@@ -18,7 +18,7 @@ class UpdateLastSeen
         if (auth()->check()) {
             $user = auth()->user();
             // Optimization: Only update if last update was > 5 minutes ago
-            if (!$user->last_seen_at || $user->last_seen_at->diffInMinutes(now()) >= 5) {
+            if (! $user->last_seen_at || $user->last_seen_at->diffInMinutes(now()) >= 5) {
                 $user->last_seen_at = now();
                 $user->saveQuietly();
             }

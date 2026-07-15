@@ -2,9 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\ProductImage;
 use App\Models\Product;
-
+use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

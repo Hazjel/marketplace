@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Helpers\ImageHelper\ImageHelper;
 use App\Models\ProductCategory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -35,8 +34,8 @@ class ProductCategorySeeder extends Seeder
                         'name' => 'Aksesoris gadget',
                         'tagline' => 'Lengkapi gadget anda dengan aksesoris terbaik',
                         'description' => 'Berbagai aksesoris untuk smartphone dan laptop',
-                    ]
-                ]
+                    ],
+                ],
             ],
             [
                 'name' => 'Fashion',
@@ -52,8 +51,8 @@ class ProductCategorySeeder extends Seeder
                         'name' => 'Pakaian wanita',
                         'tagline' => 'Koleksi pakaian wanita terkini',
                         'description' => 'Berbagai pakaian wanita untuk berbagai kesempatan',
-                    ]
-                ]
+                    ],
+                ],
             ],
             [
                 'name' => 'Kesehatan & Kecantikan',
@@ -69,9 +68,9 @@ class ProductCategorySeeder extends Seeder
                         'name' => 'Suplemen',
                         'tagline' => 'Suplemen kesehatan berkualitas',
                         'description' => 'Berbagai suplemen untuk menjaga kesehatan tubuh',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         $imageHelper = new ImageHelper;
@@ -84,19 +83,19 @@ class ProductCategorySeeder extends Seeder
                 'description' => $category['description'],
                 'image' => $imageHelper->storeAndResizeImage(
                     $imageHelper->createDummyImageWithTextSizeAndPosition(250, 250, 'center', 'center', 'random', 'medium'), 'product-category', 250, 250),
-                'parent_id' => null
+                'parent_id' => null,
             ]);
 
             foreach ($category['children'] as $child) {
                 ProductCategory::create([
-                'name' => $child['name'],
-                'slug' => Str::slug($child['name']),
-                'tagline' => $child['tagline'],
-                'description' => $child['description'],
-                'image' => $imageHelper->storeAndResizeImage(
-                    $imageHelper->createDummyImageWithTextSizeAndPosition(250, 250, 'center', 'center', 'random', 'medium'), 'product-category', 250, 250),
-                'parent_id' => $parent->id
-            ]);
+                    'name' => $child['name'],
+                    'slug' => Str::slug($child['name']),
+                    'tagline' => $child['tagline'],
+                    'description' => $child['description'],
+                    'image' => $imageHelper->storeAndResizeImage(
+                        $imageHelper->createDummyImageWithTextSizeAndPosition(250, 250, 'center', 'center', 'random', 'medium'), 'product-category', 250, 250),
+                    'parent_id' => $parent->id,
+                ]);
             }
         }
     }

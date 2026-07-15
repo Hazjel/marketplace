@@ -2,13 +2,18 @@
 
 namespace App\Interfaces;
 
-interface ProductRepositoryInterface{
+interface ProductRepositoryInterface
+{
     public function getAll(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $limit, ?bool $random, bool $execute, array $filters = []);
-    public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId = null, ?int $rowPerPage, array $filters = []);
+
+    public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $rowPerPage, array $filters = []);
+
     public function getTotalSold();
+
     public function getById(
         string $id
     );
+
     public function getBySlug(
         string $slug
     );
@@ -25,5 +30,4 @@ interface ProductRepositoryInterface{
     public function delete(
         string $id
     );
-
 }

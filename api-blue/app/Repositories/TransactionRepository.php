@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Repositories;
+
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Product;
 use App\Models\Store;
@@ -9,7 +10,6 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Repositories\TransactionDetailRepository;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
@@ -18,11 +18,11 @@ class TransactionRepository implements TransactionRepositoryInterface
         $mode = request('mode');
 
         $query = Transaction::with([
-            'buyer.user', 
-            'store', 
-            'transactionDetails.product.store', 
+            'buyer.user',
+            'store',
+            'transactionDetails.product.store',
             'transactionDetails.product.productCategory',
-            'transactionDetails.product.productImages'
+            'transactionDetails.product.productImages',
         ])
             ->where(function ($query) use ($search) {
                 if ($search) {
@@ -32,20 +32,20 @@ class TransactionRepository implements TransactionRepositoryInterface
 
         // Strict Mode Filtering
         if ($mode === 'store' && auth()->check() && auth()->user()->hasRole('store')) {
-             $query->where('store_id', auth()->user()->store?->id);
+            $query->where('store_id', auth()->user()->store?->id);
         } elseif ($mode === 'buyer' && auth()->check() && auth()->user()->hasRole('buyer')) {
-             $query->where('buyer_id', auth()->user()->buyer?->id);
+            $query->where('buyer_id', auth()->user()->buyer?->id);
         } else {
-             // Fallback / Admin / Legacy behavior
-             if (auth()->check() && !auth()->user()->hasRole('admin')) {
-                 // If not admin and no mode specified, apply broad filters carefully
-                 // (This fallback might still be ambiguous for dual roles, but controller should send mode)
-                 if (auth()->user()->hasRole('store')) {
+            // Fallback / Admin / Legacy behavior
+            if (auth()->check() && ! auth()->user()->hasRole('admin')) {
+                // If not admin and no mode specified, apply broad filters carefully
+                // (This fallback might still be ambiguous for dual roles, but controller should send mode)
+                if (auth()->user()->hasRole('store')) {
                     $query->where('store_id', auth()->user()->store?->id);
-                 } elseif (auth()->user()->hasRole('buyer')) {
+                } elseif (auth()->user()->hasRole('buyer')) {
                     $query->where('buyer_id', auth()->user()->buyer?->id);
-                 }
-             }
+                }
+            }
         }
 
         $query->orderBy('created_at', 'desc');
@@ -71,7 +71,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getTotalRevenue()
     {
         $query = Transaction::where('payment_status', 'paid');
-        
+
         if (auth()->check() && auth()->user()->hasRole('store')) {
             $query->where('store_id', auth()->user()->store?->id ?? null);
         }
@@ -86,7 +86,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getTotalAdminFee()
     {
         $query = Transaction::where('payment_status', 'paid');
-        
+
         if (auth()->check() && auth()->user()->hasRole('store')) {
             $query->where('store_id', auth()->user()->store?->id ?? null);
         }
@@ -105,7 +105,9 @@ class TransactionRepository implements TransactionRepositoryInterface
             $storeId = auth()->user()->store?->id;
         }
 
-        if (!$storeId) return [];
+        if (! $storeId) {
+            return [];
+        }
 
         // Generate last 7 days period ending today (inclusive)
         $endDate = now('Asia/Jakarta')->endOfDay();
@@ -118,23 +120,23 @@ class TransactionRepository implements TransactionRepositoryInterface
             DB::raw('SUM(grand_total) as total_revenue'),
             DB::raw('COUNT(*) as total_transaction')
         )
-        ->where('store_id', $storeId)
-        ->where('payment_status', 'paid')
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->groupBy('date')
-        ->orderBy('date', 'ASC')
-        ->get();
+            ->where('store_id', $storeId)
+            ->where('payment_status', 'paid')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get();
 
         // Fill missing dates with 0
         $data = [];
         foreach ($period as $date) {
             $dateString = $date->format('Y-m-d');
             $record = $transactions->firstWhere('date', $dateString);
-            
+
             $data[] = [
                 'date' => $dateString,
-                'total_revenue' => $record ? (int)$record->total_revenue : 0,
-                'total_transaction' => $record ? (int)$record->total_transaction : 0
+                'total_revenue' => $record ? (int) $record->total_revenue : 0,
+                'total_transaction' => $record ? (int) $record->total_transaction : 0,
             ];
         }
 
@@ -146,7 +148,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         $query = Transaction::where('id', $id)->with([
             'transactionDetails.product.productImages',
             'productReviews.user',
-            'productReviews.attachments'
+            'productReviews.attachments',
         ]);
 
         return $query->first();
@@ -169,7 +171,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             $transaction = new Transaction;
 
-            $transaction->code = 'BLK' . now()->format('dmYHis') . mt_rand(10, 99);
+            $transaction->code = 'BLK'.now()->format('dmYHis').mt_rand(10, 99);
             $transaction->buyer_id = $data['buyer_id'];
             $transaction->store_id = $data['store_id'];
             $transaction->address_id = $data['address_id'];
@@ -192,33 +194,33 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             foreach ($data['products'] as $productData) {
                 // Find Product with Lock for Atomic Update
-                Log::error("REPO: Deduction loop for Product ID: " . $productData['product_id']);
-                
+                Log::error('REPO: Deduction loop for Product ID: '.$productData['product_id']);
+
                 $product = Product::where('id', $productData['product_id'])->lockForUpdate()->first();
 
-                if (!$product) {
-                    Log::error("REPO: Product NOT FOUND ID: " . $productData['product_id']);
-                    throw new Exception("Product not found: " . $productData['product_id']);
+                if (! $product) {
+                    Log::error('REPO: Product NOT FOUND ID: '.$productData['product_id']);
+                    throw new Exception('Product not found: '.$productData['product_id']);
                 }
 
                 Log::error("REPO: Found Prod {$product->id} | Stock: {$product->stock} | Qty: {$productData['qty']}");
 
                 if ($product->stock < $productData['qty']) {
                     Log::error("REPO ERROR: Insufficient stock for {$product->id}. Has {$product->stock}, need {$productData['qty']}");
-                    throw new Exception("Insufficient stock for product: " . $product->name);
+                    throw new Exception('Insufficient stock for product: '.$product->name);
                 }
 
                 // Deduct Stock
                 $oldStock = $product->stock;
                 $product->stock -= $productData['qty'];
                 $product->save();
-                
+
                 Log::error("REPO SUCCESS: Updated Stock {$oldStock} -> {$product->stock}");
 
                 $detail = $transactionDetailRepository->create([
                     'transaction_id' => $transaction->id,
                     'product_id' => $productData['product_id'],
-                    'qty' => $productData['qty']
+                    'qty' => $productData['qty'],
                 ]);
 
                 $detail->load('product');
@@ -246,7 +248,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'subtotal' => $subtotal,
                 'shipping_cost' => $transaction->shipping_cost,
                 'tax' => $tax,
-                'grand_total' => $grandTotal
+                'grand_total' => $grandTotal,
             ]);
 
             DB::commit();
@@ -262,24 +264,24 @@ class TransactionRepository implements TransactionRepositoryInterface
             \Midtrans\Config::$isSanitized = config('midtrans.isSanitized');
             \Midtrans\Config::$is3ds = config('midtrans.is3ds');
 
-            $params = array(
-                'transaction_details' => array(
+            $params = [
+                'transaction_details' => [
                     'order_id' => $transaction->code,
-                    'gross_amount' => (int) $transaction->grand_total
-                ),
-                'customer_details' => array(
+                    'gross_amount' => (int) $transaction->grand_total,
+                ],
+                'customer_details' => [
                     'first_name' => $transaction->buyer->user?->name ?? 'Customer',
                     'email' => $transaction->buyer->user?->email ?? 'no-email@example.com',
-                ),
-                'callbacks' => array(
-                    'finish' => env('FRONTEND_URL', 'http://localhost:5173') . '/admin/transaction/' . $transaction->id
-                ),
-                'expiry' => array(
-                  'start_time' => date("Y-m-d H:i:s O"),
-                  'unit' => 'minute',
-                  'duration' => 15
-                )
-            );
+                ],
+                'callbacks' => [
+                    'finish' => env('FRONTEND_URL', 'http://localhost:5173').'/admin/transaction/'.$transaction->id,
+                ],
+                'expiry' => [
+                    'start_time' => date('Y-m-d H:i:s O'),
+                    'unit' => 'minute',
+                    'duration' => 15,
+                ],
+            ];
 
             Log::info('Midtrans params:', ['params' => $params]);
 
@@ -296,7 +298,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            $errorMsg = "REPO FATAL ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString();
+            $errorMsg = 'REPO FATAL ERROR: '.$e->getMessage()."\n".$e->getTraceAsString();
             Log::error($errorMsg);
             // file_put_contents(storage_path('logs/debug.txt'), $errorMsg, FILE_APPEND); // Reverted original or comment out
             throw new Exception($e->getMessage());
@@ -330,9 +332,9 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function restoreStock(Transaction $transaction)
     {
         try {
-            Log::info('Start restoring stock for transaction: ' . $transaction->id);
+            Log::info('Start restoring stock for transaction: '.$transaction->id);
             $transaction->load('transactionDetails');
-            
+
             foreach ($transaction->transactionDetails as $detail) {
                 // Pessimistic lock prevents double-restore from concurrent cancel + webhook
                 $product = Product::where('id', $detail->product_id)->lockForUpdate()->first();
@@ -343,7 +345,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 }
             }
         } catch (\Throwable $e) {
-            Log::error('Error restoring stock: ' . $e->getMessage());
+            Log::error('Error restoring stock: '.$e->getMessage());
         }
     }
 
@@ -354,7 +356,6 @@ class TransactionRepository implements TransactionRepositoryInterface
         try {
             $transaction = Transaction::find($id);
 
-
             if (isset($data['tracking_number'])) {
                 $transaction->tracking_number = $data['tracking_number'];
             }
@@ -364,10 +365,10 @@ class TransactionRepository implements TransactionRepositoryInterface
             }
 
             // Restore stock if being cancelled/failed AND it wasn't already cancelled/failed
-            if (isset($data['delivery_status']) && 
-                in_array($data['delivery_status'], ['cancelled', 'failed']) && 
-                !in_array($transaction->delivery_status, ['cancelled', 'failed'])) {
-                
+            if (isset($data['delivery_status']) &&
+                in_array($data['delivery_status'], ['cancelled', 'failed']) &&
+                ! in_array($transaction->delivery_status, ['cancelled', 'failed'])) {
+
                 $this->restoreStock($transaction);
 
                 // Refund escrow: kembalikan pending_balance jika payment sudah paid
@@ -377,14 +378,14 @@ class TransactionRepository implements TransactionRepositoryInterface
             }
 
             if (isset($data['delivery_status'])) {
-                 $transaction->delivery_status = $data['delivery_status'];
-                 
-                 // Also sync payment status for consistency if cancelled
-                 if ($data['delivery_status'] === 'cancelled' && $transaction->payment_status !== 'failed') {
-                     $transaction->payment_status = 'failed';
-                 }
+                $transaction->delivery_status = $data['delivery_status'];
+
+                // Also sync payment status for consistency if cancelled
+                if ($data['delivery_status'] === 'cancelled' && $transaction->payment_status !== 'failed') {
+                    $transaction->payment_status = 'failed';
+                }
             }
-            
+
             $transaction->save();
 
             DB::commit();
@@ -392,7 +393,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             return $transaction->fresh([
                 'buyer.user',
                 'store.user',
-                'transactionDetails.product'
+                'transactionDetails.product',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -435,26 +436,26 @@ class TransactionRepository implements TransactionRepositoryInterface
             Log::info('calculateShippingAndTax called with:', [
                 'data' => $data,
                 'subtotal' => $subtotal,
-                'weight' => $weight
+                'weight' => $weight,
             ]);
 
-            if (!isset($data['store_id'])) {
+            if (! isset($data['store_id'])) {
                 throw new \Exception('store_id is missing from data');
             }
 
             $store = Store::find($data['store_id']);
 
-            if (!$store) {
-                throw new \Exception('Store not found with id: ' . $data['store_id']);
+            if (! $store) {
+                throw new \Exception('Store not found with id: '.$data['store_id']);
             }
 
-            if (!$store->address_id) {
-                throw new \Exception('Store address_id is null for store: ' . $store->id);
+            if (! $store->address_id) {
+                throw new \Exception('Store address_id is null for store: '.$store->id);
             }
 
             $origin = $store->address_id;
 
-            if (!isset($data['address_id'])) {
+            if (! isset($data['address_id'])) {
                 throw new \Exception('address_id is missing from data');
             }
 
@@ -467,40 +468,40 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'origin' => $origin,
                 'destination' => $destination,
                 'subtotal' => round($subtotal),
-                'weight' => $weightInGrams  // dalam gram
+                'weight' => $weightInGrams,  // dalam gram
             ]);
 
             // Komerce RajaOngkir API
             $response = Http::withHeaders([
                 'x-api-key' => env('KEY_RAJA_ONGKIR'),
             ])->get('https://api-sandbox.collaborator.komerce.id/tariff/api/v1/calculate', [
-                        'shipper_destination_id' => $origin,
-                        'receiver_destination_id' => $destination,
-                        'item_value' => round($subtotal),
-                        'weight' => $weightInGrams  // kirim dalam gram
-                    ]);
+                'shipper_destination_id' => $origin,
+                'receiver_destination_id' => $destination,
+                'item_value' => round($subtotal),
+                'weight' => $weightInGrams,  // kirim dalam gram
+            ]);
 
             $result = $response->json();
 
             Log::info('RajaOngkir API Response:', ['result' => $result]);
 
             // Validasi response structure
-            if (!isset($result['data']) || $result['data'] === null) {
+            if (! isset($result['data']) || $result['data'] === null) {
                 Log::error('API returned error:', ['response' => $result]);
-                throw new \Exception('RajaOngkir API error: ' . ($result['meta']['message'] ?? 'Unknown error'));
+                throw new \Exception('RajaOngkir API error: '.($result['meta']['message'] ?? 'Unknown error'));
             }
 
-            if (!isset($result['data']['calculate_reguler'])) {
+            if (! isset($result['data']['calculate_reguler'])) {
                 throw new \Exception('Invalid API response - missing calculate_reguler key');
             }
 
             $shippingCost = 0;
 
-            if (!isset($data['shipping'])) {
+            if (! isset($data['shipping'])) {
                 throw new \Exception('shipping is missing from data');
             }
 
-            if (!isset($data['shipping_type'])) {
+            if (! isset($data['shipping_type'])) {
                 throw new \Exception('shipping_type is missing from data');
             }
 
@@ -519,7 +520,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             if ($shippingCost === 0) {
                 Log::warning('No matching courier found for:', [
                     'shipping' => $data['shipping'],
-                    'shipping_type' => $data['shipping_type']
+                    'shipping_type' => $data['shipping_type'],
                 ]);
             }
 
@@ -529,20 +530,20 @@ class TransactionRepository implements TransactionRepositoryInterface
             Log::info('Calculation completed:', [
                 'shipping_cost' => $shippingCost,
                 'tax' => $tax,
-                'grand_total' => $grandTotal
+                'grand_total' => $grandTotal,
             ]);
 
             return [
                 'shipping_cost' => $shippingCost,
                 'tax' => $tax,
-                'grand_total' => $grandTotal
+                'grand_total' => $grandTotal,
             ];
 
         } catch (\Exception $e) {
             Log::error('Shipping calculation error:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
             throw $e;
         }
@@ -557,10 +558,11 @@ class TransactionRepository implements TransactionRepositoryInterface
         try {
             $store = Store::find($transaction->store_id);
 
-            if (!$store || !$store->storeBalance) {
+            if (! $store || ! $store->storeBalance) {
                 Log::error('refundEscrow: Store or StoreBalance not found', [
                     'store_id' => $transaction->store_id,
                 ]);
+
                 return;
             }
 
@@ -577,15 +579,15 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'reference_id' => $transaction->id,
                 'reference_type' => Transaction::class,
                 'amount' => -$sellerAmount,
-                'remarks' => 'Escrow dibatalkan (refund) — pesanan ' . $transaction->code . ' dibatalkan',
+                'remarks' => 'Escrow dibatalkan (refund) — pesanan '.$transaction->code.' dibatalkan',
             ]);
 
-            Log::info('Escrow refunded for transaction: ' . $transaction->code, [
+            Log::info('Escrow refunded for transaction: '.$transaction->code, [
                 'store_id' => $store->id,
                 'refunded_amount' => $sellerAmount,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Error refunding escrow: ' . $e->getMessage(), [
+            Log::error('Error refunding escrow: '.$e->getMessage(), [
                 'transaction_id' => $transaction->id,
             ]);
         }

@@ -49,7 +49,7 @@ class LogHelper
         Log::channel('daily')->error("[ERROR] {$message}", array_merge([
             'exception' => get_class($e),
             'error_message' => $e->getMessage(),
-            'file' => $e->getFile() . ':' . $e->getLine(),
+            'file' => $e->getFile().':'.$e->getLine(),
             'user_id' => auth()->id(),
             'url' => request()->fullUrl(),
             'timestamp' => now()->toIso8601String(),

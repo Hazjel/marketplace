@@ -15,7 +15,7 @@ class ProductImageRepository implements ProductImageRepositoryInterface
         DB::beginTransaction();
 
         try {
-            $productImage = new ProductImage();
+            $productImage = new ProductImage;
             $productImage->product_id = $data['product_id'];
             // Save raw file immediately for fast API response
             $rawPath = $data['image']->store('assets/products', 'public');

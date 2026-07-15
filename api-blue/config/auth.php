@@ -44,13 +44,13 @@ return [
         'api' => [
             'driver' => 'sanctum',
             'provider' => 'users',
-            'hash' => false
+            'hash' => false,
         ],
 
         'sanctum' => [
             'driver' => 'sanctum',
             'provider' => 'users',
-            'hash' => false
+            'hash' => false,
         ],
     ],
 

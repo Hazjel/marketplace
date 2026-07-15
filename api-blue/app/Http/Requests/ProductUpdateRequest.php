@@ -2,14 +2,12 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Models\ProductCategory;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
 class ProductUpdateRequest extends FormRequest
 {
-    
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,11 +22,10 @@ class ProductUpdateRequest extends FormRequest
                 'exists:product_categories,id',
                 function ($attribute, $value, $fail) {
                     $category = ProductCategory::find($value);
-                    if ($category && $category->parent_id === null)
-                    {
+                    if ($category && $category->parent_id === null) {
                         $fail('Kategori produk harus memiliki kategori induk.');
                     }
-                }
+                },
             ],
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -52,9 +49,9 @@ class ProductUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'store_id' => 'Toko', 
+            'store_id' => 'Toko',
             'product_category_id' => 'Kategori Produk',
-            'name' => 'Nama', 
+            'name' => 'Nama',
             'description' => 'Deskripsi',
             'condition' => 'Kondisi',
             'price' => 'Harga',
@@ -69,7 +66,7 @@ class ProductUpdateRequest extends FormRequest
     {
         $user = Auth::user();
 
-        if ($user && $user->role === 'store'){
+        if ($user && $user->role === 'store') {
             $this->merge(['store_id' => $user->store->id]);
         }
     }
