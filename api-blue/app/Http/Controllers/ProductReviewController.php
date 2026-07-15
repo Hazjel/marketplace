@@ -15,7 +15,8 @@ class ProductReviewController extends Controller implements HasMiddleware
 {
     private ProductReviewRepositoryInterface $productReviewRepository;
 
-    public function __construct(ProductReviewRepositoryInterface $productReviewRepository) {
+    public function __construct(ProductReviewRepositoryInterface $productReviewRepository)
+    {
         $this->productReviewRepository = $productReviewRepository;
     }
 
@@ -51,7 +52,7 @@ class ProductReviewController extends Controller implements HasMiddleware
                 })
                 ->first();
 
-            if (!$transaction) {
+            if (! $transaction) {
                 return ResponseHelper::jsonResponse(false, 'Transaksi tidak ditemukan atau Anda tidak memiliki akses.', null, 404);
             }
 
@@ -64,7 +65,7 @@ class ProductReviewController extends Controller implements HasMiddleware
                 ->where('product_id', $validated['product_id'])
                 ->exists();
 
-            if (!$productExists) {
+            if (! $productExists) {
                 return ResponseHelper::jsonResponse(false, 'Produk ini tidak ada dalam transaksi tersebut.', null, 400);
             }
 
@@ -84,7 +85,7 @@ class ProductReviewController extends Controller implements HasMiddleware
                 'user_id' => $user->id,
                 'rating' => $validated['rating'],
                 'review' => $validated['review'],
-                'is_anonymous' => $request->boolean('is_anonymous', false)
+                'is_anonymous' => $request->boolean('is_anonymous', false),
             ];
 
             $productReview = $this->productReviewRepository->create($data);
@@ -97,14 +98,16 @@ class ProductReviewController extends Controller implements HasMiddleware
                 ];
                 foreach ($request->file('attachments') as $file) {
                     $mime = $file->getMimeType();
-                    if (!array_key_exists($mime, $allowedMimes)) continue;
+                    if (! array_key_exists($mime, $allowedMimes)) {
+                        continue;
+                    }
                     $type = str_starts_with($mime, 'video') ? 'video' : 'image';
-                    $filename = time() . '_' . \Illuminate\Support\Str::random(16) . '.' . $allowedMimes[$mime];
+                    $filename = time().'_'.\Illuminate\Support\Str::random(16).'.'.$allowedMimes[$mime];
                     $file->move(public_path('upload/reviews'), $filename);
                     \App\Models\ProductReviewAttachment::create([
                         'product_review_id' => $productReview->id,
-                        'file_path' => 'upload/reviews/' . $filename,
-                        'file_type' => $type
+                        'file_path' => 'upload/reviews/'.$filename,
+                        'file_type' => $type,
                     ]);
                 }
             }

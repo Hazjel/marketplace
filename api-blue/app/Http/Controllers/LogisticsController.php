@@ -18,13 +18,14 @@ class LogisticsController extends Controller
      *    "pod_receiver": "Budi", (Optional)
      *    "pod_date": "2024-01-01 12:00:00" (Optional)
      * }
-     */ 
+     */
     public function webhook(Request $request)
     {
         // Authenticate webhook caller via pre-shared secret
         $secret = config('app.logistics_webhook_secret');
         if ($secret && $request->header('X-Webhook-Secret') !== $secret) {
             Log::warning('Logistics webhook unauthorized', ['ip' => $request->ip()]);
+
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -41,7 +42,7 @@ class LogisticsController extends Controller
         // 2. Find Transaction by Tracking Number
         $transaction = Transaction::where('tracking_number', $awb)->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             return response()->json(['message' => 'AWB Not Found matched with any transaction'], 404);
         }
 
@@ -67,6 +68,7 @@ class LogisticsController extends Controller
 
                 default:
                     Log::warning("Unknown logistics status: $status for AWB: $awb");
+
                     return response()->json(['message' => "Status '$status' ignored"], 200);
             }
 
@@ -76,7 +78,7 @@ class LogisticsController extends Controller
                     $transaction->delivery_status = $newStatus;
 
                     if ($status === 'DELIVERED' && $request->has('pod_receiver')) {
-                        Log::info("Recipient: " . $request->pod_receiver);
+                        Log::info('Recipient: '.$request->pod_receiver);
                     }
 
                     $transaction->save();
@@ -86,11 +88,12 @@ class LogisticsController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Webhook Processed Successfully', [
                 'transaction_code' => $transaction->code,
-                'new_status' => $newStatus
+                'new_status' => $newStatus,
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Error processing logistics webhook: ' . $e->getMessage());
+            Log::error('Error processing logistics webhook: '.$e->getMessage());
+
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
     }

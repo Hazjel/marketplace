@@ -25,17 +25,17 @@ class TransactionResource extends JsonResource
             'postal_code' => $this->postal_code,
             'shipping' => $this->shipping,
             'shipping_type' => $this->shipping_type,
-            'shipping_cost' => (float)(string)$this->shipping_cost,
+            'shipping_cost' => (float) (string) $this->shipping_cost,
             'tracking_number' => $this->tracking_number,
             'delivery_proof' => $this->delivery_proof,
             'delivery_status' => $this->delivery_status,
-            'tax' => (float)(string)$this->tax,
-            'grand_total' => (float)(string)$this->grand_total,
+            'tax' => (float) (string) $this->tax,
+            'grand_total' => (float) (string) $this->grand_total,
             'payment_status' => $this->payment_status,
             'snap_token' => $this->snap_token,
             'transaction_details' => TransactionDetailResource::collection($this->transactionDetails),
             'product_reviews' => ProductReviewResource::collection($this->whenLoaded('productReviews')),
-            'created_at' => $this->created_at
+            'created_at' => $this->created_at,
         ];
     }
 }

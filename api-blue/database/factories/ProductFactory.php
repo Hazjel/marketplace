@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Product;
-use App\Models\Store;
 use App\Models\ProductCategory;
+use App\Models\Store;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
@@ -24,6 +24,7 @@ class ProductFactory extends Factory
     {
         $name = $this->faker->words(rand(2, 4), true);
         $conditions = ['new', 'second'];
+
         return [
             'store_id' => Store::factory(),
             'product_category_id' => ProductCategory::inRandomOrder()->first()->id,

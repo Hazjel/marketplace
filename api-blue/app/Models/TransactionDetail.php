@@ -5,21 +5,20 @@ namespace App\Models;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Testing\Fluent\Concerns\Has;
 
 class TransactionDetail extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
 
     protected $fillable = [
         'transaction_id',
         'product_id',
         'qty',
-        'subtotal'
+        'subtotal',
     ];
 
     protected $casts = [
-        'subtotal' => 'decimal:2'
+        'subtotal' => 'decimal:2',
     ];
 
     public function transaction()

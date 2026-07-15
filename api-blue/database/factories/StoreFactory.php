@@ -30,15 +30,15 @@ class StoreFactory extends Factory
                 'roles'
             ),
             'name' => $name,
-            'username' => Str::slug($name) . '-s' . rand(100000, 999999),
-            'logo' => 'https://picsum.photos/seed/store' . rand(1, 50) . '/250/250',
+            'username' => Str::slug($name).'-s'.rand(100000, 999999),
+            'logo' => 'https://picsum.photos/seed/store'.rand(1, 50).'/250/250',
             'about' => $this->faker->paragraph(),
             'phone' => $this->faker->phoneNumber(),
-            'address_id' => $this->faker->numberBetween(1,100),
+            'address_id' => $this->faker->numberBetween(1, 100),
             'city' => $this->faker->city(),
             'address' => $this->faker->streetAddress(),
             'postal_code' => $this->faker->postcode(),
-            'is_verified' => $this->faker->boolean(70)
+            'is_verified' => $this->faker->boolean(70),
         ];
     }
 }

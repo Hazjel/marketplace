@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
-use App\Http\Resources\UserResource;
 use App\Models\User;
-use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
@@ -17,9 +15,9 @@ class GoogleAuthController extends Controller
     {
         Log::info('GoogleAuth: Redirect Hit', [
             'platform' => request('platform'),
-            'session_id' => session()->getId()
+            'session_id' => session()->getId(),
         ]);
-        
+
         $redirectUrl = config('services.google.redirect');
         Log::info('GoogleAuth: Using redirect URL', ['redirect' => $redirectUrl]);
 
@@ -27,6 +25,7 @@ class GoogleAuthController extends Controller
             $provider = Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->with(['prompt' => 'select_account']);
             $response = $provider->redirect();
             Log::info('GoogleAuth: Generated URL', ['url' => $response->getTargetUrl()]);
+
             return $response;
         } catch (\Exception $e) {
             Log::error('GoogleAuth: Redirect Error', ['error' => $e->getMessage()]);
@@ -43,7 +42,7 @@ class GoogleAuthController extends Controller
 
             $user = User::where('email', $googleUser->getEmail())->first();
 
-            if (!$user) {
+            if (! $user) {
                 // Register new user
                 $user = new User;
                 $user->name = $googleUser->getName();
@@ -51,16 +50,16 @@ class GoogleAuthController extends Controller
                 $user->email_verified_at = now();
                 $user->password = bcrypt(Str::random(16)); // Random password
                 $user->profile_picture = $googleUser->getAvatar();
-                
+
                 // Generate Username
                 $slug = Str::slug($user->name);
                 $count = 1;
                 while (User::where('username', $slug)->exists()) {
-                    $slug = Str::slug($user->name) . '-' . $count;
+                    $slug = Str::slug($user->name).'-'.$count;
                     $count++;
                 }
                 $user->username = $slug;
-                
+
                 $user->save();
 
                 // Assign default role 'buyer'
@@ -68,7 +67,7 @@ class GoogleAuthController extends Controller
 
                 // Create default buyer profile (empty phone number for now)
                 $user->buyer()->create([
-                   'phone_number' => '' // Handle missing phone logic later
+                    'phone_number' => '', // Handle missing phone logic later
                 ]);
             }
 
@@ -87,20 +86,20 @@ class GoogleAuthController extends Controller
                     $platform = $stateParams['platform'];
                 }
             }
-            
+
             // Fallback to session if state is empty (for web or legacy flows)
-            if (!$platform) {
+            if (! $platform) {
                 $platform = session('auth_platform');
             }
 
             Log::info('GoogleAuth: Callback Hit', [
-                 'platform' => $platform,
-                 'state_param' => request('state'),
-                 'session_id' => session()->getId()
+                'platform' => $platform,
+                'state_param' => request('state'),
+                'session_id' => session()->getId(),
             ]);
 
             $token = $user->token;
-            
+
             if ($platform === 'mobile') {
                 return redirect("mobileblue://callback?token={$token}&username={$user->username}");
             }
@@ -111,7 +110,8 @@ class GoogleAuthController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return ResponseHelper::jsonResponse(false, 'Google Login Failed: ' . $e->getMessage(), null, 500);
+
+            return ResponseHelper::jsonResponse(false, 'Google Login Failed: '.$e->getMessage(), null, 500);
         }
     }
 }

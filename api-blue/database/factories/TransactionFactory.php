@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Transaction;
 use App\Models\Buyer;
-use App\Models\Store;
 use App\Models\Product;
+use App\Models\Store;
+use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Transaction>
@@ -34,7 +34,7 @@ class TransactionFactory extends Factory
         };
 
         return [
-            'code' => 'TRX-' . $this->faker->unique()->numerify('########'),
+            'code' => 'TRX-'.$this->faker->unique()->numerify('########'),
             'buyer_id' => Buyer::factory(),
             'store_id' => Store::factory(),
             'address_id' => $this->faker->numberBetween(1, 1000),
@@ -53,30 +53,30 @@ class TransactionFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Transaction $transaction) {
-           $numberOfDetails = $this->faker->numberBetween(1, 5);
-           $subtotal = 0;
+            $numberOfDetails = $this->faker->numberBetween(1, 5);
+            $subtotal = 0;
 
-           for ($i = 0; $i < $numberOfDetails; $i++) {
-               $product = Product::factory()->create(['store_id' => $transaction->store_id]);
-               $qty = $this->faker->numberBetween(1, 5);
-               $subtotal += $product->price * $qty;
+            for ($i = 0; $i < $numberOfDetails; $i++) {
+                $product = Product::factory()->create(['store_id' => $transaction->store_id]);
+                $qty = $this->faker->numberBetween(1, 5);
+                $subtotal += $product->price * $qty;
 
-               TransactionDetail::factory()->create([
-                   'transaction_id' => $transaction->id,
-                   'product_id' => $product->id,
-                   'qty' => $qty,
-                   'subtotal' => $product->price * $qty,
-               ]);
-           }
+                TransactionDetail::factory()->create([
+                    'transaction_id' => $transaction->id,
+                    'product_id' => $product->id,
+                    'qty' => $qty,
+                    'subtotal' => $product->price * $qty,
+                ]);
+            }
 
-           $tax = round($subtotal * 0.11);
+            $tax = round($subtotal * 0.11);
 
-           $grandTotal = $subtotal + $tax + $transaction->shipping_cost;
+            $grandTotal = $subtotal + $tax + $transaction->shipping_cost;
 
-           $transaction->update([
-               'tax' => $tax,
-               'grand_total' => $grandTotal,
-           ]);
+            $transaction->update([
+                'tax' => $tax,
+                'grand_total' => $grandTotal,
+            ]);
         });
     }
 }

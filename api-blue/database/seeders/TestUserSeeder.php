@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
 class TestUserSeeder extends Seeder
@@ -15,10 +14,10 @@ class TestUserSeeder extends Seeder
     public function run(): void
     {
         // Ensure roles exist
-        if (!Role::where('name', 'buyer')->exists()) {
-             Role::create(['name' => 'buyer', 'guard_name' => 'web']);
+        if (! Role::where('name', 'buyer')->exists()) {
+            Role::create(['name' => 'buyer', 'guard_name' => 'web']);
         }
-        
+
         $user = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
@@ -28,13 +27,13 @@ class TestUserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        
+
         $user->assignRole('buyer');
-        
+
         // Create buyer profile
         $user->buyer()->updateOrCreate(
-             ['user_id' => $user->id],
-             ['phone_number' => '081234567890']
+            ['user_id' => $user->id],
+            ['phone_number' => '081234567890']
         );
 
         $this->command->info('Test User Created: admin@example.com / password');

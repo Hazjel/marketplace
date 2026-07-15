@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use App\Traits\UUID;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Testing\Fluent\Concerns\Has;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class StoreBalance extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
 
     protected $fillable = [
         'store_id',
@@ -24,8 +23,8 @@ class StoreBalance extends Model
 
     public function scopeSearch($query, $search)
     {
-        return $query->whereHas('store', function($q) use ($search){
-            $q->where('name', 'LIKE', "%".$search."%");
+        return $query->whereHas('store', function ($q) use ($search) {
+            $q->where('name', 'LIKE', '%'.$search.'%');
         });
     }
 

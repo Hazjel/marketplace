@@ -22,12 +22,12 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
                 $query->whereNull('parent_id');
             }
         })
-        ->with(['childrens' => function ($query) {
-            $query->withCount('products', 'childrens');
-        }])
-        ->withCount('products', 'childrens')
-        ->orderByRaw('CASE WHEN parent_id IS NULL THEN 0 ELSE 1 END')
-        ->orderBy('name', 'asc');
+            ->with(['childrens' => function ($query) {
+                $query->withCount('products', 'childrens');
+            }])
+            ->withCount('products', 'childrens')
+            ->orderByRaw('CASE WHEN parent_id IS NULL THEN 0 ELSE 1 END')
+            ->orderBy('name', 'asc');
 
         if ($limit) {
             $query->take($limit);
@@ -72,12 +72,12 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
         DB::beginTransaction();
 
         try {
-            $productCategory = new ProductCategory();
+            $productCategory = new ProductCategory;
 
             if (isset($data['parent_id'])) {
                 // Validasi parent exist
                 $parent = ProductCategory::find($data['parent_id']);
-                if (!$parent) {
+                if (! $parent) {
                     throw new Exception('Kategori parent tidak ditemukan');
                 }
                 $productCategory->parent_id = $data['parent_id'];
@@ -102,7 +102,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
             return $productCategory->load([
                 'childrens' => function ($query) {
                     $query->withCount(['products as product_count', 'childrens as children_count']);
-                }
+                },
             ])->loadCount(['products as product_count', 'childrens as children_count']);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -117,7 +117,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
         try {
             $productCategory = ProductCategory::find($id);
 
-            if (!$productCategory) {
+            if (! $productCategory) {
                 throw new Exception('Kategori produk tidak ditemukan');
             }
 
@@ -129,7 +129,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
             if (isset($data['parent_id'])) {
                 // Validasi parent exist
                 $parent = ProductCategory::find($data['parent_id']);
-                if (!$parent) {
+                if (! $parent) {
                     throw new Exception('Kategori parent tidak ditemukan');
                 }
                 $productCategory->parent_id = $data['parent_id'];
@@ -159,7 +159,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
             return $productCategory->load([
                 'childrens' => function ($query) {
                     $query->withCount(['products as product_count', 'childrens as children_count']);
-                }
+                },
             ])->loadCount(['products as product_count', 'childrens as children_count']);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -174,7 +174,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
         try {
             $productCategory = ProductCategory::find($id);
 
-            if (!$productCategory) {
+            if (! $productCategory) {
                 throw new Exception('Kategori produk tidak ditemukan');
             }
 

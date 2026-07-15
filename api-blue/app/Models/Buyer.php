@@ -5,21 +5,20 @@ namespace App\Models;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Testing\Fluent\Concerns\Has;
 
 class Buyer extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
 
     protected $fillable = [
         'user_id',
-        'phone_number'
+        'phone_number',
     ];
 
     public function scopeSearch($query, $search)
     {
-        return $query->whereHas('user', function($q) use ($search){
-            $q->where('name', 'LIKE', "%".$search."%");
+        return $query->whereHas('user', function ($q) use ($search) {
+            $q->where('name', 'LIKE', '%'.$search.'%');
         });
     }
 

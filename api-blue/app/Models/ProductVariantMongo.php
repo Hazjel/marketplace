@@ -7,6 +7,7 @@ use MongoDB\Laravel\Eloquent\Model;
 class ProductVariantMongo extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'product_variants';
 
     protected $fillable = [
@@ -16,7 +17,7 @@ class ProductVariantMongo extends Model
         'price',
         'stock',
         'sku',
-        'image'
+        'image',
     ];
 
     protected $casts = [

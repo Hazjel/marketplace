@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class StoreBalanceHistory extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
 
     /**
      * History types for escrow-based payment flow:
-     * 
+     *
      * - income          : (LEGACY) Dana langsung masuk ke available balance
      * - expense         : (LEGACY) Potongan dari available balance (admin fee)
      * - pending_income  : Dana masuk ke pending_balance (escrow hold)
@@ -21,10 +21,15 @@ class StoreBalanceHistory extends Model
      * - withdrawal      : Pencairan saldo ke rekening seller
      */
     const TYPE_INCOME = 'income';
+
     const TYPE_EXPENSE = 'expense';
+
     const TYPE_PENDING_INCOME = 'pending_income';
+
     const TYPE_RELEASED = 'released';
+
     const TYPE_REFUNDED = 'refunded';
+
     const TYPE_WITHDRAWAL = 'withdrawal';
 
     protected $fillable = [
@@ -37,7 +42,7 @@ class StoreBalanceHistory extends Model
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2'
+        'amount' => 'decimal:2',
     ];
 
     /**

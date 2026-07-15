@@ -3,34 +3,34 @@
 namespace App\Providers;
 
 use App\Interfaces\AuthRepositoryInterface;
-use App\Interfaces\StoreBalanceHistoryRepositoryInterface;
-use App\Interfaces\StoreRepositoryInterface;
-use App\Interfaces\UserRepositoryInterface;
-use App\Repositories\StoreRepository;
-use App\Repositories\UserRepository;
-use Illuminate\Support\ServiceProvider;
-use App\Interfaces\StoreBalanceRepositoryInterface;
-use App\Interfaces\WithdrawalRepositoryInterface;
-use App\Repositories\StoreBalanceHistoryRepository;
-use App\Repositories\StoreBalanceRepository;
-use App\Repositories\WithdrawalRepository;
 use App\Interfaces\BuyerRepositoryInterface;
+use App\Interfaces\CartRepositoryInterface;
 use App\Interfaces\ProductCategoryRepositoryInterface;
-use App\Repositories\BuyerRepository;
-use App\Repositories\ProductCategoryRepository;
 use App\Interfaces\ProductRepositoryInterface;
 use App\Interfaces\ProductReviewRepositoryInterface;
+use App\Interfaces\StoreBalanceHistoryRepositoryInterface;
+use App\Interfaces\StoreBalanceRepositoryInterface;
+use App\Interfaces\StoreRepositoryInterface;
 use App\Interfaces\TransactionDetailRepositoryInterface;
-use App\Repositories\ProductRepository;
 use App\Interfaces\TransactionRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
+use App\Interfaces\WishlistRepositoryInterface;
+use App\Interfaces\WithdrawalRepositoryInterface;
 use App\Repositories\AuthRepository;
+use App\Repositories\BuyerRepository;
+use App\Repositories\CartRepository;
+use App\Repositories\ProductCategoryRepository;
+use App\Repositories\ProductRepository;
 use App\Repositories\ProductReviewRepository;
+use App\Repositories\StoreBalanceHistoryRepository;
+use App\Repositories\StoreBalanceRepository;
+use App\Repositories\StoreRepository;
 use App\Repositories\TransactionDetailRepository;
 use App\Repositories\TransactionRepository;
-use App\Interfaces\WishlistRepositoryInterface;
+use App\Repositories\UserRepository;
 use App\Repositories\WishlistRepository;
-use App\Interfaces\CartRepositoryInterface;
-use App\Repositories\CartRepository;
+use App\Repositories\WithdrawalRepository;
+use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
 {

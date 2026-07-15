@@ -15,7 +15,8 @@ class StoreBalanceHistoryController extends Controller implements HasMiddleware
 {
     private StoreBalanceHistoryRepositoryInterface $storeBalanceHistoryRepository;
 
-    public function __construct(StoreBalanceHistoryRepositoryInterface $storeBalanceHistoryRepository) {
+    public function __construct(StoreBalanceHistoryRepositoryInterface $storeBalanceHistoryRepository)
+    {
         $this->storeBalanceHistoryRepository = $storeBalanceHistoryRepository;
     }
 
@@ -44,7 +45,7 @@ class StoreBalanceHistoryController extends Controller implements HasMiddleware
     {
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer|min:1|max:100'
+            'row_per_page' => 'required|integer|min:1|max:100',
         ]);
 
         try {
@@ -64,7 +65,7 @@ class StoreBalanceHistoryController extends Controller implements HasMiddleware
         try {
             $storeBalanceHistory = $this->storeBalanceHistoryRepository->getById($id);
 
-            if (!$storeBalanceHistory) {
+            if (! $storeBalanceHistory) {
                 return ResponseHelper::jsonResponse(true, 'Data Riwayat Dompet Toko Tidak Ditemukan', null, 404);
             }
 
@@ -73,5 +74,4 @@ class StoreBalanceHistoryController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
-
 }

@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use App\Helpers\ImageHelper\ImageHelper;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\ProductImage;
 use App\Models\Store;
-use App\Models\ProductCategory;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use App\Helpers\ImageHelper\ImageHelper;
 
 class ProductSeeder extends Seeder
 {
@@ -20,6 +19,7 @@ class ProductSeeder extends Seeder
 
         if ($stores->isEmpty()) {
             $this->command->warn('No stores found. Skipping ProductSeeder.');
+
             return;
         }
 
@@ -686,23 +686,24 @@ class ProductSeeder extends Seeder
             unset($productData['category']);
 
             $category = $categories->get($categoryName);
-            if (!$category) {
+            if (! $category) {
                 $this->command->warn("Category '{$categoryName}' not found. Skipping: {$productData['name']}");
+
                 continue;
             }
 
             $store = $stores->random();
 
             $product = Product::create([
-                'store_id'            => $store->id,
+                'store_id' => $store->id,
                 'product_category_id' => $category->id,
-                'name'                => $productData['name'],
-                'slug'                => Str::slug($productData['name']) . '-' . rand(100, 999),
-                'description'         => $productData['description'],
-                'condition'           => $productData['condition'],
-                'price'               => $productData['price'],
-                'weight'              => $productData['weight'],
-                'stock'               => $productData['stock'],
+                'name' => $productData['name'],
+                'slug' => Str::slug($productData['name']).'-'.rand(100, 999),
+                'description' => $productData['description'],
+                'condition' => $productData['condition'],
+                'price' => $productData['price'],
+                'weight' => $productData['weight'],
+                'stock' => $productData['stock'],
             ]);
 
             ProductImage::factory()->thumbnail()->create([
@@ -715,6 +716,6 @@ class ProductSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Created ' . count($products) . ' products with realistic Indonesian market data.');
+        $this->command->info('Created '.count($products).' products with realistic Indonesian market data.');
     }
 }

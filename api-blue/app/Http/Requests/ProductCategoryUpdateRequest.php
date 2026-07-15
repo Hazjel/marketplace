@@ -15,9 +15,9 @@ class ProductCategoryUpdateRequest extends FormRequest
     {
         return [
             'image' => 'nullable|image|mimes:png,jpg|max:2048',
-            'name' => 'required|string|max:255|unique:product_categories,name,' . $this->route('product_category'),
+            'name' => 'required|string|max:255|unique:product_categories,name,'.$this->route('product_category'),
             'tagline' => 'nullable|string|max:255',
-            'description' => 'required|string'
+            'description' => 'required|string',
         ];
     }
 
@@ -27,7 +27,7 @@ class ProductCategoryUpdateRequest extends FormRequest
             'image' => 'Foto',
             'name' => 'Nama Kategori',
             'tagline' => 'tagline',
-            'description' => 'Deskripsi'
+            'description' => 'Deskripsi',
         ];
     }
 }

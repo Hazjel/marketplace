@@ -19,7 +19,7 @@ class ProductReviewStoreRequest extends FormRequest
             'rating' => 'required|integer|min:1|max:5',
             'review' => 'nullable|string',
             'is_anonymous' => 'nullable|boolean',
-            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,mov|max:10240'
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,mov|max:10240',
         ];
     }
 
@@ -29,7 +29,7 @@ class ProductReviewStoreRequest extends FormRequest
             'transaction_id' => 'Transaksi',
             'product_id' => 'Produk',
             'rating' => 'Rating',
-            'review' => 'Review'
+            'review' => 'Review',
         ];
     }
 }

@@ -14,22 +14,22 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         $permissions = Permission::all()->filter(function ($permission) {
-            return !in_array($permission->name, [
+            return ! in_array($permission->name, [
                 'product-create',
                 'product-edit',
                 'product-delete',
-                'transaction-create' // Admin cannot buy
+                'transaction-create', // Admin cannot buy
             ]);
         });
 
         Role::firstOrCreate([
             'name' => 'admin',
-            'guard_name' => 'sanctum'
+            'guard_name' => 'sanctum',
         ])->givePermissionTo($permissions);
 
         Role::firstOrCreate([
             'name' => 'buyer',
-            'guard_name' => 'sanctum'
+            'guard_name' => 'sanctum',
         ])->givePermissionTo([
             'dashboard-menu',
 
@@ -44,12 +44,12 @@ class RoleSeeder extends Seeder
             'transaction-create',
 
             'product-review-list',
-            'product-review-create'
+            'product-review-create',
         ]);
 
         Role::firstOrCreate([
             'name' => 'store',
-            'guard_name' => 'sanctum'
+            'guard_name' => 'sanctum',
         ])->givePermissionTo([
             'dashboard-menu',
 
@@ -84,7 +84,7 @@ class RoleSeeder extends Seeder
 
             'product-review-menu',
             'product-review-list',
-            'product-review-create'
+            'product-review-create',
         ]);
     }
 }

@@ -2,12 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\Store;
 use App\Interfaces\StoreBalanceRepositoryInterface;
 use App\Models\StoreBalance;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class StoreBalanceRepository implements StoreBalanceRepositoryInterface
 {
@@ -52,7 +51,6 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         return $query->first();
     }
 
-
     public function credit(
         string $id,
         string $amount
@@ -63,7 +61,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
             // Pessimistic lock prevents double-credit from concurrent webhooks
             $storeBalance = StoreBalance::where('id', $id)->lockForUpdate()->first();
 
-            if (!$storeBalance) {
+            if (! $storeBalance) {
                 throw new Exception('Store Balance not found');
             }
 
@@ -89,11 +87,11 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
             // Pessimistic lock prevents concurrent over-debit (withdrawal race)
             $storeBalance = StoreBalance::where('id', $id)->lockForUpdate()->first();
 
-            if (!$storeBalance) {
+            if (! $storeBalance) {
                 throw new Exception('Store Balance not found');
             }
 
-            if($storeBalance->balance < $amount) {
+            if ($storeBalance->balance < $amount) {
                 throw new Exception('Saldo Tidak Mencukupi');
             }
 
@@ -120,7 +118,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         try {
             $storeBalance = StoreBalance::where('id', $id)->lockForUpdate()->first();
 
-            if (!$storeBalance) {
+            if (! $storeBalance) {
                 throw new Exception('Store Balance not found');
             }
 
@@ -147,7 +145,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         try {
             $storeBalance = StoreBalance::where('id', $id)->lockForUpdate()->first();
 
-            if (!$storeBalance) {
+            if (! $storeBalance) {
                 throw new Exception('Store Balance not found');
             }
 
@@ -180,7 +178,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
         try {
             $storeBalance = StoreBalance::where('id', $id)->lockForUpdate()->first();
 
-            if (!$storeBalance) {
+            if (! $storeBalance) {
                 throw new Exception('Store Balance not found');
             }
 

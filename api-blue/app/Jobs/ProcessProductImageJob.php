@@ -24,6 +24,7 @@ class ProcessProductImageJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $backoff = 10;
 
     public function __construct(
@@ -35,16 +36,18 @@ class ProcessProductImageJob implements ShouldQueue
     {
         $productImage = ProductImage::find($this->productImageId);
 
-        if (!$productImage) {
+        if (! $productImage) {
             Log::warning("ProcessProductImageJob: ProductImage {$this->productImageId} not found, skipping.");
+
             return;
         }
 
         $disk = Storage::disk('public');
         $absolutePath = $disk->path($this->originalPath);
 
-        if (!file_exists($absolutePath)) {
+        if (! file_exists($absolutePath)) {
             Log::warning("ProcessProductImageJob: File not found at {$absolutePath}");
+
             return;
         }
 
@@ -59,7 +62,7 @@ class ProcessProductImageJob implements ShouldQueue
             // Generate WebP filename
             $directory = pathinfo($this->originalPath, PATHINFO_DIRNAME);
             $filenameWithoutExt = pathinfo($this->originalPath, PATHINFO_FILENAME);
-            $webpPath = $directory . '/' . $filenameWithoutExt . '.webp';
+            $webpPath = $directory.'/'.$filenameWithoutExt.'.webp';
             $webpAbsolutePath = $disk->path($webpPath);
 
             // Encode to WebP with quality 80 (balances quality vs size)

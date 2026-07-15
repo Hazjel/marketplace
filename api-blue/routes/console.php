@@ -11,5 +11,4 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('transaction:check-expiry')->everyMinute();
 
-
 Schedule::command('transaction:auto-complete')->dailyAt('02:00');

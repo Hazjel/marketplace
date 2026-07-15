@@ -18,12 +18,14 @@ class WishlistRepository implements WishlistRepositoryInterface
 
         if ($wishlist) {
             $wishlist->delete();
+
             return 'removed';
         } else {
             Wishlist::create([
                 'user_id' => $userId,
-                'product_id' => $productId
+                'product_id' => $productId,
             ]);
+
             return 'added';
         }
     }

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 
@@ -10,7 +9,7 @@ class PermissionSeeder extends Seeder
 {
     private $permissions = [
         'dashboard' => [
-            'menu'
+            'menu',
         ],
 
         'user' => [
@@ -18,7 +17,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'role' => [
@@ -26,7 +25,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'permission' => [
@@ -34,7 +33,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'store' => [
@@ -42,16 +41,16 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'store-balance' => [
             'menu',
-            'list'
+            'list',
         ],
 
         'store-balance-history' => [
-            'list'
+            'list',
         ],
 
         'withdrawal' => [
@@ -59,7 +58,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'buyer' => [
@@ -67,7 +66,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'product-category' => [
@@ -75,7 +74,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'product' => [
@@ -83,7 +82,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'transaction' => [
@@ -91,7 +90,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
 
         'product-review' => [
@@ -99,7 +98,7 @@ class PermissionSeeder extends Seeder
             'list',
             'create',
             'edit',
-            'delete'
+            'delete',
         ],
     ];
 
@@ -111,8 +110,8 @@ class PermissionSeeder extends Seeder
         foreach ($this->permissions as $key => $value) {
             foreach ($value as $permission) {
                 Permission::firstOrCreate([
-                    'name' => $key . '-' . $permission,
-                    'guard_name' => 'sanctum'
+                    'name' => $key.'-'.$permission,
+                    'guard_name' => 'sanctum',
                 ]);
             }
         }

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Buyer;
+use Illuminate\Database\Seeder;
 
 class BuyerSeeder extends Seeder
 {
@@ -13,7 +13,7 @@ class BuyerSeeder extends Seeder
     public function run(): void
     {
         Buyer::factory()->count(10)->create(
-            
+
         );
     }
 }

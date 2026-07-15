@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseHelper;
+use App\Http\Resources\PaginateResource;
+use App\Http\Resources\StoreBalanceResource;
 use App\Interfaces\StoreBalanceRepositoryInterface;
 use Illuminate\Http\Request;
-use App\Helpers\ResponseHelper;
-use App\Http\Resources\StoreBalanceResource;
-use App\Http\Resources\PaginateResource;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -45,7 +45,7 @@ class StoreBalanceController extends Controller implements HasMiddleware
     {
         $request = $request->validate([
             'search' => 'nullable|string',
-            'row_per_page' => 'required|integer|min:1|max:100'
+            'row_per_page' => 'required|integer|min:1|max:100',
         ]);
 
         try {
@@ -57,7 +57,6 @@ class StoreBalanceController extends Controller implements HasMiddleware
         }
     }
 
-
     /**
      * Display the specified resource.
      */
@@ -66,7 +65,7 @@ class StoreBalanceController extends Controller implements HasMiddleware
         try {
             $storeBalance = $this->storeBalanceRepository->getById($id);
 
-            if (!$storeBalance) {
+            if (! $storeBalance) {
                 return ResponseHelper::jsonResponse(true, 'Data Dompet Toko Tidak Ditemukan', null, 404);
             }
 
@@ -75,12 +74,13 @@ class StoreBalanceController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
+
     public function showByStore()
     {
         try {
             $store = $this->storeBalanceRepository->getByStore();
 
-            if (!$store) {
+            if (! $store) {
                 return ResponseHelper::jsonResponse(true, 'Dompet Tidak Ditemukan', null, 200);
             }
 
@@ -89,5 +89,4 @@ class StoreBalanceController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
     }
-
 }

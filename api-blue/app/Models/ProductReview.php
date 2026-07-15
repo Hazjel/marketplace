@@ -15,7 +15,7 @@ class ProductReview extends Model
         'user_id',
         'rating',
         'review',
-        'is_anonymous'
+        'is_anonymous',
     ];
 
     public function transaction()

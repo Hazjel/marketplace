@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
 
     protected $fillable = [
         'code',
@@ -28,19 +28,19 @@ class Transaction extends Model
         'grand_total',
         'payment_status',
         'receiving_proof',
-        'admin_fee'
+        'admin_fee',
     ];
 
     protected $casts = [
         'shipping_cost' => 'decimal:2',
         'tax' => 'decimal:2',
         'grand_total' => 'decimal:2',
-        'admin_fee' => 'decimal:2'
+        'admin_fee' => 'decimal:2',
     ];
 
     public function scopeSearch($query, $search)
     {
-        return $query->where('code', 'like', '%' . $search . '%');
+        return $query->where('code', 'like', '%'.$search.'%');
     }
 
     public function buyer()

@@ -5,12 +5,11 @@ namespace App\Models;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use MongoDB\Laravel\Eloquent\HybridRelations;
 
 class Product extends Model
 {
-    use UUID, HasFactory, HybridRelations;
+    use HasFactory, HybridRelations, UUID;
 
     protected $fillable = [
         'store_id',
@@ -22,7 +21,7 @@ class Product extends Model
         'price',
         'weight',
         'stock',
-        'has_variants'
+        'has_variants',
     ];
 
     protected $casts = [
@@ -37,10 +36,11 @@ class Product extends Model
         if (mb_strlen($search) >= 3) {
             $safeTerm = preg_replace('/[+\-*"<>()~@]+/', '', $search);
             if (mb_strlen(trim($safeTerm)) >= 3) {
-                return $query->whereRaw('MATCH(name, description) AGAINST(? IN BOOLEAN MODE)', ['+' . $safeTerm . '*']);
+                return $query->whereRaw('MATCH(name, description) AGAINST(? IN BOOLEAN MODE)', ['+'.$safeTerm.'*']);
             }
         }
-        return $query->where('name', 'like', '%' . $search . '%');
+
+        return $query->where('name', 'like', '%'.$search.'%');
     }
 
     public function store()

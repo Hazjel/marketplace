@@ -21,8 +21,8 @@ class ForgotPasswordController extends Controller
             'email' => 'required|email|exists:users,email',
         ], [
             'email.required' => 'Email wajib diisi.',
-            'email.email'    => 'Format email tidak valid.',
-            'email.exists'   => 'Email tidak terdaftar di sistem kami.',
+            'email.email' => 'Format email tidak valid.',
+            'email.exists' => 'Email tidak terdaftar di sistem kami.',
         ]);
 
         $status = Password::sendResetLink(
@@ -63,17 +63,17 @@ class ForgotPasswordController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'token'                 => 'required|string',
-            'email'                 => 'required|email',
-            'password'              => 'required|string|min:8|confirmed',
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
             'password_confirmation' => 'required|string',
         ], [
-            'token.required'                 => 'Token reset tidak valid.',
-            'email.required'                 => 'Email wajib diisi.',
-            'email.email'                    => 'Format email tidak valid.',
-            'password.required'              => 'Password baru wajib diisi.',
-            'password.min'                   => 'Password minimal 8 karakter.',
-            'password.confirmed'             => 'Konfirmasi password tidak cocok.',
+            'token.required' => 'Token reset tidak valid.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'password_confirmation.required' => 'Konfirmasi password wajib diisi.',
         ]);
 
@@ -81,7 +81,7 @@ class ForgotPasswordController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
-                    'password'       => Hash::make($password),
+                    'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
                 ])->save();
 

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Nullable first to support existing users, we will backfill later
-            $table->string('username')->nullable()->unique()->after('name'); 
+            $table->string('username')->nullable()->unique()->after('name');
         });
     }
 

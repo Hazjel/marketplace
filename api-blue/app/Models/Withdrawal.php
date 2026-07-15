@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Withdrawal extends Model
 {
-    use UUID, HasFactory;
+    use HasFactory, UUID;
 
     protected $fillable = [
         'store_balance_id',
@@ -21,13 +21,13 @@ class Withdrawal extends Model
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2'
+        'amount' => 'decimal:2',
     ];
 
     public function scopeSearch($query, $search)
     {
-        return $query->whereHas('storeBalance.store', function($q) use ($search){
-            $q->where('name','like', '%' . $search . '%');
+        return $query->whereHas('storeBalance.store', function ($q) use ($search) {
+            $q->where('name', 'like', '%'.$search.'%');
         });
     }
 

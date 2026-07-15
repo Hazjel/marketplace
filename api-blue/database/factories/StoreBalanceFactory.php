@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Store;
 use App\Models\StoreBalance;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Store;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\StoreBalance>
@@ -12,6 +12,7 @@ use App\Models\Store;
 class StoreBalanceFactory extends Factory
 {
     protected $model = StoreBalance::class;
+
     /**
      * Define the model's default state.
      *

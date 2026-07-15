@@ -13,23 +13,23 @@ class VerificationController extends Controller
     {
         $user = User::find($id);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Invalid user'], 404);
         }
 
         if (! hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
-             return response()->json(['message' => 'Invalid verification link'], 403);
+            return response()->json(['message' => 'Invalid verification link'], 403);
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/auth/login?verified=1');
+            return redirect(env('FRONTEND_URL', 'http://localhost:5173').'/auth/login?verified=1');
         }
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
 
-        return redirect(env('FRONTEND_URL', 'http://localhost:5173') . '/auth/login?verified=1');
+        return redirect(env('FRONTEND_URL', 'http://localhost:5173').'/auth/login?verified=1');
     }
 
     public function resend(Request $request)

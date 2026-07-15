@@ -14,14 +14,14 @@ class WithdrawalApproveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'proof' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048'
+            'proof' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048',
         ];
     }
 
     public function attributes()
     {
         return [
-            'proof' => 'Bukti Transfer'
+            'proof' => 'Bukti Transfer',
         ];
     }
 }

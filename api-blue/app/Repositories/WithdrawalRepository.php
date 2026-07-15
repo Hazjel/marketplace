@@ -7,9 +7,6 @@ use App\Models\Withdrawal;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use App\Repositories\StoreBalanceRepository;
-use App\Repositories\StoreBalanceHistoryRepository;
-use Illuminate\Support\Facades\Auth;
 
 class WithdrawalRepository implements WithdrawalRepositoryInterface
 {
@@ -22,8 +19,8 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
         });
 
         if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->whereHas('storeBalance', function($query){
-                $query->whereHas('store', function($query){
+            $query->whereHas('storeBalance', function ($query) {
+                $query->whereHas('store', function ($query) {
                     $query->where('id', auth()->user()->store->id ?? null);
                 });
             });
@@ -56,23 +53,24 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
         return $query->first();
     }
 
-    public function create(array $data) {
+    public function create(array $data)
+    {
         DB::beginTransaction();
 
         try {
             // Validasi: hanya bisa tarik dari saldo tersedia (balance), bukan pending_balance
             $storeBalance = \App\Models\StoreBalance::where('id', $data['store_balance_id'])->lockForUpdate()->first();
 
-            if (!$storeBalance) {
+            if (! $storeBalance) {
                 throw new Exception('Store Balance tidak ditemukan');
             }
 
             if ($storeBalance->balance < $data['amount']) {
                 throw new Exception(
-                    'Saldo tersedia tidak mencukupi. ' .
-                    'Saldo tersedia: Rp ' . number_format($storeBalance->balance, 0, ',', '.') . '. ' .
+                    'Saldo tersedia tidak mencukupi. '.
+                    'Saldo tersedia: Rp '.number_format($storeBalance->balance, 0, ',', '.').'. '.
                     ($storeBalance->pending_balance > 0
-                        ? 'Rp ' . number_format($storeBalance->pending_balance, 0, ',', '.') . ' masih ditahan (escrow) dan belum bisa ditarik.'
+                        ? 'Rp '.number_format($storeBalance->pending_balance, 0, ',', '.').' masih ditahan (escrow) dan belum bisa ditarik.'
                         : '')
                 );
             }
@@ -90,14 +88,14 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             $storeBalanceRepository = new StoreBalanceRepository;
             $storeBalanceRepository->debit($withdrawal->store_balance_id, $withdrawal->amount);
 
-            $storeBalanceHistoryRepository = new StoreBalanceHistoryRepository();
+            $storeBalanceHistoryRepository = new StoreBalanceHistoryRepository;
             $storeBalanceHistoryRepository->create([
                 'store_balance_id' => $withdrawal->store_balance_id,
                 'type' => 'withdrawal',
                 'reference_id' => $withdrawal->id,
                 'reference_type' => Withdrawal::class,
                 'amount' => -$data['amount'],
-                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number}"
+                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number}",
             ]);
 
             DB::commit();
@@ -108,6 +106,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             throw new Exception($e->getMessage());
         }
     }
+
     public function approve(string $id, UploadedFile $proof)
     {
         DB::beginTransaction();
@@ -115,7 +114,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
         try {
             $withdrawal = Withdrawal::find($id);
 
-            if (!$withdrawal) {
+            if (! $withdrawal) {
                 throw new Exception('Withdrawal not found');
             }
 

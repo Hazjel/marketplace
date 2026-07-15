@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\ResponseHelper;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use App\Helpers\ResponseHelper;
 
 /**
  * Idempotency Middleware — Antigravity Standard.
@@ -24,7 +24,7 @@ class IdempotencyMiddleware
     {
         $idempotencyKey = $request->header('X-Idempotency-Key');
 
-        if (!$idempotencyKey) {
+        if (! $idempotencyKey) {
             return ResponseHelper::jsonResponse(
                 false,
                 'Header X-Idempotency-Key wajib disertakan untuk operasi ini.',
@@ -33,11 +33,12 @@ class IdempotencyMiddleware
             );
         }
 
-        $cacheKey = 'idempotency:' . auth()->id() . ':' . $idempotencyKey;
+        $cacheKey = 'idempotency:'.auth()->id().':'.$idempotencyKey;
 
         // If this key already exists in Redis, return the cached response
         if (Cache::has($cacheKey)) {
             $cachedResponse = Cache::get($cacheKey);
+
             return response()->json($cachedResponse, $cachedResponse['code'] ?? 200)
                 ->header('X-Idempotency-Replayed', 'true');
         }

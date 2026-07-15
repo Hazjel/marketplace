@@ -18,7 +18,7 @@ class ProductCategoryStoreRequest extends FormRequest
             'image' => 'nullable|image|mimes:png,jpg|max:2048',
             'name' => 'required|string|max:255|unique:product_categories',
             'tagline' => 'nullable|string|max:255',
-            'description' => 'required|string'
+            'description' => 'required|string',
         ];
     }
 
@@ -29,7 +29,7 @@ class ProductCategoryStoreRequest extends FormRequest
             'image' => 'Foto',
             'name' => 'Nama Kategori',
             'tagline' => 'tagline',
-            'description' => 'Deskripsi'
+            'description' => 'Deskripsi',
         ];
     }
 }

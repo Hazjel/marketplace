@@ -140,7 +140,7 @@ class CartRepository implements CartRepositoryInterface
             ->toArray();
 
         $variants = [];
-        if (!empty($variantIds)) {
+        if (! empty($variantIds)) {
             try {
                 $variants = ProductVariantMongo::whereIn('_id', $variantIds)
                     ->get()
@@ -156,7 +156,7 @@ class CartRepository implements CartRepositoryInterface
             $product = $products->get($item['product_id']);
             $requestedQty = (int) ($item['quantity'] ?? 1);
 
-            if (!$product) {
+            if (! $product) {
                 $results[] = [
                     'product_id' => $item['product_id'],
                     'variant_id' => $item['variant_id'] ?? null,
@@ -165,12 +165,13 @@ class CartRepository implements CartRepositoryInterface
                     'valid' => false,
                     'reason' => 'product_not_found',
                 ];
+
                 continue;
             }
 
             // Determine available stock: variant stock takes precedence
             $availableStock = $product->stock;
-            if (!empty($item['variant_id']) && isset($variants[$item['variant_id']])) {
+            if (! empty($item['variant_id']) && isset($variants[$item['variant_id']])) {
                 $availableStock = $variants[$item['variant_id']]->stock;
             }
 
