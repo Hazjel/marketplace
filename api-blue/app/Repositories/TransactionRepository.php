@@ -198,7 +198,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             foreach ($data['products'] as $productData) {
                 // Find Product with Lock for Atomic Update
-                Log::error('REPO: Deduction loop for Product ID: '.$productData['product_id']);
+                Log::debug('REPO: Deduction loop for Product ID: '.$productData['product_id']);
 
                 $product = Product::where('id', $productData['product_id'])->lockForUpdate()->first();
 
@@ -207,7 +207,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                     throw new Exception('Product not found: '.$productData['product_id']);
                 }
 
-                Log::error("REPO: Found Prod {$product->id} | Stock: {$product->stock} | Qty: {$productData['qty']}");
+                Log::debug("REPO: Found Prod {$product->id} | Stock: {$product->stock} | Qty: {$productData['qty']}");
 
                 if ($product->stock < $productData['qty']) {
                     Log::error("REPO ERROR: Insufficient stock for {$product->id}. Has {$product->stock}, need {$productData['qty']}");
@@ -219,7 +219,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 $product->stock -= $productData['qty'];
                 $product->save();
 
-                Log::error("REPO SUCCESS: Updated Stock {$oldStock} -> {$product->stock}");
+                Log::debug("REPO: Updated Stock {$oldStock} -> {$product->stock}");
 
                 $detail = $transactionDetailRepository->create([
                     'transaction_id' => $transaction->id,
