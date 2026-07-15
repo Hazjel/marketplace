@@ -1,7 +1,11 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\RepositoryServiceProvider;
+use MongoDB\Laravel\MongoDBServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\RepositoryServiceProvider::class,
-    MongoDB\Laravel\MongoDBServiceProvider::class,
+    AppServiceProvider::class,
+    RepositoryServiceProvider::class,
+    MongoDBServiceProvider::class,
 ];

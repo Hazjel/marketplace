@@ -10,7 +10,11 @@ use App\Models\StoreBalance;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class AutoCompleteTransactionTest extends TestCase
@@ -29,9 +33,9 @@ class AutoCompleteTransactionTest extends TestCase
     {
         parent::setUp();
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         // Setup Store
         $sellerUser = User::factory()->create();
@@ -108,7 +112,7 @@ class AutoCompleteTransactionTest extends TestCase
         ]);
 
         // Backdate updated_at to 8 days ago (use DB::table to bypass model events)
-        \Illuminate\Support\Facades\DB::table('transactions')
+        DB::table('transactions')
             ->where('id', $transaction->id)
             ->update(['updated_at' => now()->subDays(8)->toDateTimeString()]);
 
@@ -167,7 +171,7 @@ class AutoCompleteTransactionTest extends TestCase
         ]);
 
         // Only 3 days ago - should NOT be auto-completed
-        \Illuminate\Support\Facades\DB::table('transactions')
+        DB::table('transactions')
             ->where('id', $transaction->id)
             ->update(['updated_at' => now()->subDays(3)->toDateTimeString()]);
 
@@ -207,7 +211,7 @@ class AutoCompleteTransactionTest extends TestCase
             'delivery_status' => 'pending', // Not delivering
         ]);
 
-        \Illuminate\Support\Facades\DB::table('transactions')
+        DB::table('transactions')
             ->where('id', $transaction->id)
             ->update(['updated_at' => now()->subDays(10)->toDateTimeString()]);
 

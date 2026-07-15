@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
@@ -13,8 +15,8 @@ class AuthTest extends TestCase
 
     public function test_user_can_register()
     {
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $payload = [
             'name' => 'Tester Blue',
@@ -37,8 +39,8 @@ class AuthTest extends TestCase
 
     public function test_user_can_login()
     {
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $user = User::factory()->create([
             'email' => 'login@blukios.com',

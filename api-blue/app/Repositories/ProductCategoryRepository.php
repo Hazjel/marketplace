@@ -104,7 +104,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
                     $query->withCount(['products as product_count', 'childrens as children_count']);
                 },
             ])->loadCount(['products as product_count', 'childrens as children_count']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
@@ -161,7 +161,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
                     $query->withCount(['products as product_count', 'childrens as children_count']);
                 },
             ])->loadCount(['products as product_count', 'childrens as children_count']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
@@ -187,7 +187,7 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface
             DB::commit();
 
             return $productCategory;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }

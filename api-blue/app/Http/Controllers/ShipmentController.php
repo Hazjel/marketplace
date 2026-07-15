@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Support\IndonesianCities;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -28,7 +29,7 @@ class ShipmentController extends Controller
             // Ekspansi: cocokkan sebagai prefix nama kota, gabungkan hasilnya
             // supaya "ban" mengeluarkan Bandung + Banjarmasin + Banyuwangi dst.
             if (count($results) < 10) {
-                foreach (\App\Support\IndonesianCities::matchPrefix($keyword, 5) as $city) {
+                foreach (IndonesianCities::matchPrefix($keyword, 5) as $city) {
                     if (mb_strtolower($city) === mb_strtolower($keyword)) {
                         continue; // sudah dicari langsung
                     }

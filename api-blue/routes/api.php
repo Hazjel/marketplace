@@ -1,7 +1,14 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BuyerController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\LogisticsController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
@@ -12,6 +19,8 @@ use App\Http\Controllers\StoreBalanceHistoryController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -19,7 +28,7 @@ use Illuminate\Support\Facades\Route;
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // Health Check
-Route::get('health', \App\Http\Controllers\HealthController::class);
+Route::get('health', HealthController::class);
 
 // Public Routes that must take precedence
 Route::get('store/locations', [StoreController::class, 'getLocations']);
@@ -154,7 +163,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Address routes
     Route::apiResource(
         'address',
-        \App\Http\Controllers\AddressController::class,
+        AddressController::class,
     );
 
     // Product Category routes - custom routes BEFORE resource
@@ -212,37 +221,37 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Wishlist
     Route::get('wishlist', [
-        App\Http\Controllers\WishlistController::class,
+        WishlistController::class,
         'index',
     ]);
     Route::post('wishlist', [
-        App\Http\Controllers\WishlistController::class,
+        WishlistController::class,
         'store',
     ]);
 
     // Cart Routes
-    Route::get('cart', [App\Http\Controllers\CartController::class, 'index']);
-    Route::post('cart', [App\Http\Controllers\CartController::class, 'store']);
-    Route::put('cart/{productId}', [App\Http\Controllers\CartController::class, 'update']);
-    Route::delete('cart/clear', [App\Http\Controllers\CartController::class, 'clear']);
-    Route::delete('cart/{productId}', [App\Http\Controllers\CartController::class, 'destroy']);
-    Route::post('cart/sync', [App\Http\Controllers\CartController::class, 'sync']);
-    Route::post('cart/validate-stock', [App\Http\Controllers\CartController::class, 'validateStock']);
+    Route::get('cart', [CartController::class, 'index']);
+    Route::post('cart', [CartController::class, 'store']);
+    Route::put('cart/{productId}', [CartController::class, 'update']);
+    Route::delete('cart/clear', [CartController::class, 'clear']);
+    Route::delete('cart/{productId}', [CartController::class, 'destroy']);
+    Route::post('cart/sync', [CartController::class, 'sync']);
+    Route::post('cart/validate-stock', [CartController::class, 'validateStock']);
     // Chat Routes
     Route::get('chat/contacts', [
-        App\Http\Controllers\ChatController::class,
+        ChatController::class,
         'getContacts',
     ]);
     Route::get('chat/user/{id}', [
-        App\Http\Controllers\ChatController::class,
+        ChatController::class,
         'getUserInfo',
     ]);
     Route::get('chat/{user}', [
-        App\Http\Controllers\ChatController::class,
+        ChatController::class,
         'getMessages',
     ]);
     Route::post('chat/send', [
-        App\Http\Controllers\ChatController::class,
+        ChatController::class,
         'sendMessage',
     ]);
 });
@@ -255,25 +264,25 @@ Route::middleware('throttle:6,1')->group(function () {
 
 // Verification Routes
 Route::get('/email/verify/{id}/{hash}', [
-    \App\Http\Controllers\VerificationController::class,
+    VerificationController::class,
     'verify',
 ])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
 
 Route::post('/email/resend', [
-    \App\Http\Controllers\VerificationController::class,
+    VerificationController::class,
     'resend',
 ])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
     ->name('verification.send');
 Route::middleware(['web'])->group(function () {
     Route::get('auth/google/redirect', [
-        \App\Http\Controllers\GoogleAuthController::class,
+        GoogleAuthController::class,
         'redirect',
     ]);
     Route::get('auth/google/callback', [
-        \App\Http\Controllers\GoogleAuthController::class,
+        GoogleAuthController::class,
         'callback',
     ]);
 });
@@ -281,11 +290,11 @@ Route::middleware(['web'])->group(function () {
 // Password Reset Routes (Public, throttled)
 Route::middleware('throttle:5,1')->group(function () {
     Route::post('password/forgot', [
-        \App\Http\Controllers\ForgotPasswordController::class,
+        ForgotPasswordController::class,
         'sendResetLink',
     ]);
     Route::post('password/reset', [
-        \App\Http\Controllers\ForgotPasswordController::class,
+        ForgotPasswordController::class,
         'resetPassword',
     ]);
 });
@@ -303,6 +312,6 @@ Route::post('/midtrans-callback', [MidtransController::class, 'callback'])->midd
 
 // Logistics Webhook (Simulation - RajaOngkir/Komerce)
 Route::post('/logistics/webhook', [
-    \App\Http\Controllers\LogisticsController::class,
+    LogisticsController::class,
     'webhook',
 ])->middleware('throttle:60,1');

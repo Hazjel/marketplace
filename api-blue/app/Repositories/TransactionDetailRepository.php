@@ -28,7 +28,7 @@ class TransactionDetailRepository implements TransactionDetailRepositoryInterfac
             DB::commit();
 
             return $transactionDetail;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());

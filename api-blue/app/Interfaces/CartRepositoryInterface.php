@@ -2,15 +2,16 @@
 
 namespace App\Interfaces;
 
+use App\Models\Cart;
 use Illuminate\Support\Collection;
 
 interface CartRepositoryInterface
 {
     public function getByUserId(string $userId): Collection;
 
-    public function addOrUpdate(string $userId, array $data): \App\Models\Cart;
+    public function addOrUpdate(string $userId, array $data): Cart;
 
-    public function updateQuantity(string $userId, string $productId, ?string $variantId, int $quantity): \App\Models\Cart;
+    public function updateQuantity(string $userId, string $productId, ?string $variantId, int $quantity): Cart;
 
     public function remove(string $userId, string $productId, ?string $variantId): void;
 

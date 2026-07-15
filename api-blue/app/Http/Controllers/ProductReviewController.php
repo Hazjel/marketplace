@@ -6,9 +6,13 @@ use App\Helpers\ResponseHelper;
 use App\Http\Requests\ProductReviewStoreRequest;
 use App\Http\Resources\ProductReviewResource;
 use App\Interfaces\ProductReviewRepositoryInterface;
+use App\Models\ProductReview;
+use App\Models\ProductReviewAttachment;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Str;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class ProductReviewController extends Controller implements HasMiddleware
@@ -46,7 +50,7 @@ class ProductReviewController extends Controller implements HasMiddleware
 
         try {
             // 1. Validasi Transaksi (Milik User & Status Completed)
-            $transaction = \App\Models\Transaction::where('id', $validated['transaction_id'])
+            $transaction = Transaction::where('id', $validated['transaction_id'])
                 ->whereHas('buyer', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })
@@ -70,7 +74,7 @@ class ProductReviewController extends Controller implements HasMiddleware
             }
 
             // 3. Cek Duplicate Review
-            $exists = \App\Models\ProductReview::where('transaction_id', $validated['transaction_id'])
+            $exists = ProductReview::where('transaction_id', $validated['transaction_id'])
                 ->where('product_id', $validated['product_id'])
                 ->exists();
 
@@ -102,9 +106,9 @@ class ProductReviewController extends Controller implements HasMiddleware
                         continue;
                     }
                     $type = str_starts_with($mime, 'video') ? 'video' : 'image';
-                    $filename = time().'_'.\Illuminate\Support\Str::random(16).'.'.$allowedMimes[$mime];
+                    $filename = time().'_'.Str::random(16).'.'.$allowedMimes[$mime];
                     $file->move(public_path('upload/reviews'), $filename);
-                    \App\Models\ProductReviewAttachment::create([
+                    ProductReviewAttachment::create([
                         'product_review_id' => $productReview->id,
                         'file_path' => 'upload/reviews/'.$filename,
                         'file_type' => $type,

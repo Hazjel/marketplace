@@ -5,9 +5,11 @@ namespace App\Repositories;
 use App\Interfaces\AuthRepositoryInterface;
 use App\Models\User;
 use Exception;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AuthRepository implements AuthRepositoryInterface
@@ -51,7 +53,7 @@ class AuthRepository implements AuthRepositoryInterface
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
@@ -89,7 +91,7 @@ class AuthRepository implements AuthRepositoryInterface
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage(), $e->getCode());
@@ -110,10 +112,10 @@ class AuthRepository implements AuthRepositoryInterface
             $user->name = $data['name'];
 
             // Handle Profile Picture Upload
-            if (isset($data['profile_picture']) && $data['profile_picture'] instanceof \Illuminate\Http\UploadedFile) {
+            if (isset($data['profile_picture']) && $data['profile_picture'] instanceof UploadedFile) {
                 // Delete old image if exists and is not a default/google image (optional check)
-                if ($user->profile_picture && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_picture)) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
+                if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+                    Storage::disk('public')->delete($user->profile_picture);
                 }
 
                 $path = $data['profile_picture']->store('assets/user', 'public');
@@ -144,7 +146,7 @@ class AuthRepository implements AuthRepositoryInterface
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage(), $e->getCode() ?: 500);
@@ -167,7 +169,7 @@ class AuthRepository implements AuthRepositoryInterface
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
@@ -190,7 +192,7 @@ class AuthRepository implements AuthRepositoryInterface
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());

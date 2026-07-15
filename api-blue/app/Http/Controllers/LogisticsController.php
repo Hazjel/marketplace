@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LogisticsController extends Controller
@@ -74,7 +75,7 @@ class LogisticsController extends Controller
 
             // Save only if status changed
             if ($previousStatus !== $newStatus) {
-                \Illuminate\Support\Facades\DB::transaction(function () use ($transaction, $newStatus, $status, $request) {
+                DB::transaction(function () use ($transaction, $newStatus, $status, $request) {
                     $transaction->delivery_status = $newStatus;
 
                     if ($status === 'DELIVERED' && $request->has('pod_receiver')) {

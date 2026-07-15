@@ -1,9 +1,13 @@
 <?php
 
+use App\Http\Middleware\IdempotencyMiddleware;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\UpdateLastSeen;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -21,11 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'midtrans-callback',
             'logistics/webhook',
         ]);
-        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
-        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
-        $middleware->append(\App\Http\Middleware\UpdateLastSeen::class);
+        $middleware->append(HandleCors::class);
+        $middleware->append(SecurityHeaders::class);
+        $middleware->append(UpdateLastSeen::class);
         $middleware->alias([
-            'idempotent' => \App\Http\Middleware\IdempotencyMiddleware::class,
+            'idempotent' => IdempotencyMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -67,7 +71,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Generic fallback for production — hide internal errors
-        $exceptions->render(function (\Throwable $e, $request) {
+        $exceptions->render(function (Throwable $e, $request) {
             if ($request->expectsJson() && ! app()->hasDebugModeEnabled()) {
                 $code = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
 

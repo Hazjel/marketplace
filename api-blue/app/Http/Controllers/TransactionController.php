@@ -8,11 +8,16 @@ use App\Http\Requests\TransactionUpdateRequest;
 use App\Http\Resources\PaginateResource;
 use App\Http\Resources\TransactionResource;
 use App\Interfaces\TransactionRepositoryInterface;
+use App\Models\Store;
 use App\Models\Transaction;
+use App\Repositories\StoreBalanceRepository;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Midtrans\Config;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class TransactionController extends Controller implements HasMiddleware
@@ -215,7 +220,7 @@ class TransactionController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(false, 'Hanya status delivering yang bisa diselesaikan', null, 400);
             }
 
-            $validation = \Illuminate\Support\Facades\Validator::make(request()->all(), [
+            $validation = Validator::make(request()->all(), [
                 'receiving_proof' => 'required|image|max:2048',
             ]);
 
@@ -231,7 +236,7 @@ class TransactionController extends Controller implements HasMiddleware
                 if (! array_key_exists($mime, $allowedMimes)) {
                     return ResponseHelper::jsonResponse(false, 'Tipe file tidak diizinkan.', null, 422);
                 }
-                $filename = time().'_'.\Illuminate\Support\Str::random(16).'.'.$allowedMimes[$mime];
+                $filename = time().'_'.Str::random(16).'.'.$allowedMimes[$mime];
                 $file->move(public_path('upload/transactions'), $filename);
                 $receivingProof = 'upload/transactions/'.$filename;
             }
@@ -257,7 +262,7 @@ class TransactionController extends Controller implements HasMiddleware
     private function releaseEscrowBalance(Transaction $transaction): void
     {
         try {
-            $store = \App\Models\Store::find($transaction->store_id);
+            $store = Store::find($transaction->store_id);
 
             if (! $store || ! $store->storeBalance) {
                 Log::error('releaseEscrowBalance: Store or StoreBalance not found', [
@@ -271,7 +276,7 @@ class TransactionController extends Controller implements HasMiddleware
             $adminFee = $netSales * config('marketplace.admin_fee_percentage');
             $sellerAmount = $netSales - $adminFee;
 
-            $storeBalanceRepository = new \App\Repositories\StoreBalanceRepository;
+            $storeBalanceRepository = new StoreBalanceRepository;
 
             // Pindahkan dari pending ke available
             $storeBalanceRepository->releasePending($store->storeBalance->id, $sellerAmount);
@@ -321,10 +326,10 @@ class TransactionController extends Controller implements HasMiddleware
             }
 
             // Configure Midtrans
-            \Midtrans\Config::$serverKey = config('midtrans.serverKey');
-            \Midtrans\Config::$isProduction = config('midtrans.isProduction');
-            \Midtrans\Config::$isSanitized = config('midtrans.isSanitized');
-            \Midtrans\Config::$is3ds = config('midtrans.is3ds');
+            Config::$serverKey = config('midtrans.serverKey');
+            Config::$isProduction = config('midtrans.isProduction');
+            Config::$isSanitized = config('midtrans.isSanitized');
+            Config::$is3ds = config('midtrans.is3ds');
 
             try {
                 // Fetch status from Midtrans
@@ -367,7 +372,7 @@ class TransactionController extends Controller implements HasMiddleware
                     $transaction->save();
 
                     // Credit ke pending_balance (escrow) — sama seperti Midtrans callback
-                    $store = \App\Models\Store::find($transaction->store_id);
+                    $store = Store::find($transaction->store_id);
                     if ($store && $store->storeBalance) {
                         $netSales = $transaction->grand_total - $transaction->shipping_cost;
                         $adminFee = $netSales * config('marketplace.admin_fee_percentage');
@@ -376,7 +381,7 @@ class TransactionController extends Controller implements HasMiddleware
                         $transaction->admin_fee = $adminFee;
                         $transaction->save();
 
-                        $storeBalanceRepository = new \App\Repositories\StoreBalanceRepository;
+                        $storeBalanceRepository = new StoreBalanceRepository;
                         $storeBalanceRepository->creditPending($store->storeBalance->id, $sellerAmount);
 
                         $store->storeBalance->storeBalanceHistories()->create([

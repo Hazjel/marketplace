@@ -6,7 +6,10 @@ use App\Models\Store;
 use App\Models\StoreBalance;
 use App\Models\User;
 use App\Repositories\StoreBalanceRepository;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class StoreBalanceRepositoryTest extends TestCase
@@ -21,9 +24,9 @@ class StoreBalanceRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $this->repository = new StoreBalanceRepository;
 

@@ -10,7 +10,12 @@ use App\Models\StoreBalance;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\User;
+use App\Repositories\TransactionRepository;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class EscrowPaymentTest extends TestCase
@@ -33,9 +38,9 @@ class EscrowPaymentTest extends TestCase
     {
         parent::setUp();
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         // Setup Seller
         $this->sellerUser = User::factory()->create();
@@ -236,7 +241,7 @@ class EscrowPaymentTest extends TestCase
         $this->storeBalance->update(['pending_balance' => $sellerAmount]);
 
         // Act: buyer confirms receipt
-        $file = \Illuminate\Http\UploadedFile::fake()->image('proof.jpg');
+        $file = UploadedFile::fake()->image('proof.jpg');
 
         $response = $this->actingAs($this->buyerUser, 'sanctum')
             ->post("/api/transaction/{$transaction->id}/complete", [
@@ -280,7 +285,7 @@ class EscrowPaymentTest extends TestCase
         ]);
 
         // Seller trying to complete → should fail
-        $file = \Illuminate\Http\UploadedFile::fake()->image('proof.jpg');
+        $file = UploadedFile::fake()->image('proof.jpg');
 
         $response = $this->actingAs($this->sellerUser, 'sanctum')
             ->post("/api/transaction/{$transaction->id}/complete", [
@@ -309,7 +314,7 @@ class EscrowPaymentTest extends TestCase
             'delivery_status' => 'pending', // Not "delivering"
         ]);
 
-        $file = \Illuminate\Http\UploadedFile::fake()->image('proof.jpg');
+        $file = UploadedFile::fake()->image('proof.jpg');
 
         $response = $this->actingAs($this->buyerUser, 'sanctum')
             ->post("/api/transaction/{$transaction->id}/complete", [
@@ -358,7 +363,7 @@ class EscrowPaymentTest extends TestCase
 
         // Directly call the repository's updateStatus with cancelled
         // (This bypasses the FormRequest validation which doesn't allow 'cancelled' via HTTP)
-        $transactionRepository = new \App\Repositories\TransactionRepository;
+        $transactionRepository = new TransactionRepository;
         $transactionRepository->updateStatus($transaction->id, [
             'delivery_status' => 'cancelled',
         ]);

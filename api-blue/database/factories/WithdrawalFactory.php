@@ -7,7 +7,7 @@ use App\Models\Withdrawal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Withdrawal>
+ * @extends Factory<Withdrawal>
  */
 class WithdrawalFactory extends Factory
 {

@@ -7,6 +7,7 @@ use App\Models\Store;
 use App\Models\Transaction;
 use App\Repositories\StoreBalanceRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class MidtransController extends Controller
@@ -98,14 +99,14 @@ class MidtransController extends Controller
             case 'deny':
             case 'expire':
             case 'cancel':
-                \Illuminate\Support\Facades\DB::transaction(function () use ($transaction) {
+                DB::transaction(function () use ($transaction) {
                     $transaction->update(['payment_status' => 'failed']);
                     $this->transactionRepository->restoreStock($transaction);
                 });
                 break;
 
             default:
-                \Illuminate\Support\Facades\DB::transaction(function () use ($transaction) {
+                DB::transaction(function () use ($transaction) {
                     $transaction->update(['payment_status' => 'failed']);
                     $this->transactionRepository->restoreStock($transaction);
                 });

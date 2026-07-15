@@ -6,12 +6,15 @@ use App\Helpers\ResponseHelper;
 use App\Http\Requests\StoreStoreRequest;
 use App\Http\Requests\StoreUpdateRequest;
 use App\Http\Resources\PaginateResource;
+use App\Http\Resources\ProductCategoryResource;
+use App\Http\Resources\ProductReviewResource;
 use App\Http\Resources\StoreResource;
 use App\Interfaces\StoreRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -59,7 +62,7 @@ class StoreController extends Controller implements HasMiddleware
                 $stores = $this->storeRepository->getAll($search, $is_verified, $limit, $random, true, $nearLat, $nearLng);
             } else {
                 $cacheKey = "stores_index_search_{$search}_verified_{$is_verified}_limit_{$limit}";
-                $stores = \Illuminate\Support\Facades\Cache::tags(['stores'])->remember($cacheKey, 600, function () use ($search, $is_verified, $limit, $random) {
+                $stores = Cache::tags(['stores'])->remember($cacheKey, 600, function () use ($search, $is_verified, $limit, $random) {
                     return $this->storeRepository->getAll($search, $is_verified, $limit, $random, true);
                 });
             }
@@ -107,7 +110,7 @@ class StoreController extends Controller implements HasMiddleware
 
         try {
             $store = $this->storeRepository->create($request);
-            \Illuminate\Support\Facades\Cache::tags(['stores'])->flush();
+            Cache::tags(['stores'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Ditambahkan', new StoreResource($store), 201);
         } catch (\Exception $e) {
@@ -174,7 +177,7 @@ class StoreController extends Controller implements HasMiddleware
 
             $categories = $this->storeRepository->getCategories($store->id);
 
-            return ResponseHelper::jsonResponse(true, 'Store Categories Fetched', \App\Http\Resources\ProductCategoryResource::collection($categories), 200);
+            return ResponseHelper::jsonResponse(true, 'Store Categories Fetched', ProductCategoryResource::collection($categories), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
@@ -212,7 +215,7 @@ class StoreController extends Controller implements HasMiddleware
             }
 
             $store = $this->storeRepository->update($id, $request);
-            \Illuminate\Support\Facades\Cache::tags(['stores'])->flush();
+            Cache::tags(['stores'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diupdate', new StoreResource($store), 200);
         } catch (\Exception $e) {
@@ -233,7 +236,7 @@ class StoreController extends Controller implements HasMiddleware
             }
 
             $store = $this->storeRepository->delete($id);
-            \Illuminate\Support\Facades\Cache::tags(['stores'])->flush();
+            Cache::tags(['stores'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Dihapus', new StoreResource($store), 200);
         } catch (\Exception $e) {
@@ -352,7 +355,7 @@ class StoreController extends Controller implements HasMiddleware
 
             $reviews = $this->storeRepository->getReviews($store->id);
 
-            return ResponseHelper::jsonResponse(true, 'Review Toko Berhasil Diambil', \App\Http\Resources\PaginateResource::make($reviews, \App\Http\Resources\ProductReviewResource::class), 200);
+            return ResponseHelper::jsonResponse(true, 'Review Toko Berhasil Diambil', PaginateResource::make($reviews, ProductReviewResource::class), 200);
 
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);

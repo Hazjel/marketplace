@@ -3,6 +3,8 @@
 namespace App\Repositories;
 
 use App\Interfaces\StoreRepositoryInterface;
+use App\Models\ProductCategory;
+use App\Models\ProductReview;
 use App\Models\Store;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -73,7 +75,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getCategories(string $id)
     {
-        return \App\Models\ProductCategory::whereHas('products', function ($query) use ($id) {
+        return ProductCategory::whereHas('products', function ($query) use ($id) {
             $query->where('store_id', $id);
         })->get();
     }
@@ -123,7 +125,7 @@ class StoreRepository implements StoreRepositoryInterface
             DB::commit();
 
             return $store;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
@@ -141,7 +143,7 @@ class StoreRepository implements StoreRepositoryInterface
             DB::commit();
 
             return $store;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
@@ -177,7 +179,7 @@ class StoreRepository implements StoreRepositoryInterface
             DB::commit();
 
             return $store;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }
@@ -193,7 +195,7 @@ class StoreRepository implements StoreRepositoryInterface
             DB::commit();
 
             return $store;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
@@ -236,7 +238,7 @@ class StoreRepository implements StoreRepositoryInterface
 
     public function getReviews(string $storeId, ?int $limit = 10)
     {
-        return \App\Models\ProductReview::whereHas('product', function ($query) use ($storeId) {
+        return ProductReview::whereHas('product', function ($query) use ($storeId) {
             $query->where('store_id', $storeId);
         })
             ->with(['user', 'product', 'attachments'])

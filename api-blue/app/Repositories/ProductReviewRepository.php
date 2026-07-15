@@ -26,7 +26,7 @@ class ProductReviewRepository implements ProductReviewRepositoryInterface
             DB::commit();
 
             return $productReview;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());

@@ -6,10 +6,14 @@ use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\Transaction;
+use Carbon\CarbonPeriod;
 use Exception;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
@@ -112,7 +116,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         // Generate last 7 days period ending today (inclusive)
         $endDate = now('Asia/Jakarta')->endOfDay();
         $startDate = now('Asia/Jakarta')->subDays(6)->startOfDay();
-        $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+        $period = CarbonPeriod::create($startDate, $endDate);
 
         // Fetch data based on date range
         $transactions = Transaction::select(
@@ -259,10 +263,10 @@ class TransactionRepository implements TransactionRepositoryInterface
             $transaction->load('buyer.user');
 
             // Set your Merchant Server Key
-            \Midtrans\Config::$serverKey = config('midtrans.serverKey');
-            \Midtrans\Config::$isProduction = config('midtrans.isProduction');
-            \Midtrans\Config::$isSanitized = config('midtrans.isSanitized');
-            \Midtrans\Config::$is3ds = config('midtrans.is3ds');
+            Config::$serverKey = config('midtrans.serverKey');
+            Config::$isProduction = config('midtrans.isProduction');
+            Config::$isSanitized = config('midtrans.isSanitized');
+            Config::$is3ds = config('midtrans.is3ds');
 
             $params = [
                 'transaction_details' => [
@@ -285,7 +289,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             Log::info('Midtrans params:', ['params' => $params]);
 
-            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            $snapToken = Snap::getSnapToken($params);
 
             Log::info('Snap token generated:', ['token' => $snapToken]);
 
@@ -322,7 +326,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             DB::commit();
 
             return $transaction;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
@@ -360,7 +364,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 $transaction->tracking_number = $data['tracking_number'];
             }
 
-            if (isset($data['delivery_proof']) && $data['delivery_proof'] instanceof \Illuminate\Http\UploadedFile) {
+            if (isset($data['delivery_proof']) && $data['delivery_proof'] instanceof UploadedFile) {
                 $transaction->delivery_proof = $data['delivery_proof']->store('assets/transaction', 'public');
             }
 
@@ -395,7 +399,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'store.user',
                 'transactionDetails.product',
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
@@ -424,7 +428,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             return $totalWeight;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error calculating weight:', ['error' => $e->getMessage()]);
             throw $e;
         }
@@ -440,23 +444,23 @@ class TransactionRepository implements TransactionRepositoryInterface
             ]);
 
             if (! isset($data['store_id'])) {
-                throw new \Exception('store_id is missing from data');
+                throw new Exception('store_id is missing from data');
             }
 
             $store = Store::find($data['store_id']);
 
             if (! $store) {
-                throw new \Exception('Store not found with id: '.$data['store_id']);
+                throw new Exception('Store not found with id: '.$data['store_id']);
             }
 
             if (! $store->address_id) {
-                throw new \Exception('Store address_id is null for store: '.$store->id);
+                throw new Exception('Store address_id is null for store: '.$store->id);
             }
 
             $origin = $store->address_id;
 
             if (! isset($data['address_id'])) {
-                throw new \Exception('address_id is missing from data');
+                throw new Exception('address_id is missing from data');
             }
 
             $destination = $data['address_id'];
@@ -488,21 +492,21 @@ class TransactionRepository implements TransactionRepositoryInterface
             // Validasi response structure
             if (! isset($result['data']) || $result['data'] === null) {
                 Log::error('API returned error:', ['response' => $result]);
-                throw new \Exception('RajaOngkir API error: '.($result['meta']['message'] ?? 'Unknown error'));
+                throw new Exception('RajaOngkir API error: '.($result['meta']['message'] ?? 'Unknown error'));
             }
 
             if (! isset($result['data']['calculate_reguler'])) {
-                throw new \Exception('Invalid API response - missing calculate_reguler key');
+                throw new Exception('Invalid API response - missing calculate_reguler key');
             }
 
             $shippingCost = 0;
 
             if (! isset($data['shipping'])) {
-                throw new \Exception('shipping is missing from data');
+                throw new Exception('shipping is missing from data');
             }
 
             if (! isset($data['shipping_type'])) {
-                throw new \Exception('shipping_type is missing from data');
+                throw new Exception('shipping_type is missing from data');
             }
 
             // Find matching courier and service
@@ -539,7 +543,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'grand_total' => $grandTotal,
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Shipping calculation error:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),

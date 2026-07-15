@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Interfaces\ProductImageRepositoryInterface;
+use App\Jobs\ProcessProductImageJob;
 use App\Models\ProductImage;
 use exception;
 use Illuminate\Support\Facades\DB;
@@ -26,13 +27,13 @@ class ProductImageRepository implements ProductImageRepositoryInterface
             DB::commit();
 
             // Dispatch async job for resize + WebP conversion
-            \App\Jobs\ProcessProductImageJob::dispatch(
+            ProcessProductImageJob::dispatch(
                 $productImage->id,
                 $rawPath
             );
 
             return $productImage;
-        } catch (Exception $e) {
+        } catch (exception $e) {
             DB::rollBack();
             throw new exception($e->getMessage());
         }
@@ -52,7 +53,7 @@ class ProductImageRepository implements ProductImageRepositoryInterface
             DB::commit();
 
             return $productImage;
-        } catch (Exception $e) {
+        } catch (exception $e) {
             DB::rollBack();
             throw new exception($e->getMessage());
         }

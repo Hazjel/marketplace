@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\ProductCategory;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,8 +15,8 @@ class ProductCategoryTest extends TestCase
 
     public function test_admin_can_create_product_category()
     {
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $admin = User::factory()->create();
         $admin->assignRole('admin');
@@ -34,8 +36,8 @@ class ProductCategoryTest extends TestCase
 
     public function test_can_create_child_category_relationship()
     {
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $admin = User::factory()->create();
         $admin->assignRole('admin');
