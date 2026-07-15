@@ -289,12 +289,21 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             Log::info('Midtrans params:', ['params' => $params]);
 
-            $snapToken = Snap::getSnapToken($params);
+            // Transaksi sudah ter-commit; kegagalan Midtrans tidak boleh
+            // membuat request 500 padahal order & stok sudah tercatat.
+            // FE sudah menangani snap_token null dengan pesan yang jelas.
+            try {
+                $snapToken = Snap::getSnapToken($params);
 
-            Log::info('Snap token generated:', ['token' => $snapToken]);
+                Log::info('Snap token generated:', ['token' => $snapToken]);
 
-            $transaction->snap_token = $snapToken;
-            $transaction->save();
+                $transaction->snap_token = $snapToken;
+                $transaction->save();
+            } catch (\Throwable $e) {
+                Log::error('Midtrans snap token failed: '.$e->getMessage(), [
+                    'transaction' => $transaction->code,
+                ]);
+            }
 
             Log::info('=== TRANSACTION COMPLETED SUCCESSFULLY ===');
 
