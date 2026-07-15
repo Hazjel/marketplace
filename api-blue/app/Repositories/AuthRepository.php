@@ -65,7 +65,13 @@ class AuthRepository implements AuthRepositoryInterface
         $lockKey = 'login_locked_'.md5(strtolower($data['email'] ?? ''));
         $attemptsKey = 'login_attempts_'.md5(strtolower($data['email'] ?? ''));
 
-        if (Cache::get($lockKey)) {
+        // Lockout per-IP: ambang lebih longgar (20x) supaya NAT bersama tidak
+        // gampang kena, tapi brute force lintas-akun dari satu IP tetap tertahan.
+        $ip = request()->ip() ?? 'unknown';
+        $ipLockKey = 'login_ip_locked_'.md5($ip);
+        $ipAttemptsKey = 'login_ip_attempts_'.md5($ip);
+
+        if (Cache::get($lockKey) || Cache::get($ipLockKey)) {
             throw new Exception('Akun dikunci sementara karena terlalu banyak percobaan login gagal.', 429);
         }
 
@@ -78,6 +84,13 @@ class AuthRepository implements AuthRepositoryInterface
                 if ($attempts >= 5) {
                     Cache::put($lockKey, true, now()->addMinutes(15));
                 }
+
+                $ipAttempts = (int) Cache::get($ipAttemptsKey, 0) + 1;
+                Cache::put($ipAttemptsKey, $ipAttempts, now()->addMinutes(15));
+                if ($ipAttempts >= 20) {
+                    Cache::put($ipLockKey, true, now()->addMinutes(15));
+                }
+
                 throw new Exception('Email atau password salah.', 401);
             }
 
