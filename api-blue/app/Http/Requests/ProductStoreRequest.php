@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Models\ProductCategory;
+use Illuminate\Foundation\Http\FormRequest;
+
 class ProductStoreRequest extends FormRequest
 {
-    
     /**
      * Get the validation rules that apply to the request.
      *
@@ -21,11 +21,10 @@ class ProductStoreRequest extends FormRequest
                 'exists:product_categories,id',
                 function ($attribute, $value, $fail) {
                     $category = ProductCategory::find($value);
-                    if ($category && $category->parent_id === null)
-                    {
+                    if ($category && $category->parent_id === null) {
                         $fail('Kategori produk harus memiliki kategori induk.');
                     }
-                }
+                },
             ],
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -34,7 +33,7 @@ class ProductStoreRequest extends FormRequest
             'weight' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'product_images' => 'required|array',
-            'product_images.*.image' => 'required|image|mimes:jpg,+jpeg,png|max:2048',
+            'product_images.*.image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'product_images.*.is_thumbnail' => 'required|boolean',
             'variants' => 'nullable|array',
             'variants.*.name' => 'required_with:variants|string',
@@ -48,9 +47,9 @@ class ProductStoreRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'store_id' => 'Toko', 
+            'store_id' => 'Toko',
             'product_category_id' => 'Kategori Produk',
-            'name' => 'Nama', 
+            'name' => 'Nama',
             'description' => 'Deskripsi',
             'condition' => 'Kondisi',
             'price' => 'Harga',
