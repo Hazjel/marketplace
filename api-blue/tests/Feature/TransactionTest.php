@@ -6,7 +6,11 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class TransactionTest extends TestCase
@@ -17,10 +21,10 @@ class TransactionTest extends TestCase
     {
         parent::setUp();
         // Reset cache permission
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->seed(\Database\Seeders\PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
     }
 
     /**
@@ -33,7 +37,7 @@ class TransactionTest extends TestCase
         $admin->assignRole('admin');
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->withHeaders(['X-Idempotency-Key' => (string) \Illuminate\Support\Str::uuid()])
+            ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
             ->postJson('/api/transaction', []);
 
         // Node 4: Return 403 Forbidden
@@ -51,7 +55,7 @@ class TransactionTest extends TestCase
 
         // Payload kosong
         $response = $this->actingAs($user, 'sanctum')
-            ->withHeaders(['X-Idempotency-Key' => (string) \Illuminate\Support\Str::uuid()])
+            ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
             ->postJson('/api/transaction', []);
 
         // Node 7: Return 422 Unprocessable Entity
@@ -135,7 +139,7 @@ class TransactionTest extends TestCase
 
         // 5. Execute API
         $response = $this->actingAs($buyerUser, 'sanctum')
-            ->withHeaders(['X-Idempotency-Key' => (string) \Illuminate\Support\Str::uuid()])
+            ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
             ->postJson('/api/transaction', $payload);
 
         // Node 10: Return 201 Created

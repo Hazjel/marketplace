@@ -7,7 +7,9 @@ use App\Http\Requests\LoginStoreRequest;
 use App\Http\Requests\RegisterStoreRequest;
 use App\Http\Resources\UserResource;
 use App\Interfaces\AuthRepositoryInterface;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -25,7 +27,7 @@ class AuthController extends Controller
         try {
             $user = $this->authRepository->register($request);
 
-            event(new \Illuminate\Auth\Events\Registered($user));
+            event(new Registered($user));
 
             if (app()->isLocal()) {
                 // Auto-verify email on local environment only
@@ -37,7 +39,7 @@ class AuthController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Registrasi Berhasil', new UserResource($user), 200);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Register failed', ['error' => $e->getMessage()]);
+            Log::error('Register failed', ['error' => $e->getMessage()]);
 
             return ResponseHelper::jsonResponse(false, 'Registrasi gagal. Silakan coba lagi.', null, 500);
         }
@@ -56,7 +58,7 @@ class AuthController extends Controller
 
             // Hanya teruskan status HTTP yang valid; selain itu 500 generik
             if (! is_int($code) || $code < 400 || $code > 499) {
-                \Illuminate\Support\Facades\Log::error('Login failed', ['error' => $e->getMessage()]);
+                Log::error('Login failed', ['error' => $e->getMessage()]);
 
                 return ResponseHelper::jsonResponse(false, 'Login gagal. Silakan coba lagi.', null, 500);
             }

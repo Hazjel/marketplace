@@ -2,6 +2,7 @@
 
 namespace App\Helpers\ImageHelper;
 
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use LogicException;
@@ -122,7 +123,7 @@ class ImageHelper
     {
         $path = $image->store($path, 'public');
 
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('public');
         $storagePath = $disk->path($path);
 
@@ -171,7 +172,7 @@ class ImageHelper
 
     public static function getPath(?string $path): ?string
     {
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('public');
 
         if ($path && $disk->exists($path)) {
@@ -183,7 +184,7 @@ class ImageHelper
 
     public static function getUrl(?string $path): ?string
     {
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('public');
 
         if ($path && $disk->exists($path)) {
@@ -195,7 +196,7 @@ class ImageHelper
 
     public static function getBinary(?string $path): ?string
     {
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('public');
 
         if ($path && $disk->exists($path)) {

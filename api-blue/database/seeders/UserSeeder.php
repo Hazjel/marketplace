@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Store;
+use App\Models\StoreBalance;
 use App\Models\User;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Seeder;
@@ -43,14 +45,14 @@ class UserSeeder extends Seeder
         ]);
         $seller->assignRole('store');
 
-        $store = \App\Models\Store::factory()->create([
+        $store = Store::factory()->create([
             'user_id' => $seller->id,
             'name' => 'Seller Official Store',
             'username' => 'seller-official',
         ]);
 
         // Create Wallet for Seller
-        \App\Models\StoreBalance::create(['store_id' => $store->id, 'balance' => 0]);
+        StoreBalance::create(['store_id' => $store->id, 'balance' => 0]);
 
         // Random Users
         UserFactory::new()->count(15)->create();

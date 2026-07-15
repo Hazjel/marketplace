@@ -60,7 +60,7 @@ class StoreBalanceHistoryRepository implements StoreBalanceHistoryRepositoryInte
             DB::commit();
 
             return $storeBalanceHistory;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
@@ -84,7 +84,7 @@ class StoreBalanceHistoryRepository implements StoreBalanceHistoryRepositoryInte
             DB::commit();
 
             return $storeBalanceHistory;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());

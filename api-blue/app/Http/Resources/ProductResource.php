@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProductResource extends JsonResource
@@ -50,7 +51,7 @@ class ProductResource extends JsonResource
      * Varian tersimpan di MongoDB. Hanya query kalau produk memang punya
      * varian, dan jangan sampai kegagalan Mongo mematikan serialisasi produk.
      */
-    private function getVariantsSafely(): array|\Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    private function getVariantsSafely(): array|AnonymousResourceCollection
     {
         if (! $this->has_variants) {
             return [];

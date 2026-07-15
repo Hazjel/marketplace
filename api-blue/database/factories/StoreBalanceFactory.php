@@ -7,7 +7,7 @@ use App\Models\StoreBalance;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\StoreBalance>
+ * @extends Factory<StoreBalance>
  */
 class StoreBalanceFactory extends Factory
 {

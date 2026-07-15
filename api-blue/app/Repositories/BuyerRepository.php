@@ -56,7 +56,7 @@ class BuyerRepository implements BuyerRepositoryInterface
             DB::commit();
 
             return $buyer;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
@@ -75,7 +75,7 @@ class BuyerRepository implements BuyerRepositoryInterface
             DB::commit();
 
             return $buyer;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
@@ -93,7 +93,7 @@ class BuyerRepository implements BuyerRepositoryInterface
             DB::commit();
 
             return $buyer;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());

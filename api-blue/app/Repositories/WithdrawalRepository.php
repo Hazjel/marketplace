@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Interfaces\WithdrawalRepositoryInterface;
+use App\Models\StoreBalance;
 use App\Models\Withdrawal;
 use Exception;
 use Illuminate\Http\UploadedFile;
@@ -59,7 +60,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
 
         try {
             // Validasi: hanya bisa tarik dari saldo tersedia (balance), bukan pending_balance
-            $storeBalance = \App\Models\StoreBalance::where('id', $data['store_balance_id'])->lockForUpdate()->first();
+            $storeBalance = StoreBalance::where('id', $data['store_balance_id'])->lockForUpdate()->first();
 
             if (! $storeBalance) {
                 throw new Exception('Store Balance tidak ditemukan');
@@ -101,7 +102,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             DB::commit();
 
             return $withdrawal;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
@@ -129,7 +130,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             DB::commit();
 
             return $withdrawal;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw new Exception($e->getMessage());
         }

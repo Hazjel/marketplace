@@ -62,7 +62,7 @@ class UserRepository implements UserRepositoryInterface
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
@@ -87,7 +87,7 @@ class UserRepository implements UserRepositoryInterface
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
@@ -105,7 +105,7 @@ class UserRepository implements UserRepositoryInterface
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             throw new Exception($e->getMessage());
