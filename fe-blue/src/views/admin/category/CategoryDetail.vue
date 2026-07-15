@@ -137,7 +137,7 @@ watch(error, (value) => {
 
         <!-- Subcategory List -->
         <div id="List-Subcategory" class="flex flex-col gap-3 px-6">
-          <template v-for="childrens in productCategory?.childrens">
+          <template v-for="childrens in productCategory?.childrens" :key="childrens.id">
             <div class="flex items-center gap-4 rounded-xl bg-gray-50 dark:bg-white/5 p-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors duration-200">
               <div class="flex size-14 shrink-0 rounded-xl bg-white dark:bg-surface-card items-center justify-center p-2.5 border border-gray-100 dark:border-white/10">
                 <img :src="childrens.image ?? PlaceHolder" class="size-full object-contain" alt="icon" />

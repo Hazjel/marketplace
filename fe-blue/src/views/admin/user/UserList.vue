@@ -112,7 +112,7 @@ watch(
         </div>
         <p class="font-semibold text-gray-500 dark:text-gray-400">Belum ada data pengguna</p>
       </div>
-      <Pagination v-if="users?.length > 0" :meta="meta" :server-options="serverOptions" />
+      <Pagination v-if="users?.length > 0" :meta="meta" v-model:server-options="serverOptions" />
     </section>
   </div>
 </template>

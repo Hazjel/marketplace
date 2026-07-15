@@ -255,7 +255,7 @@ watch(error, (value) => {
         </button>
       </div>
 
-      <Pagination :meta="meta" :server-options="serverOptions" />
+      <Pagination :meta="meta" v-model:server-options="serverOptions" />
     </div>
 
     <!-- Empty State -->

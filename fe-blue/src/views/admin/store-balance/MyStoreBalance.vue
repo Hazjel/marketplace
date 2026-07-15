@@ -294,7 +294,7 @@ onMounted(fetchStoreBalance)
             </div>
           </div>
         </div>
-        <Pagination :meta="meta" :server-options="serverOptions" />
+        <Pagination :meta="meta" v-model:server-options="serverOptions" />
       </section>
 
       <!-- Empty State -->
