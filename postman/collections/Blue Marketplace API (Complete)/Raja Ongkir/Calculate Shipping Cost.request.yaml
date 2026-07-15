@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{base_url}}/shipment/calculate?shipper_destination_id=4816&receiver_destination_id=4870&item_value=100000&weight=0.5"
+method: GET
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+description: >-
+  Hitung ongkir (RajaOngkir-Komerce v2, kurir jne/sicepat/jnt/anteraja/pos/tiki).
+  weight dalam kg. Response berbentuk data.calculate_reguler terurut termurah.
+order: 1002

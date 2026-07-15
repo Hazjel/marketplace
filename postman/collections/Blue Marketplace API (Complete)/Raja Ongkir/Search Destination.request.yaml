@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{base_url}}/shipment/destination?keyword=bandung"
+method: GET
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+description: >-
+  Cari kecamatan/kota (min 2 huruf). Keyword pendek diekspansi ke beberapa
+  kota (prefix match) supaya hasil tetap banyak; makin panjang makin spesifik.
+order: 1001
