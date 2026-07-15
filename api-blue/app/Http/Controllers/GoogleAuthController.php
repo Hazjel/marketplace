@@ -22,7 +22,14 @@ class GoogleAuthController extends Controller
         Log::info('GoogleAuth: Using redirect URL', ['redirect' => $redirectUrl]);
 
         try {
-            $provider = Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->with(['prompt' => 'select_account']);
+            // Teruskan platform lewat OAuth state supaya callback (stateless,
+            // tanpa session) tahu harus redirect ke deep link mobile atau web
+            $params = ['prompt' => 'select_account'];
+            if (request('platform')) {
+                $params['state'] = http_build_query(['platform' => request('platform')]);
+            }
+
+            $provider = Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->with($params);
             $response = $provider->redirect();
             Log::info('GoogleAuth: Generated URL', ['url' => $response->getTargetUrl()]);
 
@@ -65,9 +72,9 @@ class GoogleAuthController extends Controller
                 // Assign default role 'buyer'
                 $user->assignRole('buyer');
 
-                // Create default buyer profile (empty phone number for now)
+                // Create default buyer profile (nomor HP diisi belakangan)
                 $user->buyer()->create([
-                    'phone_number' => '', // Handle missing phone logic later
+                    'phone_number' => null,
                 ]);
             }
 

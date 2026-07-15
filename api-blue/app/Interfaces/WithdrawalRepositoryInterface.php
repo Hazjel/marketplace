@@ -15,4 +15,6 @@ interface WithdrawalRepositoryInterface
     public function create(array $data);
 
     public function approve(string $id, UploadedFile $proof);
+
+    public function reject(string $id, ?string $reason = null);
 }

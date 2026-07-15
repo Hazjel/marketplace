@@ -24,7 +24,21 @@ const triggerFileInput = () => {
 
 const withdrawalStore = useWithdrawalStore()
 const { loading } = storeToRefs(withdrawalStore)
-const { fetchWithdrawalById, approveWithdrawal } = withdrawalStore
+const { fetchWithdrawalById, approveWithdrawal, rejectWithdrawal } = withdrawalStore
+
+const rejectReason = ref('')
+const showRejectForm = ref(false)
+
+const handleRejectWithdrawal = async () => {
+  try {
+    await rejectWithdrawal(withdrawal.value.id, rejectReason.value || null)
+    toast.success('Penarikan ditolak — dana dikembalikan ke saldo toko')
+    showRejectForm.value = false
+    fetchData()
+  } catch {
+    toast.error('Gagal menolak penarikan')
+  }
+}
 
 const fetchData = async () => {
   const response = await fetchWithdrawalById(route.params.id)
@@ -96,6 +110,19 @@ onMounted(fetchData)
       <div>
         <p class="font-semibold text-green-700 dark:text-green-400">Status: Selesai</p>
         <p class="text-sm text-green-600/80 dark:text-green-400/70">Penarikan telah diproses dan diselesaikan</p>
+      </div>
+    </div>
+    <div
+      v-if="withdrawal?.status === 'rejected'"
+      class="flex items-center gap-3 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-500/20 p-4">
+      <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </div>
+      <div>
+        <p class="font-semibold text-red-700 dark:text-red-400">Status: Ditolak</p>
+        <p class="text-sm text-red-600/80 dark:text-red-400/70">Penarikan ditolak — dana telah dikembalikan ke saldo toko</p>
       </div>
     </div>
 
@@ -200,6 +227,38 @@ onMounted(fetchData)
             </svg>
             <span class="font-semibold text-sm text-white">Proses Penarikan</span>
           </button>
+
+          <!-- Reject -->
+          <div class="flex flex-col gap-3 pt-2 border-t border-gray-100 dark:border-white/10">
+            <button
+              v-if="!showRejectForm"
+              type="button"
+              class="h-11 w-full rounded-xl flex items-center justify-center gap-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-semibold text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              @click="showRejectForm = true">
+              Tolak Penarikan
+            </button>
+            <template v-else>
+              <textarea
+                v-model="rejectReason"
+                rows="2"
+                placeholder="Alasan penolakan (opsional) — mis. nomor rekening tidak valid"
+                class="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-3 text-sm dark:text-white outline-none focus:border-red-400"></textarea>
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  class="h-11 flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors"
+                  @click="handleRejectWithdrawal">
+                  Konfirmasi Tolak — Dana Kembali ke Toko
+                </button>
+                <button
+                  type="button"
+                  class="h-11 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold dark:text-white"
+                  @click="showRejectForm = false">
+                  Batal
+                </button>
+              </div>
+            </template>
+          </div>
         </form>
 
         <!-- Proof Display (approved) -->

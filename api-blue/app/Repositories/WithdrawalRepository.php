@@ -135,4 +135,45 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             throw new Exception($e->getMessage());
         }
     }
+
+    public function reject(string $id, ?string $reason = null)
+    {
+        DB::beginTransaction();
+
+        try {
+            $withdrawal = Withdrawal::lockForUpdate()->find($id);
+
+            if (! $withdrawal) {
+                throw new Exception('Withdrawal not found');
+            }
+
+            if ($withdrawal->status !== 'pending') {
+                throw new Exception('Hanya penarikan berstatus pending yang bisa ditolak.');
+            }
+
+            $withdrawal->status = 'rejected';
+            $withdrawal->save();
+
+            // Saldo didebit saat request dibuat — kembalikan ke saldo tersedia
+            $storeBalanceRepository = new StoreBalanceRepository;
+            $storeBalanceRepository->credit($withdrawal->store_balance_id, $withdrawal->amount);
+
+            $storeBalanceHistoryRepository = new StoreBalanceHistoryRepository;
+            $storeBalanceHistoryRepository->create([
+                'store_balance_id' => $withdrawal->store_balance_id,
+                'type' => 'withdrawal_rejected',
+                'reference_id' => $withdrawal->id,
+                'reference_type' => Withdrawal::class,
+                'amount' => $withdrawal->amount,
+                'remarks' => 'Penarikan ditolak'.($reason ? ": {$reason}" : '').' — dana dikembalikan ke saldo.',
+            ]);
+
+            DB::commit();
+
+            return $withdrawal;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage());
+        }
+    }
 }
