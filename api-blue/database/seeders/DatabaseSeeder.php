@@ -22,7 +22,9 @@ class DatabaseSeeder extends Seeder
             BuyerSeeder::class,
             ProductCategorySeeder::class,
             ProductSeeder::class,
-            TransactionSeeder::class,
+            // TransactionSeeder disabled sementara — TransactionDetailFactory bikin
+            // Product::factory() baru pakai nama Latin generic, ngerusak katalog demo
+            // TransactionSeeder::class,
         ]);
     }
 }
