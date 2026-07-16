@@ -1,5 +1,6 @@
 <script setup>
 import { ref, reactive, nextTick } from 'vue'
+import { MessageCircle } from 'lucide-vue-next'
 
 const AI_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8001'
 
@@ -174,7 +175,7 @@ const sendFeedback = async (msg, rating) => {
 </script>
 
 <template>
-  <div class="fixed z-[9999] bottom-4 right-4 w-auto flex flex-col items-end gap-3 font-sans">
+  <div class="fixed z-[9999] bottom-6 right-24 w-auto flex flex-col items-end gap-3 font-sans">
 
     <!-- ── Chat Window ─────────────────────────────────────────────── -->
     <transition
@@ -365,7 +366,7 @@ const sendFeedback = async (msg, rating) => {
         class="w-14 h-14 bg-custom-blue rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform duration-300 text-white text-2xl absolute bottom-0 right-0"
         @click="toggleChat"
       >
-        <span>💬</span>
+        <MessageCircle :size="26" :stroke-width="2.25" />
       </button>
     </transition>
   </div>
