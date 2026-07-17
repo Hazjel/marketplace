@@ -1,0 +1,11 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: blukios-email
+    receivers:
+      - uid: blukios-email-receiver
+        type: email
+        settings:
+          addresses: blukios.marketplace@gmail.com
+          singleEmail: true

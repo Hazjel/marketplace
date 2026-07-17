@@ -1,0 +1,79 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: ai-service-alerts
+    folder: AI Service
+    interval: 1m
+    rules:
+      - uid: alert-error-rate-high
+        title: "AI Service: Error rate tinggi (>10%)"
+        condition: C
+        for: 5m
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              expr: "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100 or vector(0)"
+              refId: A
+          - refId: C
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              expression: A
+              conditions:
+                - evaluator: { type: gt, params: [10] }
+        annotations:
+          summary: "Error rate 5xx AI service di atas 10% selama 5 menit — cek log blue-ai."
+        labels:
+          severity: critical
+
+      - uid: alert-latency-high
+        title: "AI Service: Latency p95 tinggi (>30s)"
+        condition: C
+        for: 5m
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              expr: "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{endpoint=~\"/predict.*\"}[5m])))"
+              refId: A
+          - refId: C
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              expression: A
+              conditions:
+                - evaluator: { type: gt, params: [30] }
+        annotations:
+          summary: "Latency p95 endpoint /predict di atas 30 detik — kemungkinan Ollama overload atau OOM."
+        labels:
+          severity: warning
+
+      - uid: alert-rag-index-empty
+        title: "AI Service: RAG index kosong"
+        condition: C
+        for: 10m
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              expr: "rag_products_indexed"
+              refId: A
+          - refId: C
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              expression: A
+              conditions:
+                - evaluator: { type: lt, params: [1] }
+        annotations:
+          summary: "RAG index 0 produk selama 10 menit — chatbot tidak bisa jawab pertanyaan produk. Cek koneksi ke Laravel API."
+        labels:
+          severity: warning
