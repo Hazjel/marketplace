@@ -1,3 +1,5 @@
+import uuid
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -11,6 +13,19 @@ class ChatRequest(BaseModel):
         if not v.strip():
             raise ValueError("message cannot be blank")
         return v.strip()
+
+    @field_validator("session_id")
+    @classmethod
+    def session_id_must_be_uuid(cls, v: str | None) -> str | None:
+        # session_id dipakai sebagai key Redis — batasi ke format UUID agar
+        # client tidak bisa menebak/memilih key sesi milik orang lain
+        if v is None:
+            return v
+        try:
+            uuid.UUID(v)
+        except ValueError:
+            return None
+        return v
 
 
 class ChatResponse(BaseModel):
