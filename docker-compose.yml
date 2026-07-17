@@ -348,6 +348,25 @@ services:
     depends_on:
       - ai-service
 
+  # ─────────────────────────────────────────
+  # CD — Jenkins (opsional, profile "cd")
+  # ─────────────────────────────────────────
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: blue-jenkins
+    profiles: ["cd"]
+    restart: unless-stopped
+    user: root  # perlu akses /var/run/docker.sock milik root di host
+    ports:
+      - "8082:8080"   # web UI — beda dari phpmyadmin (8080)
+      - "50000:50000" # agent port (tidak dipakai untuk built-in node, aman dibiarkan)
+    environment:
+      JAVA_OPTS: "-Xmx512m"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker:ro
+
 volumes:
   mysql_data:
   mongo_data:
@@ -355,6 +374,7 @@ volumes:
   grafana:
   prometheus_data:   # Prometheus histori metrics
   chroma_data:       # ChromaDB RAG vector index
+  jenkins_home:      # Jenkins config, job history, plugin
   chroma_cache:      # ONNX model all-MiniLM-L6-v2 cache (79MB)
   api_vendor:
   fe_node_modules:
