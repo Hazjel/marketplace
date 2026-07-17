@@ -362,15 +362,23 @@ services:
       - "50000:50000" # agent port (tidak dipakai untuk built-in node, aman dibiarkan)
     environment:
       JAVA_OPTS: "-Xmx512m"
+      # dipakai Jenkinsfile buat cd — HARUS sama persis dgn source volume di bawah,
+      # soalnya docker compose yg dijalankan di dalam container ini ngomong ke docker
+      # daemon HOST (lewat docker.sock), bukan daemon di dalam container. Kalau target
+      # mount beda dari path host asli (misal /host-project), relative path (./docker/nginx/...)
+      # di-resolve jadi absolute path yg cuma valid di namespace container Jenkins, lalu
+      # dikirim ke daemon host yang gak punya path itu -> "bind source path does not exist"
+      HOST_PROJECT_DIR: ${PWD}
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker:ro
       - /usr/libexec/docker/cli-plugins/docker-compose:/usr/libexec/docker/cli-plugins/docker-compose:ro
-      # mount direktori project host — deploy stage cd ke sini biar docker compose
-      # jalan di project dir yang sama dgn stack yg udah running (nama container gak konflik),
-      # dan .env/.env host ikut kebaca (tidak ada di checkout workspace Jenkins sendiri)
-      - ${PWD}:/host-project
+      # mount direktori project host PERSIS di path yang sama (bukan /host-project) —
+      # biar relative path di docker-compose.yml (./docker/nginx/default.conf dkk) di-resolve
+      # jadi absolute path yang juga valid di docker daemon host. Efek sampingnya: nama folder
+      # otomatis "marketplace" jadi -p marketplace di Jenkinsfile tetap dipertahankan untuk jaga-jaga.
+      - ${PWD}:${PWD}
 
 volumes:
   mysql_data:
