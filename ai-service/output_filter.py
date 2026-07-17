@@ -21,7 +21,8 @@ _CODE_RE = re.compile("|".join(_CODE_PATTERNS), re.IGNORECASE | re.MULTILINE)
 
 REFUSAL_MESSAGE = (
     "Maaf, Ri cuma bisa bantu soal belanja di Blukios ya~ "
-    "Ada produk yang lagi kamu cari? 😊"
+    "Ada produk yang lagi kamu cari? Kalau butuh bantuan lebih detail, "
+    "kamu juga bisa chat langsung ke toko lewat halaman produknya 😊"
 )
 
 
