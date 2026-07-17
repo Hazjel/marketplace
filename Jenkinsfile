@@ -69,7 +69,9 @@ pipeline {
         stage('Deploy') {
             agent any
             when {
-                branch 'main'
+                // job Pipeline biasa (bukan Multibranch) tidak set env.BRANCH_NAME,
+                // jadi cek GIT_BRANCH dari step checkout sebagai gantinya
+                expression { env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main' }
             }
             steps {
                 sh 'docker compose up -d --build api queue nginx frontend ai-service'
