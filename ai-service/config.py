@@ -48,7 +48,9 @@ RAG_REFRESH_HOURS        = int(os.getenv("RAG_REFRESH_HOURS", "2"))
 # REDIS KEY PREFIXES & CACHE
 # ---------------------------------------------------------------------------
 MAX_HISTORY_MESSAGES  = 10    # sliding window — 10 messages = 5 turn
+SUMMARY_TRIGGER_TURNS = 8     # ringkas begitu history tembus batas ini (sebelum trim)
 LLM_CACHE_TTL_SECONDS = 300   # cache response LLM 5 menit
 SESSION_KEY   = "chat:session:"
+SUMMARY_KEY   = "chat:summary:"
 LLM_CACHE_KEY = "chat:llmcache:"
 FEEDBACK_KEY  = "chat:feedback:"

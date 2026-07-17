@@ -42,6 +42,32 @@ SYSTEM_PROMPT = (
 # ---------------------------------------------------------------------------
 # Non-Streaming Chat
 # ---------------------------------------------------------------------------
+SUMMARY_PROMPT = (
+    "Ringkas percakapan berikut jadi maksimal 2 kalimat singkat bahasa Indonesia, "
+    "fokus ke preferensi/kebutuhan user (produk yang dicari, budget, dll). "
+    "Jangan pakai markdown, jangan sertakan basa-basi."
+)
+
+
+async def summarize_history(messages: list[dict], existing_summary: str | None = None) -> str | None:
+    """Ringkas potongan history yang akan dibuang jadi satu-dua kalimat singkat."""
+    transcript = "\n".join(f"{m['role']}: {m['content']}" for m in messages)
+    prefix = f"Ringkasan sebelumnya: {existing_summary}\n\n" if existing_summary else ""
+    prompt = f"{prefix}Percakapan baru:\n{transcript}"
+
+    try:
+        return await ollama_chat(
+            [
+                {"role": "system", "content": SUMMARY_PROMPT},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.3,
+        )
+    except Exception as e:
+        print(f"[Ollama] Summary error: {e}")
+        return existing_summary  # gagal ringkas baru — pertahankan yang lama daripada hilang
+
+
 async def ollama_chat(messages: list[dict], temperature: float | None = None) -> str:
     payload: dict[str, Any] = {
         "model":    OLLAMA_MODEL,
