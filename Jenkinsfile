@@ -79,6 +79,7 @@ pipeline {
                 // dengan stack yang udah running (nama container gak bentrok) dan .env
                 // host (gitignored, gak ada di checkout Jenkins) ikut kepakai
                 sh '''
+                    git config --global --add safe.directory /host-project
                     cd /host-project
                     git fetch origin main
                     git checkout main
