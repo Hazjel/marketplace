@@ -74,7 +74,17 @@ pipeline {
                 expression { env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main' }
             }
             steps {
-                sh 'docker compose up -d --build api queue nginx frontend ai-service'
+                // jalan dari /host-project (bind mount direktori host), BUKAN workspace
+                // checkout Jenkins sendiri — biar docker compose kenali project yang sama
+                // dengan stack yang udah running (nama container gak bentrok) dan .env
+                // host (gitignored, gak ada di checkout Jenkins) ikut kepakai
+                sh '''
+                    cd /host-project
+                    git fetch origin main
+                    git checkout main
+                    git reset --hard origin/main
+                    docker compose up -d --build api queue nginx frontend ai-service
+                '''
             }
         }
     }
