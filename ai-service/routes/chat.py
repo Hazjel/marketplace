@@ -9,6 +9,7 @@ from context import prepare_context
 from models import ChatRequest, ChatResponse
 from nlp import make_cache_key
 from ollama import ollama_chat, ollama_stream
+from output_filter import sanitize_reply
 from redis_helper import append_session_history, get_llm_cache, set_llm_cache
 
 from _limiter import limiter
@@ -36,7 +37,7 @@ async def predict_response(request: Request, body: ChatRequest) -> ChatResponse:
             print(f"[Cache] HIT session={session_id}")
             reply_text = cached_reply
         else:
-            reply_text = await ollama_chat(messages, temperature=0.7)
+            reply_text = sanitize_reply(await ollama_chat(messages, temperature=0.7))
             await set_llm_cache(cache_key, reply_text)
 
         await append_session_history(session_id, body.message, reply_text)
@@ -87,40 +88,45 @@ async def predict_stream(request: Request, body: ChatRequest) -> StreamingRespon
                 yield f"data: {json.dumps({'token': '', 'done': True, 'session_id': session_id, 'products': clean})}\n\n"
                 return
 
-            # Cache miss — stream dari Ollama
+            # Cache miss — buffer penuh dulu dari Ollama (bukan stream token
+            # langsung) supaya output_filter bisa cek pola kode sebelum
+            # dikirim ke user — lapis kedua di luar SYSTEM_PROMPT
             async for token, done in ollama_stream(messages, temperature=0.7):
                 if token:
                     full_reply_parts.append(token)
-
                 if done:
-                    clean = [
-                        {
-                            "id":        p.get("id", ""),
-                            "slug":      p.get("slug", ""),
-                            "name":      p.get("name", ""),
-                            "price":     p.get("price", 0),
-                            "thumbnail": p.get("thumbnail", ""),
-                            "store":     p.get("store", ""),
-                            "category":  p.get("category", ""),
-                            "condition": p.get("condition", ""),
-                            "stock":     p.get("stock", 0),
-                        }
-                        for p in found_products
-                    ]
-                    event_data = json.dumps(
-                        {"token": "", "done": True, "session_id": session_id, "products": clean},
-                        ensure_ascii=False,
-                    )
-                    # Simpan ke cache setelah stream selesai
-                    await set_llm_cache(cache_key, "".join(full_reply_parts))
-                    yield f"data: {event_data}\n\n"
                     break
-                elif token:
-                    event_data = json.dumps(
-                        {"token": token, "done": False, "session_id": session_id},
-                        ensure_ascii=False,
-                    )
-                    yield f"data: {event_data}\n\n"
+
+            full_reply = sanitize_reply("".join(full_reply_parts))
+            full_reply_parts = [full_reply]
+
+            clean = [
+                {
+                    "id":        p.get("id", ""),
+                    "slug":      p.get("slug", ""),
+                    "name":      p.get("name", ""),
+                    "price":     p.get("price", 0),
+                    "thumbnail": p.get("thumbnail", ""),
+                    "store":     p.get("store", ""),
+                    "category":  p.get("category", ""),
+                    "condition": p.get("condition", ""),
+                    "stock":     p.get("stock", 0),
+                }
+                for p in found_products
+            ]
+            words      = full_reply.split()
+            chunk_size = 5
+            for i in range(0, len(words), chunk_size):
+                token = " ".join(words[i:i + chunk_size]) + (" " if i + chunk_size < len(words) else "")
+                yield f"data: {json.dumps({'token': token, 'done': False, 'session_id': session_id}, ensure_ascii=False)}\n\n"
+
+            event_data = json.dumps(
+                {"token": "", "done": True, "session_id": session_id, "products": clean},
+                ensure_ascii=False,
+            )
+            # Simpan ke cache setelah stream selesai (versi sudah difilter)
+            await set_llm_cache(cache_key, full_reply)
+            yield f"data: {event_data}\n\n"
 
         except Exception as e:
             print(f"[Stream] Error: {e}")
