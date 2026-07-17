@@ -16,7 +16,7 @@ pipeline {
             }
             steps {
                 dir('api-blue') {
-                    sh 'composer install --no-interaction --prefer-dist --no-progress'
+                    sh 'composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-mongodb'
                     stash name: 'backend-vendor', includes: 'vendor/**'
                 }
             }
@@ -33,8 +33,11 @@ pipeline {
                 dir('api-blue') {
                     unstash 'backend-vendor'
                     sh '''
-                        apt-get update -qq && apt-get install -y -qq git unzip libsqlite3-dev >/dev/null
-                        docker-php-ext-install pdo_sqlite >/dev/null
+                        apt-get update -qq
+                        apt-get install -y -qq git unzip libsqlite3-dev libzip-dev libssl-dev >/dev/null
+                        docker-php-ext-install pdo_sqlite zip bcmath >/dev/null
+                        pecl install mongodb redis >/dev/null 2>&1
+                        docker-php-ext-enable mongodb redis
                         vendor/bin/pint --test
                         cp .env.example .env
                         php artisan key:generate
