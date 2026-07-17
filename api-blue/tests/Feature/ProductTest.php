@@ -58,6 +58,9 @@ class ProductTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')->postJson('/api/product', $payload);
 
         // Assert
+        if ($response->status() !== 201) {
+            dump($response->json());
+        }
         $response->assertStatus(201);
         // Slug digenerate dengan suffix unik (mis. kaos-polos-i417522...)
         $this->assertDatabaseHas('products', ['name' => 'Kaos Polos']);
