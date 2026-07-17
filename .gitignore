@@ -20,3 +20,5 @@ ai-service/venv/
 
 # Mobile app — pindah ke repo terpisah (Hazjel/marketplace-mobile)
 flutter-app/
+
+PROPOSAL-ARSITEKTUR-TOKOPEDIA-STYLE.md
