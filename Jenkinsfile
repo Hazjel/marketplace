@@ -4,6 +4,15 @@ pipeline {
     options {
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
+        // JENKINS_HOME numpuk terus tiap build (workspace + build record) sampai
+        // disk host hampir penuh — batasi histori biar otomatis kebersihin
+        buildDiscarder(logRotator(numToKeepStr: '15'))
+    }
+
+    triggers {
+        // Gak ada webhook GitHub -> Jenkins (Jenkins ini gak publicly reachable),
+        // jadi pakai polling tiap 5 menit sebagai gantinya
+        pollSCM('H/5 * * * *')
     }
 
     stages {
