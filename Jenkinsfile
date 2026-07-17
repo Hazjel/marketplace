@@ -34,8 +34,9 @@ pipeline {
                     unstash 'backend-vendor'
                     sh '''
                         apt-get update -qq
-                        apt-get install -y -qq git unzip libsqlite3-dev libzip-dev libssl-dev >/dev/null
-                        docker-php-ext-install pdo_sqlite zip bcmath >/dev/null
+                        apt-get install -y -qq git unzip libsqlite3-dev libzip-dev libssl-dev libpng-dev libjpeg-dev libfreetype6-dev libonig-dev >/dev/null
+                        docker-php-ext-configure gd --with-freetype --with-jpeg >/dev/null
+                        docker-php-ext-install pdo_sqlite zip bcmath gd exif mbstring >/dev/null
                         pecl install mongodb redis >/dev/null 2>&1
                         docker-php-ext-enable mongodb redis
                         vendor/bin/pint --test
