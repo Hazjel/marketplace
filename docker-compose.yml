@@ -367,6 +367,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker:ro
       - /usr/libexec/docker/cli-plugins/docker-compose:/usr/libexec/docker/cli-plugins/docker-compose:ro
+      # mount direktori project host — deploy stage cd ke sini biar docker compose
+      # jalan di project dir yang sama dgn stack yg udah running (nama container gak konflik),
+      # dan .env/.env host ikut kebaca (tidak ada di checkout workspace Jenkins sendiri)
+      - ${PWD}:/host-project
 
 volumes:
   mysql_data:
