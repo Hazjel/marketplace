@@ -83,8 +83,8 @@ pipeline {
                 // beda dan container_name yang di-hardcode (blue-mongo dkk) bentrok
                 // sama container punya stack yang udah running.
                 sh '''
-                    git config --global --add safe.directory /host-project
-                    cd /host-project
+                    git config --global --add safe.directory "$HOST_PROJECT_DIR"
+                    cd "$HOST_PROJECT_DIR"
                     git fetch origin main
                     git checkout main
                     git reset --hard origin/main
