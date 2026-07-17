@@ -9,6 +9,12 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '15'))
     }
 
+    triggers {
+        // Gak ada webhook GitHub -> Jenkins (Jenkins ini gak publicly reachable),
+        // jadi pakai polling tiap 5 menit sebagai gantinya
+        pollSCM('H/5 * * * *')
+    }
+
     stages {
         stage('Backend: Install') {
             agent {
