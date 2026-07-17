@@ -75,16 +75,20 @@ pipeline {
             }
             steps {
                 // jalan dari /host-project (bind mount direktori host), BUKAN workspace
-                // checkout Jenkins sendiri — biar docker compose kenali project yang sama
-                // dengan stack yang udah running (nama container gak bentrok) dan .env
-                // host (gitignored, gak ada di checkout Jenkins) ikut kepakai
+                // checkout Jenkins sendiri — biar .env host (gitignored, gak ada di
+                // checkout Jenkins) ikut kepakai. Project name di-pin manual ke
+                // "marketplace" (-p marketplace) karena nama folder mount di dalam
+                // container Jenkins ("host-project") beda dari nama folder host
+                // ("marketplace") — kalau nggak di-pin, compose infer project name
+                // beda dan container_name yang di-hardcode (blue-mongo dkk) bentrok
+                // sama container punya stack yang udah running.
                 sh '''
                     git config --global --add safe.directory /host-project
                     cd /host-project
                     git fetch origin main
                     git checkout main
                     git reset --hard origin/main
-                    docker compose up -d --build api queue nginx frontend ai-service
+                    docker compose -p marketplace up -d --build api queue nginx frontend ai-service
                 '''
             }
         }
