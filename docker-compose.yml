@@ -94,7 +94,6 @@ services:
         condition: service_healthy
     volumes:
       - ./api-blue:/var/www
-      - api_vendor:/var/www/vendor
     environment:
       APP_NAME: Blukios
       APP_ENV: local
@@ -174,7 +173,6 @@ services:
       - api
     volumes:
       - ./api-blue:/var/www
-      - api_vendor:/var/www/vendor
     environment:
       APP_NAME: Blukios
       APP_ENV: local
@@ -216,7 +214,6 @@ services:
       - api
     volumes:
       - ./api-blue:/var/www
-      - api_vendor:/var/www/vendor
     environment:
       APP_NAME: Blukios
       APP_ENV: local
@@ -390,6 +387,5 @@ volumes:
   chroma_data:       # ChromaDB RAG vector index
   jenkins_home:      # Jenkins config, job history, plugin
   chroma_cache:      # ONNX model all-MiniLM-L6-v2 cache (79MB)
-  api_vendor:
   fe_node_modules:
   fe_dist:
