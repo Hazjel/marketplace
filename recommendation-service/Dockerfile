@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8002
 
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
