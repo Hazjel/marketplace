@@ -13,6 +13,7 @@ use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\ProductViewController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StoreBalanceController;
 use App\Http\Controllers\StoreBalanceHistoryController;
@@ -52,6 +53,7 @@ Route::get('product/all/paginated', [
 ]);
 Route::get('product/slug/{slug}', [ProductController::class, 'showBySlug']);
 Route::get('product/{id}', [ProductController::class, 'show']);
+Route::middleware('throttle:60,1')->post('product/{id}/view', [ProductViewController::class, 'store']);
 
 Route::get('store', [StoreController::class, 'index']);
 Route::get('store/username/{store}', [
