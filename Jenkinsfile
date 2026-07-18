@@ -151,6 +151,10 @@ pipeline {
                     # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi
                     # -> 502 connect() failed. Paksa restart biar re-resolve IP yang baru.
                     docker compose -p marketplace up -d --force-recreate nginx
+
+                    # tiap --build bikin image baru, image lama nganggur numpuk terus
+                    # (disk sempat 93% penuh) -- bersihin image gak kepake tiap abis deploy
+                    docker image prune -af || true
                 '''
             }
         }
