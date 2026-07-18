@@ -16,12 +16,38 @@ pipeline {
     }
 
     stages {
+        stage('Detect Changes') {
+            agent any
+            steps {
+                script {
+                    // pollSCM cuma checkout HEAD, gak ada histori commit sebelumnya
+                    // di workspace secara default -> fetch depth cukup buat diff
+                    // terhadap commit sebelum HEAD saat ini
+                    sh 'git fetch --depth=2 origin main || true'
+                    def changed = sh(
+                        script: 'git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "ALL"',
+                        returnStdout: true
+                    ).trim()
+
+                    // build pertama / histori dangkal -> HEAD~1 gak ada -> anggap semua berubah
+                    env.BACKEND_CHANGED  = (changed == 'ALL' || changed.contains('api-blue/')).toString()
+                    env.FRONTEND_CHANGED = (changed == 'ALL' || changed.contains('fe-blue/')).toString()
+
+                    echo "File berubah:\n${changed}"
+                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED}"
+                }
+            }
+        }
+
         stage('Backend: Install') {
             agent {
                 docker {
                     image 'composer:2'
                     args '-u root'
                 }
+            }
+            when {
+                expression { env.BACKEND_CHANGED == 'true' }
             }
             steps {
                 dir('api-blue') {
@@ -37,6 +63,9 @@ pipeline {
                     image 'php:8.4-cli'
                     args '-u root'
                 }
+            }
+            when {
+                expression { env.BACKEND_CHANGED == 'true' }
             }
             steps {
                 dir('api-blue') {
@@ -62,6 +91,9 @@ pipeline {
                 docker {
                     image 'node:20-alpine'
                 }
+            }
+            when {
+                expression { env.FRONTEND_CHANGED == 'true' }
             }
             steps {
                 dir('fe-blue') {
