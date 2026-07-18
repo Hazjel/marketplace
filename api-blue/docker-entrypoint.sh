@@ -45,5 +45,13 @@ php artisan route:clear
 php artisan config:cache
 php artisan route:cache
 
+# storage/ & bootstrap/cache ke-bind-mount dari host, ownership-nya sering balik
+# ke host-user (root/UID lain) setelah rebuild/restart container -- entrypoint ini
+# jalan sebagai root sebelum php-fpm fork worker sebagai www-data, jadi paling
+# aman dibetulkan di sini tiap start daripada nunggu error tempnam()/permission
+# denied muncul dulu baru fix manual
+chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
 echo "🚀 Starting PHP-FPM..."
 exec php-fpm -F
