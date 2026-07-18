@@ -12,7 +12,7 @@ from ollama import ollama_chat, ollama_stream
 from output_filter import sanitize_reply
 from redis_helper import append_session_history, get_llm_cache, set_llm_cache
 
-from _limiter import limiter
+from limiter import limiter
 
 router = APIRouter()
 

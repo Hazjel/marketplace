@@ -1,6 +1,9 @@
 # Node
 node_modules/
 
+# PHP
+composer.phar
+
 # Postman Security
 postman/globals/
 postman/environments/
