@@ -9,7 +9,7 @@ import ProductCard from '@/components/card/ProductCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 
 import { useHead } from '@vueuse/head'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useProductStore } from '@/stores/product'
 import { logger } from '@/utils/logger'
 
@@ -31,8 +31,6 @@ const loading = ref(false)
 const initialLoading = ref(true)
 const page = ref(1)
 const hasMore = ref(true)
-const observer = ref(null)
-const loadTrigger = ref(null)
 
 const loadProducts = async () => {
   if (loading.value || !hasMore.value) return
@@ -61,35 +59,12 @@ const loadProducts = async () => {
   }
 }
 
-// Intersection Observer for infinite scroll
-const setupObserver = () => {
-  observer.value = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting && hasMore.value && !loading.value) {
-        loadProducts()
-      }
-    },
-    { rootMargin: '200px' }
-  )
-
-  if (loadTrigger.value) {
-    observer.value.observe(loadTrigger.value)
-  }
-}
-
 onMounted(async () => {
   // Reset store products for fresh load
   productStore.products = []
   productStore.meta = { current_page: 1, last_page: 1, per_page: 30, total: 0 }
 
   await loadProducts()
-  setupObserver()
-})
-
-onUnmounted(() => {
-  if (observer.value) {
-    observer.value.disconnect()
-  }
 })
 </script>
 
@@ -134,8 +109,16 @@ onUnmounted(() => {
         </template>
       </div>
 
-      <!-- Load trigger (invisible element at bottom) -->
-      <div ref="loadTrigger" class="h-1 w-full"></div>
+      <!-- Load more button -->
+      <div v-if="hasMore && products.length > 0" class="flex justify-center py-4">
+        <button
+          :disabled="loading"
+          class="px-6 py-2.5 rounded-xl border border-custom-blue text-custom-blue dark:border-blue-400 dark:text-blue-400 font-semibold text-sm hover:bg-custom-blue hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="loadProducts"
+        >
+          {{ loading ? 'Memuat...' : 'Lihat Lebih Banyak' }}
+        </button>
+      </div>
 
       <!-- End of products message -->
       <div v-if="!hasMore && products.length > 0" class="flex justify-center py-6">
