@@ -6,9 +6,11 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.recommend import router as recommend_router
+from collaborative.scheduler import cf_retrain_loop, retrain_once
+from collaborative.svd import load_model_from_disk
 from config import CORS_ALLOWED_ORIGINS
 from utils.cache import get_cached_products, product_cache_refresh_loop, refresh_product_cache
-from utils.metrics import PRODUCTS_CACHED, REQUEST_COUNT, REQUEST_LATENCY
+from utils.metrics import CF_MODEL_TRAINED, PRODUCTS_CACHED, REQUEST_COUNT, REQUEST_LATENCY
 
 
 @asynccontextmanager
@@ -20,11 +22,24 @@ async def lifespan(application: FastAPI):
     except Exception as e:
         print(f"[Startup] WARNING: Product cache gagal dimuat: {e}. Akan retry di background.")
 
+    # model lama dari disk dulu (kalau ada) biar gak nunggu training pertama
+    # kali selesai buat mulai serve rekomendasi personalisasi
+    loaded = load_model_from_disk()
+    CF_MODEL_TRAINED.set(1 if loaded else 0)
+    if not loaded:
+        try:
+            trained = await retrain_once()
+            print(f"[Startup] CF training awal: {'berhasil' if trained else 'data belum cukup, fallback CBF'}")
+        except Exception as e:
+            print(f"[Startup] WARNING: CF training awal gagal: {e}")
+
     refresh_task = asyncio.create_task(product_cache_refresh_loop())
+    retrain_task  = asyncio.create_task(cf_retrain_loop())
 
     yield
 
     refresh_task.cancel()
+    retrain_task.cancel()
     print("[Shutdown] Cleanup selesai.")
 
 
@@ -61,7 +76,20 @@ async def metrics_middleware(request: Request, call_next):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "products_cached": len(get_cached_products())}
+    from collaborative.svd import is_model_ready
+
+    return {
+        "status": "ok",
+        "products_cached": len(get_cached_products()),
+        "cf_model_ready": is_model_ready(),
+    }
+
+
+@app.post("/internal/retrain")
+async def trigger_retrain():
+    """Trigger retrain manual (testing/debug) -- bukan dipanggil rutin, ada scheduler-nya sendiri."""
+    trained = await retrain_once()
+    return {"trained": trained}
 
 
 @app.get("/metrics")

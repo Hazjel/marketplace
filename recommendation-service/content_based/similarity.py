@@ -66,3 +66,25 @@ def score_similar_products(
 
     scored.sort(key=lambda x: x["_score"], reverse=True)
     return scored[:top_k]
+
+
+def trending_products(candidates: list[dict], top_k: int = 8) -> list[dict]:
+    """
+    Produk populer (total_sold + rating) tanpa mempertimbangkan kategori
+    apa pun -- fallback terakhir buat guest/user tanpa histori sama sekali
+    (gak ada target produk buat dibandingkan seperti CBF biasa).
+    """
+    if not candidates:
+        return []
+
+    max_sold = max((c.get("total_sold", 0) for c in candidates), default=0) or 1
+
+    scored = []
+    for c in candidates:
+        pop_score    = c.get("total_sold", 0) / max_sold
+        rating_score = min(c.get("rating", 0) / 5.0, 1.0)
+        score = pop_score * 0.7 + rating_score * 0.3
+        scored.append({**c, "_score": round(score, 4)})
+
+    scored.sort(key=lambda x: x["_score"], reverse=True)
+    return scored[:top_k]
