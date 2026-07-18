@@ -15,18 +15,25 @@ groups:
             datasourceUid: prometheus
             relativeTimeRange: { from: 300, to: 0 }
             model:
-              expr: "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100 or vector(0)"
+              expr: "(sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))) * 100"
               refId: A
+          - refId: B
+            datasourceUid: "__expr__"
+            model:
+              type: reduce
+              refId: B
+              expression: A
+              reducer: last
           - refId: C
             datasourceUid: "__expr__"
             model:
               type: threshold
               refId: C
-              expression: A
+              expression: B
               conditions:
                 - evaluator: { type: gt, params: [10] }
         annotations:
-          summary: "Error rate 5xx AI service di atas 10% selama 5 menit — cek log blue-ai."
+          summary: "Error rate 5xx chat service di atas 10% selama 5 menit — cek log blue-ai."
         labels:
           severity: critical
 
@@ -92,14 +99,21 @@ groups:
             datasourceUid: prometheus
             relativeTimeRange: { from: 300, to: 0 }
             model:
-              expr: "sum(rate(api_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(api_http_requests_total[5m])) * 100 or vector(0)"
+              expr: "(sum(rate(api_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(api_http_requests_total[5m]))) * 100"
               refId: A
+          - refId: B
+            datasourceUid: "__expr__"
+            model:
+              type: reduce
+              refId: B
+              expression: A
+              reducer: last
           - refId: C
             datasourceUid: "__expr__"
             model:
               type: threshold
               refId: C
-              expression: A
+              expression: B
               conditions:
                 - evaluator: { type: gt, params: [10] }
         annotations:
