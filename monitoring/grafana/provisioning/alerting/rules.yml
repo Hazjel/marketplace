@@ -2,12 +2,12 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: ai-service-alerts
-    folder: AI Service
+    name: chat-service-alerts
+    folder: Chat Service
     interval: 1m
     rules:
       - uid: alert-error-rate-high
-        title: "AI Service: Error rate tinggi (>10%)"
+        title: "Chat Service: Error rate tinggi (>10%)"
         condition: C
         for: 5m
         data:
@@ -31,7 +31,7 @@ groups:
           severity: critical
 
       - uid: alert-latency-high
-        title: "AI Service: Latency p95 tinggi (>30s)"
+        title: "Chat Service: Latency p95 tinggi (>30s)"
         condition: C
         for: 5m
         data:
@@ -55,7 +55,7 @@ groups:
           severity: warning
 
       - uid: alert-rag-index-empty
-        title: "AI Service: RAG index kosong"
+        title: "Chat Service: RAG index kosong"
         condition: C
         for: 10m
         data:

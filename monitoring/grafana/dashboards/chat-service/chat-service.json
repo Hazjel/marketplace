@@ -1,8 +1,8 @@
 {
   "id": null,
-  "uid": "ai-service-monitor",
-  "title": "AI Service Monitoring",
-  "tags": ["ai-service", "prometheus"],
+  "uid": "chat-service-monitor",
+  "title": "Chat Service Monitoring",
+  "tags": ["chat-service", "prometheus"],
   "timezone": "browser",
   "schemaVersion": 37,
   "version": 2,

@@ -268,9 +268,9 @@ services:
     volumes:
       - ollama:/root/.ollama
 
-  ai-service:
+  chat-service:
     build:
-      context: ./ai-service
+      context: ./chat-service
     container_name: blue-ai
     restart: unless-stopped
     depends_on:
@@ -282,7 +282,7 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      - ./ai-service:/app
+      - ./chat-service:/app
       - chroma_data:/app/chroma_db        # RAG vector index
       - chroma_cache:/root/.cache/chroma  # ONNX model cache — hindari re-download 79MB
     environment:
@@ -313,7 +313,7 @@ services:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus               # persist data antar restart
     depends_on:
-      - ai-service
+      - chat-service
       - nginx
 
   grafana:
@@ -347,7 +347,7 @@ services:
       - ./monitoring/k6:/scripts:ro
     entrypoint: ["k6", "run", "/scripts/loadtest.js"]
     depends_on:
-      - ai-service
+      - chat-service
 
   # ─────────────────────────────────────────
   # CD — Jenkins (opsional, profile "cd")
