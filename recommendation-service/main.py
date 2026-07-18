@@ -13,12 +13,28 @@ from utils.cache import get_cached_products, product_cache_refresh_loop, refresh
 from utils.metrics import CF_MODEL_TRAINED, PRODUCTS_CACHED, REQUEST_COUNT, REQUEST_LATENCY
 
 
+async def _startup_fetch_with_retry(retries: int = 5, delay_seconds: float = 3.0) -> None:
+    """
+    nginx/api kadang belum siap terima request pas recommendation-service
+    baru start (depends_on cuma nunggu container start, bukan health check
+    beneran) -- coba beberapa kali dengan jeda pendek sebelum nyerah ke
+    jadwal refresh normal (yang bisa berjarak sampai 30 menit).
+    """
+    for attempt in range(1, retries + 1):
+        count = await refresh_product_cache()
+        if count > 0:
+            PRODUCTS_CACHED.set(count)
+            print(f"[Startup] Product cache ready: {count} produk (percobaan {attempt})")
+            return
+        print(f"[Startup] Product cache masih kosong (percobaan {attempt}/{retries}), retry dalam {delay_seconds}s...")
+        await asyncio.sleep(delay_seconds)
+    print("[Startup] WARNING: Product cache tetap kosong setelah retry. Akan coba lagi di jadwal refresh berikutnya.")
+
+
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     try:
-        count = await refresh_product_cache()
-        PRODUCTS_CACHED.set(count)
-        print(f"[Startup] Product cache ready: {count} produk")
+        await _startup_fetch_with_retry()
     except Exception as e:
         print(f"[Startup] WARNING: Product cache gagal dimuat: {e}. Akan retry di background.")
 
