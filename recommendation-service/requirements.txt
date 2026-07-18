@@ -3,5 +3,8 @@ uvicorn
 python-dotenv
 httpx
 prometheus-client
-scikit-learn
 numpy
+pandas
+scikit-learn
+scikit-surprise
+apscheduler

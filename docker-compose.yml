@@ -145,6 +145,7 @@ services:
       GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL:-}
       # Fallback ke KEY_RAJA_ONGKIR — string kosong akan menimpa fallback di config
       KOMERCE_API_KEY: ${KOMERCE_API_KEY:-${KEY_RAJA_ONGKIR:-}}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY wajib diisi di .env}
 
   nginx:
     image: nginx:alpine
@@ -312,11 +313,18 @@ services:
       - "8002:8002"
     volumes:
       - ./recommendation-service:/app
+      - reco_models:/app/models   # model SVD terlatih -- persist antar restart, gak perlu retrain dari nol
     environment:
       LARAVEL_API_URL: http://nginx:80
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY wajib diisi di .env}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://lab-hajel.tail03faae.ts.net,http://192.168.1.29,http://localhost:5173,http://localhost:3000}
       CBF_TOP_K: 8
       PRODUCT_CACHE_REFRESH_MINUTES: 30
+      CF_TOP_K: 8
+      CF_MIN_INTERACTIONS: 50
+      CF_MIN_ACTIVE_USERS: 5
+      CF_RETRAIN_INTERVAL_HOURS: 24
+      CF_MODEL_PATH: /app/models/svd_model.pkl
 
   # ─────────────────────────────────────────
   # Monitoring (optional profile)
@@ -414,3 +422,4 @@ volumes:
   api_vendor:
   fe_node_modules:
   fe_dist:
+  reco_models:       # Model SVD terlatih (recommendation-service)
