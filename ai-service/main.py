@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from _limiter import limiter
+from limiter import limiter
 from config import CORS_ALLOWED_ORIGINS, REDIS_URL
 from metrics import REQUEST_COUNT, REQUEST_LATENCY
 from rag import ProductVectorStore, init_vector_store, rag_refresh_loop
