@@ -8,6 +8,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\InternalController;
 use App\Http\Controllers\LogisticsController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\ProductCategoryController;
@@ -30,6 +31,10 @@ Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 // Health Check
 Route::get('health', HealthController::class);
+
+// Internal — cuma diakses service internal (recommendation-service dkk),
+// bukan lewat auth token user
+Route::middleware('internal')->get('internal/interactions', [InternalController::class, 'interactions']);
 
 // Public Routes that must take precedence
 Route::get('store/locations', [StoreController::class, 'getLocations']);

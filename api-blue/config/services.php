@@ -53,4 +53,8 @@ return [
         'api_key' => env('RAJAONGKIR_API_KEY', ''),
     ],
 
+    'internal' => [
+        'key' => env('INTERNAL_SERVICE_KEY', ''),
+    ],
+
 ];
