@@ -5,14 +5,14 @@ from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
 from config import RATE_LIMIT_PER_MINUTE
-from context import prepare_context
+from utils.context import prepare_context
 from models import ChatRequest, ChatResponse
-from nlp import make_cache_key
-from ollama import ollama_chat, ollama_stream
-from output_filter import sanitize_reply
-from redis_helper import append_session_history, get_llm_cache, set_llm_cache
+from nlp.intent import make_cache_key
+from llm.ollama import ollama_chat, ollama_stream
+from llm.output_filter import sanitize_reply
+from utils.redis_helper import append_session_history, get_llm_cache, set_llm_cache
 
-from limiter import limiter
+from utils.limiter import limiter
 
 router = APIRouter()
 

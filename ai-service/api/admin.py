@@ -6,11 +6,11 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Request, Response
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
-import rag as rag_module
+from rag import vectorstore as rag_module
 from config import FEEDBACK_KEY, SESSION_KEY, RAG_SIMILARITY_THRESHOLD, RAG_TOP_K
-from metrics import FEEDBACK_RATING, FEEDBACK_TOTAL
+from utils.metrics import FEEDBACK_RATING, FEEDBACK_TOTAL
 from models import FeedbackRequest
-from redis_helper import _get_redis
+from utils.redis_helper import _get_redis
 
 router = APIRouter()
 

@@ -2,16 +2,14 @@ import asyncio
 import re
 
 import chromadb
-import httpx
 from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 
 from config import (
     CHROMA_DB_PATH,
     RAG_SIMILARITY_THRESHOLD,
     RAG_TOP_K,
-    RAG_REFRESH_HOURS,
-    LARAVEL_API_URL,
 )
+from rag.ingestion import fetch_all_products
 
 # ---------------------------------------------------------------------------
 # Singleton — diinisialisasi oleh lifespan di main.py
@@ -27,54 +25,6 @@ def init_vector_store(vs: "ProductVectorStore") -> None:
 
 def get_vector_store() -> "ProductVectorStore | None":
     return _vector_store
-
-
-# ---------------------------------------------------------------------------
-# Laravel API fetch
-# ---------------------------------------------------------------------------
-async def fetch_all_products() -> list[dict]:
-    """Ambil semua produk dari Laravel API (dengan pagination)."""
-    all_products: list[dict] = []
-    page = 1
-    async with httpx.AsyncClient(timeout=httpx.Timeout(30.0)) as client:
-        while True:
-            try:
-                r = await client.get(
-                    f"{LARAVEL_API_URL}/api/product",
-                    params={"limit": 500, "page": page},
-                )
-                if r.status_code != 200:
-                    break
-                data     = r.json()
-                products = data.get("data", [])
-                if not products:
-                    break
-
-                for p in products:
-                    store    = p.get("store") or {}
-                    category = p.get("product_category") or {}
-                    all_products.append({
-                        "id":          str(p.get("id", "")),
-                        "slug":        p.get("slug", ""),
-                        "name":        p.get("name", ""),
-                        "price":       p.get("price", 0),
-                        "thumbnail":   p.get("thumbnail") or "",
-                        "description": p.get("description", ""),
-                        "condition":   p.get("condition", ""),
-                        "stock":       p.get("stock", 0),
-                        "total_sold":  p.get("total_sold", 0),
-                        "store":       store.get("name", "") if isinstance(store, dict) else "",
-                        "category":    category.get("name", "") if isinstance(category, dict) else "",
-                    })
-
-                if not data.get("next_page_url"):
-                    break
-                page += 1
-            except Exception as e:
-                print(f"[RAG] Error fetch halaman {page}: {e}")
-                break
-
-    return all_products
 
 
 # ---------------------------------------------------------------------------
@@ -260,7 +210,7 @@ class ProductVectorStore:
 
         all_results = await asyncio.gather(*[_search_token(t) for t in clean_tokens])
 
-        seen_ids: set[str] = set()
+        seen_ids:   set[str] = set()
         merged:   list[dict] = []
         for metas in all_results:
             for meta in metas:
@@ -275,26 +225,3 @@ class ProductVectorStore:
 
     def count(self) -> int:
         return self._collection.count()
-
-
-# ---------------------------------------------------------------------------
-# Background Refresh Loop
-# ---------------------------------------------------------------------------
-async def rag_refresh_loop() -> None:
-    """Background task: re-index produk dari Laravel setiap RAG_REFRESH_HOURS jam."""
-    consecutive_failures = 0
-    while True:
-        await asyncio.sleep(RAG_REFRESH_HOURS * 3600)
-        vs = get_vector_store()
-        if vs is None:
-            continue
-        try:
-            count = await vs.build_index()
-            consecutive_failures = 0
-            print(f"[RAG] Refresh: {count} produk.")
-        except Exception as e:
-            consecutive_failures += 1
-            if consecutive_failures >= 3:
-                print(f"[RAG] ERROR: Refresh gagal {consecutive_failures}x berturut-turut: {e}")
-            else:
-                print(f"[RAG] Refresh error ({consecutive_failures}x): {e}")

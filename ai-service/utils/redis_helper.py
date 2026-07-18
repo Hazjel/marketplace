@@ -75,7 +75,7 @@ async def append_session_history(session_id: str, user_msg: str, reply: str) -> 
 
 async def _extend_summary(r: aioredis.Redis, session_id: str, overflow: list[dict]) -> None:
     """Ringkas pesan yang akan dibuang, gabung ke ringkasan sesi yang sudah ada."""
-    from ollama import summarize_history  # local import — hindari circular import
+    from llm.ollama import summarize_history  # local import — hindari circular import
 
     try:
         existing    = await r.get(f"{SUMMARY_KEY}{session_id}")
