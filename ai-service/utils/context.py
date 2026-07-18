@@ -1,11 +1,11 @@
 import asyncio
 
-import rag as rag_module
+from rag import vectorstore as rag_module
 from config import RAG_TOP_K
-from metrics import RAG_SEARCH_HITS, RAG_SEARCH_MISSES
-from nlp import is_general_query, rewrite_query, extract_metadata_filters
-from ollama import SYSTEM_PROMPT
-from redis_helper import get_session_history
+from utils.metrics import RAG_SEARCH_HITS, RAG_SEARCH_MISSES
+from nlp.intent import is_general_query, rewrite_query, extract_metadata_filters
+from llm.ollama import SYSTEM_PROMPT
+from utils.redis_helper import get_session_history
 
 
 # ---------------------------------------------------------------------------
