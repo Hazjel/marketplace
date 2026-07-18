@@ -129,7 +129,23 @@ pipeline {
                     git fetch origin main
                     git checkout main
                     git reset --hard origin/main
-                    docker compose -p marketplace up -d --build api queue frontend ai-service
+
+                    # api_vendor named volume nge-override folder vendor/ dari bind mount
+                    # ./api-blue (biar vendor gak ketiban bind-mount kosong dari host --
+                    # vendor/ digitignore, gak pernah ada fisik di host). Tapi volume ini
+                    # persisten -- kalau composer.json berubah & image di-rebuild, volume
+                    # LAMA tetap dipasang ke container baru, jadi package baru "sukses"
+                    # ke-install di image tapi container tetap pakai vendor basi (silent
+                    # bug, ketauannya cuma lewat "Class not found" pas runtime). Hapus
+                    # volume sebelum build kalau ada perubahan di api-blue/, biar volume
+                    # dibuat ulang fresh dari image setiap kali dependency berubah.
+                    if [ "$BACKEND_CHANGED" = "true" ]; then
+                        docker compose -p marketplace stop api queue reverb || true
+                        docker compose -p marketplace rm -f api queue reverb || true
+                        docker volume rm marketplace_api_vendor || true
+                    fi
+
+                    docker compose -p marketplace up -d --build api queue reverb frontend ai-service
                     # nginx sendiri jarang berubah -> compose gak recreate dia, tapi upstream
                     # (blue-api dkk) di atas barusan direcreate dan dapet IP Docker baru.
                     # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi
