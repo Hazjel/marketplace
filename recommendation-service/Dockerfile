@@ -13,8 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
-RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8002
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+# "sh script.sh" (bukan "./script.sh") -- bind-mount ./recommendation-service:/app
+# nimpa docker-entrypoint.sh dari image (yang udah di-chmod +x) dengan versi
+# host, yang di Windows/git gak selalu bawa execute bit. Invoke eksplisit
+# lewat sh gak butuh execute bit sama sekali.
+ENTRYPOINT ["sh", "docker-entrypoint.sh"]
