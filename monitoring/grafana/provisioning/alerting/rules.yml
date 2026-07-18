@@ -48,12 +48,19 @@ groups:
             model:
               expr: "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{endpoint=~\"/predict.*\"}[5m])))"
               refId: A
+          - refId: B
+            datasourceUid: "__expr__"
+            model:
+              type: reduce
+              refId: B
+              expression: A
+              reducer: last
           - refId: C
             datasourceUid: "__expr__"
             model:
               type: threshold
               refId: C
-              expression: A
+              expression: B
               conditions:
                 - evaluator: { type: gt, params: [30] }
         annotations:
@@ -72,12 +79,19 @@ groups:
             model:
               expr: "rag_products_indexed"
               refId: A
+          - refId: B
+            datasourceUid: "__expr__"
+            model:
+              type: reduce
+              refId: B
+              expression: A
+              reducer: last
           - refId: C
             datasourceUid: "__expr__"
             model:
               type: threshold
               refId: C
-              expression: A
+              expression: B
               conditions:
                 - evaluator: { type: lt, params: [1] }
         annotations:
@@ -132,12 +146,19 @@ groups:
             model:
               expr: "histogram_quantile(0.95, sum by (le) (rate(api_http_request_duration_seconds_bucket[5m])))"
               refId: A
+          - refId: B
+            datasourceUid: "__expr__"
+            model:
+              type: reduce
+              refId: B
+              expression: A
+              reducer: last
           - refId: C
             datasourceUid: "__expr__"
             model:
               type: threshold
               refId: C
-              expression: A
+              expression: B
               conditions:
                 - evaluator: { type: gt, params: [3] }
         annotations:
