@@ -145,7 +145,7 @@ pipeline {
                         docker volume rm marketplace_api_vendor || true
                     fi
 
-                    docker compose -p marketplace up -d --build api queue reverb frontend chat-service
+                    docker compose -p marketplace up -d --build api queue reverb frontend chat-service recommendation-service
                     # nginx sendiri jarang berubah -> compose gak recreate dia, tapi upstream
                     # (blue-api dkk) di atas barusan direcreate dan dapet IP Docker baru.
                     # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi
