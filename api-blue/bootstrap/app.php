@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\IdempotencyMiddleware;
+use App\Http\Middleware\InternalServiceAuth;
 use App\Http\Middleware\PrometheusMetrics;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\UpdateLastSeen;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(PrometheusMetrics::class);
         $middleware->alias([
             'idempotent' => IdempotencyMiddleware::class,
+            'internal' => InternalServiceAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
