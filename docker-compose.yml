@@ -314,6 +314,7 @@ services:
       - prometheus_data:/prometheus               # persist data antar restart
     depends_on:
       - ai-service
+      - nginx
 
   grafana:
     image: grafana/grafana:latest

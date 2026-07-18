@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\IdempotencyMiddleware;
+use App\Http\Middleware\PrometheusMetrics;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\UpdateLastSeen;
 use Illuminate\Auth\AuthenticationException;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(HandleCors::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->append(UpdateLastSeen::class);
+        $middleware->append(PrometheusMetrics::class);
         $middleware->alias([
             'idempotent' => IdempotencyMiddleware::class,
         ]);

@@ -77,3 +77,56 @@ groups:
           summary: "RAG index 0 produk selama 10 menit — chatbot tidak bisa jawab pertanyaan produk. Cek koneksi ke Laravel API."
         labels:
           severity: warning
+
+  - orgId: 1
+    name: laravel-api-alerts
+    folder: Laravel API
+    interval: 1m
+    rules:
+      - uid: alert-api-error-rate-high
+        title: "Laravel API: Error rate tinggi (>10%)"
+        condition: C
+        for: 5m
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              expr: "sum(rate(api_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(api_http_requests_total[5m])) * 100 or vector(0)"
+              refId: A
+          - refId: C
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              expression: A
+              conditions:
+                - evaluator: { type: gt, params: [10] }
+        annotations:
+          summary: "Error rate 5xx Laravel API di atas 10% selama 5 menit — cek log blue-api."
+        labels:
+          severity: critical
+
+      - uid: alert-api-latency-high
+        title: "Laravel API: Latency p95 tinggi (>3s)"
+        condition: C
+        for: 5m
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange: { from: 300, to: 0 }
+            model:
+              expr: "histogram_quantile(0.95, sum by (le) (rate(api_http_request_duration_seconds_bucket[5m])))"
+              refId: A
+          - refId: C
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              expression: A
+              conditions:
+                - evaluator: { type: gt, params: [3] }
+        annotations:
+          summary: "Latency p95 Laravel API di atas 3 detik — cek query lambat atau koneksi MySQL/Mongo."
+        labels:
+          severity: warning
