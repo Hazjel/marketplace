@@ -1,0 +1,23 @@
+# Virtual Environment — jangan copy ke image, pip install sudah handle ini
+venv/
+env/
+.venv/
+
+# Python cache — tidak dibutuhkan di container
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Local env file — env diset via docker-compose environment:
+.env
+.env.example
+
+# IDE & OS
+.vscode/
+.idea/
+*.DS_Store
+
+# Git
+.git/
+.gitignore

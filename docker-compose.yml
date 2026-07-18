@@ -298,6 +298,27 @@ services:
       REDIS_URL: redis://redis:6379/0
 
   # ─────────────────────────────────────────
+  # Recommendation Service (content-based + collaborative filtering)
+  # ─────────────────────────────────────────
+  recommendation-service:
+    build:
+      context: ./recommendation-service
+    container_name: blue-recommendation
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload --reload-delay 1 --proxy-headers --forwarded-allow-ips='*'
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./recommendation-service:/app
+    environment:
+      LARAVEL_API_URL: http://nginx:80
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://lab-hajel.tail03faae.ts.net,http://192.168.1.29,http://localhost:5173,http://localhost:3000}
+      CBF_TOP_K: 8
+      PRODUCT_CACHE_REFRESH_MINUTES: 30
+
+  # ─────────────────────────────────────────
   # Monitoring (optional profile)
   # ─────────────────────────────────────────
   prometheus:
