@@ -129,7 +129,12 @@ pipeline {
                     git fetch origin main
                     git checkout main
                     git reset --hard origin/main
-                    docker compose -p marketplace up -d --build api queue nginx frontend ai-service
+                    docker compose -p marketplace up -d --build api queue frontend ai-service
+                    # nginx sendiri jarang berubah -> compose gak recreate dia, tapi upstream
+                    # (blue-api dkk) di atas barusan direcreate dan dapet IP Docker baru.
+                    # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi
+                    # -> 502 connect() failed. Paksa restart biar re-resolve IP yang baru.
+                    docker compose -p marketplace up -d --force-recreate nginx
                 '''
             }
         }
