@@ -18,6 +18,9 @@ import { axiosInstance } from '@/plugins/axios'
 import { useHead } from '@vueuse/head'
 import { useToast } from 'vue-toastification'
 import { logger } from '@/utils/logger'
+import { useRecommendationStore } from '@/stores/recommendation'
+import { getGuestSessionId } from '@/utils/guestSession'
+import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,8 +57,11 @@ useHead({
 })
 
 const productStore = useProductStore()
-const { products, loading } = storeToRefs(productStore)
-const { fetchProductBySlug, fetchProducts } = productStore
+const { fetchProductBySlug } = productStore
+
+const recommendationStore = useRecommendationStore()
+const { similarProducts, loadingSimilar } = storeToRefs(recommendationStore)
+const { fetchSimilarProducts, trackProductView } = recommendationStore
 
 const authStore = useAuthStore()
 const cart = useCartStore()
@@ -290,6 +296,10 @@ const fetchProduct = async () => {
   product.value.product_images.sort((a, b) => {
     return (b.is_thumbnail === true) - (a.is_thumbnail === true)
   })
+
+  // Rekomendasi & view tracking baru bisa jalan setelah product.value.id ada
+  fetchSimilarProducts(product.value.id)
+  trackProductView(product.value.id, authStore.user?.id ? null : getGuestSessionId())
 }
 
 const increase = () => {
@@ -366,19 +376,11 @@ watch(
   () => route.params.slug,
   () => {
     fetchProduct()
-    fetchProducts({
-      limit: 4,
-      random: true
-    })
   }
 )
 
 onMounted(() => {
   fetchProduct()
-  fetchProducts({
-    limit: 4,
-    random: true
-  })
   if (authStore.user) {
     fetchWishlist()
   }
@@ -823,11 +825,14 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
         </button>
       </div>
     </div>
-    <section id="Recommendation" class="flex flex-col gap-9 scroll-mt-[150px]">
+    <section v-if="similarProducts.length || loadingSimilar" id="Recommendation" class="flex flex-col gap-9 scroll-mt-[150px]">
       <SectionHeader title="Produk Serupa" subtitle="" :link="{ name: 'app.all-products' }" />
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
-        <template v-if="!loading">
-          <ProductCard v-for="recProduct in products" :key="recProduct.id" :item="recProduct" />
+        <template v-if="loadingSimilar">
+          <SkeletonProductCard v-for="i in 6" :key="i" />
+        </template>
+        <template v-else>
+          <ProductCard v-for="recProduct in similarProducts" :key="recProduct.id" :item="recProduct" />
         </template>
       </div>
     </section>

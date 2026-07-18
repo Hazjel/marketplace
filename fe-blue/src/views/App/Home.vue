@@ -3,6 +3,7 @@ import 'swiper/swiper-bundle.css'
 
 import Banner from '@/components/App/home/Banner.vue'
 import Categories from '@/components/App/home/Categories.vue'
+import Recommended from '@/components/App/home/Recommended.vue'
 import Chatbot from '@/components/App/Chatbot.vue'
 import ProductCard from '@/components/card/ProductCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
@@ -100,6 +101,9 @@ onUnmounted(() => {
   <main class="flex flex-col w-full max-w-[1280px] px-4 lg:px-6 mx-auto mt-6 md:mt-10 mb-20 md:mb-24 gap-8 md:gap-10">
     <!-- Categories Section -->
     <Categories />
+
+    <!-- Personalized Recommendations -->
+    <Recommended />
 
     <!-- Products Section (Lazy Load / Infinite Scroll) -->
     <section class="flex flex-col gap-5">

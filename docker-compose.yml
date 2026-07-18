@@ -246,6 +246,7 @@ services:
         # Relative — nginx proxy /api & /ai, jalan di localhost/LAN/Tailscale sekaligus
         VITE_API_BASE_URL: /api
         VITE_AI_SERVICE_URL: /ai
+        VITE_RECOMMENDATION_BASE_URL: /recommend
         VITE_MIDTRANS_CLIENT_KEY: Mid-client-xjQUjCcbhOHl68O3
         VITE_MIDTRANS_IS_PRODUCTION: "false"
         # Host/port websocket dinamis mengikuti halaman (lihat echo.js)

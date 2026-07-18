@@ -11,6 +11,19 @@ export const axiosInstance = axios.create({
   }
 })
 
+// Instance terpisah buat recommendation-service — path /recommend/* ada di root
+// domain (bukan di bawah /api, lihat nginx location /recommend). Sengaja TANPA
+// interceptor auth/401-redirect/toast-error: rekomendasi sifatnya nice-to-have,
+// kalau gagal harus silent-fail, jangan sampai ganggu UX halaman produk/homepage
+export const recoAxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_RECOMMENDATION_BASE_URL || '/recommend',
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json'
+  },
+  timeout: 5000
+})
+
 // Tambahkan interceptor ke axiosInstance (BUKAN axios global)
 axiosInstance.interceptors.request.use(
   (config) => {
