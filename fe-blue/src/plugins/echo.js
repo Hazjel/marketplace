@@ -17,7 +17,12 @@ const echo = new Echo({
   wsPort,
   wssPort: wsPort,
   forceTLS: isSecure,
-  enabledTransports: isSecure ? ['wss'] : ['ws'],
+  // JANGAN set enabledTransports manual (mis. ['wss']) -- pusher-js@8 butuh
+  // full default transport/strategy scaffolding buat connection manager-nya,
+  // list custom bikin connection.state langsung "failed" secara sinkron tanpa
+  // pernah nyoba connect sama sekali (dikonfirmasi manual: hapus opsi ini,
+  // fresh Pusher instance ke Reverb langsung "connecting"->"connected").
+  // forceTLS di atas udah cukup buat maksa wss saat halaman https.
   authorizer: (channel, options) => {
     return {
       authorize: (socketId, callback) => {
