@@ -1,8 +1,9 @@
 <script setup>
-import { ref, reactive, nextTick } from 'vue'
+import { ref, reactive, nextTick, onMounted, onUnmounted } from 'vue'
 import { MessageCircle } from 'lucide-vue-next'
 
 const AI_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8001'
+const HEALTH_CHECK_INTERVAL_MS = 10000
 
 // ---------------------------------------------------------------------------
 // STATE
@@ -13,6 +14,8 @@ const isStreaming   = ref(false)
 const isWaiting     = ref(false)
 const chatContainer = ref(null)
 const sessionId     = ref(null)
+const isOnline       = ref(true)
+let   healthInterval = null
 
 const chats = ref([
   {
@@ -38,6 +41,26 @@ const toggleChat = () => {
   scrollToBottom()
 }
 
+const checkHealth = async () => {
+  try {
+    const res = await fetch(`${AI_URL}/health`)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    isOnline.value = data.status === 'ok'
+  } catch (err) {
+    isOnline.value = false
+  }
+}
+
+onMounted(() => {
+  checkHealth()
+  healthInterval = setInterval(checkHealth, HEALTH_CHECK_INTERVAL_MS)
+})
+
+onUnmounted(() => {
+  if (healthInterval) clearInterval(healthInterval)
+})
+
 const formatPrice = (price) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })
     .format(price)
@@ -56,6 +79,17 @@ const stripMarkdown = (text) =>
 const sendMessage = async () => {
   const userMsg = message.value.trim()
   if (!userMsg || isStreaming.value) return
+
+  if (!isOnline.value) {
+    chats.value.push({ text: userMsg, isBot: false, streaming: false, rating: null, products: [] })
+    chats.value.push({
+      text: 'Ri lagi offline nih.. coba beberapa saat lagi ya~ 🙏',
+      isBot: true, streaming: false, rating: null, products: []
+    })
+    message.value = ''
+    scrollToBottom()
+    return
+  }
 
   chats.value.push({ text: userMsg, isBot: false, streaming: false, rating: null, products: [] })
   message.value = ''
@@ -195,8 +229,11 @@ const sendFeedback = async (msg, rating) => {
             <div>
               <h3 class="font-bold text-sm">Ri (AI Assistant)</h3>
               <div class="flex items-center gap-1">
-                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                <span class="text-xs opacity-80">Online</span>
+                <span
+                  class="w-2 h-2 rounded-full"
+                  :class="isOnline ? 'bg-green-400 animate-pulse' : 'bg-gray-300'"
+                ></span>
+                <span class="text-xs opacity-80">{{ isOnline ? 'Online' : 'Offline' }}</span>
               </div>
             </div>
           </div>
@@ -337,13 +374,13 @@ const sendFeedback = async (msg, rating) => {
           <input
             v-model="message"
             type="text"
-            placeholder="Tanya produk Blukios..."
+            :placeholder="isOnline ? 'Tanya produk Blukios...' : 'Ri sedang offline...'"
             class="flex-1 bg-gray-100 dark:bg-white/5 text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-custom-blue/50 dark:focus:ring-custom-blue/30"
-            :disabled="isStreaming"
+            :disabled="isStreaming || !isOnline"
             @keyup.enter="sendMessage"
           />
           <button
-            :disabled="isStreaming"
+            :disabled="isStreaming || !isOnline"
             class="bg-custom-blue text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 transition"
             @click="sendMessage"
           >

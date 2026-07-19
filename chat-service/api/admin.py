@@ -3,11 +3,12 @@ import json
 import time
 from datetime import datetime, timezone
 
+import httpx
 from fastapi import APIRouter, Request, Response
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 from rag import vectorstore as rag_module
-from config import FEEDBACK_KEY, SESSION_KEY, RAG_SIMILARITY_THRESHOLD, RAG_TOP_K
+from config import FEEDBACK_KEY, SESSION_KEY, RAG_SIMILARITY_THRESHOLD, RAG_TOP_K, OLLAMA_BASE_URL
 from utils.metrics import FEEDBACK_RATING, FEEDBACK_TOTAL
 from models import FeedbackRequest
 from utils.redis_helper import _get_redis
@@ -236,7 +237,20 @@ async def debug_search(q: str, n: int = 10, show_vectors: bool = False) -> dict:
 @router.get("/health")
 async def health() -> dict:
     vs = rag_module.get_vector_store()
+
+    # Timeout pendek (bukan OLLAMA_TIMEOUT_S yang default 180s) -- health check
+    # harus cepat kejawab walau Ollama lagi hang, biar FE gak nunggu lama buat
+    # nampilin badge Offline
+    ollama_ok = False
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            r = await client.get(f"{OLLAMA_BASE_URL}/api/tags")
+            ollama_ok = r.status_code == 200
+    except Exception:
+        ollama_ok = False
+
     return {
-        "status":   "ok",
+        "status":   "ok" if ollama_ok else "degraded",
+        "ollama":   ollama_ok,
         "indexed":  vs.count() if vs else 0,
     }
