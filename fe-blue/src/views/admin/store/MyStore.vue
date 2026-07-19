@@ -61,7 +61,17 @@ const mapSrc = computed(() => {
         <div class="flex flex-col md:flex-row items-start md:items-center w-full gap-4 bg-white dark:bg-surface-card rounded-2xl p-4 border border-gray-100 dark:border-white/10 shadow-sm">
           <div class="flex items-center gap-3 w-full min-w-0">
             <div class="flex size-16 shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 overflow-hidden border border-gray-100 dark:border-white/10">
-              <img :src="store?.logo" class="size-full object-cover" alt="photo" />
+              <img
+                v-if="store?.logo"
+                :src="store.logo"
+                class="size-full object-cover"
+                alt="Logo toko"
+              />
+              <div v-else class="flex size-full items-center justify-center text-gray-300 dark:text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75V21h18V9.75M3 9.75L12 3l9 6.75M3 9.75l7.5 5.25M21 9.75l-7.5 5.25m0 0L12 13.5m1.5 1.5L12 13.5m0 0L10.5 15" />
+                </svg>
+              </div>
             </div>
             <div class="flex flex-col gap-1 w-full overflow-hidden">
               <p class="font-bold text-base leading-tight w-full truncate dark:text-white">
