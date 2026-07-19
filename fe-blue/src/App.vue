@@ -9,6 +9,7 @@ import { useToast } from 'vue-toastification'
 import FloatingChatWidget from '@/components/App/chat/FloatingChatWidget.vue'
 
 const error = ref(null)
+const isDev = import.meta.env.DEV
 const router = useRouter()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
@@ -27,6 +28,11 @@ onErrorCaptured((err, instance, info) => {
 const reloadApp = () => {
   error.value = null
   router.go(0)
+}
+
+const goHome = () => {
+  error.value = null
+  window.location.href = '/'
 }
 
 const handleApiError = (event) => {
@@ -81,27 +87,40 @@ onUnmounted(() => {
 <template>
   <div
     v-if="error"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-10 text-white"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 text-gray-900 dark:text-white"
   >
-    <div class="bg-red-900 p-8 rounded-xl max-w-4xl w-full overflow-auto max-h-[90vh]">
-      <h1 class="text-3xl font-bold mb-4">Application Error</h1>
-      <pre class="bg-black/50 p-4 rounded text-sm mb-4 whitespace-pre-wrap">{{
-        error.message
-      }}</pre>
-      <div class="mb-4">
-        <p class="font-bold">Info:</p>
-        <pre>{{ error.info }}</pre>
+    <div class="bg-white dark:bg-surface-card p-8 rounded-2xl max-w-md w-full text-center shadow-xl">
+      <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+        <svg class="size-7 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+        </svg>
       </div>
-      <div class="mb-4">
-        <p class="font-bold">Stack:</p>
-        <pre class="text-xs whitespace-pre-wrap">{{ error.stack }}</pre>
+      <h1 class="text-lg font-bold mb-2">Ups, Terjadi Kesalahan</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        Halaman ini mengalami masalah. Silakan muat ulang, atau kembali ke beranda.
+      </p>
+
+      <details v-if="isDev" class="mb-4 text-left">
+        <summary class="cursor-pointer text-xs font-semibold text-gray-500">Detail teknis (dev only)</summary>
+        <pre class="bg-gray-100 dark:bg-black/50 p-3 rounded text-xs mt-2 whitespace-pre-wrap max-h-60 overflow-auto">{{ error.message }}
+{{ error.info }}
+{{ error.stack }}</pre>
+      </details>
+
+      <div class="flex gap-3 justify-center">
+        <button
+          class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-white/10 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+          @click="goHome"
+        >
+          Ke Beranda
+        </button>
+        <button
+          class="px-5 py-2.5 rounded-xl bg-custom-blue text-white font-semibold text-sm hover:shadow-lg hover:shadow-[#0D5CD7]/30 transition-all"
+          @click="reloadApp"
+        >
+          Muat Ulang
+        </button>
       </div>
-      <button
-        class="bg-white text-red-900 px-6 py-2 rounded font-bold hover:bg-gray-200"
-        @click="reloadApp"
-      >
-        Reload Application
-      </button>
     </div>
   </div>
 
