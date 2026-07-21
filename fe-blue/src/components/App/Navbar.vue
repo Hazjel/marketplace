@@ -458,6 +458,22 @@ src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark
                         My Activity
                       </p>
 
+                      <!-- Overview (Buyer Dashboard) -->
+                      <RouterLink
+                        :to="{ name: 'user.dashboard', params: { username: user.username } }"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group"
+                        @click="authStore.setMode('buyer')"
+                      >
+                        <div class="flex items-center gap-3">
+                          <img
+                            src="@/assets/images/icons/home-black.svg"
+                            class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
+                            alt="overview"
+                          />
+                          <span class="text-sm font-medium text-custom-black">Overview</span>
+                        </div>
+                      </RouterLink>
+
                       <!-- Wishlist (Moved here) -->
                       <RouterLink
 :to="{ name: 'app.wishlist' }"

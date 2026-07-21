@@ -39,7 +39,7 @@ v-for="(action, index) in actions" :key="index" :to="action.route || '#'"
         <div class="size-12 rounded-full bg-green-100 flex items-center justify-center mb-1">
           <i class="fa-solid fa-check text-custom-green text-xl"></i>
         </div>
-        <p class="text-sm font-bold text-custom-black dark:text-white">All clared!</p>
+        <p class="text-sm font-bold text-custom-black dark:text-white">All clear!</p>
         <p class="text-xs text-custom-grey dark:text-gray-400">Great job, you have no pending tasks.</p>
       </div>
     </div>
