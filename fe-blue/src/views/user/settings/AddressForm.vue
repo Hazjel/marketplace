@@ -1,8 +1,7 @@
 <script setup>
-import { logger } from '@/utils/logger'
 import { onMounted, ref, reactive } from 'vue'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
-import { axiosInstance } from '@/plugins/axios'
+import { useAddressStore } from '@/stores/address'
 import { useToast } from 'vue-toastification'
 import { debounce } from 'lodash'
 import MapPicker from '@/components/Molecule/MapPicker.vue'
@@ -10,6 +9,7 @@ import MapPicker from '@/components/Molecule/MapPicker.vue'
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
+const addressStore = useAddressStore()
 
 const isEdit = route.params.id ? true : false
 const loading = ref(false)
@@ -64,18 +64,9 @@ const handleCityInput = debounce(async (search) => {
     return
   }
   loadingCities.value = true
-  try {
-    const response = await axiosInstance.get('/shipment/destination', {
-      params: { keyword: search }
-    })
-    const data = response.data
-    cityOptions.value = data.data
-    showCityOptions.value = true
-  } catch (err) {
-    logger.error(err)
-  } finally {
-    loadingCities.value = false
-  }
+  cityOptions.value = await addressStore.searchCity(search)
+  showCityOptions.value = true
+  loadingCities.value = false
 }, 500)
 
 const selectCity = (city) => {
@@ -89,49 +80,50 @@ const selectCity = (city) => {
 const fetchAddress = async () => {
   if (!isEdit) return
   loading.value = true
-  try {
-    const response = await axiosInstance.get(`/address/${route.params.id}`)
-    const data = response.data.data
-    Object.assign(form, {
-      label: data.label,
-      recipient_name: data.recipient_name,
-      phone: data.phone,
-      address: data.address,
-      city: data.city,
-      city_id: data.city_id,
-      postal_code: data.postal_code,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      is_primary: !!data.is_primary
-    })
-    coords.latitude = data.latitude
-    coords.longitude = data.longitude
-    citySearch.value = data.city
-  } catch {
-    toast.error('Failed to load address')
+  const data = await addressStore.fetchAddressById(route.params.id)
+
+  if (!data) {
+    toast.error('Gagal memuat alamat')
     router.push({ name: 'user.settings.address' })
-  } finally {
     loading.value = false
+    return
   }
+
+  Object.assign(form, {
+    label: data.label,
+    recipient_name: data.recipient_name,
+    phone: data.phone,
+    address: data.address,
+    city: data.city,
+    city_id: data.city_id,
+    postal_code: data.postal_code,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    is_primary: !!data.is_primary
+  })
+  coords.latitude = data.latitude
+  coords.longitude = data.longitude
+  citySearch.value = data.city
+  loading.value = false
 }
 
 const submit = async () => {
   if (!form.city_id) {
-    toast.error('Please select a city from the list')
+    toast.error('Pilih kota dari daftar terlebih dahulu')
     return
   }
   submitting.value = true
   try {
     if (isEdit) {
-      await axiosInstance.put(`/address/${route.params.id}`, form)
-      toast.success('Address updated successfully')
+      await addressStore.updateAddress(route.params.id, form)
+      toast.success('Alamat berhasil diperbarui')
     } else {
-      await axiosInstance.post('/address', form)
-      toast.success('Address created successfully')
+      await addressStore.createAddress(form)
+      toast.success('Alamat berhasil ditambahkan')
     }
     router.push({ name: 'user.settings.address' })
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to save address')
+    toast.error(error.response?.data?.message || 'Gagal menyimpan alamat')
   } finally {
     submitting.value = false
   }

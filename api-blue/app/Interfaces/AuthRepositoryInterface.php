@@ -12,5 +12,7 @@ interface AuthRepositoryInterface
 
     public function updateProfile(array $data);
 
+    public function updateSettings(array $data);
+
     public function logout();
 }

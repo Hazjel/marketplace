@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
-import { axiosInstance as axios } from '@/plugins/axios'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -25,16 +24,18 @@ const handleDelete = async () => {
   deleting.value = true
   error.value = null
 
-  try {
-    await axios.delete('/profile')
-    const cartStore = useCartStore()
-    cartStore.onLogout()
-    await authStore.logout()
-    router.push({ name: 'auth.login' })
-  } catch (e) {
-    error.value = e.response?.data?.message || 'Gagal menghapus akun. Silakan coba lagi.'
+  const result = await authStore.deleteAccount()
+
+  if (!result.success) {
+    error.value = result.message
     deleting.value = false
+    return
   }
+
+  const cartStore = useCartStore()
+  cartStore.onLogout()
+  await authStore.logout()
+  router.push({ name: 'auth.login' })
 }
 </script>
 

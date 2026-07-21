@@ -12,25 +12,12 @@ import iconSendOrange from '@/assets/images/icons/card-send-orange-fill.svg'
 import iconEyeSlash from '@/assets/images/icons/eye-slash-white.svg'
 import iconEye from '@/assets/images/icons/eye-white.svg'
 import Pagination from '@/components/admin/Pagination.vue'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const storeBalance = ref({})
 const store = ref({})
 const isBalanceHidden = ref(false)
-import { useAuthStore } from '@/stores/auth'
-const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
 
-const getRoute = (name, params = {}) => {
-  if (user.value?.role === 'admin') {
-    // Admin uses admin.* routes
-    return { name: `admin.${name}`, params }
-  }
-  // Seller uses user.* routes with username
-  return {
-    name: `user.${name}`,
-    params: { username: user.value?.username, ...params }
-  }
-}
 const storeBalanceStore = useStoreBalanceStore()
 const { loading } = storeToRefs(storeBalanceStore)
 const { fetchStoreBalanceByStore } = storeBalanceStore
@@ -237,7 +224,7 @@ onMounted(fetchStoreBalance)
           </div>
         </div>
         <RouterLink
-          :to="getRoute('withdrawal.create')"
+          :to="dashboardRoute('withdrawal.create')"
           class="flex h-11 items-center rounded-xl py-2.5 px-5 bg-blue-600 hover:bg-blue-700 transition-colors duration-200 gap-2 shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -283,7 +270,7 @@ onMounted(fetchStoreBalance)
                 {{ withdrawal.status }}
               </span>
               <RouterLink
-                :to="getRoute('withdrawal.detail', { id: withdrawal.id })"
+                :to="dashboardRoute('withdrawal.detail', { id: withdrawal.id })"
                 class="flex items-center justify-center h-10 w-full md:w-auto px-4 rounded-xl gap-2 bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />

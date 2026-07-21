@@ -1,9 +1,10 @@
 <script setup>
 import { useStoreStore } from '@/stores/store'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import MapPreview from '@/components/Molecule/MapPreview.vue'
 
 const toast = useToast()
 const route = useRoute()
@@ -25,6 +26,10 @@ async function handleApprovedStore() {
 
   fetchData()
 }
+
+const hasCoordinates = computed(
+  () => Boolean(store.value?.latitude) && Boolean(store.value?.longitude)
+)
 
 onMounted(fetchData)
 
@@ -246,15 +251,16 @@ watch(error, (value) => {
 
       <!-- Map -->
       <div class="flex flex-col gap-3">
-        <div class="w-full h-[260px] overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10">
-          <div id="g-mapdisplay" class="size-full">
-            <iframe
-              class="size-full border-none"
-              frameborder="0"
-              src="https://www.google.com/maps/embed/v1/place?q=Malang&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
-            >
-            </iframe>
-          </div>
+        <MapPreview
+          v-if="hasCoordinates"
+          :latitude="store.latitude"
+          :longitude="store.longitude"
+          height="h-[260px]"
+        />
+        <div
+          v-else
+          class="flex w-full h-[260px] items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
+          <p class="text-sm text-gray-500 dark:text-gray-400">Lokasi belum diatur</p>
         </div>
         <p class="font-medium text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
           {{ store.address }}

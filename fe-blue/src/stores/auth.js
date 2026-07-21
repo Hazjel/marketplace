@@ -124,6 +124,72 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async updateProfile(formData) {
+      this.loading = true
+      this.error = null
+      this.success = null
+
+      try {
+        const response = await axiosInstance.post('/profile', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+
+        this.user = response.data.data
+        this.success = response.data.message
+
+        return { success: true }
+      } catch (error) {
+        if (error.response?.status === 422) {
+          this.error = error.response.data.errors
+          return { success: false, errors: error.response.data.errors }
+        }
+        this.error = handleError(error)
+        return {
+          success: false,
+          errors: { general: [error.response?.data?.message || 'Terjadi kesalahan.'] }
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateSettings(payload) {
+      this.loading = true
+      this.error = null
+      this.success = null
+
+      try {
+        const response = await axiosInstance.put('/profile/settings', payload)
+
+        this.user = response.data.data
+        this.success = response.data.message
+
+        return true
+      } catch (error) {
+        this.error = handleError(error)
+        return false
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async deleteAccount() {
+      this.loading = true
+      this.error = null
+
+      try {
+        await axiosInstance.delete('/profile')
+        return { success: true }
+      } catch (error) {
+        return {
+          success: false,
+          message: error.response?.data?.message || 'Gagal menghapus akun. Silakan coba lagi.'
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+
     async forgotPassword(email) {
       this.loading = true
       this.error = null

@@ -10,6 +10,7 @@ import { useToast } from 'vue-toastification'
 import ReviewModal from '@/components/ReviewModal.vue'
 import TrackingMap from '@/components/TrackingMap.vue'
 import { logger } from '@/utils/logger'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const route = useRoute()
 const toast = useToast()
@@ -244,7 +245,7 @@ v-else-if="!transaction || !transaction.id"
     </div>
     <p class="font-bold text-xl text-custom-black dark:text-white">Transaksi Tidak Ditemukan</p>
     <p class="text-sm text-custom-grey dark:text-gray-400">Data transaksi tidak tersedia atau telah dihapus</p>
-    <RouterLink :to="{ name: 'admin.my-transaction' }" class="mt-2 px-6 py-2.5 rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors">
+    <RouterLink :to="dashboardRoute('my-transaction')" class="mt-2 px-6 py-2.5 rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors">
       Kembali ke Transaksi
     </RouterLink>
   </div>

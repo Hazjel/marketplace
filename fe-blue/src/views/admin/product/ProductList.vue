@@ -3,6 +3,7 @@ import CardList from '@/components/admin/product/CardList.vue'
 import Pagination from '@/components/admin/Pagination.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useProductStore } from '@/stores/product'
+import { dashboardRoute } from '@/helpers/routeHelper'
 import { debounce } from 'lodash'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch, reactive, computed } from 'vue'
@@ -135,7 +136,7 @@ watch(error, (value) => {
       </div>
       <RouterLink
         v-if="user?.permissions?.includes('product-create')"
-        :to="{ name: 'admin.product.create' }"
+        :to="dashboardRoute('product.create')"
         class="flex h-11 items-center justify-center rounded-xl px-5 gap-2 bg-white text-blue-700 font-semibold text-sm hover:bg-blue-50 transition-colors shadow-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -271,7 +272,7 @@ watch(error, (value) => {
       </div>
       <RouterLink
         v-if="user?.permissions?.includes('product-create')"
-        :to="{ name: 'admin.product.create' }"
+        :to="dashboardRoute('product.create')"
         class="flex h-10 items-center rounded-xl px-5 gap-2 bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors mt-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />

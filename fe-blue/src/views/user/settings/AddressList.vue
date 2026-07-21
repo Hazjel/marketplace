@@ -1,41 +1,27 @@
 <script setup>
-import { logger } from '@/utils/logger'
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-
-import { axiosInstance } from '@/plugins/axios'
+import { storeToRefs } from 'pinia'
+import { useAddressStore } from '@/stores/address'
 import { useToast } from 'vue-toastification'
 
 const toast = useToast()
-const addresses = ref([])
-const loading = ref(true)
+const addressStore = useAddressStore()
+const { addresses, loading } = storeToRefs(addressStore)
 
-const fetchAddresses = async () => {
-  loading.value = true
-  try {
-    const response = await axiosInstance.get('/address')
-    addresses.value = response.data.data
-  } catch (error) {
-    logger.error('Error fetching addresses:', error)
-  } finally {
-    loading.value = false
-  }
-}
+const handleDelete = async (id) => {
+  if (!confirm('Yakin ingin menghapus alamat ini?')) return
 
-const deleteAddress = async (id) => {
-  if (!confirm('Are you sure you want to delete this address?')) return
-
-  try {
-    await axiosInstance.delete(`/address/${id}`)
-    toast.success('Address deleted successfully')
-    fetchAddresses()
-  } catch {
-    toast.error('Failed to delete address')
+  const ok = await addressStore.deleteAddress(id)
+  if (ok) {
+    toast.success('Alamat berhasil dihapus')
+  } else {
+    toast.error('Gagal menghapus alamat')
   }
 }
 
 onMounted(() => {
-  fetchAddresses()
+  addressStore.fetchAddresses()
 })
 </script>
 
@@ -137,7 +123,7 @@ onMounted(() => {
           </RouterLink>
           <button
             class="flex-1 py-2.5 text-center bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-900/30 transition-all"
-            @click="deleteAddress(address.id)"
+            @click="handleDelete(address.id)"
           >
             Hapus
           </button>

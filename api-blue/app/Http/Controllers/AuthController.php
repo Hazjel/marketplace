@@ -97,6 +97,24 @@ class AuthController extends Controller
         }
     }
 
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'notification_prefs' => 'sometimes|array',
+            'notification_prefs.*' => 'boolean',
+            'privacy_prefs' => 'sometimes|array',
+            'privacy_prefs.*' => 'boolean',
+        ]);
+
+        try {
+            $user = $this->authRepository->updateSettings($request->only(['notification_prefs', 'privacy_prefs']));
+
+            return ResponseHelper::jsonResponse(true, 'Pengaturan Berhasil Disimpan', new UserResource($user), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
     public function logout()
     {
         try {

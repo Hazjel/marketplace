@@ -1,28 +1,17 @@
 <script setup>
 import { formatDate } from '@/helpers/format'
 import { useStoreStore } from '@/stores/store'
-import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import MapPreview from '@/components/Molecule/MapPreview.vue'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const store = ref({})
 
 const storeStore = useStoreStore()
 const { loading } = storeToRefs(storeStore)
 
-const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
-
-const getEditStoreRoute = () => {
-  if (user.value?.role === 'admin') {
-    return { name: 'admin.edit-store' }
-  }
-  return {
-    name: 'user.edit-store',
-    params: { username: user.value?.username }
-  }
-}
 const { fetchStoreByUser } = storeStore
 
 const fetchStore = async () => {
@@ -38,10 +27,9 @@ const fullAddress = computed(() => {
   return [store.value.address, store.value.city, store.value.postal_code].filter(Boolean).join(', ')
 })
 
-const mapSrc = computed(() => {
-  const query = fullAddress.value || 'Malang'
-  return `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(query)}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`
-})
+const hasCoordinates = computed(
+  () => Boolean(store.value?.latitude) && Boolean(store.value?.longitude)
+)
 </script>
 
 <template>
@@ -103,7 +91,7 @@ const mapSrc = computed(() => {
         </div>
         <div class="flex flex-col gap-3 pt-2">
           <RouterLink
-            :to="getEditStoreRoute()"
+            :to="dashboardRoute('edit-store')"
             class="flex items-center justify-center h-11 w-full rounded-xl gap-2 bg-gray-900 dark:bg-white dark:hover:bg-gray-100 hover:bg-gray-800 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-white dark:text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -151,10 +139,16 @@ const mapSrc = computed(() => {
         </div>
       </div>
       <div class="flex flex-col gap-3">
-        <div class="w-full h-[250px] overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10">
-          <div id="g-mapdisplay" class="size-full">
-            <iframe class="size-full border-none" frameborder="0" :src="mapSrc"> </iframe>
-          </div>
+        <MapPreview
+          v-if="hasCoordinates"
+          :latitude="store.latitude"
+          :longitude="store.longitude"
+          height="h-[250px]"
+        />
+        <div
+          v-else
+          class="flex w-full h-[250px] items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
+          <p class="text-sm text-gray-500 dark:text-gray-400">Lokasi belum diatur</p>
         </div>
         <p v-if="fullAddress" class="text-sm font-medium leading-relaxed dark:text-white">{{ fullAddress }}</p>
         <p v-else class="text-sm font-medium text-gray-500 dark:text-gray-400">Alamat belum diatur</p>
@@ -174,7 +168,7 @@ const mapSrc = computed(() => {
           <p class="text-sm text-gray-500">Buat toko Anda sekarang untuk mulai berjualan</p>
         </div>
         <RouterLink
-          :to="{ name: 'admin.create-store' }"
+          :to="dashboardRoute('create-store')"
           class="flex h-10 items-center rounded-xl px-5 bg-blue-600 gap-2 hover:bg-blue-700 transition-colors">
           <span class="font-semibold text-sm text-white">Buat Toko</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
