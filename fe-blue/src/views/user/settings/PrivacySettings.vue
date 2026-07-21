@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 
@@ -15,12 +15,23 @@ const privacy = ref({
 const saving = ref(false)
 const saved = ref(false)
 
+const loadPrefs = () => {
+  if (user.value?.privacy_prefs) {
+    privacy.value = { ...privacy.value, ...user.value.privacy_prefs }
+  }
+}
+
+onMounted(loadPrefs)
+
 const handleSave = async () => {
   saving.value = true
-  await new Promise((r) => setTimeout(r, 800))
+  const ok = await authStore.updateSettings({ privacy_prefs: privacy.value })
   saving.value = false
-  saved.value = true
-  setTimeout(() => (saved.value = false), 3000)
+
+  if (ok) {
+    saved.value = true
+    setTimeout(() => (saved.value = false), 3000)
+  }
 }
 </script>
 

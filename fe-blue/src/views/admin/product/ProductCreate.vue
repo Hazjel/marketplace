@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { parseRupiah } from '@/helpers/format'
 import StepWizard from '@/components/Molecule/StepWizard.vue'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const productStore = useProductStore()
 const router = useRouter()
@@ -176,7 +177,7 @@ const handleSubmit = async () => {
 
   // This component — not the store — is responsible for post-success navigation.
   if (result?.success) {
-    router.push({ name: 'admin.product' })
+    router.push(dashboardRoute('product'))
   }
 }
 

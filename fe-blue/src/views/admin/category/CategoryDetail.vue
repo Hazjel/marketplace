@@ -6,6 +6,7 @@ import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { RouterLink } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const toast = useToast()
 const route = useRoute()
@@ -124,7 +125,7 @@ watch(error, (value) => {
 
         <div class="px-6">
           <RouterLink
-            :to="{ name: 'admin.category.create', query: { parent_id: productCategory?.id } }"
+            :to="{ ...dashboardRoute('category.create'), query: { parent_id: productCategory?.id } }"
             class="flex h-11 items-center justify-center rounded-xl py-2.5 px-5 bg-blue-600 hover:bg-blue-700 gap-2 transition-colors duration-200 w-full">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -158,8 +159,7 @@ watch(error, (value) => {
                 </button>
                 <RouterLink
                   :to="{
-                    name: 'admin.category.edit',
-                    params: { id: childrens.id },
+                    ...dashboardRoute('category.edit', { id: childrens.id }),
                     query: { parent_id: productCategory.id }
                   }"
                   class="flex items-center justify-center size-9 shrink-0 rounded-lg bg-gray-900 dark:bg-white/10 hover:bg-gray-800 dark:hover:bg-white/20 transition-colors duration-200">

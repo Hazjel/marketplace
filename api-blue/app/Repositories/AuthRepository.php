@@ -166,6 +166,47 @@ class AuthRepository implements AuthRepositoryInterface
         }
     }
 
+    public function updateSettings(array $data)
+    {
+        DB::beginTransaction();
+
+        try {
+            if (! Auth::check()) {
+                throw new Exception('Unauthorized', 401);
+            }
+
+            $user = Auth::user();
+
+            // Merge dengan nilai lama (atau default) + batasi hanya key yang dikenal,
+            // supaya request parsial tidak menghapus preferensi lain.
+            if (isset($data['notification_prefs'])) {
+                $current = $user->notification_prefs ?? User::DEFAULT_NOTIFICATION_PREFS;
+                $user->notification_prefs = array_intersect_key(
+                    array_merge($current, $data['notification_prefs']),
+                    User::DEFAULT_NOTIFICATION_PREFS
+                );
+            }
+
+            if (isset($data['privacy_prefs'])) {
+                $current = $user->privacy_prefs ?? User::DEFAULT_PRIVACY_PREFS;
+                $user->privacy_prefs = array_intersect_key(
+                    array_merge($current, $data['privacy_prefs']),
+                    User::DEFAULT_PRIVACY_PREFS
+                );
+            }
+
+            $user->save();
+
+            DB::commit();
+
+            return $user;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw new Exception($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
     public function me()
     {
         DB::beginTransaction();

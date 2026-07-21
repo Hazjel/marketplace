@@ -6,12 +6,14 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { debounce } from 'lodash'
-import { axiosInstance } from '@/plugins/axios'
+import { useAddressStore } from '@/stores/address'
 
 const route = useRoute()
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
+
+const addressStore = useAddressStore()
 
 const storeStore = useStoreStore()
 const { loading, error } = storeToRefs(storeStore)
@@ -58,23 +60,10 @@ const handleAddressInput = debounce(async (search) => {
   }
 
   loadingAddress.value = true
-  try {
-    const response = await axiosInstance.get('/shipment/destination', {
-      params: { keyword: search }
-    })
-
-    const data = response.data
-
-    if (data.data) {
-      addressOptions.value = data.data
-      showAddressOptions.value = true
-    }
-  } catch (err) {
-    console.error('Error fetching address:', err)
-    addressOptions.value = []
-  } finally {
-    loadingAddress.value = false
-  }
+  const results = await addressStore.searchCity(search)
+  addressOptions.value = results
+  showAddressOptions.value = results.length > 0
+  loadingAddress.value = false
 }, 500)
 
 const handleAddressSelect = (selected) => {

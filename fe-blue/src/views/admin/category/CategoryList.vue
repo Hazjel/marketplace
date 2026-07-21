@@ -12,20 +12,7 @@ const toast = useToast()
 const productCategoryStore = useProductCategoryStore()
 const { productCategories, meta, loading, success, error } = storeToRefs(productCategoryStore)
 const { fetchProductCategoriesPaginated, deleteProductCategory } = productCategoryStore
-import { useAuthStore } from '@/stores/auth'
-
-const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
-
-const getRoute = (name, params = {}) => {
-  if (user.value?.role === 'admin') {
-    return { name: `admin.${name}`, params }
-  }
-  return {
-    name: `user.${name}`,
-    params: { username: user.value?.username, ...params }
-  }
-}
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const serverOptions = ref({
   page: 1,
@@ -101,7 +88,7 @@ watch(error, (value) => {
           </div>
         </div>
         <RouterLink
-          :to="getRoute('category.create')"
+          :to="dashboardRoute('category.create')"
           class="flex h-11 items-center rounded-xl py-2.5 px-5 bg-white/20 hover:bg-white/30 transition-colors duration-200 gap-2 border border-white/20">
           <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

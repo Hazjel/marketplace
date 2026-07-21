@@ -18,13 +18,23 @@ const notifications = ref({
 const saving = ref(false)
 const saved = ref(false)
 
+const loadPrefs = () => {
+  if (user.value?.notification_prefs) {
+    notifications.value = { ...notifications.value, ...user.value.notification_prefs }
+  }
+}
+
+onMounted(loadPrefs)
+
 const handleSave = async () => {
   saving.value = true
-  // Simulated save — integrate with backend API later
-  await new Promise((r) => setTimeout(r, 800))
+  const ok = await authStore.updateSettings({ notification_prefs: notifications.value })
   saving.value = false
-  saved.value = true
-  setTimeout(() => (saved.value = false), 3000)
+
+  if (ok) {
+    saved.value = true
+    setTimeout(() => (saved.value = false), 3000)
+  }
 }
 </script>
 

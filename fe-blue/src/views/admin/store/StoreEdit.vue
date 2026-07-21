@@ -6,8 +6,9 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { debounce } from 'lodash'
 import { useToast } from 'vue-toastification'
-import { axiosInstance } from '@/plugins/axios'
+import { useAddressStore } from '@/stores/address'
 import MapPicker from '@/components/Molecule/MapPicker.vue'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const router = useRouter()
 const toast = useToast()
@@ -18,6 +19,8 @@ const { user } = storeToRefs(authStore)
 const storeStore = useStoreStore()
 const { loading } = storeToRefs(storeStore)
 const { fetchStoreByUser, updateStore } = storeStore
+
+const addressStore = useAddressStore()
 
 const store = ref({
   id: null,
@@ -96,7 +99,7 @@ const handleSubmit = async () => {
 
     // Redirect after success
     setTimeout(() => {
-      router.push({ name: 'admin.my-store' })
+      router.push(dashboardRoute('my-store'))
     }, 2000)
   } catch (err) {
     console.error('Submit error:', err)
@@ -132,20 +135,9 @@ const handleAddressInput = debounce(async (search) => {
   }
 
   loadingAddress.value = true
-  try {
-    const response = await axiosInstance.get('/shipment/destination', {
-      params: { keyword: search }
-    })
-
-    const data = response.data
-    addressOptions.value = data.data
-    showAddressOptions.value = true
-  } catch (err) {
-    console.error('Error fetching address:', err)
-    addressOptions.value = []
-  } finally {
-    loadingAddress.value = false
-  }
+  addressOptions.value = await addressStore.searchCity(search)
+  showAddressOptions.value = true
+  loadingAddress.value = false
 }, 500)
 
 const handleAddressSelect = (selected) => {
@@ -417,7 +409,7 @@ onMounted(fetchData)
       </div>
       <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
         <RouterLink
-          :to="{ name: 'admin.my-store' }"
+          :to="dashboardRoute('my-store')"
           class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
         >
           Batal

@@ -4,8 +4,6 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 
-import { axiosInstance as axios } from '@/plugins/axios'
-
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 const { checkAuth } = authStore
@@ -100,17 +98,15 @@ const handleSubmit = async () => {
       formData.append('password_confirmation', form.value.password_confirmation)
     }
 
-    // Use POST with _method: PUT for file upload support
-    const response = await axios.post('/profile', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    // Method spoofing (POST + _method:PUT) dipertahankan untuk dukung file upload
+    const result = await authStore.updateProfile(formData)
+
+    if (!result.success) {
+      errors.value = result.errors
+      return
+    }
 
     successMessage.value = 'Profil berhasil diperbarui!'
-
-    // Refresh auth user data
-    await checkAuth()
 
     // Reset password fields
     form.value.current_password = ''
@@ -122,15 +118,6 @@ const handleSubmit = async () => {
     // keep previewImage as it is now the current user image, or reset it?
     // Better to reset preview and show default user image from store (which is updated)
     previewImage.value = null
-  } catch (error) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors
-    } else {
-      console.error(error)
-      errors.value = {
-        general: [error.response?.data?.message || 'Something went wrong']
-      }
-    }
   } finally {
     isLoading.value = false
   }

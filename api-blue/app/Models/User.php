@@ -17,6 +17,27 @@ class User extends Authenticatable implements MustVerifyEmail
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable, UUID;
 
+    /**
+     * Default preferensi notifikasi (dipakai saat kolom masih null).
+     */
+    public const DEFAULT_NOTIFICATION_PREFS = [
+        'order_updates' => true,
+        'review_reminders' => true,
+        'promotions' => false,
+        'price_drops' => true,
+        'newsletter' => false,
+        'new_messages' => true,
+    ];
+
+    /**
+     * Default preferensi privasi.
+     */
+    public const DEFAULT_PRIVACY_PREFS = [
+        'profile_visible' => true,
+        'show_online_status' => true,
+        'show_purchase_history' => false,
+    ];
+
     public function getProfilePictureAttribute($value)
     {
         if ($value) {
@@ -43,6 +64,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'last_seen_at',
+        'notification_prefs',
+        'privacy_prefs',
     ];
 
     /**
@@ -63,6 +86,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_seen_at' => 'datetime',
+            'notification_prefs' => 'array',
+            'privacy_prefs' => 'array',
         ];
     }
 

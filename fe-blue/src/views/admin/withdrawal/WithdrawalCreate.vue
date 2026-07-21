@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { ref, onMounted, watch } from 'vue'
 import { formatRupiah, parseRupiah } from '@/helpers/format'
 import { useWithdrawalStore } from '@/stores/withdrawal'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const storeBalance = ref({})
 
@@ -221,7 +222,7 @@ onMounted(fetchStoreBalance)
 
       <div class="flex items-center justify-end gap-3 pt-2">
         <RouterLink
-          :to="{ name: 'admin.my-store-balance' }"
+          :to="dashboardRoute('my-store-balance')"
           class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-semibold text-sm border border-red-200 dark:border-red-700/50 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200">
           Batal
         </RouterLink>

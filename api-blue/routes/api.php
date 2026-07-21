@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\HealthController;
@@ -78,6 +79,7 @@ Route::get('store/{id}', [StoreController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::put('profile', [AuthController::class, 'updateProfile']);
+    Route::put('profile/settings', [AuthController::class, 'updateSettings']);
     Route::post('logout', [AuthController::class, 'logout']);
 
     // Register Store (Upgrade Role)
@@ -192,6 +194,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
         'show',
     ]);
+
+    // Dashboard summary routes
+    Route::get('seller/dashboard/summary', [DashboardController::class, 'sellerSummary']);
+    Route::get('buyer/dashboard/summary', [DashboardController::class, 'buyerSummary']);
 
     // Transaction routes - custom routes BEFORE resource
     Route::get('transaction/chart-data', [

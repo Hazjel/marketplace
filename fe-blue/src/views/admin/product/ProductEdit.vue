@@ -7,6 +7,7 @@ import { onMounted, ref, watch } from 'vue'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { useRoute, useRouter } from 'vue-router'
 import { parseRupiah } from '@/helpers/format'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const route = useRoute()
 
@@ -150,7 +151,7 @@ const handleSubmit = async () => {
 
   // This component — not the store — is responsible for post-success navigation.
   if (result?.success) {
-    router.push({ name: 'admin.product' })
+    router.push(dashboardRoute('product'))
   }
 }
 
@@ -505,7 +506,7 @@ src="@/assets/images/icons/arrow-down-black.svg"
 
     <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
       <RouterLink
-        :to="{ name: 'admin.product' }"
+        :to="dashboardRoute('product')"
         class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
         Batal
       </RouterLink>

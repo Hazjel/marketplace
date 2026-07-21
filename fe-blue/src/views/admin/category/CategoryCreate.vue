@@ -6,6 +6,7 @@ import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { RouterLink, useRoute } from 'vue-router'
 import Button from '@/components/Atom/Button.vue'
 import Input from '@/components/Atom/Input.vue'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const route = useRoute()
 
@@ -173,10 +174,10 @@ onMounted(async () => {
         <Button
           v-if="productCategory?.parent_id"
           variant="danger"
-          :to="{ name: 'admin.category.detail', params: { id: productCategory?.parent_id } }">
+          :to="dashboardRoute('category.detail', { id: productCategory?.parent_id })">
           Batal
         </Button>
-        <Button v-if="!productCategory.parent_id" variant="danger" :to="{ name: 'admin.category' }">
+        <Button v-if="!productCategory.parent_id" variant="danger" :to="dashboardRoute('category')">
           Batal
         </Button>
         <Button type="submit" variant="primary" :loading="loading"> Buat Sekarang </Button>

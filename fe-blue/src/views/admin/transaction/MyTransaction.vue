@@ -3,42 +3,22 @@ import { useTransactionStore } from '@/stores/transaction'
 import { debounce } from 'lodash'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch, computed } from 'vue'
-import { axiosInstance } from '@/plugins/axios'
 import { RouterLink } from 'vue-router'
 import { formatToClientTimeZone } from '@/helpers/format'
 import { formatRupiah } from '@/helpers/format'
 import { useToast } from 'vue-toastification'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const toast = useToast()
 const transactionStore = useTransactionStore()
 const { transactions, meta, loading, success, error } = storeToRefs(transactionStore)
 const { fetchTransactionsPaginated } = transactionStore
 
-import { useAuthStore } from '@/stores/auth'
-const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
-
-const filteredTransactions = computed(() => {
-  const items = transactions.value || []
-  if (!user.value) return []
-
-  const userBuyerId = user.value?.buyer?.id || user.value?.buyer_id || user.value?.id
-
-  return items
-    .filter((t) => {
-      const txBuyerId = t?.buyer?.id || t?.buyer_id
-      return txBuyerId && userBuyerId && String(txBuyerId) === String(userBuyerId)
-    })
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-})
-
-const clientFiltered = ref([])
-
+// Backend sudah filter by buyer/store sesuai `mode` (lihat transaction.js
+// store: fetchTransactionsPaginated selalu kirim activeMode) — tidak perlu
+// filter ulang di client.
 const displayTransactions = computed(() => {
-  let items =
-    clientFiltered.value && clientFiltered.value.length
-      ? clientFiltered.value
-      : filteredTransactions.value
+  let items = transactions.value || []
 
   if (filters.value.search && filters.value.search.trim()) {
     const searchTerm = filters.value.search.trim().toLowerCase()
@@ -110,62 +90,13 @@ const filters = ref({
 })
 
 const fetchData = async () => {
-  clientFiltered.value = []
-
-  const params = {
+  await fetchTransactionsPaginated({
     ...serverOptions.value,
     ...filters.value
-  }
-
-  if (user.value?.buyer?.id) {
-    params.buyer_id = user.value.buyer.id
-  }
-
-  await fetchTransactionsPaginated(params)
-
-  try {
-    if (
-      !filters.value.search &&
-      (transactions.value || []).length > 0 &&
-      filteredTransactions.value.length === 0
-    ) {
-      const all = []
-      const lastPage = meta.value?.last_page || 1
-      for (let p = 1; p <= lastPage; p++) {
-        const resp = await axiosInstance.get('transaction/all/paginated', {
-          params: { ...serverOptions.value, ...filters.value, page: p }
-        })
-        const pageItems = resp.data.data.data || []
-        all.push(...pageItems)
-      }
-
-      const userBuyerId = user.value?.buyer?.id || user.value?.buyer_id || user.value?.id
-      const matched = all
-        .filter((t) => {
-          const txBuyerId = t?.buyer?.id || t?.buyer_id
-          return txBuyerId && userBuyerId && String(txBuyerId) === String(userBuyerId)
-        })
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-
-      clientFiltered.value = matched
-    }
-  } catch (err) {
-    // fallback error handled silently
-  }
+  })
 }
 
-const getDetailRoute = (transactionId) => {
-  if (user.value?.role === 'buyer') {
-    return {
-      name: 'user.transaction.detail',
-      params: { username: user.value.username, id: transactionId }
-    }
-  }
-  return {
-    name: 'admin.transaction.detail',
-    params: { id: transactionId }
-  }
-}
+const getDetailRoute = (transactionId) => dashboardRoute('transaction.detail', { id: transactionId })
 
 const debounceFetchData = debounce(fetchData, 2000)
 
