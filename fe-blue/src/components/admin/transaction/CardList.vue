@@ -3,6 +3,7 @@ import { formatRupiah, formatToClientTimeZone } from '@/helpers/format'
 import { can } from '@/helpers/permissionHelper'
 import { RouterLink } from 'vue-router'
 import Badge from '@/components/Atom/Badge.vue'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 defineProps({
   item: {
@@ -11,24 +12,6 @@ defineProps({
   }
 })
 
-import { useAuthStore } from '@/stores/auth'
-import { storeToRefs } from 'pinia'
-
-const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
-
-const getDetailRoute = (transactionId) => {
-  if (user.value?.role === 'admin') {
-    return {
-      name: 'admin.transaction.detail',
-      params: { id: transactionId }
-    }
-  }
-  return {
-    name: 'user.transaction.detail',
-    params: { username: user.value?.username, id: transactionId }
-  }
-}
 const emit = defineEmits(['delete'])
 </script>
 
@@ -108,7 +91,7 @@ src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 
       </div>
       <div class="flex items-center justify-end gap-[14px] w-full md:w-auto">
         <RouterLink
-:to="getDetailRoute(item.id)"
+:to="dashboardRoute('transaction.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>

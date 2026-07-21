@@ -2,6 +2,7 @@
 import { formatRupiah } from '@/helpers/format'
 import { can } from '@/helpers/permissionHelper'
 import { RouterLink } from 'vue-router'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 defineProps({
   item: {
@@ -71,7 +72,7 @@ src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 
       </div>
       <div class="flex items-center justify-end gap-[14px] w-full md:w-auto">
         <RouterLink
-:to="{ name: 'admin.store-balance.detail', params: { id: item.id } }"
+:to="dashboardRoute('store-balance.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>
