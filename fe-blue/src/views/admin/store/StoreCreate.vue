@@ -7,6 +7,8 @@ import { useRoute } from 'vue-router'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { debounce } from 'lodash'
 import { useAddressStore } from '@/stores/address'
+import { dashboardRoute } from '@/helpers/routeHelper'
+import MapPicker from '@/components/Molecule/MapPicker.vue'
 
 const route = useRoute()
 
@@ -36,6 +38,28 @@ const addressSearch = ref('')
 const addressOptions = ref([])
 const showAddressOptions = ref(false)
 const loadingAddress = ref(false)
+
+const storeCoords = ref({ latitude: null, longitude: null })
+
+const handleCoordsUpdate = (value) => {
+  storeCoords.value = value
+  store.value.latitude = value.latitude
+  store.value.longitude = value.longitude
+}
+
+// Auto-isi alamat dari reverse geocode saat pin digeser / "Gunakan Lokasi Saya"
+const handleResolvedAddress = (info) => {
+  if (info.display_name) {
+    store.value.address = [info.road, info.suburb].filter(Boolean).join(', ') || info.display_name
+    addressSearch.value = store.value.address
+  }
+  if (info.postal_code) {
+    store.value.postal_code = info.postal_code
+  }
+  if (info.city) {
+    store.value.city = info.city
+  }
+}
 
 const handleSubmit = async () => {
   await createStore(store.value)
@@ -221,6 +245,16 @@ const handleAddressSelect = (selected) => {
       </div>
     </div>
     <div class="flex flex-col md:flex-row justify-between gap-4">
+      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Titik Lokasi Toko</p>
+      <div class="flex flex-col gap-2 w-full md:w-1/2">
+        <MapPicker
+          :model-value="storeCoords"
+          @update:model-value="handleCoordsUpdate"
+          @address="handleResolvedAddress"
+        />
+      </div>
+    </div>
+    <div class="flex flex-col md:flex-row justify-between gap-4">
       <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Alamat Toko</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.address }">
         <label
@@ -294,12 +328,12 @@ const handleAddressSelect = (selected) => {
       </div>
     </div>
     <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
-      <a
-        href="my-store.html"
+      <RouterLink
+        :to="dashboardRoute('my-store')"
         class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
       >
         Batal
-      </a>
+      </RouterLink>
       <button
         type="submit"
         :disabled="loading"

@@ -9,6 +9,7 @@ import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { parseRupiah } from '@/helpers/format'
 import StepWizard from '@/components/Molecule/StepWizard.vue'
 import { dashboardRoute } from '@/helpers/routeHelper'
+import { useProductVariants } from '@/composables/useProductVariants'
 
 const productStore = useProductStore()
 const router = useRouter()
@@ -61,43 +62,8 @@ const product = ref({
   ]
 })
 
-// Dynamic Variant Options
-const optionGroups = ref([])
-const newOptionName = ref('')
-
-const addOptionGroup = () => {
-  if (newOptionName.value && !optionGroups.value.includes(newOptionName.value)) {
-    optionGroups.value.push(newOptionName.value)
-    newOptionName.value = ''
-    // Add new key to existing variants
-    product.value.variants.forEach((v) => {
-      if (!v.variant_attributes) v.variant_attributes = {}
-    })
-  }
-}
-
-const addVariant = () => {
-  const attributes = {}
-  optionGroups.value.forEach((opt) => (attributes[opt] = ''))
-  product.value.variants.push({
-    name: '',
-    price: product.value.price || 0, // Default to product price
-    stock: 0,
-    variant_attributes: attributes
-  })
-}
-
-const autoGenerateName = (variant) => {
-  if (variant.variant_attributes) {
-    // e.g. "Red - XL"
-    const parts = Object.values(variant.variant_attributes).filter((val) => val)
-    if (parts.length > 0) {
-      variant.name = parts.join(' - ')
-    } else {
-      variant.name = ''
-    }
-  }
-}
+const { optionGroups, newOptionName, addOptionGroup, addVariant, autoGenerateName } =
+  useProductVariants(product)
 
 const steps = ['General Info', 'Stock & Price', 'Visuals']
 
@@ -122,18 +88,6 @@ const validateStep = (step) => {
     }
   }
   if (step === 3) {
-    const hasThumbnail = product.value.product_images.some(
-      (img) => img.is_thumbnail && (img.image || img.url !== PlaceHolder)
-    )
-    // However, maybe it SHOULD be used?
-    // "Also check if at least one real image exists" - next check.
-    // I will check lines 123-134.
-    // Original:
-    // const hasThumbnail = ...
-    // const hasImage = ...
-    // if (!hasImage) ...
-    // It seems hasThumbnail is unused. I will remove it.
-    // Also check if at least one real image exists
     const hasImage = product.value.product_images.some(
       (img) => img.image || img.url !== PlaceHolder
     )
