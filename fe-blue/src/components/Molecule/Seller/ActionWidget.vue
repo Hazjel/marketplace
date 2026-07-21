@@ -1,4 +1,6 @@
 <script setup>
+import { resolveIconUrl } from '@/helpers/iconHelper'
+
 defineProps({
   actions: {
     type: Array,
@@ -24,7 +26,7 @@ v-for="(action, index) in actions" :key="index" :to="action.route || '#'"
             <div
               class="size-10 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-custom-blue group-hover:text-custom-blue text-custom-grey transition-colors">
               <img
-:src="`/src/assets/images/icons/${action.icon}`"
+:src="resolveIconUrl(action.icon)"
                 class="size-5 opacity-60 group-hover:opacity-100 dark:invert" />
             </div>
             <span class="font-medium text-custom-black dark:text-white text-sm">{{ action.label }}</span>

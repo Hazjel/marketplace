@@ -1,5 +1,6 @@
 <script setup>
 import { Card } from '@/components/ui/card'
+import { resolveIconUrl } from '@/helpers/iconHelper'
 
 defineProps({
   title: { type: String, required: true },
@@ -22,7 +23,7 @@ defineProps({
     <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
     <div class="relative flex flex-col gap-4">
       <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm">
-        <img :src="`/src/assets/images/icons/${icon}`" class="size-6 shrink-0 invert" alt="icon" />
+        <img :src="resolveIconUrl(icon)" class="size-6 shrink-0 invert" alt="icon" />
       </div>
       <div>
         <p class="text-sm font-medium text-white/80">{{ title }}</p>
@@ -56,7 +57,7 @@ defineProps({
     <div class="flex flex-col gap-6">
       <div class="flex justify-between items-start">
         <div class="flex size-[56px] bg-custom-blue/10 dark:bg-blue-500/20 items-center justify-center rounded-2xl">
-          <img :src="`/src/assets/images/icons/${icon}`" class="flex size-6 shrink-0 dark:invert" alt="icon" />
+          <img :src="resolveIconUrl(icon)" class="flex size-6 shrink-0 dark:invert" alt="icon" />
         </div>
         <div
           v-if="trend"
