@@ -134,6 +134,27 @@ class ProductRepository implements ProductRepositoryInterface
         return $query->sum('transaction_details.qty');
     }
 
+    public function getProductCountForStore(string $storeId): int
+    {
+        return Product::where('store_id', $storeId)->count();
+    }
+
+    /**
+     * Produk terlaris toko, diurutkan dari total qty terjual (transaksi paid).
+     */
+    public function getTopProducts(string $storeId, int $limit = 5)
+    {
+        return Product::where('store_id', $storeId)
+            ->withSum(['transactionDetails as sold' => function ($q) {
+                $q->whereHas('transaction', function ($t) {
+                    $t->where('payment_status', 'paid');
+                });
+            }], 'qty')
+            ->orderByDesc('sold')
+            ->take($limit)
+            ->get();
+    }
+
     public function getById(string $id)
     {
         $query = Product::where('id', $id)->with(['productImages', 'variants', 'productReviews.user', 'productReviews.attachments']);

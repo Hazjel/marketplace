@@ -96,10 +96,15 @@ class TransactionController extends Controller implements HasMiddleware
         }
     }
 
-    public function getChartData()
+    public function getChartData(Request $request)
     {
+        $days = (int) $request->query('days', 7);
+        if (! in_array($days, [7, 30, 90], true)) {
+            $days = 7;
+        }
+
         try {
-            $data = $this->transactionRepository->getChartData();
+            $data = $this->transactionRepository->getChartData($days);
 
             return ResponseHelper::jsonResponse(true, 'success', $data, 200);
         } catch (\Exception $e) {

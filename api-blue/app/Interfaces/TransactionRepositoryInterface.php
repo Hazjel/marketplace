@@ -14,7 +14,11 @@ interface TransactionRepositoryInterface
 
     public function getTotalAdminFee();
 
-    public function getChartData();
+    public function getChartData(int $days = 7);
+
+    public function getStatusBreakdown();
+
+    public function getWeekOverWeekTrend(): ?array;
 
     public function getById(string $id);
 
