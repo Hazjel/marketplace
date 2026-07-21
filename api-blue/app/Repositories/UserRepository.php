@@ -34,6 +34,13 @@ class UserRepository implements UserRepositoryInterface
         return $query;
     }
 
+    public function getCountByRole(string $role): int
+    {
+        return User::whereHas('roles', function ($q) use ($role) {
+            $q->where('name', $role);
+        })->count();
+    }
+
     public function getAllPaginated(?string $search, ?int $rowPerPage, ?string $roles = null)
     {
         $query = $this->getAll($search, null, false, $roles);

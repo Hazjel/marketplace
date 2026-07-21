@@ -66,6 +66,17 @@ class StoreRepository implements StoreRepositoryInterface
             ->pluck('city');
     }
 
+    public function getCount(?bool $isVerified = null): int
+    {
+        $query = Store::query();
+
+        if ($isVerified !== null) {
+            $query->where('is_verified', $isVerified);
+        }
+
+        return $query->count();
+    }
+
     public function getById(string $id)
     {
         $query = Store::where('id', $id)->with(['followers', 'user'])->withCount('followers');

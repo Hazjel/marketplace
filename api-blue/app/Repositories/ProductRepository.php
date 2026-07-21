@@ -139,6 +139,11 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::where('store_id', $storeId)->count();
     }
 
+    public function getTotalCount(): int
+    {
+        return Product::count();
+    }
+
     /**
      * Produk terlaris toko, diurutkan dari total qty terjual (transaksi paid).
      */

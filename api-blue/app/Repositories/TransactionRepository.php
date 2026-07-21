@@ -87,6 +87,11 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $query->sum('grand_total');
     }
 
+    public function getTotalCount(): int
+    {
+        return Transaction::count();
+    }
+
     public function getTotalAdminFee()
     {
         $query = Transaction::where('payment_status', 'paid');
