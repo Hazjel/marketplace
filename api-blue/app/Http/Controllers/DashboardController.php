@@ -45,7 +45,7 @@ class DashboardController extends Controller
 
         try {
             $balance = $this->storeBalanceRepository->getByStore();
-            $statusBreakdown = $this->transactionRepository->getStatusBreakdown();
+            $statusBreakdown = $this->transactionRepository->getStatusBreakdown('store');
 
             $data = [
                 'balance' => $balance?->balance ?? 0,
@@ -60,7 +60,7 @@ class DashboardController extends Controller
                 'average_rating' => $this->productReviewRepository->getAverageRatingForStore($storeId),
                 'total_products' => $this->productRepository->getProductCountForStore($storeId),
                 'top_products' => $this->productRepository->getTopProducts($storeId, 5),
-                'chart' => $this->transactionRepository->getChartData($this->resolveDays($request)),
+                'chart' => $this->transactionRepository->getChartData($this->resolveDays($request), 'store'),
                 'trend' => $this->transactionRepository->getWeekOverWeekTrend(),
             ];
 
@@ -78,9 +78,9 @@ class DashboardController extends Controller
 
         try {
             $data = [
-                'total_expense' => $this->transactionRepository->getTotalRevenue(),
-                'status_breakdown' => $this->transactionRepository->getStatusBreakdown(),
-                'chart' => $this->transactionRepository->getChartData($this->resolveDays($request)),
+                'total_expense' => $this->transactionRepository->getTotalRevenue('buyer'),
+                'status_breakdown' => $this->transactionRepository->getStatusBreakdown('buyer'),
+                'chart' => $this->transactionRepository->getChartData($this->resolveDays($request), 'buyer'),
             ];
 
             return ResponseHelper::jsonResponse(true, 'success', new BuyerDashboardResource($data), 200);

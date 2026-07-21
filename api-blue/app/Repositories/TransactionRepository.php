@@ -34,22 +34,11 @@ class TransactionRepository implements TransactionRepositoryInterface
                 }
             });
 
-        // Strict Mode Filtering
-        if ($mode === 'store' && auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('store_id', auth()->user()->store?->id);
-        } elseif ($mode === 'buyer' && auth()->check() && auth()->user()->hasRole('buyer')) {
-            $query->where('buyer_id', auth()->user()->buyer?->id);
-        } else {
-            // Fallback / Admin / Legacy behavior
-            if (auth()->check() && ! auth()->user()->hasRole('admin')) {
-                // If not admin and no mode specified, apply broad filters carefully
-                // (This fallback might still be ambiguous for dual roles, but controller should send mode)
-                if (auth()->user()->hasRole('store')) {
-                    $query->where('store_id', auth()->user()->store?->id);
-                } elseif (auth()->user()->hasRole('buyer')) {
-                    $query->where('buyer_id', auth()->user()->buyer?->id);
-                }
-            }
+        // User bisa dual-role (buyer + store) sejak dukung mode ganda ala
+        // Shopee — $mode dari FE (?mode=store|buyer) menentukan KONTEKS,
+        // scopeToMode tidak asumsikan role eksklusif seperti sebelumnya.
+        if (! (auth()->check() && auth()->user()->hasRole('admin'))) {
+            $this->scopeToMode($query, $mode);
         }
 
         $query->orderBy('created_at', 'desc');
@@ -72,16 +61,64 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $query->paginate($rowPerPage);
     }
 
-    public function getTotalRevenue()
+    /**
+     * Scope query ke store_id/buyer_id milik user login, berdasar $mode eksplisit.
+     * Wajib dipakai (bukan cek hasRole berurutan) karena user bisa dual-role
+     * (buyer + store sekaligus, sejak dukung mode ganda ala Shopee) — hasRole
+     * saja tak cukup untuk tahu KONTEKS mana yang diminta caller.
+     * Return false kalau user tidak punya akses ke mode yang diminta.
+     */
+    private function scopeToMode($query, ?string $mode): bool
+    {
+        if (! auth()->check()) {
+            return false;
+        }
+        $user = auth()->user();
+
+        if ($mode === 'store') {
+            if (! $user->hasRole('store') || ! $user->store) {
+                return false;
+            }
+            $query->where('store_id', $user->store->id);
+
+            return true;
+        }
+
+        if ($mode === 'buyer') {
+            if (! $user->hasRole('buyer') || ! $user->buyer) {
+                return false;
+            }
+            $query->where('buyer_id', $user->buyer->id);
+
+            return true;
+        }
+
+        // Tanpa mode eksplisit: admin lihat semua, non-admin default ke
+        // scope store (prioritas) lalu buyer — pola lama dipertahankan
+        // untuk pemanggil yang belum di-migrasi ke $mode eksplisit.
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        if ($user->hasRole('store') && $user->store) {
+            $query->where('store_id', $user->store->id);
+
+            return true;
+        }
+        if ($user->hasRole('buyer') && $user->buyer) {
+            $query->where('buyer_id', $user->buyer->id);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getTotalRevenue(?string $mode = null)
     {
         $query = Transaction::where('payment_status', 'paid');
 
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('store_id', auth()->user()->store?->id ?? null);
-        }
-
-        if (auth()->check() && auth()->user()->hasRole('buyer')) {
-            $query->where('buyer_id', auth()->user()->buyer?->id ?? null);
+        if (! $this->scopeToMode($query, $mode)) {
+            return 0;
         }
 
         return $query->sum('grand_total');
@@ -92,16 +129,12 @@ class TransactionRepository implements TransactionRepositoryInterface
         return Transaction::count();
     }
 
-    public function getTotalAdminFee()
+    public function getTotalAdminFee(?string $mode = null)
     {
         $query = Transaction::where('payment_status', 'paid');
 
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('store_id', auth()->user()->store?->id ?? null);
-        }
-
-        if (auth()->check() && auth()->user()->hasRole('buyer')) {
-            $query->where('buyer_id', auth()->user()->buyer?->id ?? null);
+        if (! $this->scopeToMode($query, $mode)) {
+            return 0;
         }
 
         return $query->sum('admin_fee');
@@ -111,15 +144,11 @@ class TransactionRepository implements TransactionRepositoryInterface
      * Time-series revenue (store) atau pengeluaran (buyer) N hari terakhir.
      * $days dibatasi allow-list oleh controller (7/30/90).
      */
-    public function getChartData(int $days = 7)
+    public function getChartData(int $days = 7, ?string $mode = null)
     {
         $query = Transaction::query()->where('payment_status', 'paid');
 
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('store_id', auth()->user()->store?->id);
-        } elseif (auth()->check() && auth()->user()->hasRole('buyer')) {
-            $query->where('buyer_id', auth()->user()->buyer?->id);
-        } else {
+        if (! $this->scopeToMode($query, $mode)) {
             return [];
         }
 
@@ -158,15 +187,11 @@ class TransactionRepository implements TransactionRepositoryInterface
      * Hitung transaksi per status (payment_status + delivery_status) untuk
      * user login, role-scoped. Single query pakai conditional SUM.
      */
-    public function getStatusBreakdown()
+    public function getStatusBreakdown(?string $mode = null)
     {
         $query = Transaction::query();
 
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('store_id', auth()->user()->store?->id);
-        } elseif (auth()->check() && auth()->user()->hasRole('buyer')) {
-            $query->where('buyer_id', auth()->user()->buyer?->id);
-        } else {
+        if (! $this->scopeToMode($query, $mode)) {
             return [
                 'unpaid' => 0, 'paid' => 0, 'failed' => 0,
                 'pending' => 0, 'shipping' => 0, 'delivering' => 0,
