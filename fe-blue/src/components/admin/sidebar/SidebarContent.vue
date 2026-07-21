@@ -192,6 +192,16 @@ const marketplaceLink = computed(() => {
   }
 })
 
+// Muncul cuma buat user yang sudah py toko tapi lagi di buyer-mode —
+// beda dari marketplaceLink (yang selalu ke "/" saat buyer-mode).
+const sellerSwitchLink = computed(() => ({
+  label: 'Switch to Seller Mode',
+  path: null,
+  iconDefault: ShopGreyIcon,
+  iconActive: ShopBlueFillIcon,
+  permission: 'dashboard-menu'
+}))
+
 const chatLink = computed(() => ({
   label: 'Messages',
   path: `${prefix.value}/chat`,
@@ -202,10 +212,8 @@ const chatLink = computed(() => ({
 }))
 
 const handleSwitchMode = () => {
-  if (authStore.activeMode === 'store') {
-    authStore.setMode('buyer')
-    router.push({ name: 'app.home' })
-  }
+  const target = authStore.activeMode === 'store' ? 'buyer' : 'store'
+  authStore.switchToMode(router, target)
 }
 
 const handleLogout = async () => {
@@ -270,7 +278,17 @@ src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" al
       <div class="pb-8 animate-fade-in-up delay-100">
         <ul class="flex flex-col gap-2">
           <SidebarItem v-if="user?.role !== 'admin'" :item="chatLink" />
-          <SidebarItem v-if="user?.role !== 'admin'" :item="marketplaceLink" @click="handleSwitchMode" />
+          <SidebarItem
+            v-if="user?.role === 'store' && authStore.activeMode === 'buyer'"
+            :item="sellerSwitchLink"
+            @click="handleSwitchMode" />
+          <SidebarItem
+            v-if="user?.role !== 'admin' && authStore.activeMode === 'store'"
+            :item="marketplaceLink"
+            @click="handleSwitchMode" />
+          <SidebarItem
+            v-if="user?.role !== 'admin' && authStore.activeMode === 'buyer'"
+            :item="marketplaceLink" />
           <!-- Logout Button -->
           <li class="list-none">
             <button

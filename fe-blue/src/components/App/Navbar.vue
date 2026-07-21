@@ -462,7 +462,7 @@ src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark
                       <RouterLink
                         :to="{ name: 'user.dashboard', params: { username: user.username } }"
                         class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group"
-                        @click="authStore.setMode('buyer')"
+                        @click="authStore.switchToMode(router, 'buyer')"
                       >
                         <div class="flex items-center gap-3">
                           <img
@@ -517,7 +517,7 @@ src="@/assets/images/icons/receipt-text-black.svg"
                         name: user.role === 'store' ? 'admin.dashboard' : 'auth.open-store'
                       }"
                         class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group"
-                        @click="authStore.setMode(user.role === 'store' ? 'store' : 'buyer')">
+                        @click="user.role === 'store' && authStore.switchToMode(router, 'store')">
                         <div class="flex items-center gap-3">
                           <img
 src="@/assets/images/icons/shop-black.svg"

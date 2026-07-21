@@ -14,6 +14,8 @@ import StickyNoteBlueFillIcon from '@/assets/images/icons/stickynote-blue-fill.s
 import HeartBlackIcon from '@/assets/images/icons/heart-black.svg'
 import HeartRedIcon from '@/assets/images/icons/heart-red.svg'
 import LocationGreyIcon from '@/assets/images/icons/location-grey.svg'
+import ShopGreyIcon from '@/assets/images/icons/shop-grey.svg'
+import ShopBlueFillIcon from '@/assets/images/icons/shop-blue-fill.svg'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -95,6 +97,20 @@ const homeLink = {
   permission: 'dashboard-menu'
 }
 
+// Muncul cuma buat user yang sudah py toko — buyer-shell selalu di
+// buyer-mode, jadi tak perlu cek activeMode di sini.
+const sellerSwitchLink = {
+  label: 'Switch to Seller Mode',
+  path: null,
+  iconDefault: ShopGreyIcon,
+  iconActive: ShopBlueFillIcon,
+  permission: 'dashboard-menu'
+}
+
+const handleSwitchToSeller = () => {
+  authStore.switchToMode(router, 'store')
+}
+
 const handleLogout = async () => {
   const success = await authStore.logout()
   if (success) {
@@ -136,6 +152,10 @@ const handleLogout = async () => {
     <div class="pb-8 animate-fade-in-up delay-100">
       <ul class="flex flex-col gap-2">
         <SidebarItem :item="chatLink" />
+        <SidebarItem
+          v-if="user?.role === 'store'"
+          :item="sellerSwitchLink"
+          @click="handleSwitchToSeller" />
         <SidebarItem :item="homeLink" />
         <li class="list-none">
           <button

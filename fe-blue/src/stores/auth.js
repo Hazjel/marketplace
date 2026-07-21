@@ -22,6 +22,17 @@ export const useAuthStore = defineStore('auth', {
       this.activeMode = mode
       Cookies.set('activeMode', mode, { secure: true, sameSite: 'Strict' })
     },
+
+    // Pindah mode + arahkan ke dashboard yang sesuai. Router diterima sebagai
+    // param (bukan import langsung) karena circular dependency store <-> router.
+    switchToMode(router, mode) {
+      this.setMode(mode)
+      if (mode === 'buyer') {
+        router.push({ name: 'user.dashboard', params: { username: this.user.username } })
+      } else {
+        router.push({ name: 'admin.dashboard' })
+      }
+    },
     async login(credentials) {
       this.loading = true
       this.error = null
