@@ -6,6 +6,7 @@ import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { RouterLink } from 'vue-router'
 import { useRoute } from 'vue-router'
 import { dashboardRoute } from '@/helpers/routeHelper'
+import DashboardPageHeader from '@/components/Molecule/DashboardPageHeader.vue'
 
 const route = useRoute()
 
@@ -56,20 +57,13 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col gap-6">
-    <!-- Page Header -->
-    <div class="rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 p-6 shadow-sm">
-      <div class="flex items-center gap-4">
-        <div class="flex size-12 items-center justify-center rounded-xl bg-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-white">Edit Kategori</h1>
-          <p class="text-blue-100">Perbarui informasi kategori produk</p>
-        </div>
-      </div>
-    </div>
+    <DashboardPageHeader title="Edit Kategori" subtitle="Perbarui informasi kategori produk">
+      <template #icon>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+        </svg>
+      </template>
+    </DashboardPageHeader>
 
     <!-- Form -->
     <form class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-surface-card shadow-sm p-6 gap-6" @submit.prevent="handleSubmit">

@@ -7,6 +7,7 @@ import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import DashboardPageHeader from '@/components/Molecule/DashboardPageHeader.vue'
 
 const toast = useToast()
 const productCategoryStore = useProductCategoryStore()
@@ -72,21 +73,14 @@ watch(error, (value) => {
 
 <template>
   <div class="flex flex-col gap-6">
-    <!-- Page Header -->
-    <div class="rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 p-6 shadow-sm">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <div class="flex size-12 items-center justify-center rounded-xl bg-white/20">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
-            </svg>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold text-white">Kategori Produk</h1>
-            <p class="text-blue-100">Kelola semua kategori produk marketplace</p>
-          </div>
-        </div>
+    <DashboardPageHeader title="Kategori Produk" subtitle="Kelola semua kategori produk marketplace">
+      <template #icon>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+        </svg>
+      </template>
+      <template #actions>
         <RouterLink
           :to="dashboardRoute('category.create')"
           class="flex h-11 items-center rounded-xl py-2.5 px-5 bg-white/20 hover:bg-white/30 transition-colors duration-200 gap-2 border border-white/20">
@@ -95,8 +89,8 @@ watch(error, (value) => {
           </svg>
           <span class="font-semibold text-sm text-white">Tambah Kategori</span>
         </RouterLink>
-      </div>
-    </div>
+      </template>
+    </DashboardPageHeader>
 
     <!-- Main Content Card -->
     <div class="flex flex-col flex-1 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-surface-card shadow-sm p-6 gap-6">

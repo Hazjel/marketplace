@@ -7,6 +7,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import Button from '@/components/Atom/Button.vue'
 import Input from '@/components/Atom/Input.vue'
 import { dashboardRoute } from '@/helpers/routeHelper'
+import DashboardPageHeader from '@/components/Molecule/DashboardPageHeader.vue'
 
 const route = useRoute()
 
@@ -47,20 +48,13 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col gap-6">
-    <!-- Page Header -->
-    <div class="rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 p-6 shadow-sm">
-      <div class="flex items-center gap-4">
-        <div class="flex size-12 items-center justify-center rounded-xl bg-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-white">Tambah Kategori</h1>
-          <p class="text-blue-100">Buat kategori produk baru</p>
-        </div>
-      </div>
-    </div>
+    <DashboardPageHeader title="Tambah Kategori" subtitle="Buat kategori produk baru">
+      <template #icon>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </template>
+    </DashboardPageHeader>
 
     <!-- Form -->
     <form class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-surface-card shadow-sm p-6 gap-6" @submit.prevent="handleSubmit">
