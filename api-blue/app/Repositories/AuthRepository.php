@@ -141,14 +141,16 @@ class AuthRepository implements AuthRepositoryInterface
 
             $user->save();
 
-            // Update Phone Number based on Role
+            // Update Phone Number — user bisa dual-role (buyer + store sekaligus,
+            // sejak dukung mode ganda ala Shopee), jadi update SEMUA profil yang ada.
             if (isset($data['phone_number'])) {
                 if ($user->hasRole('buyer')) {
                     $user->buyer()->updateOrCreate(
                         ['user_id' => $user->id],
                         ['phone_number' => $data['phone_number']]
                     );
-                } elseif ($user->hasRole('store')) {
+                }
+                if ($user->hasRole('store')) {
                     $user->store()->updateOrCreate(
                         ['user_id' => $user->id],
                         ['phone' => $data['phone_number']]

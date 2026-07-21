@@ -10,15 +10,15 @@ interface TransactionRepositoryInterface
 
     public function getAllPaginated(?string $search, ?int $rowPerPage);
 
-    public function getTotalRevenue();
+    public function getTotalRevenue(?string $mode = null);
 
     public function getTotalCount(): int;
 
-    public function getTotalAdminFee();
+    public function getTotalAdminFee(?string $mode = null);
 
-    public function getChartData(int $days = 7);
+    public function getChartData(int $days = 7, ?string $mode = null);
 
-    public function getStatusBreakdown();
+    public function getStatusBreakdown(?string $mode = null);
 
     public function getWeekOverWeekTrend(): ?array;
 

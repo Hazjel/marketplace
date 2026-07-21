@@ -68,9 +68,10 @@ class TransactionController extends Controller implements HasMiddleware
         ]);
 
         try {
+            $mode = request('mode');
             $transactions = $this->transactionRepository->getAllPaginated($request['search'] ?? null, $request['row_per_page']);
-            $totalRevenue = $this->transactionRepository->getTotalRevenue();
-            $totalAdminFee = $this->transactionRepository->getTotalAdminFee();
+            $totalRevenue = $this->transactionRepository->getTotalRevenue($mode);
+            $totalAdminFee = $this->transactionRepository->getTotalAdminFee($mode);
 
             // Manual wrapping because using getData(true) returns the array structure directly
             // but ResponseHelper expects to wrap it in 'data'
@@ -104,7 +105,7 @@ class TransactionController extends Controller implements HasMiddleware
         }
 
         try {
-            $data = $this->transactionRepository->getChartData($days);
+            $data = $this->transactionRepository->getChartData($days, request('mode'));
 
             return ResponseHelper::jsonResponse(true, 'success', $data, 200);
         } catch (\Exception $e) {

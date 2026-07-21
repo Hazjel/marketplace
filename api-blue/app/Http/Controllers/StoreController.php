@@ -286,8 +286,8 @@ class StoreController extends Controller implements HasMiddleware
                 'balance' => 0,
             ]);
 
-            // Change Role: Remove 'buyer', Assign 'store'
-            $user->removeRole('buyer');
+            // Assign 'store' role — buyer role TETAP dipertahankan (dual-role ala Shopee),
+            // supaya seller tetap bisa belanja / pakai "Back to Buyer Mode" tanpa 403.
             $user->assignRole('store');
 
             // Refresh permissions
