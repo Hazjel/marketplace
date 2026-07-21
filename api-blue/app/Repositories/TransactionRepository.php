@@ -102,30 +102,32 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $query->sum('admin_fee');
     }
 
-    public function getChartData()
+    /**
+     * Time-series revenue (store) atau pengeluaran (buyer) N hari terakhir.
+     * $days dibatasi allow-list oleh controller (7/30/90).
+     */
+    public function getChartData(int $days = 7)
     {
-        $storeId = null;
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $storeId = auth()->user()->store?->id;
-        }
+        $query = Transaction::query()->where('payment_status', 'paid');
 
-        if (! $storeId) {
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $query->where('store_id', auth()->user()->store?->id);
+        } elseif (auth()->check() && auth()->user()->hasRole('buyer')) {
+            $query->where('buyer_id', auth()->user()->buyer?->id);
+        } else {
             return [];
         }
 
-        // Generate last 7 days period ending today (inclusive)
         $endDate = now('Asia/Jakarta')->endOfDay();
-        $startDate = now('Asia/Jakarta')->subDays(6)->startOfDay();
+        $startDate = now('Asia/Jakarta')->subDays($days - 1)->startOfDay();
         $period = CarbonPeriod::create($startDate, $endDate);
 
-        // Fetch data based on date range
-        $transactions = Transaction::select(
-            DB::raw('DATE(created_at) as date'),
-            DB::raw('SUM(grand_total) as total_revenue'),
-            DB::raw('COUNT(*) as total_transaction')
-        )
-            ->where('store_id', $storeId)
-            ->where('payment_status', 'paid')
+        $transactions = (clone $query)
+            ->select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('SUM(grand_total) as total_revenue'),
+                DB::raw('COUNT(*) as total_transaction')
+            )
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('date')
             ->orderBy('date', 'ASC')
@@ -145,6 +147,106 @@ class TransactionRepository implements TransactionRepositoryInterface
         }
 
         return $data;
+    }
+
+    /**
+     * Hitung transaksi per status (payment_status + delivery_status) untuk
+     * user login, role-scoped. Single query pakai conditional SUM.
+     */
+    public function getStatusBreakdown()
+    {
+        $query = Transaction::query();
+
+        if (auth()->check() && auth()->user()->hasRole('store')) {
+            $query->where('store_id', auth()->user()->store?->id);
+        } elseif (auth()->check() && auth()->user()->hasRole('buyer')) {
+            $query->where('buyer_id', auth()->user()->buyer?->id);
+        } else {
+            return [
+                'unpaid' => 0, 'paid' => 0, 'failed' => 0,
+                'pending' => 0, 'shipping' => 0, 'delivering' => 0,
+                'delivered' => 0, 'completed' => 0, 'cancelled' => 0,
+            ];
+        }
+
+        $row = $query->selectRaw("
+            SUM(CASE WHEN payment_status = 'unpaid' THEN 1 ELSE 0 END) as unpaid,
+            SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) as paid,
+            SUM(CASE WHEN payment_status = 'failed' THEN 1 ELSE 0 END) as failed,
+            SUM(CASE WHEN delivery_status = 'pending' THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN delivery_status = 'shipping' THEN 1 ELSE 0 END) as shipping,
+            SUM(CASE WHEN delivery_status = 'delivering' THEN 1 ELSE 0 END) as delivering,
+            SUM(CASE WHEN delivery_status = 'delivered' THEN 1 ELSE 0 END) as delivered,
+            SUM(CASE WHEN delivery_status = 'completed' THEN 1 ELSE 0 END) as completed,
+            SUM(CASE WHEN delivery_status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
+        ")->first();
+
+        return [
+            'unpaid' => (int) $row->unpaid,
+            'paid' => (int) $row->paid,
+            'failed' => (int) $row->failed,
+            'pending' => (int) $row->pending,
+            'shipping' => (int) $row->shipping,
+            'delivering' => (int) $row->delivering,
+            'delivered' => (int) $row->delivered,
+            'completed' => (int) $row->completed,
+            'cancelled' => (int) $row->cancelled,
+        ];
+    }
+
+    /**
+     * Bandingkan revenue & jumlah order 7 hari terakhir vs 7 hari sebelumnya
+     * (store-only — dipakai untuk trend badge di dashboard seller).
+     * Return null kalau bukan store (tidak ada perbandingan bermakna).
+     */
+    public function getWeekOverWeekTrend(): ?array
+    {
+        if (! auth()->check() || ! auth()->user()->hasRole('store')) {
+            return null;
+        }
+
+        $storeId = auth()->user()->store?->id;
+        if (! $storeId) {
+            return null;
+        }
+
+        $now = now('Asia/Jakarta');
+        $thisWeekStart = $now->copy()->subDays(6)->startOfDay();
+        $lastWeekStart = $now->copy()->subDays(13)->startOfDay();
+        $lastWeekEnd = $now->copy()->subDays(7)->endOfDay();
+
+        $base = Transaction::where('store_id', $storeId)->where('payment_status', 'paid');
+
+        $thisWeek = (clone $base)->whereBetween('created_at', [$thisWeekStart, $now])
+            ->selectRaw('COALESCE(SUM(grand_total), 0) as revenue, COUNT(*) as orders')
+            ->first();
+
+        $lastWeek = (clone $base)->whereBetween('created_at', [$lastWeekStart, $lastWeekEnd])
+            ->selectRaw('COALESCE(SUM(grand_total), 0) as revenue, COUNT(*) as orders')
+            ->first();
+
+        return [
+            'revenue' => $this->percentChange((float) $thisWeek->revenue, (float) $lastWeek->revenue),
+            'orders' => $this->percentChange((int) $thisWeek->orders, (int) $lastWeek->orders),
+        ];
+    }
+
+    /**
+     * Persentase perubahan; null kalau baseline 0 (tidak ada dasar perbandingan
+     * yang bermakna — FE harus sembunyikan badge trend, bukan tampilkan Infinity).
+     */
+    private function percentChange(float $current, float $previous): ?array
+    {
+        if ($previous <= 0) {
+            return null;
+        }
+
+        $percent = (($current - $previous) / $previous) * 100;
+
+        return [
+            'value' => round(abs($percent), 1),
+            'direction' => $percent >= 0 ? 'up' : 'down',
+        ];
     }
 
     public function getById(string $id)

@@ -33,6 +33,20 @@ class ProductReviewRepository implements ProductReviewRepositoryInterface
         }
     }
 
+    public function getAverageRatingForStore(string $storeId): float
+    {
+        return (float) ProductReview::whereHas('product', function ($q) use ($storeId) {
+            $q->where('store_id', $storeId);
+        })->avg('rating');
+    }
+
+    public function getReviewCountForStore(string $storeId): int
+    {
+        return (int) ProductReview::whereHas('product', function ($q) use ($storeId) {
+            $q->where('store_id', $storeId);
+        })->count();
+    }
+
     public function getAllPaginated(array $params)
     {
         $query = ProductReview::query()
