@@ -198,6 +198,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard summary routes
     Route::get('seller/dashboard/summary', [DashboardController::class, 'sellerSummary']);
     Route::get('buyer/dashboard/summary', [DashboardController::class, 'buyerSummary']);
+    Route::get('admin/dashboard/summary', [DashboardController::class, 'adminSummary']);
 
     // Transaction routes - custom routes BEFORE resource
     Route::get('transaction/chart-data', [

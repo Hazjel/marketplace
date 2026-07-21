@@ -8,6 +8,8 @@ interface UserRepositoryInterface
 
     public function getAllPaginated(?string $search, ?int $rowPerPage, ?string $roles = null);
 
+    public function getCountByRole(string $role): int;
+
     public function getById(string $id);
 
     public function create(array $data);

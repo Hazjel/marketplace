@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Http\Resources\AdminDashboardResource;
 use App\Http\Resources\BuyerDashboardResource;
 use App\Http\Resources\SellerDashboardResource;
 use App\Interfaces\ProductRepositoryInterface;
 use App\Interfaces\ProductReviewRepositoryInterface;
 use App\Interfaces\StoreBalanceRepositoryInterface;
+use App\Interfaces\StoreRepositoryInterface;
 use App\Interfaces\TransactionRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -18,6 +21,8 @@ class DashboardController extends Controller
         private ProductRepositoryInterface $productRepository,
         private ProductReviewRepositoryInterface $productReviewRepository,
         private StoreBalanceRepositoryInterface $storeBalanceRepository,
+        private StoreRepositoryInterface $storeRepository,
+        private UserRepositoryInterface $userRepository,
     ) {}
 
     private function resolveDays(Request $request): int
@@ -79,6 +84,33 @@ class DashboardController extends Controller
             ];
 
             return ResponseHelper::jsonResponse(true, 'success', new BuyerDashboardResource($data), 200);
+        } catch (\Throwable $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+        }
+    }
+
+    public function adminSummary()
+    {
+        if (! auth()->user()->hasRole('admin')) {
+            return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+        }
+
+        try {
+            $data = [
+                'total_revenue' => $this->transactionRepository->getTotalRevenue(),
+                'total_admin_fee' => $this->transactionRepository->getTotalAdminFee(),
+                // Catatan: sesuai perilaku dashboard lama — "Total Seller" = semua toko,
+                // "Total Toko" = toko terverifikasi saja.
+                'total_sellers' => $this->storeRepository->getCount(),
+                'total_buyers' => $this->userRepository->getCountByRole('buyer'),
+                'total_products' => $this->productRepository->getTotalCount(),
+                'total_transactions' => $this->transactionRepository->getTotalCount(),
+                'total_stores' => $this->storeRepository->getCount(true),
+                'latest_stores' => $this->storeRepository->getAll(null, true, 3, false, true),
+                'latest_transactions' => $this->transactionRepository->getAll(null, 3, true),
+            ];
+
+            return ResponseHelper::jsonResponse(true, 'success', new AdminDashboardResource($data), 200);
         } catch (\Throwable $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }

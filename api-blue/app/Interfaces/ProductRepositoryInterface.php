@@ -12,6 +12,8 @@ interface ProductRepositoryInterface
 
     public function getProductCountForStore(string $storeId): int;
 
+    public function getTotalCount(): int;
+
     public function getTopProducts(string $storeId, int $limit = 5);
 
     public function getById(

@@ -10,6 +10,8 @@ interface StoreRepositoryInterface
 
     public function getLocations();
 
+    public function getCount(?bool $isVerified = null): int;
+
     public function getById(string $id);
 
     public function getCategories(string $id);

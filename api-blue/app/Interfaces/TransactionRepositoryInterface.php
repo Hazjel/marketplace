@@ -12,6 +12,8 @@ interface TransactionRepositoryInterface
 
     public function getTotalRevenue();
 
+    public function getTotalCount(): int;
+
     public function getTotalAdminFee();
 
     public function getChartData(int $days = 7);
