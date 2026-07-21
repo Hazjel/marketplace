@@ -15,7 +15,14 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $role = $this->roles->first()->name ?? '-';
+        // User bisa dual-role (buyer + store sekaligus, ala Shopee) — roles->first()
+        // urutannya tak deterministik (tergantung urutan assign di pivot table).
+        // Prioritaskan admin > store > buyer supaya FE yang masih cek `role === 'store'`
+        // tetap benar utk user yang py toko.
+        $roleNames = $this->roles->pluck('name');
+        $role = collect(['admin', 'store', 'buyer'])->first(fn ($r) => $roleNames->contains($r))
+            ?? $roleNames->first()
+            ?? '-';
 
         return [
             'id' => $this->id,

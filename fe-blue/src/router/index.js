@@ -695,6 +695,14 @@ const router = createRouter({
   ]
 })
 
+// Store-mode gak boleh akses route buyer (app.*) — redirect ke dashboard-nya sendiri.
+function redirectIfStoreModeOnBuyerRoute(to, authStore) {
+  if (authStore.activeMode === 'store' && to.name && to.name.toString().startsWith('app.')) {
+    return { name: 'user.dashboard', params: { username: authStore.user.username } }
+  }
+  return null
+}
+
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
@@ -724,9 +732,9 @@ router.beforeEach(async (to, from, next) => {
           return
         }
 
-        // Restrict 'store' mode users from accessing buyer pages (app.*)
-        if (authStore.activeMode === 'store' && to.name && to.name.toString().startsWith('app.')) {
-          next({ name: 'user.dashboard', params: { username: authStore.user.username } })
+        const redirect = redirectIfStoreModeOnBuyerRoute(to, authStore)
+        if (redirect) {
+          next(redirect)
           return
         }
 
@@ -741,15 +749,12 @@ router.beforeEach(async (to, from, next) => {
     // Also check for non-auth routes if necessary, but 'app.home' is public?
     // If 'app.home' does not require auth, we still might want to restrict if the user IS logged in and IS in store mode.
 
-    if (
-      authStore.token &&
-      authStore.user &&
-      authStore.activeMode === 'store' &&
-      to.name &&
-      to.name.toString().startsWith('app.')
-    ) {
-      next({ name: 'user.dashboard', params: { username: authStore.user.username } })
-      return
+    if (authStore.token && authStore.user) {
+      const redirect = redirectIfStoreModeOnBuyerRoute(to, authStore)
+      if (redirect) {
+        next(redirect)
+        return
+      }
     }
 
     next()

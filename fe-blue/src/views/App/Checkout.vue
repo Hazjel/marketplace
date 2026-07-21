@@ -728,7 +728,7 @@ onMounted(async () => {
           </div>
         </div>
         <div class="px-6 pb-6 flex flex-col gap-3">
-          <RouterLink :to="user?.activeMode === 'store'
+          <RouterLink :to="authStore.activeMode === 'store'
               ? { name: 'admin.my-transaction' }
               : { name: 'user.my-transaction', params: { username: user?.username } }"
             class="flex items-center justify-center h-12 w-full rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors">
