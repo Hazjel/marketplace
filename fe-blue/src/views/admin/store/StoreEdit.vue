@@ -96,11 +96,7 @@ const handleSubmit = async () => {
 
     await updateStore(store.value.id, store.value)
     toast.success('Informasi Toko berhasil diperbarui')
-
-    // Redirect after success
-    setTimeout(() => {
-      router.push(dashboardRoute('my-store'))
-    }, 2000)
+    router.push(dashboardRoute('my-store'))
   } catch (err) {
     console.error('Submit error:', err)
   }

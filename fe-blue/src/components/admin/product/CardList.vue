@@ -2,6 +2,7 @@
 // import { can } from '@/helpers/permissionHelper';
 import { RouterLink } from 'vue-router'
 import { formatDate } from '@/helpers/format'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 defineProps({
   item: {
@@ -90,7 +91,7 @@ v-if="user?.permissions?.includes('product-delete')"
         </button>
         <RouterLink
 v-if="user?.permissions?.includes('product-edit')"
-          :to="{ name: 'admin.product.edit', params: { id: item.id } }"
+          :to="dashboardRoute('product.edit', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black dark:bg-white dark:hover:bg-gray-200 transition-colors">
           <img
 src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0"
@@ -98,7 +99,7 @@ src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0 dark:brig
           <span class="font-semibold text-white dark:text-black">Edit</span>
         </RouterLink>
         <RouterLink
-:to="{ name: 'admin.product.detail', params: { id: item.id } }"
+:to="dashboardRoute('product.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>

@@ -2,6 +2,7 @@
 import { formatRupiah, formatToClientTimeZone } from '@/helpers/format'
 import { can } from '@/helpers/permissionHelper'
 import { RouterLink } from 'vue-router'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 defineProps({
   item: {
@@ -10,24 +11,6 @@ defineProps({
   }
 })
 
-import { useAuthStore } from '@/stores/auth'
-import { storeToRefs } from 'pinia'
-
-const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
-
-const getDetailRoute = (withdrawalId) => {
-  if (user.value?.role === 'admin') {
-    return {
-      name: 'admin.withdrawal.detail',
-      params: { id: withdrawalId }
-    }
-  }
-  return {
-    name: 'user.withdrawal.detail',
-    params: { username: user.value?.username, id: withdrawalId }
-  }
-}
 const emit = defineEmits(['delete'])
 </script>
 
@@ -84,7 +67,7 @@ const emit = defineEmits(['delete'])
           <img src="@/assets/images/icons/receive-square-white.svg" class="flex size-6 shrink-0" alt="icon" />
         </button>
         <RouterLink
-:to="getDetailRoute(item.id)"
+:to="dashboardRoute('withdrawal.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>

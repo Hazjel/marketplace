@@ -2,6 +2,7 @@
 import { can } from '@/helpers/permissionHelper'
 import { formatDate } from '@/helpers/format'
 import { RouterLink } from 'vue-router'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 defineProps({
   item: {
@@ -71,7 +72,7 @@ v-if="can('store-delete')"
           <span class="font-semibold text-custom-red">Delete</span>
         </button>
         <RouterLink
-:to="{ name: 'admin.store.detail', params: { id: item.id } }"
+:to="dashboardRoute('store.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Details</span>

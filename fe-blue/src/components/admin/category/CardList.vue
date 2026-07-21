@@ -1,4 +1,6 @@
 <script setup>
+import { dashboardRoute } from '@/helpers/routeHelper'
+
 defineProps({
   item: {
     type: Object,
@@ -78,14 +80,14 @@ const emit = defineEmits(['delete'])
           <span class="font-semibold text-custom-red">Delete</span>
         </button>
         <RouterLink
-          :to="{ name: 'admin.category.edit', params: { id: item.id } }"
+          :to="dashboardRoute('category.edit', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black"
         >
           <img src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0" alt="icon" />
           <span class="font-semibold text-white">Edit</span>
         </RouterLink>
         <RouterLink
-          :to="{ name: 'admin.category.detail', params: { id: item.id } }"
+          :to="dashboardRoute('category.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue"
         >
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
