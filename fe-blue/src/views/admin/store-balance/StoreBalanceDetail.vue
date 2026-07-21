@@ -7,6 +7,7 @@ import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Pagination from '@/components/admin/Pagination.vue'
 import { useToast } from 'vue-toastification'
+import DashboardPageHeader from '@/components/Molecule/DashboardPageHeader.vue'
 
 const toast = useToast()
 const route = useRoute()
@@ -45,20 +46,17 @@ watch(error, (value) => {
 
 <template>
   <div class="flex flex-col gap-6">
-    <!-- Page Header -->
-    <div class="rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 p-6 shadow-sm">
-      <div class="flex items-center gap-4">
-        <div class="flex size-12 items-center justify-center rounded-xl bg-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3" />
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-white">Detail Saldo Toko</h1>
-          <p class="text-green-100">Informasi lengkap saldo dan riwayat transaksi</p>
-        </div>
-      </div>
-    </div>
+    <DashboardPageHeader
+      title="Detail Saldo Toko"
+      subtitle="Informasi lengkap saldo dan riwayat transaksi"
+      gradient="from-green-600 to-emerald-600"
+      subtitle-color="text-green-100">
+      <template #icon>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3" />
+        </svg>
+      </template>
+    </DashboardPageHeader>
 
     <!-- Main Content -->
     <div class="flex flex-col xl:flex-row w-full gap-6">

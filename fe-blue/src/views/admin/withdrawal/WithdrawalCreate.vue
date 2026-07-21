@@ -5,6 +5,7 @@ import { ref, onMounted, watch } from 'vue'
 import { formatRupiah, parseRupiah } from '@/helpers/format'
 import { useWithdrawalStore } from '@/stores/withdrawal'
 import { dashboardRoute } from '@/helpers/routeHelper'
+import DashboardPageHeader from '@/components/Molecule/DashboardPageHeader.vue'
 
 const storeBalance = ref({})
 
@@ -73,20 +74,17 @@ onMounted(fetchStoreBalance)
 
 <template>
   <div class="flex flex-col gap-6">
-    <!-- Page Header -->
-    <div class="rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 p-6 shadow-sm">
-      <div class="flex items-center gap-4">
-        <div class="flex size-12 items-center justify-center rounded-xl bg-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-white">Ajukan Penarikan</h1>
-          <p class="text-green-100">Buat permintaan penarikan dana baru</p>
-        </div>
-      </div>
-    </div>
+    <DashboardPageHeader
+      title="Ajukan Penarikan"
+      subtitle="Buat permintaan penarikan dana baru"
+      gradient="from-green-600 to-emerald-600"
+      subtitle-color="text-green-100">
+      <template #icon>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </template>
+    </DashboardPageHeader>
 
     <!-- Store & Balance Summary -->
     <div class="flex flex-col md:flex-row items-center rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-surface-card shadow-sm p-5 gap-5">
