@@ -75,6 +75,7 @@ const handleSend = async () => {
 </script>
 
 <template>
+  <div v-bind="$attrs" class="flex flex-col flex-1 min-h-0">
   <div v-if="activeUser" class="flex flex-col flex-1 h-full bg-custom-background dark:bg-surface relative">
     <!-- Chat Header -->
     <div
@@ -167,5 +168,6 @@ v-else
     </div>
     <h3 class="font-bold text-lg text-custom-black dark:text-white">Select a conversation</h3>
     <p>Pick a person from the left sidebar to start chatting</p>
+  </div>
   </div>
 </template>

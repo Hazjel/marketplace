@@ -8,6 +8,7 @@ import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { useRoute, useRouter } from 'vue-router'
 import { parseRupiah } from '@/helpers/format'
 import { dashboardRoute } from '@/helpers/routeHelper'
+import { useProductVariants } from '@/composables/useProductVariants'
 
 const route = useRoute()
 
@@ -47,70 +48,14 @@ const product = ref({
   ]
 })
 
-// Dynamic Variant Options
-const optionGroups = ref([])
-const newOptionName = ref('')
-
-const addOptionGroup = () => {
-  if (newOptionName.value && !optionGroups.value.includes(newOptionName.value)) {
-    optionGroups.value.push(newOptionName.value)
-    newOptionName.value = ''
-    // Add new key to existing variants
-    product.value.variants.forEach((v) => {
-      if (!v.variant_attributes) v.variant_attributes = {}
-    })
-  }
-}
-
-const addVariant = () => {
-  const attributes = {}
-  optionGroups.value.forEach((opt) => (attributes[opt] = ''))
-  product.value.variants.push({
-    _temp_id: Date.now() + Math.random(),
-    name: '',
-    price: product.value.price || 0, // Default to product price
-    stock: 0,
-    variant_attributes: attributes
-  })
-}
-
-const autoGenerateName = (variant) => {
-  if (variant.variant_attributes) {
-    const parts = Object.values(variant.variant_attributes).filter((val) => val)
-    if (parts.length > 0) {
-      variant.name = parts.join(' - ')
-    } else {
-      variant.name = ''
-    }
-  }
-}
+const { optionGroups, newOptionName, addOptionGroup, addVariant, autoGenerateName, loadExistingVariants } =
+  useProductVariants(product)
 
 const fetchData = async () => {
   const response = await fetchProductById(route.params.id)
 
   product.value = response
-
-  // Populate variants if they exist
-  if (response.variants && response.variants.length > 0) {
-    product.value.has_variants = true
-    // Ensure every variant has variant_attributes object
-    product.value.variants = response.variants.map((v) => ({
-      ...v,
-      variant_attributes: v.variant_attributes || {}
-    }))
-
-    // EXTRACT EXISTING OPTIONS FROM VARIANTS
-    const groups = new Set()
-    product.value.variants.forEach((v) => {
-      if (v.variant_attributes) {
-        Object.keys(v.variant_attributes).forEach((k) => groups.add(k))
-      }
-    })
-    optionGroups.value = Array.from(groups)
-  } else {
-    product.value.has_variants = false
-    product.value.variants = []
-  }
+  loadExistingVariants(response.variants)
 
   // ensure store_id stays set (response may not include it)
   if (!product.value.store_id && user.value?.store?.id) {
@@ -333,7 +278,7 @@ v-for="(opt, idx) in optionGroups" :key="idx"
           <span class="text-xs font-bold text-gray-500 uppercase mt-2">2. Kelola Varian</span>
 
           <div
-v-for="(variant, index) in product.variants" :key="variant.id || variant._temp_id || index"
+v-for="(variant, index) in product.variants" :key="variant.id || index"
             class="p-4 border rounded-xl bg-gray-50 dark:bg-white/5 dark:border-white/10 flex flex-col gap-3">
             <div class="flex justify-between items-center">
               <h4 class="font-bold text-sm text-gray-500">Varian #{{ index + 1 }}</h4>

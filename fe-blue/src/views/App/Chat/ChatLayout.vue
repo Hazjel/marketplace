@@ -2,7 +2,7 @@
 import ChatSidebar from '@/components/App/chat/ChatSidebar.vue'
 import ChatRoom from '@/components/App/chat/ChatRoom.vue'
 import echo from '@/plugins/echo'
-import { onMounted, onUnmounted, watch } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
@@ -41,11 +41,6 @@ onMounted(async () => {
 
   // Add ESC key listener
   window.addEventListener('keydown', handleEscKey)
-})
-
-// Watch for user changes (e.g. late login)
-watch(user, (newUser) => {
-  // No local listener setup needed, Sidebar handles global listener
 })
 
 const handleEscKey = (e) => {
