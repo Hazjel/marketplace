@@ -35,4 +35,11 @@ class RegisterStoreRequest extends FormRequest
             'phone_number' => 'Nomor Telepon',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'password.regex' => 'Kata Sandi wajib mengandung minimal 1 huruf besar dan 1 angka.',
+        ];
+    }
 }

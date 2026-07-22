@@ -184,6 +184,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
           </button>
         </div>
         <span v-if="error?.password" class="text-red-500 text-xs font-medium ml-2">{{ error?.password?.join(', ') }}</span>
+        <span v-else class="text-xs text-custom-grey dark:text-gray-400 ml-2">Min. 8 karakter, wajib ada huruf besar & angka</span>
       </div>
     </div>
 
