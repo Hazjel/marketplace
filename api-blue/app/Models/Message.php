@@ -15,10 +15,12 @@ class Message extends Model
         'receiver_id',
         'message',
         'is_read',
+        'is_ai_reply',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
+        'is_ai_reply' => 'boolean',
     ];
 
     public function sender()

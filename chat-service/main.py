@@ -16,6 +16,7 @@ from rag.refresh import rag_refresh_loop
 from utils.redis_helper import init_redis
 from api.admin import router as admin_router
 from api.chat import router as chat_router
+from api.store_assistant import router as store_assistant_router
 
 # ---------------------------------------------------------------------------
 # LIFESPAN
@@ -75,6 +76,7 @@ app.add_middleware(
 
 app.include_router(chat_router)
 app.include_router(admin_router)
+app.include_router(store_assistant_router)
 
 
 # ---------------------------------------------------------------------------

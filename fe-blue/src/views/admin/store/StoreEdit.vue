@@ -371,6 +371,18 @@ onMounted(fetchData)
           />
         </div>
       </div>
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-gray-100 dark:border-white/10">
+        <div>
+          <p class="font-semibold text-gray-600 dark:text-gray-300">Asisten AI</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 md:max-w-xs">
+            AI akan otomatis membalas chat pembeli berdasarkan produk tokomu.
+          </p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" v-model="store.ai_assistant_enabled" class="sr-only peer" />
+          <div class="w-11 h-6 bg-gray-200 dark:bg-white/10 peer-focus:ring-4 peer-focus:ring-custom-blue/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-custom-blue after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm"></div>
+        </label>
+      </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <p class="font-semibold text-gray-600 dark:text-gray-300">Kota</p>
         <div

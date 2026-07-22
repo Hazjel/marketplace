@@ -18,6 +18,13 @@ OLLAMA_CONTEXT_LENGTH = int(os.getenv("OLLAMA_CONTEXT_LENGTH", "2048"))
 LARAVEL_API_URL = os.getenv("LARAVEL_API_URL", "http://localhost:8000").rstrip("/")
 
 # ---------------------------------------------------------------------------
+# INTERNAL SERVICE AUTH — dipakai proteksi endpoint yang cuma boleh dipanggil
+# Laravel (bukan publik), sama shared secret dengan InternalServiceAuth di sisi
+# Laravel (header X-Internal-Key).
+# ---------------------------------------------------------------------------
+INTERNAL_SERVICE_KEY = os.getenv("INTERNAL_SERVICE_KEY", "")
+
+# ---------------------------------------------------------------------------
 # CORS
 # ---------------------------------------------------------------------------
 CORS_ALLOWED_ORIGINS: list[str] = [

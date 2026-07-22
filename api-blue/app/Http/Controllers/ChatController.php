@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
 use App\Helpers\ResponseHelper;
+use App\Jobs\GenerateAiChatReplyJob;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -121,6 +122,14 @@ class ChatController extends Controller
 
             // Broadcast event
             broadcast(new MessageSent($message))->toOthers();
+
+            // Kalau penerima adalah toko yang mengaktifkan Asisten AI, generate
+            // balasan otomatis async (job) -- jangan sinkron di sini karena
+            // panggilan ke Ollama bisa makan beberapa detik.
+            $receiver = User::with('store')->find($request->receiver_id);
+            if ($receiver?->store?->ai_assistant_enabled) {
+                GenerateAiChatReplyJob::dispatch($receiver->store->id, Auth::id(), $request->message);
+            }
 
             return ResponseHelper::jsonResponse(true, 'Message sent successfully', $message->load('sender'), 201);
 

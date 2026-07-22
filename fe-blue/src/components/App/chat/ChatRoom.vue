@@ -128,6 +128,12 @@ v-for="msg in messages" :key="msg.id" :class="[
               ? 'bg-custom-blue text-white rounded-tr-none'
               : 'bg-white dark:bg-surface-card border border-custom-stroke dark:border-white/10 rounded-tl-none text-custom-black dark:text-white'
           ]">
+            <span
+              v-if="msg.is_ai_reply"
+              class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full mb-1.5 bg-custom-blue/10 text-custom-blue dark:bg-white/10 dark:text-blue-300">
+              Dibalas otomatis oleh AI
+            </span>
+            <br v-if="msg.is_ai_reply" />
             {{ msg.message }}
             <p
 :class="[

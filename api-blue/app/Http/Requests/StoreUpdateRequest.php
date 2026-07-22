@@ -25,6 +25,7 @@ class StoreUpdateRequest extends FormRequest
             'postal_code' => 'required|string',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'ai_assistant_enabled' => 'nullable|boolean',
         ];
     }
 

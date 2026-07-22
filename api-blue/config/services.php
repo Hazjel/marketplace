@@ -57,4 +57,8 @@ return [
         'key' => env('INTERNAL_SERVICE_KEY', ''),
     ],
 
+    'chat_service' => [
+        'url' => env('CHAT_SERVICE_URL', 'http://chat-service:8001'),
+    ],
+
 ];
