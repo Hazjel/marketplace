@@ -3,7 +3,7 @@ import { useProductStore } from '@/stores/product'
 import { useProductCategoryStore } from '@/stores/productCategory'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, nextTick } from 'vue'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { useRoute, useRouter } from 'vue-router'
 import { parseRupiah } from '@/helpers/format'
@@ -25,6 +25,10 @@ const { productCategories } = storeToRefs(productCategoryStore)
 const { fetchProductCategories } = productCategoryStore
 
 const subCategories = ref([])
+// Watcher kategori harus diam saat fetchData() lagi isi form dari data
+// existing — kalau enggak, product_category_id yang baru di-load ikut
+// ke-reset jadi null padahal user belum ganti apa-apa.
+const isInitialLoad = ref(true)
 
 const product = ref({
   store_id: null,
@@ -70,6 +74,12 @@ const fetchData = async () => {
 
   product.value.parent_product_category_id = product.value.product_category.parent_id
   product.value.product_category_id = product.value.product_category.id
+
+  // Tunggu watcher (default flush:'pre', dibatch ke microtask) selesai jalan
+  // dulu sebelum lepas flag — kalau enggak, watcher bisa telat trigger
+  // SETELAH flag ini false dan salah nge-reset product_category_id.
+  await nextTick()
+  isInitialLoad.value = false
 }
 
 const deletedImages = ref([])
@@ -116,9 +126,12 @@ const handleImageChange = (event, index) => {
 watch(
   () => product.value.parent_product_category_id,
   async (newValue) => {
-    const category = productCategories.value.find((category) => category.id === newValue).childrens
+    if (!isInitialLoad.value) {
+      product.value.product_category_id = null
+    }
 
-    subCategories.value = category
+    subCategories.value =
+      productCategories.value.find((category) => category.id === newValue)?.childrens || []
   }
 )
 

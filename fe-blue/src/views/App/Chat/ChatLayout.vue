@@ -1,7 +1,6 @@
 <script setup>
 import ChatSidebar from '@/components/App/chat/ChatSidebar.vue'
 import ChatRoom from '@/components/App/chat/ChatRoom.vue'
-import echo from '@/plugins/echo'
 import { onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -36,7 +35,6 @@ onMounted(async () => {
   if (user.value) {
     await fetchContacts()
     await handleInitialParams()
-    chatStore.joinPresenceChannel() // Join presence channel
   }
 
   // Add ESC key listener
@@ -50,10 +48,10 @@ const handleEscKey = (e) => {
 }
 
 onUnmounted(() => {
-  if (user.value) {
-    echo.leave(`chat.${user.value.id}`)
-    chatStore.leavePresenceChannel()
-  }
+  // Channel chat.{id} & presence "online" dipegang App.vue/Navbar untuk
+  // seumur sesi login (notifikasi global) — ChatLayout tidak pernah join
+  // keduanya, jadi tidak boleh leave di sini juga (dulu salah leave channel
+  // orang lain, notifikasi chat global mati begitu halaman Chat ditinggalkan).
   window.removeEventListener('keydown', handleEscKey)
 })
 </script>

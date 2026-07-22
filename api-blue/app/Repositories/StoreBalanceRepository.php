@@ -18,6 +18,12 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
             }
         })->with(['storeBalanceHistories']);
 
+        // Non-admin (role store) cuma boleh lihat saldo toko sendiri —
+        // tanpa ini, saldo & riwayat transaksi toko lain bisa bocor.
+        if (auth()->check() && ! auth()->user()->hasRole('admin')) {
+            $query->where('store_id', auth()->user()->store->id ?? null);
+        }
+
         if ($limit) {
             $query->take($limit);
         }
@@ -39,6 +45,12 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
     public function getById(string $id)
     {
         $query = StoreBalance::where('id', $id)->with(['storeBalanceHistories']);
+
+        // Non-admin (role store) cuma boleh lihat saldo toko sendiri —
+        // tanpa ini, ID store_balance toko lain bisa ditebak/di-enumerate.
+        if (auth()->check() && ! auth()->user()->hasRole('admin')) {
+            $query->where('store_id', auth()->user()->store->id ?? null);
+        }
 
         return $query->first();
     }

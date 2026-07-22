@@ -17,7 +17,7 @@ const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
 const storeStore = useStoreStore()
-const { loading } = storeToRefs(storeStore)
+const { loading, error } = storeToRefs(storeStore)
 const { fetchStoreByUser, updateStore } = storeStore
 
 const addressStore = useAddressStore()
