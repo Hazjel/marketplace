@@ -30,7 +30,9 @@ class GenerateAiChatReplyJob implements ShouldQueue
 
     public int $backoff = 5;
 
-    public int $timeout = 30;
+    // Inference Ollama (qwen3:1.7b, CPU-only) bisa makan puluhan detik --
+    // job timeout & HTTP client timeout harus lebih longgar dari itu.
+    public int $timeout = 120;
 
     public function __construct(
         private readonly string $storeId,
@@ -63,7 +65,7 @@ class GenerateAiChatReplyJob implements ShouldQueue
             $response = Http::withHeaders([
                 'X-Internal-Key' => config('services.internal.key'),
             ])
-                ->timeout(20)
+                ->timeout(110)
                 ->post(config('services.chat_service.url').'/store-assistant/reply', [
                     'store_name' => $store->name,
                     'products' => $products,
