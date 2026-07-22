@@ -71,6 +71,7 @@ const selectSavedAddress = (addr) => {
     addr.latitude != null && addr.longitude != null
       ? { latitude: addr.latitude, longitude: addr.longitude }
       : null
+  resetSelectedShipping()
   toast.success('Address applied: ' + addr.label)
 }
 
@@ -95,6 +96,16 @@ const couriers = ref([])
 const selectedCourier = ref(null)
 const showDeliveryModal = ref(false)
 const deliveryFee = ref(0)
+
+// Reset kurir & ongkir yang sudah dipilih — dihitung berdasarkan alamat lama,
+// jadi begitu alamat ganti wajib dihitung ulang, bukan dibawa terus.
+const resetSelectedShipping = () => {
+  selectedCourier.value = null
+  deliveryFee.value = 0
+  transaction.value.shipping = null
+  transaction.value.shipping_type = null
+  transaction.value.shipping_cost = 0
+}
 
 // Address search state
 const addressSearch = ref('')
@@ -190,12 +201,13 @@ const handleAddressSelect = (selected) => {
   transaction.value.postal_code = selected.zip_code
   addressSearch.value = selected.label
   showAddressOptions.value = false
+  resetSelectedShipping()
   toast.success('Alamat berhasil dipilih')
 }
 
 // Delivery calculation functionality
 const handleDeliveryModal = async () => {
-  if (!transaction.value.address) {
+  if (!transaction.value.address_id) {
     toast.error('Silakan pilih alamat terlebih dahulu')
     return
   }

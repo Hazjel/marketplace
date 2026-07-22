@@ -12,7 +12,8 @@ export const useChatStore = defineStore('chat', {
     loadingMessages: false,
     sendingMessage: false,
     error: null,
-    onlineUsers: [] // Array of user IDs or objects
+    onlineUsers: [], // Array of user IDs or objects
+    _listeningChannel: null // channel name yang sedang di-subscribe, cegah listener dobel
   }),
 
   getters: {
@@ -118,23 +119,27 @@ export const useChatStore = defineStore('chat', {
     },
 
     initializeChatListener(userId) {
-      // Importing echo here or using global echo from plugins
-      // Since we can't easily import 'echo' inside actions if not at top, assumes echo is available or imported.
-      // We imported `axiosInstance` at top, we need to import `echo` at top of file.
-
-      // Check if already listening to avoid duplicates? Echo handles this usually.
-      // But good to track if initialized.
+      const channel = `chat.${userId}`
+      // Dipanggil dari beberapa komponen (App.vue, Navbar, Sidebar, BuyerSidebar)
+      // tanpa saling tahu satu sama lain — tanpa guard ini tiap komponen pasang
+      // listener baru, jadi notifikasi & unread count kelipatan per pesan masuk.
+      if (this._listeningChannel === channel) return
+      this._listeningChannel = channel
 
       import('@/plugins/echo').then(({ default: echo }) => {
-        echo.private(`chat.${userId}`).listen('MessageSent', (e) => {
+        echo.private(channel).listen('MessageSent', (e) => {
           this.pushMessage(e.message)
         })
       })
     },
 
     cleanupChatListener(userId) {
+      const channel = `chat.${userId}`
+      if (this._listeningChannel !== channel) return
+      this._listeningChannel = null
+
       import('@/plugins/echo').then(({ default: echo }) => {
-        echo.leave(`chat.${userId}`)
+        echo.leave(channel)
       })
     },
 

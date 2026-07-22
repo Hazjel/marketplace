@@ -69,6 +69,16 @@ const handleCityInput = debounce(async (search) => {
   loadingCities.value = false
 }, 500)
 
+// User ngetik ulang teks pencarian (belum tentu pilih opsi baru) — city_id
+// lama jadi gak valid lagi buat teks ini, wajib pilih ulang dari dropdown
+// sebelum bisa submit. Tanpa ini, guard di submit() lolos dengan city_id
+// lama padahal label yang tampil sudah beda.
+const handleCitySearchChange = () => {
+  form.city_id = ''
+  form.city = ''
+  handleCityInput(citySearch.value)
+}
+
 const selectCity = (city) => {
   form.city = city.label
   form.city_id = String(city.id)
@@ -231,7 +241,7 @@ onMounted(() => {
             required
             placeholder="Cari kota atau kecamatan..."
             class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-            @input="handleCityInput(citySearch)"
+            @input="handleCitySearchChange"
           />
           <div v-if="loadingCities" class="absolute inset-y-0 right-4 flex items-center">
             <div class="size-5 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
