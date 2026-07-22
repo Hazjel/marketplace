@@ -37,8 +37,12 @@ const store = ref({
 })
 
 const storeCoords = ref({ latitude: null, longitude: null })
+// User klik peta sebelum fetchData() selesai → fetchData tidak boleh timpa
+// balik pin yang baru saja dipilih user dengan data lama dari server.
+const userMovedPin = ref(false)
 
 const handleCoordsUpdate = (value) => {
+  userMovedPin.value = true
   storeCoords.value = value
   store.value.latitude = value.latitude
   store.value.longitude = value.longitude
@@ -70,16 +74,22 @@ const fetchData = async () => {
     const response = await fetchStoreByUser()
 
     if (response) {
+      const { latitude, longitude, ...rest } = response
+
       store.value = {
-        ...response,
+        ...rest,
+        latitude: userMovedPin.value ? store.value.latitude : latitude,
+        longitude: userMovedPin.value ? store.value.longitude : longitude,
         logo_url: response.logo, // existing logo URL
         logo: null // new logo file (if changed)
       }
 
       addressSearch.value = response.address || ''
-      storeCoords.value = {
-        latitude: response.latitude ?? null,
-        longitude: response.longitude ?? null
+      if (!userMovedPin.value) {
+        storeCoords.value = {
+          latitude: latitude ?? null,
+          longitude: longitude ?? null
+        }
       }
     }
   } catch (err) {

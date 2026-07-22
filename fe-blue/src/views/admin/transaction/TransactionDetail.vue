@@ -221,11 +221,6 @@ const handleRepayment = () => {
     }
   })
 }
-
-onMounted(async () => {
-  await fetchData()
-  loadMidtransScript().catch(console.error)
-})
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
@@ -53,10 +53,6 @@ onMounted(async () => {
   if (route.query.alert === 'complete_profile') {
     showProfileAlert.value = true
   }
-})
-
-watch(user, () => {
-  populateForm()
 })
 
 const triggerFileInput = () => {

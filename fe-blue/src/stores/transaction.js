@@ -15,13 +15,19 @@ export const useTransactionStore = defineStore('transaction', {
     },
     loading: false,
     error: null,
-    success: null
+    success: null,
+    _fetchSeq: 0 // cegah response request lama nimpa hasil request lebih baru
   }),
   actions: {
     async fetchTransactionsPaginated(params) {
       this.loading = true
       const authStore = useAuthStore()
       const mode = authStore.activeMode
+
+      // Tandai request ini sebagai yang terbaru — kalau ada request lebih
+      // baru menyusul sebelum ini selesai, hasil request ini dibuang saat
+      // resolve (mencegah search/filter lama flicker menimpa hasil terbaru).
+      const seq = ++this._fetchSeq
 
       try {
         // Merge params with mode
@@ -30,12 +36,17 @@ export const useTransactionStore = defineStore('transaction', {
           params: queryParams
         })
 
+        if (seq !== this._fetchSeq) return
+
         this.transactions = response.data.data.data
         this.meta = response.data.data.meta
       } catch (error) {
+        if (seq !== this._fetchSeq) return
         this.error = handleError(error)
       } finally {
-        this.loading = false
+        if (seq === this._fetchSeq) {
+          this.loading = false
+        }
       }
     },
 
