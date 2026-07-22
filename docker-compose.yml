@@ -396,7 +396,8 @@ services:
       - "8082:8080"   # web UI — beda dari phpmyadmin (8080)
       - "50000:50000" # agent port (tidak dipakai untuk built-in node, aman dibiarkan)
     environment:
-      JAVA_OPTS: "-Xmx512m"
+      JAVA_OPTS: "-Xmx512m -Duser.timezone=Asia/Jakarta"
+      TZ: "Asia/Jakarta"
       # dipakai Jenkinsfile buat cd — HARUS sama persis dgn source volume di bawah,
       # soalnya docker compose yg dijalankan di dalam container ini ngomong ke docker
       # daemon HOST (lewat docker.sock), bukan daemon di dalam container. Kalau target
