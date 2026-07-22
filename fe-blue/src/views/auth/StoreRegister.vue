@@ -41,9 +41,12 @@ const handleResolvedAddress = (info) => {
   if (info.postal_code) {
     form.value.postal_code = info.postal_code
   }
-  if (!form.value.city && info.city) {
+  if (info.city) {
     form.value.city = info.city
   }
+  // Sinkronkan kolom pencarian juga — dulu cuma form.address yang keupdate,
+  // jadi kolom "Cari Lokasi" tetap nampilin hasil ketik manual lama.
+  addressSearch.value = form.value.address
 }
 
 // Saat kota dipilih, arahkan peta ke pusat kota kalau pin belum ditaruh
