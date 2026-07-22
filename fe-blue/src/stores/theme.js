@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 
 export const useThemeStore = defineStore('theme', () => {
   // State: 'light' | 'dark' | 'system'
-  const theme = ref(localStorage.getItem('blukios_theme') || 'system')
+  const theme = ref(localStorage.getItem('blukios_theme') || 'light')
 
   // Computed: Actual effective theme ('light' or 'dark')
   const effectiveTheme = computed(() => {
