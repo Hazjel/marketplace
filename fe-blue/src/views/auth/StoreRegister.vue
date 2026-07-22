@@ -49,9 +49,10 @@ const handleResolvedAddress = (info) => {
   addressSearch.value = form.value.address
 }
 
-// Saat kota dipilih, arahkan peta ke pusat kota kalau pin belum ditaruh
+// Saat user pilih lokasi dari hasil pencarian, pindahkan pin peta ke situ —
+// pilih dari search = user jelas mau pindah lokasi, jadi pin lama (GPS/manual
+// sebelumnya) wajib ditimpa, bukan dipertahankan.
 const centerMapOnCity = async (city) => {
-  if (coords.value.latitude != null) return
   try {
     const res = await axios.get('/shipment/geocode', { params: { city } })
     if (res.data?.lat && res.data?.lon) {
