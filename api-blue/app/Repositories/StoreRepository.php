@@ -185,6 +185,10 @@ class StoreRepository implements StoreRepositoryInterface
             $store->latitude = $data['latitude'] ?? $store->latitude;
             $store->longitude = $data['longitude'] ?? $store->longitude;
 
+            if (isset($data['ai_assistant_enabled'])) {
+                $store->ai_assistant_enabled = $data['ai_assistant_enabled'];
+            }
+
             $store->save();
 
             DB::commit();

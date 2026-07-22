@@ -146,6 +146,7 @@ services:
       # Fallback ke KEY_RAJA_ONGKIR — string kosong akan menimpa fallback di config
       KOMERCE_API_KEY: ${KOMERCE_API_KEY:-${KEY_RAJA_ONGKIR:-}}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY wajib diisi di .env}
+      CHAT_SERVICE_URL: http://chat-service:8001
 
   nginx:
     image: nginx:alpine
@@ -202,6 +203,8 @@ services:
       REVERB_HOST: reverb
       REVERB_PORT: 8080
       REVERB_SCHEME: http
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY wajib diisi di .env}
+      CHAT_SERVICE_URL: http://chat-service:8001
 
   # ─────────────────────────────────────────
   # Reverb WebSocket Server
@@ -298,6 +301,7 @@ services:
       SESSION_TTL_MINUTES: 60
       # Tier 3 — Redis persistent session
       REDIS_URL: redis://redis:6379/0
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY wajib diisi di .env}
 
   # ─────────────────────────────────────────
   # Recommendation Service (content-based + collaborative filtering)
