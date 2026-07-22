@@ -8,6 +8,9 @@ export const useWishlistStore = defineStore('wishlist', () => {
   const items = ref([])
   const loading = ref(false)
   const toast = useToast()
+  // Cegah double-click cepat kirim 2 request toggle paralel utk produk yang
+  // sama — race bisa bikin status server & state lokal saling menimpa.
+  const pendingToggleIds = ref(new Set())
 
   // Get list of product IDs in wishlist for quick lookup
   const wishlistIds = computed(() => items.value.map((item) => item.id))
@@ -25,6 +28,9 @@ export const useWishlistStore = defineStore('wishlist', () => {
   }
 
   const toggleWishlist = async (product) => {
+    if (pendingToggleIds.value.has(product.id)) return
+    pendingToggleIds.value.add(product.id)
+
     try {
       const response = await axiosInstance.post('/wishlist', {
         product_id: product.id
@@ -44,6 +50,8 @@ export const useWishlistStore = defineStore('wishlist', () => {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update wishlist')
       throw error
+    } finally {
+      pendingToggleIds.value.delete(product.id)
     }
   }
 

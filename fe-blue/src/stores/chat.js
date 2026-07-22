@@ -13,7 +13,8 @@ export const useChatStore = defineStore('chat', {
     sendingMessage: false,
     error: null,
     onlineUsers: [], // Array of user IDs or objects
-    _listeningChannel: null // channel name yang sedang di-subscribe, cegah listener dobel
+    _listeningChannel: null, // channel name yang sedang di-subscribe, cegah listener dobel
+    _fetchMessagesSeq: 0 // cegah response fetch kontak lama nimpa kontak yang baru diklik
   }),
 
   getters: {
@@ -38,8 +39,16 @@ export const useChatStore = defineStore('chat', {
     async fetchMessages(userId) {
       this.loadingMessages = true
       this.messages = [] // Clear previous messages
+
+      // User klik kontak A lalu cepat pindah ke B — kalau response A telat
+      // datang setelah B, jangan sampai pesan A menimpa chat room B.
+      const seq = ++this._fetchMessagesSeq
+
       try {
         const response = await axiosInstance.get(`/chat/${userId}`)
+
+        if (seq !== this._fetchMessagesSeq) return
+
         this.messages = response.data.data
 
         // Reset unread count for this user locally
@@ -48,9 +57,12 @@ export const useChatStore = defineStore('chat', {
           contact.unread_count = 0
         }
       } catch (error) {
+        if (seq !== this._fetchMessagesSeq) return
         this.error = handleError(error)
       } finally {
-        this.loadingMessages = false
+        if (seq === this._fetchMessagesSeq) {
+          this.loadingMessages = false
+        }
       }
     },
 

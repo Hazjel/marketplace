@@ -83,7 +83,7 @@ class ProductController extends Controller implements HasMiddleware
                 });
             }
 
-            $totalSold = $this->productRepository->getTotalSold();
+            $totalSold = $this->productRepository->getTotalSold($validated['store_id'] ?? null);
             // Log::info("CONTROLLER debug totalSold: " . $totalSold);
             // Log::info("CONTROLLER debug Auth: " . (auth()->check() ? auth()->user()->id : 'Guest'));
 

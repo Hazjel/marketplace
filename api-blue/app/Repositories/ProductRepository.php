@@ -115,20 +115,19 @@ class ProductRepository implements ProductRepositoryInterface
         return $query->paginate($rowPerPage);
     }
 
-    public function getTotalSold()
+    public function getTotalSold(?string $storeId = null)
     {
-        // Calculate Total Sold based on PRODUCTS belonging to the store
-        // This ensures consistency with the "Product List" which shows products of the store.
-        // We join transaction_details -> transactions to check Payment Status.
-        // We filter by products.store_id.
-
+        // Total sold harus mengikuti scope listing yang sedang ditampilkan
+        // (parameter $storeId dari request), BUKAN role user yang login —
+        // dual-role user (buyer+store) browsing katalog publik tanpa filter
+        // toko dulu diam-diam dapat angka toko sendiri, bukan total listing.
         $query = DB::table('transaction_details')
             ->join('products', 'transaction_details.product_id', '=', 'products.id')
             ->join('transactions', 'transaction_details.transaction_id', '=', 'transactions.id')
             ->where('transactions.payment_status', 'paid');
 
-        if (auth()->check() && auth()->user()->hasRole('store')) {
-            $query->where('products.store_id', auth()->user()->store->id ?? null);
+        if ($storeId) {
+            $query->where('products.store_id', $storeId);
         }
 
         return $query->sum('transaction_details.qty');
