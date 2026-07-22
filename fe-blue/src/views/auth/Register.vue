@@ -2,7 +2,7 @@
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 
 const authStore = useAuthStore()
@@ -21,6 +21,18 @@ const form = ref({
 
 const showPassword = ref(false)
 const loading = ref(false) // Added loading state
+
+// Cerminan aturan validasi backend (RegisterStoreRequest): min 8 karakter,
+// wajib ada huruf besar & angka. Ditampilkan real-time biar user gak perlu
+// coba-coba submit dulu buat tau syarat mana yang belum terpenuhi.
+const passwordRules = computed(() => {
+  const value = form.value.password || ''
+  return [
+    { label: 'Minimal 8 karakter', met: value.length >= 8 },
+    { label: 'Mengandung huruf besar (A-Z)', met: /[A-Z]/.test(value) },
+    { label: 'Mengandung angka (0-9)', met: /[0-9]/.test(value) }
+  ]
+})
 
 const handleImageChange = (e) => {
   const file = e.target.files[0]
@@ -184,7 +196,17 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
           </button>
         </div>
         <span v-if="error?.password" class="text-red-500 text-xs font-medium ml-2">{{ error?.password?.join(', ') }}</span>
-        <span v-else class="text-xs text-custom-grey dark:text-gray-400 ml-2">Min. 8 karakter, wajib ada huruf besar & angka</span>
+        <ul class="flex flex-col gap-1 ml-2 mt-1">
+          <li
+            v-for="rule in passwordRules" :key="rule.label"
+            class="flex items-center gap-2 text-xs font-medium transition-colors"
+            :class="rule.met ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'">
+            <span
+              class="size-1.5 rounded-full shrink-0 transition-colors"
+              :class="rule.met ? 'bg-green-500' : 'bg-red-500'"></span>
+            {{ rule.label }}
+          </li>
+        </ul>
       </div>
     </div>
 
