@@ -108,7 +108,7 @@ const sellerSwitchLink = {
 }
 
 const handleSwitchToSeller = () => {
-  authStore.switchToMode(router, 'store')
+  authStore.initiateSso(import.meta.env.VITE_SELLER_APP_URL)
 }
 
 const handleLogout = async () => {

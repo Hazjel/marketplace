@@ -7,9 +7,13 @@ use App\Http\Requests\LoginStoreRequest;
 use App\Http\Requests\RegisterStoreRequest;
 use App\Http\Resources\UserResource;
 use App\Interfaces\AuthRepositoryInterface;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -124,5 +128,53 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
         }
+    }
+
+    /**
+     * SSO — dipanggil dari domain A (user sudah login) untuk mendapatkan token
+     * exchange sekali-pakai yang dibawa lewat redirect ke domain B (blukios.store
+     * <-> seller.blukios.store). Dipakai bukan cookie shared-domain karena kedua
+     * app di subdomain berbeda dan auth di sini murni Sanctum Bearer token
+     * (bukan cookie SPA, lihat config/cors.php supports_credentials=false).
+     */
+    public function ssoInitiate(Request $request)
+    {
+        $rawToken = Str::random(64);
+
+        // Cache::pull di endpoint exchange nanti = atomic get+delete, jadi
+        // token ini otomatis one-time-use. TTL pendek (30 detik) cukup untuk
+        // sekali redirect browser, bukan disimpan lama seperti token sesi biasa.
+        Cache::put("sso_exchange_{$rawToken}", Auth::id(), now()->addSeconds(30));
+
+        return ResponseHelper::jsonResponse(true, 'success', ['exchange_token' => $rawToken], 200);
+    }
+
+    /**
+     * SSO — dipanggil dari domain B (belum ada sesi) untuk menukar exchange
+     * token jadi token Sanctum baru. Publik (tanpa auth:sanctum) karena
+     * dipanggil sebelum user punya sesi di domain ini, tapi hanya valid kalau
+     * bawa exchange_token yang benar dari ssoInitiate().
+     */
+    public function ssoExchange(Request $request)
+    {
+        $request->validate([
+            'exchange_token' => 'required|string',
+        ]);
+
+        $userId = Cache::pull("sso_exchange_{$request->exchange_token}");
+
+        if (! $userId) {
+            return ResponseHelper::jsonResponse(false, 'Token SSO tidak valid atau sudah kedaluwarsa.', null, 401);
+        }
+
+        $user = User::find($userId);
+
+        if (! $user) {
+            return ResponseHelper::jsonResponse(false, 'Token SSO tidak valid atau sudah kedaluwarsa.', null, 401);
+        }
+
+        $user->token = $user->createToken('sso_auth_token')->plainTextToken;
+
+        return ResponseHelper::jsonResponse(true, 'success', new UserResource($user), 200);
     }
 }

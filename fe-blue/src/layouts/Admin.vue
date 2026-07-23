@@ -9,11 +9,16 @@ import Topbar from '@/components/admin/Topbar.vue'
 const isSidebarOpen = ref(false)
 
 const authStore = useAuthStore()
-const { user, activeMode } = storeToRefs(authStore)
+const { user } = storeToRefs(authStore)
 
-// Buyer punya sidebar sendiri (menu berbeda total dari seller/admin) —
-// shell tetap satu komponen supaya route `/:username/*` tidak perlu dipecah.
-const isBuyerShell = computed(() => user.value?.role !== 'admin' && activeMode.value === 'buyer')
+// Shell ini dipakai KEDUA build (buyer & seller), tapi routenya sudah
+// terpisah total sejak split domain -- build mana yang aktif langsung
+// menentukan sidebar mana yang relevan. Admin platform selalu pakai
+// Sidebar biasa (dia sudah di-redirect keluar dari buyer app kalau nyasar
+// ke situ, lihat router/routes/buyer.js).
+const isBuyerShell = computed(
+  () => import.meta.env.VITE_APP_TARGET !== 'seller' && user.value?.role !== 'admin'
+)
 </script>
 
 <template>

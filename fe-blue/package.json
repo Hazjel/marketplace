@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:seller": "vite --port 5174 --mode seller",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix",

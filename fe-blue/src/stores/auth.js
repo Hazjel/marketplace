@@ -4,11 +4,17 @@ import { axiosInstance } from '@/plugins/axios'
 import Cookies from 'js-cookie'
 import { defineStore } from 'pinia'
 
+// App ini SELALU 'buyer' atau SELALU 'store', ditentukan saat build (bukan
+// toggle runtime lagi) -- dua domain terpisah (blukios.store vs
+// seller.blukios.store), sama seperti Shopee App vs Seller Centre yang
+// juga dua app terpisah tanpa konsep "switch mode" di dalam 1 app.
+const APP_TARGET = import.meta.env.VITE_APP_TARGET === 'seller' ? 'store' : 'buyer'
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: Cookies.get('token') || null,
-    activeMode: Cookies.get('activeMode') || 'buyer', // 'buyer' or 'store'
+    activeMode: APP_TARGET,
     loading: false,
     error: null,
     success: null
@@ -18,20 +24,12 @@ export const useAuthStore = defineStore('auth', {
     currentMode: (state) => state.activeMode
   },
   actions: {
-    setMode(mode) {
-      this.activeMode = mode
-      Cookies.set('activeMode', mode, { secure: true, sameSite: 'Strict' })
-    },
-
-    // Pindah mode + arahkan ke dashboard yang sesuai. Router diterima sebagai
-    // param (bukan import langsung) karena circular dependency store <-> router.
-    switchToMode(router, mode) {
-      this.setMode(mode)
-      if (mode === 'buyer') {
-        router.push({ name: 'user.dashboard', params: { username: this.user.username } })
-      } else {
-        router.push({ name: 'admin.dashboard' })
-      }
+    // Minta exchange token dari domain ini, lalu redirect penuh (bukan
+    // router.push) ke domain lain -- kedua app tidak share router instance.
+    async initiateSso(targetUrl) {
+      const response = await axiosInstance.post('/auth/sso/initiate')
+      const exchangeToken = response.data.data.exchange_token
+      window.location.href = `${targetUrl}/sso/callback?xt=${exchangeToken}`
     },
     async login(credentials) {
       this.loading = true
