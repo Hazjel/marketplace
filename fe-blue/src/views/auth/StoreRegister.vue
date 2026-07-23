@@ -132,9 +132,9 @@ const handleSubmit = async () => {
     })
     authStore.user = newUser
 
-    setTimeout(() => {
-      // Force reload to ensure all states (sidebar etc) are fresh
-      window.location.href = '/admin/dashboard'
+    setTimeout(async () => {
+      // Dashboard toko tidak ada di build buyer -- SSO ke seller app.
+      await authStore.initiateSso(import.meta.env.VITE_SELLER_APP_URL)
     }, 1000)
   } catch (error) {
     if (error.response?.status === 422) {
