@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/stores/auth'
 import Admin from '@/layouts/Admin.vue'
 import CategoryList from '@/views/admin/category/CategoryList.vue'
 import CategoryCreate from '@/views/admin/category/CategoryCreate.vue'
@@ -460,8 +461,8 @@ const rootRedirect = [
   {
     path: '/',
     name: 'root',
-    redirect: async () => {
-      const { useAuthStore } = await import('@/stores/auth')
+    component: { render: () => null },
+    beforeEnter: async (to, from, next) => {
       const authStore = useAuthStore()
 
       if (authStore.token && !authStore.user) {
@@ -473,11 +474,11 @@ const rootRedirect = [
       }
 
       if (authStore.user?.role === 'admin') {
-        return { name: 'admin.dashboard' }
-      } else if (authStore.user) {
-        return { name: 'user.dashboard', params: { username: authStore.user.username } }
+        next({ name: 'admin.dashboard' })
+      } else if (authStore.user?.username) {
+        next({ name: 'user.dashboard', params: { username: authStore.user.username } })
       } else {
-        return { name: 'auth.login' }
+        next({ name: 'auth.login' })
       }
     }
   }
