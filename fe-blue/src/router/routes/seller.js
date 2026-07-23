@@ -452,4 +452,34 @@ const storeRoutes = [
   }
 ]
 
-export const sellerRoutes = [...adminRoutes, ...storeRoutes]
+// Seller app tidak punya "homepage" publik seperti buyer app -- akses ke
+// root langsung diarahkan ke dashboard yang sesuai (atau login kalau belum
+// ada sesi). Tanpa ini path '/' tidak match route manapun, Vue Router
+// render blank (bukan error/crash, cuma tidak ada apa-apa buat ditampilkan).
+const rootRedirect = [
+  {
+    path: '/',
+    beforeEnter: async (to, from, next) => {
+      const { useAuthStore } = await import('@/stores/auth')
+      const authStore = useAuthStore()
+
+      if (authStore.token && !authStore.user) {
+        try {
+          await authStore.checkAuth()
+        } catch (e) {
+          // Token tidak valid, treat sebagai guest
+        }
+      }
+
+      if (authStore.user?.role === 'admin') {
+        next({ name: 'admin.dashboard' })
+      } else if (authStore.user) {
+        next({ name: 'user.dashboard', params: { username: authStore.user.username } })
+      } else {
+        next({ name: 'auth.login' })
+      }
+    }
+  }
+]
+
+export const sellerRoutes = [...adminRoutes, ...storeRoutes, ...rootRedirect]
