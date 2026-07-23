@@ -4,6 +4,7 @@ import Login from '@/views/auth/Login.vue'
 import Register from '@/views/auth/Register.vue'
 import ForgotPassword from '@/views/auth/ForgotPassword.vue'
 import ResetPassword from '@/views/auth/ResetPassword.vue'
+import Forbidden from '@/views/App/Forbidden.vue'
 
 // Route auth dipakai KEDUA build (buyer & seller) -- login/register sama
 // persis, cuma tujuan setelah login yang beda (ditentukan di stores/auth.js
@@ -54,6 +55,13 @@ export const authRoutes = [
     path: '/sso/callback',
     name: 'auth.sso.callback',
     component: () => import('@/views/auth/SsoCallback.vue')
+  },
+  {
+    // Dipakai KEDUA build -- guard permission (router/index.js) redirect ke
+    // sini kalau user login tapi tidak punya izin akses suatu route.
+    path: '/403',
+    name: '403',
+    component: Forbidden
   },
   {
     // "Buka Toko" cuma ada di build buyer -- upgrade dari buyer jadi seller

@@ -43,9 +43,9 @@ const handleSubmit = async () => {
   const cart = useCartStore()
   await cart.syncAfterLogin()
 
-  // Redirect based on role
+  // Admin platform tidak ada di build buyer -- SSO ke seller app.
   if (response.role === 'admin') {
-    router.push({ name: 'admin.dashboard' })
+    await authStore.initiateSso(import.meta.env.VITE_SELLER_APP_URL)
   } else {
     router.push({
       name: 'user.dashboard',
