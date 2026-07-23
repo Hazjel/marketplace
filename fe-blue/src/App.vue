@@ -9,7 +9,9 @@ import { useToast } from 'vue-toastification'
 import FloatingChatWidget from '@/components/App/chat/FloatingChatWidget.vue'
 
 const error = ref(null)
-const isDev = import.meta.env.DEV
+// TEMPORARY DEBUG — paksa true buat lihat detail error di production,
+// REVERT ke import.meta.env.DEV setelah selesai debug.
+const isDev = true
 const router = useRouter()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
@@ -17,6 +19,7 @@ const chatStore = useChatStore()
 const toast = useToast()
 
 onErrorCaptured((err, instance, info) => {
+  console.error('[onErrorCaptured]', err, info) // TEMPORARY DEBUG
   error.value = {
     message: err.message,
     stack: err.stack,
