@@ -42,7 +42,7 @@
           Kembali
         </button>
         <button
-          @click="$router.push({ name: 'admin.dashboard' })"
+          @click="goDashboard"
           class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#2563EB] to-blue-700 text-white font-semibold hover:shadow-lg hover:shadow-[#2563EB]/25 transition-all duration-200"
         >
           Ke Dashboard
@@ -54,6 +54,21 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
+
+// '403' route ada di kedua build (auth.js) -- 'admin.dashboard' cuma ada
+// di build seller, jadi dashboard tujuan wajib disesuaikan role/target.
+const goDashboard = async () => {
+  const user = authStore.user
+  if (user?.role === 'admin') {
+    await authStore.initiateSso(import.meta.env.VITE_SELLER_APP_URL)
+  } else if (user) {
+    router.push({ name: 'user.dashboard', params: { username: user.username } })
+  } else {
+    router.push({ name: 'app.home' })
+  }
+}
 </script>

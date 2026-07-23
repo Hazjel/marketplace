@@ -12,9 +12,22 @@ const authStore = useAuthStore()
 const router = useRouter()
 const swiperInstance = ref(null)
 
-onMounted(() => {
+onMounted(async () => {
   if (authStore.token) {
-    router.replace({ name: 'admin.dashboard' })
+    if (!authStore.user) {
+      try {
+        await authStore.checkAuth()
+      } catch (e) {
+        // Token tidak valid, biarkan tetap di halaman auth
+      }
+    }
+
+    if (authStore.user?.role === 'admin') {
+      // Admin platform tidak ada di build buyer -- SSO ke seller app.
+      await authStore.initiateSso(import.meta.env.VITE_SELLER_APP_URL)
+    } else if (authStore.user) {
+      router.replace({ name: 'user.dashboard', params: { username: authStore.user.username } })
+    }
   }
 
   const swiper = new Swiper('.swiper', {

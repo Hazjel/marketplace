@@ -6,7 +6,6 @@ import BrowseCategory from '@/views/App/BrowseCategory.vue'
 import AppProductDetail from '@/views/App/ProductDetail.vue'
 import AppStoreDetail from '@/views/App/StoreDetail.vue'
 import Wishlist from '@/views/App/Wishlist.vue'
-import Forbidden from '@/views/App/Forbidden.vue'
 import Cart from '@/views/App/Cart.vue'
 import Checkout from '@/views/App/Checkout.vue'
 import TransactionList from '@/views/admin/transaction/TransactionList.vue'
@@ -46,11 +45,6 @@ export const buyerRoutes = [
       next()
     },
     children: [
-      {
-        path: '403',
-        name: '403',
-        component: Forbidden
-      },
       {
         path: '',
         name: 'app.home',
