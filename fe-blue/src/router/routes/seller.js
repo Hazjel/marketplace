@@ -459,7 +459,8 @@ const storeRoutes = [
 const rootRedirect = [
   {
     path: '/',
-    beforeEnter: async (to, from, next) => {
+    name: 'root',
+    redirect: async () => {
       const { useAuthStore } = await import('@/stores/auth')
       const authStore = useAuthStore()
 
@@ -472,11 +473,11 @@ const rootRedirect = [
       }
 
       if (authStore.user?.role === 'admin') {
-        next({ name: 'admin.dashboard' })
+        return { name: 'admin.dashboard' }
       } else if (authStore.user) {
-        next({ name: 'user.dashboard', params: { username: authStore.user.username } })
+        return { name: 'user.dashboard', params: { username: authStore.user.username } }
       } else {
-        next({ name: 'auth.login' })
+        return { name: 'auth.login' }
       }
     }
   }
