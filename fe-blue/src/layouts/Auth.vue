@@ -22,9 +22,17 @@ onMounted(async () => {
       }
     }
 
-    if (authStore.user?.role === 'admin') {
-      // Admin platform tidak ada di build buyer -- SSO ke seller app.
+    const isSellerBuild = import.meta.env.VITE_APP_TARGET === 'seller'
+    const isSellerRole = authStore.user?.role === 'admin' || authStore.user?.role === 'store'
+
+    if (isSellerRole && !isSellerBuild) {
+      // Dashboard toko/admin tidak ada di build buyer -- SSO ke seller app.
       await authStore.initiateSso(import.meta.env.VITE_SELLER_APP_URL)
+    } else if (!isSellerRole && isSellerBuild) {
+      // Marketplace tidak ada di build seller -- SSO balik ke buyer app.
+      await authStore.initiateSso(import.meta.env.VITE_BUYER_APP_URL)
+    } else if (authStore.user?.role === 'admin') {
+      router.replace({ name: 'admin.dashboard' })
     } else if (authStore.user) {
       router.replace({ name: 'user.dashboard', params: { username: authStore.user.username } })
     }

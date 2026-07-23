@@ -43,9 +43,17 @@ const handleSubmit = async () => {
   const cart = useCartStore()
   await cart.syncAfterLogin()
 
-  // Admin platform tidak ada di build buyer -- SSO ke seller app.
-  if (response.role === 'admin') {
+  const isSellerBuild = import.meta.env.VITE_APP_TARGET === 'seller'
+  const isSellerRole = response.role === 'admin' || response.role === 'store'
+
+  if (isSellerRole && !isSellerBuild) {
+    // Dashboard toko/admin tidak ada di build buyer -- SSO ke seller app.
     await authStore.initiateSso(import.meta.env.VITE_SELLER_APP_URL)
+  } else if (!isSellerRole && isSellerBuild) {
+    // Marketplace tidak ada di build seller -- SSO balik ke buyer app.
+    await authStore.initiateSso(import.meta.env.VITE_BUYER_APP_URL)
+  } else if (response.role === 'admin') {
+    router.push({ name: 'admin.dashboard' })
   } else {
     router.push({
       name: 'user.dashboard',

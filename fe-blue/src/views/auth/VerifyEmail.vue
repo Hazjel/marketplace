@@ -42,7 +42,21 @@ const checkStatus = async () => {
   await authStore.checkAuth()
   if (authStore.user?.email_verified_at) {
     toast.success('Email terverifikasi!')
-    router.push({ name: 'app.home' })
+
+    const isSellerBuild = import.meta.env.VITE_APP_TARGET === 'seller'
+    const isSellerRole = authStore.user?.role === 'admin' || authStore.user?.role === 'store'
+
+    if (isSellerRole && !isSellerBuild) {
+      await authStore.initiateSso(import.meta.env.VITE_SELLER_APP_URL)
+    } else if (!isSellerRole && isSellerBuild) {
+      await authStore.initiateSso(import.meta.env.VITE_BUYER_APP_URL)
+    } else if (authStore.user?.role === 'admin') {
+      router.push({ name: 'admin.dashboard' })
+    } else if (authStore.user?.role === 'store') {
+      router.push({ name: 'user.dashboard', params: { username: authStore.user.username } })
+    } else {
+      router.push({ name: 'app.home' })
+    }
   } else {
     toast.info('Belum terverifikasi. Cek inbox atau folder spam emailmu.')
   }
