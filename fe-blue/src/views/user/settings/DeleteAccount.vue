@@ -43,7 +43,7 @@ const handleDelete = async () => {
   <div class="flex flex-col gap-8 w-full max-w-2xl">
     <!-- Page Header -->
     <div class="flex flex-col gap-1">
-      <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">Hapus Akun</h1>
+      <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">Hapus Akun</h1>
       <p class="text-custom-grey dark:text-gray-400 font-medium">Tindakan ini bersifat permanen dan tidak dapat dibatalkan.</p>
     </div>
 
@@ -56,7 +56,7 @@ const handleDelete = async () => {
           </svg>
         </div>
         <div class="flex-1">
-          <h3 class="font-bold text-red-800 dark:text-red-300 text-base mb-2">Perhatian!</h3>
+          <h3 class="font-medium text-red-800 dark:text-red-300 text-base mb-2">Perhatian!</h3>
           <ul class="text-red-700 dark:text-red-400/80 text-sm space-y-2">
             <li class="flex items-start gap-2">
               <svg class="size-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +107,7 @@ const handleDelete = async () => {
     <div v-if="!showConfirm" class="flex justify-start">
       <button
         @click="showConfirm = true"
-        class="flex items-center gap-2 h-12 px-6 rounded-full bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-900/40 active:scale-[0.98] transition-all duration-300"
+        class="flex items-center gap-2 h-12 px-6 rounded-full bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 font-medium text-sm hover:bg-red-100 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-900/40 active:scale-[0.98] transition-all duration-300"
       >
         <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -124,8 +124,8 @@ const handleDelete = async () => {
     >
       <div v-if="showConfirm" class="bg-white dark:bg-white/[0.02] rounded-2xl border border-red-200 dark:border-red-900/30 p-6 flex flex-col gap-5">
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm">
-            Ketik <span class="text-red-600 dark:text-red-400 font-bold">HAPUS AKUN</span> untuk konfirmasi
+          <label class="font-medium text-custom-black dark:text-white text-sm">
+            Ketik <span class="text-red-600 dark:text-red-400 font-medium">HAPUS AKUN</span> untuk konfirmasi
           </label>
           <input
             v-model="confirmText"
@@ -139,14 +139,14 @@ const handleDelete = async () => {
         <div class="flex items-center gap-3">
           <button
             @click="showConfirm = false; confirmText = ''; canDelete = false"
-            class="flex-1 h-12 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-custom-black dark:text-white font-bold text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+            class="flex-1 h-12 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-custom-black dark:text-white font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
           >
             Batalkan
           </button>
           <button
             @click="handleDelete"
             :disabled="!canDelete || deleting"
-            class="flex-1 flex items-center justify-center h-12 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 hover:shadow-lg hover:shadow-red-600/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-red-600 disabled:hover:shadow-none disabled:active:scale-100"
+            class="flex-1 flex items-center justify-center h-12 rounded-xl bg-red-600 text-white font-medium text-sm hover:bg-red-700 hover:shadow-lg hover:shadow-red-600/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-red-600 disabled:hover:shadow-none disabled:active:scale-100"
           >
             <div v-if="deleting" class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
             Hapus Permanen

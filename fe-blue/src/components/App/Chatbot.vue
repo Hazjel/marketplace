@@ -227,7 +227,7 @@ const sendFeedback = async (msg, rating) => {
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">🤖</div>
             <div>
-              <h3 class="font-bold text-sm">Ri (AI Assistant)</h3>
+              <h3 class="font-medium text-sm">Ri (AI Assistant)</h3>
               <div class="flex items-center gap-1">
                 <span
                   class="w-2 h-2 rounded-full"
@@ -303,10 +303,10 @@ const sendFeedback = async (msg, rating) => {
 
                   <!-- Info -->
                   <div class="flex-1 min-w-0">
-                    <p class="text-[12px] font-semibold text-gray-800 dark:text-gray-100 leading-tight truncate">
+                    <p class="text-[12px] font-medium text-gray-800 dark:text-gray-100 leading-tight truncate">
                       {{ p.name }}
                     </p>
-                    <p class="text-[13px] font-bold text-custom-blue mt-0.5">
+                    <p class="text-[13px] font-medium text-custom-blue mt-0.5">
                       {{ formatPrice(p.price) }}
                     </p>
                     <div class="flex items-center gap-1.5 mt-0.5">

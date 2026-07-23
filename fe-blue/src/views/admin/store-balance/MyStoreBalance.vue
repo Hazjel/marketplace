@@ -108,13 +108,13 @@ onMounted(fetchStoreBalance)
     <div class="flex flex-col xl:flex-row w-full gap-6">
       <!-- Store Details -->
       <section class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Detail Toko</p>
+        <p class="font-medium text-lg dark:text-white">Detail Toko</p>
         <div class="flex flex-col md:flex-row items-center gap-4 w-full min-w-0">
           <div class="flex size-[80px] shrink-0 rounded-full bg-gray-100 dark:bg-white/5 overflow-hidden ring-4 ring-green-100 dark:ring-green-900/30">
             <img :src="store?.logo" class="size-full object-cover" alt="photo" />
           </div>
           <div class="flex flex-col gap-1.5 w-full overflow-hidden text-center md:text-left">
-            <p class="font-bold text-xl leading-tight w-full truncate dark:text-white">
+            <p class="font-medium text-xl leading-tight w-full truncate dark:text-white">
               {{ store?.name }}
             </p>
             <p class="flex items-center justify-center md:justify-start gap-1.5 font-medium text-gray-500 dark:text-gray-400">
@@ -134,7 +134,7 @@ onMounted(fetchStoreBalance)
               </svg>
             </div>
             <div class="flex flex-col">
-              <p class="font-bold text-lg dark:text-white">{{ completedWithdrawals }}</p>
+              <p class="font-medium text-lg dark:text-white">{{ completedWithdrawals }}</p>
               <p class="text-sm text-gray-500 dark:text-gray-400">Penarikan Selesai</p>
             </div>
           </div>
@@ -145,7 +145,7 @@ onMounted(fetchStoreBalance)
               </svg>
             </div>
             <div class="flex flex-col">
-              <p class="font-bold text-lg dark:text-white">{{ pendingWithdrawals }}</p>
+              <p class="font-medium text-lg dark:text-white">{{ pendingWithdrawals }}</p>
               <p class="text-sm text-gray-500 dark:text-gray-400">Menunggu Proses</p>
             </div>
           </div>
@@ -164,7 +164,7 @@ onMounted(fetchStoreBalance)
             <svg xmlns="http://www.w3.org/2000/svg" class="size-8 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
             </svg>
-            <p class="font-semibold text-white">Dana aman dan terlindungi</p>
+            <p class="font-medium text-white">Dana aman dan terlindungi</p>
           </div>
         </div>
 
@@ -173,7 +173,7 @@ onMounted(fetchStoreBalance)
           <img src="@/assets/images/backgrounds/wallet.png" class="size-full object-cover" alt="wallet" />
           <div class="flex flex-col items-center justify-center gap-2 text-center min-w-0 w-full px-4 absolute transform -translate-x-1/2 left-1/2 top-[15%] sm:top-[51px]">
             <p class="font-medium text-[#BFC6E9] leading-none">Saldo Tersedia:</p>
-            <p class="w-full font-extrabold text-3xl sm:text-[40px] text-white leading-none break-all">
+            <p class="w-full font-medium text-3xl sm:text-[40px] text-white leading-none break-all">
               <span id="balanceText">{{ toggleBalanceValue }}</span>
             </p>
           </div>
@@ -199,7 +199,7 @@ onMounted(fetchStoreBalance)
               </svg>
             </div>
             <div class="flex flex-col gap-0.5">
-              <p class="font-bold text-amber-700 dark:text-amber-400">{{ pendingBalanceValue }}</p>
+              <p class="font-medium text-amber-700 dark:text-amber-400">{{ pendingBalanceValue }}</p>
               <p class="text-sm text-amber-600/80 dark:text-amber-400/70">Saldo ditahan (escrow) — akan dirilis setelah buyer konfirmasi</p>
             </div>
           </div>
@@ -217,7 +217,7 @@ onMounted(fetchStoreBalance)
             </svg>
           </div>
           <div>
-            <h2 class="font-bold text-lg dark:text-white">Semua Penarikan</h2>
+            <h2 class="font-medium text-lg dark:text-white">Semua Penarikan</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ totalWithdrawals }} Total Penarikan</p>
           </div>
         </div>
@@ -227,7 +227,7 @@ onMounted(fetchStoreBalance)
           <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <span class="font-semibold text-sm text-white">Ajukan Penarikan</span>
+          <span class="font-medium text-sm text-white">Ajukan Penarikan</span>
         </RouterLink>
       </div>
 
@@ -251,7 +251,7 @@ onMounted(fetchStoreBalance)
                 </svg>
               </div>
               <div class="flex flex-col gap-1">
-                <p class="font-bold text-xl text-amber-600 dark:text-amber-400">
+                <p class="font-medium text-xl text-amber-600 dark:text-amber-400">
                   Rp {{ formatRupiah(withdrawal.amount) }}
                 </p>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Penarikan Dana</p>
@@ -260,7 +260,7 @@ onMounted(fetchStoreBalance)
             <div class="flex flex-col md:flex-row w-full md:w-auto items-center gap-3">
               <span
                 :class="[
-                  'inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold uppercase ring-1',
+                  'inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium uppercase ring-1',
                   withdrawal.status === 'completed'
                     ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-700/50'
                     : 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-700/50'
@@ -274,7 +274,7 @@ onMounted(fetchStoreBalance)
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
-                <span class="font-semibold text-sm text-white">Detail</span>
+                <span class="font-medium text-sm text-white">Detail</span>
               </RouterLink>
             </div>
           </div>
@@ -290,7 +290,7 @@ onMounted(fetchStoreBalance)
           </svg>
         </div>
         <div class="flex flex-col gap-1 items-center text-center">
-          <p class="font-semibold text-gray-900 dark:text-white">Belum ada data penarikan</p>
+          <p class="font-medium text-gray-900 dark:text-white">Belum ada data penarikan</p>
           <p class="text-sm text-gray-500 dark:text-gray-400">Ajukan penarikan pertama Anda</p>
         </div>
       </div>

@@ -36,7 +36,7 @@ v-if="item.banner" :src="item.banner" class="w-full h-full object-cover opacity-
       <!-- Store Name & Verified -->
       <div class="flex flex-col items-center gap-1 w-full">
         <h3
-class="font-bold text-lg text-custom-black dark:text-white leading-tight line-clamp-1 w-full"
+class="font-medium text-lg text-custom-black dark:text-white leading-tight line-clamp-1 w-full"
           :title="item.name">
           {{ item.name }}
         </h3>
@@ -46,7 +46,7 @@ v-if="item?.is_verified"
           <img
 src="@/assets/images/icons/verify-star.svg" class="size-3.5 shrink-0 dark:brightness-0 dark:invert"
             alt="icon" />
-          <span class="text-xs font-bold text-custom-blue uppercase tracking-wide">Official</span>
+          <span class="text-xs font-medium text-custom-blue uppercase tracking-wide">Official</span>
         </div>
       </div>
 
@@ -58,7 +58,7 @@ src="@/assets/images/icons/verify-star.svg" class="size-3.5 shrink-0 dark:bright
         </div>
         <template v-if="item.distance_m != null">
           <div class="w-1 h-1 rounded-full bg-gray-300 shrink-0"></div>
-          <div class="flex items-center gap-1 shrink-0 text-custom-blue font-semibold">
+          <div class="flex items-center gap-1 shrink-0 text-custom-blue font-medium">
             <i class="fa-solid fa-route text-xs"></i>
             <span>{{ formatDistance(item.distance_m) }}</span>
           </div>
@@ -74,7 +74,7 @@ src="@/assets/images/icons/verify-star.svg" class="size-3.5 shrink-0 dark:bright
       <div class="mt-auto w-full pt-5">
         <RouterLink
 v-if="item?.username" :to="{ name: 'app.store-detail', params: { username: item.username } }"
-          class="flex items-center justify-center h-10 w-full rounded-full border border-custom-stroke dark:border-white/20 font-bold text-sm text-custom-black dark:text-white bg-white dark:bg-transparent hover:bg-custom-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-custom-black dark:hover:border-white transition-all duration-300">
+          class="flex items-center justify-center h-10 w-full rounded-full border border-custom-stroke dark:border-white/20 font-medium text-sm text-custom-black dark:text-white bg-white dark:bg-transparent hover:bg-custom-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-custom-black dark:hover:border-white transition-all duration-300">
           Kunjungi Toko
         </RouterLink>
       </div>

@@ -89,7 +89,7 @@ watch(() => route.query, () => { performSearch() }, { deep: true })
         <svg class="size-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
         <span class="text-sm text-white/80 font-medium">Hasil Pencarian</span>
       </div>
-      <h1 class="font-extrabold text-2xl md:text-3xl text-white">
+      <h1 class="font-medium text-2xl md:text-3xl text-white">
         Hasil pencarian "<span class="text-blue-400">{{ searchQuery }}</span>"
       </h1>
       <div class="flex items-center gap-4 mt-3">
@@ -111,7 +111,7 @@ watch(() => route.query, () => { performSearch() }, { deep: true })
           <svg class="size-5 text-custom-black dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
-          <span class="font-bold text-custom-black dark:text-white">Filter</span>
+          <span class="font-medium text-custom-black dark:text-white">Filter</span>
         </div>
         <svg class="size-5 text-gray-400 transition-transform" :class="{ 'rotate-180': showFilters }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -127,13 +127,13 @@ watch(() => route.query, () => { performSearch() }, { deep: true })
       <div class="flex flex-col gap-8 flex-1 min-w-0">
         <!-- Tab Buttons -->
         <div class="flex items-center gap-2 border-b border-gray-200 dark:border-white/10">
-          <button class="px-4 py-3 text-sm font-bold relative transition-colors"
+          <button class="px-4 py-3 text-sm font-medium relative transition-colors"
             :class="activeTab === 'products' ? 'text-custom-blue' : 'text-custom-grey hover:text-custom-black dark:hover:text-white'"
             @click="activeTab = 'products'">
             Produk ({{ products.length }})
             <div v-if="activeTab === 'products'" class="absolute bottom-0 left-0 w-full h-[3px] bg-custom-blue rounded-t-full"></div>
           </button>
-          <button class="px-4 py-3 text-sm font-bold relative transition-colors"
+          <button class="px-4 py-3 text-sm font-medium relative transition-colors"
             :class="activeTab === 'stores' ? 'text-custom-blue' : 'text-custom-grey hover:text-custom-black dark:hover:text-white'"
             @click="activeTab = 'stores'">
             Toko ({{ stores.length }})
@@ -155,7 +155,7 @@ watch(() => route.query, () => { performSearch() }, { deep: true })
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h2 class="font-bold text-lg text-custom-black dark:text-white">Tidak ada produk ditemukan</h2>
+            <h2 class="font-medium text-lg text-custom-black dark:text-white">Tidak ada produk ditemukan</h2>
             <p class="text-sm text-custom-grey dark:text-gray-400 mt-1">Coba periksa ejaan atau gunakan kata kunci lain</p>
           </div>
         </section>
@@ -174,7 +174,7 @@ watch(() => route.query, () => { performSearch() }, { deep: true })
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 class="font-bold text-lg text-custom-black dark:text-white">Tidak ada toko ditemukan</h2>
+            <h2 class="font-medium text-lg text-custom-black dark:text-white">Tidak ada toko ditemukan</h2>
             <p class="text-sm text-custom-grey dark:text-gray-400 mt-1">Coba kata kunci pencarian yang berbeda</p>
           </div>
         </section>

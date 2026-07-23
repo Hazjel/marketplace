@@ -71,7 +71,7 @@ const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
       <li class="group">
         <button
           :disabled="meta.current_page === 1"
-          class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
+          class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-medium"
           @click="goToPage(meta.current_page - 1)"
         >
           <img
@@ -90,14 +90,14 @@ const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
       >
         <button
           v-if="page !== '...'"
-          class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold text-sm md:text-base"
+          class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-medium text-sm md:text-base"
           @click="goToPage(page)"
         >
           {{ page }}
         </button>
         <span
           v-else
-          class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center text-gray-500 font-semibold text-sm md:text-base"
+          class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center text-gray-500 font-medium text-sm md:text-base"
         >
           {{ page }}
         </span>
@@ -106,7 +106,7 @@ const getPageNumbers = (currentPage, lastPage, maxVisible = 5) => {
       <li class="group">
         <button
           :disabled="meta.current_page === meta.last_page"
-          class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-semibold"
+          class="flex size-9 md:size-11 shrink-0 rounded-full items-center justify-center bg-custom-blue/10 text-custom-blue group-[&.active]:bg-custom-blue group-[&.active]:text-white font-medium"
           @click="goToPage(meta.current_page + 1)"
         >
           <img

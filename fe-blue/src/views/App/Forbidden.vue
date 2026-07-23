@@ -24,8 +24,8 @@
 
       <!-- Title -->
       <div class="flex flex-col gap-3">
-        <h1 class="text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-purple-600 font-['Plus_Jakarta_Sans']">403</h1>
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Akses Ditolak</h2>
+        <h1 class="text-7xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-purple-600 font-['Plus_Jakarta_Sans']">403</h1>
+        <h2 class="text-2xl md:text-3xl font-medium text-gray-900 dark:text-white">Akses Ditolak</h2>
       </div>
 
       <!-- Description -->
@@ -37,13 +37,13 @@
       <div class="flex items-center gap-4 mt-4">
         <button
           @click="$router.go(-1)"
-          class="px-6 py-3 rounded-2xl border-2 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200"
+          class="px-6 py-3 rounded-2xl border-2 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200"
         >
           Kembali
         </button>
         <button
           @click="goDashboard"
-          class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#2563EB] to-blue-700 text-white font-semibold hover:shadow-lg hover:shadow-[#2563EB]/25 transition-all duration-200"
+          class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#2563EB] to-blue-700 text-white font-medium hover:shadow-lg hover:shadow-[#2563EB]/25 transition-all duration-200"
         >
           Ke Dashboard
         </button>

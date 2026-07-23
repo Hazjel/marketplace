@@ -82,7 +82,7 @@ onMounted(() => {
   <div v-else-if="data" class="flex flex-col gap-8">
     <!-- Header -->
     <div class="flex flex-col gap-1">
-      <h1 class="font-bold text-2xl md:text-3xl text-gray-900 dark:text-white font-['Plus_Jakarta_Sans']">Ringkasan</h1>
+      <h1 class="font-medium text-2xl md:text-3xl text-gray-900 dark:text-white font-['Plus_Jakarta_Sans']">Ringkasan</h1>
       <p class="text-gray-500 dark:text-gray-400">
         Selamat datang kembali, {{ user?.store?.name }}! Berikut perkembangan hari ini.
       </p>
@@ -134,7 +134,7 @@ onMounted(() => {
               <button
                 v-for="option in rangeOptions"
                 :key="option.value"
-                class="px-3 py-1.5 text-xs font-bold rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
                 :class="
                   range === option.value
                     ? 'bg-[#2563EB] text-white'
@@ -186,7 +186,7 @@ onMounted(() => {
                   </svg>
                 </div>
                 <div class="flex flex-col">
-                  <span class="font-bold text-sm text-gray-900 dark:text-white">
+                  <span class="font-medium text-sm text-gray-900 dark:text-white">
                     Order #{{ transaction.code || transaction.id.substr(0, 8) }}
                   </span>
                   <span class="text-xs text-gray-500 dark:text-gray-400">
@@ -195,11 +195,11 @@ onMounted(() => {
                 </div>
               </div>
               <div class="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
-                <span class="font-bold text-sm text-[#2563EB] dark:text-blue-400">
+                <span class="font-medium text-sm text-[#2563EB] dark:text-blue-400">
                   Rp {{ formatRupiah(transaction.grand_total) }}
                 </span>
                 <div
-                  class="px-2.5 py-1 rounded-full text-xs font-bold capitalize ring-1"
+                  class="px-2.5 py-1 rounded-full text-xs font-medium capitalize ring-1"
                   :class="{
                     'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-500/30':
                       transaction.payment_status === 'paid',
@@ -225,22 +225,22 @@ onMounted(() => {
         <div
           class="flex flex-col w-full rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/10 p-5 gap-4 shadow-sm"
         >
-          <h3 class="font-bold text-lg text-gray-900 dark:text-white">Produk Terlaris</h3>
+          <h3 class="font-medium text-lg text-gray-900 dark:text-white">Produk Terlaris</h3>
           <div class="flex flex-col gap-4">
             <template v-if="data.top_products.length > 0">
               <div v-for="(product, index) in data.top_products" :key="product.id" class="flex items-center gap-3">
                 <div
-                  class="size-10 rounded-xl bg-gradient-to-br from-[#2563EB]/10 to-purple-500/10 dark:from-[#2563EB]/20 dark:to-purple-500/20 border border-gray-100 dark:border-white/10 flex items-center justify-center text-xs font-bold text-[#2563EB]"
+                  class="size-10 rounded-xl bg-gradient-to-br from-[#2563EB]/10 to-purple-500/10 dark:from-[#2563EB]/20 dark:to-purple-500/20 border border-gray-100 dark:border-white/10 flex items-center justify-center text-xs font-medium text-[#2563EB]"
                 >
                   {{ index + 1 }}
                 </div>
                 <div class="flex flex-col flex-1 min-w-0">
-                  <span class="font-bold text-sm truncate text-gray-900 dark:text-white" :title="product.name">
+                  <span class="font-medium text-sm truncate text-gray-900 dark:text-white" :title="product.name">
                     {{ product.name }}
                   </span>
                   <span class="text-xs text-gray-500 dark:text-gray-400">{{ product.total_sold || 0 }} Terjual</span>
                 </div>
-                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                   Rp {{ formatRupiah(product.price) }}
                 </span>
               </div>

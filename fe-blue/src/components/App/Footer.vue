@@ -24,7 +24,7 @@ const { user } = storeToRefs(authStore)
         <div class="flex flex-col md:flex-row gap-8 lg:gap-[52px] w-full lg:w-fit">
           <div class="grid grid-cols-2 sm:grid-cols-3 md:flex md:gap-[52px] gap-8 w-full">
             <div class="flex flex-col gap-4">
-              <p class="font-semibold dark:text-white">Main Menu</p>
+              <p class="font-medium dark:text-white">Main Menu</p>
               <nav
                 class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 hover:*:text-custom-blue dark:hover:*:text-blue-400"
               >
@@ -43,7 +43,7 @@ const { user } = storeToRefs(authStore)
               </nav>
             </div>
             <div class="flex flex-col gap-4">
-              <p class="font-semibold dark:text-white">Company</p>
+              <p class="font-medium dark:text-white">Company</p>
               <nav
                 class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 hover:*:text-custom-blue dark:hover:*:text-blue-400"
               >
@@ -54,7 +54,7 @@ const { user } = storeToRefs(authStore)
               </nav>
             </div>
             <div class="flex flex-col gap-4 col-span-2 sm:col-span-1">
-              <p class="font-semibold dark:text-white">Support</p>
+              <p class="font-medium dark:text-white">Support</p>
               <nav
                 class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 hover:*:text-custom-blue dark:hover:*:text-blue-400"
               >
@@ -67,7 +67,7 @@ const { user } = storeToRefs(authStore)
           </div>
         </div>
         <div class="flex flex-row md:flex-col gap-4 items-center md:items-start">
-          <p class="font-semibold hidden md:block dark:text-white">Download App</p>
+          <p class="font-medium hidden md:block dark:text-white">Download App</p>
           <span class="cursor-default opacity-60">
             <img src="@/assets/images/logos/gplay.png" class="h-10 md:h-12" alt="Google Play" />
           </span>

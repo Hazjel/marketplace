@@ -126,7 +126,7 @@ const setRating = (r) => {
     <div class="bg-white rounded-[24px] w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
       <!-- Header -->
       <div class="flex items-center justify-between p-6 border-b border-gray-100">
-        <h3 class="text-xl font-bold text-custom-black">Tulis Ulasan</h3>
+        <h3 class="text-xl font-medium text-custom-black">Tulis Ulasan</h3>
         <button
           class="p-2 hover:bg-gray-100 rounded-full transition-colors"
           @click="$emit('close')"
@@ -155,13 +155,13 @@ const setRating = (r) => {
             alt="Product"
           />
           <div>
-            <p class="font-bold text-custom-black line-clamp-2">{{ productName }}</p>
+            <p class="font-medium text-custom-black line-clamp-2">{{ productName }}</p>
           </div>
         </div>
 
         <!-- Star Rating -->
         <div class="flex flex-col items-center gap-2">
-          <p class="font-semibold text-custom-grey">Bagaimana kualitas produk ini?</p>
+          <p class="font-medium text-custom-grey">Bagaimana kualitas produk ini?</p>
           <div class="flex gap-2">
             <button
               v-for="i in 5"
@@ -201,7 +201,7 @@ const setRating = (r) => {
 
         <!-- Textarea -->
         <div class="flex flex-col gap-2">
-          <label class="font-bold text-sm text-custom-black">Ulasan Anda</label>
+          <label class="font-medium text-sm text-custom-black">Ulasan Anda</label>
           <textarea
             v-model="form.review"
             rows="4"
@@ -212,7 +212,7 @@ const setRating = (r) => {
 
         <!-- File Upload -->
         <div class="flex flex-col gap-2">
-          <label class="font-bold text-sm text-custom-black">Foto / Video (Opsional)</label>
+          <label class="font-medium text-sm text-custom-black">Foto / Video (Opsional)</label>
           <div class="flex flex-wrap gap-2">
             <div
               v-for="(media, idx) in previewImages"
@@ -263,14 +263,14 @@ const setRating = (r) => {
       <!-- Footer -->
       <div class="p-6 border-t border-gray-100 flex gap-4">
         <button
-          class="flex-1 py-3 px-6 rounded-full font-bold text-custom-black bg-gray-100 hover:bg-gray-200 transition-300"
+          class="flex-1 py-3 px-6 rounded-full font-medium text-custom-black bg-gray-100 hover:bg-gray-200 transition-300"
           @click="$emit('close')"
         >
           Batal
         </button>
         <button
           :disabled="loading"
-          class="flex-1 py-3 px-6 rounded-full font-bold text-white bg-custom-blue hover:shadow-lg hover:shadow-custom-blue/50 transition-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex-1 py-3 px-6 rounded-full font-medium text-white bg-custom-blue hover:shadow-lg hover:shadow-custom-blue/50 transition-300 disabled:opacity-50 disabled:cursor-not-allowed"
           @click="submitReview"
         >
           {{ loading ? 'Mengirim...' : 'Kirim Ulasan' }}

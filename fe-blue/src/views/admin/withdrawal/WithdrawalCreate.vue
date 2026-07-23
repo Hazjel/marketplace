@@ -93,7 +93,7 @@ onMounted(fetchStoreBalance)
           <img :src="storeBalance?.store?.logo" class="size-full object-cover" alt="photo" />
         </div>
         <div class="flex flex-col gap-1 w-full overflow-hidden">
-          <p class="font-bold text-lg leading-tight w-full truncate dark:text-white">
+          <p class="font-medium text-lg leading-tight w-full truncate dark:text-white">
             {{ storeBalance?.store?.name }}
           </p>
           <p class="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -106,7 +106,7 @@ onMounted(fetchStoreBalance)
       </div>
       <div class="hidden md:block w-px h-14 bg-gray-200 dark:bg-white/10 shrink-0"></div>
       <div class="flex flex-col w-full items-center justify-center gap-1.5">
-        <p class="font-bold text-2xl md:text-3xl text-blue-600 dark:text-blue-400">
+        <p class="font-medium text-2xl md:text-3xl text-blue-600 dark:text-blue-400">
           Rp {{ formatRupiah(storeBalance?.balance) }}
         </p>
         <div class="flex items-center gap-1.5">
@@ -128,7 +128,7 @@ onMounted(fetchStoreBalance)
         </svg>
       </div>
       <div class="flex flex-col gap-0.5">
-        <p class="font-semibold text-sm text-amber-700 dark:text-amber-400">
+        <p class="font-medium text-sm text-amber-700 dark:text-amber-400">
           Rp {{ formatRupiah(storeBalance?.pending_balance) }} sedang ditahan (escrow)
         </p>
         <p class="text-xs text-amber-600/80 dark:text-amber-400/70">
@@ -145,7 +145,7 @@ onMounted(fetchStoreBalance)
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
           </svg>
         </div>
-        <h2 class="font-bold text-lg dark:text-white">Formulir Penarikan</h2>
+        <h2 class="font-medium text-lg dark:text-white">Formulir Penarikan</h2>
       </div>
 
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
@@ -221,13 +221,13 @@ onMounted(fetchStoreBalance)
       <div class="flex items-center justify-end gap-3 pt-2">
         <RouterLink
           :to="dashboardRoute('my-store-balance')"
-          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-semibold text-sm border border-red-200 dark:border-red-700/50 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200">
+          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-medium text-sm border border-red-200 dark:border-red-700/50 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200">
           Batal
         </RouterLink>
         <button
           type="submit"
           :disabled="loadingWithdrawal"
-          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
           <svg v-if="loadingWithdrawal" class="animate-spin size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>

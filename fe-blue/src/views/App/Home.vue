@@ -82,7 +82,7 @@ onMounted(async () => {
 
     <!-- Products Section (Lazy Load / Infinite Scroll) -->
     <section class="flex flex-col gap-5">
-      <h2 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Produk Untukmu</h2>
+      <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-white">Produk Untukmu</h2>
 
       <!-- Initial Loading -->
       <div
@@ -113,7 +113,7 @@ onMounted(async () => {
       <div v-if="hasMore && products.length > 0" class="flex justify-center py-4">
         <button
           :disabled="loading"
-          class="px-6 py-2.5 rounded-xl border border-custom-blue text-custom-blue dark:border-blue-400 dark:text-blue-400 font-semibold text-sm hover:bg-custom-blue hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-6 py-2.5 rounded-xl border border-custom-blue text-custom-blue dark:border-blue-400 dark:text-blue-400 font-medium text-sm hover:bg-custom-blue hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           @click="loadProducts"
         >
           {{ loading ? 'Memuat...' : 'Lihat Lebih Banyak' }}

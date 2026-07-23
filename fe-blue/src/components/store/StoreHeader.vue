@@ -83,7 +83,7 @@ const handleFollowClick = () => {
         <div class="flex flex-col gap-1 md:gap-2 flex-1 min-w-0">
           <div class="flex items-center gap-2">
             <h1
-              class="font-bold text-xl md:text-3xl text-custom-black truncate leading-tight tracking-tight"
+              class="font-medium text-xl md:text-3xl text-custom-black truncate leading-tight tracking-tight"
             >
               {{ storeName }}
             </h1>
@@ -115,21 +115,21 @@ const handleFollowClick = () => {
                 class="w-4 h-4 md:w-5 md:h-5"
                 alt="Star"
               />
-              <span class="font-bold text-sm md:text-base text-custom-black">{{
+              <span class="font-medium text-sm md:text-base text-custom-black">{{
                 rating.toFixed(1)
               }}</span>
               <span class="text-[10px] md:text-xs text-custom-grey">/ 5.0</span>
             </div>
             <div class="w-px h-3 md:h-4 bg-gray-200"></div>
             <div class="flex flex-col leading-none">
-              <span class="font-bold text-sm md:text-base text-custom-black">{{
+              <span class="font-medium text-sm md:text-base text-custom-black">{{
                 followersCount
               }}</span>
               <span class="text-[10px] text-custom-grey uppercase tracking-wide">Followers</span>
             </div>
             <div class="w-px h-3 md:h-4 bg-gray-200"></div>
             <div class="hidden sm:flex flex-col leading-none">
-              <span class="font-bold text-sm md:text-base text-custom-black">98%</span>
+              <span class="font-medium text-sm md:text-base text-custom-black">98%</span>
               <span class="text-[10px] text-custom-grey uppercase tracking-wide">Chat Reply</span>
             </div>
           </div>
@@ -141,7 +141,7 @@ const handleFollowClick = () => {
         <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto">
           <!-- Follow Button -->
           <button
-            class="flex-1 md:flex-none h-10 md:h-11 px-6 rounded-full font-bold text-sm md:text-base transition-all duration-300 flex items-center justify-center gap-2 border"
+            class="flex-1 md:flex-none h-10 md:h-11 px-6 rounded-full font-medium text-sm md:text-base transition-all duration-300 flex items-center justify-center gap-2 border"
             :class="
               isFollowing
                 ? 'bg-transparent border-gray-200 text-custom-grey hover:bg-gray-50'

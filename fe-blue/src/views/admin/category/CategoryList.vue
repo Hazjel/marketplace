@@ -87,7 +87,7 @@ watch(error, (value) => {
           <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <span class="font-semibold text-sm text-white">Tambah Kategori</span>
+          <span class="font-medium text-sm text-white">Tambah Kategori</span>
         </RouterLink>
       </template>
     </DashboardPageHeader>
@@ -155,7 +155,7 @@ watch(error, (value) => {
           </svg>
         </div>
         <div class="flex flex-col gap-1 items-center text-center">
-          <p class="font-semibold text-gray-900 dark:text-white">Belum ada kategori</p>
+          <p class="font-medium text-gray-900 dark:text-white">Belum ada kategori</p>
           <p class="text-sm text-gray-500 dark:text-gray-400">Mulai tambahkan kategori produk baru</p>
         </div>
       </div>

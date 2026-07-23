@@ -172,12 +172,12 @@ onMounted(fetchData)
           </svg>
         </div>
         <div>
-          <h1 class="font-bold text-xl text-gray-900 dark:text-white">Edit Toko</h1>
+          <h1 class="font-medium text-xl text-gray-900 dark:text-white">Edit Toko</h1>
           <p class="text-sm text-gray-500 dark:text-gray-400">Perbarui informasi toko Anda</p>
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300">Foto Toko</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300">Foto Toko</p>
         <div class="flex items-center justify-between w-full md:w-1/2">
           <div
             class="group relative flex size-20 rounded-2xl overflow-hidden items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10"
@@ -200,7 +200,7 @@ onMounted(fetchData)
           <button
             id="Change-Photo"
             type="button"
-            class="flex items-center justify-center rounded-xl py-2.5 px-5 bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+            class="flex items-center justify-center rounded-xl py-2.5 px-5 bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-medium text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
             @click="$refs.fileInput.click()"
           >
             Ubah Foto
@@ -208,7 +208,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300">Nama Toko</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300">Nama Toko</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.name }"
@@ -228,7 +228,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300">Telepon Toko</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300">Telepon Toko</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.phone }"
@@ -257,7 +257,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Deskripsi Toko</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Deskripsi Toko</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.about }"
@@ -274,13 +274,13 @@ onMounted(fetchData)
             </div>
             <div class="flex flex-col gap-[6px] pl-4 w-full">
               <p
-                class="placeholder font-semibold text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-bold transition-300"
+                class="placeholder font-medium text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-medium transition-300"
               >
                 Enter Store Description
               </p>
               <textarea
                 v-model="store.about"
-                class="appearance-none outline-none w-full font-semibold leading-[160%]"
+                class="appearance-none outline-none w-full font-medium leading-[160%]"
                 rows="3"
                 placeholder=""
               ></textarea>
@@ -288,13 +288,13 @@ onMounted(fetchData)
           </label>
           <span
             v-if="error?.about"
-            class="font-semibold text-lg text-custom-red hidden leading-none group-[&.invalid]/errorState:block"
+            class="font-medium text-lg text-custom-red hidden leading-none group-[&.invalid]/errorState:block"
             >{{ error?.about?.join(', ') }}</span
           >
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300">Pencarian Alamat</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300">Pencarian Alamat</p>
         <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2 relative">
           <label class="group relative">
             <div class="input-icon">
@@ -325,7 +325,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Alamat Toko</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Alamat Toko</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.address }"
@@ -342,13 +342,13 @@ onMounted(fetchData)
             </div>
             <div class="flex flex-col gap-[6px] pl-4 w-full">
               <p
-                class="placeholder font-semibold text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-bold transition-300"
+                class="placeholder font-medium text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-medium transition-300"
               >
                 Enter Store Address
               </p>
               <textarea
                 v-model="store.address"
-                class="appearance-none outline-none w-full font-semibold leading-[160%]"
+                class="appearance-none outline-none w-full font-medium leading-[160%]"
                 rows="3"
                 placeholder=""
               ></textarea>
@@ -356,13 +356,13 @@ onMounted(fetchData)
           </label>
           <span
             v-if="error?.address"
-            class="font-semibold text-lg text-custom-red hidden leading-none group-[&.invalid]/errorState:block"
+            class="font-medium text-lg text-custom-red hidden leading-none group-[&.invalid]/errorState:block"
             >{{ error?.address?.join(', ') }}</span
           >
         </div>
       </div>
       <div class="flex flex-col md:flex-row justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Titik Lokasi Toko</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Titik Lokasi Toko</p>
         <div class="flex flex-col gap-2 w-full md:w-1/2">
           <MapPicker
             :model-value="storeCoords"
@@ -373,7 +373,7 @@ onMounted(fetchData)
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-gray-100 dark:border-white/10">
         <div>
-          <p class="font-semibold text-gray-600 dark:text-gray-300">Asisten AI</p>
+          <p class="font-medium text-gray-600 dark:text-gray-300">Asisten AI</p>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 md:max-w-xs">
             AI akan otomatis membalas chat pembeli berdasarkan produk tokomu.
           </p>
@@ -384,7 +384,7 @@ onMounted(fetchData)
         </label>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300">Kota</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300">Kota</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.city }"
@@ -404,7 +404,7 @@ onMounted(fetchData)
         </div>
       </div>
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <p class="font-semibold text-gray-600 dark:text-gray-300">Kode Pos</p>
+        <p class="font-medium text-gray-600 dark:text-gray-300">Kode Pos</p>
         <div
           class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
           :class="{ invalid: error?.postal_code }"
@@ -428,14 +428,14 @@ onMounted(fetchData)
       <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
         <RouterLink
           :to="dashboardRoute('my-store')"
-          class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+          class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
         >
           Batal
         </RouterLink>
         <button
           type="submit"
           :disabled="loading"
-          class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {{ loading ? 'Menyimpan...' : 'Simpan' }}
         </button>

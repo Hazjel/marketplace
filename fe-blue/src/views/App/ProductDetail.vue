@@ -464,17 +464,17 @@ const handleShare = async () => {
       <div class="flex items-center gap-3">
         <RouterLink
 :to="{ name: 'app.home' }"
-          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
+          class="font-medium text-lg text-custom-grey last:font-medium last:text-custom-blue">
           Homepage
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
         <RouterLink
 :to="{ name: 'app.browse-category', params: { slug: product?.product_category?.slug } }"
-          class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
+          class="font-medium text-lg text-custom-grey last:font-medium last:text-custom-blue">
           {{ product?.product_category?.name }}
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
-        <a href="#" class="font-medium text-lg text-custom-grey last:font-semibold last:text-custom-blue">
+        <a href="#" class="font-medium text-lg text-custom-grey last:font-medium last:text-custom-blue">
           Product Details
         </a>
       </div>
@@ -491,42 +491,42 @@ const handleShare = async () => {
       <div class="lg:col-span-5 flex flex-col gap-6">
         <!-- Title & Stats -->
         <div>
-          <h1 class="font-bold text-xl md:text-2xl leading-snug mb-3">{{ product?.name }}</h1>
+          <h1 class="font-medium text-xl md:text-2xl leading-snug mb-3">{{ product?.name }}</h1>
 
           <!-- Social Proof Header -->
           <div class="flex items-center gap-4 text-sm mb-4">
             <div class="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-              <span class="font-bold text-custom-orange text-lg">{{ averageRating }}</span>
+              <span class="font-medium text-custom-orange text-lg">{{ averageRating }}</span>
               <div class="flex">
                 <img src="@/assets/images/icons/Star-pointy.svg" class="size-4" />
               </div>
             </div>
             <div class="flex items-center gap-1.5 pr-4 border-r border-gray-200 cursor-pointer hover:text-custom-blue">
-              <span class="font-bold text-custom-black underline decoration-gray-300 underline-offset-2">{{
+              <span class="font-medium text-custom-black underline decoration-gray-300 underline-offset-2">{{
                 product?.product_reviews?.length || 0 }}</span>
               <span class="text-custom-grey">Ulasan</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="font-bold text-custom-black">{{ product?.total_sold || 0 }}</span>
+              <span class="font-medium text-custom-black">{{ product?.total_sold || 0 }}</span>
               <span class="text-custom-grey">Terjual</span>
             </div>
           </div>
 
-          <div class="text-3xl font-bold text-custom-black mt-2">
+          <div class="text-3xl font-medium text-custom-black mt-2">
             Rp {{ formatRupiah(displayedPrice) }}
           </div>
 
           <!-- Variant Options -->
           <div v-if="product?.variants?.length > 0" class="flex flex-col gap-4 mt-6">
             <div v-for="(values, key) in uniqueAttributes" :key="key">
-              <h3 class="font-bold text-base mb-2 capitalize flex items-center gap-1">
+              <h3 class="font-medium text-base mb-2 capitalize flex items-center gap-1">
                 {{ key }}
                 <span v-if="!selectedOptions[key]" class="text-custom-red text-xs font-normal">(wajib dipilih)</span>
               </h3>
               <div class="flex flex-wrap gap-2">
                 <button
 v-for="value in values" :key="value"
-                  class="px-4 py-2 rounded-lg text-sm font-semibold border transition-all" :class="selectedOptions[key] === value
+                  class="px-4 py-2 rounded-lg text-sm font-medium border transition-all" :class="selectedOptions[key] === value
                     ? 'bg-custom-black dark:bg-white text-white dark:text-custom-background border-custom-black dark:border-white'
                     : 'bg-white dark:bg-transparent text-custom-black dark:text-white border-gray-200 dark:border-white/20 hover:border-custom-black dark:hover:border-white'
                     " @click="selectOption(key, value)">
@@ -546,7 +546,7 @@ v-for="value in values" :key="value"
           <ProductSpecs :product="product" />
 
           <div class="flex flex-col gap-2">
-            <h3 class="font-bold text-lg">Deskripsi</h3>
+            <h3 class="font-medium text-lg">Deskripsi</h3>
             <div class="whitespace-pre-wrap text-custom-black leading-relaxed text-sm">
               {{ product?.description }}
             </div>
@@ -562,20 +562,20 @@ v-for="value in values" :key="value"
           </div>
           <div class="flex flex-col">
             <div class="flex items-center gap-1">
-              <span class="font-bold text-base">{{ product?.store?.name }}</span>
+              <span class="font-medium text-base">{{ product?.store?.name }}</span>
               <img src="@/assets/images/icons/verify-star.svg" class="size-4" />
             </div>
-            <span class="text-xs text-custom-green font-bold">Online</span>
+            <span class="text-xs text-custom-green font-medium">Online</span>
           </div>
           <RouterLink
 v-if="product?.store?.username"
             :to="{ name: 'app.store-detail', params: { username: product?.store?.username } }"
-            class="ml-auto px-4 py-1.5 border border-custom-blue text-custom-blue rounded-lg text-sm font-bold hover:bg-blue-50 transition-colors">
+            class="ml-auto px-4 py-1.5 border border-custom-blue text-custom-blue rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
             Kunjungi
           </RouterLink>
           <button
             :disabled="followLoading"
-            class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all"
+            class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
             :class="isFollowing
               ? 'bg-gray-100 dark:bg-white/10 text-custom-grey border border-custom-stroke dark:border-white/10 hover:bg-red-50 hover:text-custom-red'
               : 'border border-custom-blue text-custom-blue hover:bg-blue-50'"
@@ -588,22 +588,22 @@ v-if="product?.store?.username"
 
         <!-- Reviews Section -->
         <div id="Reviews" class="flex flex-col gap-4 scroll-mt-[180px]">
-          <h3 class="font-bold text-lg">Ulasan Pembeli</h3>
+          <h3 class="font-medium text-lg">Ulasan Pembeli</h3>
           <div class="flex flex-col md:flex-row items-center gap-10">
             <div class="flex flex-col gap-2">
               <div class="flex items-center gap-2">
                 <img src="@/assets/images/icons/Star-pointy.svg" class="size-8" />
-                <span class="text-4xl font-bold">{{ averageRating }}</span>
+                <span class="text-4xl font-medium">{{ averageRating }}</span>
                 <span class="text-custom-grey text-sm mb-[-5px]">/ 5.0</span>
               </div>
-              <span class="text-sm font-semibold text-custom-black">{{ product?.product_reviews?.length || 0 }}
+              <span class="text-sm font-medium text-custom-black">{{ product?.product_reviews?.length || 0 }}
                 Ulasan</span>
             </div>
 
             <div class="flex flex-col gap-1 flex-1 w-full max-w-sm">
               <div v-for="star in 5" :key="star" class="flex items-center gap-2">
                 <img src="@/assets/images/icons/Star-pointy.svg" class="size-4" />
-                <span class="text-sm font-bold w-3 text-custom-grey">{{ 6 - star }}</span>
+                <span class="text-sm font-medium w-3 text-custom-grey">{{ 6 - star }}</span>
                 <div class="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
                   <div
 class="h-full bg-custom-green rounded-full"
@@ -634,7 +634,7 @@ v-if="!review.is_anonymous && review.user?.profile_picture" :src="review.user.pr
                     class="w-full h-full object-cover" />
                   <div
 v-else
-                    class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-white/5 text-gray-500 dark:text-gray-400 font-bold text-xs uppercase">
+                    class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-white/5 text-gray-500 dark:text-gray-400 font-medium text-xs uppercase">
                     {{ review.is_anonymous ? 'A' : review.user?.name?.[0] || 'U' }}
                   </div>
                 </div>
@@ -643,7 +643,7 @@ v-else
                   <!-- Header: Name & Date -->
                   <div class="flex justify-between items-start">
                     <div class="flex flex-col">
-                      <span class="font-bold text-sm text-custom-black">
+                      <span class="font-medium text-sm text-custom-black">
                         {{ review.is_anonymous ? 'Anonim' : review.user?.name }}
                       </span>
                       <div class="flex items-center gap-1">
@@ -686,7 +686,7 @@ v-if="media.file_type === 'image'" :src="media.file_path"
       <div class="hidden lg:block lg:col-span-3">
         <div
           class="sticky top-[160px] bg-white dark:bg-surface-card rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-border flex flex-col gap-5 transition-all duration-300">
-          <h3 class="font-bold text-base">Atur jumlah dan catatan</h3>
+          <h3 class="font-medium text-base">Atur jumlah dan catatan</h3>
 
           <div class="flex items-center gap-3 my-2">
             <div class="size-12 rounded bg-gray-100 dark:bg-white/10 overflow-hidden shrink-0">
@@ -703,7 +703,7 @@ v-if="media.file_type === 'image'" :src="media.file_path"
           <!-- Multi-Dimensional Variant Selector -->
           <!-- Selected Variant Display (Read Only) -->
           <div v-if="product?.has_variants && Object.keys(selectedOptions).length > 0" class="flex flex-col gap-1">
-            <span class="text-sm font-semibold text-custom-black">Varian Dipilih:</span>
+            <span class="text-sm font-medium text-custom-black">Varian Dipilih:</span>
             <div class="flex flex-wrap gap-2">
               <span
 v-for="(value, key) in selectedOptions" :key="key"
@@ -720,7 +720,7 @@ type="button" :disabled="quantity <= 1"
               @click="decrease">
               <i class="fa-solid fa-minus text-xs"></i>
             </button>
-            <input v-model="quantity" type="number" readonly class="w-10 text-center font-bold text-sm outline-none" />
+            <input v-model="quantity" type="number" readonly class="w-10 text-center font-medium text-sm outline-none" />
             <button
 type="button" :disabled="quantity >= (displayedStock || 0)"
               class="size-7 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
@@ -736,22 +736,22 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
 
           <div class="flex items-center justify-between mt-2">
             <span class="text-custom-grey">Subtotal</span>
-            <span class="font-bold text-lg">Rp {{ formatRupiah((displayedPrice || 0) * quantity) }}</span>
+            <span class="font-medium text-lg">Rp {{ formatRupiah((displayedPrice || 0) * quantity) }}</span>
           </div>
 
           <div class="flex flex-col gap-2 mt-2">
-            <p v-if="product?.variants?.length > 0 && !allVariantsSelected" class="text-xs text-custom-red font-semibold -mb-1">
+            <p v-if="product?.variants?.length > 0 && !allVariantsSelected" class="text-xs text-custom-red font-medium -mb-1">
               Pilih semua varian terlebih dahulu
             </p>
             <button
               :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
-              class="w-full py-3 bg-custom-blue text-white rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              class="w-full py-3 bg-custom-blue text-white rounded-lg font-medium hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               @click.prevent="addToCart">
               <i class="fa-solid fa-plus"></i> Keranjang
             </button>
             <button
               :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
-              class="w-full py-3 border border-custom-blue text-custom-blue rounded-lg font-bold hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full py-3 border border-custom-blue text-custom-blue rounded-lg font-medium hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               @click="handleBuyNow">
               Beli Langsung
             </button>
@@ -759,14 +759,14 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
 
           <div class="flex items-center justify-center gap-4 mt-2">
             <button
-              class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-red transition-colors"
+              class="flex items-center gap-2 text-sm font-medium text-custom-grey hover:text-custom-red transition-colors"
               @click="handleToggleWishlist">
               <i class="fa-solid fa-heart" :class="isInWishlist ? 'text-custom-red' : ''"></i>
               Wishlist
             </button>
             <!-- Chat Seller: enterprise pattern — deep-link to seller conversation -->
             <button
-              class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-blue transition-colors"
+              class="flex items-center gap-2 text-sm font-medium text-custom-grey hover:text-custom-blue transition-colors"
               @click="handleChatSeller">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor" stroke-width="2">
@@ -776,7 +776,7 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
               Tanya Seller
             </button>
             <button
-              class="flex items-center gap-2 text-sm font-bold text-custom-grey hover:text-custom-black transition-colors"
+              class="flex items-center gap-2 text-sm font-medium text-custom-grey hover:text-custom-black transition-colors"
               @click="handleShare">
               <i class="fa-solid fa-share-nodes"></i> Share
             </button>
@@ -812,13 +812,13 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
       <div class="flex gap-3 grow h-12">
         <button
           :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
-          class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-bold text-sm hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex-1 rounded-xl border border-custom-blue text-custom-blue font-medium text-sm hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           @click="handleBuyNow">
           Beli Langsung
         </button>
         <button
           :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
-          class="flex-1 rounded-xl bg-custom-blue text-white font-bold text-sm flex items-center justify-center gap-2 disabled:bg-custom-grey disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
+          class="flex-1 rounded-xl bg-custom-blue text-white font-medium text-sm flex items-center justify-center gap-2 disabled:bg-custom-grey disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
           @click.prevent="addToCart">
           <img src="@/assets/images/icons/shopping-cart-white.svg" class="size-5 shrink-0" alt="icon" />
           <span>+ Keranjang</span>
@@ -866,7 +866,7 @@ v-if="showVariantDrawer"
             " class="size-full object-cover" />
         </div>
         <div class="flex flex-col gap-1 items-start">
-          <span class="text-custom-red font-bold text-lg">Rp {{ formatRupiah(displayedPrice) }}</span>
+          <span class="text-custom-red font-medium text-lg">Rp {{ formatRupiah(displayedPrice) }}</span>
           <span class="text-xs text-custom-grey">Stok: {{ displayedStock || 0 }}</span>
         </div>
         <button class="ml-auto -mt-2 text-custom-grey p-2" @click="showVariantDrawer = false">
@@ -881,11 +881,11 @@ v-if="showVariantDrawer"
         <!-- Variants -->
         <div v-if="product?.variants?.length > 0" class="flex flex-col gap-4">
           <div v-for="(values, key) in uniqueAttributes" :key="key">
-            <h3 class="font-bold text-sm mb-2 capitalize">{{ key }}</h3>
+            <h3 class="font-medium text-sm mb-2 capitalize">{{ key }}</h3>
             <div class="flex flex-wrap gap-2">
               <button
 v-for="value in values" :key="value"
-                class="px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all" :class="selectedOptions[key] === value
+                class="px-3 py-1.5 rounded-lg text-sm font-medium border transition-all" :class="selectedOptions[key] === value
                   ? 'bg-custom-black text-white border-custom-black'
                   : 'bg-white text-custom-black border-gray-200 hover:border-custom-black'
                   " @click="selectOption(key, value)">
@@ -897,7 +897,7 @@ v-for="value in values" :key="value"
 
         <!-- Quantity -->
         <div class="flex items-center justify-between border-t border-gray-100 pt-4">
-          <span class="font-bold text-sm">Jumlah</span>
+          <span class="font-medium text-sm">Jumlah</span>
           <div class="flex items-center gap-3 border border-custom-stroke rounded-lg p-1">
             <button
 type="button" :disabled="quantity <= 1"
@@ -905,7 +905,7 @@ type="button" :disabled="quantity <= 1"
               @click="decrease">
               <i class="fa-solid fa-minus text-sm"></i>
             </button>
-            <input v-model="quantity" type="number" readonly class="w-10 text-center font-bold text-sm outline-none" />
+            <input v-model="quantity" type="number" readonly class="w-10 text-center font-medium text-sm outline-none" />
             <button
 type="button" :disabled="quantity >= (displayedStock || 0)"
               class="size-8 flex items-center justify-center text-custom-blue hover:bg-gray-50 rounded disabled:text-gray-300"
@@ -920,7 +920,7 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
       <div class="absolute bottom-0 left-0 w-full p-4 bg-white border-t border-custom-stroke">
         <button
 :disabled="!displayedStock || displayedStock <= 0"
-          class="w-full py-3 bg-custom-green text-white rounded-xl font-bold hover:bg-green-600 disabled:bg-gray-300 transition-colors shadow-lg shadow-green-100"
+          class="w-full py-3 bg-custom-green text-white rounded-xl font-medium hover:bg-green-600 disabled:bg-gray-300 transition-colors shadow-lg shadow-green-100"
           @click="handleDrawerAction">
           {{ drawerAction === 'cart' ? '+ Keranjang' : 'Beli Sekarang' }}
         </button>

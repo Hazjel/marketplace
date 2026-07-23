@@ -150,7 +150,7 @@ onMounted(async () => {
         <svg class="size-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
         <RouterLink :to="{ name: 'app.all-stores' }" class="text-custom-grey hover:text-custom-blue transition-colors">Toko</RouterLink>
         <svg class="size-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-        <span class="font-semibold text-custom-blue">{{ store?.name }}</span>
+        <span class="font-medium text-custom-blue">{{ store?.name }}</span>
       </div>
     </div>
   </header>
@@ -181,7 +181,7 @@ onMounted(async () => {
           { key: 'products', label: 'Produk', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
           { key: 'reviews', label: 'Ulasan', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' }
         ]" :key="tab.key"
-          class="flex items-center gap-2 px-5 py-4 font-semibold text-sm transition-all relative"
+          class="flex items-center gap-2 px-5 py-4 font-medium text-sm transition-all relative"
           :class="activeTab === tab.key ? 'text-custom-blue' : 'text-custom-grey dark:text-gray-400 hover:text-custom-black dark:hover:text-white'"
           @click="activeTab = tab.key">
           <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -198,7 +198,7 @@ onMounted(async () => {
       <!-- Home Tab -->
       <section v-if="activeTab === 'home'" class="flex flex-col gap-6">
         <div class="flex items-center justify-between">
-          <h2 class="font-bold text-xl text-custom-black dark:text-white">Produk Unggulan</h2>
+          <h2 class="font-medium text-xl text-custom-black dark:text-white">Produk Unggulan</h2>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
           <template v-if="loadingProducts">
@@ -215,13 +215,13 @@ onMounted(async () => {
               <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
-          <p class="font-bold text-lg text-custom-black dark:text-white">Belum ada produk</p>
+          <p class="font-medium text-lg text-custom-black dark:text-white">Belum ada produk</p>
           <p class="text-sm text-custom-grey dark:text-gray-400">Toko ini belum menambahkan produk</p>
         </div>
 
         <!-- Store Location -->
         <div v-if="store?.latitude != null && store?.longitude != null" class="flex flex-col gap-4">
-          <h2 class="font-bold text-xl text-custom-black dark:text-white">Lokasi Toko</h2>
+          <h2 class="font-medium text-xl text-custom-black dark:text-white">Lokasi Toko</h2>
           <MapPreview :latitude="store.latitude" :longitude="store.longitude" height="h-56" />
           <p class="text-sm text-custom-grey dark:text-gray-400">{{ store.address }}, {{ store.city }}</p>
         </div>
@@ -232,17 +232,17 @@ onMounted(async () => {
         <!-- Sidebar Filter (Desktop) -->
         <aside class="hidden md:flex flex-col w-60 shrink-0">
           <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-card p-5 flex flex-col gap-4 sticky top-20">
-            <h3 class="font-bold text-sm text-custom-black dark:text-white uppercase tracking-wider">Etalase Toko</h3>
+            <h3 class="font-medium text-sm text-custom-black dark:text-white uppercase tracking-wider">Etalase Toko</h3>
             <div class="flex flex-col gap-0.5">
               <button
                 class="text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-                :class="!selectedCategory ? 'bg-custom-blue/10 text-custom-blue font-semibold' : 'text-custom-grey dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-custom-black dark:hover:text-white'"
+                :class="!selectedCategory ? 'bg-custom-blue/10 text-custom-blue font-medium' : 'text-custom-grey dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-custom-black dark:hover:text-white'"
                 @click="handleCategoryFilter(null)">
                 Semua Produk
               </button>
               <button v-for="category in storeCategories" :key="category.id"
                 class="text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-                :class="selectedCategory?.id === category.id ? 'bg-custom-blue/10 text-custom-blue font-semibold' : 'text-custom-grey dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-custom-black dark:hover:text-white'"
+                :class="selectedCategory?.id === category.id ? 'bg-custom-blue/10 text-custom-blue font-medium' : 'text-custom-grey dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-custom-black dark:hover:text-white'"
                 @click="handleCategoryFilter(category)">
                 {{ category.name }}
                 <span class="text-xs text-gray-400 ml-1">({{ category.products_count }})</span>
@@ -256,13 +256,13 @@ onMounted(async () => {
           <!-- Mobile Filter (Horizontal) -->
           <div class="md:hidden flex overflow-x-auto pb-2 -mx-4 px-4 gap-2 hide-scrollbar">
             <button
-              class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all"
+              class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all"
               :class="!selectedCategory ? 'bg-custom-blue text-white shadow-md shadow-blue-500/20' : 'bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 text-custom-grey'"
               @click="handleCategoryFilter(null)">
               Semua
             </button>
             <button v-for="category in storeCategories" :key="category.id"
-              class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all"
+              class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all"
               :class="selectedCategory?.id === category.id ? 'bg-custom-blue text-white shadow-md shadow-blue-500/20' : 'bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 text-custom-grey'"
               @click="handleCategoryFilter(category)">
               {{ category.name }}
@@ -272,10 +272,10 @@ onMounted(async () => {
           <!-- Sorting Bar -->
           <div class="flex items-center justify-between bg-white dark:bg-surface-card rounded-xl border border-gray-100 dark:border-white/10 px-4 py-3">
             <p class="text-sm text-custom-grey dark:text-gray-400">
-              <span class="font-bold text-custom-black dark:text-white">{{ products.length }}</span> produk
+              <span class="font-medium text-custom-black dark:text-white">{{ products.length }}</span> produk
             </p>
             <select v-model="selectedSort"
-              class="bg-transparent text-sm font-bold text-custom-black dark:text-white focus:outline-none cursor-pointer appearance-none"
+              class="bg-transparent text-sm font-medium text-custom-black dark:text-white focus:outline-none cursor-pointer appearance-none"
               @change="handleSortChange">
               <option value="default">Paling Sesuai</option>
               <option value="newest">Terbaru</option>
@@ -300,7 +300,7 @@ onMounted(async () => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </div>
-            <h3 class="font-bold text-lg text-custom-black dark:text-white">Belum ada produk</h3>
+            <h3 class="font-medium text-lg text-custom-black dark:text-white">Belum ada produk</h3>
             <p class="text-sm text-custom-grey dark:text-gray-400">Toko ini belum memiliki produk di etalase ini.</p>
           </div>
         </div>
@@ -318,7 +318,7 @@ onMounted(async () => {
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </div>
-          <h3 class="font-bold text-lg text-custom-black dark:text-white">Belum ada ulasan</h3>
+          <h3 class="font-medium text-lg text-custom-black dark:text-white">Belum ada ulasan</h3>
           <p class="text-sm text-custom-grey dark:text-gray-400">Toko ini belum memiliki ulasan dari pembeli</p>
         </div>
       </section>

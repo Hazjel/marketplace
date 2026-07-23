@@ -35,7 +35,7 @@ const triggers = {
   [Scatter.selectors.point]: (d) => `
     <div class="bg-white dark:bg-surface-card p-2 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-gray-200 dark:border-white/10">
       <p class="text-gray-500 dark:text-gray-400 text-xs mb-1">${props.label}</p>
-      <p class="text-gray-900 dark:text-white font-bold text-sm">${props.valueFormatter(d[props.yKey])}</p>
+      <p class="text-gray-900 dark:text-white font-medium text-sm">${props.valueFormatter(d[props.yKey])}</p>
     </div>
   `
 }

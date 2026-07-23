@@ -53,7 +53,7 @@ onMounted(async () => {
 
 <template>
   <div class="flex items-center justify-center min-h-screen">
-    <p v-if="errorMessage" class="font-bold text-xl text-red-500">{{ errorMessage }}</p>
-    <p v-else class="font-bold text-xl">Menyiapkan sesi...</p>
+    <p v-if="errorMessage" class="font-medium text-xl text-red-500">{{ errorMessage }}</p>
+    <p v-else class="font-medium text-xl">Menyiapkan sesi...</p>
   </div>
 </template>

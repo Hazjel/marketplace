@@ -36,7 +36,7 @@ const rows = computed(() =>
       <div v-for="row in rows" :key="row.key" class="flex flex-col gap-1.5">
         <div class="flex items-center justify-between text-sm">
           <span class="font-medium text-gray-700 dark:text-gray-300">{{ row.label }}</span>
-          <span class="font-bold text-gray-900 dark:text-white">{{ row.count }}</span>
+          <span class="font-medium text-gray-900 dark:text-white">{{ row.count }}</span>
         </div>
         <div class="w-full h-2 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden">
           <div

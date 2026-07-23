@@ -44,8 +44,8 @@ onMounted(() => {
             class="size-full object-contain" alt="icon" />
         </div>
         <div class="flex flex-col flex-1 gap-1.5 overflow-hidden">
-          <p class="font-bold text-lg truncate">{{ product.name }}</p>
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold w-fit">
+          <p class="font-medium text-lg truncate">{{ product.name }}</p>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-medium w-fit">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
@@ -63,7 +63,7 @@ onMounted(() => {
             </svg>
           </div>
           <div class="flex flex-col gap-0.5">
-            <p class="font-bold text-lg leading-none">{{ product.total_sold || 0 }}</p>
+            <p class="font-medium text-lg leading-none">{{ product.total_sold || 0 }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Terjual</p>
           </div>
         </div>
@@ -74,7 +74,7 @@ onMounted(() => {
             </svg>
           </div>
           <div class="flex flex-col gap-0.5">
-            <p class="font-bold text-lg leading-none">{{ product?.stock }}</p>
+            <p class="font-medium text-lg leading-none">{{ product?.stock }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Stok</p>
           </div>
         </div>
@@ -84,7 +84,7 @@ onMounted(() => {
 
       <!-- Description -->
       <div class="flex flex-col gap-2">
-        <p class="font-bold text-base">Tentang Produk</p>
+        <p class="font-medium text-base">Tentang Produk</p>
         <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed">{{ product.description }}</p>
       </div>
 
@@ -122,7 +122,7 @@ onMounted(() => {
             </svg>
           </div>
           <div class="flex flex-col gap-0.5">
-            <p class="font-bold text-sm leading-none">{{ product.weight }} KG</p>
+            <p class="font-medium text-sm leading-none">{{ product.weight }} KG</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Berat Produk</p>
           </div>
         </div>
@@ -134,7 +134,7 @@ onMounted(() => {
             </svg>
           </div>
           <div class="flex flex-col gap-0.5">
-            <p class="font-bold text-sm leading-none">{{ product.product_category?.name }}</p>
+            <p class="font-medium text-sm leading-none">{{ product.product_category?.name }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Kategori</p>
           </div>
         </div>
@@ -146,7 +146,7 @@ onMounted(() => {
             </svg>
           </div>
           <div class="flex flex-col gap-0.5">
-            <p class="font-bold text-sm leading-none capitalize">{{ product.condition }}</p>
+            <p class="font-medium text-sm leading-none capitalize">{{ product.condition }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Kondisi</p>
           </div>
         </div>

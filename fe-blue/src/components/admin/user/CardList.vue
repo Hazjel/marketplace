@@ -21,10 +21,10 @@ const emit = defineEmits(['delete'])
         <img :src="item.profile_picture" class="size-full object-cover" alt="photo" />
       </div>
       <div class="flex flex-col gap-[6px] w-full overflow-hidden">
-        <p class="font-bold text-[22px] leading-tight w-full truncate">
+        <p class="font-medium text-[22px] leading-tight w-full truncate">
           {{ item.name }}
         </p>
-        <p class="flex items-center gap-1 font-semibold text-lg text-custom-grey leading-none">
+        <p class="flex items-center gap-1 font-medium text-lg text-custom-grey leading-none">
           <img src="@/assets/images/icons/call-grey.svg" class="size-5" alt="icon" />
           <span v-if="item?.role === 'store'">
             {{ item.store?.phone }}
@@ -46,8 +46,8 @@ const emit = defineEmits(['delete'])
         />
       </div>
       <div class="flex flex-col gap-1">
-        <p class="font-bold text-lg leading-none">{{ item.role }}</p>
-        <p class="font-semibold text-custom-grey">User Role</p>
+        <p class="font-medium text-lg leading-none">{{ item.role }}</p>
+        <p class="font-medium text-custom-grey">User Role</p>
       </div>
     </div>
   </div>

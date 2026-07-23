@@ -10,9 +10,11 @@
        Identity: Trusted digital marketplace, modern, approachable
        ---------------------------------- */
 
-  /* Primary: Vibrant Blue — modern, trustworthy */
-  --color-primary: #2563eb;
-  --color-primary-dark: #111827;
+  /* Primary: HP Electric Blue — deep, singular signal action */
+  --color-primary: #024ad8;
+  --color-primary-bright: #296ef9;
+  --color-primary-deep: #0e3191;
+  --color-primary-dark: #1a1a1a;
   --color-primary-light: #eff6ff;
 
   /* Secondary: Warm Amber — contrast accent for CTAs & highlights */
@@ -23,14 +25,19 @@
   --color-neutral: #6b7280;
   --color-neutral-dark: #111827;
 
-  /* Surfaces — Warm White */
-  --color-surface: #f9fafb;
+  /* Surfaces — Pure White canvas (HP) */
+  --color-surface: #ffffff;
   --color-surface-card: #ffffff;
-  --color-text-main: #111827;
-  --color-text-muted: #6b7280;
-  --color-border: #e5e7eb;
-  --color-input: #e5e7eb;
-  --color-ring: #2563eb;
+  --color-text-main: #1a1a1a;
+  --color-text-muted: #636363;
+  --color-border: #e8e8e8;
+  --color-input: #e8e8e8;
+  --color-ring: #024ad8;
+
+  /* HP surface bands */
+  --color-cloud: #f7f7f7;
+  --color-fog: #e8e8e8;
+  --color-hairline: #e8e8e8;
 
   /* ----------------------------------
        Design System Standard Tokens
@@ -61,11 +68,11 @@
        Legacy / Custom Mapping
        ---------------------------------- */
   /* Custom Mappings — Light Mode */
-  --color-custom-black: #111827;
+  --color-custom-black: #1a1a1a;
   --color-custom-blue: var(--color-primary);
-  --color-custom-red: #ef4444;
-  --color-custom-grey: #6b7280;
-  --color-custom-stroke: #e5e7eb;
+  --color-custom-red: #b3262b;
+  --color-custom-grey: #636363;
+  --color-custom-stroke: #e8e8e8;
 
   --color-custom-green: #10b981;
   --color-custom-yellow: #fbbf24;
@@ -73,7 +80,7 @@
 
   --color-custom-lime-green-char: #deff6e;
   --color-custom-lime-green: #84cc16;
-  --color-custom-background: #f9fafb;
+  --color-custom-background: #ffffff;
   --color-custom-icon-background: #eff6ff;
 
   /* ----------------------------------
@@ -82,7 +89,7 @@
        Perfect for marketplace: readable at small sizes, 
        bold weights have strong presence for headings
        ---------------------------------- */
-  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-sans: 'Manrope', 'Inter', system-ui, sans-serif;
 
   /* ----------------------------------
        Shadows & Effects
@@ -141,7 +148,7 @@
 
   /* Custom Mappings — Dark Mode */
   --color-custom-black: #fafafa;
-  --color-custom-blue: #60a5fa;
+  --color-custom-blue: #296ef9;
   --color-custom-background: #0a0a0a;
   --color-custom-icon-background: #1e293b;
   --color-custom-stroke: rgba(255, 255, 255, 0.08);
@@ -178,7 +185,7 @@ body {
 
   /* --- Form Elements --- */
   .custom-input {
-    @apply h-[76px] w-full border-[1.5px] border-custom-stroke rounded-[18px] pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-semibold transition-all duration-300 appearance-none outline-none bg-white dark:bg-surface-card dark:text-white dark:border-white/10;
+    @apply h-[76px] w-full border border-custom-stroke rounded-md pl-20 pr-6 pb-[14.5px] pt-[34.5px] font-normal transition-all duration-300 appearance-none outline-none bg-white dark:bg-surface-card dark:text-white dark:border-white/10;
   }
 
   /* Placeholder Logic */
@@ -198,7 +205,7 @@ body {
 
   /* Floating Labels */
   .input-placeholder {
-    @apply absolute left-[81px] top-[25px] -translate-y-1/2 text-sm font-semibold text-custom-grey transition-all duration-300 pointer-events-none;
+    @apply absolute left-[81px] top-[25px] -translate-y-1/2 text-sm font-medium text-custom-grey transition-all duration-300 pointer-events-none;
   }
 
   .group:focus-within .input-placeholder {
@@ -207,16 +214,16 @@ body {
 
   .group:has(:placeholder-shown) .input-placeholder,
   .group:has(:-moz-placeholder-shown) .input-placeholder {
-    @apply top-[38px] text-base font-bold text-custom-black dark:text-white;
+    @apply top-[38px] text-base font-medium text-custom-black dark:text-white;
   }
 
   /* Input Icons */
   .input-icon {
-    @apply absolute top-1/2 left-6 flex h-7 -translate-y-1/2 items-center border-r-[1.5px] border-custom-stroke dark:border-white/10 pr-4;
+    @apply absolute top-1/2 left-6 flex h-7 -translate-y-1/2 items-center border-r border-custom-stroke dark:border-white/10 pr-4;
   }
 
   .input-error {
-    @apply hidden text-sm font-semibold leading-none text-custom-red;
+    @apply hidden text-sm font-medium leading-none text-custom-red;
   }
 
   .group\/errorState.invalid .input-error {
@@ -225,11 +232,11 @@ body {
 
   /* --- Visual Utilities --- */
   .blue-gradient {
-    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+    background: linear-gradient(135deg, #0e3191 0%, #024ad8 50%, #296ef9 100%);
   }
 
   .blukios-gradient {
-    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #60a5fa 100%);
+    background: linear-gradient(135deg, #0e3191 0%, #024ad8 60%, #296ef9 100%);
   }
 
   .gradient-black-transparent {
@@ -270,11 +277,11 @@ body {
   }
 
   .tab-link {
-    @apply px-5 py-2.5 font-bold text-custom-grey rounded-full transition-all hover:bg-gray-100 cursor-pointer;
+    @apply px-5 py-2.5 font-medium text-custom-grey rounded-full transition-all hover:bg-gray-100 cursor-pointer;
   }
 
   .tab-link.active {
-    @apply text-white bg-custom-black shadow-lg shadow-gray-500/20;
+    @apply text-white bg-custom-black;
   }
 
   /* --- Universal Interactive Card --- */

@@ -90,7 +90,7 @@ const handleSend = async () => {
       </div>
 
       <div>
-        <h2 class="font-bold text-lg dark:text-white">{{ activeUser.name }}</h2>
+        <h2 class="font-medium text-lg dark:text-white">{{ activeUser.name }}</h2>
         <div class="flex items-center gap-1.5">
           <div v-if="isOnline" class="size-2 rounded-full bg-green-500"></div>
           <p class="text-xs text-custom-grey dark:text-gray-400">{{ statusText }}</p>
@@ -130,7 +130,7 @@ v-for="msg in messages" :key="msg.id" :class="[
           ]">
             <span
               v-if="msg.is_ai_reply"
-              class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full mb-1.5 bg-custom-blue/10 text-custom-blue dark:bg-white/10 dark:text-blue-300">
+              class="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full mb-1.5 bg-custom-blue/10 text-custom-blue dark:bg-white/10 dark:text-blue-300">
               Dibalas otomatis oleh AI
             </span>
             <br v-if="msg.is_ai_reply" />
@@ -172,7 +172,7 @@ v-else
     <div class="size-20 bg-custom-stroke dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
       <img src="@/assets/images/icons/sms-grey.svg" class="size-10 opacity-50 dark:invert" alt="chat" />
     </div>
-    <h3 class="font-bold text-lg text-custom-black dark:text-white">Select a conversation</h3>
+    <h3 class="font-medium text-lg text-custom-black dark:text-white">Select a conversation</h3>
     <p>Pick a person from the left sidebar to start chatting</p>
   </div>
   </div>

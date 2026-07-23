@@ -30,7 +30,7 @@ const emit = defineEmits(['change-step'])
       @click="index + 1 < currentStep ? emit('change-step', index + 1) : null"
     >
       <div
-        class="size-10 rounded-full flex items-center justify-center font-bold text-sm border-[3px] transition-all duration-300"
+        class="size-10 rounded-full flex items-center justify-center font-medium text-sm border-[3px] transition-all duration-300"
         :class="[
           currentStep > index + 1
             ? 'bg-custom-blue border-custom-blue text-white'
@@ -43,7 +43,7 @@ const emit = defineEmits(['change-step'])
         <span v-else>{{ index + 1 }}</span>
       </div>
       <span
-        class="text-xs font-semibold uppercase tracking-wider"
+        class="text-xs font-medium uppercase tracking-wider"
         :class="currentStep >= index + 1 ? 'text-custom-blue' : 'text-gray-400'"
       >
         {{ step }}

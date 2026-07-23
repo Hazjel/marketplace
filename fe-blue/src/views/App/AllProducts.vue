@@ -57,7 +57,7 @@ watch(() => route.query, () => {
       </div>
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 class="font-extrabold text-3xl md:text-4xl text-white">Top Picks</h1>
+          <h1 class="font-medium text-3xl md:text-4xl text-white">Top Picks</h1>
           <p class="text-white/70 mt-2 text-sm md:text-base">Produk pilihan terbaik untuk kamu</p>
         </div>
         <div class="size-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
@@ -74,7 +74,7 @@ watch(() => route.query, () => {
     <!-- Controls -->
     <div class="flex items-center justify-between mb-8">
       <p class="text-sm text-custom-grey dark:text-gray-400">
-        <span class="font-bold text-custom-black dark:text-white">{{ products.length }}</span> produk ditemukan
+        <span class="font-medium text-custom-black dark:text-white">{{ products.length }}</span> produk ditemukan
       </p>
       <select v-model="sortBy"
         class="h-10 px-4 rounded-xl bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 text-sm font-medium text-custom-black dark:text-white focus:outline-none focus:border-custom-blue appearance-none cursor-pointer"
@@ -104,10 +104,10 @@ watch(() => route.query, () => {
           <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
       </div>
-      <h2 class="font-bold text-xl text-custom-black dark:text-white">Belum ada produk</h2>
+      <h2 class="font-medium text-xl text-custom-black dark:text-white">Belum ada produk</h2>
       <p class="text-custom-grey dark:text-gray-400 mt-1">Nantikan produk baru segera hadir</p>
       <RouterLink :to="{ name: 'app.home' }"
-        class="mt-6 h-12 px-8 rounded-full bg-custom-blue text-white font-bold text-sm flex items-center justify-center hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all">
+        class="mt-6 h-12 px-8 rounded-md bg-custom-blue text-white font-medium text-sm flex items-center justify-center hover:bg-primary-deep transition-all">
         Kembali ke Beranda
       </RouterLink>
     </div>

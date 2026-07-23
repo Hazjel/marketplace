@@ -55,7 +55,7 @@ const current = computed(() => config[props.status])
         </svg>
       </div>
       <div>
-        <p class="font-bold text-white text-base">{{ current.title }}</p>
+        <p class="font-medium text-white text-base">{{ current.title }}</p>
         <p class="text-white/80 text-sm">{{ current.subtitle }}</p>
       </div>
     </div>

@@ -30,10 +30,10 @@ onMounted(() => {
     <!-- Header -->
     <header class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-white/10 py-16 md:py-20 px-5 md:px-[52px]">
       <div class="max-w-[1280px] mx-auto">
-        <span class="text-[#2563EB] font-bold tracking-widest uppercase text-sm mb-4 block"
+        <span class="text-[#2563EB] font-medium tracking-widest uppercase text-sm mb-4 block"
           >Legal</span
         >
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 font-['Plus_Jakarta_Sans']">Terms & Conditions</h1>
+        <h1 class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white mb-4 font-['Plus_Jakarta_Sans']">Terms & Conditions</h1>
         <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl">
           Silakan baca syarat dan ketentuan ini dengan seksama sebelum menggunakan layanan kami.
         </p>
@@ -52,13 +52,13 @@ onMounted(() => {
       <!-- Sidebar Navigation -->
       <aside class="w-full md:w-1/4 hidden md:block">
         <div class="sticky top-32 flex flex-col gap-2">
-          <p class="font-bold text-gray-900 dark:text-white mb-2 px-4 uppercase text-xs tracking-wider">
+          <p class="font-medium text-gray-900 dark:text-white mb-2 px-4 uppercase text-xs tracking-wider">
             Daftar Isi
           </p>
           <button
             :class="
               activeSection === 'agreement'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -69,7 +69,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'representations'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -80,7 +80,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'products'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -91,7 +91,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'prohibited'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -102,7 +102,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'contact'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -119,7 +119,7 @@ onMounted(() => {
           class="prose prose-lg prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-li:text-gray-600 dark:prose-li:text-gray-400 max-w-none flex flex-col gap-12"
         >
           <section id="agreement" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">1. Agreement to Terms</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">1. Agreement to Terms</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
               These Terms and Conditions constitute a legally binding agreement made between you,
               whether personally or on behalf of an entity ("you") and Blukios ("we," "us" or
@@ -130,7 +130,7 @@ onMounted(() => {
           </section>
 
           <section id="representations" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">2. User Representations</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">2. User Representations</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
               By using the Site, you represent and warrant that:
             </p>
@@ -162,7 +162,7 @@ onMounted(() => {
           </section>
 
           <section id="products" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">3. Products and Purchases</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">3. Products and Purchases</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
               We make every effort to display as accurately as possible the colors, features,
               specifications, and details of the products available on the Site. However, we do not
@@ -172,7 +172,7 @@ onMounted(() => {
           </section>
 
           <section id="prohibited" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">4. Prohibited Activities</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Prohibited Activities</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
               You may not access or use the Site for any purpose other than that for which we make
               the Site available. As a user of the Site, you agree not to:
@@ -192,7 +192,7 @@ onMounted(() => {
           </section>
 
           <section id="contact" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">5. Contact Us</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Contact Us</h2>
             <div
               class="bg-blue-50 dark:bg-[#2563EB]/10 border border-blue-100 dark:border-[#2563EB]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6"
             >
@@ -202,11 +202,11 @@ onMounted(() => {
                 <i class="fa-solid fa-scale-balanced"></i>
               </div>
               <div>
-                <h3 class="font-bold text-gray-900 dark:text-white text-lg">Legal Concerns?</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white text-lg">Legal Concerns?</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Our legal team is here to assist you.</p>
                 <a
                   href="mailto:legal@blukios.com"
-                  class="text-[#2563EB] font-semibold hover:underline"
+                  class="text-[#2563EB] font-medium hover:underline"
                   >legal@blukios.com</a
                 >
               </div>

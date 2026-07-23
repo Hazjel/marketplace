@@ -13,7 +13,7 @@ defineProps({
   <div
     class="flex flex-col w-full rounded-[20px] bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 overflow-hidden">
     <div class="p-5 border-b border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/5">
-      <h3 class="font-bold text-lg text-custom-black dark:text-white">Things to do</h3>
+      <h3 class="font-medium text-lg text-custom-black dark:text-white">Things to do</h3>
       <p class="text-xs text-custom-grey dark:text-gray-400">Prioritize these tasks today</p>
     </div>
 
@@ -32,7 +32,7 @@ v-for="(action, index) in actions" :key="index" :to="action.route || '#'"
             <span class="font-medium text-custom-black dark:text-white text-sm">{{ action.label }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="font-bold text-custom-orange">{{ action.count }}</span>
+            <span class="font-medium text-custom-orange">{{ action.count }}</span>
             <i class="fa-solid fa-chevron-right text-xs text-gray-300 group-hover:text-custom-blue"></i>
           </div>
         </RouterLink>
@@ -41,7 +41,7 @@ v-for="(action, index) in actions" :key="index" :to="action.route || '#'"
         <div class="size-12 rounded-full bg-green-100 flex items-center justify-center mb-1">
           <i class="fa-solid fa-check text-custom-green text-xl"></i>
         </div>
-        <p class="text-sm font-bold text-custom-black dark:text-white">All clear!</p>
+        <p class="text-sm font-medium text-custom-black dark:text-white">All clear!</p>
         <p class="text-xs text-custom-grey dark:text-gray-400">Great job, you have no pending tasks.</p>
       </div>
     </div>

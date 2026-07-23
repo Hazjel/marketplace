@@ -146,7 +146,7 @@ const useMyLocation = () => {
       <button
         type="button"
         :disabled="locating"
-        class="absolute top-3 right-3 z-[500] flex items-center gap-2 h-9 px-3 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 shadow-md text-xs font-semibold text-custom-black dark:text-white hover:border-custom-blue transition-colors disabled:opacity-60"
+        class="absolute top-3 right-3 z-[500] flex items-center gap-2 h-9 px-3 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 shadow-md text-xs font-medium text-custom-black dark:text-white hover:border-custom-blue transition-colors disabled:opacity-60"
         @click="useMyLocation"
       >
         <div

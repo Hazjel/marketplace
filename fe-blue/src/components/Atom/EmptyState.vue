@@ -33,7 +33,7 @@ defineProps({
       </slot>
     </div>
     <div>
-      <p class="font-bold text-custom-black dark:text-white" :class="size === 'sm' ? 'text-sm' : 'text-lg'">
+      <p class="font-medium text-custom-black dark:text-white" :class="size === 'sm' ? 'text-sm' : 'text-lg'">
         {{ title }}
       </p>
       <p v-if="subtitle" class="text-custom-grey dark:text-gray-400 text-sm mt-1">{{ subtitle }}</p>

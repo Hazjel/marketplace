@@ -25,8 +25,8 @@ const emit = defineEmits(['delete'])
           <img :src="item.image" class="size-full object-contain" alt="icon" />
         </div>
         <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
-          <p class="font-bold text-lg truncate">{{ item.name }}</p>
-          <p class="font-semibold text-custom-grey truncate">{{ item.tagline }}</p>
+          <p class="font-medium text-lg truncate">{{ item.name }}</p>
+          <p class="font-medium text-custom-grey truncate">{{ item.tagline }}</p>
         </div>
       </div>
       <!-- Stats Group -->
@@ -44,8 +44,8 @@ const emit = defineEmits(['delete'])
             />
           </div>
           <div class="flex flex-col gap-1 w-full overflow-hidden">
-            <p class="font-bold text-lg leading-none truncate">{{ item.product_count }}</p>
-            <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">
+            <p class="font-medium text-lg leading-none truncate">{{ item.product_count }}</p>
+            <p class="font-medium text-custom-grey text-sm sm:text-base truncate">
               Total Products
             </p>
           </div>
@@ -63,8 +63,8 @@ const emit = defineEmits(['delete'])
             />
           </div>
           <div class="flex flex-col gap-1 w-full overflow-hidden">
-            <p class="font-bold text-lg leading-none truncate">{{ item.children_count }}</p>
-            <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">Sub Category</p>
+            <p class="font-medium text-lg leading-none truncate">{{ item.children_count }}</p>
+            <p class="font-medium text-custom-grey text-sm sm:text-base truncate">Sub Category</p>
           </div>
         </div>
       </div>
@@ -77,21 +77,21 @@ const emit = defineEmits(['delete'])
           @click="emit('delete', item.id)"
         >
           <img src="@/assets/images/icons/trash-red.svg" class="flex size-6 shrink-0" alt="icon" />
-          <span class="font-semibold text-custom-red">Delete</span>
+          <span class="font-medium text-custom-red">Delete</span>
         </button>
         <RouterLink
           :to="dashboardRoute('category.edit', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-black"
         >
           <img src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0" alt="icon" />
-          <span class="font-semibold text-white">Edit</span>
+          <span class="font-medium text-white">Edit</span>
         </RouterLink>
         <RouterLink
           :to="dashboardRoute('category.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue"
         >
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
-          <span class="font-semibold text-white">Details</span>
+          <span class="font-medium text-white">Details</span>
         </RouterLink>
       </div>
     </div>

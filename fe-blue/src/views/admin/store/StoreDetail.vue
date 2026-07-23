@@ -56,7 +56,7 @@ watch(error, (value) => {
         v-if="store.is_verified"
         class="flex flex-col w-full h-fit rounded-2xl p-6 gap-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/10 shadow-sm"
       >
-        <h2 class="font-bold text-xl text-gray-900 dark:text-white">Detail Toko</h2>
+        <h2 class="font-medium text-xl text-gray-900 dark:text-white">Detail Toko</h2>
         <div class="flex items-center w-full gap-5">
           <div class="flex items-center gap-4 w-full min-w-0">
             <div
@@ -65,7 +65,7 @@ watch(error, (value) => {
               <img :src="store.logo" class="size-full object-cover" alt="photo" />
             </div>
             <div class="flex flex-col gap-1.5 w-full overflow-hidden">
-              <p class="font-bold text-lg leading-tight w-full truncate text-gray-900 dark:text-white">
+              <p class="font-medium text-lg leading-tight w-full truncate text-gray-900 dark:text-white">
                 {{ store.name }}
               </p>
               <p class="flex items-center gap-1.5 font-medium text-gray-500 dark:text-gray-400 text-sm leading-none">
@@ -80,14 +80,14 @@ watch(error, (value) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
               <path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
             </svg>
-            <p class="font-bold text-emerald-700 dark:text-emerald-400 text-xs text-nowrap uppercase">Terverifikasi</p>
+            <p class="font-medium text-emerald-700 dark:text-emerald-400 text-xs text-nowrap uppercase">Terverifikasi</p>
           </div>
         </div>
 
         <hr class="border-gray-100 dark:border-white/10" />
 
         <div class="flex flex-col gap-2">
-          <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tentang Toko</h3>
+          <h3 class="font-medium text-lg text-gray-900 dark:text-white">Tentang Toko</h3>
           <p class="font-medium text-gray-600 dark:text-gray-400 whitespace-pre-wrap text-sm leading-relaxed">{{ store.about }}</p>
         </div>
 
@@ -100,7 +100,7 @@ watch(error, (value) => {
               </svg>
             </div>
             <div class="flex flex-col">
-              <p class="font-bold text-lg leading-none text-gray-900 dark:text-white">{{ store.transaction_count }}</p>
+              <p class="font-medium text-lg leading-none text-gray-900 dark:text-white">{{ store.transaction_count }}</p>
               <p class="font-medium text-gray-500 dark:text-gray-400 text-xs mt-0.5">Transaksi</p>
             </div>
           </div>
@@ -111,7 +111,7 @@ watch(error, (value) => {
               </svg>
             </div>
             <div class="flex flex-col">
-              <p class="font-bold text-lg leading-none text-gray-900 dark:text-white">{{ store.product_count }}</p>
+              <p class="font-medium text-lg leading-none text-gray-900 dark:text-white">{{ store.product_count }}</p>
               <p class="font-medium text-gray-500 dark:text-gray-400 text-xs mt-0.5">Produk</p>
             </div>
           </div>
@@ -122,7 +122,7 @@ watch(error, (value) => {
               </svg>
             </div>
             <div class="flex flex-col">
-              <p class="font-bold text-sm leading-none text-gray-900 dark:text-white">Buka</p>
+              <p class="font-medium text-sm leading-none text-gray-900 dark:text-white">Buka</p>
               <p class="font-medium text-gray-500 dark:text-gray-400 text-xs mt-0.5">Status Toko</p>
             </div>
           </div>
@@ -142,7 +142,7 @@ watch(error, (value) => {
               :to="{ name: 'app.store-detail', params: { username: store.username } }"
               class="flex items-center justify-center h-12 w-full rounded-2xl gap-2 bg-gradient-to-r from-[#2563EB] to-blue-700 hover:shadow-lg hover:shadow-[#2563EB]/25 transition-all"
             >
-              <span class="font-semibold text-white text-sm">Kunjungi Toko</span>
+              <span class="font-medium text-white text-sm">Kunjungi Toko</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
               </svg>
@@ -162,7 +162,7 @@ watch(error, (value) => {
         v-if="!store.is_verified"
         class="flex flex-col w-full h-fit rounded-2xl p-6 gap-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/10 shadow-sm"
       >
-        <h2 class="font-bold text-xl text-gray-900 dark:text-white">Detail Toko</h2>
+        <h2 class="font-medium text-xl text-gray-900 dark:text-white">Detail Toko</h2>
         <div class="flex items-center w-full gap-5">
           <div class="flex items-center gap-4 w-full min-w-0">
             <div
@@ -171,7 +171,7 @@ watch(error, (value) => {
               <img :src="store.logo" class="size-full object-cover" alt="photo" />
             </div>
             <div class="flex flex-col gap-1.5 w-full overflow-hidden">
-              <p class="font-bold text-lg leading-tight w-full truncate text-gray-900 dark:text-white">
+              <p class="font-medium text-lg leading-tight w-full truncate text-gray-900 dark:text-white">
                 {{ store.name }}
               </p>
               <p class="flex items-center gap-1.5 font-medium text-gray-500 dark:text-gray-400 text-sm leading-none">
@@ -186,14 +186,14 @@ watch(error, (value) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
-            <p class="font-bold text-red-600 dark:text-red-400 text-xs text-nowrap uppercase">Belum Aktif</p>
+            <p class="font-medium text-red-600 dark:text-red-400 text-xs text-nowrap uppercase">Belum Aktif</p>
           </div>
         </div>
 
         <hr class="border-gray-100 dark:border-white/10" />
 
         <div class="flex flex-col gap-2">
-          <h3 class="font-bold text-lg text-gray-900 dark:text-white">Tentang Toko</h3>
+          <h3 class="font-medium text-lg text-gray-900 dark:text-white">Tentang Toko</h3>
           <p class="font-medium text-gray-600 dark:text-gray-400 whitespace-pre-wrap text-sm leading-relaxed">{{ store.about }}</p>
         </div>
 
@@ -204,7 +204,7 @@ watch(error, (value) => {
               class="flex items-center justify-center h-12 w-full rounded-2xl gap-2 bg-gradient-to-r from-[#2563EB] to-blue-700 hover:shadow-lg hover:shadow-[#2563EB]/25 transition-all cursor-pointer"
               @click="handleApprovedStore"
             >
-              <span class="font-semibold text-white text-sm">Setujui Toko</span>
+              <span class="font-medium text-white text-sm">Setujui Toko</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -224,7 +224,7 @@ watch(error, (value) => {
     <section
       class="flex flex-col w-full lg:w-2/5 h-fit rounded-2xl p-6 gap-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/10 shadow-sm animate-fade-in-up"
     >
-      <h2 class="font-bold text-xl text-gray-900 dark:text-white">Alamat Toko</h2>
+      <h2 class="font-medium text-xl text-gray-900 dark:text-white">Alamat Toko</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="flex items-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-white/10">
           <div class="flex size-11 shrink-0 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 items-center justify-center">
@@ -233,7 +233,7 @@ watch(error, (value) => {
             </svg>
           </div>
           <div class="flex flex-col">
-            <p class="font-bold text-sm leading-none text-gray-900 dark:text-white">{{ store.city }}</p>
+            <p class="font-medium text-sm leading-none text-gray-900 dark:text-white">{{ store.city }}</p>
             <p class="font-medium text-gray-500 dark:text-gray-400 text-xs mt-0.5">Kota</p>
           </div>
         </div>
@@ -244,7 +244,7 @@ watch(error, (value) => {
             </svg>
           </div>
           <div class="flex flex-col">
-            <p class="font-bold text-sm leading-none text-gray-900 dark:text-white">{{ store.postal_code }}</p>
+            <p class="font-medium text-sm leading-none text-gray-900 dark:text-white">{{ store.postal_code }}</p>
             <p class="font-medium text-gray-500 dark:text-gray-400 text-xs mt-0.5">Kode Pos</p>
           </div>
         </div>

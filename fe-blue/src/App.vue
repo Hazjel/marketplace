@@ -95,13 +95,13 @@ onUnmounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       </div>
-      <h1 class="text-lg font-bold mb-2">Ups, Terjadi Kesalahan</h1>
+      <h1 class="text-lg font-medium mb-2">Ups, Terjadi Kesalahan</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
         Halaman ini mengalami masalah. Silakan muat ulang, atau kembali ke beranda.
       </p>
 
       <details v-if="isDev" class="mb-4 text-left">
-        <summary class="cursor-pointer text-xs font-semibold text-gray-500">Detail teknis (dev only)</summary>
+        <summary class="cursor-pointer text-xs font-medium text-gray-500">Detail teknis (dev only)</summary>
         <pre class="bg-gray-100 dark:bg-black/50 p-3 rounded text-xs mt-2 whitespace-pre-wrap max-h-60 overflow-auto">{{ error.message }}
 {{ error.info }}
 {{ error.stack }}</pre>
@@ -109,13 +109,13 @@ onUnmounted(() => {
 
       <div class="flex gap-3 justify-center">
         <button
-          class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-white/10 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+          class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-white/10 font-medium text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
           @click="goHome"
         >
           Ke Beranda
         </button>
         <button
-          class="px-5 py-2.5 rounded-xl bg-custom-blue text-white font-semibold text-sm hover:shadow-lg hover:shadow-[#0D5CD7]/30 transition-all"
+          class="px-5 py-2.5 rounded-xl bg-custom-blue text-white font-medium text-sm hover:shadow-lg hover:shadow-[#0D5CD7]/30 transition-all"
           @click="reloadApp"
         >
           Muat Ulang
