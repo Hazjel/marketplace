@@ -212,8 +212,7 @@ const chatLink = computed(() => ({
 }))
 
 const handleSwitchMode = () => {
-  const target = authStore.activeMode === 'store' ? 'buyer' : 'store'
-  authStore.switchToMode(router, target)
+  authStore.initiateSso(import.meta.env.VITE_BUYER_APP_URL)
 }
 
 const handleLogout = async () => {

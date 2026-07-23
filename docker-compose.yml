@@ -133,6 +133,9 @@ services:
       MIDTRANS_IS_PRODUCTION: "false"
       KEY_RAJA_ONGKIR: ${KEY_RAJA_ONGKIR:-}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      # Dua domain FE (buyer + seller) -- lihat config/cors.php, fallback
+      # ke FRONTEND_URL tunggal kalau var ini belum di-set di .env.
+      FRONTEND_URLS: ${FRONTEND_URLS:-}
       BROADCAST_CONNECTION: reverb
       REVERB_APP_ID: "543210123"
       REVERB_APP_KEY: ${REVERB_APP_KEY:-reverbkey}
@@ -155,12 +158,14 @@ services:
     depends_on:
       - api
       - frontend
+      - frontend-seller
     ports:
       - "${NGINX_HOST_PORT:-80}:80"
     volumes:
       - ./api-blue:/var/www
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - fe_dist:/usr/share/nginx/html:ro
+      - fe_dist_seller:/usr/share/nginx/html-seller:ro
 
   # ─────────────────────────────────────────
   # Queue Worker
@@ -239,7 +244,7 @@ services:
       CACHE_STORE: redis
 
   # ─────────────────────────────────────────
-  # Frontend (Vue.js)
+  # Frontend — Buyer app (blukios.store)
   # ─────────────────────────────────────────
   frontend:
     build:
@@ -254,12 +259,39 @@ services:
         VITE_MIDTRANS_IS_PRODUCTION: "false"
         # Host/port websocket dinamis mengikuti halaman (lihat echo.js)
         VITE_REVERB_APP_KEY: ${REVERB_APP_KEY:-reverbkey}
+        VITE_APP_TARGET: buyer
+        VITE_BUYER_APP_URL: ${BUYER_APP_URL:-https://blukios.store}
+        VITE_SELLER_APP_URL: ${SELLER_APP_URL:-https://seller.blukios.store}
     container_name: blue-frontend
     restart: unless-stopped
     depends_on:
       - api
     volumes:
       - fe_dist:/app/dist
+
+  # ─────────────────────────────────────────
+  # Frontend — Seller app (seller.blukios.store)
+  # ─────────────────────────────────────────
+  frontend-seller:
+    build:
+      context: ./fe-blue
+      args:
+        VITE_APP_NAME: Blue Seller
+        VITE_API_BASE_URL: /api
+        VITE_AI_SERVICE_URL: /ai
+        VITE_RECOMMENDATION_BASE_URL: /recommend
+        VITE_MIDTRANS_CLIENT_KEY: Mid-client-xjQUjCcbhOHl68O3
+        VITE_MIDTRANS_IS_PRODUCTION: "false"
+        VITE_REVERB_APP_KEY: ${REVERB_APP_KEY:-reverbkey}
+        VITE_APP_TARGET: seller
+        VITE_BUYER_APP_URL: ${BUYER_APP_URL:-https://blukios.store}
+        VITE_SELLER_APP_URL: ${SELLER_APP_URL:-https://seller.blukios.store}
+    container_name: blue-frontend-seller
+    restart: unless-stopped
+    depends_on:
+      - api
+    volumes:
+      - fe_dist_seller:/app/dist
 
   # ─────────────────────────────────────────
   # AI Service (FastAPI + Ollama)
@@ -432,4 +464,5 @@ volumes:
   api_vendor:
   fe_node_modules:
   fe_dist:
+  fe_dist_seller:    # Build seller app (seller.blukios.store)
   reco_models:       # Model SVD terlatih (recommendation-service)

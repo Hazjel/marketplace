@@ -39,10 +39,7 @@ const chatBadgeText = computed(() =>
   totalUnreadCount.value > 99 ? '99+' : totalUnreadCount.value
 )
 
-// Computed properties for template logic safety
-const sellerDashboardLabel = computed(() => {
-  return authStore.activeMode === 'buyer' ? 'Switch to Seller' : 'Seller Dashboard'
-})
+const sellerAppUrl = import.meta.env.VITE_SELLER_APP_URL
 
 const wishlistBadgeText = computed(() => {
   return totalWishlistItems.value > 99 ? '99+' : totalWishlistItems.value
@@ -462,7 +459,6 @@ src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark
                       <RouterLink
                         :to="{ name: 'user.dashboard', params: { username: user.username } }"
                         class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group"
-                        @click="authStore.switchToMode(router, 'buyer')"
                       >
                         <div class="flex items-center gap-3">
                           <img
@@ -513,22 +509,33 @@ src="@/assets/images/icons/receipt-text-black.svg"
                       </p>
 
                       <RouterLink
-:to="{
-                        name: user.role === 'store' ? 'admin.dashboard' : 'auth.open-store'
-                      }"
-                        class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group"
-                        @click="user.role === 'store' && authStore.switchToMode(router, 'store')">
+                        v-if="user.role !== 'store'"
+                        :to="{ name: 'auth.open-store' }"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group">
                         <div class="flex items-center gap-3">
                           <img
-src="@/assets/images/icons/shop-black.svg"
+                            src="@/assets/images/icons/shop-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
                             alt="shop" />
-                          <span class="text-sm font-medium text-custom-black">{{
-                            user.role === 'store' ? 'Store Dashboard' : 'Open Store for Free'
-                          }}</span>
+                          <span class="text-sm font-medium text-custom-black">Open Store for Free</span>
                         </div>
-                        <span v-if="user.role === 'store'" class="size-2 rounded-full bg-custom-green"></span>
                       </RouterLink>
+                      <!-- Sudah punya toko: Store Dashboard pindah ke seller app via SSO
+                           (bukan RouterLink, karena dashboard toko sudah tidak ada di build ini) -->
+                      <button
+                        v-else
+                        type="button"
+                        class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 hover-glow-blue transition-colors group text-left"
+                        @click="authStore.initiateSso(sellerAppUrl)">
+                        <div class="flex items-center gap-3">
+                          <img
+                            src="@/assets/images/icons/shop-black.svg"
+                            class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
+                            alt="shop" />
+                          <span class="text-sm font-medium text-custom-black">Store Dashboard</span>
+                        </div>
+                        <span class="size-2 rounded-full bg-custom-green"></span>
+                      </button>
                     </div>
 
                     <!-- Section 3: Settings & Theme -->

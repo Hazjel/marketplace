@@ -82,6 +82,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('profile/settings', [AuthController::class, 'updateSettings']);
     Route::post('logout', [AuthController::class, 'logout']);
 
+    // SSO cross-domain (blukios.store <-> seller.blukios.store) — dipanggil
+    // dari domain yang sudah punya sesi untuk minta exchange token.
+    Route::post('auth/sso/initiate', [AuthController::class, 'ssoInitiate']);
+
     // Register Store (Upgrade Role)
     Route::post('register-store', [
         StoreController::class,
@@ -279,6 +283,10 @@ Route::middleware('throttle:6,1')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
 });
+
+// SSO cross-domain — publik (belum ada sesi di domain ini), dilindungi
+// exchange_token sekali-pakai + throttle ketat, bukan token permanen.
+Route::middleware('throttle:10,1')->post('auth/sso/exchange', [AuthController::class, 'ssoExchange']);
 
 // Verification Routes
 Route::get('/email/verify/{id}/{hash}', [
