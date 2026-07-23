@@ -95,7 +95,7 @@ const handleSend = async () => {
         <!-- ── CONTACT LIST VIEW ── -->
         <template v-if="view === 'contacts' || !activeUser">
           <div class="flex items-center justify-between px-5 py-4 border-b border-custom-stroke dark:border-white/10 shrink-0">
-            <h2 class="font-bold text-base dark:text-white">Pesan</h2>
+            <h2 class="font-medium text-base dark:text-white">Pesan</h2>
             <button
               class="size-7 flex items-center justify-center text-custom-grey hover:text-custom-black dark:hover:text-white transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
               @click="isOpen = false"
@@ -129,7 +129,7 @@ const handleSend = async () => {
                 ></div>
               </div>
               <div class="flex flex-col flex-1 min-w-0">
-                <span class="text-sm font-semibold dark:text-white truncate" :class="{ 'font-bold': contact.unread_count > 0 }">
+                <span class="text-sm font-medium dark:text-white truncate" :class="{ 'font-medium': contact.unread_count > 0 }">
                   {{ contact.name }}
                 </span>
                 <span class="text-xs text-custom-grey truncate" :class="{ 'text-custom-black dark:text-white font-medium': contact.unread_count > 0 }">
@@ -137,7 +137,7 @@ const handleSend = async () => {
                 </span>
               </div>
               <div v-if="contact.unread_count > 0" class="size-5 bg-custom-red rounded-full flex items-center justify-center shrink-0">
-                <span class="text-white text-[9px] font-bold">{{ contact.unread_count > 99 ? '99+' : contact.unread_count }}</span>
+                <span class="text-white text-[9px] font-medium">{{ contact.unread_count > 99 ? '99+' : contact.unread_count }}</span>
               </div>
             </button>
           </div>
@@ -160,8 +160,8 @@ const handleSend = async () => {
               <div v-if="isOnline" class="absolute bottom-0 right-0 size-2 rounded-full bg-green-500 border border-white"></div>
             </div>
             <div class="flex flex-col">
-              <span class="text-sm font-bold dark:text-white">{{ activeUser.name }}</span>
-              <span class="text-[10px]" :class="isOnline ? 'text-green-500 font-semibold' : 'text-custom-grey'">
+              <span class="text-sm font-medium dark:text-white">{{ activeUser.name }}</span>
+              <span class="text-[10px]" :class="isOnline ? 'text-green-500 font-medium' : 'text-custom-grey'">
                 {{ isOnline ? 'Online' : 'Offline' }}
               </span>
             </div>
@@ -267,7 +267,7 @@ const handleSend = async () => {
           v-if="totalUnreadCount > 0 && !isOpen"
           class="absolute -top-1 -right-1 size-5 bg-custom-red rounded-full flex items-center justify-center border-2 border-white animate-pulse"
         >
-          <span class="text-white text-[9px] font-bold leading-none">{{ badgeText }}</span>
+          <span class="text-white text-[9px] font-medium leading-none">{{ badgeText }}</span>
         </div>
       </Transition>
     </button>

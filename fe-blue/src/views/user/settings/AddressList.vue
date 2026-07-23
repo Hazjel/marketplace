@@ -30,12 +30,12 @@ onMounted(() => {
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="flex flex-col gap-1">
-        <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">Alamat Saya</h1>
+        <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">Alamat Saya</h1>
         <p class="text-custom-grey dark:text-gray-400 font-medium text-sm">Kelola alamat pengirimanmu untuk checkout yang lebih cepat.</p>
       </div>
       <RouterLink
         :to="{ name: 'user.settings.address.create' }"
-        class="flex items-center justify-center gap-2 px-5 py-3 bg-custom-blue text-white rounded-full font-bold text-sm hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 shrink-0"
+        class="flex items-center justify-center gap-2 px-5 py-3 bg-custom-blue text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 shrink-0"
       >
         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
@@ -72,11 +72,11 @@ onMounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       </div>
-      <p class="font-bold text-lg text-custom-black dark:text-white mb-1">Belum Ada Alamat</p>
+      <p class="font-medium text-lg text-custom-black dark:text-white mb-1">Belum Ada Alamat</p>
       <p class="text-custom-grey dark:text-gray-400 text-sm mb-6 text-center max-w-xs">Tambahkan alamat untuk mempercepat proses checkout kamu.</p>
       <RouterLink
         :to="{ name: 'user.settings.address.create' }"
-        class="flex items-center gap-2 px-6 py-3 bg-custom-blue text-white rounded-full font-bold text-sm hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300"
+        class="flex items-center gap-2 px-6 py-3 bg-custom-blue text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300"
       >
         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
@@ -95,7 +95,7 @@ onMounted(() => {
         <!-- Primary Badge -->
         <div
           v-if="address.is_primary"
-          class="absolute top-4 right-4 px-3 py-1 bg-custom-blue/10 dark:bg-custom-blue/20 text-custom-blue text-xs font-bold rounded-full"
+          class="absolute top-4 right-4 px-3 py-1 bg-custom-blue/10 dark:bg-custom-blue/20 text-custom-blue text-xs font-medium rounded-full"
         >
           Utama
         </div>
@@ -103,9 +103,9 @@ onMounted(() => {
         <!-- Address Info -->
         <div class="flex flex-col gap-1 mb-3">
           <div class="flex items-center gap-2">
-            <p class="font-bold text-base text-custom-black dark:text-white">{{ address.label }}</p>
+            <p class="font-medium text-base text-custom-black dark:text-white">{{ address.label }}</p>
           </div>
-          <p class="font-semibold text-sm text-custom-black dark:text-gray-200">{{ address.recipient_name }}</p>
+          <p class="font-medium text-sm text-custom-black dark:text-gray-200">{{ address.recipient_name }}</p>
           <p class="text-custom-grey dark:text-gray-400 text-sm">{{ address.phone }}</p>
         </div>
 
@@ -117,12 +117,12 @@ onMounted(() => {
         <div class="flex items-center gap-3 mt-auto">
           <RouterLink
             :to="{ name: 'user.settings.address.edit', params: { id: address.id } }"
-            class="flex-1 py-2.5 text-center bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm font-bold text-custom-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 hover:border-gray-200 dark:hover:border-white/20 transition-all"
+            class="flex-1 py-2.5 text-center bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl text-sm font-medium text-custom-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 hover:border-gray-200 dark:hover:border-white/20 transition-all"
           >
             Edit
           </RouterLink>
           <button
-            class="flex-1 py-2.5 text-center bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-900/30 transition-all"
+            class="flex-1 py-2.5 text-center bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-900/30 transition-all"
             @click="handleDelete(address.id)"
           >
             Hapus

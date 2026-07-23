@@ -41,9 +41,9 @@ type="checkbox" :checked="selected"
             alt="icon" />
         </div>
         <div class="flex flex-col flex-1 gap-[6px] overflow-hidden">
-          <p class="font-bold text-base md:text-lg truncate">{{ item.name }}</p>
-          <p class="font-semibold leading-none text-custom-grey flex items-center gap-[6px]">
-            <span class="font-bold text-sm md:text-base text-custom-blue">{{
+          <p class="font-medium text-base md:text-lg truncate">{{ item.name }}</p>
+          <p class="font-medium leading-none text-custom-grey flex items-center gap-[6px]">
+            <span class="font-medium text-sm md:text-base text-custom-blue">{{
               item.product_category?.name
               }}</span>
           </p>
@@ -57,10 +57,10 @@ type="checkbox" :checked="selected"
             <img src="@/assets/images/icons/status-up-black.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
           </div>
           <div class="flex flex-col gap-1 overflow-hidden">
-            <p class="font-bold text-base md:text-lg leading-none truncate">
+            <p class="font-medium text-base md:text-lg leading-none truncate">
               {{ item.total_sold ? item.total_sold.toLocaleString() : 0 }}
             </p>
-            <p class="font-semibold text-sm md:text-base text-custom-grey truncate">Total Sold</p>
+            <p class="font-medium text-sm md:text-base text-custom-grey truncate">Total Sold</p>
           </div>
         </div>
         <div class="flex items-center gap-[10px] w-full md:w-auto">
@@ -69,15 +69,15 @@ type="checkbox" :checked="selected"
             <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
           </div>
           <div class="flex flex-col gap-1 overflow-hidden">
-            <p class="font-bold text-base md:text-lg leading-none truncate">{{ item.stock }}</p>
-            <p class="font-semibold text-sm md:text-base text-custom-grey truncate">Total Stock</p>
+            <p class="font-medium text-base md:text-lg leading-none truncate">{{ item.stock }}</p>
+            <p class="font-medium text-sm md:text-base text-custom-grey truncate">Total Stock</p>
           </div>
         </div>
       </div>
     </div>
     <hr class="border-custom-stroke dark:border-white/10" />
     <div class="flex flex-col md:flex-row items-center justify-between gap-5">
-      <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none w-full md:w-auto">
+      <p class="flex items-center gap-2 font-medium text-custom-grey leading-none w-full md:w-auto">
         <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0 dark:invert" alt="icon" />
         Created on {{ formatDate(item.created_at) }}
       </p>
@@ -87,7 +87,7 @@ v-if="user?.permissions?.includes('product-delete')"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-red/10"
           @click="emit('delete', item.id)">
           <img src="@/assets/images/icons/trash-red.svg" class="flex size-6 shrink-0" alt="icon" />
-          <span class="font-semibold text-custom-red">Delete</span>
+          <span class="font-medium text-custom-red">Delete</span>
         </button>
         <RouterLink
 v-if="user?.permissions?.includes('product-edit')"
@@ -96,13 +96,13 @@ v-if="user?.permissions?.includes('product-edit')"
           <img
 src="@/assets/images/icons/edit-white.svg" class="flex size-6 shrink-0 dark:brightness-0 dark:invert-0"
             alt="icon" />
-          <span class="font-semibold text-white dark:text-black">Edit</span>
+          <span class="font-medium text-white dark:text-black">Edit</span>
         </RouterLink>
         <RouterLink
 :to="dashboardRoute('product.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
-          <span class="font-semibold text-white">Details</span>
+          <span class="font-medium text-white">Details</span>
         </RouterLink>
       </div>
     </div>

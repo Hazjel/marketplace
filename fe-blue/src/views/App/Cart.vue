@@ -72,7 +72,7 @@ onMounted(async () => {
 
 <template>
   <form action="checkout.html" class="flex flex-col gap-6 w-full max-w-[1280px] px-4 md:px-[52px] mx-auto">
-    <h1 class="font-bold text-[32px] dark:text-white">Keranjang Belanja</h1>
+    <h1 class="font-medium text-[32px] dark:text-white">Keranjang Belanja</h1>
     <div class="flex flex-col lg:flex-row gap-5">
       <section id="Carts-Container" class="flex flex-col gap-5 w-full min-w-0">
         <div
@@ -80,13 +80,13 @@ v-if="carts.length === 0" id="Empty-Cart-State"
           class="flex flex-col flex-1 items-center justify-center rounded-[20px] bg-white dark:bg-surface-card gap-9">
           <img src="@/assets/images/icons/bag-cross-blue-transparent.svg" class="size-16" alt="icon" />
           <div class="text-center">
-            <p class="font-bold text-2xl dark:text-white">Keranjang kamu masih kosong</p>
-            <p class="font-semibold text-custom-grey dark:text-gray-400">Yuk, mulai belanja dan temukan produk favoritmu!</p>
+            <p class="font-medium text-2xl dark:text-white">Keranjang kamu masih kosong</p>
+            <p class="font-medium text-custom-grey dark:text-gray-400">Yuk, mulai belanja dan temukan produk favoritmu!</p>
           </div>
           <RouterLink
 :to="{ name: 'app.home' }"
             class="flex items-center justify-center h-14 w-fit rounded-2xl p-4 px-6 gap-2 bg-custom-blue">
-            <span class="font-bold text-white">Cari Produk</span>
+            <span class="font-medium text-white">Cari Produk</span>
             <img
 src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
               alt="icon" />
@@ -110,7 +110,7 @@ src="@/assets/images/icons/checkbox.svg"
                   alt="icon" />
               </div>
             </label>
-            <p class="flex items-center gap-1 font-semibold text-custom-grey dark:text-gray-300 leading-none">
+            <p class="flex items-center gap-1 font-medium text-custom-grey dark:text-gray-300 leading-none">
               <img src="@/assets/images/icons/shop-grey.svg" class="size-4" alt="icon" />
               {{ store.storeName }}
             </p>
@@ -130,16 +130,16 @@ v-for="product in store.products" :key="product.id"
                       " class="size-full object-contain mix-blend-multiply dark:mix-blend-normal" alt="icon" />
                   </div>
                   <div class="flex flex-col flex-1 gap-1">
-                    <p class="font-bold text-base leading-tight line-clamp-2 w-full dark:text-white">
+                    <p class="font-medium text-base leading-tight line-clamp-2 w-full dark:text-white">
                       {{ product.name }}
                     </p>
                     <div class="flex items-center gap-2">
-                      <p class="text-xs font-semibold text-custom-blue bg-blue-50 px-2 py-1 rounded-md">
+                      <p class="text-xs font-medium text-custom-blue bg-blue-50 px-2 py-1 rounded-md">
                         {{ product.product_category.name }}
                       </p>
                       <p class="text-sm text-custom-grey">{{ product.weight }} KG</p>
                     </div>
-                    <p class="font-bold text-lg text-custom-black dark:text-white mt-2">
+                    <p class="font-medium text-lg text-custom-black dark:text-white mt-2">
                       Rp {{ formatRupiah(product.price) }}
                     </p>
 
@@ -147,19 +147,19 @@ v-for="product in store.products" :key="product.id"
                     <div v-if="stockChecked" class="flex items-center gap-2 mt-1">
                       <span
                         v-if="product.stock === 0"
-                        class="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-full"
+                        class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full"
                       >
                         Stok Habis
                       </span>
                       <span
                         v-else-if="product.stock < 5"
-                        class="text-xs font-bold text-custom-orange bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full"
+                        class="text-xs font-medium text-custom-orange bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full"
                       >
                         Sisa {{ product.stock }} buah
                       </span>
                       <span
                         v-if="product._stockValid === false"
-                        class="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full"
+                        class="text-xs font-medium text-amber-600 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full"
                       >
                         Stok berubah
                       </span>
@@ -193,7 +193,7 @@ type="button"
                       </button>
                       <input
 type="number"
-                        class="amount appearance-none w-10 text-center font-bold text-sm outline-none bg-transparent dark:text-white"
+                        class="amount appearance-none w-10 text-center font-medium text-sm outline-none bg-transparent dark:text-white"
                         :value="product.quantity" min="1" :max="product.stock" @change="handleUpdateQuantity(store.storeId, product.id, $event)" />
                       <button
 type="button"
@@ -211,54 +211,54 @@ type="button"
       </section>
       <section id="Order-Summary" class="flex flex-col gap-5 w-full lg:w-[444px] shrink-0">
         <div class="flex flex-col gap-4 rounded-[20px] p-5 bg-white dark:bg-surface-card">
-          <p class="font-bold text-xl dark:text-white">Ringkasan Pesanan</p>
+          <p class="font-medium text-xl dark:text-white">Ringkasan Pesanan</p>
           <div class="flex flex-col rounded-xl border border-custom-stroke dark:border-white/10 p-5 gap-4">
             <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+              <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Total Item:
               </p>
-              <p class="font-bold text-lg leading-none dark:text-white">{{ totalSelectedItems }} Produk</p>
+              <p class="font-medium text-lg leading-none dark:text-white">{{ totalSelectedItems }} Produk</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+              <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/box-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Total Kuantitas:
               </p>
-              <p class="font-bold text-lg leading-none dark:text-white">{{ totalSelectedQuantity }}x</p>
+              <p class="font-medium text-lg leading-none dark:text-white">{{ totalSelectedQuantity }}x</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+              <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/ticket-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Sub Total:
               </p>
-              <p class="font-bold text-lg leading-none dark:text-white">Rp {{ formatRupiah(subtotalSelected) }}</p>
+              <p class="font-medium text-lg leading-none dark:text-white">Rp {{ formatRupiah(subtotalSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+              <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/receipt-2-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 PPN 11%
               </p>
-              <p class="font-bold text-lg leading-none dark:text-white">Rp {{ formatRupiah(ppnSelected) }}</p>
+              <p class="font-medium text-lg leading-none dark:text-white">Rp {{ formatRupiah(ppnSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+              <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/discount-shape-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Discount
               </p>
-              <p class="font-bold text-lg leading-none dark:text-white">Rp {{ formatRupiah(discountSelected) }}</p>
+              <p class="font-medium text-lg leading-none dark:text-white">Rp {{ formatRupiah(discountSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey text-lg leading-none">
+              <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0" alt="icon" />
                 Grand total
               </p>
-              <p class="font-bold text-lg leading-none text-custom-blue dark:text-blue-400">
+              <p class="font-medium text-lg leading-none text-custom-blue dark:text-blue-400">
                 Rp {{ formatRupiah(grandTotalSelected) }}
               </p>
             </div>
@@ -266,7 +266,7 @@ type="button"
           <RouterLink
 :to="{ name: 'app.checkout' }"
             class="flex items-center justify-center h-16 w-full rounded-2xl p-4 gap-2 bg-custom-blue disabled:bg-custom-stroke transition-300">
-            <span class="font-bold text-white">
+            <span class="font-medium text-white">
               {{ hasSelectedStores ? 'Lanjut ke Pembayaran' : 'Pilih toko untuk checkout' }}
             </span>
             <img

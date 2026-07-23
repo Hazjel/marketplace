@@ -56,11 +56,11 @@ onMounted(() => {
 
       <div class="relative z-10 text-center max-w-4xl flex flex-col items-center gap-6">
         <span
-          class="px-4 py-1.5 bg-[#2563EB]/20 backdrop-blur-md rounded-full text-blue-400 border border-[#2563EB]/30 font-bold text-xs uppercase tracking-widest"
+          class="px-4 py-1.5 bg-[#2563EB]/20 backdrop-blur-md rounded-full text-blue-400 border border-[#2563EB]/30 font-medium text-xs uppercase tracking-widest"
         >
           We Are Hiring
         </span>
-        <h1 class="text-5xl md:text-7xl font-bold text-white tracking-tight leading-none font-['Plus_Jakarta_Sans']">
+        <h1 class="text-5xl md:text-7xl font-medium text-white tracking-tight leading-none font-['Plus_Jakarta_Sans']">
           Do Your Best Work<br />
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-teal-400"
             >At Blukios.</span
@@ -72,7 +72,7 @@ onMounted(() => {
         </p>
         <div class="flex gap-4 mt-4">
           <button
-            class="px-8 py-3 bg-white text-gray-900 rounded-full font-bold hover:bg-gray-200 transition-colors"
+            class="px-8 py-3 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-200 transition-colors"
             @click="$el.querySelector('#open-roles').scrollIntoView({ behavior: 'smooth' })"
           >
             View Openings
@@ -90,7 +90,7 @@ onMounted(() => {
           >
             <i class="fa-solid fa-heart"></i>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Work-Life Balance</h3>
+          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Work-Life Balance</h3>
           <p class="text-gray-600 dark:text-gray-400 text-sm">
             We believe in working smart, not just hard. Flexible hours and remote-first culture.
           </p>
@@ -101,7 +101,7 @@ onMounted(() => {
           >
             <i class="fa-solid fa-rocket"></i>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Growth Mindset</h3>
+          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Growth Mindset</h3>
           <p class="text-gray-600 dark:text-gray-400 text-sm">
             Learning stipends, mentorship programs, and clear career progression paths.
           </p>
@@ -112,7 +112,7 @@ onMounted(() => {
           >
             <i class="fa-solid fa-users"></i>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Inclusive Team</h3>
+          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Inclusive Team</h3>
           <p class="text-gray-600 dark:text-gray-400 text-sm">
             A diverse environment where every voice is heard, valued, and respected.
           </p>
@@ -124,7 +124,7 @@ onMounted(() => {
     <section id="open-roles" class="max-w-[1280px] mx-auto px-5 md:px-[52px] py-24">
       <div class="flex justify-between items-end mb-12">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Posisi Tersedia</h2>
+          <h2 class="text-3xl font-medium text-gray-900 dark:text-white mb-2">Posisi Tersedia</h2>
           <p class="text-gray-600 dark:text-gray-400">Temukan tempat kamu di tim kami yang terus berkembang.</p>
         </div>
       </div>
@@ -138,11 +138,11 @@ onMounted(() => {
           <div class="flex justify-between items-start">
             <div>
               <span
-                class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block"
+                class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block"
                 >{{ role.department }}</span
               >
               <h3
-                class="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-[#2563EB] transition-colors"
+                class="text-2xl font-medium text-gray-900 dark:text-white group-hover:text-[#2563EB] transition-colors"
               >
                 {{ role.title }}
               </h3>

@@ -29,11 +29,11 @@ onMounted(() => {
       <div class="relative z-10 w-full max-w-[1280px] px-5 md:px-[52px] pt-20 pb-20 md:pb-32">
         <div class="max-w-3xl flex flex-col gap-6 animate-fade-in-up">
           <span
-            class="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-blue-400 font-bold text-sm tracking-widest border border-white/20 w-fit"
+            class="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-blue-400 font-medium text-sm tracking-widest border border-white/20 w-fit"
           >
             EST. 2024
           </span>
-          <h1 class="text-5xl md:text-7xl font-bold text-white leading-tight font-['Plus_Jakarta_Sans']">
+          <h1 class="text-5xl md:text-7xl font-medium text-white leading-tight font-['Plus_Jakarta_Sans']">
             Connecting
             <span
               class="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-teal-400"
@@ -62,7 +62,7 @@ onMounted(() => {
       >
         <div class="flex flex-col items-center text-center gap-2 group">
           <span
-            class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white group-hover:text-[#2563EB] transition-colors duration-300"
+            class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white group-hover:text-[#2563EB] transition-colors duration-300"
             >10K+</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
@@ -71,7 +71,7 @@ onMounted(() => {
         </div>
         <div class="flex flex-col items-center text-center gap-2 group">
           <span
-            class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white group-hover:text-orange-500 transition-colors duration-300"
+            class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white group-hover:text-orange-500 transition-colors duration-300"
             >500K+</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
@@ -80,7 +80,7 @@ onMounted(() => {
         </div>
         <div class="flex flex-col items-center text-center gap-2 group">
           <span
-            class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white group-hover:text-emerald-500 transition-colors duration-300"
+            class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white group-hover:text-emerald-500 transition-colors duration-300"
             >2M+</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
@@ -89,7 +89,7 @@ onMounted(() => {
         </div>
         <div class="flex flex-col items-center text-center gap-2 group">
           <span
-            class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white group-hover:text-purple-500 transition-colors duration-300"
+            class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white group-hover:text-purple-500 transition-colors duration-300"
             >99%</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
@@ -114,10 +114,10 @@ onMounted(() => {
           />
         </div>
         <div class="w-full lg:w-1/2 flex flex-col gap-6">
-          <span class="text-[#2563EB] font-bold tracking-widest uppercase text-sm"
+          <span class="text-[#2563EB] font-medium tracking-widest uppercase text-sm"
             >Our Origin</span
           >
-          <h2 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+          <h2 class="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white leading-tight">
             Built for the Community,<br />by the Community.
           </h2>
           <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
@@ -126,7 +126,7 @@ onMounted(() => {
           </p>
           <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
             We asked a simple question:
-            <span class="text-gray-900 dark:text-white font-semibold italic"
+            <span class="text-gray-900 dark:text-white font-medium italic"
               >"Why does selling online have to be so hard?"</span
             >
             Use that curiosity to fuel our innovation.
@@ -137,10 +137,10 @@ onMounted(() => {
       <!-- Row 2 -->
       <div class="flex flex-col-reverse lg:flex-row gap-12 lg:gap-20 items-center">
         <div class="w-full lg:w-1/2 flex flex-col gap-6 lg:pl-10">
-          <span class="text-orange-500 font-bold tracking-widest uppercase text-sm"
+          <span class="text-orange-500 font-medium tracking-widest uppercase text-sm"
             >The Vision</span
           >
-          <h2 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+          <h2 class="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white leading-tight">
             Technology with a <br />Human Touch.
           </h2>
           <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
@@ -192,7 +192,7 @@ onMounted(() => {
     <section class="bg-gradient-to-b from-gray-50 dark:from-gray-900 to-white dark:to-gray-950 py-24">
       <div class="max-w-[1280px] mx-auto px-5 md:px-[52px]">
         <div class="text-center max-w-2xl mx-auto mb-20">
-          <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">Our Core Values</h2>
+          <h2 class="text-4xl font-medium text-gray-900 dark:text-white mb-6">Our Core Values</h2>
           <p class="text-gray-600 dark:text-gray-400 text-lg">The principles that guide every decision we make.</p>
         </div>
 
@@ -207,7 +207,7 @@ onMounted(() => {
               <i class="fa-solid fa-users"></i>
             </div>
             <h3
-              class="text-2xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-[#2563EB] transition-colors"
+              class="text-2xl font-medium text-gray-900 dark:text-white mb-4 group-hover:text-[#2563EB] transition-colors"
             >
               Customer Obsession
             </h3>
@@ -227,7 +227,7 @@ onMounted(() => {
               <i class="fa-solid fa-lightbulb"></i>
             </div>
             <h3
-              class="text-2xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-orange-500 transition-colors"
+              class="text-2xl font-medium text-gray-900 dark:text-white mb-4 group-hover:text-orange-500 transition-colors"
             >
               Invent and Simplify
             </h3>
@@ -247,7 +247,7 @@ onMounted(() => {
               <i class="fa-solid fa-leaf"></i>
             </div>
             <h3
-              class="text-2xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-emerald-500 transition-colors"
+              class="text-2xl font-medium text-gray-900 dark:text-white mb-4 group-hover:text-emerald-500 transition-colors"
             >
               Sustainability
             </h3>
@@ -277,7 +277,7 @@ onMounted(() => {
         </div>
 
         <div class="relative z-10 flex flex-col items-center gap-8">
-          <h2 class="text-4xl md:text-6xl font-bold text-white tracking-tight">
+          <h2 class="text-4xl md:text-6xl font-medium text-white tracking-tight">
             Be Part of the <br /><span
               class="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-teal-400"
               >Revolution.</span
@@ -290,13 +290,13 @@ onMounted(() => {
           <div class="flex flex-col sm:flex-row gap-4">
             <RouterLink
               :to="{ name: 'app.all-products' }"
-              class="px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg hover:bg-gray-100 transition-all"
+              class="px-8 py-4 bg-white text-gray-900 rounded-full font-medium text-lg hover:bg-gray-100 transition-all"
             >
               Start Shopping
             </RouterLink>
             <RouterLink
               :to="{ name: 'auth.open-store' }"
-              class="px-8 py-4 bg-transparent border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all backdrop-blur-sm"
+              class="px-8 py-4 bg-transparent border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/10 transition-all backdrop-blur-sm"
             >
               Open a Store
             </RouterLink>

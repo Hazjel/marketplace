@@ -124,7 +124,7 @@ const handleSubmit = async () => {
   <div v-if="user" class="flex flex-col gap-8 w-full">
     <!-- Page Header -->
     <div class="flex flex-col gap-1">
-      <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">Profil Saya</h1>
+      <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">Profil Saya</h1>
       <p class="text-custom-grey dark:text-gray-400 font-medium">Kelola informasi profil dan keamanan akunmu.</p>
     </div>
 
@@ -147,7 +147,7 @@ const handleSubmit = async () => {
           </svg>
         </div>
         <div class="flex-1">
-          <p class="font-bold text-amber-800 dark:text-amber-300 text-sm">Lengkapi Profil Kamu</p>
+          <p class="font-medium text-amber-800 dark:text-amber-300 text-sm">Lengkapi Profil Kamu</p>
           <p class="text-amber-700 dark:text-amber-400/80 text-sm mt-1">Kamu baru saja login via Google. Silakan lengkapi nomor telepon untuk pengalaman belanja yang lebih baik.</p>
         </div>
         <button @click="showProfileAlert = false" class="shrink-0 p-1 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
@@ -180,9 +180,9 @@ const handleSubmit = async () => {
         <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleFileChange" />
 
         <div class="flex flex-col gap-1.5">
-          <p class="font-bold text-xl text-custom-black dark:text-white capitalize">{{ user?.name || '&nbsp;' }}</p>
+          <p class="font-medium text-xl text-custom-black dark:text-white capitalize">{{ user?.name || '&nbsp;' }}</p>
           <p class="text-custom-grey dark:text-gray-400 text-sm">Klik foto untuk mengganti gambar profil.</p>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-custom-blue/10 dark:bg-custom-blue/20 text-custom-blue text-xs font-bold rounded-full w-fit capitalize">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-custom-blue/10 dark:bg-custom-blue/20 text-custom-blue text-xs font-medium rounded-full w-fit capitalize">
             {{ user?.role }}
           </span>
         </div>
@@ -227,7 +227,7 @@ const handleSubmit = async () => {
 
         <!-- Name Field -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Nama Lengkap</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nama Lengkap</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <img src="@/assets/images/icons/profile-circle-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -246,7 +246,7 @@ const handleSubmit = async () => {
 
         <!-- Email (Read-only) -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Email</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Email</label>
           <div class="group relative">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <svg class="size-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,7 +261,7 @@ const handleSubmit = async () => {
               class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-full font-medium text-gray-500 dark:text-gray-400 cursor-not-allowed"
             />
             <div v-if="user?.email_verified_at" class="absolute inset-y-0 right-4 flex items-center">
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold rounded-full">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-medium rounded-full">
                 <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                 </svg>
@@ -273,7 +273,7 @@ const handleSubmit = async () => {
 
         <!-- Phone Number -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Nomor Telepon</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nomor Telepon</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -298,7 +298,7 @@ const handleSubmit = async () => {
         <!-- Divider -->
         <div class="flex items-center gap-4 my-2">
           <div class="flex-1 h-px bg-gray-100 dark:bg-white/10"></div>
-          <span class="text-xs font-semibold text-custom-grey dark:text-gray-500 uppercase tracking-wider">Ubah Password</span>
+          <span class="text-xs font-medium text-custom-grey dark:text-gray-500 uppercase tracking-wider">Ubah Password</span>
           <div class="flex-1 h-px bg-gray-100 dark:bg-white/10"></div>
         </div>
 
@@ -306,7 +306,7 @@ const handleSubmit = async () => {
 
         <!-- Current Password -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Password Saat Ini</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Password Saat Ini</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -325,7 +325,7 @@ const handleSubmit = async () => {
 
         <!-- New Password -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Password Baru</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Password Baru</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -344,7 +344,7 @@ const handleSubmit = async () => {
 
         <!-- Confirm New Password -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Konfirmasi Password Baru</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Konfirmasi Password Baru</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -364,7 +364,7 @@ const handleSubmit = async () => {
           <button
             type="submit"
             :disabled="isLoading"
-            class="flex items-center justify-center h-12 px-8 rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex items-center justify-center h-12 px-8 rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div
               v-if="isLoading"

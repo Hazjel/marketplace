@@ -62,13 +62,13 @@ watch(error, (value) => {
     <div class="flex flex-col xl:flex-row w-full gap-6">
       <!-- Store Info -->
       <section class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Detail Toko</p>
+        <p class="font-medium text-lg dark:text-white">Detail Toko</p>
         <div class="flex items-center gap-4 w-full min-w-0">
           <div class="flex size-[80px] shrink-0 rounded-full bg-gray-100 dark:bg-white/5 overflow-hidden ring-4 ring-green-100 dark:ring-green-900/30">
             <img :src="storeBalance?.store?.logo" class="size-full object-cover" alt="photo" />
           </div>
           <div class="flex flex-col gap-1.5 w-full overflow-hidden">
-            <p class="font-bold text-xl leading-tight w-full truncate dark:text-white">
+            <p class="font-medium text-xl leading-tight w-full truncate dark:text-white">
               {{ storeBalance?.store?.name }}
             </p>
             <p class="flex items-center gap-1.5 font-medium text-gray-500 dark:text-gray-400">
@@ -88,7 +88,7 @@ watch(error, (value) => {
               </svg>
             </div>
             <div class="flex flex-col">
-              <p class="font-bold text-lg dark:text-white">{{ storeBalance?.store?.transaction_count }}</p>
+              <p class="font-medium text-lg dark:text-white">{{ storeBalance?.store?.transaction_count }}</p>
               <p class="text-sm text-gray-500 dark:text-gray-400">Total Transaksi</p>
             </div>
           </div>
@@ -99,7 +99,7 @@ watch(error, (value) => {
               </svg>
             </div>
             <div class="flex flex-col">
-              <p class="font-bold text-lg dark:text-white">{{ storeBalance?.store?.product_count }}</p>
+              <p class="font-medium text-lg dark:text-white">{{ storeBalance?.store?.product_count }}</p>
               <p class="text-sm text-gray-500 dark:text-gray-400">Total Produk</p>
             </div>
           </div>
@@ -118,7 +118,7 @@ watch(error, (value) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="size-8 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
             </svg>
-            <p class="font-semibold text-white">Dana aman dan terlindungi</p>
+            <p class="font-medium text-white">Dana aman dan terlindungi</p>
           </div>
         </div>
 
@@ -127,7 +127,7 @@ watch(error, (value) => {
           <img src="@/assets/images/backgrounds/wallet.png" class="size-full object-cover" alt="wallet" />
           <div class="flex flex-col items-center justify-center gap-2 text-center min-w-0 w-full px-4 absolute transform -translate-x-1/2 left-1/2 top-[15%] sm:top-[51px]">
             <p class="font-medium text-[#BFC6E9] leading-none">Saldo Tersedia:</p>
-            <p class="w-full font-extrabold text-3xl sm:text-[40px] text-white leading-none break-all">
+            <p class="w-full font-medium text-3xl sm:text-[40px] text-white leading-none break-all">
               <span v-if="isShowBalance">Rp {{ formatRupiah(storeBalance.balance) }}</span>
               <span v-else>Rp **********</span>
             </p>
@@ -164,7 +164,7 @@ watch(error, (value) => {
               </svg>
             </div>
             <div class="flex flex-col gap-0.5">
-              <p class="font-bold text-amber-700 dark:text-amber-400">
+              <p class="font-medium text-amber-700 dark:text-amber-400">
                 <span v-if="isShowBalance">Rp {{ formatRupiah(storeBalance.pending_balance) }}</span>
                 <span v-else>Rp ***</span>
                 <span class="font-medium text-sm ml-2">ditahan (escrow)</span>
@@ -185,7 +185,7 @@ watch(error, (value) => {
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
           </div>
-          <h2 class="font-bold text-lg dark:text-white">Riwayat Transaksi Wallet</h2>
+          <h2 class="font-medium text-lg dark:text-white">Riwayat Transaksi Wallet</h2>
         </div>
       </div>
 
@@ -201,10 +201,10 @@ watch(error, (value) => {
               </svg>
             </div>
             <div class="flex flex-col gap-1 flex-1">
-              <p class="font-bold text-xl text-amber-600 dark:text-amber-400">Rp {{ formatRupiah(history.amount) }}</p>
+              <p class="font-medium text-xl text-amber-600 dark:text-amber-400">Rp {{ formatRupiah(history.amount) }}</p>
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ history.type }}</p>
             </div>
-            <span class="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-700/50 uppercase">
+            <span class="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-700/50 uppercase">
               {{ history.remarks }}
             </span>
           </div>
@@ -219,7 +219,7 @@ watch(error, (value) => {
           </svg>
         </div>
         <div class="flex flex-col gap-1 items-center text-center">
-          <p class="font-semibold text-gray-900 dark:text-white">Belum ada riwayat transaksi</p>
+          <p class="font-medium text-gray-900 dark:text-white">Belum ada riwayat transaksi</p>
           <p class="text-sm text-gray-500 dark:text-gray-400">Riwayat transaksi wallet akan muncul di sini</p>
         </div>
       </div>

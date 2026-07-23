@@ -48,10 +48,10 @@ const handleSubmit = async () => {
         class="h-8 lg:h-10 mx-auto mb-4 dark:brightness-0 dark:invert"
         alt="Blukios"
       />
-      <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">
-        Lupa Password? 🔑
+      <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">
+        Lupa Password?
       </h1>
-      <p class="text-custom-grey dark:text-gray-400 font-medium text-sm lg:text-base">
+      <p class="text-custom-grey dark:text-gray-400 font-normal text-sm lg:text-base">
         Masukkan email akunmu dan kami akan mengirimkan link untuk reset password.
       </p>
     </div>
@@ -64,7 +64,7 @@ const handleSubmit = async () => {
     >
       <div
         v-if="successMessage"
-        class="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl"
+        class="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md"
       >
         <div
           class="shrink-0 w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center mt-0.5"
@@ -79,7 +79,7 @@ const handleSubmit = async () => {
           </svg>
         </div>
         <div class="flex flex-col gap-1">
-          <p class="font-semibold text-green-800 dark:text-green-300 text-sm">Email Terkirim!</p>
+          <p class="font-medium text-green-800 dark:text-green-300 text-sm">Email Terkirim!</p>
           <p class="text-green-700 dark:text-green-400 text-sm leading-relaxed">
             {{ successMessage }}
           </p>
@@ -87,7 +87,7 @@ const handleSubmit = async () => {
             Tidak menerima email?
             <button
               type="button"
-              class="font-semibold underline hover:text-green-800 dark:hover:text-green-300 transition-colors"
+              class="font-medium underline hover:text-green-800 dark:hover:text-green-300 transition-colors"
               :disabled="loading"
               @click="handleSubmit"
             >
@@ -107,7 +107,7 @@ const handleSubmit = async () => {
     >
       <!-- Email Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Alamat Email</label>
+        <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Alamat Email</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img
@@ -119,7 +119,7 @@ const handleSubmit = async () => {
           <input
             v-model="form.email"
             type="email"
-            class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             placeholder="Masukkan email akunmu"
             autocomplete="email"
             :class="{ '!border-red-500 !bg-red-50 dark:!bg-red-900/20': error?.email }"
@@ -134,7 +134,7 @@ const handleSubmit = async () => {
       <!-- Submit Button -->
       <button
         type="submit"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+        class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         :disabled="loading || !form.email"
       >
         <span v-if="loading" class="animate-spin mr-2">⏳</span>
@@ -146,18 +146,18 @@ const handleSubmit = async () => {
     <div v-if="successMessage" class="flex flex-col gap-3 mt-2">
       <RouterLink
         :to="{ name: 'auth.login' }"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300"
+        class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300"
       >
         Kembali ke Login
       </RouterLink>
     </div>
 
     <!-- Back to Login -->
-    <p v-if="!successMessage" class="text-center text-custom-grey dark:text-gray-400 font-medium">
+    <p v-if="!successMessage" class="text-center text-custom-grey dark:text-gray-400 font-normal">
       Ingat password?
       <RouterLink
         :to="{ name: 'auth.login' }"
-        class="text-custom-blue font-bold hover:underline ml-1"
+        class="text-custom-blue font-medium hover:underline ml-1"
       >
         Masuk Sekarang
       </RouterLink>

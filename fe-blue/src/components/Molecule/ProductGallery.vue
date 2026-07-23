@@ -101,7 +101,7 @@ onMounted(() => {
 
         <!-- Zoom Hint -->
         <div
-          class="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-custom-black opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none flex items-center gap-2"
+          class="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium text-custom-black opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none flex items-center gap-2"
         >
           <i class="fa-solid fa-magnifying-glass-plus"></i> Click to Expand
         </div>

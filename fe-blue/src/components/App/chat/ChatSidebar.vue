@@ -20,7 +20,7 @@ const selectUser = (user) => {
   <div
     class="flex flex-col w-full md:w-[320px] border-r border-custom-stroke dark:border-white/10 h-full bg-white dark:bg-surface-card">
     <div class="p-6 border-b border-custom-stroke dark:border-white/10">
-      <h2 class="font-bold text-xl dark:text-white">Messages</h2>
+      <h2 class="font-medium text-xl dark:text-white">Messages</h2>
     </div>
     <div class="flex flex-col flex-1 overflow-y-auto">
       <div v-if="loadingContacts" class="flex justify-center py-10">
@@ -44,8 +44,8 @@ v-for="user in contacts" :key="user.id" :class="[
         <div class="flex flex-col flex-1 min-w-0">
           <h3
 class="text-sm truncate dark:text-white" :class="{
-            'font-bold': (user.unread_count || 0) > 0,
-            'font-semibold': (user.unread_count || 0) === 0
+            'font-medium': (user.unread_count || 0) > 0,
+            'font-medium': (user.unread_count || 0) === 0
           }">
             {{ user.name }}
           </h3>
@@ -61,7 +61,7 @@ class="text-xs truncate dark:text-gray-400" :class="{
         </div>
         <div v-if="(user.unread_count || 0) > 0" class="flex shrink-0">
           <div
-            class="bg-custom-red text-white text-[10px] font-bold h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full">
+            class="bg-custom-red text-white text-[10px] font-medium h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full">
             {{ user.unread_count > 99 ? '99+' : user.unread_count }}
           </div>
         </div>

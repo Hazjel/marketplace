@@ -168,8 +168,8 @@ const handleSubmit = async () => {
               class="h-8 lg:h-10 w-fit mb-2 dark:brightness-0 dark:invert"
               alt="Blukios"
             />
-            <h1 class="font-bold text-3xl lg:text-4xl text-custom-black dark:text-white">
-              Buka Toko Sekarang! 🏪
+            <h1 class="font-medium text-3xl lg:text-4xl text-custom-black dark:text-white">
+              Buka Toko Sekarang
             </h1>
             <p class="text-custom-grey dark:text-gray-400 text-base lg:text-lg">Lengkapi detail tokomu untuk mulai berjualan.</p>
           </div>
@@ -180,7 +180,7 @@ const handleSubmit = async () => {
             enter-from-class="opacity-0 -translate-y-1"
             enter-to-class="opacity-100 translate-y-0"
           >
-            <div v-if="errors.general" class="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-medium border border-red-200 dark:border-red-800">
+            <div v-if="errors.general" class="p-4 rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-normal border border-red-200 dark:border-red-800">
               {{ errors.general[0] }}
             </div>
           </Transition>
@@ -189,7 +189,7 @@ const handleSubmit = async () => {
             enter-from-class="opacity-0 -translate-y-1"
             enter-to-class="opacity-100 translate-y-0"
           >
-            <div v-if="successMessage" class="p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-medium border border-green-200 dark:border-green-800">
+            <div v-if="successMessage" class="p-4 rounded-md bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-normal border border-green-200 dark:border-green-800">
               {{ successMessage }}
             </div>
           </Transition>
@@ -197,7 +197,7 @@ const handleSubmit = async () => {
           <div class="flex flex-col gap-5">
             <!-- Store Name -->
             <div class="flex flex-col gap-2">
-              <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Nama Toko</label>
+              <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nama Toko</label>
               <div class="group relative transition-all duration-300">
                 <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <img src="@/assets/images/icons/shop-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -205,7 +205,7 @@ const handleSubmit = async () => {
                 <input
                   v-model="form.name"
                   type="text"
-                  class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                  class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Nama toko kamu"
                   required
                   :class="{ '!border-red-500 !bg-red-50 dark:!bg-red-900/20': errors?.name }"
@@ -216,7 +216,7 @@ const handleSubmit = async () => {
 
             <!-- Phone -->
             <div class="flex flex-col gap-2">
-              <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Nomor Telepon Toko</label>
+              <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nomor Telepon Toko</label>
               <div class="group relative transition-all duration-300">
                 <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -224,7 +224,7 @@ const handleSubmit = async () => {
                 <input
                   v-model="form.phone"
                   type="tel"
-                  class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                  class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Contoh: 0812345678"
                   :class="{ '!border-red-500 !bg-red-50 dark:!bg-red-900/20': errors?.phone }"
                   @input="form.phone = form.phone.replace(/[^0-9]/g, '').slice(0, 15)"
@@ -238,7 +238,7 @@ const handleSubmit = async () => {
 
             <!-- Address Search (RajaOngkir) -->
             <div class="flex flex-col gap-2 relative">
-              <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Cari Lokasi (Kecamatan/Kota)</label>
+              <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Cari Lokasi (Kecamatan/Kota)</label>
               <div class="group relative transition-all duration-300">
                 <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <img src="@/assets/images/icons/global-search-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -246,7 +246,7 @@ const handleSubmit = async () => {
                 <input
                   v-model="addressSearch"
                   type="text"
-                  class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+                  class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="Ketik nama kecamatan atau kota..."
                   @input="handleAddressInput(addressSearch)"
                 />
@@ -266,7 +266,7 @@ const handleSubmit = async () => {
               >
                 <ul
                   v-if="showAddressOptions"
-                  class="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/10 rounded-2xl shadow-xl max-h-[300px] overflow-y-auto z-50"
+                  class="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/10 rounded-md shadow-xl max-h-[300px] overflow-y-auto z-50"
                 >
                   <li v-if="loadingAddress" class="p-4 text-center text-custom-grey dark:text-gray-400 font-medium">
                     Mencari...
@@ -293,7 +293,7 @@ const handleSubmit = async () => {
             <!-- City & Postal Code (Grid) -->
             <div class="grid grid-cols-2 gap-4">
               <div class="flex flex-col gap-2">
-                <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Kota</label>
+                <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Kota</label>
                 <div class="group relative transition-all duration-300">
                   <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                     <img src="@/assets/images/icons/location-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -301,7 +301,7 @@ const handleSubmit = async () => {
                   <input
                     v-model="form.city"
                     type="text"
-                    class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full text-custom-black dark:text-white font-medium placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed"
+                    class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md text-custom-black dark:text-white font-normal placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed"
                     placeholder="Otomatis terisi"
                     readonly
                     :class="{ '!border-red-500': errors?.city }"
@@ -310,7 +310,7 @@ const handleSubmit = async () => {
                 <span v-if="errors.city" class="text-red-500 dark:text-red-400 text-xs font-medium ml-2">{{ errors.city[0] }}</span>
               </div>
               <div class="flex flex-col gap-2">
-                <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Kode Pos</label>
+                <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Kode Pos</label>
                 <div class="group relative transition-all duration-300">
                   <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                     <img src="@/assets/images/icons/box-grey.svg" class="size-5 custom-icon" alt="icon" />
@@ -318,7 +318,7 @@ const handleSubmit = async () => {
                   <input
                     v-model="form.postal_code"
                     type="text"
-                    class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full text-custom-black dark:text-white font-medium placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed"
+                    class="w-full h-12 pl-12 pr-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md text-custom-black dark:text-white font-normal placeholder-gray-400 dark:placeholder-gray-500 cursor-not-allowed"
                     placeholder="Otomatis terisi"
                     readonly
                     :class="{ '!border-red-500': errors?.postal_code }"
@@ -330,14 +330,14 @@ const handleSubmit = async () => {
 
             <!-- Full Address -->
             <div class="flex flex-col gap-2">
-              <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Detail Alamat Lengkap</label>
+              <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Detail Alamat Lengkap</label>
               <div class="group relative transition-all duration-300">
                 <div class="absolute top-4 left-4 flex items-start pointer-events-none">
                   <img src="@/assets/images/icons/note-grey.svg" class="size-5 custom-icon" alt="icon" />
                 </div>
                 <textarea
                   v-model="form.address"
-                  class="w-full min-h-[100px] pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none"
+                  class="w-full min-h-[100px] pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none"
                   placeholder="Nama jalan, nomor bangunan, dll."
                   :class="{ '!border-red-500 !bg-red-50 dark:!bg-red-900/20': errors?.address }"
                 ></textarea>
@@ -347,7 +347,7 @@ const handleSubmit = async () => {
 
             <!-- Mobile/Tablet Map Picker -->
             <div v-if="form.city" class="flex flex-col gap-2 lg:hidden">
-              <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Titik Lokasi Toko</label>
+              <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Titik Lokasi Toko</label>
               <MapPicker
                 :model-value="coords"
                 height="h-[200px]"
@@ -362,7 +362,7 @@ const handleSubmit = async () => {
             <button
               type="submit"
               :disabled="isLoading"
-              class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="isLoading" class="animate-spin mr-2">⏳</span>
               {{ isLoading ? 'Memproses...' : 'Buka Toko Sekarang' }}
@@ -399,10 +399,10 @@ const handleSubmit = async () => {
               <img src="@/assets/images/icons/location-grey.svg" class="w-5 h-5" alt="city" />
             </div>
             <div class="flex flex-col">
-              <p class="text-[11px] font-bold text-custom-grey dark:text-gray-400 uppercase tracking-wider mb-0.5">
+              <p class="text-[11px] font-medium text-custom-grey dark:text-gray-400 uppercase tracking-wider mb-0.5">
                 Lokasi Kota
               </p>
-              <p class="font-bold text-custom-black dark:text-white text-lg leading-tight">{{ form.city }}</p>
+              <p class="font-medium text-custom-black dark:text-white text-lg leading-tight">{{ form.city }}</p>
             </div>
           </div>
           <div class="h-px w-full bg-gray-100 dark:bg-white/10"></div>
@@ -413,10 +413,10 @@ const handleSubmit = async () => {
               <img src="@/assets/images/icons/box-grey.svg" class="w-5 h-5" alt="zip" />
             </div>
             <div class="flex flex-col">
-              <p class="text-[11px] font-bold text-custom-grey dark:text-gray-400 uppercase tracking-wider mb-0.5">
+              <p class="text-[11px] font-medium text-custom-grey dark:text-gray-400 uppercase tracking-wider mb-0.5">
                 Kode Pos
               </p>
-              <p class="font-bold text-custom-black dark:text-white text-lg leading-tight">
+              <p class="font-medium text-custom-black dark:text-white text-lg leading-tight">
                 {{ form.postal_code }}
               </p>
             </div>
@@ -435,7 +435,7 @@ const handleSubmit = async () => {
           />
         </div>
         <div>
-          <h3 class="font-bold text-xl text-custom-black dark:text-white mb-2">Temukan Lokasi Tokomu</h3>
+          <h3 class="font-medium text-xl text-custom-black dark:text-white mb-2">Temukan Lokasi Tokomu</h3>
           <p class="font-medium text-gray-400 dark:text-gray-500 max-w-xs mx-auto">
             Masukkan kota atau kecamatan di kolom pencarian untuk melihat lokasi tokomu di peta.
           </p>

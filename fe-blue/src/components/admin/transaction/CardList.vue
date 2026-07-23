@@ -19,7 +19,7 @@ const emit = defineEmits(['delete'])
   <div
     class="card flex flex-col rounded-[20px] border border-custom-stroke dark:border-white/10 py-[18px] px-5 gap-5 bg-white dark:bg-surface-card dark:text-white">
     <div class="flex items-center justify-between">
-      <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
+      <p class="flex items-center gap-2 font-medium text-custom-grey leading-none">
         <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0 dark:invert" alt="icon" />
         {{ formatToClientTimeZone(item.created_at) }}
       </p>
@@ -41,7 +41,7 @@ const emit = defineEmits(['delete'])
           <img :src="item.buyer?.user?.profile_picture" class="size-full object-cover" alt="photo" />
         </div>
         <div class="flex flex-col gap-[6px] w-full overflow-hidden">
-          <p class="font-bold text-lg leading-tight w-full truncate">
+          <p class="font-medium text-lg leading-tight w-full truncate">
             {{ item?.buyer?.user?.name }}
           </p>
         </div>
@@ -56,10 +56,10 @@ src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 
               alt="icon" />
           </div>
           <div class="flex flex-col gap-1 w-full overflow-hidden">
-            <p class="font-bold text-lg leading-none truncate">
+            <p class="font-medium text-lg leading-none truncate">
               {{ item?.transaction_details?.length }}
             </p>
-            <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">
+            <p class="font-medium text-custom-grey text-sm sm:text-base truncate">
               Total Products
             </p>
           </div>
@@ -70,10 +70,10 @@ src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 
             <img src="@/assets/images/icons/box-black.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
           </div>
           <div class="flex flex-col gap-1 w-full overflow-hidden">
-            <p class="font-bold text-lg leading-none truncate">
+            <p class="font-medium text-lg leading-none truncate">
               {{item?.transaction_details?.reduce((total, detail) => total + detail.qty, 0)}}
             </p>
-            <p class="font-semibold text-custom-grey text-sm sm:text-base truncate">
+            <p class="font-medium text-custom-grey text-sm sm:text-base truncate">
               Total Quantity
             </p>
           </div>
@@ -83,8 +83,8 @@ src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 
     <hr class="border-custom-stroke dark:border-white/10" />
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div class="flex flex-col gap-[6px]">
-        <p class="font-bold text-xl text-custom-blue">{{ formatRupiah(item.grand_total) }}</p>
-        <p class="flex items-center gap-2 font-semibold text-custom-grey leading-none">
+        <p class="font-medium text-xl text-custom-blue">{{ formatRupiah(item.grand_total) }}</p>
+        <p class="flex items-center gap-2 font-medium text-custom-grey leading-none">
           <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0 dark:invert" alt="icon" />
           Grand Total
         </p>
@@ -94,7 +94,7 @@ src="@/assets/images/icons/shopping-cart-black.svg" class="flex size-6 shrink-0 
 :to="dashboardRoute('transaction.detail', { id: item.id })"
           class="flex items-center justify-center h-14 w-full md:w-[126px] shrink-0 rounded-2xl p-4 gap-2 bg-custom-blue">
           <img src="@/assets/images/icons/eye-white.svg" class="flex size-6 shrink-0" alt="icon" />
-          <span class="font-semibold text-white">Details</span>
+          <span class="font-medium text-white">Details</span>
         </RouterLink>
       </div>
     </div>

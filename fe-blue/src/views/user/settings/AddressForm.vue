@@ -157,7 +157,7 @@ onMounted(() => {
         </svg>
       </RouterLink>
       <div class="flex flex-col gap-0.5">
-        <h1 class="font-bold text-2xl text-custom-black dark:text-white">{{ isEdit ? 'Edit Alamat' : 'Tambah Alamat Baru' }}</h1>
+        <h1 class="font-medium text-2xl text-custom-black dark:text-white">{{ isEdit ? 'Edit Alamat' : 'Tambah Alamat Baru' }}</h1>
         <p class="text-custom-grey dark:text-gray-400 text-sm font-medium">{{ isEdit ? 'Perbarui informasi alamat pengirimanmu.' : 'Isi detail alamat baru untuk pengiriman.' }}</p>
       </div>
     </div>
@@ -169,7 +169,7 @@ onMounted(() => {
     >
       <!-- Label -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Label Alamat</label>
+        <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Label Alamat</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <svg class="size-5 text-gray-400 group-focus-within:text-custom-blue transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -190,7 +190,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <!-- Recipient -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Nama Penerima</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nama Penerima</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <svg class="size-5 text-gray-400 group-focus-within:text-custom-blue transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,7 +208,7 @@ onMounted(() => {
         </div>
         <!-- Phone -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Nomor Telepon</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nomor Telepon</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <svg class="size-5 text-gray-400 group-focus-within:text-custom-blue transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,7 +228,7 @@ onMounted(() => {
 
       <!-- City Search -->
       <div class="flex flex-col gap-2 relative">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Kota / Kecamatan</label>
+        <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Kota / Kecamatan</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <svg class="size-5 text-gray-400 group-focus-within:text-custom-blue transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -275,7 +275,7 @@ onMounted(() => {
 
       <!-- Map Picker -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">
+        <label class="font-medium text-custom-black dark:text-white text-sm ml-1">
           Titik Lokasi <span class="font-normal text-custom-grey dark:text-gray-400">(opsional, untuk akurasi pengiriman)</span>
         </label>
         <MapPicker
@@ -289,7 +289,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <!-- Full Address -->
         <div class="flex flex-col gap-2 md:col-span-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Alamat Lengkap</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Alamat Lengkap</label>
           <textarea
             v-model="form.address"
             required
@@ -300,7 +300,7 @@ onMounted(() => {
         </div>
         <!-- Postal Code -->
         <div class="flex flex-col gap-2">
-          <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Kode Pos</label>
+          <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Kode Pos</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <svg class="size-5 text-gray-400 group-focus-within:text-custom-blue transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -325,7 +325,7 @@ onMounted(() => {
           class="w-[52px] h-7 bg-gray-200 dark:bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-transparent after:border after:rounded-full after:h-[24px] after:w-[24px] after:shadow-sm after:transition-all peer-checked:bg-custom-blue relative"
         ></div>
         <div class="flex flex-col">
-          <span class="font-semibold text-sm text-custom-black dark:text-white group-hover:text-custom-blue transition-colors">Jadikan Alamat Utama</span>
+          <span class="font-medium text-sm text-custom-black dark:text-white group-hover:text-custom-blue transition-colors">Jadikan Alamat Utama</span>
           <span class="text-xs text-custom-grey dark:text-gray-500">Alamat ini akan digunakan secara default saat checkout.</span>
         </div>
       </label>
@@ -334,7 +334,7 @@ onMounted(() => {
       <button
         type="submit"
         :disabled="submitting"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+        class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
       >
         <div
           v-if="submitting"

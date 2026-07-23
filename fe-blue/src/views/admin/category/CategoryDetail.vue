@@ -67,7 +67,7 @@ watch(error, (value) => {
               <img :src="productCategory?.image" class="size-full object-contain" alt="icon" />
             </div>
             <div class="flex flex-col flex-1 min-w-0 gap-1.5">
-              <p class="font-bold text-xl dark:text-white truncate">{{ productCategory?.name }}</p>
+              <p class="font-medium text-xl dark:text-white truncate">{{ productCategory?.name }}</p>
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                 {{ productCategory?.tagline }}
               </p>
@@ -85,7 +85,7 @@ watch(error, (value) => {
                 </svg>
               </div>
               <div class="flex flex-col">
-                <p class="font-bold text-lg dark:text-white">{{ productCategory?.product_count }}</p>
+                <p class="font-medium text-lg dark:text-white">{{ productCategory?.product_count }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Total Produk</p>
               </div>
             </div>
@@ -96,7 +96,7 @@ watch(error, (value) => {
                 </svg>
               </div>
               <div class="flex flex-col">
-                <p class="font-bold text-lg dark:text-white">{{ productCategory?.children_count }}</p>
+                <p class="font-medium text-lg dark:text-white">{{ productCategory?.children_count }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Sub Kategori</p>
               </div>
             </div>
@@ -113,7 +113,7 @@ watch(error, (value) => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
               </svg>
             </div>
-            <p class="font-bold text-lg dark:text-white">Sub Kategori</p>
+            <p class="font-medium text-lg dark:text-white">Sub Kategori</p>
           </div>
         </div>
 
@@ -124,7 +124,7 @@ watch(error, (value) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            <span class="font-semibold text-sm text-white">Tambah Sub Kategori Baru</span>
+            <span class="font-medium text-sm text-white">Tambah Sub Kategori Baru</span>
           </RouterLink>
         </div>
 
@@ -138,7 +138,7 @@ watch(error, (value) => {
                 <img :src="childrens.image ?? PlaceHolder" class="size-full object-contain" alt="icon" />
               </div>
               <div class="flex flex-col gap-0.5 flex-1 min-w-0">
-                <p class="font-semibold text-sm dark:text-white truncate">{{ childrens?.name }}</p>
+                <p class="font-medium text-sm dark:text-white truncate">{{ childrens?.name }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                   {{ childrens?.product_count }} Produk
                 </p>

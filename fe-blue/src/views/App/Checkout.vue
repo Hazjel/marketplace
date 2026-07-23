@@ -375,7 +375,7 @@ onMounted(async () => {
                 </svg>
               </div>
               <div>
-                <h2 class="font-bold text-base text-custom-black dark:text-white">Alamat Pengiriman</h2>
+                <h2 class="font-medium text-base text-custom-black dark:text-white">Alamat Pengiriman</h2>
                 <p class="text-xs text-custom-grey dark:text-gray-400">Pilih atau masukkan alamat tujuan</p>
               </div>
             </div>
@@ -384,13 +384,13 @@ onMounted(async () => {
               <!-- Toggle Buttons -->
               <div class="flex gap-2">
                 <button v-if="savedAddresses.length > 0" type="button"
-                  class="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                  class="px-4 py-2 rounded-full text-sm font-medium transition-all"
                   :class="showSavedAddresses ? 'bg-custom-blue text-white shadow-md shadow-blue-500/20' : 'bg-gray-100 dark:bg-white/10 text-custom-grey dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'"
                   @click="showSavedAddresses = true">
                   Alamat Tersimpan
                 </button>
                 <button type="button"
-                  class="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                  class="px-4 py-2 rounded-full text-sm font-medium transition-all"
                   :class="!showSavedAddresses ? 'bg-custom-blue text-white shadow-md shadow-blue-500/20' : 'bg-gray-100 dark:bg-white/10 text-custom-grey dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/15'"
                   @click="showSavedAddresses = false">
                   Cari Manual
@@ -405,8 +405,8 @@ onMounted(async () => {
                   @click="selectSavedAddress(addr)">
                   <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
-                      <span class="font-bold text-sm text-custom-black dark:text-white">{{ addr.label }}</span>
-                      <span v-if="addr.is_primary" class="text-[10px] font-bold bg-custom-blue/10 text-custom-blue px-2 py-0.5 rounded-full">UTAMA</span>
+                      <span class="font-medium text-sm text-custom-black dark:text-white">{{ addr.label }}</span>
+                      <span v-if="addr.is_primary" class="text-[10px] font-medium bg-custom-blue/10 text-custom-blue px-2 py-0.5 rounded-full">UTAMA</span>
                     </div>
                     <div class="size-5 rounded-full border-2 flex items-center justify-center transition-all"
                       :class="transaction.address === addr.address ? 'border-custom-blue bg-custom-blue' : 'border-gray-300 dark:border-gray-600'">
@@ -478,7 +478,7 @@ onMounted(async () => {
 
                 <div class="group/errorState flex flex-col gap-2" :class="{ invalid: error?.address }">
                   <label class="flex flex-col gap-2 rounded-2xl border-2 border-gray-100 dark:border-white/10 focus-within:border-custom-blue p-4 transition-all">
-                    <span class="text-xs font-semibold text-custom-grey uppercase tracking-wider">Alamat Lengkap</span>
+                    <span class="text-xs font-medium text-custom-grey uppercase tracking-wider">Alamat Lengkap</span>
                     <textarea v-model="transaction.address"
                       class="appearance-none outline-none w-full font-medium text-sm text-custom-black dark:text-white bg-transparent resize-none leading-relaxed"
                       rows="3" placeholder="Masukkan detail alamat lengkap..."></textarea>
@@ -498,7 +498,7 @@ onMounted(async () => {
                 </svg>
               </div>
               <div>
-                <h2 class="font-bold text-base text-custom-black dark:text-white">Pesanan Kamu</h2>
+                <h2 class="font-medium text-base text-custom-black dark:text-white">Pesanan Kamu</h2>
                 <p class="text-xs text-custom-grey dark:text-gray-400">{{ totalSelectedItems }} item dari {{ selectedCarts.length }} toko</p>
               </div>
             </div>
@@ -511,7 +511,7 @@ onMounted(async () => {
                 </svg>
               </div>
               <p class="text-custom-grey font-medium">Belum ada toko yang dipilih</p>
-              <RouterLink :to="{ name: 'app.cart' }" class="text-custom-blue font-bold text-sm mt-2 inline-flex items-center gap-1 hover:underline">
+              <RouterLink :to="{ name: 'app.cart' }" class="text-custom-blue font-medium text-sm mt-2 inline-flex items-center gap-1 hover:underline">
                 <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -528,7 +528,7 @@ onMounted(async () => {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <span class="font-bold text-sm text-custom-black dark:text-white">{{ store.storeName }}</span>
+                <span class="font-medium text-sm text-custom-black dark:text-white">{{ store.storeName }}</span>
               </div>
 
               <!-- Products -->
@@ -540,11 +540,11 @@ onMounted(async () => {
                       @error="(e) => (e.target.src = ThumbnailFallback)" />
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-sm text-custom-black dark:text-white line-clamp-1">{{ product.name }}</p>
+                    <p class="font-medium text-sm text-custom-black dark:text-white line-clamp-1">{{ product.name }}</p>
                     <p class="text-xs text-custom-grey dark:text-gray-400 mt-0.5">{{ product.weight }}kg &middot; {{ product.product_category?.name }}</p>
                   </div>
                   <div class="text-right shrink-0">
-                    <p class="font-bold text-sm text-custom-black dark:text-white">Rp {{ formatRupiah(product.price) }}</p>
+                    <p class="font-medium text-sm text-custom-black dark:text-white">Rp {{ formatRupiah(product.price) }}</p>
                     <p class="text-xs text-custom-grey dark:text-gray-400">x{{ product.quantity }}</p>
                   </div>
                 </div>
@@ -561,7 +561,7 @@ onMounted(async () => {
                 </svg>
               </div>
               <div class="flex-1">
-                <h2 class="font-bold text-base text-custom-black dark:text-white">Pilih Pengiriman</h2>
+                <h2 class="font-medium text-base text-custom-black dark:text-white">Pilih Pengiriman</h2>
                 <p class="text-xs text-custom-grey dark:text-gray-400">Estimasi ongkir berdasarkan berat & lokasi</p>
               </div>
             </div>
@@ -576,7 +576,7 @@ onMounted(async () => {
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="font-bold text-sm text-custom-black dark:text-white">Pilih Kurir</p>
+                  <p class="font-medium text-sm text-custom-black dark:text-white">Pilih Kurir</p>
                   <p class="text-xs text-custom-grey dark:text-gray-400">Klik untuk cek ongkir & pilih layanan pengiriman</p>
                 </div>
                 <svg class="size-5 text-custom-blue shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -593,10 +593,10 @@ onMounted(async () => {
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="font-bold text-sm text-custom-black dark:text-white">{{ selectedCourier.shipping_name }}</p>
+                  <p class="font-medium text-sm text-custom-black dark:text-white">{{ selectedCourier.shipping_name }}</p>
                   <p class="text-xs text-custom-grey dark:text-gray-400">{{ selectedCourier.service_name }} &middot; Rp {{ formatRupiah(selectedCourier.shipping_cost_net) }}</p>
                 </div>
-                <span class="text-xs font-bold text-custom-blue hover:underline">Ubah</span>
+                <span class="text-xs font-medium text-custom-blue hover:underline">Ubah</span>
               </div>
             </div>
           </div>
@@ -608,35 +608,35 @@ onMounted(async () => {
             <!-- Summary Card -->
             <div class="bg-white dark:bg-surface-card rounded-2xl border border-gray-100 dark:border-white/10 overflow-hidden">
               <div class="px-5 py-4 border-b border-gray-50 dark:border-white/5">
-                <h2 class="font-bold text-base text-custom-black dark:text-white">Ringkasan Belanja</h2>
+                <h2 class="font-medium text-base text-custom-black dark:text-white">Ringkasan Belanja</h2>
               </div>
 
               <div class="p-5 flex flex-col gap-3">
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-custom-grey dark:text-gray-400">Total Harga ({{ totalSelectedQuantity }} barang)</span>
-                  <span class="text-sm font-semibold text-custom-black dark:text-white">Rp {{ formatRupiah(subtotalSelected) }}</span>
+                  <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(subtotalSelected) }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-custom-grey dark:text-gray-400">Ongkos Kirim</span>
-                  <span class="text-sm font-semibold text-custom-black dark:text-white">
+                  <span class="text-sm font-medium text-custom-black dark:text-white">
                     <template v-if="deliveryFee > 0">Rp {{ formatRupiah(deliveryFee) }}</template>
                     <template v-else>-</template>
                   </span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-custom-grey dark:text-gray-400">PPN 11%</span>
-                  <span class="text-sm font-semibold text-custom-black dark:text-white">Rp {{ formatRupiah(finalPpn) }}</span>
+                  <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(finalPpn) }}</span>
                 </div>
                 <div v-if="discountSelected > 0" class="flex items-center justify-between">
                   <span class="text-sm text-green-600">Diskon</span>
-                  <span class="text-sm font-semibold text-green-600">-Rp {{ formatRupiah(discountSelected) }}</span>
+                  <span class="text-sm font-medium text-green-600">-Rp {{ formatRupiah(discountSelected) }}</span>
                 </div>
 
                 <hr class="border-gray-100 dark:border-white/10 my-1" />
 
                 <div class="flex items-center justify-between">
-                  <span class="font-bold text-base text-custom-black dark:text-white">Total Tagihan</span>
-                  <span class="font-bold text-lg text-custom-blue">Rp {{ formatRupiah(finalGrandTotal) }}</span>
+                  <span class="font-medium text-base text-custom-black dark:text-white">Total Tagihan</span>
+                  <span class="font-medium text-lg text-custom-blue">Rp {{ formatRupiah(finalGrandTotal) }}</span>
                 </div>
               </div>
 
@@ -644,7 +644,7 @@ onMounted(async () => {
               <div class="px-5 pb-5">
                 <button id="Pay-Button" type="submit"
                   :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment || user?.role === 'admin'"
-                  class="flex items-center justify-center w-full h-14 rounded-2xl font-bold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex items-center justify-center w-full h-14 rounded-2xl font-medium text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   :class="selectedCarts.length > 0 && selectedCourier && !isProcessingPayment ? 'bg-custom-blue hover:bg-blue-700 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5' : 'bg-gray-300 dark:bg-gray-700'">
                   <template v-if="isProcessingPayment">
                     <div class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
@@ -679,7 +679,7 @@ onMounted(async () => {
         <!-- Modal Header -->
         <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/10">
           <div>
-            <h3 class="font-bold text-lg text-custom-black dark:text-white">Pilih Kurir</h3>
+            <h3 class="font-medium text-lg text-custom-black dark:text-white">Pilih Kurir</h3>
             <p class="text-xs text-custom-grey dark:text-gray-400">Pilih layanan pengiriman yang tersedia</p>
           </div>
           <button type="button" class="size-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors" @click="closeModal">
@@ -700,11 +700,11 @@ onMounted(async () => {
               </svg>
             </div>
             <div class="flex-1">
-              <p class="font-bold text-sm text-custom-black dark:text-white">{{ courier.shipping_name }}</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">{{ courier.shipping_name }}</p>
               <p class="text-xs text-custom-grey dark:text-gray-400">{{ courier.service_name }}</p>
             </div>
             <div class="text-right">
-              <p class="font-bold text-sm text-custom-blue">Rp {{ formatRupiah(courier.shipping_cost_net) }}</p>
+              <p class="font-medium text-sm text-custom-blue">Rp {{ formatRupiah(courier.shipping_cost_net) }}</p>
             </div>
             <input type="radio" name="courier" class="sr-only" :value="courier.code" @change="selectedCourier = courier" />
           </label>
@@ -713,7 +713,7 @@ onMounted(async () => {
         <!-- Modal Footer -->
         <div class="p-5 border-t border-gray-100 dark:border-white/10">
           <button type="button"
-            class="w-full h-12 rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full h-12 rounded-xl bg-custom-blue text-white font-medium text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="!selectedCourier"
             @click="handleCourierSubmit">
             Konfirmasi Kurir
@@ -735,17 +735,17 @@ onMounted(async () => {
             </svg>
           </div>
           <div>
-            <h3 class="font-bold text-xl text-custom-black dark:text-white">Pembayaran Berhasil!</h3>
+            <h3 class="font-medium text-xl text-custom-black dark:text-white">Pembayaran Berhasil!</h3>
             <p class="text-sm text-custom-grey dark:text-gray-400 mt-1">Pesanan kamu sedang diproses</p>
           </div>
         </div>
         <div class="px-6 pb-6 flex flex-col gap-3">
           <RouterLink :to="{ name: 'user.my-transaction', params: { username: user?.username } }"
-            class="flex items-center justify-center h-12 w-full rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors">
+            class="flex items-center justify-center h-12 w-full rounded-xl bg-custom-blue text-white font-medium text-sm hover:bg-blue-700 transition-colors">
             Lihat Transaksi
           </RouterLink>
           <RouterLink :to="{ name: 'app.home' }"
-            class="flex items-center justify-center h-12 w-full rounded-xl bg-gray-100 dark:bg-white/10 text-custom-black dark:text-white font-bold text-sm hover:bg-gray-200 dark:hover:bg-white/15 transition-colors">
+            class="flex items-center justify-center h-12 w-full rounded-xl bg-gray-100 dark:bg-white/10 text-custom-black dark:text-white font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/15 transition-colors">
             Kembali ke Beranda
           </RouterLink>
         </div>

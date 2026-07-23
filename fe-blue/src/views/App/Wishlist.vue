@@ -92,7 +92,7 @@ onMounted(() => {
 
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 class="font-extrabold text-3xl md:text-4xl text-white">Wishlist Saya</h1>
+          <h1 class="font-medium text-3xl md:text-4xl text-white">Wishlist Saya</h1>
           <p class="text-white/70 mt-2 text-sm md:text-base">
             {{ items.length }} produk yang kamu simpan
           </p>
@@ -174,11 +174,11 @@ onMounted(() => {
         <!-- Product Info -->
         <div class="flex-1 min-w-0">
           <RouterLink :to="{ name: 'app.product-detail', params: { slug: product.slug } }">
-            <h3 class="font-semibold text-sm text-custom-black dark:text-white line-clamp-1 group-hover:text-custom-blue transition-colors">
+            <h3 class="font-medium text-sm text-custom-black dark:text-white line-clamp-1 group-hover:text-custom-blue transition-colors">
               {{ product.name }}
             </h3>
           </RouterLink>
-          <p class="font-bold text-base text-custom-blue dark:text-blue-400 mt-1">
+          <p class="font-medium text-base text-custom-blue dark:text-blue-400 mt-1">
             Rp {{ product.price?.toLocaleString('id-ID') }}
           </p>
           <div class="flex items-center gap-2 mt-1">
@@ -191,7 +191,7 @@ onMounted(() => {
         <!-- Actions -->
         <div class="flex items-center gap-2 shrink-0">
           <button @click="handleAddToCart(product)"
-            class="h-10 px-4 rounded-xl bg-custom-blue text-white text-xs font-bold hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+            class="h-10 px-4 rounded-xl bg-custom-blue text-white text-xs font-medium hover:bg-blue-700 transition-colors flex items-center gap-1.5"
             :disabled="product.stock <= 0">
             <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -223,13 +223,13 @@ onMounted(() => {
         </div>
       </div>
       <div class="text-center">
-        <h2 class="font-bold text-xl text-custom-black dark:text-white">Wishlist masih kosong</h2>
+        <h2 class="font-medium text-xl text-custom-black dark:text-white">Wishlist masih kosong</h2>
         <p class="text-custom-grey dark:text-gray-400 mt-2 max-w-sm">
           Temukan produk yang kamu suka dan simpan di sini untuk dibeli nanti
         </p>
       </div>
       <RouterLink :to="{ name: 'app.home' }"
-        class="h-12 px-8 rounded-full bg-custom-blue text-white font-bold text-sm flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all">
+        class="h-12 px-8 rounded-md bg-custom-blue text-white font-medium text-sm flex items-center justify-center gap-2 hover:bg-primary-deep transition-all">
         <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
@@ -244,7 +244,7 @@ onMounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
-      <p class="font-bold text-lg text-custom-black dark:text-white">Tidak ditemukan</p>
+      <p class="font-medium text-lg text-custom-black dark:text-white">Tidak ditemukan</p>
       <p class="text-sm text-custom-grey dark:text-gray-400 mt-1">Coba ubah kata kunci pencarian</p>
     </div>
   </main>

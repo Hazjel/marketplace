@@ -76,7 +76,7 @@ const toggleSection = (section) => {
 
 <template>
   <div class="flex flex-col gap-6 w-full md:w-[250px] md:min-w-[250px]">
-    <h3 class="font-bold text-xl">Filter</h3>
+    <h3 class="font-medium text-xl">Filter</h3>
 
     <div
       class="flex flex-col gap-4 bg-white dark:bg-surface-card p-4 rounded-xl border border-custom-stroke dark:border-white/5"
@@ -89,7 +89,7 @@ const toggleSection = (section) => {
           class="flex justify-between items-center w-full mb-3"
           @click="toggleSection('price')"
         >
-          <span class="font-bold text-custom-black dark:text-white">Harga</span>
+          <span class="font-medium text-custom-black dark:text-white">Harga</span>
           <i
             :class="openSections.price ? 'rotate-180' : ''"
             class="transition-transform fa-solid fa-chevron-down text-xs"
@@ -98,7 +98,7 @@ const toggleSection = (section) => {
         <div v-if="openSections.price" class="flex flex-col gap-3">
           <div class="flex rounded-lg shadow-sm">
             <span
-              class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-custom-stroke dark:border-white/10 bg-gray-50 dark:bg-white/5 text-custom-grey text-xs font-bold"
+              class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-custom-stroke dark:border-white/10 bg-gray-50 dark:bg-white/5 text-custom-grey text-xs font-medium"
             >
               Rp
             </span>
@@ -111,7 +111,7 @@ const toggleSection = (section) => {
           </div>
           <div class="flex rounded-lg shadow-sm">
             <span
-              class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-custom-stroke dark:border-white/10 bg-gray-50 dark:bg-white/5 text-custom-grey text-xs font-bold"
+              class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-custom-stroke dark:border-white/10 bg-gray-50 dark:bg-white/5 text-custom-grey text-xs font-medium"
             >
               Rp
             </span>
@@ -133,7 +133,7 @@ const toggleSection = (section) => {
           class="flex justify-between items-center w-full mb-3"
           @click="toggleSection('condition')"
         >
-          <span class="font-bold text-custom-black dark:text-white">Kondisi</span>
+          <span class="font-medium text-custom-black dark:text-white">Kondisi</span>
           <i
             :class="openSections.condition ? 'rotate-180' : ''"
             class="transition-transform fa-solid fa-chevron-down text-xs"
@@ -164,7 +164,7 @@ const toggleSection = (section) => {
           class="flex justify-between items-center w-full mb-3"
           @click="toggleSection('rating')"
         >
-          <span class="font-bold text-custom-black dark:text-white">Rating</span>
+          <span class="font-medium text-custom-black dark:text-white">Rating</span>
           <i
             :class="openSections.rating ? 'rotate-180' : ''"
             class="transition-transform fa-solid fa-chevron-down text-xs"
@@ -204,7 +204,7 @@ const toggleSection = (section) => {
           class="flex justify-between items-center w-full mb-3"
           @click="toggleSection('added')"
         >
-          <span class="font-bold text-custom-black dark:text-white">Terakhir ditambahkan</span>
+          <span class="font-medium text-custom-black dark:text-white">Terakhir ditambahkan</span>
           <i
             :class="openSections.added ? 'rotate-180' : ''"
             class="transition-transform fa-solid fa-chevron-down text-xs"

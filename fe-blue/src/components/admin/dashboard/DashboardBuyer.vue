@@ -71,7 +71,7 @@ onMounted(() => {
           :key="tile.key"
           class="flex flex-col w-full rounded-2xl p-4 md:p-5 gap-3 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 items-center justify-center text-center hover:shadow-lg transition-all duration-300"
         >
-          <p class="font-bold text-lg md:text-2xl dark:text-white">{{ tile.count }}</p>
+          <p class="font-medium text-lg md:text-2xl dark:text-white">{{ tile.count }}</p>
           <p class="font-medium text-xs md:text-sm text-custom-grey dark:text-gray-400">{{ tile.label }}</p>
         </div>
       </div>
@@ -83,7 +83,7 @@ onMounted(() => {
           <button
             v-for="option in rangeOptions"
             :key="option.value"
-            class="px-3 py-1.5 text-xs font-bold rounded-lg transition-colors"
+            class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
             :class="
               range === option.value
                 ? 'bg-[#2563EB] text-white'
@@ -134,7 +134,7 @@ onMounted(() => {
                 </svg>
               </div>
               <div>
-                <p class="font-bold text-sm text-custom-black dark:text-white leading-tight">
+                <p class="font-medium text-sm text-custom-black dark:text-white leading-tight">
                   {{ transaction?.store?.name || 'Store' }}
                 </p>
                 <p class="text-[11px] text-custom-grey dark:text-gray-500">
@@ -163,7 +163,7 @@ onMounted(() => {
                   </svg>
                 </div>
                 <div>
-                  <p class="font-bold text-sm dark:text-white">{{ transaction?.transaction_details?.length }}</p>
+                  <p class="font-medium text-sm dark:text-white">{{ transaction?.transaction_details?.length }}</p>
                   <p class="text-[11px] text-custom-grey dark:text-gray-400">Produk</p>
                 </div>
               </div>
@@ -184,7 +184,7 @@ onMounted(() => {
                   </svg>
                 </div>
                 <div>
-                  <p class="font-bold text-sm dark:text-white">
+                  <p class="font-medium text-sm dark:text-white">
                     {{ transaction?.transaction_details?.reduce((total, detail) => total + detail.qty, 0) }}
                   </p>
                   <p class="text-[11px] text-custom-grey dark:text-gray-400">Qty</p>
@@ -195,13 +195,13 @@ onMounted(() => {
             <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
               <div class="text-left md:text-right">
                 <p class="text-[11px] text-custom-grey dark:text-gray-500 font-medium">Total Belanja</p>
-                <p class="font-bold text-base text-custom-blue dark:text-blue-400">
+                <p class="font-medium text-base text-custom-blue dark:text-blue-400">
                   Rp {{ formatRupiah(transaction.grand_total) }}
                 </p>
               </div>
               <RouterLink
                 :to="dashboardRoute('transaction.detail', { id: transaction.id })"
-                class="px-4 py-2.5 rounded-xl text-sm font-bold transition-all border-2 border-custom-blue/20 text-custom-blue dark:text-blue-400 hover:bg-custom-blue hover:text-white hover:border-custom-blue hover:shadow-lg hover:shadow-blue-500/20 shrink-0"
+                class="px-4 py-2.5 rounded-xl text-sm font-medium transition-all border-2 border-custom-blue/20 text-custom-blue dark:text-blue-400 hover:bg-custom-blue hover:text-white hover:border-custom-blue hover:shadow-lg hover:shadow-blue-500/20 shrink-0"
               >
                 Detail
               </RouterLink>

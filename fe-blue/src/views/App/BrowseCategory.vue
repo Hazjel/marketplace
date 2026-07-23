@@ -98,7 +98,7 @@ watch(
 
       <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
         <div>
-          <h1 class="font-extrabold text-3xl md:text-4xl text-white capitalize">{{ productCategory?.name || 'Kategori' }}</h1>
+          <h1 class="font-medium text-3xl md:text-4xl text-white capitalize">{{ productCategory?.name || 'Kategori' }}</h1>
           <div class="flex items-center gap-4 mt-3">
             <div class="flex items-center gap-1.5">
               <svg class="size-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -132,7 +132,7 @@ watch(
           <svg class="size-5 text-custom-black dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
-          <span class="font-bold text-custom-black dark:text-white">Filter Produk</span>
+          <span class="font-medium text-custom-black dark:text-white">Filter Produk</span>
         </div>
         <svg class="size-5 text-gray-400 transition-transform" :class="{ 'rotate-180': showFilters }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -149,7 +149,7 @@ watch(
         <!-- Results info -->
         <div class="flex items-center justify-between">
           <p class="text-sm text-custom-grey dark:text-gray-400">
-            <span class="font-bold text-custom-black dark:text-white">{{ products.length }}</span> produk ditemukan
+            <span class="font-medium text-custom-black dark:text-white">{{ products.length }}</span> produk ditemukan
           </p>
         </div>
 
@@ -170,17 +170,17 @@ watch(
               <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
-          <h2 class="font-bold text-xl text-custom-black dark:text-white">Belum ada produk di kategori ini</h2>
+          <h2 class="font-medium text-xl text-custom-black dark:text-white">Belum ada produk di kategori ini</h2>
           <p class="text-custom-grey dark:text-gray-400 mt-1">Coba cek kategori lain atau kembali ke beranda</p>
           <RouterLink :to="{ name: 'app.home' }"
-            class="mt-6 h-12 px-8 rounded-full bg-custom-blue text-white font-bold text-sm flex items-center justify-center hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all">
+            class="mt-6 h-12 px-8 rounded-md bg-custom-blue text-white font-medium text-sm flex items-center justify-center hover:bg-primary-deep transition-all">
             Ke Beranda
           </RouterLink>
         </div>
 
         <!-- Load More -->
         <button v-if="meta.current_page < meta.last_page && products.length > 0"
-          class="mx-auto h-12 px-8 rounded-full bg-white dark:bg-surface-card border-2 border-custom-blue text-custom-blue font-bold text-sm flex items-center justify-center gap-2 hover:bg-custom-blue hover:text-white hover:shadow-lg hover:shadow-blue-500/20 transition-all"
+          class="mx-auto h-12 px-8 rounded-full bg-white dark:bg-surface-card border-2 border-custom-blue text-custom-blue font-medium text-sm flex items-center justify-center gap-2 hover:bg-custom-blue hover:text-white hover:shadow-lg hover:shadow-blue-500/20 transition-all"
           @click="handleLoadMore">
           <span>Muat Lebih Banyak</span>
           <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

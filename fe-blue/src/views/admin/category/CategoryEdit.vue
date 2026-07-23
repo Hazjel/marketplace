@@ -73,7 +73,7 @@ onMounted(async () => {
             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
           </svg>
         </div>
-        <h2 class="font-bold text-lg dark:text-white">Lengkapi Formulir</h2>
+        <h2 class="font-medium text-lg dark:text-white">Lengkapi Formulir</h2>
       </div>
 
       <!-- Image Upload -->
@@ -96,7 +96,7 @@ onMounted(async () => {
           <button
             id="Add-Photo"
             type="button"
-            class="flex items-center justify-center gap-2 rounded-xl py-3 px-5 bg-gray-900 dark:bg-white/10 text-white font-semibold text-sm hover:bg-gray-800 transition-colors duration-200">
+            class="flex items-center justify-center gap-2 rounded-xl py-3 px-5 bg-gray-900 dark:bg-white/10 text-white font-medium text-sm hover:bg-gray-800 transition-colors duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 0 3Z" />
             </svg>
@@ -192,18 +192,18 @@ onMounted(async () => {
         <RouterLink
           v-if="productCategory?.parent_id"
           :to="dashboardRoute('category.detail', { id: productCategory?.parent_id })"
-          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-semibold text-sm border border-red-200 dark:border-red-700/50 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200">
+          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-medium text-sm border border-red-200 dark:border-red-700/50 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200">
           Batal
         </RouterLink>
         <RouterLink
           v-if="!productCategory.parent_id"
           :to="dashboardRoute('category')"
-          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-semibold text-sm border border-red-200 dark:border-red-700/50 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200">
+          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-medium text-sm border border-red-200 dark:border-red-700/50 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200">
           Batal
         </RouterLink>
         <button
           type="submit"
-          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors duration-200">
+          class="flex items-center justify-center h-11 rounded-xl py-2.5 px-5 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors duration-200">
           Perbarui Sekarang
         </button>
       </div>

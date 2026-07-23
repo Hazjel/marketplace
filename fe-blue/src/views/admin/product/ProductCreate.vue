@@ -177,7 +177,7 @@ onMounted(async () => {
         </svg>
       </div>
       <div>
-        <h1 class="font-bold text-xl text-gray-900 dark:text-white">Tambah Produk Baru</h1>
+        <h1 class="font-medium text-xl text-gray-900 dark:text-white">Tambah Produk Baru</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Lengkapi informasi produk Anda</p>
       </div>
     </div>
@@ -191,7 +191,7 @@ onMounted(async () => {
       <!-- STEP 1: General Info -->
       <div v-show="currentStep === 1" class="flex flex-col gap-5 animate-fade-in-up">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <p class="font-semibold text-custom-grey w-full md:w-1/3">Product Name</p>
+          <p class="font-medium text-custom-grey w-full md:w-1/3">Product Name</p>
           <div class="group/errorState flex flex-col gap-2 w-full" :class="{ invalid: error?.name }">
             <label class="group relative">
               <div class="input-icon">
@@ -207,7 +207,7 @@ src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 d
         </div>
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <p class="font-semibold text-custom-grey w-full md:w-1/3">Description</p>
+          <p class="font-medium text-custom-grey w-full md:w-1/3">Description</p>
           <div class="group/errorState flex flex-col gap-2 w-full" :class="{ invalid: error?.description }">
             <label
               class="group flex py-4 px-6 rounded-3xl border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red">
@@ -218,12 +218,12 @@ src="@/assets/images/icons/stickynote-grey.svg" class="flex size-6 shrink-0 dark
               </div>
               <div class="flex flex-col gap-[6px] pl-4 w-full">
                 <p
-                  class="placeholder font-semibold text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-bold transition-300">
+                  class="placeholder font-medium text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-medium transition-300">
                   Enter Product Description
                 </p>
                 <textarea
 v-model="product.description"
-                  class="appearance-none outline-none w-full font-semibold leading-[160%]" rows="3"
+                  class="appearance-none outline-none w-full font-medium leading-[160%]" rows="3"
                   placeholder=""></textarea>
               </div>
             </label>
@@ -234,7 +234,7 @@ v-model="product.description"
         </div>
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <p class="font-semibold text-custom-grey w-full md:w-1/3">Category</p>
+          <p class="font-medium text-custom-grey w-full md:w-1/3">Category</p>
           <div class="flex flex-col md:flex-row gap-4 w-full">
             <div class="group/errorState flex flex-col gap-2 w-full">
               <label
@@ -244,15 +244,15 @@ v-model="product.description"
                 </div>
                 <select
 v-model="product.parent_product_category_id" required
-                  class="appearance-none w-full h-[72px] font-semibold text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px] bg-transparent z-10 relative">
+                  class="appearance-none w-full h-[72px] font-medium text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px] bg-transparent z-10 relative">
                   <option hidden></option>
                   <option v-for="category in productCategories" :key="category.id" :value="category.id">
                     {{ category.name }}
                   </option>
                 </select>
                 <p
-class="placeholder font-bold absolute -translate-y-1/2 left-[81px] top-[25px] transition-300" :class="product.parent_product_category_id
-                  ? 'text-sm text-custom-grey font-semibold'
+class="placeholder font-medium absolute -translate-y-1/2 left-[81px] top-[25px] transition-300" :class="product.parent_product_category_id
+                  ? 'text-sm text-custom-grey font-medium'
                   : ''
                   ">
                   Select Category
@@ -272,14 +272,14 @@ src="@/assets/images/icons/shopping-bag-black.svg" class="flex size-6 shrink-0 d
                 </div>
                 <select
 v-model="product.product_category_id" required
-                  class="appearance-none w-full h-[72px] font-semibold text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px] bg-transparent z-10 relative">
+                  class="appearance-none w-full h-[72px] font-medium text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px] bg-transparent z-10 relative">
                   <option hidden></option>
                   <option v-for="category in subCategories" :key="category.id" :value="category.id">
                     {{ category.name }}
                   </option>
                 </select>
                 <p
-class="placeholder font-bold absolute -translate-y-1/2 left-[81px] top-[25px] transition-300" :class="product.product_category_id ? 'text-sm text-custom-grey font-semibold' : ''
+class="placeholder font-medium absolute -translate-y-1/2 left-[81px] top-[25px] transition-300" :class="product.product_category_id ? 'text-sm text-custom-grey font-medium' : ''
                   ">
                   Select Sub Category
                 </p>
@@ -291,14 +291,14 @@ src="@/assets/images/icons/arrow-down-black.svg"
           </div>
         </div>
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <p class="font-semibold text-custom-grey w-full md:w-1/3">Condition</p>
+          <p class="font-medium text-custom-grey w-full md:w-1/3">Condition</p>
           <div class="grid grid-cols-2 gap-6 h-[76px] w-full">
             <label
               class="group relative flex items-center h-full py-4 px-5 gap-4 rounded-[18px] border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full cursor-pointer">
               <div class="flex h-[28px] shrink-0 items-center pr-4 pl-1 border-r-[1.5px] border-custom-border">
                 <img src="@/assets/images/icons/gift-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
               </div>
-              <p class="font-bold leading-none w-full">New</p>
+              <p class="font-medium leading-none w-full">New</p>
               <div
                 class="flex size-4 shrink-0 rounded-full ring-2 ring-custom-grey border-[3px] border-white group-has-[:checked]:bg-custom-blue group-has-[:checked]:ring-custom-blue transition-300">
               </div>
@@ -309,7 +309,7 @@ src="@/assets/images/icons/arrow-down-black.svg"
               <div class="flex h-[28px] shrink-0 items-center pr-4 pl-1 border-r-[1.5px] border-custom-border">
                 <img src="@/assets/images/icons/box-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
               </div>
-              <p class="font-bold leading-none w-full">Used</p>
+              <p class="font-medium leading-none w-full">Used</p>
               <div
                 class="flex size-4 shrink-0 rounded-full ring-2 ring-custom-grey border-[3px] border-white group-has-[:checked]:bg-custom-blue group-has-[:checked]:ring-custom-blue transition-300">
               </div>
@@ -324,7 +324,7 @@ v-model="product.condition" type="radio" name="condition" class="absolute opacit
       <!-- STEP 2: Stock & Price -->
       <div v-show="currentStep === 2" class="flex flex-col gap-5 animate-fade-in-up">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <p class="font-semibold text-custom-grey w-full md:w-1/3">Weight (grams)</p>
+          <p class="font-medium text-custom-grey w-full md:w-1/3">Weight (grams)</p>
           <div class="group/errorState flex flex-col gap-2 w-full" :class="{ invalid: error?.weight }">
             <label class="group relative">
               <div class="input-icon">
@@ -338,7 +338,7 @@ v-model="product.condition" type="radio" name="condition" class="absolute opacit
 
         <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div class="w-full md:w-1/3 pt-2">
-            <p class="font-semibold text-custom-grey">Varian Produk</p>
+            <p class="font-medium text-custom-grey">Varian Produk</p>
             <p class="text-xs text-custom-grey mt-1">
               Apakah produk ini memiliki pilihan seperti ukuran, warna, RAM, dll?
             </p>
@@ -348,19 +348,19 @@ v-model="product.condition" type="radio" name="condition" class="absolute opacit
             <label
               class="flex items-center gap-2 cursor-pointer p-4 border rounded-xl bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
               <input v-model="product.has_variants" type="checkbox" class="toggle toggle-primary" />
-              <span class="font-bold">Aktifkan Varian</span>
+              <span class="font-medium">Aktifkan Varian</span>
             </label>
 
             <!-- Option Groups Definition -->
             <div v-if="product.has_variants" class="p-4 border rounded-xl bg-blue-50/50 flex flex-col gap-4">
-              <span class="text-xs font-bold text-gray-500 uppercase">1. Tentukan Tipe Varian</span>
+              <span class="text-xs font-medium text-gray-500 uppercase">1. Tentukan Tipe Varian</span>
               <div class="flex gap-2">
                 <input
 v-model="newOptionName" type="text" placeholder="Tambah opsi (contoh: RAM, Warna)"
                   class="custom-input h-10 text-sm bg-white" />
                 <button
 type="button"
-                  class="h-10 px-6 text-sm font-bold bg-custom-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                  class="h-10 px-6 text-sm font-medium bg-custom-black text-white rounded-lg hover:bg-gray-800 transition-colors"
                   @click="addOptionGroup">
                   Tambah
                 </button>
@@ -368,7 +368,7 @@ type="button"
               <div class="flex flex-wrap gap-2">
                 <span
 v-for="(opt, idx) in optionGroups" :key="idx"
-                  class="px-3 py-1 bg-white border border-custom-blue/30 text-custom-blue rounded-full text-xs font-bold flex items-center gap-2">
+                  class="px-3 py-1 bg-white border border-custom-blue/30 text-custom-blue rounded-full text-xs font-medium flex items-center gap-2">
                   {{ opt }}
                   <button
 type="button" class="hover:text-red-500 text-lg leading-none"
@@ -380,15 +380,15 @@ type="button" class="hover:text-red-500 text-lg leading-none"
             </div>
 
             <div v-if="product.has_variants" class="flex flex-col gap-3">
-              <span class="text-xs font-bold text-gray-500 uppercase mt-2">2. Kelola Varian</span>
+              <span class="text-xs font-medium text-gray-500 uppercase mt-2">2. Kelola Varian</span>
 
               <div
 v-for="(variant, index) in product.variants" :key="index"
                 class="p-4 border rounded-xl bg-white flex flex-col gap-4 shadow-sm">
                 <div class="flex justify-between items-center border-b pb-2 mb-2">
-                  <h4 class="font-bold text-sm text-custom-black">Varian #{{ index + 1 }}</h4>
+                  <h4 class="font-medium text-sm text-custom-black">Varian #{{ index + 1 }}</h4>
                   <button
-type="button" class="text-red-500 text-xs font-bold hover:underline"
+type="button" class="text-red-500 text-xs font-medium hover:underline"
                     @click="product.variants.splice(index, 1)">
                     Hapus
                   </button>
@@ -397,17 +397,17 @@ type="button" class="text-red-500 text-xs font-bold hover:underline"
                 <!-- Dynamic Attributes Inputs -->
                 <div v-if="optionGroups.length > 0" class="grid grid-cols-2 gap-3">
                   <div v-for="opt in optionGroups" :key="opt" class="flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">{{ opt }}</label>
+                    <label class="text-[10px] font-medium text-gray-400 uppercase">{{ opt }}</label>
                     <input
 v-model="variant.variant_attributes[opt]" type="text"
-                      class="h-10 w-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 rounded-lg px-3 text-sm font-semibold outline-none focus:border-custom-black dark:focus:border-white transition-all"
+                      class="h-10 w-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 rounded-lg px-3 text-sm font-medium outline-none focus:border-custom-black dark:focus:border-white transition-all"
                       :placeholder="'Nilai ' + opt" @input="autoGenerateName(variant)" />
                   </div>
                 </div>
 
                 <!-- Variant Name (Auto-generated or Manual) -->
                 <div class="flex flex-col gap-1">
-                  <label class="text-xs font-semibold text-gray-400">Nama Varian (otomatis)</label>
+                  <label class="text-xs font-medium text-gray-400">Nama Varian (otomatis)</label>
                   <input
 v-model="variant.name" type="text" class="custom-input h-10 text-sm bg-gray-50"
                     placeholder="Nama varian" />
@@ -415,13 +415,13 @@ v-model="variant.name" type="text" class="custom-input h-10 text-sm bg-gray-50"
 
                 <div class="flex gap-3">
                   <div class="flex flex-col gap-1 w-1/2">
-                    <label class="text-xs font-semibold text-gray-400">Harga (Rp)</label>
+                    <label class="text-xs font-medium text-gray-400">Harga (Rp)</label>
                     <input
 v-model="variant.price" type="number" class="custom-input h-10 text-sm"
                       placeholder="Harga" />
                   </div>
                   <div class="flex flex-col gap-1 w-1/2">
-                    <label class="text-xs font-semibold text-gray-400">Stok</label>
+                    <label class="text-xs font-medium text-gray-400">Stok</label>
                     <input
 v-model="variant.stock" type="number" class="custom-input h-10 text-sm"
                       placeholder="Stok" />
@@ -431,7 +431,7 @@ v-model="variant.stock" type="number" class="custom-input h-10 text-sm"
 
               <button
 type="button"
-                class="btn-primary w-full py-3 rounded-xl text-sm font-bold border-2 border-dashed border-custom-blue text-custom-blue bg-blue-50 hover:bg-blue-100 transition-colors"
+                class="btn-primary w-full py-3 rounded-xl text-sm font-medium border-2 border-dashed border-custom-blue text-custom-blue bg-blue-50 hover:bg-blue-100 transition-colors"
                 @click="addVariant">
                 + Tambah Baris Varian
               </button>
@@ -440,7 +440,7 @@ type="button"
         </div>
 
         <div v-if="!product.has_variants" class="flex flex-col md:flex-row justify-between gap-4">
-          <p class="font-semibold text-custom-grey w-full md:w-1/3">Harga & Stok</p>
+          <p class="font-medium text-custom-grey w-full md:w-1/3">Harga & Stok</p>
           <div class="flex gap-6 w-full">
             <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ invalid: error?.price }">
               <label class="group relative">
@@ -468,7 +468,7 @@ type="button"
       <div v-show="currentStep === 3" class="flex flex-col gap-5 animate-fade-in-up">
         <div class="flex flex-col justify-between gap-4">
           <div class="flex flex-col gap-1">
-            <p class="font-semibold text-gray-900 dark:text-white">Galeri Produk</p>
+            <p class="font-medium text-gray-900 dark:text-white">Galeri Produk</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">Unggah gambar produk dengan kualitas tinggi.</p>
           </div>
 
@@ -489,7 +489,7 @@ type="button"
 
               <div
                 v-if="index === 0"
-                class="absolute bottom-0 left-0 w-full py-1.5 bg-blue-600/90 text-white text-[10px] font-semibold text-center backdrop-blur-sm">
+                class="absolute bottom-0 left-0 w-full py-1.5 bg-blue-600/90 text-white text-[10px] font-medium text-center backdrop-blur-sm">
                 Thumbnail
               </div>
             </div>
@@ -502,7 +502,7 @@ type="button"
         <button
           v-if="currentStep > 1"
           type="button"
-          class="h-11 px-5 rounded-xl font-semibold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+          class="h-11 px-5 rounded-xl font-medium text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
           @click="prevStep">
           Kembali
         </button>
@@ -511,14 +511,14 @@ type="button"
         <button
           v-if="currentStep < 3"
           type="button"
-          class="h-11 px-6 rounded-xl bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
+          class="h-11 px-6 rounded-xl bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-medium text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
           @click="nextStep">
           Lanjut
         </button>
         <button
           v-else
           type="submit"
-          class="h-11 px-6 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200 dark:shadow-none">
+          class="h-11 px-6 rounded-xl bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200 dark:shadow-none">
           Buat Produk
         </button>
       </div>

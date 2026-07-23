@@ -42,7 +42,7 @@ const handleSave = async () => {
   <div class="flex flex-col gap-8 w-full">
     <!-- Page Header -->
     <div class="flex flex-col gap-1">
-      <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">Notifikasi</h1>
+      <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">Notifikasi</h1>
       <p class="text-custom-grey dark:text-gray-400 font-medium">Atur preferensi notifikasi yang ingin kamu terima.</p>
     </div>
 
@@ -73,7 +73,7 @@ const handleSave = async () => {
       <!-- Transaksi -->
       <div class="bg-white dark:bg-white/[0.02] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10">
-          <h2 class="font-bold text-base text-custom-black dark:text-white flex items-center gap-2">
+          <h2 class="font-medium text-base text-custom-black dark:text-white flex items-center gap-2">
             <svg class="size-5 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
@@ -83,7 +83,7 @@ const handleSave = async () => {
         <div class="divide-y divide-gray-50 dark:divide-white/5">
           <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
             <div>
-              <p class="font-semibold text-sm text-custom-black dark:text-white">Update Pesanan</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">Update Pesanan</p>
               <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Notifikasi status pengiriman dan pembayaran</p>
             </div>
             <div class="relative">
@@ -93,7 +93,7 @@ const handleSave = async () => {
           </label>
           <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
             <div>
-              <p class="font-semibold text-sm text-custom-black dark:text-white">Reminder Review</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">Reminder Review</p>
               <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Pengingat untuk memberi ulasan produk yang sudah diterima</p>
             </div>
             <div class="relative">
@@ -107,7 +107,7 @@ const handleSave = async () => {
       <!-- Promosi -->
       <div class="bg-white dark:bg-white/[0.02] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10">
-          <h2 class="font-bold text-base text-custom-black dark:text-white flex items-center gap-2">
+          <h2 class="font-medium text-base text-custom-black dark:text-white flex items-center gap-2">
             <svg class="size-5 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
             </svg>
@@ -117,7 +117,7 @@ const handleSave = async () => {
         <div class="divide-y divide-gray-50 dark:divide-white/5">
           <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
             <div>
-              <p class="font-semibold text-sm text-custom-black dark:text-white">Promo & Diskon</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">Promo & Diskon</p>
               <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Info promo, flash sale, dan voucher eksklusif</p>
             </div>
             <div class="relative">
@@ -127,7 +127,7 @@ const handleSave = async () => {
           </label>
           <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
             <div>
-              <p class="font-semibold text-sm text-custom-black dark:text-white">Penurunan Harga</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">Penurunan Harga</p>
               <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Notifikasi saat harga produk di wishlist turun</p>
             </div>
             <div class="relative">
@@ -137,7 +137,7 @@ const handleSave = async () => {
           </label>
           <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
             <div>
-              <p class="font-semibold text-sm text-custom-black dark:text-white">Newsletter</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">Newsletter</p>
               <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Email mingguan dengan rekomendasi produk</p>
             </div>
             <div class="relative">
@@ -151,7 +151,7 @@ const handleSave = async () => {
       <!-- Pesan -->
       <div class="bg-white dark:bg-white/[0.02] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10">
-          <h2 class="font-bold text-base text-custom-black dark:text-white flex items-center gap-2">
+          <h2 class="font-medium text-base text-custom-black dark:text-white flex items-center gap-2">
             <svg class="size-5 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
@@ -160,7 +160,7 @@ const handleSave = async () => {
         </div>
         <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
           <div>
-            <p class="font-semibold text-sm text-custom-black dark:text-white">Pesan Baru</p>
+            <p class="font-medium text-sm text-custom-black dark:text-white">Pesan Baru</p>
             <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Notifikasi saat ada pesan baru dari penjual atau pembeli</p>
           </div>
           <div class="relative">
@@ -176,7 +176,7 @@ const handleSave = async () => {
       <button
         @click="handleSave"
         :disabled="saving"
-        class="flex items-center justify-center h-12 px-8 rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="flex items-center justify-center h-12 px-8 rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <div v-if="saving" class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
         Simpan Preferensi

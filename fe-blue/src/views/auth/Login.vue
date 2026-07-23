@@ -93,10 +93,10 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
         class="h-8 lg:h-10 mx-auto mb-4 dark:brightness-0 dark:invert"
         alt="Blukios"
       />
-      <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">
-        Selamat Datang! 👋
+      <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">
+        Selamat Datang
       </h1>
-      <p class="text-custom-grey dark:text-gray-400 font-medium text-sm lg:text-base">
+      <p class="text-custom-grey dark:text-gray-400 font-normal text-sm lg:text-base">
         Masukkan detail akunmu untuk melanjutkan.
       </p>
     </div>
@@ -104,7 +104,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
     <!-- Email verified banner -->
     <div
       v-if="justVerified"
-      class="p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-medium text-sm border border-green-200 dark:border-green-800 text-center"
+      class="p-4 rounded-md bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-normal text-sm border border-green-200 dark:border-green-800 text-center"
     >
       ✅ Email berhasil diverifikasi! Silakan masuk.
     </div>
@@ -113,7 +113,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
     <div class="flex flex-col gap-5">
       <!-- Email Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Alamat Email</label>
+        <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Alamat Email</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img
@@ -125,7 +125,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
           <input
             v-model="form.email"
             type="email"
-            class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             placeholder="Masukkan email kamu"
             autocomplete="email"
             :class="{ '!border-red-500 !bg-red-50 dark:!bg-red-900/20': error?.email }"
@@ -138,7 +138,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
 
       <!-- Password Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Password</label>
+        <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Password</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img
@@ -151,7 +151,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
             id="passwordInput"
             v-model="form.password"
             :type="showPassword ? 'text' : 'password'"
-            class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             placeholder="••••••••"
             autocomplete="current-password"
             :class="{ '!border-red-500 !bg-red-50 dark:!bg-red-900/20': error?.password }"
@@ -212,7 +212,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
         </label>
         <RouterLink
           :to="{ name: 'auth.forgot-password' }"
-          class="text-sm font-semibold text-custom-blue hover:text-blue-700 hover:underline transition-colors"
+          class="text-sm font-medium text-custom-blue hover:text-primary-deep hover:underline transition-colors"
         >
           Lupa Password?
         </RouterLink>
@@ -224,7 +224,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
       <!-- Primary Button -->
       <button
         type="submit"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="loading"
       >
         <span v-if="loading" class="animate-spin mr-2">⏳</span>
@@ -234,7 +234,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
       <!-- Google Button -->
       <a
         :href="`${apiUrl}/auth/google/redirect`"
-        class="w-full h-12 flex items-center justify-center rounded-full border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-custom-black dark:text-white font-semibold hover:bg-gray-50 dark:hover:bg-white/10 hover:border-gray-300 hover:shadow-sm transition-all duration-300"
+        class="w-full h-12 flex items-center justify-center rounded-md border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-custom-black dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-white/10 hover:border-gray-300 transition-all duration-300"
       >
         <img src="@/assets/images/icons/google.svg" class="size-5 mr-3" alt="Google" />
         Masuk dengan Google
@@ -242,11 +242,11 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
     </div>
 
     <!-- Footer -->
-    <p class="text-center text-custom-grey dark:text-gray-400 font-medium mt-2">
+    <p class="text-center text-custom-grey dark:text-gray-400 font-normal mt-2">
       Belum punya akun?
       <RouterLink
         :to="{ name: 'auth.register' }"
-        class="text-custom-blue font-bold hover:underline ml-1"
+        class="text-custom-blue font-medium hover:underline ml-1"
       >
         Daftar Sekarang
       </RouterLink>

@@ -63,7 +63,7 @@ const steps = [
           <!-- Number for Active/Pending -->
           <span
             v-else
-            class="text-xs md:text-sm font-bold transition-colors"
+            class="text-xs md:text-sm font-medium transition-colors"
             :class="currentStep === step.number ? 'text-custom-blue' : 'text-gray-400'"
           >
             {{ step.number }}
@@ -71,7 +71,7 @@ const steps = [
         </div>
 
         <span
-          class="text-[10px] md:text-xs font-bold uppercase tracking-wider absolute top-10 md:top-12 transition-colors whitespace-nowrap"
+          class="text-[10px] md:text-xs font-medium uppercase tracking-wider absolute top-10 md:top-12 transition-colors whitespace-nowrap"
           :class="[
             currentStep >= step.number ? 'text-custom-black' : 'text-gray-400',
             index === 0

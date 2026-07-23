@@ -76,7 +76,7 @@ onUnmounted(() => {
     </div>
 
     <div class="flex flex-col gap-2">
-      <h1 class="font-bold text-2xl text-custom-black dark:text-white">
+      <h1 class="font-medium text-2xl text-custom-black dark:text-white">
         {{ isVerified ? 'Email Sudah Terverifikasi' : 'Verifikasi Emailmu' }}
       </h1>
       <p class="text-custom-grey dark:text-gray-400 text-sm leading-relaxed">
@@ -85,7 +85,7 @@ onUnmounted(() => {
         </template>
         <template v-else>
           Kami sudah mengirim link verifikasi ke
-          <span class="font-semibold text-custom-black dark:text-white">{{ user?.email }}</span>.
+          <span class="font-medium text-custom-black dark:text-white">{{ user?.email }}</span>.
           Klik link di email untuk mengaktifkan akunmu — cek juga folder spam.
         </template>
       </p>
@@ -95,7 +95,7 @@ onUnmounted(() => {
       <button
         type="button"
         :disabled="sending || cooldown > 0"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         @click="resend"
       >
         <div v-if="sending" class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
@@ -103,7 +103,7 @@ onUnmounted(() => {
       </button>
       <button
         type="button"
-        class="w-full h-12 flex items-center justify-center rounded-full border border-gray-200 dark:border-white/10 font-semibold text-sm text-custom-black dark:text-white hover:border-custom-blue transition-all"
+        class="w-full h-12 flex items-center justify-center rounded-md border border-gray-200 dark:border-white/10 font-medium text-sm text-custom-black dark:text-white hover:border-custom-blue transition-all"
         @click="checkStatus"
       >
         Saya Sudah Verifikasi

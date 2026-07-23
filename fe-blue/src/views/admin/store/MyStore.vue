@@ -40,7 +40,7 @@ const hasCoordinates = computed(
       class="flex flex-col w-full lg:flex-1 h-fit rounded-2xl overflow-hidden bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
       <!-- Gradient Header -->
       <div class="relative bg-gradient-to-br from-blue-600 to-blue-700 p-6 pb-16">
-        <p class="font-bold text-lg text-white">Toko Saya</p>
+        <p class="font-medium text-lg text-white">Toko Saya</p>
         <p class="text-blue-100 text-sm mt-0.5">Kelola informasi toko Anda</p>
       </div>
 
@@ -62,7 +62,7 @@ const hasCoordinates = computed(
               </div>
             </div>
             <div class="flex flex-col gap-1 w-full overflow-hidden">
-              <p class="font-bold text-base leading-tight w-full truncate dark:text-white">
+              <p class="font-medium text-base leading-tight w-full truncate dark:text-white">
                 {{ store.name }}
               </p>
               <p class="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
@@ -77,8 +77,8 @@ const hasCoordinates = computed(
             <svg v-if="store?.is_verified" xmlns="http://www.w3.org/2000/svg" class="size-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
-            <span v-if="store?.is_verified" class="font-semibold text-sm text-blue-600 text-nowrap">TERVERIFIKASI</span>
-            <span v-else class="font-semibold text-sm text-gray-500 text-nowrap">BELUM VERIFIKASI</span>
+            <span v-if="store?.is_verified" class="font-medium text-sm text-blue-600 text-nowrap">TERVERIFIKASI</span>
+            <span v-else class="font-medium text-sm text-gray-500 text-nowrap">BELUM VERIFIKASI</span>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@ const hasCoordinates = computed(
       <!-- Store Content -->
       <div class="p-5 flex flex-col gap-4">
         <div class="flex flex-col gap-2">
-          <p class="font-bold text-base dark:text-white">Tentang Toko</p>
+          <p class="font-medium text-base dark:text-white">Tentang Toko</p>
           <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed">{{ store?.about }}</p>
         </div>
         <div class="flex flex-col gap-3 pt-2">
@@ -96,7 +96,7 @@ const hasCoordinates = computed(
             <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-white dark:text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            <span class="font-semibold text-sm text-white dark:text-gray-900">Edit Toko</span>
+            <span class="font-medium text-sm text-white dark:text-gray-900">Edit Toko</span>
           </RouterLink>
           <p class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -112,7 +112,7 @@ const hasCoordinates = computed(
     <section
       v-if="store"
       class="flex flex-col w-full lg:w-[380px] shrink-0 h-fit rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-      <p class="font-bold text-base dark:text-white">Alamat Toko</p>
+      <p class="font-medium text-base dark:text-white">Alamat Toko</p>
       <div class="flex flex-col rounded-2xl border border-gray-100 dark:border-white/10 p-4 gap-4">
         <div class="flex items-center gap-3 w-full">
           <div class="flex size-10 shrink-0 rounded-xl bg-gray-50 dark:bg-white/5 items-center justify-center">
@@ -121,7 +121,7 @@ const hasCoordinates = computed(
             </svg>
           </div>
           <div class="flex flex-col gap-0.5">
-            <p class="font-bold text-sm leading-none dark:text-white">{{ store?.city }}</p>
+            <p class="font-medium text-sm leading-none dark:text-white">{{ store?.city }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Kota</p>
           </div>
         </div>
@@ -133,7 +133,7 @@ const hasCoordinates = computed(
             </svg>
           </div>
           <div class="flex flex-col gap-0.5">
-            <p class="font-bold text-sm leading-none dark:text-white">{{ store?.postal_code }}</p>
+            <p class="font-medium text-sm leading-none dark:text-white">{{ store?.postal_code }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Kode Pos</p>
           </div>
         </div>
@@ -164,13 +164,13 @@ const hasCoordinates = computed(
           </svg>
         </div>
         <div class="flex flex-col gap-1 items-center text-center">
-          <p class="font-semibold text-gray-700 dark:text-gray-300">Belum ada profil toko</p>
+          <p class="font-medium text-gray-700 dark:text-gray-300">Belum ada profil toko</p>
           <p class="text-sm text-gray-500">Buat toko Anda sekarang untuk mulai berjualan</p>
         </div>
         <RouterLink
           :to="dashboardRoute('create-store')"
           class="flex h-10 items-center rounded-xl px-5 bg-blue-600 gap-2 hover:bg-blue-700 transition-colors">
-          <span class="font-semibold text-sm text-white">Buat Toko</span>
+          <span class="font-medium text-sm text-white">Buat Toko</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>

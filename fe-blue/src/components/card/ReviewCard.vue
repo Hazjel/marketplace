@@ -47,7 +47,7 @@ const formattedDate = computed(() => {
             alt="Avatar"
           />
           <div class="flex flex-col">
-            <span class="font-bold text-sm text-custom-black">{{ userName }}</span>
+            <span class="font-medium text-sm text-custom-black">{{ userName }}</span>
             <span class="text-xs text-custom-grey">{{ formattedDate }}</span>
           </div>
         </div>
@@ -97,7 +97,7 @@ const formattedDate = computed(() => {
           alt="Product"
         />
         <div class="flex flex-col min-w-0">
-          <span class="text-xs font-bold text-custom-black truncate">{{
+          <span class="text-xs font-medium text-custom-black truncate">{{
             review.product.name
           }}</span>
           <span class="text-[10px] text-custom-grey">Varian: Default</span>

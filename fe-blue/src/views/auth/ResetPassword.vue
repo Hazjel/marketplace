@@ -89,12 +89,12 @@ const handleSubmit = async () => {
         class="h-8 lg:h-10 mx-auto mb-4 dark:brightness-0 dark:invert"
         alt="Blukios"
       />
-      <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">
-        Buat Password Baru 🔐
+      <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">
+        Buat Password Baru
       </h1>
-      <p class="text-custom-grey dark:text-gray-400 font-medium text-sm lg:text-base">
+      <p class="text-custom-grey dark:text-gray-400 font-normal text-sm lg:text-base">
         Masukkan password baru untuk akun
-        <span v-if="form.email" class="text-custom-blue dark:text-blue-400 font-semibold">{{
+        <span v-if="form.email" class="text-custom-blue dark:text-blue-400 font-medium">{{
           form.email
         }}</span>
       </p>
@@ -115,7 +115,7 @@ const handleSubmit = async () => {
         </svg>
       </div>
       <div class="text-center flex flex-col gap-2">
-        <p class="font-bold text-custom-black dark:text-white text-lg">Link Tidak Valid</p>
+        <p class="font-medium text-custom-black dark:text-white text-lg">Link Tidak Valid</p>
         <p class="text-custom-grey dark:text-gray-400 text-sm leading-relaxed">
           Link reset password ini tidak valid atau sudah kadaluarsa.<br />
           Silakan minta link baru.
@@ -123,7 +123,7 @@ const handleSubmit = async () => {
       </div>
       <RouterLink
         :to="{ name: 'auth.forgot-password' }"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300"
+        class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300"
       >
         Minta Link Baru
       </RouterLink>
@@ -149,7 +149,7 @@ const handleSubmit = async () => {
           </svg>
         </div>
         <div class="text-center flex flex-col gap-2">
-          <p class="font-bold text-custom-black dark:text-white text-lg">
+          <p class="font-medium text-custom-black dark:text-white text-lg">
             Password Berhasil Diperbarui!
           </p>
           <p class="text-custom-grey dark:text-gray-400 text-sm leading-relaxed">
@@ -159,7 +159,7 @@ const handleSubmit = async () => {
         </div>
         <RouterLink
           :to="{ name: 'auth.login' }"
-          class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300"
+          class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300"
         >
           Login Sekarang
         </RouterLink>
@@ -181,7 +181,7 @@ const handleSubmit = async () => {
       >
         <div
           v-if="error?.token"
-          class="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl"
+          class="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md"
         >
           <svg
             class="shrink-0 w-5 h-5 text-red-500 dark:text-red-400 mt-0.5"
@@ -202,7 +202,7 @@ const handleSubmit = async () => {
             </p>
             <RouterLink
               :to="{ name: 'auth.forgot-password' }"
-              class="text-red-600 dark:text-red-400 text-xs font-semibold underline hover:text-red-800 dark:hover:text-red-300 transition-colors"
+              class="text-red-600 dark:text-red-400 text-xs font-medium underline hover:text-red-800 dark:hover:text-red-300 transition-colors"
             >
               Minta link reset baru →
             </RouterLink>
@@ -212,7 +212,7 @@ const handleSubmit = async () => {
 
       <!-- New Password Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Password Baru</label>
+        <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Password Baru</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img
@@ -224,7 +224,7 @@ const handleSubmit = async () => {
           <input
             v-model="form.password"
             :type="showPassword ? 'text' : 'password'"
-            class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             placeholder="Minimal 8 karakter"
             autocomplete="new-password"
             :class="{ '!border-red-500 !bg-red-50 dark:!bg-red-900/20': error?.password }"
@@ -256,7 +256,7 @@ const handleSubmit = async () => {
 
       <!-- Confirm Password Field -->
       <div class="flex flex-col gap-2">
-        <label class="font-semibold text-custom-black dark:text-white text-sm ml-1">Konfirmasi Password</label>
+        <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Konfirmasi Password</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <img
@@ -268,7 +268,7 @@ const handleSubmit = async () => {
           <input
             v-model="form.password_confirmation"
             :type="showConfirmPassword ? 'text' : 'password'"
-            class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/20 outline-none transition-all font-medium text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             placeholder="Ulangi password baru"
             autocomplete="new-password"
             :class="{
@@ -320,7 +320,7 @@ const handleSubmit = async () => {
       <!-- Submit Button -->
       <button
         type="submit"
-        class="w-full h-12 flex items-center justify-center rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+        class="w-full h-12 flex items-center justify-center rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         :disabled="
           loading ||
           !form.password ||
@@ -336,12 +336,12 @@ const handleSubmit = async () => {
     <!-- Back to Login -->
     <p
       v-if="!tokenInvalid && !successMessage"
-      class="text-center text-custom-grey dark:text-gray-400 font-medium"
+      class="text-center text-custom-grey dark:text-gray-400 font-normal"
     >
       Ingat password?
       <RouterLink
         :to="{ name: 'auth.login' }"
-        class="text-custom-blue font-bold hover:underline ml-1"
+        class="text-custom-blue font-medium hover:underline ml-1"
       >
         Masuk Sekarang
       </RouterLink>

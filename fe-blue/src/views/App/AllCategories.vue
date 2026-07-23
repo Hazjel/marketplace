@@ -37,7 +37,7 @@ onMounted(() => {
       </div>
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 class="font-extrabold text-3xl md:text-4xl text-white">Semua Kategori</h1>
+          <h1 class="font-medium text-3xl md:text-4xl text-white">Semua Kategori</h1>
           <p class="text-white/70 mt-2 text-sm md:text-base">{{ productCategories.length }} kategori tersedia</p>
         </div>
         <div class="size-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
@@ -81,7 +81,7 @@ onMounted(() => {
           <img :src="category.image" class="size-8 object-contain" :alt="category.name" />
         </div>
         <div class="flex flex-col items-center gap-1 text-center">
-          <p class="font-bold text-sm text-custom-black dark:text-white capitalize line-clamp-2 group-hover:text-custom-blue transition-colors">{{ category.name }}</p>
+          <p class="font-medium text-sm text-custom-black dark:text-white capitalize line-clamp-2 group-hover:text-custom-blue transition-colors">{{ category.name }}</p>
           <p class="text-xs text-custom-grey dark:text-gray-400">{{ category.product_count }} produk</p>
         </div>
       </RouterLink>
@@ -94,7 +94,7 @@ onMounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
-      <h2 class="font-bold text-xl text-custom-black dark:text-white">
+      <h2 class="font-medium text-xl text-custom-black dark:text-white">
         {{ searchQuery ? 'Kategori tidak ditemukan' : 'Belum ada kategori' }}
       </h2>
       <p class="text-custom-grey dark:text-gray-400 mt-1">

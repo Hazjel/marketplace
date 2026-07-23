@@ -32,7 +32,7 @@ onUnmounted(() => {
         <img src="@/assets/images/logos/blukios_logo.png" class="h-10" alt="Blukios Logo" />
         <span
           :class="[
-            'font-bold text-xl tracking-tight hidden md:block',
+            'font-medium text-xl tracking-tight hidden md:block',
             isScrolled ? 'text-custom-black' : 'text-white mix-blend-difference'
           ]"
         >
@@ -44,7 +44,7 @@ onUnmounted(() => {
       <div class="hidden md:flex items-center gap-8">
         <RouterLink
           :to="{ name: 'app.about' }"
-          active-class="text-custom-blue font-semibold"
+          active-class="text-custom-blue font-medium"
           :class="
             isScrolled
               ? 'text-custom-grey hover:text-custom-blue'
@@ -55,7 +55,7 @@ onUnmounted(() => {
         </RouterLink>
         <RouterLink
           :to="{ name: 'app.career' }"
-          active-class="text-custom-blue font-semibold"
+          active-class="text-custom-blue font-medium"
           :class="
             isScrolled
               ? 'text-custom-grey hover:text-custom-blue'
@@ -66,7 +66,7 @@ onUnmounted(() => {
         </RouterLink>
         <RouterLink
           :to="{ name: 'app.privacy' }"
-          active-class="text-custom-blue font-semibold"
+          active-class="text-custom-blue font-medium"
           :class="
             isScrolled
               ? 'text-custom-grey hover:text-custom-blue'
@@ -82,7 +82,7 @@ onUnmounted(() => {
         <RouterLink
           :to="{ name: 'app.home' }"
           :class="[
-            'px-6 py-2.5 rounded-full font-bold text-sm transition-all',
+            'px-6 py-2.5 rounded-full font-medium text-sm transition-all',
             isScrolled
               ? 'bg-custom-black text-white hover:bg-gray-800'
               : 'bg-white text-custom-black hover:bg-gray-100'

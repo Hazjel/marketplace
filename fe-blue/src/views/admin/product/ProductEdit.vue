@@ -161,12 +161,12 @@ onMounted(async () => {
         </svg>
       </div>
       <div>
-        <h1 class="font-bold text-xl text-gray-900 dark:text-white">Edit Produk</h1>
+        <h1 class="font-medium text-xl text-gray-900 dark:text-white">Edit Produk</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400">Perbarui informasi produk Anda</p>
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300">Gambar Produk</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300">Gambar Produk</p>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-1/2">
         <div
           v-for="(image, index) in product.product_images"
@@ -185,7 +185,7 @@ onMounted(async () => {
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300">Nama Produk</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300">Nama Produk</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.name }">
         <label class="group relative">
           <div class="input-icon">
@@ -200,7 +200,7 @@ src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 d
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300">Berat Produk</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300">Berat Produk</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.weight }">
         <div class="relative">
           <label class="group relative h-full block">
@@ -213,7 +213,7 @@ src="@/assets/images/icons/shopping-cart-grey.svg" class="flex size-6 shrink-0 d
           <div class="absolute transform -translate-y-1/2 top-1/2 right-5 w-fit h-fit">
             <select
 id="" name=""
-              class="rounded-lg py-[10px] px-4 bg-custom-blue/10 text-custom-blue font-extrabold text-sm h-[38px] w-[71px] appearance-none leading-none">
+              class="rounded-lg py-[10px] px-4 bg-custom-blue/10 text-custom-blue font-medium text-sm h-[38px] w-[71px] appearance-none leading-none">
               <option value="" selected>KG</option>
             </select>
             <img
@@ -226,14 +226,14 @@ src="@/assets/images/icons/arrow-up-triangle-blue.svg"
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300">Kondisi Produk</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300">Kondisi Produk</p>
       <div class="grid grid-cols-2 gap-6 h-[76px] w-full md:w-1/2">
         <label
           class="group relative flex items-center h-full py-4 px-5 gap-4 rounded-[18px] border-[2px] border-custom-border focus-within:border-custom-black transition-300 w-full">
           <div class="flex h-[28px] shrink-0 items-center pr-4 pl-1 border-r-[1.5px] border-custom-border">
             <img src="@/assets/images/icons/gift-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
           </div>
-          <p class="font-bold leading-none w-full">New Item</p>
+          <p class="font-medium leading-none w-full">New Item</p>
           <div
             class="flex size-4 shrink-0 rounded-full ring-2 ring-custom-grey border-[3px] border-white group-has-[:checked]:bg-custom-blue group-has-[:checked]:ring-custom-blue transition-300">
           </div>
@@ -244,7 +244,7 @@ src="@/assets/images/icons/arrow-up-triangle-blue.svg"
           <div class="flex h-[28px] shrink-0 items-center pr-4 pl-1 border-r-[1.5px] border-custom-border">
             <img src="@/assets/images/icons/box-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
           </div>
-          <p class="font-bold leading-none w-full">Used Item</p>
+          <p class="font-medium leading-none w-full">Used Item</p>
           <div
             class="flex size-4 shrink-0 rounded-full ring-2 ring-custom-grey border-[3px] border-white group-has-[:checked]:bg-custom-blue group-has-[:checked]:ring-custom-blue transition-300">
           </div>
@@ -253,18 +253,18 @@ src="@/assets/images/icons/arrow-up-triangle-blue.svg"
       </div>
     </div>
     <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300 pt-2">Varian Produk</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300 pt-2">Varian Produk</p>
       <div class="w-full md:w-1/2 flex flex-col gap-4">
         <label class="flex items-center gap-2 cursor-pointer">
           <input v-model="product.has_variants" type="checkbox" class="toggle toggle-primary" />
-          <span class="font-semibold">Aktifkan Varian (Ukuran, Warna, RAM, dll)</span>
+          <span class="font-medium">Aktifkan Varian (Ukuran, Warna, RAM, dll)</span>
         </label>
 
         <!-- Option Groups Definition -->
         <div
 v-if="product.has_variants"
           class="p-3 border rounded-xl bg-blue-50/50 dark:bg-custom-blue/10 dark:border-white/10 flex flex-col gap-2">
-          <span class="text-xs font-bold text-gray-500 uppercase">1. Tentukan Tipe Varian</span>
+          <span class="text-xs font-medium text-gray-500 uppercase">1. Tentukan Tipe Varian</span>
           <div class="flex gap-2">
             <input
 v-model="newOptionName" type="text" placeholder="Tambah opsi (contoh: RAM, Warna)"
@@ -278,7 +278,7 @@ type="button" class="btn-primary h-9 px-4 text-xs bg-custom-black text-white rou
           <div class="flex flex-wrap gap-2 mt-1">
             <span
 v-for="(opt, idx) in optionGroups" :key="idx"
-              class="px-3 py-1 bg-white dark:bg-surface-card border dark:border-white/10 rounded-full text-xs font-bold flex items-center gap-2">
+              class="px-3 py-1 bg-white dark:bg-surface-card border dark:border-white/10 rounded-full text-xs font-medium flex items-center gap-2">
               {{ opt }}
               <button type="button" class="text-red-500 hover:text-red-700" @click="optionGroups.splice(idx, 1)">
                 &times;
@@ -288,15 +288,15 @@ v-for="(opt, idx) in optionGroups" :key="idx"
         </div>
 
         <div v-if="product.has_variants" class="flex flex-col gap-3">
-          <span class="text-xs font-bold text-gray-500 uppercase mt-2">2. Kelola Varian</span>
+          <span class="text-xs font-medium text-gray-500 uppercase mt-2">2. Kelola Varian</span>
 
           <div
 v-for="(variant, index) in product.variants" :key="variant.id || index"
             class="p-4 border rounded-xl bg-gray-50 dark:bg-white/5 dark:border-white/10 flex flex-col gap-3">
             <div class="flex justify-between items-center">
-              <h4 class="font-bold text-sm text-gray-500">Varian #{{ index + 1 }}</h4>
+              <h4 class="font-medium text-sm text-gray-500">Varian #{{ index + 1 }}</h4>
               <button
-type="button" class="text-red-500 text-xs font-bold hover:underline"
+type="button" class="text-red-500 text-xs font-medium hover:underline"
                 @click="product.variants.splice(index, 1)">
                 Hapus
               </button>
@@ -305,17 +305,17 @@ type="button" class="text-red-500 text-xs font-bold hover:underline"
             <!-- Dynamic Attributes Inputs -->
             <div v-if="optionGroups.length > 0 && variant.variant_attributes" class="grid grid-cols-2 gap-3 mb-2">
               <div v-for="opt in optionGroups" :key="opt" class="flex flex-col gap-1">
-                <label class="text-[10px] font-bold text-gray-400 uppercase">{{ opt }}</label>
+                <label class="text-[10px] font-medium text-gray-400 uppercase">{{ opt }}</label>
                 <input
 v-model="variant.variant_attributes[opt]" type="text"
-                  class="h-9 w-full border border-custom-stroke dark:border-white/10 dark:bg-surface-card rounded-lg px-3 text-sm font-semibold outline-none focus:border-custom-black dark:focus:border-white transition-all"
+                  class="h-9 w-full border border-custom-stroke dark:border-white/10 dark:bg-surface-card rounded-lg px-3 text-sm font-medium outline-none focus:border-custom-black dark:focus:border-white transition-all"
                   :placeholder="'Nilai ' + opt" @input="autoGenerateName(variant)" />
               </div>
             </div>
 
             <!-- Variant Name (Auto-generated or Manual) -->
             <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-gray-400">Nama Varian (otomatis)</label>
+              <label class="text-xs font-medium text-gray-400">Nama Varian (otomatis)</label>
               <input
 v-model="variant.name" type="text"
                 class="custom-input h-10 text-sm bg-gray-100 dark:bg-surface-card" placeholder="Nama varian" />
@@ -324,14 +324,14 @@ v-model="variant.name" type="text"
             <div class="flex gap-3">
               <!-- Variant Price -->
               <div class="flex flex-col gap-1 w-1/2">
-                <label class="text-xs font-semibold text-gray-400">Harga (Rp)</label>
+                <label class="text-xs font-medium text-gray-400">Harga (Rp)</label>
                 <input
 v-model="variant.price" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
                   placeholder="Harga" />
               </div>
               <!-- Variant Stock -->
               <div class="flex flex-col gap-1 w-1/2">
-                <label class="text-xs font-semibold text-gray-400">Stok</label>
+                <label class="text-xs font-medium text-gray-400">Stok</label>
                 <input
 v-model="variant.stock" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
                   placeholder="Stok" />
@@ -350,7 +350,7 @@ type="button"
     </div>
 
     <div v-if="!product.has_variants" class="flex flex-col md:flex-row justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Harga & Stok</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Harga & Stok</p>
       <div class="flex gap-6 w-full md:w-1/2">
         <div class="group/errorState flex flex-col gap-2 w-1/2" :class="{ invalid: error?.price }">
           <label class="group relative">
@@ -375,7 +375,7 @@ type="button"
       </div>
     </div>
     <div class="flex flex-col md:flex-row justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Deskripsi Produk</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Deskripsi Produk</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: error?.description }">
         <label
           class="group flex py-4 px-6 rounded-3xl border-2 border-custom-border focus-within:border-custom-black transition-300 w-full group-[&.invalid]/errorState:border-custom-red">
@@ -384,23 +384,23 @@ type="button"
           </div>
           <div class="flex flex-col gap-[6px] pl-4 w-full">
             <p
-              class="placeholder font-semibold text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-bold transition-300">
+              class="placeholder font-medium text-custom-grey text-sm group-has-[:placeholder-shown]:text-base group-has-[:placeholder-shown]:text-custom-black group-has-[:placeholder-shown]:font-medium transition-300">
               Enter Product Description
             </p>
             <textarea
 v-model="product.description"
-              class="appearance-none outline-none w-full font-semibold leading-[160%]" rows="3"
+              class="appearance-none outline-none w-full font-medium leading-[160%]" rows="3"
               placeholder=""></textarea>
           </div>
         </label>
         <span
 v-if="error?.description"
-          class="font-semibold text-lg text-custom-red leading-none group-[&.invalid]/errorState:block">{{
+          class="font-medium text-lg text-custom-red leading-none group-[&.invalid]/errorState:block">{{
             error?.description?.join(', ') }}</span>
       </div>
     </div>
     <div class="peer flex flex-col md:flex-row justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Kategori Produk</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Kategori Produk</p>
       <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2">
         <label
           class="group relative rounded-[18px] border-[1.5px] border-custom-stroke focus-within:border-custom-black transition-300 overflow-hidden w-full group-[&.invalid]/errorState:border-custom-red">
@@ -408,12 +408,12 @@ v-if="error?.description"
             <img src="@/assets/images/icons/bag-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
           </div>
           <p
-            class="placeholder font-bold absolute -translate-y-1/2 left-[81px] top-[25px] group-has-[:invalid]:top-[38px] group-has-[:valid]:text-sm group-has-[:valid]:text-custom-grey group-has-[:valid]:font-semibold group-focus-within:top-[25px] transition-300">
+            class="placeholder font-medium absolute -translate-y-1/2 left-[81px] top-[25px] group-has-[:invalid]:top-[38px] group-has-[:valid]:text-sm group-has-[:valid]:text-custom-grey group-has-[:valid]:font-medium group-focus-within:top-[25px] transition-300">
             Select Category
           </p>
           <select
 id="" v-model="product.parent_product_category_id" name="" required
-            class="appearance-none w-full h-[72px] font-semibold text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px]">
+            class="appearance-none w-full h-[72px] font-medium text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px]">
             <option hidden></option>
             <option v-for="category in productCategories" :key="category.id" :value="category.id">
               {{ category.name }}
@@ -429,7 +429,7 @@ src="@/assets/images/icons/arrow-down-black.svg"
       </div>
     </div>
     <div class="peer-has-[:valid]:flex hidden flex-col md:flex-row justify-between gap-4">
-      <p class="font-semibold text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Sub Kategori</p>
+      <p class="font-medium text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Sub Kategori</p>
       <div
 class="group/errorState flex flex-col gap-2 w-full md:w-1/2"
         :class="{ invalid: error?.product_category_id }">
@@ -441,12 +441,12 @@ src="@/assets/images/icons/shopping-bag-black.svg" class="flex size-6 shrink-0 d
               alt="icon" />
           </div>
           <p
-            class="placeholder font-bold absolute -translate-y-1/2 left-[81px] top-[25px] group-has-[:invalid]:top-[38px] group-has-[:valid]:text-sm group-has-[:valid]:text-custom-grey group-has-[:valid]:font-semibold group-focus-within:top-[25px] transition-300">
+            class="placeholder font-medium absolute -translate-y-1/2 left-[81px] top-[25px] group-has-[:invalid]:top-[38px] group-has-[:valid]:text-sm group-has-[:valid]:text-custom-grey group-has-[:valid]:font-medium group-focus-within:top-[25px] transition-300">
             Select Sub Category
           </p>
           <select
 id="" v-model="product.product_category_id" name="" required
-            class="appearance-none w-full h-[72px] font-semibold text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px]">
+            class="appearance-none w-full h-[72px] font-medium text-lg outline-none pl-20 pr-6 pb-[14.5px] pt-[32px]">
             <option hidden></option>
             <option v-for="category in subCategories" :key="category.id" :value="category.id">
               {{ category.name }}
@@ -465,12 +465,12 @@ src="@/assets/images/icons/arrow-down-black.svg"
     <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/10">
       <RouterLink
         :to="dashboardRoute('product')"
-        class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-semibold text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
+        class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
         Batal
       </RouterLink>
       <button
         type="submit"
-        class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
+        class="flex items-center justify-center h-11 rounded-xl py-3 px-5 gap-2 bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 transition-colors shadow-sm">
         Simpan Perubahan
       </button>
     </div>

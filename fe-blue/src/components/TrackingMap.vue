@@ -119,7 +119,7 @@ onMounted(loadMap)
         <svg class="size-4 text-custom-blue shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
-        <span class="text-sm font-semibold text-custom-black dark:text-white">Peta Pengiriman</span>
+        <span class="text-sm font-medium text-custom-black dark:text-white">Peta Pengiriman</span>
         <span v-if="storeCity || buyerCity" class="ml-auto text-xs text-custom-grey dark:text-gray-400 truncate">
           {{ storeCity }} → {{ buyerCity }}
         </span>
@@ -149,12 +149,12 @@ onMounted(loadMap)
           />
           <LMarker v-if="originCoords" :lat-lng="originCoords">
             <LTooltip :options="{ permanent: true, direction: 'top' }">
-              <span class="text-xs font-semibold">Asal: {{ storeCity }}</span>
+              <span class="text-xs font-medium">Asal: {{ storeCity }}</span>
             </LTooltip>
           </LMarker>
           <LMarker v-if="destCoords" :lat-lng="destCoords">
             <LTooltip :options="{ permanent: true, direction: 'top' }">
-              <span class="text-xs font-semibold">Tujuan: {{ buyerCity }}</span>
+              <span class="text-xs font-medium">Tujuan: {{ buyerCity }}</span>
             </LTooltip>
           </LMarker>
         </LMap>
@@ -167,14 +167,14 @@ onMounted(loadMap)
         <svg class="size-4 text-custom-blue shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
-        <span class="text-sm font-semibold text-custom-black dark:text-white">Info Pengiriman</span>
+        <span class="text-sm font-medium text-custom-black dark:text-white">Info Pengiriman</span>
       </div>
 
       <div class="px-4 py-4 flex flex-col gap-3">
         <!-- Delivery status -->
         <div v-if="statusInfo" class="flex items-center justify-between">
           <span class="text-sm text-custom-grey dark:text-gray-400">Status</span>
-          <span class="text-xs font-bold px-3 py-1.5 rounded-full" :class="statusInfo.color">
+          <span class="text-xs font-medium px-3 py-1.5 rounded-full" :class="statusInfo.color">
             {{ statusInfo.label }}
           </span>
         </div>
@@ -182,11 +182,11 @@ onMounted(loadMap)
         <!-- Courier & AWB -->
         <div v-if="shipping" class="flex items-center justify-between">
           <span class="text-sm text-custom-grey dark:text-gray-400">Kurir</span>
-          <span class="text-sm font-semibold text-custom-black dark:text-white">{{ shipping }}</span>
+          <span class="text-sm font-medium text-custom-black dark:text-white">{{ shipping }}</span>
         </div>
         <div v-if="trackingNumber" class="flex items-center justify-between">
           <span class="text-sm text-custom-grey dark:text-gray-400">No. Resi</span>
-          <span class="text-sm font-mono font-semibold text-custom-black dark:text-white">{{ trackingNumber }}</span>
+          <span class="text-sm font-mono font-medium text-custom-black dark:text-white">{{ trackingNumber }}</span>
         </div>
 
         <!-- Tracking link -->
@@ -195,7 +195,7 @@ onMounted(loadMap)
           :href="courierTrackingUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="mt-1 flex items-center justify-center gap-2 h-10 w-full rounded-xl bg-custom-blue text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+          class="mt-1 flex items-center justify-center gap-2 h-10 w-full rounded-xl bg-custom-blue text-white text-sm font-medium hover:bg-blue-700 transition-colors"
         >
           <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

@@ -30,10 +30,10 @@ onMounted(() => {
     <!-- Header -->
     <header class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-white/10 py-16 md:py-20 px-5 md:px-[52px]">
       <div class="max-w-[1280px] mx-auto">
-        <span class="text-[#2563EB] font-bold tracking-widest uppercase text-sm mb-4 block"
+        <span class="text-[#2563EB] font-medium tracking-widest uppercase text-sm mb-4 block"
           >Legal</span
         >
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 font-['Plus_Jakarta_Sans']">Privacy Policy</h1>
+        <h1 class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white mb-4 font-['Plus_Jakarta_Sans']">Privacy Policy</h1>
         <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl">
           Kami berkomitmen melindungi privasi Anda dan memastikan data Anda ditangani dengan transparansi dan kepedulian.
         </p>
@@ -52,13 +52,13 @@ onMounted(() => {
       <!-- Sidebar Navigation -->
       <aside class="w-full md:w-1/4 hidden md:block">
         <div class="sticky top-32 flex flex-col gap-2">
-          <p class="font-bold text-gray-900 dark:text-white mb-2 px-4 uppercase text-xs tracking-wider">
+          <p class="font-medium text-gray-900 dark:text-white mb-2 px-4 uppercase text-xs tracking-wider">
             Daftar Isi
           </p>
           <button
             :class="
               activeSection === 'introduction'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -69,7 +69,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'collection'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -80,7 +80,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'usage'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -91,7 +91,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'security'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -102,7 +102,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'contact'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-bold border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -119,7 +119,7 @@ onMounted(() => {
           class="prose prose-lg prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-li:text-gray-600 dark:prose-li:text-gray-400 max-w-none flex flex-col gap-12"
         >
           <section id="introduction" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">1. Introduction</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">1. Introduction</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
               Welcome to Blukios. We respect your privacy and are committed to protecting your
               personal data. This privacy policy will inform you as to how we look after your
@@ -129,7 +129,7 @@ onMounted(() => {
           </section>
 
           <section id="collection" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">2. Data We Collect</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">2. Data We Collect</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
               We may collect, use, store and transfer different kinds of personal data about you
               which we have grouped together follows:
@@ -169,7 +169,7 @@ onMounted(() => {
           </section>
 
           <section id="usage" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">3. How We Use Your Data</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">3. How We Use Your Data</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
               We will only use your personal data when the law allows us to. Most commonly, we will
               use your personal data in the following circumstances:
@@ -188,7 +188,7 @@ onMounted(() => {
           </section>
 
           <section id="security" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">4. Data Security</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Data Security</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
               We have put in place appropriate security measures to prevent your personal data from
               being accidentally lost, used or accessed in an unauthorized way, altered or
@@ -198,7 +198,7 @@ onMounted(() => {
           </section>
 
           <section id="contact" class="scroll-mt-32">
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">5. Contact Us</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Contact Us</h2>
             <div
               class="bg-blue-50 dark:bg-[#2563EB]/10 border border-blue-100 dark:border-[#2563EB]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6"
             >
@@ -208,13 +208,13 @@ onMounted(() => {
                 <i class="fa-solid fa-envelope"></i>
               </div>
               <div>
-                <h3 class="font-bold text-gray-900 dark:text-white text-lg">Have questions?</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white text-lg">Have questions?</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
                   Our data protection officer is ready to help you.
                 </p>
                 <a
                   href="mailto:privacy@blukios.com"
-                  class="text-[#2563EB] font-semibold hover:underline"
+                  class="text-[#2563EB] font-medium hover:underline"
                   >privacy@blukios.com</a
                 >
               </div>

@@ -63,7 +63,7 @@ v-if="item.path" :to="item.path"
       </p>
       <div
 v-if="item.badge"
-        class="text-white text-[10px] font-bold px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full ml-auto mr-2"
+        class="text-white text-[10px] font-medium px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full ml-auto mr-2"
         style="background-color: red">
         {{ item.badge > 99 ? '99+' : item.badge }}
       </div>
@@ -85,7 +85,7 @@ v-else
       </p>
       <div
 v-if="item.badge"
-        class="text-white text-[10px] font-bold px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full ml-auto mr-2"
+        class="text-white text-[10px] font-medium px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full ml-auto mr-2"
         style="background-color: red">
         {{ item.badge > 99 ? '99+' : item.badge }}
       </div>

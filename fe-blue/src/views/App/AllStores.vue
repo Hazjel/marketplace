@@ -91,7 +91,7 @@ onMounted(() => {
       </div>
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 class="font-extrabold text-3xl md:text-4xl text-white">Penjual Terpercaya</h1>
+          <h1 class="font-medium text-3xl md:text-4xl text-white">Penjual Terpercaya</h1>
           <p class="text-white/70 mt-2 text-sm md:text-base">{{ stores.length }} toko terverifikasi siap melayani kamu</p>
         </div>
         <div class="size-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
@@ -152,14 +152,14 @@ onMounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h2 class="font-bold text-xl text-custom-black dark:text-white">
+      <h2 class="font-medium text-xl text-custom-black dark:text-white">
         {{ searchQuery ? 'Toko tidak ditemukan' : 'Belum ada toko' }}
       </h2>
       <p class="text-custom-grey dark:text-gray-400 mt-1">
         {{ searchQuery ? 'Coba kata kunci lain' : 'Nantikan penjual baru segera bergabung' }}
       </p>
       <RouterLink :to="{ name: 'app.home' }"
-        class="mt-6 h-12 px-8 rounded-full bg-custom-blue text-white font-bold text-sm flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all">
+        class="mt-6 h-12 px-8 rounded-md bg-custom-blue text-white font-medium text-sm flex items-center justify-center gap-2 hover:bg-primary-deep transition-all">
         Kembali ke Beranda
       </RouterLink>
     </div>

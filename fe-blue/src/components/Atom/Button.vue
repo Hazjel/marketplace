@@ -5,25 +5,25 @@ import { cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-custom-blue focus-visible:ring-offset-2',
+  'inline-flex items-center justify-center gap-2 font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-custom-blue focus-visible:ring-offset-2',
   {
     variants: {
       variant: {
-        primary: 'bg-custom-blue text-white hover:bg-blue-700 hover:shadow-soft',
-        accent: 'bg-custom-orange text-white hover:bg-orange-600 hover:shadow-soft',
-        secondary: 'bg-custom-black text-white hover:bg-gray-800 rounded-2xl',
-        dark: 'bg-custom-black text-white hover:bg-gray-800 rounded-2xl',
+        primary: 'bg-custom-blue text-white hover:bg-[#0e3191]',
+        accent: 'bg-custom-orange text-white hover:bg-orange-600',
+        secondary: 'bg-custom-black text-white hover:bg-gray-800 rounded-md',
+        dark: 'bg-custom-black text-white hover:bg-gray-800 rounded-md',
         outline:
-          'border-[1.5px] border-custom-stroke bg-white text-custom-black hover:border-custom-black hover:bg-gray-50',
+          'border border-custom-stroke bg-white text-custom-black hover:border-custom-black hover:bg-gray-50',
         ghost: 'bg-transparent text-custom-grey hover:text-custom-black hover:bg-gray-100',
-        danger: 'bg-custom-red text-white hover:shadow-lg hover:shadow-custom-red/30',
+        danger: 'bg-custom-red text-white hover:bg-[#5a1313]',
         link: 'text-custom-blue underline-offset-4 hover:underline'
       },
       size: {
-        sm: 'h-10 px-4 text-sm rounded-xl',
-        md: 'h-12 px-5 text-base rounded-[16px]',
-        lg: 'h-14 px-6 text-lg rounded-full',
-        icon: 'size-10 rounded-full p-0'
+        sm: 'h-10 px-4 text-sm rounded-md',
+        md: 'h-12 px-5 text-base rounded-md',
+        lg: 'h-14 px-6 text-base rounded-md',
+        icon: 'size-10 rounded-md p-0'
       },
       block: {
         true: 'w-full',
@@ -32,7 +32,7 @@ const buttonVariants = cva(
     },
     defaultVariants: {
       variant: 'primary',
-      size: 'lg',
+      size: 'md',
       block: false
     }
   }
@@ -45,7 +45,7 @@ const props = defineProps({
   },
   size: {
     type: String,
-    default: 'lg'
+    default: 'md'
   },
   to: {
     type: [String, Object],

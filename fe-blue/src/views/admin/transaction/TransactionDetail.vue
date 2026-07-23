@@ -239,9 +239,9 @@ v-else-if="!transaction || !transaction.id"
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
       </svg>
     </div>
-    <p class="font-bold text-xl text-custom-black dark:text-white">Transaksi Tidak Ditemukan</p>
+    <p class="font-medium text-xl text-custom-black dark:text-white">Transaksi Tidak Ditemukan</p>
     <p class="text-sm text-custom-grey dark:text-gray-400">Data transaksi tidak tersedia atau telah dihapus</p>
-    <RouterLink :to="dashboardRoute('my-transaction')" class="mt-2 px-6 py-2.5 rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 transition-colors">
+    <RouterLink :to="dashboardRoute('my-transaction')" class="mt-2 px-6 py-2.5 rounded-xl bg-custom-blue text-white font-medium text-sm hover:bg-blue-700 transition-colors">
       Kembali ke Transaksi
     </RouterLink>
   </div>
@@ -253,13 +253,13 @@ v-else-if="!transaction || !transaction.id"
 
       <section
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Info Toko</p>
+        <p class="font-medium text-lg dark:text-white">Info Toko</p>
         <div class="flex items-center gap-4 w-full min-w-0">
           <div class="flex size-16 shrink-0 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 overflow-hidden">
             <img :src="transaction?.store?.logo" class="size-full object-cover" alt="photo" />
           </div>
           <div class="flex flex-col gap-1 w-full overflow-hidden">
-            <p class="font-bold text-lg leading-tight w-full truncate dark:text-white">
+            <p class="font-medium text-lg leading-tight w-full truncate dark:text-white">
               {{ transaction?.store?.name }}
             </p>
             <p class="flex items-center gap-1 text-sm text-custom-grey dark:text-gray-400">
@@ -272,15 +272,15 @@ v-else-if="!transaction || !transaction.id"
         </div>
         <div class="grid grid-cols-3 gap-3">
           <div class="flex flex-col items-center p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10">
-            <p class="font-bold text-lg text-custom-black dark:text-white">{{ transaction?.transaction_details?.length }}</p>
+            <p class="font-medium text-lg text-custom-black dark:text-white">{{ transaction?.transaction_details?.length }}</p>
             <p class="text-xs text-custom-grey dark:text-gray-400">Produk</p>
           </div>
           <div class="flex flex-col items-center p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10">
-            <p class="font-bold text-lg text-custom-black dark:text-white">{{ transaction?.transaction_details?.reduce((total, detail) => total + detail.qty, 0) }}</p>
+            <p class="font-medium text-lg text-custom-black dark:text-white">{{ transaction?.transaction_details?.reduce((total, detail) => total + detail.qty, 0) }}</p>
             <p class="text-xs text-custom-grey dark:text-gray-400">Kuantitas</p>
           </div>
           <div class="flex flex-col items-center p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10">
-            <p class="font-bold text-xs text-custom-black dark:text-white leading-tight text-center">{{ formatToClientTimeZone(transaction?.created_at) }}</p>
+            <p class="font-medium text-xs text-custom-black dark:text-white leading-tight text-center">{{ formatToClientTimeZone(transaction?.created_at) }}</p>
             <p class="text-xs text-custom-grey dark:text-gray-400 mt-1">Tanggal</p>
           </div>
         </div>
@@ -289,7 +289,7 @@ v-else-if="!transaction || !transaction.id"
         class="flex flex-col w-full rounded-2xl p-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
         <div class="flex items-center justify-between mb-5">
           <div class="flex flex-col gap-1">
-            <p class="font-bold text-lg dark:text-white">Detail Produk</p>
+            <p class="font-medium text-lg dark:text-white">Detail Produk</p>
             <p class="text-sm text-custom-grey dark:text-gray-400">
               {{ transaction?.transaction_details?.length }} produk dalam pesanan ini
             </p>
@@ -309,10 +309,10 @@ v-for="(product, index) in transaction?.transaction_details" :key="product.id ||
                     " class="size-full object-contain" alt="thumbnail" />
                 </div>
                 <div class="flex flex-col gap-[6px] w-full overflow-hidden">
-                  <p class="font-bold text-lg leading-tight w-full truncate dark:text-white">
+                  <p class="font-medium text-lg leading-tight w-full truncate dark:text-white">
                     {{ product?.product?.name }}
                   </p>
-                  <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
+                  <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
                     <img src="@/assets/images/icons/bag-grey.svg" class="size-5 dark:invert" alt="icon" />
                     {{ product?.product?.product_category?.name }}
                   </p>
@@ -320,19 +320,19 @@ v-for="(product, index) in transaction?.transaction_details" :key="product.id ||
               </div>
               <div
                 class="flex flex-row sm:flex-col gap-2 shrink-0 justify-between sm:justify-end sm:text-right w-full sm:w-auto mt-2 sm:mt-0 ml-[106px] sm:ml-0">
-                <p class="font-bold text-custom-blue dark:text-custom-blue">
+                <p class="font-medium text-custom-blue dark:text-custom-blue">
                   Rp {{ formatRupiah(product?.product?.price) }}
                 </p>
-                <p class="font-semibold leading-none text-custom-grey">{{ product.qty }}</p>
+                <p class="font-medium leading-none text-custom-grey">{{ product.qty }}</p>
               </div>
             </div>
             <hr class="border-custom-stroke dark:border-white/10" />
             <div class="flex items-center justify-between">
-              <p class="flex items-center gap-1 font-semibold text-custom-grey leading-none">
+              <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
                 <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-5 dark:invert" alt="icon" />
                 Subtotal
               </p>
-              <p class="font-bold text-lg text-custom-blue">
+              <p class="font-medium text-lg text-custom-blue">
                 Rp {{ formatRupiah(product.subtotal) }}
               </p>
             </div>
@@ -343,12 +343,12 @@ v-if="transaction?.delivery_status === 'completed' && activeMode === 'buyer'"
               class="flex justify-end pt-2">
               <div
 v-if="hasReviewed(product.product_id)"
-                class="px-4 py-2 bg-green-50 text-green-600 rounded-full text-sm font-bold border border-green-100 flex items-center gap-2">
+                class="px-4 py-2 bg-green-50 text-green-600 rounded-full text-sm font-medium border border-green-100 flex items-center gap-2">
                 <span class="text-green-500">✓</span> Ulasan Terkirim
               </div>
               <button
 v-else
-                class="px-5 py-2.5 rounded-full bg-custom-blue text-white text-sm font-bold hover:shadow-lg hover:shadow-custom-blue/30 transition-all"
+                class="px-5 py-2.5 rounded-md bg-custom-blue text-white text-sm font-medium hover:bg-primary-deep transition-all"
                 @click="handleOpenReview(product)">
                 Beri Ulasan
               </button>
@@ -360,14 +360,14 @@ v-else
     <div class="flex flex-col gap-5 w-full md:w-[440px] shrink-0">
       <section
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Detail Pembeli</p>
+        <p class="font-medium text-lg dark:text-white">Detail Pembeli</p>
         <div class="flex items-center gap-4 w-full min-w-0">
           <div
             class="flex size-14 shrink-0 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 overflow-hidden">
             <img :src="transaction?.buyer?.user?.profile_picture" class="size-full object-cover" alt="photo" />
           </div>
           <div class="flex flex-col gap-1 w-full overflow-hidden">
-            <p class="font-bold text-base leading-tight w-full truncate dark:text-white">
+            <p class="font-medium text-base leading-tight w-full truncate dark:text-white">
               {{ transaction?.buyer?.user?.name }}
             </p>
             <p class="flex items-center gap-1 text-sm text-custom-grey dark:text-gray-400">
@@ -386,7 +386,7 @@ v-else
               </svg>
             </div>
             <div class="flex flex-col min-w-0">
-              <p class="font-semibold text-sm text-custom-black dark:text-white truncate">{{ transaction?.buyer?.user?.email }}</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white truncate">{{ transaction?.buyer?.user?.email }}</p>
               <p class="text-xs text-custom-grey dark:text-gray-400">Email</p>
             </div>
           </div>
@@ -397,7 +397,7 @@ v-else
               </svg>
             </div>
             <div class="flex flex-col min-w-0">
-              <p class="font-semibold text-sm text-custom-black dark:text-white">{{ transaction?.city }}</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">{{ transaction?.city }}</p>
               <p class="text-xs text-custom-grey dark:text-gray-400">Kota</p>
             </div>
           </div>
@@ -409,7 +409,7 @@ v-else
               </svg>
             </div>
             <div class="flex flex-col min-w-0">
-              <p class="font-semibold text-sm text-custom-black dark:text-white truncate">{{ transaction?.address }}</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white truncate">{{ transaction?.address }}</p>
               <p class="text-xs text-custom-grey dark:text-gray-400">Alamat</p>
             </div>
           </div>
@@ -420,7 +420,7 @@ v-else
               </svg>
             </div>
             <div class="flex flex-col min-w-0">
-              <p class="font-semibold text-sm text-custom-black dark:text-white">{{ transaction?.postal_code }}</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">{{ transaction?.postal_code }}</p>
               <p class="text-xs text-custom-grey dark:text-gray-400">Kode Pos</p>
             </div>
           </div>
@@ -428,39 +428,39 @@ v-else
       </section>
       <section
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Ringkasan Pembayaran</p>
+        <p class="font-medium text-lg dark:text-white">Ringkasan Pembayaran</p>
         <div class="flex flex-col rounded-xl border border-gray-100 dark:border-white/10 p-4 gap-3">
           <div class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">Subtotal</span>
-            <span class="text-sm font-semibold text-custom-black dark:text-white">
+            <span class="text-sm font-medium text-custom-black dark:text-white">
               Rp {{ formatRupiah(transaction?.transaction_details?.reduce((total, detail) => total + detail.subtotal, 0)) }}
             </span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">Ongkos Kirim</span>
-            <span class="text-sm font-semibold text-custom-black dark:text-white">
+            <span class="text-sm font-medium text-custom-black dark:text-white">
               Rp {{ formatRupiah(transaction?.shipping_cost) }}
             </span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">PPN 11%</span>
-            <span class="text-sm font-semibold text-custom-black dark:text-white">Rp {{ formatRupiah(transaction?.tax) }}</span>
+            <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(transaction?.tax) }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">Diskon</span>
-            <span class="text-sm font-semibold text-custom-black dark:text-white">Rp 0</span>
+            <span class="text-sm font-medium text-custom-black dark:text-white">Rp 0</span>
           </div>
           <hr class="border-gray-100 dark:border-white/10 my-1" />
           <div class="flex items-center justify-between">
-            <span class="font-bold text-base text-custom-black dark:text-white">Grand Total</span>
-            <span class="font-bold text-lg text-custom-blue">
+            <span class="font-medium text-base text-custom-black dark:text-white">Grand Total</span>
+            <span class="font-medium text-lg text-custom-blue">
               Rp {{ formatRupiah(transaction?.grand_total) }}
             </span>
           </div>
           <hr class="border-gray-100 dark:border-white/10 my-1" />
           <div class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">Status Pembayaran</span>
-            <span class="font-bold text-sm capitalize"
+            <span class="font-medium text-sm capitalize"
               :class="transaction?.payment_status === 'paid' ? 'text-green-600' : transaction?.payment_status === 'unpaid' ? 'text-red-500' : 'text-custom-blue'">
               {{ transaction?.payment_status }}
             </span>
@@ -470,7 +470,7 @@ v-else
           <button
 v-if="activeMode === 'buyer' && transaction?.payment_status === 'unpaid'"
             :disabled="isProcessingPayment"
-            class="flex items-center justify-center h-12 w-full rounded-xl bg-custom-blue text-white font-bold text-sm hover:bg-blue-700 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-2"
+            class="flex items-center justify-center h-12 w-full rounded-xl bg-custom-blue text-white font-medium text-sm hover:bg-blue-700 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-2"
             @click="handleRepayment">
             <template v-if="isProcessingPayment">
               <div class="size-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
@@ -483,7 +483,7 @@ v-if="activeMode === 'buyer' && transaction?.payment_status === 'unpaid'"
       <section
 v-if="transaction?.delivery_status === 'pending'"
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Status Pesanan</p>
+        <p class="font-medium text-lg dark:text-white">Status Pesanan</p>
         <div class="grid grid-cols-3 relative min-h-[90px] w-full">
           <div
 id="Progress-Bar"
@@ -493,23 +493,23 @@ id="Progress-Bar"
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
-              <span class="font-bold">1</span>
+              <span class="font-medium">1</span>
             </div>
-            <p class="font-bold text-center">Book Review</p>
+            <p class="font-medium text-center">Book Review</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden items-center justify-center">
-              <span class="font-bold dark:text-custom-grey">2</span>
+              <span class="font-medium dark:text-custom-grey">2</span>
             </div>
-            <p class="font-bold text-center dark:text-white">Processing</p>
+            <p class="font-medium text-center dark:text-white">Processing</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden items-center justify-center">
-              <span class="font-bold dark:text-custom-grey">?</span>
+              <span class="font-medium dark:text-custom-grey">?</span>
             </div>
-            <p class="font-bold text-center dark:text-white">2+ More</p>
+            <p class="font-medium text-center dark:text-white">2+ More</p>
           </div>
         </div>
         <div class="flex items-center justify-between">
@@ -518,7 +518,7 @@ id="Progress-Bar"
             Delivery Status
           </p>
           <p
-            class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-yellow text-[#544607]">
+            class="badge rounded-full py-3 px-[18px] flex shrink-0 font-medium uppercase bg-custom-yellow text-[#544607]">
             pending
           </p>
         </div>
@@ -531,10 +531,10 @@ v-if="
           <button
             class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300"
             @click="handleAcceptOrder">
-            <span class="font-semibold text-lg text-white">Accept Order</span>
+            <span class="font-medium text-lg text-white">Accept Order</span>
           </button>
           <div class="flex items-center justify-center gap-[6px]">
-            <p class="font-semibold text-custom-grey">Why can't I decline the order?</p>
+            <p class="font-medium text-custom-grey">Why can't I decline the order?</p>
             <img src="@/assets/images/icons/info-circle-grey.svg" class="size-[18px]" alt="icon" />
           </div>
         </div>
@@ -542,7 +542,7 @@ v-if="
       <section
 v-if="transaction?.delivery_status === 'processing'"
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Status Pesanan</p>
+        <p class="font-medium text-lg dark:text-white">Status Pesanan</p>
         <div class="grid grid-cols-3 relative min-h-[90px] w-full">
           <div id="Progress-Bar" class="absolute w-full top-[26px] h-3 rounded-full bg-custom-stroke overflow-hidden">
             <div class="w-2/3 h-full bg-custom-lime-green"></div>
@@ -550,23 +550,23 @@ v-if="transaction?.delivery_status === 'processing'"
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
-              <span class="font-bold">1</span>
+              <span class="font-medium">1</span>
             </div>
-            <p class="font-bold text-center">Book Review</p>
+            <p class="font-medium text-center">Book Review</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
-              <span class="font-bold">2</span>
+              <span class="font-medium">2</span>
             </div>
-            <p class="font-bold text-center">Processing</p>
+            <p class="font-medium text-center">Processing</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden items-center justify-center">
-              <span class="font-bold dark:text-custom-grey">?</span>
+              <span class="font-medium dark:text-custom-grey">?</span>
             </div>
-            <p class="font-bold text-center dark:text-white">2+ More</p>
+            <p class="font-medium text-center dark:text-white">2+ More</p>
           </div>
         </div>
         <div class="flex items-center justify-between">
@@ -575,7 +575,7 @@ v-if="transaction?.delivery_status === 'processing'"
             Delivery Status
           </p>
           <p
-            class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-blue/10 text-custom-blue">
+            class="badge rounded-full py-3 px-[18px] flex shrink-0 font-medium uppercase bg-custom-blue/10 text-custom-blue">
             processing
           </p>
         </div>
@@ -589,13 +589,13 @@ id="Thumbnail" :src="transaction.delivery_proof_url"
             </div>
             <button
 id="Add-Photo" type="button"
-              class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-semibold text-lg"
+              class="flex items-center justify-center rounded-2xl py-4 px-6 bg-custom-black text-white font-medium text-lg"
               @click="fileInput.click()">
               Add Photo
             </button>
           </div>
           <div class="flex flex-col gap-3">
-            <p class="font-semibold text-custom-grey">Tracking Number</p>
+            <p class="font-medium text-custom-grey">Tracking Number</p>
             <div class="group/errorState flex flex-col gap-2">
               <label class="group relative">
                 <div class="input-icon">
@@ -613,14 +613,14 @@ id="Tracking" v-model="transaction.tracking_number" type="string" class="custom-
 id="Update-Status" type="submit"
             class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300"
             @click="handleDeliverySubmit">
-            <span class="font-semibold text-lg text-white">Update Status</span>
+            <span class="font-medium text-lg text-white">Update Status</span>
           </button>
         </template>
       </section>
       <section
 v-if="transaction?.delivery_status === 'delivering'"
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Status Pesanan</p>
+        <p class="font-medium text-lg dark:text-white">Status Pesanan</p>
         <div class="grid grid-cols-3 relative min-h-[90px] w-full">
           <div id="Progress-Bar" class="absolute w-full top-[26px] h-3 rounded-full bg-custom-stroke overflow-hidden">
             <div class="w-2/3 h-full bg-custom-lime-green"></div>
@@ -628,23 +628,23 @@ v-if="transaction?.delivery_status === 'delivering'"
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
-              <span class="font-bold">2</span>
+              <span class="font-medium">2</span>
             </div>
-            <p class="font-bold text-center">Processing</p>
+            <p class="font-medium text-center">Processing</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
-              <span class="font-bold">3</span>
+              <span class="font-medium">3</span>
             </div>
-            <p class="font-bold text-center">Delivering</p>
+            <p class="font-medium text-center">Delivering</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden items-center justify-center">
-              <span class="font-bold dark:text-custom-grey">4</span>
+              <span class="font-medium dark:text-custom-grey">4</span>
             </div>
-            <p class="font-bold text-center dark:text-white">Completed</p>
+            <p class="font-medium text-center dark:text-white">Completed</p>
           </div>
         </div>
         <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
@@ -660,14 +660,14 @@ v-if="transaction?.delivery_status === 'delivering'"
               Delivery Status
             </p>
             <p
-              class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-orange/10 text-custom-orange w-fit">
+              class="badge rounded-full py-3 px-[18px] flex shrink-0 font-medium uppercase bg-custom-orange/10 text-custom-orange w-fit">
               Delivering
             </p>
           </div>
 
           <button
 v-if="activeMode === 'buyer'"
-            class="flex items-center justify-center h-12 px-6 rounded-full bg-custom-blue text-white font-semibold shadow-lg hover:bg-blue-600 transition-300"
+            class="flex items-center justify-center h-12 px-6 rounded-md bg-custom-blue text-white font-medium hover:bg-primary-deep transition-300"
             @click="handleCompleteOrderClick">
             Order Received
           </button>
@@ -677,7 +677,7 @@ v-if="activeMode === 'buyer'"
             <img src="@/assets/images/icons/routing-grey.svg" class="size-6" alt="icon" />
             Tracking Number
           </p>
-          <p class="font-semibold text-lg leading-none dark:text-white">
+          <p class="font-medium text-lg leading-none dark:text-white">
             {{ transaction?.tracking_number }} ({{ transaction?.shipping }})
           </p>
         </div>
@@ -696,7 +696,7 @@ v-if="activeMode === 'buyer'"
       <section
 v-if="transaction?.delivery_status === 'completed'"
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Status Pesanan</p>
+        <p class="font-medium text-lg dark:text-white">Status Pesanan</p>
         <div class="grid grid-cols-3 relative min-h-[90px] w-full">
           <div
 id="Progress-Bar"
@@ -706,23 +706,23 @@ id="Progress-Bar"
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
-              <span class="font-bold">2</span>
+              <span class="font-medium">2</span>
             </div>
-            <p class="font-bold text-center">Processing</p>
+            <p class="font-medium text-center">Processing</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
-              <span class="font-bold">3</span>
+              <span class="font-medium">3</span>
             </div>
-            <p class="font-bold text-center">Delivering</p>
+            <p class="font-medium text-center">Delivering</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
-              <span class="font-bold">4</span>
+              <span class="font-medium">4</span>
             </div>
-            <p class="font-bold text-center">Completed</p>
+            <p class="font-medium text-center">Completed</p>
           </div>
         </div>
         <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
@@ -736,7 +736,7 @@ id="Progress-Bar"
             Delivery Status
           </p>
           <p
-            class="badge rounded-full py-3 px-[18px] flex shrink-0 font-bold uppercase bg-custom-green/10 text-custom-green">
+            class="badge rounded-full py-3 px-[18px] flex shrink-0 font-medium uppercase bg-custom-green/10 text-custom-green">
             completed
           </p>
         </div>
@@ -745,7 +745,7 @@ id="Progress-Bar"
             <img src="@/assets/images/icons/routing-grey.svg" class="size-6" alt="icon" />
             Tracking Number
           </p>
-          <p class="font-semibold text-lg leading-none dark:text-white">{{ transaction?.tracking_number }}</p>
+          <p class="font-medium text-lg leading-none dark:text-white">{{ transaction?.tracking_number }}</p>
         </div>
         <TrackingMap
           :store-city="transaction?.store?.city"
@@ -761,7 +761,7 @@ id="Progress-Bar"
       </section>
       <section
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
-        <p class="font-bold text-lg dark:text-white">Ulasan Pembeli</p>
+        <p class="font-medium text-lg dark:text-white">Ulasan Pembeli</p>
 
         <div v-if="transaction?.product_reviews?.length > 0" class="flex flex-col gap-4">
           <div v-for="detail in transaction.transaction_details" :key="detail.id">
@@ -770,9 +770,9 @@ v-for="review in getReviewsForProduct(detail.product_id)" :key="review.id"
               class="flex flex-col rounded-2xl border border-custom-stroke dark:border-white/10 p-4 gap-4">
               <div class="flex items-center justify-between">
                 <div class="flex flex-col">
-                  <p class="font-bold text-lg dark:text-white">{{ detail.product.name }}</p>
+                  <p class="font-medium text-lg dark:text-white">{{ detail.product.name }}</p>
                   <div class="flex items-center gap-2">
-                    <p class="font-bold tracking-tight text-xl leading-none dark:text-white">
+                    <p class="font-medium tracking-tight text-xl leading-none dark:text-white">
                       <span class="text-[32px]">{{ review.rating }}.0</span>/5.0
                     </p>
                     <div class="flex">

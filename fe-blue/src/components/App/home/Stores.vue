@@ -20,10 +20,10 @@ onMounted(async () => {
   <section class="flex flex-col gap-5">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h2 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Toko Official</h2>
+      <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-white">Toko Official</h2>
       <RouterLink
         :to="{ name: 'app.all-stores' }"
-        class="text-sm font-semibold text-custom-blue dark:text-blue-400 hover:underline"
+        class="text-sm font-medium text-custom-blue dark:text-blue-400 hover:underline"
       >
         Lihat Semua
       </RouterLink>
@@ -49,14 +49,14 @@ onMounted(async () => {
 
         <!-- Info -->
         <div class="flex flex-col items-center gap-1 text-center w-full">
-          <h3 class="text-sm font-semibold text-gray-800 dark:text-white truncate w-full group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
+          <h3 class="text-sm font-medium text-gray-800 dark:text-white truncate w-full group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
             {{ store.name }}
           </h3>
           <div v-if="store.is_verified" class="flex items-center gap-1">
             <svg class="size-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
-            <span class="text-[10px] font-bold text-blue-500 uppercase">Official</span>
+            <span class="text-[10px] font-medium text-blue-500 uppercase">Official</span>
           </div>
           <span class="text-xs text-gray-400 dark:text-gray-500">{{ store.city || 'Indonesia' }}</span>
         </div>

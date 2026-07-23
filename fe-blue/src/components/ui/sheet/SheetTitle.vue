@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <DialogTitle :class="cn('text-lg font-semibold text-slate-950', props.class)">
+  <DialogTitle :class="cn('text-lg font-medium text-slate-950', props.class)">
     <slot />
   </DialogTitle>
 </template>

@@ -39,7 +39,7 @@ const handleSave = async () => {
   <div class="flex flex-col gap-8 w-full">
     <!-- Page Header -->
     <div class="flex flex-col gap-1">
-      <h1 class="font-bold text-2xl lg:text-3xl text-custom-black dark:text-white">Privasi</h1>
+      <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">Privasi</h1>
       <p class="text-custom-grey dark:text-gray-400 font-medium">Kontrol siapa yang dapat melihat informasi profilmu.</p>
     </div>
 
@@ -68,7 +68,7 @@ const handleSave = async () => {
     <!-- Privacy Settings Card -->
     <div class="bg-white dark:bg-white/[0.02] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10">
-        <h2 class="font-bold text-base text-custom-black dark:text-white flex items-center gap-2">
+        <h2 class="font-medium text-base text-custom-black dark:text-white flex items-center gap-2">
           <svg class="size-5 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -79,7 +79,7 @@ const handleSave = async () => {
       <div class="divide-y divide-gray-50 dark:divide-white/5">
         <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
           <div>
-            <p class="font-semibold text-sm text-custom-black dark:text-white">Profil Publik</p>
+            <p class="font-medium text-sm text-custom-black dark:text-white">Profil Publik</p>
             <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Izinkan pengguna lain melihat profil dan nama kamu</p>
           </div>
           <div class="relative">
@@ -89,7 +89,7 @@ const handleSave = async () => {
         </label>
         <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
           <div>
-            <p class="font-semibold text-sm text-custom-black dark:text-white">Status Online</p>
+            <p class="font-medium text-sm text-custom-black dark:text-white">Status Online</p>
             <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Tampilkan kapan terakhir kamu online</p>
           </div>
           <div class="relative">
@@ -99,7 +99,7 @@ const handleSave = async () => {
         </label>
         <label class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
           <div>
-            <p class="font-semibold text-sm text-custom-black dark:text-white">Riwayat Pembelian</p>
+            <p class="font-medium text-sm text-custom-black dark:text-white">Riwayat Pembelian</p>
             <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">Izinkan penjual melihat riwayat belanja kamu</p>
           </div>
           <div class="relative">
@@ -113,7 +113,7 @@ const handleSave = async () => {
     <!-- Account Info Card -->
     <div class="bg-white dark:bg-white/[0.02] rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10">
-        <h2 class="font-bold text-base text-custom-black dark:text-white flex items-center gap-2">
+        <h2 class="font-medium text-base text-custom-black dark:text-white flex items-center gap-2">
           <svg class="size-5 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
@@ -124,12 +124,12 @@ const handleSave = async () => {
         <div class="flex flex-col gap-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-semibold text-sm text-custom-black dark:text-white">Login via Google</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">Login via Google</p>
               <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">
                 {{ user?.email || 'Belum terhubung' }}
               </p>
             </div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold rounded-full">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-medium rounded-full">
               <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
               </svg>
@@ -139,7 +139,7 @@ const handleSave = async () => {
           <div class="h-px bg-gray-100 dark:bg-white/10"></div>
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-semibold text-sm text-custom-black dark:text-white">Bergabung Sejak</p>
+              <p class="font-medium text-sm text-custom-black dark:text-white">Bergabung Sejak</p>
               <p class="text-custom-grey dark:text-gray-500 text-xs mt-0.5">
                 {{ user?.created_at ? new Date(user.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-' }}
               </p>
@@ -154,7 +154,7 @@ const handleSave = async () => {
       <button
         @click="handleSave"
         :disabled="saving"
-        class="flex items-center justify-center h-12 px-8 rounded-full bg-custom-blue text-white font-bold text-base hover:bg-blue-700 hover:shadow-lg hover:shadow-custom-blue/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="flex items-center justify-center h-12 px-8 rounded-md bg-custom-blue text-white font-medium text-base hover:bg-primary-deep active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <div v-if="saving" class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
         Simpan Pengaturan

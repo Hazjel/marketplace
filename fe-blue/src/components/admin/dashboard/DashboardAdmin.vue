@@ -84,7 +84,7 @@ onMounted(fetch)
                   />
                 </div>
                 <div class="flex flex-col gap-1 w-full overflow-hidden">
-                  <p class="font-bold text-sm leading-tight w-full truncate text-gray-900 dark:text-white">
+                  <p class="font-medium text-sm leading-tight w-full truncate text-gray-900 dark:text-white">
                     {{ store.name }}
                   </p>
                   <p class="font-medium text-gray-500 dark:text-gray-400 text-xs leading-none">
@@ -99,7 +99,7 @@ onMounted(fetch)
                 </p>
                 <RouterLink
                   :to="{ name: 'admin.store.detail', params: { id: store.id } }"
-                  class="px-3 py-2 rounded-xl bg-[#2563EB]/10 dark:bg-[#2563EB]/20 hover:ring-2 hover:ring-[#2563EB] transition-all font-semibold text-[#2563EB] text-xs"
+                  class="px-3 py-2 rounded-xl bg-[#2563EB]/10 dark:bg-[#2563EB]/20 hover:ring-2 hover:ring-[#2563EB] transition-all font-medium text-[#2563EB] text-xs"
                 >
                   Detail
                 </RouterLink>
@@ -137,7 +137,7 @@ onMounted(fetch)
                   />
                 </div>
                 <div class="flex flex-col gap-1 w-full flex-grow-0 overflow-hidden">
-                  <p class="font-bold text-sm leading-tight w-full truncate text-gray-900 dark:text-white">
+                  <p class="font-medium text-sm leading-tight w-full truncate text-gray-900 dark:text-white">
                     {{ transaction.store?.name || 'Unknown Store' }}
                   </p>
                   <p class="font-medium text-gray-500 dark:text-gray-400 text-xs leading-none">
@@ -145,7 +145,7 @@ onMounted(fetch)
                   </p>
                 </div>
                 <div class="flex flex-col gap-1 items-end shrink-0">
-                  <p class="font-bold text-sm leading-tight text-[#2563EB] dark:text-blue-400 text-nowrap">
+                  <p class="font-medium text-sm leading-tight text-[#2563EB] dark:text-blue-400 text-nowrap">
                     Rp {{ formatRupiah(transaction.grand_total) }}
                   </p>
                   <p class="text-xs font-medium text-gray-500 dark:text-gray-400 text-nowrap">Grand Total</p>
@@ -158,7 +158,7 @@ onMounted(fetch)
                 </p>
                 <RouterLink
                   :to="{ name: 'admin.transaction.detail', params: { id: transaction.id } }"
-                  class="px-3 py-2 rounded-xl bg-[#2563EB]/10 dark:bg-[#2563EB]/20 hover:ring-2 hover:ring-[#2563EB] transition-all font-semibold text-[#2563EB] text-xs"
+                  class="px-3 py-2 rounded-xl bg-[#2563EB]/10 dark:bg-[#2563EB]/20 hover:ring-2 hover:ring-[#2563EB] transition-all font-medium text-[#2563EB] text-xs"
                 >
                   Detail
                 </RouterLink>

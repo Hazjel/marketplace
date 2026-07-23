@@ -93,7 +93,7 @@ onMounted(fetchData)
         </svg>
       </div>
       <div>
-        <p class="font-semibold text-amber-700 dark:text-amber-400">Status: Menunggu Proses</p>
+        <p class="font-medium text-amber-700 dark:text-amber-400">Status: Menunggu Proses</p>
         <p class="text-sm text-amber-600/80 dark:text-amber-400/70">Penarikan ini masih menunggu persetujuan admin</p>
       </div>
     </div>
@@ -106,7 +106,7 @@ onMounted(fetchData)
         </svg>
       </div>
       <div>
-        <p class="font-semibold text-green-700 dark:text-green-400">Status: Selesai</p>
+        <p class="font-medium text-green-700 dark:text-green-400">Status: Selesai</p>
         <p class="text-sm text-green-600/80 dark:text-green-400/70">Penarikan telah diproses dan diselesaikan</p>
       </div>
     </div>
@@ -119,7 +119,7 @@ onMounted(fetchData)
         </svg>
       </div>
       <div>
-        <p class="font-semibold text-red-700 dark:text-red-400">Status: Ditolak</p>
+        <p class="font-medium text-red-700 dark:text-red-400">Status: Ditolak</p>
         <p class="text-sm text-red-600/80 dark:text-red-400/70">Penarikan ditolak — dana telah dikembalikan ke saldo toko</p>
       </div>
     </div>
@@ -130,13 +130,13 @@ onMounted(fetchData)
       <div class="flex flex-col w-full gap-6">
         <!-- Store Details -->
         <section class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm">
-          <p class="font-bold text-lg dark:text-white">Detail Toko</p>
+          <p class="font-medium text-lg dark:text-white">Detail Toko</p>
           <div class="flex items-center gap-4 w-full min-w-0">
             <div class="flex size-[72px] shrink-0 rounded-full bg-gray-100 dark:bg-white/5 overflow-hidden ring-4 ring-green-100 dark:ring-green-900/30">
               <img :src="withdrawal?.store_balance?.store?.logo" class="size-full object-cover" alt="photo" />
             </div>
             <div class="flex flex-col gap-1.5 w-full overflow-hidden">
-              <p class="font-bold text-xl leading-tight w-full truncate dark:text-white">
+              <p class="font-medium text-xl leading-tight w-full truncate dark:text-white">
                 {{ withdrawal?.store_balance?.store?.name }}
               </p>
               <p class="flex items-center gap-1.5 font-medium text-gray-500 dark:text-gray-400">
@@ -156,7 +156,7 @@ onMounted(fetchData)
                 </svg>
               </div>
               <div class="flex flex-col">
-                <p class="font-bold text-lg dark:text-white">{{ withdrawal?.store_balance?.store?.transaction_count }}</p>
+                <p class="font-medium text-lg dark:text-white">{{ withdrawal?.store_balance?.store?.transaction_count }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Transaksi</p>
               </div>
             </div>
@@ -167,7 +167,7 @@ onMounted(fetchData)
                 </svg>
               </div>
               <div class="flex flex-col">
-                <p class="font-bold text-lg dark:text-white">{{ withdrawal?.store_balance?.store?.product_count }}</p>
+                <p class="font-medium text-lg dark:text-white">{{ withdrawal?.store_balance?.store?.product_count }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Produk</p>
               </div>
             </div>
@@ -179,7 +179,7 @@ onMounted(fetchData)
           v-if="user.role === 'admin' && withdrawal.status === 'pending'"
           class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm"
           @submit.prevent="handleAprroveWithdrawal">
-          <p class="font-bold text-lg dark:text-white">Bukti Pembayaran</p>
+          <p class="font-medium text-lg dark:text-white">Bukti Pembayaran</p>
           <div class="flex items-center justify-between w-full">
             <div class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-gray-100 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-white/20">
               <img id="Thumbnail" :src="withdrawal.proof_url" class="size-full object-cover" alt="icon" />
@@ -195,7 +195,7 @@ onMounted(fetchData)
             <button
               id="Add-Photo"
               type="button"
-              class="flex items-center justify-center gap-2 rounded-xl py-3 px-5 bg-gray-900 dark:bg-white/10 text-white font-semibold text-sm hover:bg-gray-800 transition-colors duration-200"
+              class="flex items-center justify-center gap-2 rounded-xl py-3 px-5 bg-gray-900 dark:bg-white/10 text-white font-medium text-sm hover:bg-gray-800 transition-colors duration-200"
               @click="triggerFileInput">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 0 3Z" />
@@ -223,7 +223,7 @@ onMounted(fetchData)
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
-            <span class="font-semibold text-sm text-white">Proses Penarikan</span>
+            <span class="font-medium text-sm text-white">Proses Penarikan</span>
           </button>
 
           <!-- Reject -->
@@ -231,7 +231,7 @@ onMounted(fetchData)
             <button
               v-if="!showRejectForm"
               type="button"
-              class="h-11 w-full rounded-xl flex items-center justify-center gap-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-semibold text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              class="h-11 w-full rounded-xl flex items-center justify-center gap-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-medium text-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               @click="showRejectForm = true">
               Tolak Penarikan
             </button>
@@ -244,13 +244,13 @@ onMounted(fetchData)
               <div class="flex gap-2">
                 <button
                   type="button"
-                  class="h-11 flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors"
+                  class="h-11 flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium text-sm transition-colors"
                   @click="handleRejectWithdrawal">
                   Konfirmasi Tolak — Dana Kembali ke Toko
                 </button>
                 <button
                   type="button"
-                  class="h-11 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold dark:text-white"
+                  class="h-11 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-medium dark:text-white"
                   @click="showRejectForm = false">
                   Batal
                 </button>
@@ -263,7 +263,7 @@ onMounted(fetchData)
         <section
           v-if="withdrawal.status === 'approved'"
           class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm">
-          <p class="font-bold text-lg dark:text-white">Bukti Pembayaran</p>
+          <p class="font-medium text-lg dark:text-white">Bukti Pembayaran</p>
           <div class="relative h-[256px] w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-white/5">
             <img :src="withdrawal.proof" class="relative size-full object-cover" alt="proof" />
             <div class="absolute bottom-0 w-full h-[95px] bg-gradient-to-t from-black/50 to-transparent">
@@ -273,7 +273,7 @@ onMounted(fetchData)
                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                 </svg>
-                <span class="font-bold text-xs text-gray-700">PREVIEW</span>
+                <span class="font-medium text-xs text-gray-700">PREVIEW</span>
               </button>
             </div>
           </div>
@@ -285,7 +285,7 @@ onMounted(fetchData)
         <!-- Amount Card -->
         <section class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm">
           <div class="flex flex-col items-center justify-center py-6 gap-2">
-            <p class="font-bold text-3xl text-blue-600 dark:text-blue-400">
+            <p class="font-medium text-3xl text-blue-600 dark:text-blue-400">
               Rp {{ formatRupiah(withdrawal?.amount) }}
             </p>
             <div class="flex items-center gap-2">
@@ -305,7 +305,7 @@ onMounted(fetchData)
                 </svg>
               </div>
               <div class="flex flex-col gap-0.5">
-                <p class="font-semibold text-sm dark:text-white">{{ formatToClientTimeZone(withdrawal.created_at) }}</p>
+                <p class="font-medium text-sm dark:text-white">{{ formatToClientTimeZone(withdrawal.created_at) }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Tanggal Permintaan</p>
               </div>
             </div>
@@ -317,7 +317,7 @@ onMounted(fetchData)
                 </svg>
               </div>
               <div class="flex flex-col gap-0.5">
-                <p class="font-semibold text-sm dark:text-white">{{ withdrawal.bank_account_name }}</p>
+                <p class="font-medium text-sm dark:text-white">{{ withdrawal.bank_account_name }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Nama Rekening</p>
               </div>
             </div>
@@ -329,7 +329,7 @@ onMounted(fetchData)
                 </svg>
               </div>
               <div class="flex flex-col gap-0.5">
-                <p class="font-semibold text-sm dark:text-white">{{ withdrawal.bank_name }}</p>
+                <p class="font-medium text-sm dark:text-white">{{ withdrawal.bank_name }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Nama Bank</p>
               </div>
             </div>
@@ -341,7 +341,7 @@ onMounted(fetchData)
                 </svg>
               </div>
               <div class="flex flex-col gap-0.5">
-                <p class="font-semibold text-sm dark:text-white">{{ withdrawal.bank_account_number }}</p>
+                <p class="font-medium text-sm dark:text-white">{{ withdrawal.bank_account_number }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Nomor Rekening</p>
               </div>
             </div>

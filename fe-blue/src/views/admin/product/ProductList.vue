@@ -130,14 +130,14 @@ watch(error, (value) => {
           </svg>
         </div>
         <div>
-          <h1 class="text-2xl font-bold text-white">Produk Saya</h1>
+          <h1 class="text-2xl font-medium text-white">Produk Saya</h1>
           <p class="text-blue-100 text-sm mt-0.5">Kelola semua produk toko Anda</p>
         </div>
       </div>
       <RouterLink
         v-if="user?.permissions?.includes('product-create')"
         :to="dashboardRoute('product.create')"
-        class="flex h-11 items-center justify-center rounded-xl px-5 gap-2 bg-white text-blue-700 font-semibold text-sm hover:bg-blue-50 transition-colors shadow-sm">
+        class="flex h-11 items-center justify-center rounded-xl px-5 gap-2 bg-white text-blue-700 font-medium text-sm hover:bg-blue-50 transition-colors shadow-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>
@@ -156,7 +156,7 @@ watch(error, (value) => {
           </svg>
         </div>
         <div class="flex flex-col gap-0.5">
-          <p class="font-bold text-2xl">{{ totalProductsSummary }}</p>
+          <p class="font-medium text-2xl">{{ totalProductsSummary }}</p>
           <p class="font-medium text-sm text-custom-grey">Total Produk</p>
         </div>
       </div>
@@ -169,7 +169,7 @@ watch(error, (value) => {
           </svg>
         </div>
         <div class="flex flex-col gap-0.5">
-          <p class="font-bold text-2xl">
+          <p class="font-medium text-2xl">
             {{ meta?.total_sold ? meta.total_sold.toLocaleString() : 0 }}
           </p>
           <p class="font-medium text-sm text-custom-grey">Total Terjual</p>
@@ -244,7 +244,7 @@ watch(error, (value) => {
       <div
         v-if="selectedItems.length > 0"
         class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-surface-card dark:text-white shadow-2xl rounded-2xl px-6 py-3 flex items-center gap-4 border border-gray-100 dark:border-white/10 z-50 animate-fade-in-up">
-        <span class="font-bold text-sm text-gray-700 dark:text-white">{{ selectedItems.length }} Dipilih</span>
+        <span class="font-medium text-sm text-gray-700 dark:text-white">{{ selectedItems.length }} Dipilih</span>
         <div class="h-5 w-px bg-gray-200 dark:bg-gray-700"></div>
         <button
           class="flex items-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors"
@@ -252,7 +252,7 @@ watch(error, (value) => {
           <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          <span class="font-semibold text-sm">Hapus</span>
+          <span class="font-medium text-sm">Hapus</span>
         </button>
       </div>
 
@@ -267,13 +267,13 @@ watch(error, (value) => {
         </svg>
       </div>
       <div class="flex flex-col gap-1 items-center text-center">
-        <p class="font-semibold text-gray-700 dark:text-gray-300">Belum ada produk</p>
+        <p class="font-medium text-gray-700 dark:text-gray-300">Belum ada produk</p>
         <p class="text-sm text-custom-grey">Mulai tambahkan produk pertama Anda</p>
       </div>
       <RouterLink
         v-if="user?.permissions?.includes('product-create')"
         :to="dashboardRoute('product.create')"
-        class="flex h-10 items-center rounded-xl px-5 gap-2 bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors mt-2">
+        class="flex h-10 items-center rounded-xl px-5 gap-2 bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 transition-colors mt-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>

@@ -22,10 +22,10 @@ onMounted(() => {
   <section class="flex flex-col gap-5">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h2 class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Rekomendasi Untukmu</h2>
+      <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-white">Rekomendasi Untukmu</h2>
       <RouterLink
         :to="{ name: 'app.all-products' }"
-        class="text-sm font-semibold text-custom-blue dark:text-blue-400 hover:underline"
+        class="text-sm font-medium text-custom-blue dark:text-blue-400 hover:underline"
       >
         Lihat Semua
       </RouterLink>

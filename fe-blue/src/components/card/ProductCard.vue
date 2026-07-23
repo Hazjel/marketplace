@@ -67,7 +67,7 @@ const handleToggleWishlist = async () => {
         v-if="item.stock <= 0"
         class="absolute inset-0 bg-white/70 dark:bg-black/60 flex items-center justify-center"
       >
-        <span class="text-xs font-bold text-gray-600 dark:text-gray-300 bg-white dark:bg-surface-card px-3 py-1 rounded-full border">Stok Habis</span>
+        <span class="text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-surface-card px-3 py-1 rounded-full border">Stok Habis</span>
       </div>
     </div>
 
@@ -79,7 +79,7 @@ const handleToggleWishlist = async () => {
       </h3>
 
       <!-- Price -->
-      <p class="font-bold text-base text-custom-blue dark:text-blue-400">
+      <p class="font-medium text-base text-custom-blue dark:text-blue-400">
         Rp {{ formatRupiah(item.price) }}
       </p>
 

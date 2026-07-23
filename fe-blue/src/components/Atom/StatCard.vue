@@ -27,7 +27,7 @@ defineProps({
       </div>
       <div>
         <p class="text-sm font-medium text-white/80">{{ title }}</p>
-        <p class="text-2xl font-bold mt-1">{{ value }}</p>
+        <p class="text-2xl font-medium mt-1">{{ value }}</p>
       </div>
       <div v-if="trend" class="flex items-center gap-1 text-xs font-medium text-emerald-200">
         <svg
@@ -61,7 +61,7 @@ defineProps({
         </div>
         <div
           v-if="trend"
-          class="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full"
+          class="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full"
           :class="
             trend.direction === 'up'
               ? 'bg-green-100 dark:bg-green-500/20 text-custom-green dark:text-green-400'
@@ -73,7 +73,7 @@ defineProps({
         </div>
       </div>
       <div class="flex flex-col gap-[6px]">
-        <p class="font-bold text-2xl md:text-3xl text-custom-black dark:text-white tracking-tight">{{ value }}</p>
+        <p class="font-medium text-2xl md:text-3xl text-custom-black dark:text-white tracking-tight">{{ value }}</p>
         <p class="font-medium text-sm text-custom-grey dark:text-gray-400">{{ title }}</p>
       </div>
     </div>

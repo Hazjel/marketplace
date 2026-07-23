@@ -24,7 +24,7 @@ const specs = computed(() => [
 
 <template>
   <div class="flex flex-col gap-4">
-    <h3 class="font-bold text-lg">Spesifikasi Produk</h3>
+    <h3 class="font-medium text-lg">Spesifikasi Produk</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
       <div
         v-for="(spec, index) in specs"

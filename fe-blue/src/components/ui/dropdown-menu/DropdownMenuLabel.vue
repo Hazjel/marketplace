@@ -11,7 +11,7 @@ const props = defineProps({
 <template>
   <DropdownMenuLabel
     v-bind="props"
-    :class="cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', props.class)"
+    :class="cn('px-2 py-1.5 text-sm font-medium', inset && 'pl-8', props.class)"
   >
     <slot />
   </DropdownMenuLabel>

@@ -216,7 +216,7 @@ src="@/assets/images/icons/search-normal-grey.svg"
                 class="flex size-6 shrink-0 dark:brightness-0 dark:invert" alt="icon" />
               <input
 v-model="searchQuery" type="text"
-                class="appearance-none w-full placeholder:text-custom-grey font-semibold bg-transparent focus:outline-none text-custom-black"
+                class="appearance-none w-full placeholder:text-custom-grey font-medium bg-transparent focus:outline-none text-custom-black"
                 placeholder="Search any products" @input="handleSearchInput" @keyup.enter="handleEnterSearch" />
               <div v-if="isSearching" class="flex items-center">
                 <div class="size-5 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
@@ -231,8 +231,8 @@ v-show="showSearchResults || showHistory"
               <div v-if="showHistory && searchHistory.length > 0">
                 <div
                   class="flex items-center justify-between px-4 py-3 border-b border-custom-stroke/50 dark:border-white/5">
-                  <span class="text-xs font-bold text-custom-grey uppercase tracking-wider">Recent Searches</span>
-                  <button class="text-xs font-semibold text-custom-red hover:underline" @click="clearHistory">
+                  <span class="text-xs font-medium text-custom-grey uppercase tracking-wider">Recent Searches</span>
+                  <button class="text-xs font-medium text-custom-red hover:underline" @click="clearHistory">
                     Clear All
                   </button>
                 </div>
@@ -271,13 +271,13 @@ v-for="product in searchResults" :key="product.id"
                     </div>
                     <div class="flex flex-col gap-1 flex-1 min-w-0">
                       <p
-                        class="font-bold text-sm truncate text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
+                        class="font-medium text-sm truncate text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
                         {{ product.name }}
                       </p>
                       <div class="flex items-center gap-2">
                         <p class="text-custom-grey text-xs">{{ product.product_category?.name }}</p>
                       </div>
-                      <p class="font-bold text-custom-blue text-sm">
+                      <p class="font-medium text-custom-blue text-sm">
                         Rp {{ formatRupiah(product.price) }}
                       </p>
                     </div>
@@ -286,7 +286,7 @@ v-for="product in searchResults" :key="product.id"
                 <div
                   class="p-3 bg-custom-background dark:bg-white/5 border-t border-custom-stroke dark:border-white/10 hover:bg-custom-blue/5 transition-colors cursor-pointer text-center"
                   @click="handleEnterSearch">
-                  <p class="text-xs font-bold text-custom-blue">
+                  <p class="text-xs font-medium text-custom-blue">
                     See all results for "{{ searchQuery }}"
                   </p>
                 </div>
@@ -315,7 +315,7 @@ src="@/assets/images/icons/shopping-cart-black.svg"
               <div
 v-if="totalItems > 0"
                 class="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-custom-red border-2 border-white dark:border-[#0B1120] px-1 pointer-events-none">
-                <span class="text-white text-[9px] font-bold leading-none">{{
+                <span class="text-white text-[9px] font-medium leading-none">{{
                   cartBadgeText
                 }}</span>
               </div>
@@ -350,7 +350,7 @@ v-if="totalItems > 0"
                   v-if="totalUnreadCount > 0"
                   class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-custom-blue border-2 border-white dark:border-[#0B1120] px-1 pointer-events-none"
                 >
-                  <span class="text-white text-[9px] font-bold leading-none">{{ chatBadgeText }}</span>
+                  <span class="text-white text-[9px] font-medium leading-none">{{ chatBadgeText }}</span>
                 </div>
               </transition>
             </div>
@@ -387,14 +387,14 @@ v-if="totalItems > 0"
             <!-- Login Button (If Guest) -->
             <RouterLink
 v-if="!user" :to="{ name: 'auth.login' }"
-              class="flex shrink-0 h-10 md:h-11 rounded-lg px-6 font-bold text-custom-blue border border-custom-blue hover:bg-blue-50 dark:hover:bg-white/5 items-center justify-center transition-all">
+              class="flex shrink-0 h-10 md:h-11 rounded-lg px-6 font-medium text-custom-blue border border-custom-blue hover:bg-blue-50 dark:hover:bg-white/5 items-center justify-center transition-all">
               Masuk
             </RouterLink>
 
             <!-- Register Button (If Guest) -->
             <RouterLink
 v-if="!user" :to="{ name: 'auth.register' }"
-              class="flex shrink-0 h-10 md:h-11 rounded-lg px-6 font-bold text-white bg-custom-blue hover:bg-blue-700 shadow-custom-blue/20 shadow-lg items-center justify-center transition-all">
+              class="flex shrink-0 h-10 md:h-11 rounded-lg px-6 font-medium text-white bg-custom-blue hover:bg-blue-700 shadow-custom-blue/20 shadow-lg items-center justify-center transition-all">
               Daftar
             </RouterLink>
 
@@ -411,7 +411,7 @@ v-if="user" class="relative profile-dropdown-container z-50 h-full flex items-ce
                 </div>
                 <div class="flex flex-col items-start gap-0.5 max-w-[100px] hidden md:flex">
                   <p
-                    class="text-xs md:text-sm font-bold text-custom-black truncate w-full group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors text-left max-w-[90px]">
+                    class="text-xs md:text-sm font-medium text-custom-black truncate w-full group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors text-left max-w-[90px]">
                     {{ user.name?.split(' ')[0] }}
                   </p>
                 </div>
@@ -436,7 +436,7 @@ v-show="showDropdownProfile"
                       <img :src="user.profile_picture" class="size-full object-cover" alt="avatar" />
                     </div>
                     <div class="flex flex-col overflow-hidden">
-                      <p class="font-bold text-custom-black truncate">{{ user.name }}</p>
+                      <p class="font-medium text-custom-black truncate">{{ user.name }}</p>
                       <div class="flex items-center gap-1">
                         <img
 src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark:invert"
@@ -451,7 +451,7 @@ src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark
                     <!-- Section 1: Buying Activity -->
                     <div
                       class="flex flex-col gap-1 pb-2 border-b border-custom-stroke dark:border-white/5 border-dashed mb-2">
-                      <p class="px-3 text-[10px] font-bold text-custom-grey uppercase tracking-wider mb-1 mt-2">
+                      <p class="px-3 text-[10px] font-medium text-custom-grey uppercase tracking-wider mb-1 mt-2">
                         My Activity
                       </p>
 
@@ -483,7 +483,7 @@ src="@/assets/images/icons/heart-black.svg"
                         </div>
                         <span
 v-if="totalWishlistItems > 0"
-                          class="text-[10px] font-bold text-white bg-custom-red px-1.5 py-0.5 rounded-full">{{
+                          class="text-[10px] font-medium text-white bg-custom-red px-1.5 py-0.5 rounded-full">{{
                             totalWishlistItems }}</span>
                       </RouterLink>
 
@@ -504,7 +504,7 @@ src="@/assets/images/icons/receipt-text-black.svg"
                     <!-- Section 2: Store / Seller -->
                     <div
                       class="flex flex-col gap-1 pb-2 border-b border-custom-stroke dark:border-white/5 border-dashed mb-2">
-                      <p class="px-3 text-[10px] font-bold text-custom-grey uppercase tracking-wider mb-1">
+                      <p class="px-3 text-[10px] font-medium text-custom-grey uppercase tracking-wider mb-1">
                         Store
                       </p>
 
@@ -540,7 +540,7 @@ src="@/assets/images/icons/receipt-text-black.svg"
 
                     <!-- Section 3: Settings & Theme -->
                     <div class="flex flex-col gap-1">
-                      <p class="px-3 text-[10px] font-bold text-custom-grey uppercase tracking-wider mb-1">
+                      <p class="px-3 text-[10px] font-medium text-custom-grey uppercase tracking-wider mb-1">
                         Settings
                       </p>
 
@@ -583,7 +583,7 @@ stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           <span class="text-sm font-medium text-custom-black">Theme Mode</span>
                         </div>
                         <div
-                          class="flex items-center text-xs font-bold text-custom-grey bg-gray-100 dark:bg-white/10 px-2 py-1 rounded gap-1">
+                          class="flex items-center text-xs font-medium text-custom-grey bg-gray-100 dark:bg-white/10 px-2 py-1 rounded gap-1">
                           {{ effectiveTheme === 'dark' ? 'Dark' : 'Light' }}
                           <span
 v-if="effectiveTheme === 'dark'"
@@ -600,7 +600,7 @@ v-if="effectiveTheme === 'dark'"
 src="@/assets/images/icons/logout.svg"
                             class="size-5 opacity-70 dark:brightness-0 dark:invert dark:opacity-100 group-hover:opacity-100 transition-opacity"
                             alt="logout" />
-                          <span class="text-sm font-bold text-custom-red">Logout</span>
+                          <span class="text-sm font-medium text-custom-red">Logout</span>
                         </div>
                       </button>
                     </div>
