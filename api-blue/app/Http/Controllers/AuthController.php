@@ -174,6 +174,7 @@ class AuthController extends Controller
         }
 
         $user->token = $user->createToken('sso_auth_token')->plainTextToken;
+        $user->permissions = $user->roles->flatMap->permissions->pluck('name');
 
         return ResponseHelper::jsonResponse(true, 'success', new UserResource($user), 200);
     }
