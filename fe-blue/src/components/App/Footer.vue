@@ -34,7 +34,12 @@ const { user } = storeToRefs(authStore)
                 <RouterLink v-if="!user?.store" :to="{ name: 'auth.open-store' }"
                   >Become Seller
                 </RouterLink>
-                <RouterLink :to="{ name: 'app.my-transactions' }">Track My Order</RouterLink>
+                <RouterLink
+                  v-if="user"
+                  :to="{ name: 'user.my-transaction', params: { username: user.username } }"
+                  >Track My Order</RouterLink
+                >
+                <RouterLink v-else :to="{ name: 'auth.login' }">Track My Order</RouterLink>
               </nav>
             </div>
             <div class="flex flex-col gap-4">
