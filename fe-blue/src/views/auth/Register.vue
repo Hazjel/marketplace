@@ -66,6 +66,10 @@ const handleSubmit = async () => {
     // Arahkan ke halaman verifikasi kalau email belum terverifikasi
     if (data && !data.email_verified_at) {
       router.push({ name: 'auth.verify-email' })
+    } else if (import.meta.env.VITE_APP_TARGET === 'seller') {
+      // Marketplace tidak ada di build seller -- akun baru selalu
+      // role buyer, SSO balik ke buyer app.
+      await authStore.initiateSso(import.meta.env.VITE_BUYER_APP_URL)
     } else {
       router.push({ name: 'app.home' })
     }
