@@ -78,7 +78,7 @@ const handleSend = async () => {
 
 <template>
   <!-- Only render for logged-in users -->
-  <div v-if="user" class="fixed bottom-6 right-6 z-[999] flex flex-col items-end gap-3">
+  <div v-if="user" class="fixed bottom-4 right-4 z-[999] flex flex-col items-end gap-3 md:bottom-6 md:right-6">
     <!-- Chat Panel -->
     <Transition
       enter-active-class="transition-all duration-300 ease-out"
@@ -90,7 +90,7 @@ const handleSend = async () => {
     >
       <div
         v-if="isOpen"
-        class="w-[360px] h-[520px] bg-white dark:bg-surface-card rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-custom-stroke dark:border-white/10 flex flex-col overflow-hidden"
+        class="w-[calc(100vw-2rem)] max-w-[360px] h-[70vh] max-h-[520px] bg-white dark:bg-surface-card rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.18)] border border-custom-stroke dark:border-white/10 flex flex-col overflow-hidden"
       >
         <!-- ── CONTACT LIST VIEW ── -->
         <template v-if="view === 'contacts' || !activeUser">
