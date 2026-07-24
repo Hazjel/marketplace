@@ -24,6 +24,9 @@ import User2BlackIcon from '@/assets/images/icons/profile-2user-black.svg'
 import User2BlueIcon from '@/assets/images/icons/profile-2user-blue-fill.svg'
 import LocationGreyIcon from '@/assets/images/icons/location-grey.svg'
 import GlobalSearchIcon from '@/assets/images/icons/global-search-grey.svg'
+import ProfileCircleGreyIcon from '@/assets/images/icons/profile-circle-grey.svg'
+import NotificationIcon from '@/assets/images/icons/notification-black.svg'
+import LockGreyIcon from '@/assets/images/icons/lock-grey.svg'
 
 import { useRouter } from 'vue-router'
 const router = useRouter()
@@ -109,8 +112,8 @@ const items = computed(() => {
         {
           label: 'My Store',
           path: `${prefix.value}/my-store`,
-          iconDefault: EmpyWalletGreyIcon,
-          iconActive: Wallet3BlueFillIcon,
+          iconDefault: ShopGreyIcon,
+          iconActive: ShopBlueFillIcon,
           permission: 'store-menu',
           role: 'store'
         },
@@ -252,22 +255,22 @@ src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" al
             <SidebarItem :item="{
               label: 'Edit Profil',
               path: `${prefix}/edit-profile`,
-              iconDefault: LocationGreyIcon,
-              iconActive: LocationGreyIcon,
+              iconDefault: ProfileCircleGreyIcon,
+              iconActive: ProfileCircleGreyIcon,
               permission: 'dashboard-menu'
             }" />
             <SidebarItem :item="{
               label: 'Notifikasi',
               path: `${prefix}/settings/notifications`,
-              iconDefault: LocationGreyIcon,
-              iconActive: LocationGreyIcon,
+              iconDefault: NotificationIcon,
+              iconActive: NotificationIcon,
               permission: 'dashboard-menu'
             }" />
             <SidebarItem :item="{
               label: 'Privasi',
               path: `${prefix}/settings/privacy`,
-              iconDefault: LocationGreyIcon,
-              iconActive: LocationGreyIcon,
+              iconDefault: LockGreyIcon,
+              iconActive: LockGreyIcon,
               permission: 'dashboard-menu'
             }" />
           </ul>
