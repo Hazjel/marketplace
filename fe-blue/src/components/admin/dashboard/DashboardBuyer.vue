@@ -86,8 +86,8 @@ onMounted(() => {
             class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
             :class="
               range === option.value
-                ? 'bg-[#2563EB] text-white'
-                : 'bg-[#2563EB]/10 dark:bg-[#2563EB]/20 text-[#2563EB]'
+                ? 'bg-[#024ad8] text-white'
+                : 'bg-[#024ad8]/10 dark:bg-[#024ad8]/20 text-[#024ad8]'
             "
             @click="setRange(option.value)"
           >

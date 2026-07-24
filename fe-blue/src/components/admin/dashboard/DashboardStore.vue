@@ -82,7 +82,7 @@ onMounted(() => {
   <div v-else-if="data" class="flex flex-col gap-8">
     <!-- Header -->
     <div class="flex flex-col gap-1">
-      <h1 class="font-medium text-2xl md:text-3xl text-gray-900 dark:text-white font-['Plus_Jakarta_Sans']">Ringkasan</h1>
+      <h1 class="font-medium text-2xl md:text-3xl text-gray-900 dark:text-white">Ringkasan</h1>
       <p class="text-gray-500 dark:text-gray-400">
         Selamat datang kembali, {{ user?.store?.name }}! Berikut perkembangan hari ini.
       </p>
@@ -95,7 +95,7 @@ onMounted(() => {
         :value="`Rp ${formatRupiah(data.balance)}`"
         icon="wallet-2-blue-fill.svg"
         variant="gradient"
-        color="from-[#2563EB] to-blue-700"
+        color="from-[#024ad8] to-blue-700"
         :trend="data.trend?.revenue"
       />
       <StatCard
@@ -137,8 +137,8 @@ onMounted(() => {
                 class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
                 :class="
                   range === option.value
-                    ? 'bg-[#2563EB] text-white'
-                    : 'bg-[#2563EB]/10 dark:bg-[#2563EB]/20 text-[#2563EB]'
+                    ? 'bg-[#024ad8] text-white'
+                    : 'bg-[#024ad8]/10 dark:bg-[#024ad8]/20 text-[#024ad8]'
                 "
                 @click="setRange(option.value)"
               >
@@ -172,7 +172,7 @@ onMounted(() => {
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="w-5 h-5 text-[#2563EB]"
+                    class="w-5 h-5 text-[#024ad8]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -195,7 +195,7 @@ onMounted(() => {
                 </div>
               </div>
               <div class="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
-                <span class="font-medium text-sm text-[#2563EB] dark:text-blue-400">
+                <span class="font-medium text-sm text-[#024ad8] dark:text-blue-400">
                   Rp {{ formatRupiah(transaction.grand_total) }}
                 </span>
                 <div
@@ -230,7 +230,7 @@ onMounted(() => {
             <template v-if="data.top_products.length > 0">
               <div v-for="(product, index) in data.top_products" :key="product.id" class="flex items-center gap-3">
                 <div
-                  class="size-10 rounded-xl bg-gradient-to-br from-[#2563EB]/10 to-purple-500/10 dark:from-[#2563EB]/20 dark:to-purple-500/20 border border-gray-100 dark:border-white/10 flex items-center justify-center text-xs font-medium text-[#2563EB]"
+                  class="size-10 rounded-xl bg-gradient-to-br from-[#024ad8]/10 to-purple-500/10 dark:from-[#024ad8]/20 dark:to-purple-500/20 border border-gray-100 dark:border-white/10 flex items-center justify-center text-xs font-medium text-[#024ad8]"
                 >
                   {{ index + 1 }}
                 </div>

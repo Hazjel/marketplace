@@ -18,7 +18,7 @@ defineProps({
       </div>
       <div class="flex items-center gap-2">
         <slot name="actions" />
-        <RouterLink v-if="link" :to="link" class="text-sm font-medium text-[#2563EB] hover:underline">
+        <RouterLink v-if="link" :to="link" class="text-sm font-medium text-[#024ad8] hover:underline">
           {{ linkText }}
         </RouterLink>
       </div>

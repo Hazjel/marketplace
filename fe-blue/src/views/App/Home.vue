@@ -4,9 +4,14 @@ import 'swiper/swiper-bundle.css'
 import Banner from '@/components/App/home/Banner.vue'
 import Categories from '@/components/App/home/Categories.vue'
 import Recommended from '@/components/App/home/Recommended.vue'
+import Stores from '@/components/App/home/Stores.vue'
+import TopPicks from '@/components/App/home/TopPicks.vue'
 import Chatbot from '@/components/App/Chatbot.vue'
 import ProductCard from '@/components/card/ProductCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
+import Container from '@/components/Molecule/Container.vue'
+import SectionHeader from '@/components/Molecule/SectionHeader.vue'
+import { RouterLink } from 'vue-router'
 
 import { useHead } from '@vueuse/head'
 import { ref, onMounted } from 'vue'
@@ -69,33 +74,77 @@ onMounted(async () => {
 </script>
 
 <template>
-  <!-- Hero Banner -->
-  <Banner />
+  <!-- Hero HP: ink slab + chevron biru + headline display + CTA -->
+  <div class="relative overflow-hidden bg-[#1a1a1a] text-white">
+    <div
+      class="pointer-events-none absolute -right-16 -top-10 hidden h-[150%] w-40 -skew-x-12 bg-primary opacity-90 md:block"
+    ></div>
+    <div
+      class="pointer-events-none absolute right-28 -top-10 hidden h-[150%] w-24 -skew-x-12 bg-primary-bright opacity-40 md:block"
+    ></div>
+    <Container class="relative py-14 md:py-24">
+      <div class="flex max-w-2xl flex-col gap-5">
+        <h1 class="text-4xl font-medium leading-tight md:text-5xl lg:text-6xl">
+          Semua kebutuhan gadget & elektronikmu, satu tempat.
+        </h1>
+        <p class="max-w-xl text-base text-white/60 md:text-lg">
+          Belanja aman dari ribuan seller terpercaya. Harga bersaing, pengiriman cepat.
+        </p>
+        <div class="mt-2 flex flex-wrap gap-3">
+          <RouterLink
+            :to="{ name: 'app.all-products' }"
+            class="flex h-12 items-center justify-center rounded-md bg-custom-blue px-6 font-medium text-white transition-colors hover:bg-primary-deep"
+          >
+            Mulai Belanja
+          </RouterLink>
+          <RouterLink
+            :to="{ name: 'app.all-categories' }"
+            class="flex h-12 items-center justify-center rounded-md border border-white/20 px-6 font-medium text-white transition-colors hover:bg-white/10"
+          >
+            Jelajah Kategori
+          </RouterLink>
+        </div>
+      </div>
+    </Container>
+  </div>
 
   <!-- Main Content -->
-  <main class="flex flex-col w-full max-w-[1280px] px-4 lg:px-6 mx-auto mt-6 md:mt-10 mb-20 md:mb-24 gap-8 md:gap-10">
+  <Container as="main" class="flex flex-col mt-12 md:mt-20 mb-20 md:mb-28 gap-16 md:gap-24">
+    <!-- Promo banner slider -->
+    <Banner />
+
     <!-- Categories Section -->
     <Categories />
 
     <!-- Personalized Recommendations -->
     <Recommended />
 
+    <!-- Toko Official -->
+    <Stores />
+
+    <!-- Produk Pilihan -->
+    <TopPicks />
+
     <!-- Products Section (Lazy Load / Infinite Scroll) -->
-    <section class="flex flex-col gap-5">
-      <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-white">Produk Untukmu</h2>
+    <section class="flex flex-col gap-6 md:gap-8">
+      <SectionHeader
+        title="Produk Untukmu"
+        :link="{ name: 'app.all-products' }"
+        link-text="Lihat Semua"
+      />
 
       <!-- Initial Loading -->
       <div
         v-if="initialLoading"
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4"
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
       >
-        <SkeletonProductCard v-for="i in 12" :key="i" />
+        <SkeletonProductCard v-for="i in 10" :key="i" />
       </div>
 
       <!-- Products Grid -->
       <div
         v-else
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4"
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
       >
         <ProductCard
           v-for="product in products"
@@ -105,7 +154,7 @@ onMounted(async () => {
 
         <!-- Loading more skeletons -->
         <template v-if="loading && !initialLoading">
-          <SkeletonProductCard v-for="i in 6" :key="'loading-' + i" />
+          <SkeletonProductCard v-for="i in 5" :key="'loading-' + i" />
         </template>
       </div>
 
@@ -113,7 +162,7 @@ onMounted(async () => {
       <div v-if="hasMore && products.length > 0" class="flex justify-center py-4">
         <button
           :disabled="loading"
-          class="px-6 py-2.5 rounded-xl border border-custom-blue text-custom-blue dark:border-blue-400 dark:text-blue-400 font-medium text-sm hover:bg-custom-blue hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-6 py-2.5 rounded-md border border-custom-blue text-custom-blue dark:border-blue-400 dark:text-blue-400 font-medium text-sm hover:bg-custom-blue hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           @click="loadProducts"
         >
           {{ loading ? 'Memuat...' : 'Lihat Lebih Banyak' }}
@@ -133,7 +182,28 @@ onMounted(async () => {
         <p class="text-gray-400 dark:text-gray-500 font-medium">Belum ada produk tersedia</p>
       </div>
     </section>
-  </main>
+  </Container>
+
+  <!-- Closing band ink: ajakan jadi seller (pola help-band HP) -->
+  <div class="relative overflow-hidden bg-[#1a1a1a] text-white">
+    <div
+      class="pointer-events-none absolute -left-16 -bottom-10 hidden h-[150%] w-40 -skew-x-12 bg-primary opacity-80 md:block"
+    ></div>
+    <Container class="relative flex flex-col items-start gap-5 py-16 md:flex-row md:items-center md:justify-between md:py-20">
+      <div class="flex max-w-lg flex-col gap-2">
+        <h2 class="text-2xl font-medium leading-tight md:text-3xl">Punya produk untuk dijual?</h2>
+        <p class="text-base text-white/60">
+          Buka toko di Blukios gratis dan jangkau ribuan pembeli setiap hari.
+        </p>
+      </div>
+      <RouterLink
+        :to="{ name: 'auth.open-store' }"
+        class="flex h-12 shrink-0 items-center justify-center rounded-md bg-custom-blue px-6 font-medium text-white transition-colors hover:bg-primary-deep"
+      >
+        Buka Toko Sekarang
+      </RouterLink>
+    </Container>
+  </div>
 
   <!-- Chatbot -->
   <Chatbot />

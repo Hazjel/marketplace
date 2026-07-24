@@ -84,8 +84,8 @@ watch(error, (value) => {
       <div class="flex flex-col gap-2 w-full md:w-auto">
         <h1 class="font-medium text-2xl text-gray-900 dark:text-white">Semua Toko</h1>
         <div class="flex items-center gap-2">
-          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#2563EB]/10 dark:bg-[#2563EB]/20">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#024ad8]/10 dark:bg-[#024ad8]/20">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#024ad8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016A3.001 3.001 0 0021 9.349m-18 0a2.998 2.998 0 01.75-1.916l1.875-2.376A1.5 1.5 0 016.81 4.5h10.38a1.5 1.5 0 011.185.568l1.875 2.376a2.998 2.998 0 01.75 1.916" />
             </svg>
           </div>
@@ -102,7 +102,7 @@ watch(error, (value) => {
           @click="filters.is_verified = true">
           <div
             class="flex items-center justify-center h-10 w-full shrink-0 rounded-xl py-2 px-3 gap-2 transition-all"
-            :class="filters.is_verified ? 'bg-[#2563EB] shadow-md' : 'bg-transparent'">
+            :class="filters.is_verified ? 'bg-[#024ad8] shadow-md' : 'bg-transparent'">
             <span class="font-medium text-sm text-nowrap transition-colors"
               :class="filters.is_verified ? 'text-white' : 'text-gray-500 dark:text-gray-400'">
               Terverifikasi
@@ -114,7 +114,7 @@ watch(error, (value) => {
           @click="filters.is_verified = false">
           <div
             class="flex items-center justify-center h-10 w-full shrink-0 rounded-xl py-2 px-3 gap-2 transition-all"
-            :class="!filters.is_verified ? 'bg-[#2563EB] shadow-md' : 'bg-transparent'">
+            :class="!filters.is_verified ? 'bg-[#024ad8] shadow-md' : 'bg-transparent'">
             <span class="font-medium text-sm text-nowrap transition-colors"
               :class="!filters.is_verified ? 'text-white' : 'text-gray-500 dark:text-gray-400'">
               Menunggu Persetujuan
@@ -128,7 +128,7 @@ watch(error, (value) => {
     <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
       <form action="#" class="w-full md:w-auto">
         <label
-          class="flex items-center w-full md:w-[400px] h-12 rounded-2xl px-4 gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-white/10 focus-within:border-[#2563EB] dark:focus-within:border-[#2563EB] focus-within:ring-2 focus-within:ring-[#2563EB]/20 transition-all">
+          class="flex items-center w-full md:w-[400px] h-12 rounded-2xl px-4 gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-white/10 focus-within:border-[#024ad8] dark:focus-within:border-[#024ad8] focus-within:ring-2 focus-within:ring-[#024ad8]/20 transition-all">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
@@ -141,7 +141,7 @@ watch(error, (value) => {
       <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
         <p class="font-medium text-gray-500 dark:text-gray-400 text-sm">Tampilkan</p>
         <label
-          class="flex items-center h-12 rounded-2xl border border-gray-200 dark:border-white/10 py-2 px-4 bg-gray-50 dark:bg-gray-800 focus-within:border-[#2563EB] transition-all">
+          class="flex items-center h-12 rounded-2xl border border-gray-200 dark:border-white/10 py-2 px-4 bg-gray-50 dark:bg-gray-800 focus-within:border-[#024ad8] transition-all">
           <select
             v-model="serverOptions.row_per_page"
             class="text-gray-900 dark:text-white font-medium text-sm appearance-none focus:outline-none pr-6 bg-transparent">

@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useStoreStore } from '@/stores/store'
 import { storeToRefs } from 'pinia'
 import { RouterLink } from 'vue-router'
+import SectionHeader from '@/components/Molecule/SectionHeader.vue'
 
 const storeStore = useStoreStore()
 const { stores, loading } = storeToRefs(storeStore)
@@ -17,20 +18,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-5">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-white">Toko Official</h2>
-      <RouterLink
-        :to="{ name: 'app.all-stores' }"
-        class="text-sm font-medium text-custom-blue dark:text-blue-400 hover:underline"
-      >
-        Lihat Semua
-      </RouterLink>
-    </div>
+  <section class="flex flex-col gap-6 md:gap-8">
+    <SectionHeader
+      title="Toko Official"
+      :link="{ name: 'app.all-stores' }"
+      link-text="Lihat Semua"
+    />
 
     <!-- Store Grid -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
       <RouterLink
         v-for="store in stores"
         :key="store.id"

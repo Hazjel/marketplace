@@ -34,7 +34,7 @@ onMounted(fetch)
         :value="`Rp ${formatRupiah(data.total_admin_fee)}`"
         icon="wallet-2-blue-fill.svg"
         variant="gradient"
-        color="from-[#2563EB] to-blue-700"
+        color="from-[#024ad8] to-blue-700"
       />
       <StatCard
         title="Total GMV"
@@ -99,7 +99,7 @@ onMounted(fetch)
                 </p>
                 <RouterLink
                   :to="{ name: 'admin.store.detail', params: { id: store.id } }"
-                  class="px-3 py-2 rounded-xl bg-[#2563EB]/10 dark:bg-[#2563EB]/20 hover:ring-2 hover:ring-[#2563EB] transition-all font-medium text-[#2563EB] text-xs"
+                  class="px-3 py-2 rounded-xl bg-[#024ad8]/10 dark:bg-[#024ad8]/20 hover:ring-2 hover:ring-[#024ad8] transition-all font-medium text-[#024ad8] text-xs"
                 >
                   Detail
                 </RouterLink>
@@ -145,7 +145,7 @@ onMounted(fetch)
                   </p>
                 </div>
                 <div class="flex flex-col gap-1 items-end shrink-0">
-                  <p class="font-medium text-sm leading-tight text-[#2563EB] dark:text-blue-400 text-nowrap">
+                  <p class="font-medium text-sm leading-tight text-[#024ad8] dark:text-blue-400 text-nowrap">
                     Rp {{ formatRupiah(transaction.grand_total) }}
                   </p>
                   <p class="text-xs font-medium text-gray-500 dark:text-gray-400 text-nowrap">Grand Total</p>
@@ -158,7 +158,7 @@ onMounted(fetch)
                 </p>
                 <RouterLink
                   :to="{ name: 'admin.transaction.detail', params: { id: transaction.id } }"
-                  class="px-3 py-2 rounded-xl bg-[#2563EB]/10 dark:bg-[#2563EB]/20 hover:ring-2 hover:ring-[#2563EB] transition-all font-medium text-[#2563EB] text-xs"
+                  class="px-3 py-2 rounded-xl bg-[#024ad8]/10 dark:bg-[#024ad8]/20 hover:ring-2 hover:ring-[#024ad8] transition-all font-medium text-[#024ad8] text-xs"
                 >
                   Detail
                 </RouterLink>

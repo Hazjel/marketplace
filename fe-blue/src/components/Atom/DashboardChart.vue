@@ -9,7 +9,7 @@ const props = defineProps({
   yKey: { type: String, default: 'total_revenue' },
   // Label tooltip, mis. 'Pendapatan' atau 'Pengeluaran'
   label: { type: String, default: 'Pendapatan' },
-  color: { type: String, default: '#3D7AF0' },
+  color: { type: String, default: '#024ad8' },
   height: { type: String, default: '300px' },
   // Format nilai Y untuk tooltip & sumbu. Default: Rupiah.
   valueFormatter: { type: Function, default: (v) => `Rp ${formatRupiah(v)}` }

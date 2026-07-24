@@ -24,6 +24,7 @@ import {
   Camera
 } from 'lucide-vue-next'
 import { markRaw } from 'vue'
+import SectionHeader from '@/components/Molecule/SectionHeader.vue'
 
 const productCategoryStore = useProductCategoryStore()
 const { productCategories } = storeToRefs(productCategoryStore)
@@ -74,25 +75,20 @@ const getCategoryIcon = (name) => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-5">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-white">Kategori</h2>
-      <RouterLink
-        :to="{ name: 'app.all-categories' }"
-        class="text-sm font-medium text-custom-blue dark:text-blue-400 hover:underline"
-      >
-        Lihat Semua
-      </RouterLink>
-    </div>
+  <section class="flex flex-col gap-6 md:gap-8">
+    <SectionHeader
+      title="Kategori"
+      :link="{ name: 'app.all-categories' }"
+      link-text="Lihat Semua"
+    />
 
-    <!-- Category Grid -->
-    <div class="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
+    <!-- Category strip: kartu ikon putih ala HP, auto-fit biar tidak timpang saat sedikit -->
+    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4">
       <RouterLink
         v-for="category in productCategories"
         :key="category.id"
         :to="{ name: 'app.browse-category', params: { slug: category.slug } }"
-        class="group flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-white/80 dark:hover:bg-white/5 hover:shadow-lg hover:shadow-blue-500/5 hover:backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5"
+        class="group flex flex-col items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-card border border-gray-100 dark:border-white/5 hover:border-custom-blue/20 dark:hover:border-blue-400/30 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
       >
         <!-- Icon Circle -->
         <div class="size-12 md:size-14 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 group-hover:scale-110 transition-all duration-200">
