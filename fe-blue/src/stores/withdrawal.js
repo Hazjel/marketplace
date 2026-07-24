@@ -1,105 +1,84 @@
+import { defineStore } from 'pinia'
 import { handleError } from '@/helpers/errorHelper'
 import { axiosInstance } from '@/plugins/axios'
-import { defineStore } from 'pinia'
+import { useResourceState } from '@/stores/createResourceStore'
 import router from '@/router'
 
-export const useWithdrawalStore = defineStore('withdrawal', {
-  state: () => ({
-    withdrawals: [],
-    meta: {
-      current_page: 1,
-      last_page: 1,
-      per_page: 10,
-      total: 0
-    },
-    loading: false,
-    error: null,
-    success: null
-  }),
-  actions: {
-    async fetchWithdrawalsPaginated(params) {
-      this.loading = true
+export const useWithdrawalStore = defineStore('withdrawal', () => {
+  const {
+    list: withdrawals,
+    meta,
+    loading,
+    error,
+    success,
+    fetchPaginated,
+    fetchById
+  } = useResourceState({ endpoint: 'withdrawal' })
 
-      try {
-        const response = await axiosInstance.get(`withdrawal/all/paginated`, { params })
+  const createWithdrawal = async (payload) => {
+    loading.value = true
+    error.value = null
 
-        // API response shape: { success, message, data: { data: [...], meta: {...} } }
-        const payload = response.data?.data || {}
-        this.withdrawals = payload.data || []
-        this.meta = payload.meta || this.meta
-      } catch (error) {
-        this.error = handleError(error)
-      } finally {
-        this.loading = false
-      }
-    },
+    try {
+      const response = await axiosInstance.post('withdrawal', payload)
 
-    async fetchWithdrawalById(id) {
-      this.loading = true
+      success.value = response.data.message
 
-      try {
-        const response = await axiosInstance.get(`withdrawal/${id}`)
-
-        return response.data.data
-      } catch (error) {
-        this.error = handleError(error)
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async createWithdrawal(payload) {
-      this.loading = true
-      this.error = null
-
-      try {
-        const response = await axiosInstance.post('withdrawal', payload)
-
-        this.success = response.data.message
-
-        router.push({ name: 'admin.my-store-balance' })
-      } catch (error) {
-        this.error = handleError(error)
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async approveWithdrawal(payload) {
-      this.loading = true
-      this.error = null
-      try {
-        const formData = new FormData()
-        formData.append('proof', payload.proof)
-
-        const response = await axiosInstance.post(`withdrawal/${payload.id}/approve`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        })
-
-        this.success = response.data.message
-      } catch (error) {
-        this.error = handleError(error)
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async rejectWithdrawal(id, reason = null) {
-      this.loading = true
-      this.error = null
-      try {
-        const response = await axiosInstance.post(`withdrawal/${id}/reject`, { reason })
-
-        this.success = response.data.message
-        return response.data.data
-      } catch (error) {
-        this.error = handleError(error)
-        throw error
-      } finally {
-        this.loading = false
-      }
+      router.push({ name: 'admin.my-store-balance' })
+    } catch (err) {
+      error.value = handleError(err)
+    } finally {
+      loading.value = false
     }
+  }
+
+  const approveWithdrawal = async (payload) => {
+    loading.value = true
+    error.value = null
+    try {
+      const formData = new FormData()
+      formData.append('proof', payload.proof)
+
+      const response = await axiosInstance.post(`withdrawal/${payload.id}/approve`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      success.value = response.data.message
+    } catch (err) {
+      error.value = handleError(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const rejectWithdrawal = async (id, reason = null) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await axiosInstance.post(`withdrawal/${id}/reject`, { reason })
+
+      success.value = response.data.message
+      return response.data.data
+    } catch (err) {
+      error.value = handleError(err)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return {
+    withdrawals,
+    meta,
+    loading,
+    error,
+    success,
+    fetchWithdrawalsPaginated: fetchPaginated,
+    fetchWithdrawalById: fetchById,
+    createWithdrawal,
+    approveWithdrawal,
+    rejectWithdrawal
   }
 })

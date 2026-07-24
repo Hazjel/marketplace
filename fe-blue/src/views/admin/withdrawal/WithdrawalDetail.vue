@@ -4,7 +4,7 @@ import { formatRupiah, formatToClientTimeZone } from '@/helpers/format'
 import { useWithdrawalStore } from '@/stores/withdrawal'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
 import DashboardPageHeader from '@/components/Molecule/DashboardPageHeader.vue'
@@ -24,7 +24,6 @@ const triggerFileInput = () => {
 }
 
 const withdrawalStore = useWithdrawalStore()
-const { loading } = storeToRefs(withdrawalStore)
 const { fetchWithdrawalById, approveWithdrawal, rejectWithdrawal } = withdrawalStore
 
 const rejectReason = ref('')
@@ -132,7 +131,7 @@ onMounted(fetchData)
         <section class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm">
           <p class="font-medium text-lg dark:text-white">Detail Toko</p>
           <div class="flex items-center gap-4 w-full min-w-0">
-            <div class="flex size-[72px] shrink-0 rounded-full bg-gray-100 dark:bg-white/5 overflow-hidden ring-4 ring-green-100 dark:ring-green-900/30">
+            <div class="flex size-18 shrink-0 rounded-full bg-gray-100 dark:bg-white/5 overflow-hidden ring-4 ring-green-100 dark:ring-green-900/30">
               <img :src="withdrawal?.store_balance?.store?.logo" class="size-full object-cover" alt="photo" />
             </div>
             <div class="flex flex-col gap-1.5 w-full overflow-hidden">
@@ -181,7 +180,7 @@ onMounted(fetchData)
           @submit.prevent="handleAprroveWithdrawal">
           <p class="font-medium text-lg dark:text-white">Bukti Pembayaran</p>
           <div class="flex items-center justify-between w-full">
-            <div class="group relative flex size-[100px] rounded-2xl overflow-hidden items-center justify-center bg-gray-100 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-white/20">
+            <div class="group relative flex size-25 rounded-2xl overflow-hidden items-center justify-center bg-gray-100 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-white/20">
               <img id="Thumbnail" :src="withdrawal.proof_url" class="size-full object-cover" alt="icon" />
               <input
                 id="File-Input"
@@ -210,8 +209,8 @@ onMounted(fetchData)
               type="checkbox"
               required
               class="size-5 appearance-none rounded-md border-2 border-gray-300 checked:border-blue-600 checked:bg-blue-600 transition-all duration-200 relative
-                     checked:after:content-[''] checked:after:absolute checked:after:left-[5px] checked:after:top-[2px] checked:after:w-[6px] checked:after:h-[10px] checked:after:border-white checked:after:border-r-2 checked:after:border-b-2 checked:after:rotate-45" />
-            <span class="font-medium text-sm text-gray-600 dark:text-gray-300 group-has-[:checked]:text-blue-600 dark:group-has-[:checked]:text-blue-400 transition-colors duration-200">
+                     checked:after:content-[''] checked:after:absolute checked:after:left-1.25 checked:after:top-0.5 checked:after:w-1.5 checked:after:h-2.5 checked:after:border-white checked:after:border-r-2 checked:after:border-b-2 checked:after:rotate-45" />
+            <span class="font-medium text-sm text-gray-600 dark:text-gray-300 group-has-checked:text-blue-600 dark:group-has-checked:text-blue-400 transition-colors duration-200">
               Tandai penarikan ini sebagai selesai
             </span>
           </label>
@@ -264,9 +263,9 @@ onMounted(fetchData)
           v-if="withdrawal.status === 'approved'"
           class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm">
           <p class="font-medium text-lg dark:text-white">Bukti Pembayaran</p>
-          <div class="relative h-[256px] w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-white/5">
+          <div class="relative h-64 w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-white/5">
             <img :src="withdrawal.proof" class="relative size-full object-cover" alt="proof" />
-            <div class="absolute bottom-0 w-full h-[95px] bg-gradient-to-t from-black/50 to-transparent">
+            <div class="absolute bottom-0 w-full h-23.75 bg-linear-to-t from-black/50 to-transparent">
               <button
                 type="button"
                 class="relative flex items-center w-fit h-9 rounded-full py-2 px-3 gap-2 bg-white mx-auto mt-8 hover:bg-gray-100 transition-colors duration-200">
@@ -281,7 +280,7 @@ onMounted(fetchData)
       </div>
 
       <!-- Right Column: Amount & Info -->
-      <div class="flex flex-col w-full xl:w-[450px] shrink-0 gap-6">
+      <div class="flex flex-col w-full xl:w-112.5 shrink-0 gap-6">
         <!-- Amount Card -->
         <section class="flex flex-col w-full rounded-2xl border border-gray-100 dark:border-white/10 p-6 gap-5 bg-white dark:bg-surface-card shadow-sm">
           <div class="flex flex-col items-center justify-center py-6 gap-2">

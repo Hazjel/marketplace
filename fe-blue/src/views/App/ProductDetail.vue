@@ -14,7 +14,6 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
-import { useChatStore } from '@/stores/chat'
 import { axiosInstance } from '@/plugins/axios'
 import { useHead } from '@vueuse/head'
 import { useToast } from 'vue-toastification'
@@ -68,7 +67,6 @@ const authStore = useAuthStore()
 const cart = useCartStore()
 const wishlistStore = useWishlistStore()
 const { toggleWishlist, fetchWishlist } = wishlistStore
-const chatStore = useChatStore()
 
 const quantity = ref(1)
 const selectedOptions = ref({})
@@ -460,8 +458,8 @@ const handleShare = async () => {
 </script>
 
 <template>
-  <header class="w-full max-w-[1920px] mx-auto overflow-hidden bg-custom-background">
-    <div class="flex flex-col w-full max-w-[1280px] py-4 md:py-6 px-4 md:px-[52px] gap-3 mx-auto">
+  <header class="w-full max-w-480 mx-auto overflow-hidden bg-custom-background">
+    <div class="flex flex-col w-full max-w-7xl py-4 md:py-6 px-4 md:px-13 gap-3 mx-auto">
       <div class="flex items-center gap-3">
         <RouterLink
 :to="{ name: 'app.home' }"
@@ -481,7 +479,7 @@ const handleShare = async () => {
       </div>
     </div>
   </header>
-  <Container as="main" class="mt-8 mb-[100px]">
+  <Container as="main" class="mt-8 mb-25">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <!-- Left Column: Gallery (Span 5, lebih besar) -->
       <div class="lg:col-span-5">
@@ -543,7 +541,7 @@ v-for="value in values" :key="value"
         <!-- Tabs Navigation (Sticky) -->
 
         <!-- Detail Section -->
-        <div id="Detail" class="flex flex-col gap-6 scroll-mt-[180px]">
+        <div id="Detail" class="flex flex-col gap-6 scroll-mt-45">
           <ProductSpecs :product="product" />
 
           <div class="flex flex-col gap-2">
@@ -588,14 +586,14 @@ v-if="product?.store?.username"
         <hr class="border-custom-stroke" />
 
         <!-- Reviews Section -->
-        <div id="Reviews" class="flex flex-col gap-4 scroll-mt-[180px]">
+        <div id="Reviews" class="flex flex-col gap-4 scroll-mt-45">
           <h3 class="font-medium text-lg">Ulasan Pembeli</h3>
           <div class="flex flex-col md:flex-row items-center gap-10">
             <div class="flex flex-col gap-2">
               <div class="flex items-center gap-2">
                 <img src="@/assets/images/icons/Star-pointy.svg" class="size-8" />
                 <span class="text-4xl font-medium">{{ averageRating }}</span>
-                <span class="text-custom-grey text-sm mb-[-5px]">/ 5.0</span>
+                <span class="text-custom-grey text-sm -mb-1.25">/ 5.0</span>
               </div>
               <span class="text-sm font-medium text-custom-black">{{ product?.product_reviews?.length || 0 }}
                 Ulasan</span>
@@ -686,7 +684,7 @@ v-if="media.file_type === 'image'" :src="media.file_path"
       <!-- Right Column: Sticky Action Card (Span 3) -->
       <div class="hidden lg:block lg:col-span-3">
         <div
-          class="sticky top-[160px] bg-white dark:bg-surface-card rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-border flex flex-col gap-5 transition-all duration-300">
+          class="sticky top-40 bg-white dark:bg-surface-card rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-border flex flex-col gap-5 transition-all duration-300">
           <h3 class="font-medium text-base">Atur jumlah dan catatan</h3>
 
           <div class="flex items-center gap-3 my-2">
@@ -769,9 +767,11 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
             <button
               class="flex items-center gap-2 text-sm font-medium text-custom-grey hover:text-custom-blue transition-colors"
               @click="handleChatSeller">
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+              <svg
+xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
+                <path
+stroke-linecap="round" stroke-linejoin="round"
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               Tanya Seller
@@ -801,9 +801,11 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
         <button
           class="flex items-center justify-center size-12 rounded-xl border border-custom-stroke hover:border-custom-blue hover:bg-blue-50 transition-colors"
           @click="handleChatSeller">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-custom-grey" fill="none" viewBox="0 0 24 24"
+          <svg
+xmlns="http://www.w3.org/2000/svg" class="size-5 text-custom-grey" fill="none" viewBox="0 0 24 24"
             stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
+            <path
+stroke-linecap="round" stroke-linejoin="round"
               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </button>
@@ -826,7 +828,7 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
         </button>
       </div>
     </div>
-    <section v-if="similarProducts.length || loadingSimilar" id="Recommendation" class="flex flex-col gap-9 scroll-mt-[150px]">
+    <section v-if="similarProducts.length || loadingSimilar" id="Recommendation" class="flex flex-col gap-9 scroll-mt-37.5">
       <SectionHeader title="Produk Serupa" subtitle="" :link="{ name: 'app.all-products' }" />
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
         <template v-if="loadingSimilar">

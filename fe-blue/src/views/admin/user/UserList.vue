@@ -71,7 +71,7 @@ watch(
     <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
       <form action="#" class="w-full md:w-auto">
         <label
-          class="flex items-center w-full md:w-[400px] h-12 rounded-2xl px-4 gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-white/10 focus-within:border-[#024ad8] dark:focus-within:border-[#024ad8] focus-within:ring-2 focus-within:ring-[#024ad8]/20 transition-all">
+          class="flex items-center w-full md:w-100 h-12 rounded-2xl px-4 gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-white/10 focus-within:border-[#024ad8] dark:focus-within:border-[#024ad8] focus-within:ring-2 focus-within:ring-[#024ad8]/20 transition-all">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
@@ -112,7 +112,7 @@ watch(
         </div>
         <p class="font-medium text-gray-500 dark:text-gray-400">Belum ada data pengguna</p>
       </div>
-      <Pagination v-if="users?.length > 0" :meta="meta" v-model:server-options="serverOptions" />
+      <Pagination v-if="users?.length > 0" v-model:server-options="serverOptions" :meta="meta" />
     </section>
   </div>
 </template>

@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Transaction;
 use Exception;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -39,7 +40,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         // User bisa dual-role (buyer + store) sejak dukung mode ganda ala
         // Shopee — $mode dari FE (?mode=store|buyer) menentukan KONTEKS,
         // scopeToMode tidak asumsikan role eksklusif seperti sebelumnya.
-        if (! (auth()->check() && auth()->user()->hasRole('admin'))) {
+        if (! (Auth::check() && Auth::user()->hasRole('admin'))) {
             $this->scopeToMode($query, $mode);
         }
 
@@ -72,10 +73,10 @@ class TransactionRepository implements TransactionRepositoryInterface
      */
     private function scopeToMode($query, ?string $mode): bool
     {
-        if (! auth()->check()) {
+        if (! Auth::check()) {
             return false;
         }
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($mode === 'store') {
             if (! $user->hasRole('store') || ! $user->store) {

@@ -15,6 +15,7 @@ use App\Services\MidtransPaymentStatusInterpreter;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -68,7 +69,7 @@ class TransactionController extends Controller implements HasMiddleware
     public function getAllPaginated(Request $request)
     {
         // Manual Authorization: Allow Admin (permission), or Buyer, or Store
-        if (! auth()->user()->can('transaction-list') && ! auth()->user()->hasRole('buyer') && ! auth()->user()->hasRole('store')) {
+        if (! Auth::user()->can('transaction-list') && ! Auth::user()->hasRole('buyer') && ! Auth::user()->hasRole('store')) {
             return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
         }
 
@@ -128,7 +129,7 @@ class TransactionController extends Controller implements HasMiddleware
      */
     public function store(TransactionStoreRequest $request)
     {
-        Log::info('Transaction creation started', ['user_id' => auth()->id()]);
+        Log::info('Transaction creation started', ['user_id' => Auth::id()]);
 
         // Security: Prevent Admin from creating transactions
         if ($request->user()->hasRole('admin')) {
@@ -166,7 +167,7 @@ class TransactionController extends Controller implements HasMiddleware
             // ATAU seller dari transaksi ini, bukan harus lolos kedua guard
             // sekaligus (dual-role buyer yang beli dari toko lain akan selalu
             // gagal guard store kalau dicek independen).
-            $user = auth()->user();
+            $user = Auth::user();
             $isOwningBuyer = $user->hasRole('buyer') && $transactions->buyer_id === $user->buyer?->id;
             $isOwningStore = $user->hasRole('store') && $transactions->store_id === $user->store?->id;
             $isAdmin = $user->hasRole('admin');
@@ -232,7 +233,7 @@ class TransactionController extends Controller implements HasMiddleware
             }
 
             // Authorization: Ensure user is the buyer
-            $user = auth()->user();
+            $user = Auth::user();
             if (! $user->buyer || $transaction->buyer_id !== $user->buyer->id) {
                 return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
             }
@@ -293,7 +294,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             // Authorization: prevent IDOR — only the buyer, the seller, or admin can check.
             // Sama seperti show(): user dual-role harus lolos SALAH SATU guard, bukan keduanya.
-            $user = auth()->user();
+            $user = Auth::user();
             $isOwningBuyer = $user->hasRole('buyer') && $transaction->buyer_id === $user->buyer?->id;
             $isOwningStore = $user->hasRole('store') && $transaction->store_id === $user->store?->id;
             $isAdmin = $user->hasRole('admin');
