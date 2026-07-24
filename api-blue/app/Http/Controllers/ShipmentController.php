@@ -145,7 +145,12 @@ class ShipmentController extends Controller
                     throw new \RuntimeException('Komerce unauthorized');
                 }
                 if (! $response->successful()) {
-                    Log::warning('Komerce calculate non-200', ['status' => $status, 'body' => $response->body()]);
+                    Log::warning('Komerce calculate non-200', [
+                        'status' => $status,
+                        'body' => $response->body(),
+                        'origin' => $request->shipper_destination_id,
+                        'destination' => $request->receiver_destination_id,
+                    ]);
 
                     return [];
                 }
