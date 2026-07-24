@@ -25,3 +25,6 @@ ai-service/venv/
 flutter-app/
 
 PROPOSAL-ARSITEKTUR-TOKOPEDIA-STYLE.md
+
+# Playwright MCP artifacts
+.playwright-mcp/

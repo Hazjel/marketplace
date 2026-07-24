@@ -1,7 +1,0 @@
-[     539ms] [LOG] 🍍 "cart" store installed 🆕 @ http://localhost:5173/node_modules/.vite/deps/pinia.js?v=5cc4ac5d:4420
-[     539ms] [LOG] 🍍 "product" store installed 🆕 @ http://localhost:5173/node_modules/.vite/deps/pinia.js?v=5cc4ac5d:4420
-[     543ms] [LOG] 🍍 "productCategory" store installed 🆕 @ http://localhost:5173/node_modules/.vite/deps/pinia.js?v=5cc4ac5d:4420
-[     544ms] [LOG] 🍍 "store" store installed 🆕 @ http://localhost:5173/node_modules/.vite/deps/pinia.js?v=5cc4ac5d:4420
-[     544ms] [LOG] 🍍 "recommendation" store installed 🆕 @ http://localhost:5173/node_modules/.vite/deps/pinia.js?v=5cc4ac5d:4420
-[     614ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/recommend/user/guest?top_k=10:0
-[     615ms] [ERROR] Fetch Personalized Products Error AxiosError @ http://localhost:5173/src/utils/logger.js:5
