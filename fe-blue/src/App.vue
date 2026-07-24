@@ -9,7 +9,6 @@ import { useToast } from 'vue-toastification'
 import FloatingChatWidget from '@/components/App/chat/FloatingChatWidget.vue'
 
 const error = ref(null)
-const isDev = import.meta.env.DEV
 const router = useRouter()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
@@ -100,22 +99,15 @@ onUnmounted(() => {
         Halaman ini mengalami masalah. Silakan muat ulang, atau kembali ke beranda.
       </p>
 
-      <details v-if="isDev" class="mb-4 text-left">
-        <summary class="cursor-pointer text-xs font-medium text-gray-500">Detail teknis (dev only)</summary>
-        <pre class="bg-gray-100 dark:bg-black/50 p-3 rounded text-xs mt-2 whitespace-pre-wrap max-h-60 overflow-auto">{{ error.message }}
-{{ error.info }}
-{{ error.stack }}</pre>
-      </details>
-
       <div class="flex gap-3 justify-center">
         <button
-          class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-white/10 font-medium text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+          class="px-5 py-2.5 rounded-md border border-gray-300 dark:border-white/10 font-medium text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
           @click="goHome"
         >
           Ke Beranda
         </button>
         <button
-          class="px-5 py-2.5 rounded-xl bg-custom-blue text-white font-medium text-sm hover:shadow-lg hover:shadow-[#0D5CD7]/30 transition-all"
+          class="px-5 py-2.5 rounded-md bg-custom-blue text-white font-medium text-sm hover:bg-primary-deep transition-all"
           @click="reloadApp"
         >
           Muat Ulang
