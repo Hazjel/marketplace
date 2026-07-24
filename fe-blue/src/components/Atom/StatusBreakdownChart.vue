@@ -8,11 +8,11 @@ const props = defineProps({
   items: {
     type: Array,
     default: () => [
-      { key: 'pending', label: 'Menunggu Diproses', color: 'bg-amber-500' },
+      { key: 'pending', label: 'Menunggu Diproses', color: 'bg-blue-300' },
       { key: 'shipping', label: 'Dikirim', color: 'bg-blue-500' },
-      { key: 'delivering', label: 'Dalam Perjalanan', color: 'bg-indigo-500' },
-      { key: 'completed', label: 'Selesai', color: 'bg-emerald-500' },
-      { key: 'cancelled', label: 'Dibatalkan', color: 'bg-red-500' }
+      { key: 'delivering', label: 'Dalam Perjalanan', color: 'bg-custom-blue' },
+      { key: 'completed', label: 'Selesai', color: 'bg-custom-green' },
+      { key: 'cancelled', label: 'Dibatalkan', color: 'bg-custom-red' }
     ]
   }
 })
