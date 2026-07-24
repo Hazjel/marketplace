@@ -6,6 +6,7 @@ import 'swiper/css/navigation'
 import 'swiper/css/autoplay'
 import 'swiper/css/pagination'
 import { onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 
 onMounted(() => {
   new Swiper('.heroSwiper', {
@@ -31,59 +32,69 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="group relative w-full">
-    <div class="heroSwiper w-full rounded-2xl overflow-hidden">
-      <div class="swiper-wrapper">
-        <!-- Slide 1 -->
-        <div class="swiper-slide">
-          <div class="relative w-full aspect-[2.5/1] md:aspect-[3/1] bg-gradient-to-r from-blue-600 to-indigo-700 overflow-hidden">
-            <img
-              src="@/assets/images/banners/banner_mega_sale.png"
-              class="w-full h-full object-cover"
-              alt="Promo"
-            />
+  <!-- Banner besar kiri + 2 side promo kanan (ala marketplace) -->
+  <section class="flex flex-col lg:flex-row gap-4">
+    <!-- Main slider (kiri, lebih besar) -->
+    <div class="group relative w-full lg:w-[68%] shrink-0">
+      <div class="heroSwiper w-full rounded-2xl overflow-hidden">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <div class="relative w-full aspect-[2.5/1] bg-gradient-to-r from-blue-600 to-indigo-700 overflow-hidden">
+              <img src="@/assets/images/banners/banner_mega_sale.png" class="w-full h-full object-cover" alt="Promo" />
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="relative w-full aspect-[2.5/1] bg-gradient-to-r from-purple-600 to-pink-600 overflow-hidden">
+              <img src="@/assets/images/banners/banner_gadgets.png" class="w-full h-full object-cover" alt="Gadgets" />
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="relative w-full aspect-[2.5/1] bg-gradient-to-r from-emerald-600 to-teal-600 overflow-hidden">
+              <img src="@/assets/images/banners/banner_mega_sale.png" class="w-full h-full object-cover" alt="Sale" />
+            </div>
           </div>
         </div>
-        <!-- Slide 2 -->
-        <div class="swiper-slide">
-          <div class="relative w-full aspect-[2.5/1] md:aspect-[3/1] bg-gradient-to-r from-purple-600 to-pink-600 overflow-hidden">
-            <img
-              src="@/assets/images/banners/banner_gadgets.png"
-              class="w-full h-full object-cover"
-              alt="Gadgets"
-            />
-          </div>
-        </div>
-        <!-- Slide 3 -->
-        <div class="swiper-slide">
-          <div class="relative w-full aspect-[2.5/1] md:aspect-[3/1] bg-gradient-to-r from-emerald-600 to-teal-600 overflow-hidden">
-            <img
-              src="@/assets/images/banners/banner_mega_sale.png"
-              class="w-full h-full object-cover"
-              alt="Sale"
-            />
-          </div>
-        </div>
+        <div class="hero-pagination absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5"></div>
       </div>
 
-      <!-- Pagination -->
-      <div class="hero-pagination absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5"></div>
+      <button
+        class="hero-prev absolute left-4 top-1/2 -translate-y-1/2 z-20 size-9 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer"
+      >
+        <svg class="size-4 text-gray-700 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button
+        class="hero-next absolute right-4 top-1/2 -translate-y-1/2 z-20 size-9 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer"
+      >
+        <svg class="size-4 text-gray-700 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
     </div>
 
-    <!-- Navigation Arrows (hover reveal) -->
-    <button
-      class="hero-prev absolute left-6 lg:left-8 top-1/2 -translate-y-1/2 z-20 size-9 md:size-10 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer"
-    >
-      <svg class="size-4 md:size-5 text-gray-700 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-      </svg>
-    </button>
-    <button
-      class="hero-next absolute right-6 lg:right-8 top-1/2 -translate-y-1/2 z-20 size-9 md:size-10 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer"
-    >
-      <svg class="size-4 md:size-5 text-gray-700 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-      </svg>
-    </button>
+    <!-- Side promo cards (kanan, 2 stacked) -->
+    <div class="hidden lg:flex flex-1 flex-col gap-4">
+      <RouterLink
+        :to="{ name: 'app.all-products' }"
+        class="group relative flex-1 overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 to-rose-500 p-5 flex flex-col justify-between"
+      >
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-white/80">Diskon Spesial</p>
+          <p class="mt-1 text-2xl font-medium leading-tight text-white">Hemat s.d. 70%</p>
+        </div>
+        <span class="text-sm font-medium text-white/90 group-hover:underline">Belanja sekarang &rarr;</span>
+      </RouterLink>
+      <RouterLink
+        :to="{ name: 'auth.open-store' }"
+        class="group relative flex-1 overflow-hidden rounded-2xl bg-gradient-to-br from-primary-deep to-custom-blue p-5 flex flex-col justify-between"
+      >
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-white/80">Gabung Seller</p>
+          <p class="mt-1 text-2xl font-medium leading-tight text-white">Buka Toko Gratis</p>
+        </div>
+        <span class="text-sm font-medium text-white/90 group-hover:underline">Mulai jualan &rarr;</span>
+      </RouterLink>
+    </div>
   </section>
 </template>

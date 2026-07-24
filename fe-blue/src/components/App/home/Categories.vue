@@ -90,20 +90,22 @@ const getCategoryIcon = (name) => {
         :to="{ name: 'app.browse-category', params: { slug: category.slug } }"
         class="group flex flex-col items-center gap-3 p-4 rounded-xl bg-white dark:bg-surface-card border border-gray-100 dark:border-white/5 hover:border-custom-blue/20 dark:hover:border-blue-400/30 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
       >
-        <!-- Icon Circle -->
-        <div class="size-12 md:size-14 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 group-hover:scale-110 transition-all duration-200">
-          <!-- If category has uploaded image, use it -->
+        <!-- Foto kategori (kalau ada) tampil dominan; fallback ikon -->
+        <div
+          class="size-16 md:size-20 overflow-hidden rounded-2xl flex items-center justify-center transition-all duration-200 group-hover:scale-105"
+          :class="category.image ? 'bg-gray-100 dark:bg-white/5' : 'bg-blue-50 dark:bg-blue-900/20 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40'"
+        >
           <img
             v-if="category.image"
             :src="category.image"
-            class="size-7 md:size-8 object-contain rounded-full"
+            class="size-full object-cover"
+            loading="lazy"
             :alt="category.name"
           />
-          <!-- Otherwise, use Lucide icon -->
           <component
             v-else
             :is="getCategoryIcon(category.name)"
-            class="size-5 md:size-6 text-custom-blue dark:text-blue-400"
+            class="size-6 md:size-7 text-custom-blue dark:text-blue-400"
             :stroke-width="1.8"
           />
         </div>

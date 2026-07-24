@@ -110,7 +110,7 @@ onMounted(async () => {
 
   <!-- Main Content -->
   <Container as="main" class="flex flex-col mt-12 md:mt-20 mb-20 md:mb-28 gap-16 md:gap-24">
-    <!-- Promo banner slider -->
+    <!-- Banner besar + side promo -->
     <Banner />
 
     <!-- Categories Section -->
