@@ -32,12 +32,8 @@ const themeStore = useThemeStore()
 const { effectiveTheme } = storeToRefs(themeStore)
 const { toggleTheme } = themeStore
 
+// chatStore tetap dipakai untuk inisialisasi listener unread global (badge di floating widget)
 const chatStore = useChatStore()
-const { totalUnreadCount } = storeToRefs(chatStore)
-
-const chatBadgeText = computed(() =>
-  totalUnreadCount.value > 99 ? '99+' : totalUnreadCount.value
-)
 
 const sellerAppUrl = import.meta.env.VITE_SELLER_APP_URL
 
@@ -321,39 +317,7 @@ v-if="totalItems > 0"
               </div>
             </div>
 
-            <!-- Chat Icon with Unread Badge (Logged-in only) -->
-            <div v-if="user" class="relative group">
-              <RouterLink
-                id="Navbar-Chat"
-                :to="{ name: 'user.chat', params: { username: user.username } }"
-                class="flex items-center justify-center size-10 md:size-11 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="size-6 dark:text-white text-custom-black opacity-70 group-hover:opacity-100 transition-opacity"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </RouterLink>
-              <!-- Unread badge: pulse animation to draw attention -->
-              <transition
-                enter-active-class="transition-all duration-300"
-                enter-from-class="scale-0 opacity-0"
-                enter-to-class="scale-100 opacity-100"
-                leave-active-class="transition-all duration-200"
-                leave-from-class="scale-100 opacity-100"
-                leave-to-class="scale-0 opacity-0"
-              >
-                <div
-                  v-if="totalUnreadCount > 0"
-                  class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-custom-blue border-2 border-white dark:border-[#0B1120] px-1 pointer-events-none"
-                >
-                  <span class="text-white text-[9px] font-medium leading-none">{{ chatBadgeText }}</span>
-                </div>
-              </transition>
-            </div>
+            <!-- Chat: pakai floating widget (kanan bawah), tidak di navbar -->
 
             <!-- Vertical Divider -->
             <div class="w-px h-6 bg-custom-stroke dark:bg-white/10 mx-1 hidden md:block"></div>
