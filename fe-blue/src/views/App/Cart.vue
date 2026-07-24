@@ -72,7 +72,7 @@ onMounted(async () => {
 
 <template>
   <form action="checkout.html" class="flex flex-col gap-6 w-full max-w-[1366px] px-4 md:px-8 mx-auto py-8">
-    <h1 class="font-medium text-[32px] dark:text-white">Keranjang Belanja</h1>
+    <h1 class="font-medium text-2xl md:text-[32px] dark:text-white">Keranjang Belanja</h1>
     <div class="flex flex-col lg:flex-row gap-5">
       <section id="Carts-Container" class="flex flex-col gap-5 w-full min-w-0">
         <div
