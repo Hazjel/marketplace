@@ -41,6 +41,17 @@ const prefix = computed(() => {
   return `/${user.value?.username}`
 })
 
+// Logo klik: di build seller, route home buyer (app.home) TIDAK terdaftar,
+// jadi router.push({ name: 'app.home' }) melempar error. Arahkan sesuai mode:
+// buyer -> home; store/admin -> dashboard masing-masing (prefix).
+const handleLogoClick = () => {
+  if (authStore.activeMode === 'buyer') {
+    router.push({ name: 'app.home' })
+  } else {
+    router.push(`${prefix.value}/dashboard`)
+  }
+}
+
 const items = computed(() => {
   const mode = authStore.activeMode
   const allItems = [
@@ -235,7 +246,7 @@ const handleLogout = async () => {
       <div class="flex items-center justify-between">
         <img
 src="@/assets/images/logos/blukios_logo.png" class="h-8 w-fit cursor-pointer" alt="logo"
-          @click="router.push({ name: 'app.home' })" />
+          @click="handleLogoClick" />
         <!-- Close Button Slot (Optional) -->
         <slot name="close-button"></slot>
       </div>
