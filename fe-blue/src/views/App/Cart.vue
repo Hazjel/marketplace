@@ -80,7 +80,7 @@ v-if="carts.length === 0" id="Empty-Cart-State"
           class="flex flex-col flex-1 items-center justify-center rounded-[20px] bg-white dark:bg-surface-card gap-9">
           <img src="@/assets/images/icons/bag-cross-blue-transparent.svg" class="size-16" alt="icon" />
           <div class="text-center">
-            <p class="font-medium text-2xl dark:text-white">Keranjang kamu masih kosong</p>
+            <p class="font-medium text-xl md:text-2xl dark:text-white">Keranjang kamu masih kosong</p>
             <p class="font-medium text-custom-grey dark:text-gray-400">Yuk, mulai belanja dan temukan produk favoritmu!</p>
           </div>
           <RouterLink
