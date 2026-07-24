@@ -236,10 +236,25 @@ export const useCartStore = defineStore('cart', {
 
     // ─── Clear ────────────────────────────────────────────
     async clearSelectedItems() {
+      const storesToRemove = this.carts.filter((cart) => this.selectedStores.has(cart.storeId))
+
       this.carts = this.carts.filter((cart) => !this.selectedStores.has(cart.storeId))
       this.selectedStores.clear()
       this.save()
       this.saveSelectedStores()
+
+      if (this.isAuthenticated) {
+        for (const store of storesToRemove) {
+          for (const product of store.products) {
+            try {
+              const params = product.variant_id ? `?variant_id=${product.variant_id}` : ''
+              await axiosInstance.delete(`/cart/${product.id}${params}`)
+            } catch {
+              logger.warn('Cart server remove failed for product', product.id)
+            }
+          }
+        }
+      }
     },
 
     async clearCart() {
