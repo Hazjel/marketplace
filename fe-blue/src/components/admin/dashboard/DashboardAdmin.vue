@@ -33,29 +33,21 @@ onMounted(fetch)
         title="Pendapatan Bersih (Profit)"
         :value="`Rp ${formatRupiah(data.total_admin_fee)}`"
         icon="wallet-2-blue-fill.svg"
-        variant="gradient"
-        color="from-[#024ad8] to-blue-700"
       />
       <StatCard
         title="Total GMV"
         :value="`Rp ${formatRupiah(data.total_revenue)}`"
         icon="wallet-2-blue-fill.svg"
-        variant="gradient"
-        color="from-emerald-500 to-teal-600"
       />
       <StatCard
         title="Total Seller"
         :value="data.total_sellers.toLocaleString()"
         icon="profile-2user-blue-fill.svg"
-        variant="gradient"
-        color="from-purple-500 to-indigo-600"
       />
       <StatCard
         title="Total Buyer"
         :value="data.total_buyers.toLocaleString()"
         icon="profile-2user-blue-fill.svg"
-        variant="gradient"
-        color="from-orange-500 to-rose-500"
       />
     </div>
 

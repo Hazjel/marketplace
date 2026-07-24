@@ -61,8 +61,6 @@ onMounted(() => {
         title="Total Pengeluaran"
         :value="`Rp ${formatRupiah(data.total_expense)}`"
         icon="wallet-2-blue-fill.svg"
-        variant="gradient"
-        color="from-blue-600 to-indigo-600"
       />
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 col-span-1 xl:col-span-3">

@@ -94,16 +94,12 @@ onMounted(() => {
         title="Total Pendapatan"
         :value="`Rp ${formatRupiah(data.balance)}`"
         icon="wallet-2-blue-fill.svg"
-        variant="gradient"
-        color="from-[#024ad8] to-blue-700"
         :trend="data.trend?.revenue"
       />
       <StatCard
         title="Total Pesanan"
         :value="data.total_orders"
         icon="box-tick-blue-transparent.svg"
-        variant="gradient"
-        color="from-emerald-500 to-teal-600"
         :trend="data.trend?.orders"
       />
       <StatCard
@@ -111,16 +107,12 @@ onMounted(() => {
         title="Ulasan Produk"
         :value="`${data.average_rating} / 5 (${data.total_reviews})`"
         icon="message-text-blue-fill.svg"
-        variant="gradient"
-        color="from-purple-500 to-indigo-600"
       />
       <StatCard
         v-else
         title="Ulasan Produk"
         value="Belum ada ulasan"
         icon="message-text-blue-fill.svg"
-        variant="gradient"
-        color="from-purple-500 to-indigo-600"
       />
     </div>
 
@@ -230,7 +222,7 @@ onMounted(() => {
             <template v-if="data.top_products.length > 0">
               <div v-for="(product, index) in data.top_products" :key="product.id" class="flex items-center gap-3">
                 <div
-                  class="size-10 rounded-xl bg-gradient-to-br from-[#024ad8]/10 to-purple-500/10 dark:from-[#024ad8]/20 dark:to-purple-500/20 border border-gray-100 dark:border-white/10 flex items-center justify-center text-xs font-medium text-[#024ad8]"
+                  class="size-10 rounded-xl bg-custom-blue/10 dark:bg-custom-blue/20 border border-gray-100 dark:border-white/10 flex items-center justify-center text-xs font-medium text-custom-blue"
                 >
                   {{ index + 1 }}
                 </div>
