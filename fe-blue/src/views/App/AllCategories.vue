@@ -1,4 +1,6 @@
 <script setup>
+import PageHero from '@/components/Molecule/PageHero.vue'
+import Container from '@/components/Molecule/Container.vue'
 import { useProductCategoryStore } from '@/stores/productCategory'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, computed } from 'vue'
@@ -24,33 +26,14 @@ onMounted(() => {
 
 <template>
   <!-- Hero Header -->
-  <header class="relative bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 overflow-hidden">
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute -top-20 -left-20 size-80 bg-white/20 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-0 size-64 bg-white/15 rounded-full blur-3xl"></div>
-    </div>
-    <div class="relative w-full max-w-[1280px] px-4 md:px-[75px] mx-auto py-10 md:py-14">
-      <div class="flex items-center gap-2 mb-4">
-        <RouterLink :to="{ name: 'app.home' }" class="text-sm text-white/70 hover:text-white transition-colors">Beranda</RouterLink>
-        <svg class="size-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-        <span class="text-sm text-white font-medium">Semua Kategori</span>
-      </div>
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h1 class="font-medium text-3xl md:text-4xl text-white">Semua Kategori</h1>
-          <p class="text-white/70 mt-2 text-sm md:text-base">{{ productCategories.length }} kategori tersedia</p>
-        </div>
-        <div class="size-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-          <svg class="size-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  </header>
+  <PageHero
+    title="Semua Kategori"
+    :subtitle="`${productCategories.length} kategori tersedia`"
+    :breadcrumb="[{ label: 'Beranda', to: { name: 'app.home' } }, { label: 'Semua Kategori' }]"
+  />
 
   <!-- Main Content -->
-  <main class="w-full max-w-[1280px] px-4 md:px-[75px] mx-auto py-8 md:py-10 mb-16">
+  <Container as="main" class="py-8 md:py-10 mb-16">
     <!-- Search -->
     <div class="relative max-w-md mb-8">
       <svg class="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -101,5 +84,5 @@ onMounted(() => {
         {{ searchQuery ? 'Coba kata kunci lain' : 'Nantikan kategori baru segera hadir' }}
       </p>
     </div>
-  </main>
+  </Container>
 </template>

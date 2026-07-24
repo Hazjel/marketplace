@@ -1,4 +1,6 @@
 <script setup>
+import PageHero from '@/components/Molecule/PageHero.vue'
+import Container from '@/components/Molecule/Container.vue'
 import StoreCard from '@/components/card/StoreCard.vue'
 import SkeletonStoreCard from '@/components/skeleton/SkeletonStoreCard.vue'
 import { useStoreStore } from '@/stores/store'
@@ -78,33 +80,14 @@ onMounted(() => {
 
 <template>
   <!-- Hero Header -->
-  <header class="relative bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 overflow-hidden">
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute -top-20 -right-20 size-80 bg-white/20 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 left-0 size-64 bg-white/15 rounded-full blur-3xl"></div>
-    </div>
-    <div class="relative w-full max-w-[1280px] px-4 md:px-[75px] mx-auto py-10 md:py-14">
-      <div class="flex items-center gap-2 mb-4">
-        <RouterLink :to="{ name: 'app.home' }" class="text-sm text-white/70 hover:text-white transition-colors">Beranda</RouterLink>
-        <svg class="size-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-        <span class="text-sm text-white font-medium">Semua Toko</span>
-      </div>
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h1 class="font-medium text-3xl md:text-4xl text-white">Penjual Terpercaya</h1>
-          <p class="text-white/70 mt-2 text-sm md:text-base">{{ stores.length }} toko terverifikasi siap melayani kamu</p>
-        </div>
-        <div class="size-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-          <svg class="size-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  </header>
+  <PageHero
+    title="Penjual Terpercaya"
+    :subtitle="`${stores.length} toko terverifikasi siap melayani kamu`"
+    :breadcrumb="[{ label: 'Beranda', to: { name: 'app.home' } }, { label: 'Semua Toko' }]"
+  />
 
   <!-- Main Content -->
-  <main class="w-full max-w-[1280px] px-4 md:px-[75px] mx-auto py-8 md:py-10 mb-16">
+  <Container as="main" class="py-8 md:py-10 mb-16">
     <!-- Controls Bar -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8">
       <!-- Search -->
@@ -163,5 +146,5 @@ onMounted(() => {
         Kembali ke Beranda
       </RouterLink>
     </div>
-  </main>
+  </Container>
 </template>

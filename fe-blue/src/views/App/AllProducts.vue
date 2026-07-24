@@ -6,6 +6,8 @@ import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, watch, ref } from 'vue'
 import { useHead } from '@vueuse/head'
+import PageHero from '@/components/Molecule/PageHero.vue'
+import Container from '@/components/Molecule/Container.vue'
 
 const productStore = useProductStore()
 const { products, loading } = storeToRefs(productStore)
@@ -43,34 +45,15 @@ watch(() => route.query, () => {
 </script>
 
 <template>
-  <!-- Hero Header -->
-  <header class="relative bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-500 overflow-hidden">
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute -top-20 -left-20 size-80 bg-white/20 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-0 size-96 bg-white/10 rounded-full blur-3xl"></div>
-    </div>
-    <div class="relative w-full max-w-[1280px] px-4 md:px-[75px] mx-auto py-10 md:py-14">
-      <div class="flex items-center gap-2 mb-4">
-        <RouterLink :to="{ name: 'app.home' }" class="text-sm text-white/70 hover:text-white transition-colors">Beranda</RouterLink>
-        <svg class="size-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-        <span class="text-sm text-white font-medium">Semua Produk</span>
-      </div>
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h1 class="font-medium text-3xl md:text-4xl text-white">Top Picks</h1>
-          <p class="text-white/70 mt-2 text-sm md:text-base">Produk pilihan terbaik untuk kamu</p>
-        </div>
-        <div class="size-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-          <svg class="size-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  </header>
+  <!-- Hero Header (ink slab + chevron HP) -->
+  <PageHero
+    title="Top Picks"
+    subtitle="Produk pilihan terbaik untuk kamu"
+    :breadcrumb="[{ label: 'Beranda', to: { name: 'app.home' } }, { label: 'Semua Produk' }]"
+  />
 
   <!-- Main Content -->
-  <main class="w-full max-w-[1280px] px-4 md:px-[75px] mx-auto py-8 md:py-10 mb-16">
+  <Container as="main" class="py-8 md:py-10 mb-16">
     <!-- Controls -->
     <div class="flex items-center justify-between mb-8">
       <p class="text-sm text-custom-grey dark:text-gray-400">
@@ -88,12 +71,12 @@ watch(() => route.query, () => {
     </div>
 
     <!-- Loading -->
-    <div v-if="loading && products.length === 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
+    <div v-if="loading && products.length === 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
       <SkeletonProductCard v-for="i in 15" :key="i" />
     </div>
 
     <!-- Products Grid -->
-    <div v-else-if="products.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
+    <div v-else-if="products.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
       <ProductCard v-for="product in products" :key="product.id" :item="product" />
     </div>
 
@@ -111,5 +94,5 @@ watch(() => route.query, () => {
         Kembali ke Beranda
       </RouterLink>
     </div>
-  </main>
+  </Container>
 </template>

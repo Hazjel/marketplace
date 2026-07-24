@@ -1,5 +1,7 @@
 <script setup>
 import ProductCard from '@/components/card/ProductCard.vue'
+import PageHero from '@/components/Molecule/PageHero.vue'
+import Container from '@/components/Molecule/Container.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useCartStore } from '@/stores/cart'
@@ -71,45 +73,14 @@ onMounted(() => {
 
 <template>
   <!-- Hero Header -->
-  <header class="relative bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 overflow-hidden">
-    <!-- Background Pattern -->
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute top-0 left-0 size-64 bg-white/20 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
-      <div class="absolute bottom-0 right-0 size-96 bg-white/10 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl"></div>
-    </div>
-
-    <div class="relative w-full max-w-[1280px] px-4 md:px-[52px] mx-auto py-10 md:py-14">
-      <!-- Breadcrumb -->
-      <div class="flex items-center gap-2 mb-4">
-        <RouterLink :to="{ name: 'app.home' }" class="text-sm text-white/70 hover:text-white transition-colors">
-          Beranda
-        </RouterLink>
-        <svg class="size-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-        <span class="text-sm text-white font-medium">Wishlist Saya</span>
-      </div>
-
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h1 class="font-medium text-3xl md:text-4xl text-white">Wishlist Saya</h1>
-          <p class="text-white/70 mt-2 text-sm md:text-base">
-            {{ items.length }} produk yang kamu simpan
-          </p>
-        </div>
-
-        <!-- Heart Icon -->
-        <div class="size-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-          <svg class="size-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  </header>
+  <PageHero
+    title="Wishlist Saya"
+    :subtitle="`${items.length} produk yang kamu simpan`"
+    :breadcrumb="[{ label: 'Beranda', to: { name: 'app.home' } }, { label: 'Wishlist Saya' }]"
+  />
 
   <!-- Main Content -->
-  <main class="w-full max-w-[1280px] px-4 md:px-[52px] mx-auto py-8 md:py-10">
+  <Container as="main" class="py-8 md:py-10">
     <!-- Controls Bar -->
     <div v-if="items.length > 0" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8">
       <!-- Search -->
@@ -211,7 +182,7 @@ onMounted(() => {
     <!-- Empty State -->
     <div v-else-if="!loading && items.length === 0" class="flex flex-col items-center justify-center min-h-[450px] gap-6">
       <div class="relative">
-        <div class="size-28 rounded-full bg-gradient-to-br from-pink-50 to-red-50 dark:from-pink-900/20 dark:to-red-900/20 flex items-center justify-center">
+        <div class="size-28 rounded-full bg-custom-blue/10 dark:bg-custom-blue/20 flex items-center justify-center">
           <svg class="size-14 text-pink-300 dark:text-pink-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
@@ -247,5 +218,5 @@ onMounted(() => {
       <p class="font-medium text-lg text-custom-black dark:text-white">Tidak ditemukan</p>
       <p class="text-sm text-custom-grey dark:text-gray-400 mt-1">Coba ubah kata kunci pencarian</p>
     </div>
-  </main>
+  </Container>
 </template>
