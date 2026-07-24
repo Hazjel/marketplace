@@ -356,12 +356,12 @@ onMounted(async () => {
   <section class="min-h-screen bg-gray-50 dark:bg-custom-background pb-10">
     <!-- Header with Stepper -->
     <div class="bg-white dark:bg-surface-card border-b border-gray-100 dark:border-white/10 py-6">
-      <div class="w-full max-w-[1240px] px-4 md:px-8 mx-auto">
+      <div class="w-full max-w-[1366px] px-4 md:px-8 mx-auto">
         <CheckoutStepper :current-step="2" />
       </div>
     </div>
 
-    <div class="w-full max-w-[1240px] px-4 md:px-8 mx-auto pt-6">
+    <div class="w-full max-w-[1366px] px-4 md:px-8 mx-auto pt-6">
       <div class="flex flex-col lg:flex-row gap-6">
         <!-- LEFT COLUMN: Address + Items -->
         <div class="flex flex-col gap-5 flex-1 min-w-0">

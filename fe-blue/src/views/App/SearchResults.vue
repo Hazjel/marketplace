@@ -9,6 +9,8 @@ import StoreCard from '@/components/card/StoreCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import SkeletonStoreCard from '@/components/skeleton/SkeletonStoreCard.vue'
 import FilterSidebar from '@/components/App/FilterSidebar.vue'
+import PageHero from '@/components/Molecule/PageHero.vue'
+import Container from '@/components/Molecule/Container.vue'
 import { useHead } from '@vueuse/head'
 import { computed } from 'vue'
 
@@ -78,30 +80,14 @@ watch(() => route.query, () => { performSearch() }, { deep: true })
 
 <template>
   <!-- Hero Header -->
-  <header class="relative bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 overflow-hidden">
-    <div class="absolute inset-0 opacity-20">
-      <div class="absolute top-0 left-1/4 size-64 bg-blue-500/30 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-1/4 size-48 bg-purple-500/20 rounded-full blur-3xl"></div>
-    </div>
-    <div class="relative w-full max-w-[1280px] px-4 md:px-[52px] mx-auto py-10 md:py-12">
-      <div class="flex items-center gap-2 mb-4">
-        <RouterLink :to="{ name: 'app.home' }" class="text-sm text-white/60 hover:text-white transition-colors">Beranda</RouterLink>
-        <svg class="size-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-        <span class="text-sm text-white/80 font-medium">Hasil Pencarian</span>
-      </div>
-      <h1 class="font-medium text-2xl md:text-3xl text-white">
-        Hasil pencarian "<span class="text-blue-400">{{ searchQuery }}</span>"
-      </h1>
-      <div class="flex items-center gap-4 mt-3">
-        <span class="text-sm text-white/60">{{ products.length }} produk</span>
-        <span class="text-white/30">&middot;</span>
-        <span class="text-sm text-white/60">{{ stores.length }} toko</span>
-      </div>
-    </div>
-  </header>
+  <PageHero
+    :title="`Hasil pencarian '${searchQuery}'`"
+    :subtitle="`${products.length} produk · ${stores.length} toko`"
+    :breadcrumb="[{ label: 'Beranda', to: { name: 'app.home' } }, { label: 'Hasil Pencarian' }]"
+  />
 
   <!-- Main Content -->
-  <main class="w-full max-w-[1280px] px-4 md:px-[52px] mx-auto py-8 md:py-10 mb-16">
+  <Container as="main" class="py-8 md:py-10 mb-16">
     <div class="flex flex-col lg:flex-row gap-8">
       <!-- Mobile Filter Toggle -->
       <button
@@ -180,5 +166,5 @@ watch(() => route.query, () => { performSearch() }, { deep: true })
         </section>
       </div>
     </div>
-  </main>
+  </Container>
 </template>

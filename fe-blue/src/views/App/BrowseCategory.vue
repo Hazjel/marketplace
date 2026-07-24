@@ -7,6 +7,8 @@ import { useRoute } from 'vue-router'
 import ProductCard from '@/components/card/ProductCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import FilterSidebar from '@/components/App/FilterSidebar.vue'
+import PageHero from '@/components/Molecule/PageHero.vue'
+import Container from '@/components/Molecule/Container.vue'
 import { useHead } from '@vueuse/head'
 import { computed } from 'vue'
 
@@ -81,48 +83,18 @@ watch(
 
 <template>
   <!-- Hero Header -->
-  <header class="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 overflow-hidden">
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute -top-20 -left-20 size-80 bg-white/20 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-0 size-64 bg-white/15 rounded-full blur-3xl"></div>
-    </div>
-    <div class="relative w-full max-w-[1280px] px-4 md:px-[52px] mx-auto py-10 md:py-14">
-      <!-- Breadcrumb -->
-      <div class="flex items-center gap-2 mb-4">
-        <RouterLink :to="{ name: 'app.home' }" class="text-sm text-white/70 hover:text-white transition-colors">Beranda</RouterLink>
-        <svg class="size-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-        <RouterLink :to="{ name: 'app.all-categories' }" class="text-sm text-white/70 hover:text-white transition-colors">Kategori</RouterLink>
-        <svg class="size-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-        <span class="text-sm text-white font-medium">{{ productCategory?.name }}</span>
-      </div>
-
-      <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
-        <div>
-          <h1 class="font-medium text-3xl md:text-4xl text-white capitalize">{{ productCategory?.name || 'Kategori' }}</h1>
-          <div class="flex items-center gap-4 mt-3">
-            <div class="flex items-center gap-1.5">
-              <svg class="size-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-              <span class="text-sm text-white/70">{{ productCategory?.product_count || 0 }} Produk</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <svg class="size-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              <span class="text-sm text-white/70">Keaslian Terjamin</span>
-            </div>
-          </div>
-        </div>
-        <div v-if="productCategory?.image" class="size-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center p-2">
-          <img :src="productCategory.image" class="size-full object-contain" :alt="productCategory.name" />
-        </div>
-      </div>
-    </div>
-  </header>
+  <PageHero
+    :title="productCategory?.name || 'Kategori'"
+    :subtitle="`${productCategory?.product_count || 0} Produk`"
+    :breadcrumb="[
+      { label: 'Beranda', to: { name: 'app.home' } },
+      { label: 'Kategori', to: { name: 'app.all-categories' } },
+      { label: productCategory?.name || 'Kategori' }
+    ]"
+  />
 
   <!-- Main Content -->
-  <main class="w-full max-w-[1280px] px-4 md:px-[52px] mx-auto py-8 md:py-10 mb-16">
+  <Container as="main" class="py-8 md:py-10 mb-16">
     <div class="flex flex-col lg:flex-row gap-8">
       <!-- Mobile Filter Toggle -->
       <button
@@ -189,5 +161,5 @@ watch(
         </button>
       </div>
     </div>
-  </main>
+  </Container>
 </template>
