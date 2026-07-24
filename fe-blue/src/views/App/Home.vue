@@ -5,7 +5,6 @@ import Banner from '@/components/App/home/Banner.vue'
 import Categories from '@/components/App/home/Categories.vue'
 import Recommended from '@/components/App/home/Recommended.vue'
 import Stores from '@/components/App/home/Stores.vue'
-import TopPicks from '@/components/App/home/TopPicks.vue'
 import Chatbot from '@/components/App/Chatbot.vue'
 import ProductCard from '@/components/card/ProductCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
@@ -116,19 +115,16 @@ onMounted(async () => {
     <!-- Categories Section -->
     <Categories />
 
-    <!-- Personalized Recommendations -->
-    <Recommended />
-
     <!-- Toko Official -->
     <Stores />
 
-    <!-- Produk Pilihan -->
-    <TopPicks />
+    <!-- Rekomendasi (sistem rekomendasi / personalized) -->
+    <Recommended />
 
-    <!-- Products Section (Lazy Load / Infinite Scroll) -->
+    <!-- Katalog lengkap (infinite scroll) -->
     <section class="flex flex-col gap-6 md:gap-8">
       <SectionHeader
-        title="Produk Untukmu"
+        title="Jelajah Semua Produk"
         :link="{ name: 'app.all-products' }"
         link-text="Lihat Semua"
       />
