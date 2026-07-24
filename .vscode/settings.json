@@ -1,6 +1,0 @@
-{
-  "python.defaultInterpreterPath": "${workspaceFolder}/chat-service/venv/Scripts/python.exe",
-  "python.analysis.extraPaths": [
-    "${workspaceFolder}/chat-service"
-  ]
-}

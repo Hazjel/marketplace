@@ -28,3 +28,7 @@ PROPOSAL-ARSITEKTUR-TOKOPEDIA-STYLE.md
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Editor & tooling config personal
+.vscode/
+.postman/
