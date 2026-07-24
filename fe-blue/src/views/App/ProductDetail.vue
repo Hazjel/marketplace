@@ -6,6 +6,7 @@ import { storeToRefs } from 'pinia'
 import SectionHeader from '@/components/Molecule/SectionHeader.vue'
 import ProductGallery from '@/components/Molecule/ProductGallery.vue'
 import ProductSpecs from '@/components/Molecule/ProductSpecs.vue'
+import Container from '@/components/Molecule/Container.vue'
 import StarPointy from '@/assets/images/icons/Star-pointy.svg'
 import StarPointyOutline from '@/assets/images/icons/Star-pointy-outline.svg'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -480,15 +481,15 @@ const handleShare = async () => {
       </div>
     </div>
   </header>
-  <main class="w-full max-w-[1280px] px-4 md:px-[52px] mt-8 mb-[100px] mx-auto">
+  <Container as="main" class="mt-8 mb-[100px]">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <!-- Left Column: Gallery (Span 4) -->
-      <div class="lg:col-span-4">
+      <!-- Left Column: Gallery (Span 5, lebih besar) -->
+      <div class="lg:col-span-5">
         <ProductGallery :images="product?.product_images || []" />
       </div>
 
-      <!-- Center Column: Info & Content (Span 5) -->
-      <div class="lg:col-span-5 flex flex-col gap-6">
+      <!-- Center Column: Info & Content (Span 4) -->
+      <div class="lg:col-span-4 flex flex-col gap-6">
         <!-- Title & Stats -->
         <div>
           <h1 class="font-medium text-xl md:text-2xl leading-snug mb-3">{{ product?.name }}</h1>
@@ -827,7 +828,7 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
     </div>
     <section v-if="similarProducts.length || loadingSimilar" id="Recommendation" class="flex flex-col gap-9 scroll-mt-[150px]">
       <SectionHeader title="Produk Serupa" subtitle="" :link="{ name: 'app.all-products' }" />
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
         <template v-if="loadingSimilar">
           <SkeletonProductCard v-for="i in 6" :key="i" />
         </template>
@@ -836,7 +837,7 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
         </template>
       </div>
     </section>
-  </main>
+  </Container>
 
   <!-- Mobile Variant Drawer (Bottom Sheet) -->
   <Transition

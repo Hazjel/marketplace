@@ -83,7 +83,7 @@ onMounted(() => {
 <template>
   <div class="flex flex-col w-full gap-4">
     <!-- Desktop View (Hidden on Mobile) -->
-    <div class="hidden md:flex flex-row-reverse w-full gap-4 h-[450px]">
+    <div class="hidden md:flex flex-row-reverse w-full gap-4 h-[520px]">
       <!-- Main Image Area -->
       <div
         class="relative flex-1 bg-custom-background rounded-2xl overflow-hidden cursor-zoom-in group"
