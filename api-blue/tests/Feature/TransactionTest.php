@@ -152,4 +152,96 @@ class TransactionTest extends TestCase
             'store_id' => $store->id,
         ]);
     }
+
+    /**
+     * User dual-role (buyer + store) mengakses transaksi di mana dia adalah
+     * BUYER, tapi store-nya sendiri BUKAN penjual transaksi ini. Guard
+     * harus lolos karena dia legit sebagai buyer, bukan diblok karena
+     * guard store-nya gagal secara independen.
+     */
+    public function test_dual_role_user_can_view_own_purchase_from_other_store()
+    {
+        // Seller lain (toko yang dibeli)
+        $otherSeller = User::factory()->create();
+        $otherSeller->assignRole('store');
+        $otherStore = Store::create([
+            'user_id' => $otherSeller->id,
+            'name' => 'Other Store',
+            'username' => 'otherstore',
+            'logo' => 'default.png',
+            'about' => 'About',
+            'phone' => '08123456789',
+            'address_id' => '1',
+            'city' => 'Jakarta',
+            'address' => 'Jl. Seller',
+            'postal_code' => '12345',
+            'is_verified' => true,
+        ]);
+        $otherStore->storeBalance()->create(['balance' => 0]);
+
+        $category = ProductCategory::create([
+            'name' => 'General', 'slug' => 'general-dual', 'description' => 'General',
+        ]);
+        $product = Product::create([
+            'store_id' => $otherStore->id,
+            'product_category_id' => $category->id,
+            'name' => 'Test Product',
+            'slug' => 'test-product-dual',
+            'description' => 'Test Desc',
+            'price' => 10000,
+            'stock' => 10,
+            'weight' => 1,
+            'condition' => 'new',
+        ]);
+
+        // User dual-role: buyer DAN punya toko sendiri (beda dari otherStore)
+        $dualRoleUser = User::factory()->create();
+        $dualRoleUser->assignRole(['buyer', 'store']);
+        $buyerProfile = $dualRoleUser->buyer()->create([
+            'phone_number' => '08987654321',
+            'city' => 'Bandung',
+            'address' => 'Jl. Buyer',
+        ]);
+        $ownStore = Store::create([
+            'user_id' => $dualRoleUser->id,
+            'name' => 'My Own Store',
+            'username' => 'myownstore',
+            'logo' => 'default.png',
+            'about' => 'About',
+            'phone' => '08111111111',
+            'address_id' => '2',
+            'city' => 'Jakarta',
+            'address' => 'Jl. Toko Saya',
+            'postal_code' => '12345',
+            'is_verified' => true,
+        ]);
+        $ownStore->storeBalance()->create(['balance' => 0]);
+
+        $payload = [
+            'buyer_id' => $buyerProfile->id,
+            'store_id' => $otherStore->id,
+            'address_id' => 101,
+            'address' => 'Jl. Pengiriman',
+            'city' => 'Surabaya',
+            'postal_code' => '60000',
+            'shipping' => 'JNE',
+            'shipping_type' => 'REG',
+            'shipping_cost' => 15000,
+            'products' => [
+                ['product_id' => $product->id, 'qty' => 1],
+            ],
+        ];
+
+        $checkout = $this->actingAs($dualRoleUser, 'sanctum')
+            ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
+            ->postJson('/api/transaction', $payload);
+
+        $checkout->assertStatus(201);
+        $transactionId = $checkout->json('data.id');
+
+        $response = $this->actingAs($dualRoleUser, 'sanctum')
+            ->getJson('/api/transaction/'.$transactionId);
+
+        $response->assertStatus(200);
+    }
 }
