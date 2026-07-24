@@ -56,13 +56,13 @@ onMounted(() => {
 
       <div class="relative z-10 text-center max-w-4xl flex flex-col items-center gap-6">
         <span
-          class="px-4 py-1.5 bg-[#2563EB]/20 backdrop-blur-md rounded-full text-blue-400 border border-[#2563EB]/30 font-medium text-xs uppercase tracking-widest"
+          class="px-4 py-1.5 bg-[#024ad8]/20 backdrop-blur-md rounded-full text-blue-400 border border-[#024ad8]/30 font-medium text-xs uppercase tracking-widest"
         >
           We Are Hiring
         </span>
-        <h1 class="text-5xl md:text-7xl font-medium text-white tracking-tight leading-none font-['Plus_Jakarta_Sans']">
+        <h1 class="text-5xl md:text-7xl font-medium text-white tracking-tight leading-none">
           Do Your Best Work<br />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-teal-400"
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#024ad8] to-teal-400"
             >At Blukios.</span
           >
         </h1>
@@ -86,7 +86,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl flex flex-col gap-4 border border-gray-100 dark:border-white/10">
           <div
-            class="w-12 h-12 rounded-full bg-blue-50 dark:bg-[#2563EB]/20 flex items-center justify-center text-[#2563EB] text-xl"
+            class="w-12 h-12 rounded-full bg-blue-50 dark:bg-[#024ad8]/20 flex items-center justify-center text-[#024ad8] text-xl"
           >
             <i class="fa-solid fa-heart"></i>
           </div>
@@ -133,7 +133,7 @@ onMounted(() => {
         <div
           v-for="(role, index) in openRoles"
           :key="index"
-          class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/10 p-8 rounded-2xl hover:border-[#2563EB] dark:hover:border-[#2563EB] hover:shadow-lg shadow-sm transition-all cursor-pointer flex flex-col gap-6 relative overflow-hidden"
+          class="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/10 p-8 rounded-2xl hover:border-[#024ad8] dark:hover:border-[#024ad8] hover:shadow-lg shadow-sm transition-all cursor-pointer flex flex-col gap-6 relative overflow-hidden"
         >
           <div class="flex justify-between items-start">
             <div>
@@ -142,13 +142,13 @@ onMounted(() => {
                 >{{ role.department }}</span
               >
               <h3
-                class="text-2xl font-medium text-gray-900 dark:text-white group-hover:text-[#2563EB] transition-colors"
+                class="text-2xl font-medium text-gray-900 dark:text-white group-hover:text-[#024ad8] transition-colors"
               >
                 {{ role.title }}
               </h3>
             </div>
             <div
-              class="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/10 flex items-center justify-center group-hover:bg-[#2563EB] group-hover:text-white text-gray-500 transition-colors"
+              class="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/10 flex items-center justify-center group-hover:bg-[#024ad8] group-hover:text-white text-gray-500 transition-colors"
             >
               <i
                 class="fa-solid fa-arrow-right -rotate-45 group-hover:rotate-0 transition-transform duration-300"

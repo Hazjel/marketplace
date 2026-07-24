@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useRecommendationStore } from '@/stores/recommendation'
 import ProductCard from '@/components/card/ProductCard.vue'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
+import SectionHeader from '@/components/Molecule/SectionHeader.vue'
 
 const authStore = useAuthStore()
 const recommendationStore = useRecommendationStore()
@@ -19,22 +20,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="flex flex-col gap-5">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h2 class="text-lg md:text-xl font-medium text-gray-900 dark:text-white">Rekomendasi Untukmu</h2>
-      <RouterLink
-        :to="{ name: 'app.all-products' }"
-        class="text-sm font-medium text-custom-blue dark:text-blue-400 hover:underline"
-      >
-        Lihat Semua
-      </RouterLink>
-    </div>
+  <section class="flex flex-col gap-6 md:gap-8">
+    <SectionHeader
+      title="Rekomendasi Untukmu"
+      :link="{ name: 'app.all-products' }"
+      link-text="Lihat Semua"
+    />
 
     <!-- Loading Skeleton -->
     <div
       v-if="loadingPersonalized"
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4"
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
     >
       <SkeletonProductCard v-for="i in 5" :key="i" />
     </div>
@@ -42,7 +38,7 @@ onMounted(() => {
     <!-- Products Grid -->
     <div
       v-else-if="personalizedProducts.length"
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4"
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
     >
       <ProductCard
         v-for="product in personalizedProducts"

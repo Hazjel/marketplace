@@ -57,8 +57,8 @@ watch(
       <div class="flex flex-col gap-2">
         <h1 class="font-medium text-2xl text-gray-900 dark:text-white">Semua Pengguna</h1>
         <div class="flex items-center gap-2">
-          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#2563EB]/10 dark:bg-[#2563EB]/20">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#2563EB]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#024ad8]/10 dark:bg-[#024ad8]/20">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#024ad8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-1.053M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07m0 0a9.005 9.005 0 00-5.593-4.482M12 3a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
             </svg>
           </div>
@@ -71,7 +71,7 @@ watch(
     <div id="Filter" class="flex flex-col md:flex-row items-center justify-between gap-4">
       <form action="#" class="w-full md:w-auto">
         <label
-          class="flex items-center w-full md:w-[400px] h-12 rounded-2xl px-4 gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-white/10 focus-within:border-[#2563EB] dark:focus-within:border-[#2563EB] focus-within:ring-2 focus-within:ring-[#2563EB]/20 transition-all">
+          class="flex items-center w-full md:w-[400px] h-12 rounded-2xl px-4 gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-white/10 focus-within:border-[#024ad8] dark:focus-within:border-[#024ad8] focus-within:ring-2 focus-within:ring-[#024ad8]/20 transition-all">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
@@ -84,7 +84,7 @@ watch(
       <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
         <p class="font-medium text-gray-500 dark:text-gray-400 text-sm">Tampilkan</p>
         <label
-          class="flex items-center h-12 rounded-2xl border border-gray-200 dark:border-white/10 py-2 px-4 bg-gray-50 dark:bg-gray-800 focus-within:border-[#2563EB] transition-all">
+          class="flex items-center h-12 rounded-2xl border border-gray-200 dark:border-white/10 py-2 px-4 bg-gray-50 dark:bg-gray-800 focus-within:border-[#024ad8] transition-all">
           <select
             v-model="serverOptions.row_per_page"
             class="text-gray-900 dark:text-white font-medium text-sm appearance-none focus:outline-none pr-6 bg-transparent">

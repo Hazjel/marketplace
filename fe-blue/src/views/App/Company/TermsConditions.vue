@@ -30,10 +30,10 @@ onMounted(() => {
     <!-- Header -->
     <header class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-white/10 py-16 md:py-20 px-5 md:px-[52px]">
       <div class="max-w-[1280px] mx-auto">
-        <span class="text-[#2563EB] font-medium tracking-widest uppercase text-sm mb-4 block"
+        <span class="text-[#024ad8] font-medium tracking-widest uppercase text-sm mb-4 block"
           >Legal</span
         >
-        <h1 class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white mb-4 font-['Plus_Jakarta_Sans']">Terms & Conditions</h1>
+        <h1 class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white mb-4">Terms & Conditions</h1>
         <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl">
           Silakan baca syarat dan ketentuan ini dengan seksama sebelum menggunakan layanan kami.
         </p>
@@ -58,7 +58,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'agreement'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -69,7 +69,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'representations'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -80,7 +80,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'products'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -91,7 +91,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'prohibited'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -102,7 +102,7 @@ onMounted(() => {
           <button
             :class="
               activeSection === 'contact'
-                ? 'bg-blue-50 dark:bg-[#2563EB]/20 text-[#2563EB] font-medium border-[#2563EB]'
+                ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
             "
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
@@ -137,21 +137,21 @@ onMounted(() => {
             <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-white/10">
               <ul class="space-y-3 list-none p-0 m-0">
                 <li class="flex gap-3">
-                  <div class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mt-2 shrink-0"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
                     >All registration information you submit will be true, accurate, current, and
                     complete.</span
                   >
                 </li>
                 <li class="flex gap-3">
-                  <div class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mt-2 shrink-0"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
                     >You will maintain the accuracy of such information and promptly update such
                     registration information as necessary.</span
                   >
                 </li>
                 <li class="flex gap-3">
-                  <div class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mt-2 shrink-0"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
                     >You have the legal capacity and you agree to comply with these Terms and
                     Conditions.</span
@@ -194,10 +194,10 @@ onMounted(() => {
           <section id="contact" class="scroll-mt-32">
             <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Contact Us</h2>
             <div
-              class="bg-blue-50 dark:bg-[#2563EB]/10 border border-blue-100 dark:border-[#2563EB]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6"
+              class="bg-blue-50 dark:bg-[#024ad8]/10 border border-blue-100 dark:border-[#024ad8]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6"
             >
               <div
-                class="w-12 h-12 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-[#2563EB] shadow-sm shrink-0"
+                class="w-12 h-12 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-[#024ad8] shadow-sm shrink-0"
               >
                 <i class="fa-solid fa-scale-balanced"></i>
               </div>
@@ -206,7 +206,7 @@ onMounted(() => {
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Our legal team is here to assist you.</p>
                 <a
                   href="mailto:legal@blukios.com"
-                  class="text-[#2563EB] font-medium hover:underline"
+                  class="text-[#024ad8] font-medium hover:underline"
                   >legal@blukios.com</a
                 >
               </div>

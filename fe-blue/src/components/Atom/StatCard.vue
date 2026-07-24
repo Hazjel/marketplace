@@ -8,8 +8,8 @@ defineProps({
   icon: { type: String, default: 'wallet-2-blue-fill.svg' },
   // 'plain' = card putih + icon bulat; 'gradient' = card warna solid gradient
   variant: { type: String, default: 'plain' },
-  // Dipakai saat variant='gradient'. Contoh: 'from-[#2563EB] to-blue-700'
-  color: { type: String, default: 'from-[#2563EB] to-blue-700' },
+  // Dipakai saat variant='gradient'. Contoh: 'from-[#024ad8] to-blue-700'
+  color: { type: String, default: 'from-[#024ad8] to-blue-700' },
   // { value: '12%', direction: 'up' | 'down' } — opsional, hanya render kalau ada data nyata
   trend: { type: Object, default: null }
 })

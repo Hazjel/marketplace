@@ -33,10 +33,10 @@ onMounted(() => {
           >
             EST. 2024
           </span>
-          <h1 class="text-5xl md:text-7xl font-medium text-white leading-tight font-['Plus_Jakarta_Sans']">
+          <h1 class="text-5xl md:text-7xl font-medium text-white leading-tight">
             Connecting
             <span
-              class="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-teal-400"
+              class="text-transparent bg-clip-text bg-gradient-to-r from-[#024ad8] to-teal-400"
               >Ambitions</span
             >,<br />
             Delivering
@@ -46,7 +46,7 @@ onMounted(() => {
             >.
           </h1>
           <p
-            class="text-xl text-gray-300 leading-relaxed max-w-2xl border-l-4 border-[#2563EB] pl-6"
+            class="text-xl text-gray-300 leading-relaxed max-w-2xl border-l-4 border-[#024ad8] pl-6"
           >
             We are more than just a marketplace. We are the bridge between local craftsmanship and
             global opportunity.
@@ -62,7 +62,7 @@ onMounted(() => {
       >
         <div class="flex flex-col items-center text-center gap-2 group">
           <span
-            class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white group-hover:text-[#2563EB] transition-colors duration-300"
+            class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white group-hover:text-[#024ad8] transition-colors duration-300"
             >10K+</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
@@ -105,7 +105,7 @@ onMounted(() => {
       <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
         <div class="w-full lg:w-1/2 relative group">
           <div
-            class="absolute -inset-4 bg-[#2563EB]/20 rounded-[40px] -rotate-3 transition-transform group-hover:rotate-0 duration-500"
+            class="absolute -inset-4 bg-[#024ad8]/20 rounded-[40px] -rotate-3 transition-transform group-hover:rotate-0 duration-500"
           ></div>
           <img
             src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1932&auto=format&fit=crop"
@@ -114,7 +114,7 @@ onMounted(() => {
           />
         </div>
         <div class="w-full lg:w-1/2 flex flex-col gap-6">
-          <span class="text-[#2563EB] font-medium tracking-widest uppercase text-sm"
+          <span class="text-[#024ad8] font-medium tracking-widest uppercase text-sm"
             >Our Origin</span
           >
           <h2 class="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white leading-tight">
@@ -202,12 +202,12 @@ onMounted(() => {
             class="bg-white dark:bg-gray-900 p-10 rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group"
           >
             <div
-              class="w-16 h-16 bg-blue-50 dark:bg-[#2563EB]/20 rounded-2xl flex items-center justify-center text-[#2563EB] text-3xl mb-8 group-hover:scale-110 transition-transform"
+              class="w-16 h-16 bg-blue-50 dark:bg-[#024ad8]/20 rounded-2xl flex items-center justify-center text-[#024ad8] text-3xl mb-8 group-hover:scale-110 transition-transform"
             >
               <i class="fa-solid fa-users"></i>
             </div>
             <h3
-              class="text-2xl font-medium text-gray-900 dark:text-white mb-4 group-hover:text-[#2563EB] transition-colors"
+              class="text-2xl font-medium text-gray-900 dark:text-white mb-4 group-hover:text-[#024ad8] transition-colors"
             >
               Customer Obsession
             </h3>
@@ -279,7 +279,7 @@ onMounted(() => {
         <div class="relative z-10 flex flex-col items-center gap-8">
           <h2 class="text-4xl md:text-6xl font-medium text-white tracking-tight">
             Be Part of the <br /><span
-              class="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-teal-400"
+              class="text-transparent bg-clip-text bg-gradient-to-r from-[#024ad8] to-teal-400"
               >Revolution.</span
             >
           </h2>

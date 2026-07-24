@@ -3,11 +3,11 @@
     <div class="flex flex-col items-center justify-center text-center gap-8 max-w-lg -mt-20">
       <!-- Fun Illustration -->
       <div class="relative">
-        <div class="absolute -inset-6 bg-gradient-to-br from-[#2563EB]/20 to-purple-500/20 rounded-full blur-2xl"></div>
+        <div class="absolute -inset-6 bg-gradient-to-br from-[#024ad8]/20 to-purple-500/20 rounded-full blur-2xl"></div>
         <div class="relative flex items-center justify-center w-[140px] h-[140px] rounded-full bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-white/10">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="w-16 h-16 text-[#2563EB]"
+            class="w-16 h-16 text-[#024ad8]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -24,7 +24,7 @@
 
       <!-- Title -->
       <div class="flex flex-col gap-3">
-        <h1 class="text-7xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-purple-600 font-['Plus_Jakarta_Sans']">403</h1>
+        <h1 class="text-7xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#024ad8] to-purple-600">403</h1>
         <h2 class="text-2xl md:text-3xl font-medium text-gray-900 dark:text-white">Akses Ditolak</h2>
       </div>
 
@@ -43,7 +43,7 @@
         </button>
         <button
           @click="goDashboard"
-          class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#2563EB] to-blue-700 text-white font-medium hover:shadow-lg hover:shadow-[#2563EB]/25 transition-all duration-200"
+          class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#024ad8] to-blue-700 text-white font-medium hover:shadow-lg hover:shadow-[#024ad8]/25 transition-all duration-200"
         >
           Ke Dashboard
         </button>

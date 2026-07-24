@@ -31,7 +31,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="group relative w-full max-w-[1280px] mx-auto px-4 lg:px-6 mt-4 md:mt-6">
+  <section class="group relative w-full">
     <div class="heroSwiper w-full rounded-2xl overflow-hidden">
       <div class="swiper-wrapper">
         <!-- Slide 1 -->
