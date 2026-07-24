@@ -212,6 +212,48 @@ services:
       CHAT_SERVICE_URL: http://chat-service:8001
 
   # ─────────────────────────────────────────
+  # Scheduler — jalankan Schedule::command() di routes/console.php
+  # (transaction:check-expiry tiap menit, transaction:auto-complete harian).
+  # Tanpa ini schedule:run tidak pernah terpanggil sama sekali.
+  # ─────────────────────────────────────────
+  scheduler:
+    build:
+      context: ./api-blue
+    container_name: blue-scheduler
+    restart: unless-stopped
+    entrypoint: []
+    command: ["sh", "-c", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
+    depends_on:
+      - api
+    volumes:
+      - ./api-blue:/var/www
+      - api_vendor:/var/www/vendor
+    environment:
+      APP_NAME: Blukios
+      APP_ENV: local
+      # Cache config/route container ke luar bind mount — kalau tidak, cache
+      # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
+      APP_CONFIG_CACHE: /tmp/laravel-config.php
+      APP_ROUTES_CACHE: /tmp/laravel-routes.php
+      APP_KEY: base64:mzp8+4+f+GYdZuiqdL528buQXoyjZDXKMHrgk4+Q85o=
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: api_blue
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: "null"
+      REDIS_CLIENT: predis
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
+      MIDTRANS_IS_PRODUCTION: "false"
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY wajib diisi di .env}
+      CHAT_SERVICE_URL: http://chat-service:8001
+
+  # ─────────────────────────────────────────
   # Reverb WebSocket Server
   # ─────────────────────────────────────────
   reverb:
