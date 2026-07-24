@@ -116,6 +116,9 @@ class ShipmentController extends Controller
             'receiver_destination_id' => 'required|integer',
             'item_value' => 'required|numeric|min:0',
             'weight' => 'required|numeric|min:0.01',
+            // Nama kota alamat penerima — dipakai sebagai fallback pencarian
+            // kalau receiver_destination_id (level kecamatan) ditolak Komerce.
+            'receiver_city_name' => 'nullable|string|max:100',
         ]);
 
         // Berat produk tersimpan dalam kg; Komerce butuh gram
@@ -130,43 +133,35 @@ class ShipmentController extends Controller
 
         try {
             $couriers = Cache::remember($cacheKey, now()->addHour(), function () use ($request, $grams) {
-                $response = Http::timeout(15)
-                    ->asForm()
-                    ->withHeaders(['key' => config('services.komerce.api_key')])
-                    ->post($this->baseUrl.'/calculate/district/domestic-cost', [
-                        'origin' => $request->shipper_destination_id,
-                        'destination' => $request->receiver_destination_id,
-                        'weight' => $grams,
-                        'courier' => self::COURIERS,
-                    ]);
+                $couriers = $this->fetchCourierCosts(
+                    $request->shipper_destination_id,
+                    $request->receiver_destination_id,
+                    $grams
+                );
 
-                $status = $response->status();
-                if ($status === 401 || $status === 403) {
-                    throw new \RuntimeException('Komerce unauthorized');
+                // Fallback: Komerce kadang menolak ID level kecamatan/kelurahan
+                // hasil pencarian mereka sendiri ("Origin or Destination not
+                // found") walau ID itu valid di endpoint pencarian destinasi --
+                // inkonsistensi data di sisi mereka. Coba lagi pakai ID kota
+                // (level lebih umum) hasil pencarian ulang nama kotanya.
+                if (empty($couriers) && $request->filled('receiver_city_name')) {
+                    $fallbackId = $this->findCityLevelDestinationId($request->receiver_city_name);
+
+                    if ($fallbackId !== null && $fallbackId !== (int) $request->receiver_destination_id) {
+                        Log::info('Komerce calculate fallback ke city-level destination', [
+                            'original_destination' => $request->receiver_destination_id,
+                            'fallback_destination' => $fallbackId,
+                        ]);
+
+                        $couriers = $this->fetchCourierCosts(
+                            $request->shipper_destination_id,
+                            $fallbackId,
+                            $grams
+                        );
+                    }
                 }
-                if (! $response->successful()) {
-                    Log::warning('Komerce calculate non-200', [
-                        'status' => $status,
-                        'body' => $response->body(),
-                        'origin' => $request->shipper_destination_id,
-                        'destination' => $request->receiver_destination_id,
-                    ]);
 
-                    return [];
-                }
-
-                // Map ke format lama yang dipakai frontend (calculate_reguler)
-                return collect($response->json('data') ?? [])
-                    ->map(fn ($row) => [
-                        'shipping_name' => $row['name'] ?? $row['code'] ?? '-',
-                        'service_name' => $row['service'] ?? '-',
-                        'shipping_cost' => $row['cost'] ?? 0,
-                        'shipping_cost_net' => $row['cost'] ?? 0,
-                        'etd' => $row['etd'] ?? null,
-                    ])
-                    ->sortBy('shipping_cost_net')
-                    ->values()
-                    ->all();
+                return $couriers;
             });
 
             return response()->json([
@@ -180,6 +175,79 @@ class ShipmentController extends Controller
 
             return ResponseHelper::jsonResponse(false, 'Gagal menghitung ongkir.', null, 500);
         }
+    }
+
+    /**
+     * Panggil endpoint calculate Komerce, return list kurir (map ke format lama
+     * calculate_reguler) atau array kosong kalau gagal/tidak ditemukan.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchCourierCosts(int $originId, int $destinationId, int $grams): array
+    {
+        $response = Http::timeout(15)
+            ->asForm()
+            ->withHeaders(['key' => config('services.komerce.api_key')])
+            ->post($this->baseUrl.'/calculate/district/domestic-cost', [
+                'origin' => $originId,
+                'destination' => $destinationId,
+                'weight' => $grams,
+                'courier' => self::COURIERS,
+            ]);
+
+        $status = $response->status();
+        if ($status === 401 || $status === 403) {
+            throw new \RuntimeException('Komerce unauthorized');
+        }
+        if (! $response->successful()) {
+            Log::warning('Komerce calculate non-200', [
+                'status' => $status,
+                'body' => $response->body(),
+                'origin' => $originId,
+                'destination' => $destinationId,
+            ]);
+
+            return [];
+        }
+
+        return collect($response->json('data') ?? [])
+            ->map(fn ($row) => [
+                'shipping_name' => $row['name'] ?? $row['code'] ?? '-',
+                'service_name' => $row['service'] ?? '-',
+                'shipping_cost' => $row['cost'] ?? 0,
+                'shipping_cost_net' => $row['cost'] ?? 0,
+                'etd' => $row['etd'] ?? null,
+            ])
+            ->sortBy('shipping_cost_net')
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Cari ID destinasi level kota (bukan kecamatan/kelurahan) dari nama kota,
+     * dipakai sebagai fallback saat ID yang lebih spesifik ditolak Komerce.
+     * Level kota lebih mungkin punya cakupan ongkir kurir yang lengkap.
+     */
+    private function findCityLevelDestinationId(string $cityName): ?int
+    {
+        $results = $this->searchDestinations($cityName);
+
+        $cityLevel = collect($results)->first(
+            fn ($row) => mb_strtolower($row['city_name'] ?? '') === mb_strtolower($cityName)
+                && ($row['subdistrict_name'] ?? '') === '-'
+        );
+
+        if ($cityLevel) {
+            return (int) $cityLevel['id'];
+        }
+
+        // Tidak ada baris murni level kota -- ambil hasil pertama yang
+        // city_name-nya cocok, lebih baik daripada tidak fallback sama sekali.
+        $anyMatch = collect($results)->first(
+            fn ($row) => mb_strtolower($row['city_name'] ?? '') === mb_strtolower($cityName)
+        );
+
+        return $anyMatch ? (int) $anyMatch['id'] : null;
     }
 
     public function geocode(Request $request)
