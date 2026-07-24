@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Events\MessageSent;
+use App\Interfaces\ChatAssistantInterface;
 use App\Models\Message;
 use App\Models\Product;
 use App\Models\Store;
@@ -11,7 +12,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -40,7 +40,7 @@ class GenerateAiChatReplyJob implements ShouldQueue
         private readonly string $buyerMessage
     ) {}
 
-    public function handle(): void
+    public function handle(ChatAssistantInterface $chatAssistant): void
     {
         $store = Store::with('user')->find($this->storeId);
 
@@ -61,50 +61,25 @@ class GenerateAiChatReplyJob implements ShouldQueue
             ->values()
             ->all();
 
-        try {
-            $response = Http::withHeaders([
-                'X-Internal-Key' => config('services.internal.key'),
-            ])
-                ->timeout(110)
-                ->post(config('services.chat_service.url').'/store-assistant/reply', [
-                    'store_name' => $store->name,
-                    'products' => $products,
-                    'buyer_message' => $this->buyerMessage,
-                ]);
+        // Gagal senyap -- jangan kirim pesan generik palsu, biarkan seller
+        // yang balas manual kalau AI assistant lagi bermasalah.
+        $reply = $chatAssistant->reply($store->name, $products, $this->buyerMessage);
 
-            if (! $response->successful()) {
-                Log::warning('GenerateAiChatReplyJob: chat-service gagal', [
-                    'store_id' => $this->storeId,
-                    'status' => $response->status(),
-                ]);
-
-                return;
-            }
-
-            $reply = $response->json('reply');
-
-            if (! $reply) {
-                Log::warning('GenerateAiChatReplyJob: reply kosong dari chat-service', [
-                    'store_id' => $this->storeId,
-                ]);
-
-                return;
-            }
-
-            $message = Message::create([
-                'sender_id' => $store->user->id,
-                'receiver_id' => $this->buyerId,
-                'message' => $reply,
-                'is_ai_reply' => true,
-            ]);
-
-            broadcast(new MessageSent($message))->toOthers();
-        } catch (\Throwable $e) {
-            // Gagal senyap -- jangan kirim pesan generik palsu, biarkan
-            // seller yang balas manual kalau AI assistant lagi bermasalah.
-            Log::error('GenerateAiChatReplyJob error: '.$e->getMessage(), [
+        if (! $reply) {
+            Log::warning('GenerateAiChatReplyJob: tidak ada reply dari chat assistant', [
                 'store_id' => $this->storeId,
             ]);
+
+            return;
         }
+
+        $message = Message::create([
+            'sender_id' => $store->user->id,
+            'receiver_id' => $this->buyerId,
+            'message' => $reply,
+            'is_ai_reply' => true,
+        ]);
+
+        broadcast(new MessageSent($message))->toOthers();
     }
 }

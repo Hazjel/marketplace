@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Store;
+use App\Interfaces\EscrowRepositoryInterface;
 use App\Models\Transaction;
-use App\Repositories\StoreBalanceRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -27,7 +26,7 @@ class AutoCompleteTransaction extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(EscrowRepositoryInterface $escrowRepository)
     {
         $this->info('Checking for auto-completable transactions...');
         Log::info('SCHEDULER: Checking for auto-completable transactions...');
@@ -46,8 +45,6 @@ class AutoCompleteTransaction extends Command
 
         $this->info("Found {$transactions->count()} transaction(s) to auto-complete.");
 
-        $storeBalanceRepository = new StoreBalanceRepository;
-
         foreach ($transactions as $transaction) {
             try {
                 $this->info("Auto-completing transaction: {$transaction->code}");
@@ -58,33 +55,10 @@ class AutoCompleteTransaction extends Command
                 $transaction->save();
 
                 // 2. Release escrow: pindahkan pending_balance ke available balance
-                $store = Store::find($transaction->store_id);
+                $escrowRepository->release($transaction);
 
-                if ($store && $store->storeBalance) {
-                    $netSales = $transaction->grand_total - $transaction->shipping_cost;
-                    $adminFee = $netSales * config('marketplace.admin_fee_percentage');
-                    $sellerAmount = $netSales - $adminFee;
-
-                    $storeBalanceRepository->releasePending($store->storeBalance->id, $sellerAmount);
-
-                    // 3. Catat history
-                    $store->storeBalance->storeBalanceHistories()->create([
-                        'type' => 'released',
-                        'reference_id' => $transaction->id,
-                        'reference_type' => Transaction::class,
-                        'amount' => $sellerAmount,
-                        'remarks' => 'Dana dirilis otomatis (auto-complete 7 hari) — pesanan '.$transaction->code,
-                    ]);
-
-                    $this->info("Escrow released for {$transaction->code}: Rp ".number_format($sellerAmount));
-                    Log::info("SCHEDULER: Escrow released for {$transaction->code}", [
-                        'seller_amount' => $sellerAmount,
-                        'store_id' => $store->id,
-                    ]);
-                } else {
-                    Log::error("SCHEDULER: Store or StoreBalance not found for transaction {$transaction->code}");
-                    $this->error("Store balance not found for transaction {$transaction->code}");
-                }
+                $this->info("Escrow released for {$transaction->code}");
+                Log::info("SCHEDULER: Escrow released for {$transaction->code}");
             } catch (\Exception $e) {
                 Log::error("SCHEDULER ERROR auto-completing {$transaction->code}: ".$e->getMessage());
                 $this->error("Error processing {$transaction->code}: ".$e->getMessage());

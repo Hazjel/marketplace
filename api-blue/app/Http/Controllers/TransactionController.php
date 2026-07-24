@@ -7,10 +7,11 @@ use App\Http\Requests\TransactionStoreRequest;
 use App\Http\Requests\TransactionUpdateRequest;
 use App\Http\Resources\PaginateResource;
 use App\Http\Resources\TransactionResource;
+use App\Interfaces\EscrowRepositoryInterface;
+use App\Interfaces\TransactionAnalyticsRepositoryInterface;
 use App\Interfaces\TransactionRepositoryInterface;
-use App\Models\Store;
 use App\Models\Transaction;
-use App\Repositories\StoreBalanceRepository;
+use App\Services\MidtransPaymentStatusInterpreter;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -24,9 +25,18 @@ class TransactionController extends Controller implements HasMiddleware
 {
     private TransactionRepositoryInterface $transactionRepository;
 
-    public function __construct(TransactionRepositoryInterface $transactionRepository)
-    {
+    private TransactionAnalyticsRepositoryInterface $transactionAnalyticsRepository;
+
+    private EscrowRepositoryInterface $escrowRepository;
+
+    public function __construct(
+        TransactionRepositoryInterface $transactionRepository,
+        TransactionAnalyticsRepositoryInterface $transactionAnalyticsRepository,
+        EscrowRepositoryInterface $escrowRepository
+    ) {
         $this->transactionRepository = $transactionRepository;
+        $this->transactionAnalyticsRepository = $transactionAnalyticsRepository;
+        $this->escrowRepository = $escrowRepository;
     }
 
     public static function middleware()
@@ -70,8 +80,8 @@ class TransactionController extends Controller implements HasMiddleware
         try {
             $mode = request('mode');
             $transactions = $this->transactionRepository->getAllPaginated($request['search'] ?? null, $request['row_per_page']);
-            $totalRevenue = $this->transactionRepository->getTotalRevenue($mode);
-            $totalAdminFee = $this->transactionRepository->getTotalAdminFee($mode);
+            $totalRevenue = $this->transactionAnalyticsRepository->getTotalRevenue($mode);
+            $totalAdminFee = $this->transactionAnalyticsRepository->getTotalAdminFee($mode);
 
             // Manual wrapping because using getData(true) returns the array structure directly
             // but ResponseHelper expects to wrap it in 'data'
@@ -105,7 +115,7 @@ class TransactionController extends Controller implements HasMiddleware
         }
 
         try {
-            $data = $this->transactionRepository->getChartData($days, request('mode'));
+            $data = $this->transactionAnalyticsRepository->getChartData($days, request('mode'));
 
             return ResponseHelper::jsonResponse(true, 'success', $data, 200);
         } catch (\Exception $e) {
@@ -253,57 +263,11 @@ class TransactionController extends Controller implements HasMiddleware
             ]);
 
             // ESCROW RELEASE: Pindahkan dana dari pending_balance ke available balance
-            $this->releaseEscrowBalance($transaction);
+            $this->escrowRepository->release($transaction);
 
             return ResponseHelper::jsonResponse(true, 'Pesanan Selesai — dana telah dirilis ke saldo toko', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
-        }
-    }
-
-    /**
-     * Release escrow: pindahkan dana dari pending_balance ke available balance.
-     * Dipanggil saat buyer konfirmasi terima atau auto-complete.
-     */
-    private function releaseEscrowBalance(Transaction $transaction): void
-    {
-        try {
-            $store = Store::find($transaction->store_id);
-
-            if (! $store || ! $store->storeBalance) {
-                Log::error('releaseEscrowBalance: Store or StoreBalance not found', [
-                    'store_id' => $transaction->store_id,
-                ]);
-
-                return;
-            }
-
-            $netSales = $transaction->grand_total - $transaction->shipping_cost;
-            $adminFee = $netSales * config('marketplace.admin_fee_percentage');
-            $sellerAmount = $netSales - $adminFee;
-
-            $storeBalanceRepository = new StoreBalanceRepository;
-
-            // Pindahkan dari pending ke available
-            $storeBalanceRepository->releasePending($store->storeBalance->id, $sellerAmount);
-
-            // Catat history: dana dirilis
-            $store->storeBalance->storeBalanceHistories()->create([
-                'type' => 'released',
-                'reference_id' => $transaction->id,
-                'reference_type' => Transaction::class,
-                'amount' => $sellerAmount,
-                'remarks' => 'Dana dirilis ke saldo tersedia — pesanan '.$transaction->code.' selesai',
-            ]);
-
-            Log::info('Escrow released for transaction: '.$transaction->code, [
-                'store_id' => $store->id,
-                'seller_amount' => $sellerAmount,
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Error releasing escrow balance: '.$e->getMessage(), [
-                'transaction_id' => $transaction->id,
-            ]);
         }
     }
 
@@ -345,59 +309,17 @@ class TransactionController extends Controller implements HasMiddleware
                 $paymentType = $midtransStatus->payment_type;
                 $fraudStatus = $midtransStatus->fraud_status;
 
-                // Simulate Request object for the existing callback logic or duplicate logic?
-                // For simplicity/safety, let's just duplicate the minimal update logic here or call a repository method.
-                // Re-using the callback logic is cleaner but complex due to Request dependence.
-                // Let's implement direct update here.
-
-                $newStatus = $transaction->payment_status;
-
-                if ($transactionStatus == 'capture') {
-                    if ($paymentType == 'credit_card') {
-                        if ($fraudStatus == 'challenge') {
-                            $newStatus = 'unpaid';
-                        } else {
-                            $newStatus = 'paid';
-                        }
-                    }
-                } elseif ($transactionStatus == 'settlement') {
-                    $newStatus = 'paid';
-                } elseif ($transactionStatus == 'pending') {
-                    $newStatus = 'unpaid';
-                } elseif ($transactionStatus == 'deny') {
-                    $newStatus = 'failed';
-                } elseif ($transactionStatus == 'expire') {
-                    $newStatus = 'failed';
-                } elseif ($transactionStatus == 'cancel') {
-                    $newStatus = 'failed';
-                }
+                // Interpreter sama dengan yang dipakai webhook callback — no-op (null)
+                // berarti status tetap seperti sekarang (mis. capture non-credit_card).
+                $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus)
+                    ?? $transaction->payment_status;
 
                 if ($newStatus === 'paid' && $transaction->payment_status !== 'paid') {
-                    // Update to Paid
                     $transaction->payment_status = 'paid';
                     $transaction->save();
 
                     // Credit ke pending_balance (escrow) — sama seperti Midtrans callback
-                    $store = Store::find($transaction->store_id);
-                    if ($store && $store->storeBalance) {
-                        $netSales = $transaction->grand_total - $transaction->shipping_cost;
-                        $adminFee = $netSales * config('marketplace.admin_fee_percentage');
-                        $sellerAmount = $netSales - $adminFee;
-
-                        $transaction->admin_fee = $adminFee;
-                        $transaction->save();
-
-                        $storeBalanceRepository = new StoreBalanceRepository;
-                        $storeBalanceRepository->creditPending($store->storeBalance->id, $sellerAmount);
-
-                        $store->storeBalance->storeBalanceHistories()->create([
-                            'type' => 'pending_income',
-                            'reference_id' => $transaction->id,
-                            'reference_type' => Transaction::class,
-                            'amount' => $sellerAmount,
-                            'remarks' => 'Pembayaran diterima (ditahan) dari transaksi '.$transaction->code.' — akan dirilis setelah pesanan selesai',
-                        ]);
-                    }
+                    $this->escrowRepository->credit($transaction);
                 } elseif ($newStatus !== $transaction->payment_status) {
                     $transaction->payment_status = $newStatus;
                     $transaction->save();

@@ -363,7 +363,7 @@ class EscrowPaymentTest extends TestCase
 
         // Directly call the repository's updateStatus with cancelled
         // (This bypasses the FormRequest validation which doesn't allow 'cancelled' via HTTP)
-        $transactionRepository = new TransactionRepository;
+        $transactionRepository = app(TransactionRepository::class);
         $transactionRepository->updateStatus($transaction->id, [
             'delivery_status' => 'cancelled',
         ]);

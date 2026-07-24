@@ -2,21 +2,23 @@
 
 namespace App\Repositories;
 
+use App\Interfaces\EscrowRepositoryInterface;
+use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Product;
-use App\Models\Store;
 use App\Models\Transaction;
-use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Midtrans\Config;
-use Midtrans\Snap;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
+    public function __construct(
+        private EscrowRepositoryInterface $escrowRepository,
+        private PaymentGatewayInterface $paymentGateway
+    ) {}
+
     public function getAll(?string $search, ?int $limit, bool $execute)
     {
         $mode = request('mode');
@@ -111,172 +113,6 @@ class TransactionRepository implements TransactionRepositoryInterface
         }
 
         return false;
-    }
-
-    public function getTotalRevenue(?string $mode = null)
-    {
-        $query = Transaction::where('payment_status', 'paid');
-
-        if (! $this->scopeToMode($query, $mode)) {
-            return 0;
-        }
-
-        return $query->sum('grand_total');
-    }
-
-    public function getTotalCount(): int
-    {
-        return Transaction::count();
-    }
-
-    public function getTotalAdminFee(?string $mode = null)
-    {
-        $query = Transaction::where('payment_status', 'paid');
-
-        if (! $this->scopeToMode($query, $mode)) {
-            return 0;
-        }
-
-        return $query->sum('admin_fee');
-    }
-
-    /**
-     * Time-series revenue (store) atau pengeluaran (buyer) N hari terakhir.
-     * $days dibatasi allow-list oleh controller (7/30/90).
-     */
-    public function getChartData(int $days = 7, ?string $mode = null)
-    {
-        $query = Transaction::query()->where('payment_status', 'paid');
-
-        if (! $this->scopeToMode($query, $mode)) {
-            return [];
-        }
-
-        $endDate = now('Asia/Jakarta')->endOfDay();
-        $startDate = now('Asia/Jakarta')->subDays($days - 1)->startOfDay();
-        $period = CarbonPeriod::create($startDate, $endDate);
-
-        $transactions = (clone $query)
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(grand_total) as total_revenue'),
-                DB::raw('COUNT(*) as total_transaction')
-            )
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->groupBy('date')
-            ->orderBy('date', 'ASC')
-            ->get();
-
-        // Fill missing dates with 0
-        $data = [];
-        foreach ($period as $date) {
-            $dateString = $date->format('Y-m-d');
-            $record = $transactions->firstWhere('date', $dateString);
-
-            $data[] = [
-                'date' => $dateString,
-                'total_revenue' => $record ? (int) $record->total_revenue : 0,
-                'total_transaction' => $record ? (int) $record->total_transaction : 0,
-            ];
-        }
-
-        return $data;
-    }
-
-    /**
-     * Hitung transaksi per status (payment_status + delivery_status) untuk
-     * user login, role-scoped. Single query pakai conditional SUM.
-     */
-    public function getStatusBreakdown(?string $mode = null)
-    {
-        $query = Transaction::query();
-
-        if (! $this->scopeToMode($query, $mode)) {
-            return [
-                'unpaid' => 0, 'paid' => 0, 'failed' => 0,
-                'pending' => 0, 'shipping' => 0, 'delivering' => 0,
-                'delivered' => 0, 'completed' => 0, 'cancelled' => 0,
-            ];
-        }
-
-        $row = $query->selectRaw("
-            SUM(CASE WHEN payment_status = 'unpaid' THEN 1 ELSE 0 END) as unpaid,
-            SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) as paid,
-            SUM(CASE WHEN payment_status = 'failed' THEN 1 ELSE 0 END) as failed,
-            SUM(CASE WHEN delivery_status = 'pending' THEN 1 ELSE 0 END) as pending,
-            SUM(CASE WHEN delivery_status = 'shipping' THEN 1 ELSE 0 END) as shipping,
-            SUM(CASE WHEN delivery_status = 'delivering' THEN 1 ELSE 0 END) as delivering,
-            SUM(CASE WHEN delivery_status = 'delivered' THEN 1 ELSE 0 END) as delivered,
-            SUM(CASE WHEN delivery_status = 'completed' THEN 1 ELSE 0 END) as completed,
-            SUM(CASE WHEN delivery_status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
-        ")->first();
-
-        return [
-            'unpaid' => (int) $row->unpaid,
-            'paid' => (int) $row->paid,
-            'failed' => (int) $row->failed,
-            'pending' => (int) $row->pending,
-            'shipping' => (int) $row->shipping,
-            'delivering' => (int) $row->delivering,
-            'delivered' => (int) $row->delivered,
-            'completed' => (int) $row->completed,
-            'cancelled' => (int) $row->cancelled,
-        ];
-    }
-
-    /**
-     * Bandingkan revenue & jumlah order 7 hari terakhir vs 7 hari sebelumnya
-     * (store-only — dipakai untuk trend badge di dashboard seller).
-     * Return null kalau bukan store (tidak ada perbandingan bermakna).
-     */
-    public function getWeekOverWeekTrend(): ?array
-    {
-        if (! auth()->check() || ! auth()->user()->hasRole('store')) {
-            return null;
-        }
-
-        $storeId = auth()->user()->store?->id;
-        if (! $storeId) {
-            return null;
-        }
-
-        $now = now('Asia/Jakarta');
-        $thisWeekStart = $now->copy()->subDays(6)->startOfDay();
-        $lastWeekStart = $now->copy()->subDays(13)->startOfDay();
-        $lastWeekEnd = $now->copy()->subDays(7)->endOfDay();
-
-        $base = Transaction::where('store_id', $storeId)->where('payment_status', 'paid');
-
-        $thisWeek = (clone $base)->whereBetween('created_at', [$thisWeekStart, $now])
-            ->selectRaw('COALESCE(SUM(grand_total), 0) as revenue, COUNT(*) as orders')
-            ->first();
-
-        $lastWeek = (clone $base)->whereBetween('created_at', [$lastWeekStart, $lastWeekEnd])
-            ->selectRaw('COALESCE(SUM(grand_total), 0) as revenue, COUNT(*) as orders')
-            ->first();
-
-        return [
-            'revenue' => $this->percentChange((float) $thisWeek->revenue, (float) $lastWeek->revenue),
-            'orders' => $this->percentChange((int) $thisWeek->orders, (int) $lastWeek->orders),
-        ];
-    }
-
-    /**
-     * Persentase perubahan; null kalau baseline 0 (tidak ada dasar perbandingan
-     * yang bermakna — FE harus sembunyikan badge trend, bukan tampilkan Infinity).
-     */
-    private function percentChange(float $current, float $previous): ?array
-    {
-        if ($previous <= 0) {
-            return null;
-        }
-
-        $percent = (($current - $previous) / $previous) * 100;
-
-        return [
-            'value' => round(abs($percent), 1),
-            'direction' => $percent >= 0 ? 'up' : 'down',
-        ];
     }
 
     public function getById(string $id)
@@ -396,47 +232,13 @@ class TransactionRepository implements TransactionRepositoryInterface
             // Load Buyer & User for Midtrans
             $transaction->load('buyer.user');
 
-            // Set your Merchant Server Key
-            Config::$serverKey = config('midtrans.serverKey');
-            Config::$isProduction = config('midtrans.isProduction');
-            Config::$isSanitized = config('midtrans.isSanitized');
-            Config::$is3ds = config('midtrans.is3ds');
-
-            $params = [
-                'transaction_details' => [
-                    'order_id' => $transaction->code,
-                    'gross_amount' => (int) $transaction->grand_total,
-                ],
-                'customer_details' => [
-                    'first_name' => $transaction->buyer->user?->name ?? 'Customer',
-                    'email' => $transaction->buyer->user?->email ?? 'no-email@example.com',
-                ],
-                'callbacks' => [
-                    'finish' => env('FRONTEND_URL', 'http://localhost:5173').'/admin/transaction/'.$transaction->id,
-                ],
-                'expiry' => [
-                    'start_time' => date('Y-m-d H:i:s O'),
-                    'unit' => 'minute',
-                    'duration' => 15,
-                ],
-            ];
-
-            Log::info('Midtrans params:', ['params' => $params]);
-
-            // Transaksi sudah ter-commit; kegagalan Midtrans tidak boleh
+            // Transaksi sudah ter-commit; kegagalan gateway tidak boleh
             // membuat request 500 padahal order & stok sudah tercatat.
             // FE sudah menangani snap_token null dengan pesan yang jelas.
-            try {
-                $snapToken = Snap::getSnapToken($params);
-
-                Log::info('Snap token generated:', ['token' => $snapToken]);
-
+            $snapToken = $this->paymentGateway->getSnapToken($transaction);
+            if ($snapToken !== null) {
                 $transaction->snap_token = $snapToken;
                 $transaction->save();
-            } catch (\Throwable $e) {
-                Log::error('Midtrans snap token failed: '.$e->getMessage(), [
-                    'transaction' => $transaction->code,
-                ]);
             }
 
             Log::info('=== TRANSACTION COMPLETED SUCCESSFULLY ===');
@@ -520,7 +322,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
                 // Refund escrow: kembalikan pending_balance jika payment sudah paid
                 if ($transaction->payment_status === 'paid') {
-                    $this->refundEscrow($transaction);
+                    $this->escrowRepository->refund($transaction);
                 }
             }
 
@@ -546,197 +348,6 @@ class TransactionRepository implements TransactionRepositoryInterface
             DB::rollBack();
 
             throw new Exception($e->getMessage());
-        }
-    }
-
-    private function getTotalWeight(array $transactionDetails)
-    {
-        try {
-            if (empty($transactionDetails)) {
-                return 0;
-            }
-
-            $totalWeight = 0;
-
-            foreach ($transactionDetails as $detail) {
-                // Eager load product relationship jika belum
-                $product = $detail->product ?? Product::find($detail->product_id);
-
-                if ($product && $product->weight) {
-                    $totalWeight += $product->weight * $detail->qty;
-                }
-            }
-
-            Log::info('Total weight calculated:', ['weight' => $totalWeight]);
-
-            return $totalWeight;
-
-        } catch (Exception $e) {
-            Log::error('Error calculating weight:', ['error' => $e->getMessage()]);
-            throw $e;
-        }
-    }
-
-    private function calculateShippingAndTax(array $data, float $subtotal, float $weight): array
-    {
-        try {
-            Log::info('calculateShippingAndTax called with:', [
-                'data' => $data,
-                'subtotal' => $subtotal,
-                'weight' => $weight,
-            ]);
-
-            if (! isset($data['store_id'])) {
-                throw new Exception('store_id is missing from data');
-            }
-
-            $store = Store::find($data['store_id']);
-
-            if (! $store) {
-                throw new Exception('Store not found with id: '.$data['store_id']);
-            }
-
-            if (! $store->address_id) {
-                throw new Exception('Store address_id is null for store: '.$store->id);
-            }
-
-            $origin = $store->address_id;
-
-            if (! isset($data['address_id'])) {
-                throw new Exception('address_id is missing from data');
-            }
-
-            $destination = $data['address_id'];
-
-            // ✅ Convert weight ke gram (minimum 1 gram)
-            $weightInGrams = max(1, round($weight * 1000));
-
-            Log::info('Calling RajaOngkir API with:', [
-                'origin' => $origin,
-                'destination' => $destination,
-                'subtotal' => round($subtotal),
-                'weight' => $weightInGrams,  // dalam gram
-            ]);
-
-            // Komerce RajaOngkir API
-            $response = Http::withHeaders([
-                'x-api-key' => env('KEY_RAJA_ONGKIR'),
-            ])->get('https://api-sandbox.collaborator.komerce.id/tariff/api/v1/calculate', [
-                'shipper_destination_id' => $origin,
-                'receiver_destination_id' => $destination,
-                'item_value' => round($subtotal),
-                'weight' => $weightInGrams,  // kirim dalam gram
-            ]);
-
-            $result = $response->json();
-
-            Log::info('RajaOngkir API Response:', ['result' => $result]);
-
-            // Validasi response structure
-            if (! isset($result['data']) || $result['data'] === null) {
-                Log::error('API returned error:', ['response' => $result]);
-                throw new Exception('RajaOngkir API error: '.($result['meta']['message'] ?? 'Unknown error'));
-            }
-
-            if (! isset($result['data']['calculate_reguler'])) {
-                throw new Exception('Invalid API response - missing calculate_reguler key');
-            }
-
-            $shippingCost = 0;
-
-            if (! isset($data['shipping'])) {
-                throw new Exception('shipping is missing from data');
-            }
-
-            if (! isset($data['shipping_type'])) {
-                throw new Exception('shipping_type is missing from data');
-            }
-
-            // Find matching courier and service
-            foreach ($result['data']['calculate_reguler'] as $courier) {
-                if (
-                    strtolower($courier['shipping_name']) === strtolower($data['shipping']) &&
-                    strtoupper($courier['service_name']) === strtoupper($data['shipping_type'])
-                ) {
-                    $shippingCost = $courier['shipping_cost_net'];
-                    Log::info('Matching courier found:', ['shipping_cost' => $shippingCost]);
-                    break;
-                }
-            }
-
-            if ($shippingCost === 0) {
-                Log::warning('No matching courier found for:', [
-                    'shipping' => $data['shipping'],
-                    'shipping_type' => $data['shipping_type'],
-                ]);
-            }
-
-            $tax = round($subtotal * 0.11, 2);
-            $grandTotal = round($subtotal + $tax + $shippingCost, 2);
-
-            Log::info('Calculation completed:', [
-                'shipping_cost' => $shippingCost,
-                'tax' => $tax,
-                'grand_total' => $grandTotal,
-            ]);
-
-            return [
-                'shipping_cost' => $shippingCost,
-                'tax' => $tax,
-                'grand_total' => $grandTotal,
-            ];
-
-        } catch (Exception $e) {
-            Log::error('Shipping calculation error:', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ]);
-            throw $e;
-        }
-    }
-
-    /**
-     * Refund escrow: kembalikan pending_balance saat transaksi yang sudah paid dibatalkan.
-     * Dana dikembalikan ke buyer (di luar sistem), pending_balance seller dikurangi.
-     */
-    private function refundEscrow(Transaction $transaction): void
-    {
-        try {
-            $store = Store::find($transaction->store_id);
-
-            if (! $store || ! $store->storeBalance) {
-                Log::error('refundEscrow: Store or StoreBalance not found', [
-                    'store_id' => $transaction->store_id,
-                ]);
-
-                return;
-            }
-
-            $netSales = $transaction->grand_total - $transaction->shipping_cost;
-            $adminFee = $netSales * config('marketplace.admin_fee_percentage');
-            $sellerAmount = $netSales - $adminFee;
-
-            $storeBalanceRepository = new StoreBalanceRepository;
-            $storeBalanceRepository->refundPending($store->storeBalance->id, $sellerAmount);
-
-            // Catat history refund
-            $store->storeBalance->storeBalanceHistories()->create([
-                'type' => 'refunded',
-                'reference_id' => $transaction->id,
-                'reference_type' => Transaction::class,
-                'amount' => -$sellerAmount,
-                'remarks' => 'Escrow dibatalkan (refund) — pesanan '.$transaction->code.' dibatalkan',
-            ]);
-
-            Log::info('Escrow refunded for transaction: '.$transaction->code, [
-                'store_id' => $store->id,
-                'refunded_amount' => $sellerAmount,
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Error refunding escrow: '.$e->getMessage(), [
-                'transaction_id' => $transaction->id,
-            ]);
         }
     }
 }

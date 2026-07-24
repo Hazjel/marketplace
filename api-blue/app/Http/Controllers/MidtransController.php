@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\TransactionRepositoryInterface;
-use App\Models\Store;
 use App\Models\Transaction;
-use App\Repositories\StoreBalanceRepository;
+use App\Services\MidtransPaymentStatusInterpreter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,9 +14,14 @@ class MidtransController extends Controller
 {
     protected $transactionRepository;
 
-    public function __construct(TransactionRepositoryInterface $transactionRepository)
-    {
+    protected EscrowRepositoryInterface $escrowRepository;
+
+    public function __construct(
+        TransactionRepositoryInterface $transactionRepository,
+        EscrowRepositoryInterface $escrowRepository
+    ) {
         $this->transactionRepository = $transactionRepository;
+        $this->escrowRepository = $escrowRepository;
     }
 
     public function callback(Request $request)
@@ -65,103 +70,32 @@ class MidtransController extends Controller
             return response()->json(['message' => 'Amount mismatch'], 403);
         }
 
-        switch ($transactionStatus) {
-            case 'capture':
-                if ($request->payment_type == 'credit_card') {
-                    if ($request->fraud_status == 'challenge') {
-                        $transaction->update(['payment_status' => 'unpaid']);
-                    } else {
-                        // Guard: skip if already paid (prevents double-credit on duplicate webhook)
-                        if ($transaction->payment_status === 'paid') {
-                            Log::info('Duplicate webhook ignored for: '.$transactionCode);
-                            break;
-                        }
-                        $transaction->update(['payment_status' => 'paid']);
-                        $this->creditPendingBalance($transaction);
-                    }
-                }
-                break;
+        $newStatus = MidtransPaymentStatusInterpreter::interpret(
+            $transactionStatus,
+            $request->payment_type,
+            $request->fraud_status
+        );
 
-            case 'settlement':
-                // Guard: skip if already paid (prevents double-credit on duplicate webhook)
-                if ($transaction->payment_status === 'paid') {
-                    Log::info('Duplicate settlement webhook ignored for: '.$transactionCode);
-                    break;
-                }
+        if ($newStatus === null) {
+            // no-op (mis. capture non-credit_card)
+        } elseif ($newStatus === 'paid') {
+            // Guard: skip if already paid (prevents double-credit on duplicate webhook)
+            if ($transaction->payment_status === 'paid') {
+                Log::info('Duplicate webhook ignored for: '.$transactionCode);
+            } else {
                 $transaction->update(['payment_status' => 'paid']);
-                $this->creditPendingBalance($transaction);
-                break;
-
-            case 'pending':
-                $transaction->update(['payment_status' => 'unpaid']);
-                break;
-
-            case 'deny':
-            case 'expire':
-            case 'cancel':
-                DB::transaction(function () use ($transaction) {
-                    $transaction->update(['payment_status' => 'failed']);
-                    $this->transactionRepository->restoreStock($transaction);
-                });
-                break;
-
-            default:
-                DB::transaction(function () use ($transaction) {
-                    $transaction->update(['payment_status' => 'failed']);
-                    $this->transactionRepository->restoreStock($transaction);
-                });
-                break;
+                $this->escrowRepository->credit($transaction);
+            }
+        } elseif ($newStatus === 'unpaid') {
+            $transaction->update(['payment_status' => 'unpaid']);
+        } elseif ($newStatus === 'failed') {
+            DB::transaction(function () use ($transaction) {
+                $transaction->update(['payment_status' => 'failed']);
+                $this->transactionRepository->restoreStock($transaction);
+            });
         }
 
         // always return 200 after processing so Midtrans considers callback successful
         return response()->json(['message' => 'Payment Status updated successfully'], 200);
-    }
-
-    /**
-     * Credit ke pending_balance (ESCROW) — dana ditahan sampai buyer konfirmasi terima.
-     * Saldo baru pindah ke available balance setelah pesanan selesai (completed).
-     */
-    private function creditPendingBalance(Transaction $transaction): void
-    {
-        $store = Store::find($transaction->store_id);
-
-        $netSales = $transaction->grand_total - $transaction->shipping_cost;
-        $adminFee = $netSales * config('marketplace.admin_fee_percentage'); // 10% platform fee
-        $sellerAmount = $netSales - $adminFee;
-
-        $transaction->admin_fee = $adminFee;
-        $transaction->save();
-
-        $transaction->load('transactionDetails.product');
-
-        try {
-            $storeBalanceRepository = new StoreBalanceRepository;
-
-            if ($store && $store->storeBalance) {
-                // Credit ke PENDING balance (bukan available balance)
-                // Dana ditahan sampai buyer konfirmasi terima barang
-                $storeBalanceRepository->creditPending($store->storeBalance->id, $sellerAmount);
-
-                $storeBalance = $store->storeBalance;
-                $storeBalance->storeBalanceHistories()->create([
-                    'type' => 'pending_income',
-                    'reference_id' => $transaction->id,
-                    'reference_type' => Transaction::class,
-                    'amount' => $sellerAmount,
-                    'remarks' => 'Pembayaran diterima (ditahan) dari transaksi '.$transaction->code.' — akan dirilis setelah pesanan selesai',
-                ]);
-
-                Log::info('Pending balance credited for store: '.$store->id, [
-                    'net_sales' => $netSales,
-                    'admin_fee' => $adminFee,
-                    'seller_amount' => $sellerAmount,
-                    'transaction_code' => $transaction->code,
-                ]);
-            } else {
-                Log::error('Store Balance not found for store: '.($store->id ?? 'unknown'));
-            }
-        } catch (\Throwable $e) {
-            Log::error('Error crediting pending balance: '.$e->getMessage());
-        }
     }
 }
