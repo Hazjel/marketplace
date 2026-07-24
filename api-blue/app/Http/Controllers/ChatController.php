@@ -4,14 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
 use App\Helpers\ResponseHelper;
+use App\Interfaces\ChatRepositoryInterface;
 use App\Jobs\GenerateAiChatReplyJob;
-use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
+    public function __construct(
+        private ChatRepositoryInterface $chatRepository
+    ) {}
+
     public function getUserInfo($id)
     {
         try {
@@ -36,39 +40,7 @@ class ChatController extends Controller
     public function getContacts()
     {
         try {
-            $userId = Auth::id();
-
-            // Get IDs of users who sent messages to current user
-            $senders = Message::where('receiver_id', $userId)
-                ->pluck('sender_id');
-
-            // Get IDs of users who received messages from current user
-            $receivers = Message::where('sender_id', $userId)
-                ->pluck('receiver_id');
-
-            // Merge and unique
-            $contactIds = $senders->merge($receivers)->unique()->values();
-
-            $contacts = User::whereIn('id', $contactIds)->get();
-
-            // Attach unread count and latest message
-            foreach ($contacts as $contact) {
-                $contact->unread_count = Message::where('sender_id', $contact->id)
-                    ->where('receiver_id', $userId)
-                    ->where('is_read', false)
-                    ->count();
-
-                $contact->last_message = Message::where(function ($q) use ($userId, $contact) {
-                    $q->where('sender_id', $userId)->where('receiver_id', $contact->id);
-                })->orWhere(function ($q) use ($userId, $contact) {
-                    $q->where('sender_id', $contact->id)->where('receiver_id', $userId);
-                })->latest()->first();
-            }
-
-            // Sort by latest message
-            $contacts = $contacts->sortByDesc(function ($contact) {
-                return $contact->last_message ? $contact->last_message->created_at : $contact->created_at;
-            })->values();
+            $contacts = $this->chatRepository->getContacts(Auth::id());
 
             return ResponseHelper::jsonResponse(true, 'Contacts fetched successfully', $contacts, 200);
 
@@ -82,22 +54,8 @@ class ChatController extends Controller
         try {
             $userId = Auth::id();
 
-            // Mark as read
-            Message::where('sender_id', $otherUserId)
-                ->where('receiver_id', $userId)
-                ->where('is_read', false)
-                ->update(['is_read' => true]);
-
-            $messages = Message::where(function ($q) use ($userId, $otherUserId) {
-                $q->where('sender_id', $userId)
-                    ->where('receiver_id', $otherUserId);
-            })->orWhere(function ($q) use ($userId, $otherUserId) {
-                $q->where('sender_id', $otherUserId)
-                    ->where('receiver_id', $userId);
-            })
-                ->with(['sender', 'receiver'])
-                ->orderBy('created_at', 'asc')
-                ->get();
+            $this->chatRepository->markAsRead($userId, $otherUserId);
+            $messages = $this->chatRepository->getMessages($userId, $otherUserId);
 
             return ResponseHelper::jsonResponse(true, 'Messages fetched successfully', $messages, 200);
 
@@ -114,11 +72,7 @@ class ChatController extends Controller
         ]);
 
         try {
-            $message = Message::create([
-                'sender_id' => Auth::id(),
-                'receiver_id' => $request->receiver_id,
-                'message' => $request->message,
-            ]);
+            $message = $this->chatRepository->createMessage(Auth::id(), $request->receiver_id, $request->message);
 
             // Broadcast event
             broadcast(new MessageSent($message))->toOthers();
