@@ -227,6 +227,7 @@ const handleDeliveryModal = async () => {
       params: {
         shipper_destination_id: store.storeAddressId,
         receiver_destination_id: transaction.value.address_id,
+        receiver_city_name: transaction.value.city,
         item_value: totalValue,
         weight: totalWeight
       }
@@ -234,6 +235,14 @@ const handleDeliveryModal = async () => {
 
     const data = response.data
     couriers.value = data.data.calculate_reguler
+
+    if (couriers.value.length === 0) {
+      toast.error(
+        'Kurir tidak tersedia untuk alamat ini. Coba pilih ulang alamat dengan kecamatan/kota yang lebih umum.'
+      )
+      return
+    }
+
     showDeliveryModal.value = true
   } catch {
     toast.error('Gagal menghitung ongkir. Silakan coba lagi.')
