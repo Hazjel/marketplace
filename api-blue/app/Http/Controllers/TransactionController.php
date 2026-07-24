@@ -161,12 +161,17 @@ class TransactionController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
-            // Security: Prevent IDOR (Only Buyer, Seller, or Admin can view)
+            // Security: Prevent IDOR (Only Buyer, Seller, or Admin can view).
+            // User bisa dual-role (buyer + store) -- akses sah kalau dia buyer
+            // ATAU seller dari transaksi ini, bukan harus lolos kedua guard
+            // sekaligus (dual-role buyer yang beli dari toko lain akan selalu
+            // gagal guard store kalau dicek independen).
             $user = auth()->user();
-            if ($user->hasRole('buyer') && $transactions->buyer_id !== $user->buyer?->id) {
-                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
-            }
-            if ($user->hasRole('store') && $transactions->store_id !== $user->store?->id) {
+            $isOwningBuyer = $user->hasRole('buyer') && $transactions->buyer_id === $user->buyer?->id;
+            $isOwningStore = $user->hasRole('store') && $transactions->store_id === $user->store?->id;
+            $isAdmin = $user->hasRole('admin');
+
+            if (! $isOwningBuyer && ! $isOwningStore && ! $isAdmin) {
                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
@@ -286,12 +291,14 @@ class TransactionController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
-            // Authorization: prevent IDOR — only the buyer, the seller, or admin can check
+            // Authorization: prevent IDOR — only the buyer, the seller, or admin can check.
+            // Sama seperti show(): user dual-role harus lolos SALAH SATU guard, bukan keduanya.
             $user = auth()->user();
-            if ($user->hasRole('buyer') && $transaction->buyer_id !== $user->buyer?->id) {
-                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
-            }
-            if ($user->hasRole('store') && $transaction->store_id !== $user->store?->id) {
+            $isOwningBuyer = $user->hasRole('buyer') && $transaction->buyer_id === $user->buyer?->id;
+            $isOwningStore = $user->hasRole('store') && $transaction->store_id === $user->store?->id;
+            $isAdmin = $user->hasRole('admin');
+
+            if (! $isOwningBuyer && ! $isOwningStore && ! $isAdmin) {
                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
