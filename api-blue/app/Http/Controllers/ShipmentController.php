@@ -188,7 +188,7 @@ class ShipmentController extends Controller
         $response = Http::timeout(15)
             ->asForm()
             ->withHeaders(['key' => config('services.komerce.api_key')])
-            ->post($this->baseUrl.'/calculate/district/domestic-cost', [
+            ->post($this->baseUrl.'/calculate/domestic-cost', [
                 'origin' => $originId,
                 'destination' => $destinationId,
                 'weight' => $grams,
