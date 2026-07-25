@@ -1,16 +1,13 @@
 <script setup>
-import { onMounted, watch, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/auth'
-import { useChatStore } from '@/stores/chat'
+import { watch, ref } from 'vue'
+import { useChatLifecycle } from '@/composables/useChatLifecycle'
 import { useRoute } from 'vue-router'
 import BuyerSidebarContent from '@/components/admin/sidebar/BuyerSidebarContent.vue'
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 
 const route = useRoute()
-const authStore = useAuthStore()
-const chatStore = useChatStore()
-const { user } = storeToRefs(authStore)
+
+useChatLifecycle()
 
 const props = defineProps({
   isOpen: {
@@ -36,19 +33,6 @@ watch(sheetOpen, (val) => {
   }
 })
 
-onMounted(() => {
-  if (user.value) {
-    chatStore.fetchContacts()
-    chatStore.initializeChatListener(user.value.id)
-  }
-})
-
-watch(user, (newUser) => {
-  if (newUser) {
-    chatStore.fetchContacts()
-    chatStore.initializeChatListener(newUser.id)
-  }
-})
 
 watch(
   () => route.fullPath,

@@ -4,16 +4,17 @@ import { ref, onErrorCaptured, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useThemeStore } from '@/stores/theme'
-import { useChatStore } from '@/stores/chat'
 import { useToast } from 'vue-toastification'
+import { useChatLifecycle } from '@/composables/useChatLifecycle'
 import FloatingChatWidget from '@/components/App/chat/FloatingChatWidget.vue'
 
 const error = ref(null)
 const router = useRouter()
 const authStore = useAuthStore()
 const wishlistStore = useWishlistStore()
-const chatStore = useChatStore()
 const toast = useToast()
+
+useChatLifecycle()
 
 onErrorCaptured((err, instance, info) => {
   error.value = {
@@ -64,22 +65,12 @@ onMounted(async () => {
 
   if (authStore.user) {
     await wishlistStore.fetchWishlist()
-
-    // Initialize real-time chat globally — notif muncul di semua halaman
-    chatStore.fetchContacts()
-    chatStore.initializeChatListener(authStore.user.id)
-    chatStore.joinPresenceChannel()
   }
 })
 
 onUnmounted(() => {
   window.removeEventListener('api-error', handleApiError)
   window.removeEventListener('chat-message-received', handleChatNotification)
-
-  if (authStore.user) {
-    chatStore.cleanupChatListener(authStore.user.id)
-    chatStore.leavePresenceChannel()
-  }
 })
 </script>
 

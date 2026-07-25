@@ -1,16 +1,13 @@
 <script setup>
-import { computed, onMounted, watch, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from '@/stores/auth'
-import { useChatStore } from '@/stores/chat'
+import { computed, watch, ref } from 'vue'
+import { useChatLifecycle } from '@/composables/useChatLifecycle'
 import { useRoute } from 'vue-router'
 import SidebarContent from '@/components/admin/sidebar/SidebarContent.vue'
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 
 const route = useRoute()
-const authStore = useAuthStore()
-const chatStore = useChatStore()
-const { user } = storeToRefs(authStore)
+
+useChatLifecycle()
 
 const props = defineProps({
   isOpen: {
@@ -39,20 +36,6 @@ watch(sheetOpen, (val) => {
   }
 })
 
-onMounted(() => {
-  if (user.value) {
-    chatStore.fetchContacts()
-    chatStore.initializeChatListener(user.value.id)
-  }
-})
-
-// Ensure we listen if user logs in later or refreshes logic
-watch(user, (newUser) => {
-  if (newUser) {
-    chatStore.fetchContacts()
-    chatStore.initializeChatListener(newUser.id)
-  }
-})
 
 // Auto-close sidebar on mobile when route changes
 watch(

@@ -4,7 +4,7 @@ import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useThemeStore } from '@/stores/theme'
-import { useChatStore } from '@/stores/chat'
+import { useChatLifecycle } from '@/composables/useChatLifecycle'
 import { storeToRefs } from 'pinia'
 import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
@@ -32,8 +32,7 @@ const themeStore = useThemeStore()
 const { effectiveTheme } = storeToRefs(themeStore)
 const { toggleTheme } = themeStore
 
-// chatStore tetap dipakai untuk inisialisasi listener unread global (badge di floating widget)
-const chatStore = useChatStore()
+useChatLifecycle()
 
 const sellerAppUrl = import.meta.env.VITE_SELLER_APP_URL
 
@@ -171,9 +170,6 @@ onMounted(async () => {
     await checkAuth()
     if (user.value) {
       fetchWishlist()
-      // Initialize global chat listener for real-time unread badge
-      chatStore.fetchContacts()
-      chatStore.initializeChatListener(user.value.id)
     }
   }
   loadHistory()
@@ -181,10 +177,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (user.value) {
-    // Cleanup WebSocket listener to prevent memory leak
-    chatStore.cleanupChatListener(user.value.id)
-  }
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
