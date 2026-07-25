@@ -31,6 +31,41 @@ export const useAuthStore = defineStore('auth', {
       const exchangeToken = response.data.data.exchange_token
       window.location.href = `${targetUrl}/sso/callback?xt=${exchangeToken}`
     },
+
+    // Sisi penerima SSO (domain tujuan): tukar exchange_token sekali-pakai
+    // jadi token Sanctum, lalu set state lewat jalur yang sama dengan
+    // login() -- cookie, token, user, success -- supaya SsoCallback.vue
+    // tidak duplikat/lupa invariant yang login() jaga (mis. dulu pernah
+    // lupa reset error/success, dan caller tetap wajib panggil
+    // cart.syncAfterLogin() sendiri sama seperti alur login biasa).
+    async completeSsoExchange(exchangeToken) {
+      this.loading = true
+      this.error = null
+
+      try {
+        const response = await axiosInstance.post('/auth/sso/exchange', {
+          exchange_token: exchangeToken
+        })
+
+        const user = response.data.data
+        const token = user.token
+
+        Cookies.set('token', token, {
+          secure: window.location.protocol === 'https:',
+          sameSite: 'Strict'
+        })
+        this.token = token
+        this.user = user
+        this.success = response.data.message
+
+        return user
+      } catch (error) {
+        this.error = handleError(error)
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
     async login(credentials) {
       this.loading = true
       this.error = null

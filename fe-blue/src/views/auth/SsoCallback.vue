@@ -2,8 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { axiosInstance } from '@/plugins/axios'
-import Cookies from 'js-cookie'
+import { useCartStore } from '@/stores/cart'
 
 const route = useRoute()
 const router = useRouter()
@@ -24,29 +23,23 @@ onMounted(async () => {
     return
   }
 
-  try {
-    const response = await axiosInstance.post('/auth/sso/exchange', {
-      exchange_token: exchangeToken
-    })
+  const user = await authStore.completeSsoExchange(exchangeToken)
 
-    const user = response.data.data
-    const token = user.token
-
-    Cookies.set('token', token, {
-      secure: window.location.protocol === 'https:',
-      sameSite: 'Strict'
-    })
-    authStore.token = token
-    authStore.user = user
-
-    if (authStore.activeMode === 'store') {
-      router.push({ name: 'user.dashboard', params: { username: user.username } })
-    } else {
-      router.push({ name: 'app.home' })
-    }
-  } catch (e) {
+  if (!user) {
     errorMessage.value = 'Sesi SSO tidak valid atau sudah kedaluwarsa. Silakan login ulang.'
     setTimeout(() => router.push({ name: 'auth.login' }), 2000)
+    return
+  }
+
+  // Sama seperti alur login biasa (Login.vue) -- pindah domain lewat SSO
+  // tidak boleh diam-diam menjatuhkan cart guest yang belum tersinkron.
+  const cart = useCartStore()
+  await cart.syncAfterLogin()
+
+  if (authStore.activeMode === 'store') {
+    router.push({ name: 'user.dashboard', params: { username: user.username } })
+  } else {
+    router.push({ name: 'app.home' })
   }
 })
 </script>
