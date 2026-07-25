@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch, computed } from 'vue'
 import { formatRupiah, formatDate } from '@/helpers/format'
 import { useToast } from 'vue-toastification'
+import { resolvePaymentStatus, resolveDeliveryStatus } from '@/composables/useTransactionStatus'
 
 const toast = useToast()
 const authStore = useAuthStore()
@@ -99,45 +100,10 @@ const handleReject = async (id) => {
   }
 }
 
-const resolvePaymentBadge = (status) => {
-  switch (status) {
-    case 'unpaid': return 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-900/30'
-    case 'paid': return 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 ring-1 ring-green-200 dark:ring-green-900/30'
-    case 'failed': return 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/30'
-    default: return 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700'
-  }
-}
-
-const resolveDeliveryBadge = (status) => {
-  switch (status) {
-    case 'pending': return 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700'
-    case 'processing': return 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 ring-1 ring-blue-200 dark:ring-blue-900/30'
-    case 'delivering': return 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 ring-1 ring-purple-200 dark:ring-purple-900/30'
-    case 'completed': return 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 ring-1 ring-green-200 dark:ring-green-900/30'
-    case 'cancelled': return 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/30'
-    default: return 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700'
-  }
-}
-
-const resolvePaymentLabel = (status) => {
-  switch (status) {
-    case 'unpaid': return 'Belum Bayar'
-    case 'paid': return 'Lunas'
-    case 'failed': return 'Gagal'
-    default: return status
-  }
-}
-
-const resolveDeliveryLabel = (status) => {
-  switch (status) {
-    case 'pending': return 'Menunggu'
-    case 'processing': return 'Diproses'
-    case 'delivering': return 'Dikirim'
-    case 'completed': return 'Selesai'
-    case 'cancelled': return 'Dibatalkan'
-    default: return status
-  }
-}
+const resolvePaymentBadge = (status) => resolvePaymentStatus({ payment_status: status }).style
+const resolveDeliveryBadge = (status) => resolveDeliveryStatus({ delivery_status: status }).style
+const resolvePaymentLabel = (status) => resolvePaymentStatus({ payment_status: status }).label
+const resolveDeliveryLabel = (status) => resolveDeliveryStatus({ delivery_status: status }).label
 
 onMounted(fetchData)
 

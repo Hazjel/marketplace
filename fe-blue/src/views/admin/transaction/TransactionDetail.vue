@@ -12,6 +12,7 @@ import TrackingMap from '@/components/TrackingMap.vue'
 import TransactionStatusBanner from '@/components/admin/transaction/TransactionStatusBanner.vue'
 import { logger } from '@/utils/logger'
 import { dashboardRoute } from '@/helpers/routeHelper'
+import { resolvePaymentStatus } from '@/composables/useTransactionStatus'
 
 const route = useRoute()
 const toast = useToast()
@@ -460,9 +461,8 @@ v-else
           <hr class="border-gray-100 dark:border-white/10 my-1" />
           <div class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">Status Pembayaran</span>
-            <span class="font-medium text-sm capitalize"
-              :class="transaction?.payment_status === 'paid' ? 'text-green-600' : transaction?.payment_status === 'unpaid' ? 'text-red-500' : 'text-custom-blue'">
-              {{ transaction?.payment_status }}
+            <span class="font-medium text-sm">
+              {{ resolvePaymentStatus(transaction).label }}
             </span>
           </div>
 

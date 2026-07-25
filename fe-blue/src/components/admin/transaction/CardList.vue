@@ -4,6 +4,7 @@ import { can } from '@/helpers/permissionHelper'
 import { RouterLink } from 'vue-router'
 import Badge from '@/components/Atom/Badge.vue'
 import { dashboardRoute } from '@/helpers/routeHelper'
+import { isFailedTransaction } from '@/composables/useTransactionStatus'
 
 defineProps({
   item: {
@@ -23,14 +24,15 @@ const emit = defineEmits(['delete'])
         <img src="@/assets/images/icons/calendar-2-grey.svg" class="size-6 flex shrink-0 dark:invert" alt="icon" />
         {{ formatToClientTimeZone(item.created_at) }}
       </p>
-      <Badge v-if="item.delivery_status === 'pending'" variant="warning" size="sm"> Pending </Badge>
-      <Badge v-if="item.delivery_status === 'processing'" variant="info" size="sm">
+      <Badge v-if="isFailedTransaction(item)" variant="danger" size="sm"> Gagal </Badge>
+      <Badge v-else-if="item.delivery_status === 'pending'" variant="warning" size="sm"> Pending </Badge>
+      <Badge v-else-if="item.delivery_status === 'processing'" variant="info" size="sm">
         Processing
       </Badge>
-      <Badge v-if="item.delivery_status === 'delivering'" variant="orange" size="sm">
+      <Badge v-else-if="item.delivery_status === 'delivering'" variant="orange" size="sm">
         Delivering
       </Badge>
-      <Badge v-if="item.delivery_status === 'completed'" variant="success" size="sm">
+      <Badge v-else-if="item.delivery_status === 'completed'" variant="success" size="sm">
         Completed
       </Badge>
     </div>

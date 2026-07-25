@@ -8,6 +8,7 @@ import { onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { can } from '@/helpers/permissionHelper'
 import { useToast } from 'vue-toastification'
+import { isFailedTransaction } from '@/composables/useTransactionStatus'
 
 const toast = useToast()
 const transactionStore = useTransactionStore()
@@ -88,11 +89,11 @@ const filteredByStatus = computed(() => {
   if (activeStatusFilter.value === 'all') return transactions.value
 
   return transactions.value.filter((t) => {
-    if (activeStatusFilter.value === 'pending') return t.payment_status === 'pending' || t.payment_status === 'unpaid'
+    if (activeStatusFilter.value === 'pending') return t.payment_status === 'unpaid'
     if (activeStatusFilter.value === 'processing') return t.delivery_status === 'processing'
     if (activeStatusFilter.value === 'delivering') return t.delivery_status === 'delivering'
     if (activeStatusFilter.value === 'completed') return t.delivery_status === 'completed'
-    if (activeStatusFilter.value === 'cancelled') return t.delivery_status === 'cancelled' || t.payment_status === 'failed'
+    if (activeStatusFilter.value === 'cancelled') return t.delivery_status === 'cancelled' || isFailedTransaction(t)
     return true
   })
 })

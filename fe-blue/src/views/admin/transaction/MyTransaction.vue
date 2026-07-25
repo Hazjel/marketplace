@@ -8,6 +8,7 @@ import { formatToClientTimeZone } from '@/helpers/format'
 import { formatRupiah } from '@/helpers/format'
 import { useToast } from 'vue-toastification'
 import { dashboardRoute } from '@/helpers/routeHelper'
+import { resolveTransactionStatus, isFailedTransaction } from '@/composables/useTransactionStatus'
 
 const toast = useToast()
 const transactionStore = useTransactionStore()
@@ -55,8 +56,7 @@ const statusFilteredTransactions = computed(() => {
   if (activeStatusFilter.value === 'all') return displayTransactions.value
 
   return displayTransactions.value.filter((t) => {
-    const failureStatuses = ['expire', 'cancel', 'deny', 'failure', 'failed']
-    if (activeStatusFilter.value === 'failed') return failureStatuses.includes(t.payment_status)
+    if (activeStatusFilter.value === 'failed') return isFailedTransaction(t)
     if (activeStatusFilter.value === 'unpaid') return t.payment_status === 'unpaid'
     // "Diproses" mencakup delivery_status pending & processing -- keduanya
     // berarti sudah dibayar tapi toko belum kirim, cuma beda tahap internal.
@@ -106,69 +106,8 @@ const getDetailRoute = (transactionId) =>
 
 const debounceFetchData = debounce(fetchData, 2000)
 
-// payment_status enum: unpaid/paid/failed (tidak ada 'pending') --
-// delivery_status enum: pending/processing/delivering/completed/cancelled/failed
-const resolveStatusStyle = (transaction) => {
-  const failureStatuses = ['expire', 'cancel', 'deny', 'failure', 'failed']
-  if (failureStatuses.includes(transaction.payment_status)) {
-    return 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 ring-1 ring-red-100 dark:ring-red-900/30'
-  }
-
-  if (transaction.payment_status === 'unpaid') {
-    return 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 ring-1 ring-amber-100 dark:ring-amber-900/30'
-  }
-
-  switch (transaction.delivery_status) {
-    case 'pending':
-      return 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 ring-1 ring-amber-100 dark:ring-amber-900/30'
-    case 'processing':
-      return 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 ring-1 ring-blue-100 dark:ring-blue-900/30'
-    case 'delivering':
-      return 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 ring-1 ring-orange-100 dark:ring-orange-900/30'
-    case 'completed':
-      return 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 ring-1 ring-green-100 dark:ring-green-900/30'
-    default:
-      return 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 ring-1 ring-gray-100 dark:ring-gray-700'
-  }
-}
-
-const resolveStatusLabel = (transaction) => {
-  const failureStatuses = ['expire', 'cancel', 'deny', 'failure', 'failed']
-  if (failureStatuses.includes(transaction.payment_status)) return 'Gagal'
-  if (transaction.payment_status === 'unpaid') return 'Menunggu Pembayaran'
-
-  switch (transaction.delivery_status) {
-    case 'pending':
-      return 'Menunggu Diproses'
-    case 'processing':
-      return 'Diproses'
-    case 'delivering':
-      return 'Dikirim'
-    case 'completed':
-      return 'Selesai'
-    default:
-      return transaction.delivery_status || 'Unknown'
-  }
-}
-
-const resolveStatusIcon = (transaction) => {
-  const failureStatuses = ['expire', 'cancel', 'deny', 'failure', 'failed']
-  if (failureStatuses.includes(transaction.payment_status)) return 'x-circle'
-  if (transaction.payment_status === 'unpaid') return 'clock'
-
-  switch (transaction.delivery_status) {
-    case 'pending':
-      return 'clock'
-    case 'processing':
-      return 'package'
-    case 'delivering':
-      return 'truck'
-    case 'completed':
-      return 'check-circle'
-    default:
-      return 'help-circle'
-  }
-}
+const resolveStatusStyle = (transaction) => resolveTransactionStatus(transaction).style
+const resolveStatusLabel = (transaction) => resolveTransactionStatus(transaction).label
 
 onMounted(async () => {
   await fetchData()
