@@ -8,11 +8,13 @@ use App\Interfaces\CartRepositoryInterface;
 use App\Interfaces\ChatAssistantInterface;
 use App\Interfaces\ChatRepositoryInterface;
 use App\Interfaces\EscrowRepositoryInterface;
+use App\Interfaces\GeocodingGatewayInterface;
 use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ProductCategoryRepositoryInterface;
 use App\Interfaces\ProductRepositoryInterface;
 use App\Interfaces\ProductReviewRepositoryInterface;
 use App\Interfaces\ProductViewRepositoryInterface;
+use App\Interfaces\ShippingGatewayInterface;
 use App\Interfaces\StoreBalanceHistoryRepositoryInterface;
 use App\Interfaces\StoreBalanceRepositoryInterface;
 use App\Interfaces\StoreRepositoryInterface;
@@ -41,7 +43,9 @@ use App\Repositories\UserRepository;
 use App\Repositories\WishlistRepository;
 use App\Repositories\WithdrawalRepository;
 use App\Services\HttpChatAssistant;
+use App\Services\KomerceShippingGateway;
 use App\Services\MidtransPaymentGateway;
+use App\Services\NominatimGeocodingGateway;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -71,6 +75,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(TransactionAnalyticsRepositoryInterface::class, TransactionAnalyticsRepository::class);
         $this->app->bind(PaymentGatewayInterface::class, MidtransPaymentGateway::class);
         $this->app->bind(ChatAssistantInterface::class, HttpChatAssistant::class);
+        $this->app->bind(ShippingGatewayInterface::class, KomerceShippingGateway::class);
+        $this->app->bind(GeocodingGatewayInterface::class, NominatimGeocodingGateway::class);
     }
 
     /**
