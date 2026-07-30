@@ -26,7 +26,7 @@ const { user } = storeToRefs(authStore)
             <div class="flex flex-col gap-4">
               <p class="font-medium dark:text-white">Main Menu</p>
               <nav
-                class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 hover:*:text-custom-blue dark:hover:*:text-blue-400"
+                class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 *:hover:text-custom-blue dark:*:hover:text-blue-400"
               >
                 <RouterLink :to="{ name: 'app.home' }">Home</RouterLink>
                 <RouterLink :to="{ name: 'app.all-categories' }">Categories</RouterLink>
@@ -45,7 +45,7 @@ const { user } = storeToRefs(authStore)
             <div class="flex flex-col gap-4">
               <p class="font-medium dark:text-white">Company</p>
               <nav
-                class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 hover:*:text-custom-blue dark:hover:*:text-blue-400"
+                class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 *:hover:text-custom-blue dark:*:hover:text-blue-400"
               >
                 <RouterLink :to="{ name: 'app.about' }">About Us</RouterLink>
                 <RouterLink :to="{ name: 'app.career' }">Career</RouterLink>
@@ -56,7 +56,7 @@ const { user } = storeToRefs(authStore)
             <div class="flex flex-col gap-4 col-span-2 sm:col-span-1">
               <p class="font-medium dark:text-white">Support</p>
               <nav
-                class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 hover:*:text-custom-blue dark:hover:*:text-blue-400"
+                class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 *:hover:text-custom-blue dark:*:hover:text-blue-400"
               >
                 <span class="cursor-default opacity-60">Customer Services</span>
                 <span class="cursor-default opacity-60">Return & Refund</span>
