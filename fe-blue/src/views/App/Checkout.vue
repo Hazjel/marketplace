@@ -30,6 +30,7 @@ const {
   totalSelectedItems,
   totalSelectedQuantity,
   subtotalSelected,
+  ppnSelected,
   discountSelected
 } = storeToRefs(cart)
 const { error } = storeToRefs(transactionStore)
@@ -113,12 +114,10 @@ const addressOptions = ref([])
 const showAddressOptions = ref(false)
 const loadingAddress = ref(false)
 
-// Computed properties for final calculations
-const finalSubtotal = computed(() => Math.round(subtotalSelected.value + deliveryFee.value))
-const finalPpn = computed(() => Math.round(subtotalSelected.value * 0.11))
-const finalGrandTotal = computed(() =>
-  Math.round(finalSubtotal.value + finalPpn.value - discountSelected.value)
-)
+// Total termasuk ongkir dihitung di cart.js (grandTotalWithDelivery) supaya
+// "Total Tagihan" di sini selalu sama dengan "Grand Total" yang tadi tampil
+// di Cart.vue -- satu sumber kebenaran, bukan reimplementasi math terpisah.
+const finalGrandTotal = computed(() => cart.grandTotalWithDelivery(deliveryFee.value))
 
 const showSuccessModal = ref(false)
 
@@ -221,7 +220,9 @@ const handleDeliveryModal = async () => {
     }
 
     const totalWeight = store.products.reduce((sum, p) => sum + p.weight * p.quantity, 0)
-    const totalValue = finalSubtotal.value
+    // deliveryFee belum diketahui di titik ini (baru mau cari opsi kurir),
+    // jadi nilai barang untuk perhitungan ongkir = subtotal produk saja.
+    const totalValue = subtotalSelected.value
 
     const response = await axiosInstance.get('/shipment/calculate', {
       params: {
@@ -634,7 +635,7 @@ onMounted(async () => {
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-custom-grey dark:text-gray-400">PPN 11%</span>
-                  <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(finalPpn) }}</span>
+                  <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(ppnSelected) }}</span>
                 </div>
                 <div v-if="discountSelected > 0" class="flex items-center justify-between">
                   <span class="text-sm text-green-600">Diskon</span>

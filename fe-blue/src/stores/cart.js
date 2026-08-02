@@ -82,6 +82,15 @@ export const useCartStore = defineStore('cart', {
       return this.subtotalSelected + this.ppnSelected - this.discountSelected
     },
 
+    // Single source of truth untuk total termasuk ongkir -- dipakai Checkout.vue
+    // supaya "Grand Total" di Cart.vue dan "Total Tagihan" di Checkout.vue tidak
+    // pernah menampilkan angka berbeda untuk pesanan yang sama. PPN dihitung dari
+    // subtotal produk saja (ongkir tidak kena PPN), rounding hanya sekali di akhir.
+    grandTotalWithDelivery() {
+      return (deliveryFee = 0) =>
+        Math.round(this.subtotalSelected + deliveryFee + this.ppnSelected - this.discountSelected)
+    },
+
     hasSelectedStores: (state) => {
       return state.selectedStores.size > 0
     }
