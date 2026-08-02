@@ -22,6 +22,8 @@ storage/logs/*.txt
 /public/build
 /public/hot
 /public/storage
+/public/upload/*
+!/public/upload/.gitkeep
 /storage/*.key
 /storage/pail
 /vendor
