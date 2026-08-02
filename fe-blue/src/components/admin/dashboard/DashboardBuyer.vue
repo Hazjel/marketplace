@@ -3,7 +3,7 @@ import { useTransactionStore } from '@/stores/transaction'
 import { storeToRefs } from 'pinia'
 import { onMounted, computed } from 'vue'
 import { formatRupiah, formatDate } from '@/helpers/format'
-import { useBuyerDashboard } from '@/composables/useBuyerDashboard'
+import { useDashboardSummary } from '@/composables/useDashboardSummary'
 import { dashboardRoute } from '@/helpers/routeHelper'
 
 import StatCard from '@/components/Atom/StatCard.vue'
@@ -11,7 +11,9 @@ import DashboardSection from '@/components/Molecule/DashboardSection.vue'
 import EmptyState from '@/components/Atom/EmptyState.vue'
 import DashboardChart from '@/components/Atom/DashboardChart.vue'
 
-const { data, loading, range, fetch, setRange } = useBuyerDashboard()
+const { data, loading, range, fetch, setRange } = useDashboardSummary('buyer/dashboard/summary', {
+  withRange: true
+})
 
 const transactionStore = useTransactionStore()
 const { transactions: latestTransactions } = storeToRefs(transactionStore)

@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useTransactionStore } from '@/stores/transaction'
 import { storeToRefs } from 'pinia'
 import { formatRupiah, formatDate } from '@/helpers/format'
-import { useSellerDashboard } from '@/composables/useSellerDashboard'
+import { useDashboardSummary } from '@/composables/useDashboardSummary'
 
 import StatCard from '@/components/Atom/StatCard.vue'
 import DashboardSection from '@/components/Molecule/DashboardSection.vue'
@@ -16,7 +16,9 @@ import ActionWidget from '@/components/Molecule/Seller/ActionWidget.vue'
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
-const { data, loading, range, fetch, setRange } = useSellerDashboard()
+const { data, loading, range, fetch, setRange } = useDashboardSummary('seller/dashboard/summary', {
+  withRange: true
+})
 
 const transactionStore = useTransactionStore()
 const { transactions: latestTransactions } = storeToRefs(transactionStore)

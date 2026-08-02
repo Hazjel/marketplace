@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { formatRupiah, formatDate } from '@/helpers/format'
-import { useAdminDashboard } from '@/composables/useAdminDashboard'
+import { useDashboardSummary } from '@/composables/useDashboardSummary'
 import defaultStoreImage from '@/assets/images/thumbnails/th-1.svg'
 import defaultTransactionImage from '@/assets/images/thumbnails/th-4.svg'
 
@@ -9,7 +9,7 @@ import StatCard from '@/components/Atom/StatCard.vue'
 import DashboardSection from '@/components/Molecule/DashboardSection.vue'
 import EmptyState from '@/components/Atom/EmptyState.vue'
 
-const { data, loading, fetch } = useAdminDashboard()
+const { data, loading, fetch } = useDashboardSummary('admin/dashboard/summary')
 
 onMounted(fetch)
 </script>
