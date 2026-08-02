@@ -75,7 +75,7 @@ pipeline {
                         apt-get install -y -qq git unzip libsqlite3-dev libzip-dev libssl-dev libpng-dev libjpeg-dev libfreetype6-dev libwebp-dev libonig-dev >/dev/null
                         docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp >/dev/null
                         docker-php-ext-install pdo_sqlite zip bcmath gd exif mbstring >/dev/null
-                        pecl install mongodb redis >/dev/null 2>&1
+                        pecl install mongodb-2.3.3 redis-6.3.0 >/dev/null 2>&1
                         docker-php-ext-enable mongodb redis
                         vendor/bin/pint --test
                         cp .env.example .env
