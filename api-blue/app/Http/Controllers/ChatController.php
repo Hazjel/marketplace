@@ -72,6 +72,23 @@ class ChatController extends Controller
         ]);
 
         try {
+            if ($request->receiver_id === Auth::id()) {
+                return ResponseHelper::jsonResponse(false, 'Tidak bisa mengirim pesan ke diri sendiri', null, 422);
+            }
+
+            $receiver = User::with('store')->find($request->receiver_id);
+
+            // Chat hanya untuk percakapan pembeli <-> toko: minimal satu pihak
+            // harus punya toko. Sengaja TIDAK membandingkan role, karena
+            // registerStore memakai assignRole (menambah, bukan mengganti)
+            // sehingga seller tetap menyandang role 'buyer' -- aturan "role
+            // harus beda" akan memblokir seller yang belanja di toko lain,
+            // padahal di percakapan itu dia memang berperan sebagai pembeli.
+            $sender = Auth::user()->loadMissing('store');
+            if (! $receiver?->store && ! $sender?->store) {
+                return ResponseHelper::jsonResponse(false, 'Percakapan hanya tersedia antara pembeli dan toko', null, 403);
+            }
+
             $message = $this->chatRepository->createMessage(Auth::id(), $request->receiver_id, $request->message);
 
             // Broadcast event
@@ -80,7 +97,6 @@ class ChatController extends Controller
             // Kalau penerima adalah toko yang mengaktifkan Asisten AI, generate
             // balasan otomatis async (job) -- jangan sinkron di sini karena
             // panggilan ke Ollama bisa makan beberapa detik.
-            $receiver = User::with('store')->find($request->receiver_id);
             if ($receiver?->store?->ai_assistant_enabled) {
                 GenerateAiChatReplyJob::dispatch($receiver->store->id, Auth::id(), $request->message);
             }
