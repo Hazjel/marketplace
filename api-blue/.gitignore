@@ -26,6 +26,8 @@ storage/logs/*.txt
 !/public/upload/.gitkeep
 /storage/*.key
 /storage/pail
+# Firebase Admin SDK service account — real credential, never commit.
+/storage/app/firebase/*.json
 /vendor
 Homestead.json
 Homestead.yaml
