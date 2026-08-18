@@ -16,6 +16,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\ProductViewController;
+use App\Http\Controllers\SellerVoucherController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StoreBalanceController;
 use App\Http\Controllers\StoreBalanceHistoryController;
@@ -245,6 +246,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Voucher — preview/validate a code before checkout. Actual redemption
     // is recorded atomically inside TransactionController::store.
     Route::post('voucher/validate', [VoucherController::class, 'validateCode']);
+
+    // Seller voucher management — scoped to the caller's own store inside
+    // the controller itself (SellerVoucherController::myStoreId), not
+    // route-param-based, so there's nothing here to IDOR-guard on the id.
+    Route::get('my-store/vouchers', [SellerVoucherController::class, 'index']);
+    Route::post('my-store/vouchers', [SellerVoucherController::class, 'store']);
+    Route::put('my-store/vouchers/{id}', [SellerVoucherController::class, 'update']);
+    Route::delete('my-store/vouchers/{id}', [SellerVoucherController::class, 'destroy']);
 
     // Wishlist
     Route::get('wishlist', [
