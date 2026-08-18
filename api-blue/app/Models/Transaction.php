@@ -31,6 +31,8 @@ class Transaction extends Model
         'payment_status',
         'receiving_proof',
         'admin_fee',
+        'voucher_id',
+        'discount_amount',
     ];
 
     protected $casts = [
@@ -38,6 +40,7 @@ class Transaction extends Model
         'tax' => 'decimal:2',
         'grand_total' => 'decimal:2',
         'admin_fee' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
     ];
 
     public function scopeSearch($query, $search)
@@ -63,5 +66,10 @@ class Transaction extends Model
     public function productReviews()
     {
         return $this->hasMany(ProductReview::class);
+    }
+
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class);
     }
 }

@@ -7,6 +7,8 @@ use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\Voucher;
+use App\Models\VoucherRedemption;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -215,14 +217,51 @@ class TransactionRepository implements TransactionRepositoryInterface
             $tax = round($subtotal * 0.11);
             $grandTotal = round($subtotal + $tax + $transaction->shipping_cost);
 
+            // Voucher: re-validate server-side against the SAME rules as
+            // VoucherController::validateCode (Voucher::validateFor) — never
+            // trust a client-supplied discount amount. A validate-then-checkout
+            // race (e.g. usage_limit exhausted in between) is closed here
+            // because this whole method runs inside one DB transaction.
+            $discountAmount = 0;
+            $voucher = null;
+            if (! empty($data['voucher_code'])) {
+                $voucher = Voucher::where('code', $data['voucher_code'])->first();
+                if ($voucher) {
+                    $result = $voucher->validateFor($data['buyer_id'], $data['store_id'], (float) $subtotal);
+                    if ($result['valid']) {
+                        $discountAmount = $result['discount_amount'];
+                    } else {
+                        Log::warning('Voucher no longer valid at checkout time, ignoring:', [
+                            'code' => $data['voucher_code'],
+                            'reason' => $result['message'],
+                        ]);
+                        $voucher = null;
+                    }
+                }
+            }
+
+            $grandTotal = max(0, round($grandTotal - $discountAmount));
+
             $transaction->tax = $tax;
             $transaction->grand_total = $grandTotal;
+            $transaction->voucher_id = $voucher?->id;
+            $transaction->discount_amount = $discountAmount;
             $transaction->save();
+
+            if ($voucher) {
+                VoucherRedemption::create([
+                    'voucher_id' => $voucher->id,
+                    'buyer_id' => $data['buyer_id'],
+                    'transaction_id' => $transaction->id,
+                    'redeemed_at' => now(),
+                ]);
+            }
 
             Log::info('Transaction updated with costs:', [
                 'subtotal' => $subtotal,
                 'shipping_cost' => $transaction->shipping_cost,
                 'tax' => $tax,
+                'discount_amount' => $discountAmount,
                 'grand_total' => $grandTotal,
             ]);
 

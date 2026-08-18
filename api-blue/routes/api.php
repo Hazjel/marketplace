@@ -23,6 +23,7 @@ use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Broadcast;
@@ -240,6 +241,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'getAllPaginated',
     ]);
     Route::post('product-review', [ProductReviewController::class, 'store']);
+
+    // Voucher — preview/validate a code before checkout. Actual redemption
+    // is recorded atomically inside TransactionController::store.
+    Route::post('voucher/validate', [VoucherController::class, 'validateCode']);
 
     // Wishlist
     Route::get('wishlist', [

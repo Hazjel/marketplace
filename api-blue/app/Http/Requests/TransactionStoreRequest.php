@@ -37,6 +37,7 @@ class TransactionStoreRequest extends FormRequest
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.qty' => 'required|integer|min:1',
+            'voucher_code' => 'nullable|string|exists:vouchers,code',
         ];
     }
 
