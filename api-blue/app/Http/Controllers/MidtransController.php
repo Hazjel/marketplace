@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TransactionStatusUpdated;
 use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Transaction;
@@ -84,13 +85,16 @@ class MidtransController extends Controller
                 Log::info('Duplicate webhook ignored for: '.$transactionCode);
             } else {
                 $transaction->update(['payment_status' => 'paid']);
+                event(new TransactionStatusUpdated($transaction->fresh()));
                 $this->escrowRepository->credit($transaction);
             }
         } elseif ($newStatus === 'unpaid') {
             $transaction->update(['payment_status' => 'unpaid']);
+            event(new TransactionStatusUpdated($transaction->fresh()));
         } elseif ($newStatus === 'failed') {
             DB::transaction(function () use ($transaction) {
                 $transaction->update(['payment_status' => 'failed']);
+                event(new TransactionStatusUpdated($transaction->fresh()));
                 $this->transactionRepository->restoreStock($transaction);
             });
         }

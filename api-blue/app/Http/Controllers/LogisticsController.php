@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TransactionStatusUpdated;
 use App\Helpers\ResponseHelper;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -84,6 +85,8 @@ class LogisticsController extends Controller
 
                     $transaction->save();
                     Log::info("Transaction {$transaction->code} updated to {$transaction->delivery_status}");
+
+                    event(new TransactionStatusUpdated($transaction->fresh()));
                 });
             }
 

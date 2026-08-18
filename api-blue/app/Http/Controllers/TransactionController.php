@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TransactionStatusUpdated;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\TransactionStoreRequest;
 use App\Http\Requests\TransactionUpdateRequest;
@@ -213,6 +214,8 @@ class TransactionController extends Controller implements HasMiddleware
 
             $transaction = $this->transactionRepository->updateStatus($id, $request);
 
+            event(new TransactionStatusUpdated($transaction));
+
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diupdate', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
@@ -271,6 +274,8 @@ class TransactionController extends Controller implements HasMiddleware
             // ESCROW RELEASE: Pindahkan dana dari pending_balance ke available balance
             $this->escrowRepository->release($transaction);
 
+            event(new TransactionStatusUpdated($transaction));
+
             return ResponseHelper::jsonResponse(true, 'Pesanan Selesai — dana telah dirilis ke saldo toko', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
@@ -326,11 +331,15 @@ class TransactionController extends Controller implements HasMiddleware
                     $transaction->payment_status = 'paid';
                     $transaction->save();
 
+                    event(new TransactionStatusUpdated($transaction->fresh()));
+
                     // Credit ke pending_balance (escrow) — sama seperti Midtrans callback
                     $this->escrowRepository->credit($transaction);
                 } elseif ($newStatus !== $transaction->payment_status) {
                     $transaction->payment_status = $newStatus;
                     $transaction->save();
+
+                    event(new TransactionStatusUpdated($transaction->fresh()));
 
                     // Restore stock if payment failed/expired/cancelled
                     if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
