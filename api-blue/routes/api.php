@@ -6,6 +6,7 @@ use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\HealthController;
@@ -254,6 +255,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('my-store/vouchers', [SellerVoucherController::class, 'store']);
     Route::put('my-store/vouchers/{id}', [SellerVoucherController::class, 'update']);
     Route::delete('my-store/vouchers/{id}', [SellerVoucherController::class, 'destroy']);
+
+    // Device token registration for push notifications (FCM). Sending is
+    // not wired yet — this just gives that future work somewhere to read
+    // targets from.
+    Route::post('device-token', [DeviceTokenController::class, 'store']);
+    Route::delete('device-token', [DeviceTokenController::class, 'destroy']);
 
     // Wishlist
     Route::get('wishlist', [
