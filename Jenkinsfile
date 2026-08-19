@@ -146,7 +146,7 @@ pipeline {
                     # been stuck since 2026-07-24 no matter how many times
                     # composer.json changed. Confirmed live: kreait/laravel-firebase
                     # was in composer.json/lock for several deploys yet
-                    # "Class Kreait\Firebase\Messaging\CloudMessage not found"
+                    # "Class Kreait/Firebase/Messaging/CloudMessage not found"
                     # at runtime -- exactly the failure mode the comment above
                     # already warned about, just missing this one service.
                     if [ "$BACKEND_CHANGED" = "true" ]; then
