@@ -276,7 +276,7 @@ class StoreController extends Controller implements HasMiddleware
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
                 'is_verified' => false,
-                'logo' => 'default-store.png',
+                'logo' => '',
                 'about' => '-',
                 'address_id' => '-',
             ]);
