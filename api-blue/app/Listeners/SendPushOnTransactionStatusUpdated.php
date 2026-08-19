@@ -33,7 +33,7 @@ class SendPushOnTransactionStatusUpdated
             $user,
             'Pesanan '.$transaction->code,
             $this->statusMessage($transaction),
-            ['transaction_id' => (string) $transaction->id],
+            ['type' => 'transaction', 'transaction_id' => (string) $transaction->id],
         );
     }
 
