@@ -139,13 +139,23 @@ pipeline {
                     # bug, ketauannya cuma lewat "Class not found" pas runtime). Hapus
                     # volume sebelum build kalau ada perubahan di api-blue/, biar volume
                     # dibuat ulang fresh dari image setiap kali dependency berubah.
+                    # scheduler also mounts api_vendor (same PHP image) but was
+                    # missing from the stop/rm list below, so it kept the
+                    # volume locked -- "docker volume rm" failed silently
+                    # every single deploy since it was added, and vendor/ has
+                    # been stuck since 2026-07-24 no matter how many times
+                    # composer.json changed. Confirmed live: kreait/laravel-firebase
+                    # was in composer.json/lock for several deploys yet
+                    # "Class Kreait\Firebase\Messaging\CloudMessage not found"
+                    # at runtime -- exactly the failure mode the comment above
+                    # already warned about, just missing this one service.
                     if [ "$BACKEND_CHANGED" = "true" ]; then
-                        docker compose -p marketplace stop api queue reverb || true
-                        docker compose -p marketplace rm -f api queue reverb || true
+                        docker compose -p marketplace stop api queue reverb scheduler || true
+                        docker compose -p marketplace rm -f api queue reverb scheduler || true
                         docker volume rm marketplace_api_vendor || true
                     fi
 
-                    docker compose -p marketplace up -d --build api queue reverb frontend chat-service recommendation-service
+                    docker compose -p marketplace up -d --build api queue reverb scheduler frontend chat-service recommendation-service
                     # nginx sendiri jarang berubah -> compose gak recreate dia, tapi upstream
                     # (blue-api dkk) di atas barusan direcreate dan dapet IP Docker baru.
                     # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi
