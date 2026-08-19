@@ -41,7 +41,16 @@ class PrometheusMetrics
                 [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
             )->observe(microtime(true) - $start, [$route, $request->method()]);
         } catch (Throwable $e) {
-            report($e);
+            // report() itself must never be allowed to throw — a broken/
+            // misconfigured log channel in this exact catch path (seen in
+            // CI's isolated test containers) would otherwise turn a
+            // deliberately-swallowed metrics failure into an uncaught 500
+            // for the whole request, defeating the point of this try/catch.
+            try {
+                report($e);
+            } catch (Throwable) {
+                // Truly nothing more we can do — drop it.
+            }
         }
 
         return $response;
@@ -58,6 +67,16 @@ class PrometheusMetrics
             'persistent_connections' => false,
         ]);
 
-        return new CollectorRegistry($adapter);
+        // registerDefaultMetrics=false: the default (true) eagerly registers
+        // process/PHP gauges INSIDE this constructor, which writes to Redis
+        // immediately — outside the handle() method's try/catch scope by the
+        // time it throws (this constructor call is itself inside that catch,
+        // but the eager write made a Redis-down environment, e.g. CI's
+        // isolated test containers with no Redis service, turn every single
+        // request into an uncaught 500 instead of the graceful no-op this
+        // middleware is supposed to degrade to). Lazy registration means
+        // Redis is only touched by getOrRegisterCounter/Histogram below,
+        // which already are inside the try/catch.
+        return new CollectorRegistry($adapter, false);
     }
 }
