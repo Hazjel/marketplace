@@ -22,13 +22,13 @@ class PushNotificationServiceTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $messaging = Mockery::mock(Messaging::class);
-        $messaging->shouldNotReceive('sendMulticast');
+        // Deliberately no Messaging binding at all — if sendToUser ever
+        // touched app(Messaging::class) here, it would throw (no Firebase
+        // credentials configured in tests) and this test would fail loudly,
+        // proving the empty-tokens fast path really does skip Firebase
+        // entirely rather than just happening not to be asserted against.
+        (new PushNotificationService)->sendToUser($user, 'Title', 'Body');
 
-        (new PushNotificationService($messaging))->sendToUser($user, 'Title', 'Body');
-
-        // No assertion needed beyond the mock expectation above — if
-        // sendMulticast were called, Mockery would fail the test on tearDown.
         $this->assertTrue(true);
     }
 
@@ -59,8 +59,9 @@ class PushNotificationServiceTest extends TestCase
                 return $tokens === ['token-dead', 'token-valid'];
             })
             ->andReturn($report);
+        $this->instance(Messaging::class, $messaging);
 
-        (new PushNotificationService($messaging))->sendToUser($user, 'Pesanan ABC', 'Sedang dikirim');
+        (new PushNotificationService)->sendToUser($user, 'Pesanan ABC', 'Sedang dikirim');
 
         $this->assertDatabaseMissing('device_tokens', ['token' => 'token-dead']);
         $this->assertDatabaseHas('device_tokens', ['token' => 'token-valid']);
@@ -73,10 +74,11 @@ class PushNotificationServiceTest extends TestCase
 
         $messaging = Mockery::mock(Messaging::class);
         $messaging->shouldReceive('sendMulticast')->once()->andThrow(new \RuntimeException('Firebase unreachable'));
+        $this->instance(Messaging::class, $messaging);
 
         // Should not bubble up — a push failure is a side effect, not
         // something that should turn the caller's own request into a 500.
-        (new PushNotificationService($messaging))->sendToUser($user, 'Title', 'Body');
+        (new PushNotificationService)->sendToUser($user, 'Title', 'Body');
         $this->assertTrue(true);
     }
 }
