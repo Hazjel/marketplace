@@ -33,7 +33,14 @@ class Product extends Model
 
     public function scopeSearch($query, $search)
     {
-        if (mb_strlen($search) >= 3) {
+        // MATCH...AGAINST is MySQL-only syntax — sqlite (used by the test
+        // suite) doesn't understand it at all and throws a raw SQL syntax
+        // error, which meant this scope was never actually exercised by any
+        // test with a 3+ char term. LIKE-only here isn't a downgrade for
+        // testing purposes (still validates the matching behavior itself,
+        // just without MySQL's relevance ranking), and production keeps its
+        // real FULLTEXT index.
+        if (mb_strlen($search) >= 3 && $query->getConnection()->getDriverName() === 'mysql') {
             $safeTerm = preg_replace('/[+\-*"<>()~@]+/', '', $search);
             if (mb_strlen(trim($safeTerm)) >= 3) {
                 return $query->whereRaw('MATCH(name, description) AGAINST(? IN BOOLEAN MODE)', ['+'.$safeTerm.'*']);

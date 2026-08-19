@@ -17,6 +17,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\ProductViewController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SellerVoucherController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StoreBalanceController;
@@ -54,6 +55,11 @@ Route::get('product-category/slug/{slug}', [
     'showBySlug',
 ]);
 Route::get('product-category/{id}', [ProductCategoryController::class, 'show']);
+
+// Typeahead suggestions while typing — separate from the full search
+// results page below, throttled a bit tighter since it fires on every
+// keystroke (debounced client-side too, but don't rely on that alone).
+Route::middleware('throttle:60,1')->get('search/suggestions', [SearchController::class, 'suggestions']);
 
 Route::get('product', [ProductController::class, 'index']);
 Route::get('product/all/paginated', [
