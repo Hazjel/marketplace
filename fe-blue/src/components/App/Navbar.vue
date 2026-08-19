@@ -26,7 +26,7 @@ const { totalItems: totalWishlistItems } = storeToRefs(wishlistStore)
 const { fetchWishlist } = wishlistStore
 
 const productStore = useProductStore()
-const { searchProducts } = productStore
+const { getSearchSuggestions } = productStore
 
 const themeStore = useThemeStore()
 const { effectiveTheme } = storeToRefs(themeStore)
@@ -55,6 +55,8 @@ const getProductImage = (product) => {
 // Search State
 const searchQuery = ref('')
 const searchResults = ref([])
+const searchCategories = ref([])
+const searchStores = ref([])
 const showSearchResults = ref(false)
 const isSearching = ref(false)
 const showHistory = ref(false)
@@ -103,6 +105,15 @@ const handleSearchInput = () => {
     showSearchResults.value = false
     showHistory.value = true
     searchResults.value = []
+    searchCategories.value = []
+    searchStores.value = []
+    return
+  }
+
+  // Same 2-char floor as the backend — no point debouncing a request that
+  // would come back empty anyway.
+  if (query.length < 2) {
+    showSearchResults.value = false
     return
   }
 
@@ -111,16 +122,20 @@ const handleSearchInput = () => {
 
   searchTimeout = setTimeout(async () => {
     try {
-      const results = await searchProducts({
-        search: query,
-        limit: 5
-      })
+      const suggestions = await getSearchSuggestions(query)
 
-      searchResults.value = results || []
-      showSearchResults.value = searchResults.value.length > 0
+      searchResults.value = suggestions.products || []
+      searchCategories.value = suggestions.categories || []
+      searchStores.value = suggestions.stores || []
+      showSearchResults.value =
+        searchResults.value.length > 0 ||
+        searchCategories.value.length > 0 ||
+        searchStores.value.length > 0
     } catch (error) {
       logger.error('Search error:', error)
       searchResults.value = []
+      searchCategories.value = []
+      searchStores.value = []
       showSearchResults.value = false
     } finally {
       isSearching.value = false
@@ -144,6 +159,22 @@ const handleProductClick = (slug, name) => {
   showHistory.value = false
   searchQuery.value = ''
   router.push({ name: 'app.product-detail', params: { slug } })
+}
+
+const handleCategoryClick = (slug, name) => {
+  saveHistory(name)
+  showSearchResults.value = false
+  showHistory.value = false
+  searchQuery.value = ''
+  router.push({ name: 'app.browse-category', params: { slug } })
+}
+
+const handleStoreClick = (username, name) => {
+  saveHistory(name)
+  showSearchResults.value = false
+  showHistory.value = false
+  searchQuery.value = ''
+  router.push({ name: 'app.store-detail', params: { username } })
 }
 
 const handleClickOutside = (e) => {
@@ -249,6 +280,22 @@ class="hidden group-hover:flex p-1 hover:bg-gray-200 rounded-full"
               <!-- Product Results Section -->
               <div v-else-if="showSearchResults">
                 <div class="flex flex-col max-h-[400px] overflow-y-auto custom-scrollbar">
+                  <!-- Category matches — shown above products since picking one
+                       narrows the whole catalog rather than a single item -->
+                  <button
+v-for="category in searchCategories" :key="`cat-${category.id}`"
+                    class="flex items-center gap-3 px-4 py-3 hover:bg-custom-background dark:hover:bg-white/5 transition-300 text-left border-b border-custom-stroke/30 dark:border-white/5 group"
+                    @click="handleCategoryClick(category.slug, category.name)">
+                    <img
+src="@/assets/images/icons/box-search-grey.svg"
+                      class="size-5 opacity-60 dark:brightness-0 dark:invert" alt="category" />
+                    <span
+                      class="font-medium text-sm text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
+                      {{ category.name }}
+                    </span>
+                    <span class="text-xs text-custom-grey ml-auto">Kategori</span>
+                  </button>
+
                   <button
 v-for="product in searchResults" :key="product.id"
                     class="flex items-center gap-4 p-4 hover:bg-custom-background dark:hover:bg-white/5 transition-300 text-left border-b border-custom-stroke/30 dark:border-white/5 last:border-0 group"
@@ -269,6 +316,23 @@ v-for="product in searchResults" :key="product.id"
                         Rp {{ formatRupiah(product.price) }}
                       </p>
                     </div>
+                  </button>
+
+                  <!-- Store matches — shown last, they're the least likely
+                       intent behind a product-shaped search query -->
+                  <button
+v-for="store in searchStores" :key="`store-${store.id}`"
+                    class="flex items-center gap-3 px-4 py-3 hover:bg-custom-background dark:hover:bg-white/5 transition-300 text-left border-b border-custom-stroke/30 dark:border-white/5 last:border-0 group"
+                    @click="handleStoreClick(store.username, store.name)">
+                    <div
+                      class="flex size-8 shrink-0 rounded-full bg-custom-background dark:bg-white/5 overflow-hidden border border-custom-stroke/50 dark:border-white/5">
+                      <img v-if="store.logo" :src="store.logo" class="size-full object-cover" alt="store" />
+                    </div>
+                    <span
+                      class="font-medium text-sm text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
+                      {{ store.name }}
+                    </span>
+                    <span class="text-xs text-custom-grey ml-auto">Toko</span>
                   </button>
                 </div>
                 <div
@@ -322,17 +386,21 @@ v-if="totalItems > 0"
               @click="toggleTheme()"
             >
               <!-- Moon icon: shown in dark mode → click to go light -->
-              <svg v-if="effectiveTheme === 'dark'" xmlns="http://www.w3.org/2000/svg"
+              <svg
+v-if="effectiveTheme === 'dark'" xmlns="http://www.w3.org/2000/svg"
                 class="size-5 text-custom-black dark:text-white opacity-60 group-hover:opacity-100 transition-opacity"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
+                <path
+stroke-linecap="round" stroke-linejoin="round"
                   d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
               <!-- Sun icon: shown in light mode → click to go dark -->
-              <svg v-else xmlns="http://www.w3.org/2000/svg"
+              <svg
+v-else xmlns="http://www.w3.org/2000/svg"
                 class="size-5 text-custom-black opacity-60 group-hover:opacity-100 transition-opacity"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                <path
+stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </button>

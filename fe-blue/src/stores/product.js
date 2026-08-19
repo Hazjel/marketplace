@@ -74,6 +74,25 @@ export const useProductStore = defineStore('product', {
       }
     },
 
+    /**
+     * Typeahead dropdown — separate from searchProducts() above (which hits
+     * the full product listing endpoint). This hits a dedicated lightweight
+     * endpoint that also returns matching categories/stores, not just
+     * products, and is meant to run on every debounced keystroke.
+     */
+    async getSearchSuggestions(query) {
+      try {
+        const response = await axiosInstance.get('/search/suggestions', {
+          params: { q: query }
+        })
+
+        return response.data.data
+      } catch (error) {
+        logger.error('Search suggestions error:', error)
+        return { products: [], categories: [], stores: [] }
+      }
+    },
+
     async loadMoreProducts(params) {
       this.loading = true
 
