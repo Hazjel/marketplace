@@ -163,17 +163,7 @@ class TransactionController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
-            // Security: Prevent IDOR (Only Buyer, Seller, or Admin can view).
-            // User bisa dual-role (buyer + store) -- akses sah kalau dia buyer
-            // ATAU seller dari transaksi ini, bukan harus lolos kedua guard
-            // sekaligus (dual-role buyer yang beli dari toko lain akan selalu
-            // gagal guard store kalau dicek independen).
-            $user = Auth::user();
-            $isOwningBuyer = $user->hasRole('buyer') && $transactions->buyer_id === $user->buyer?->id;
-            $isOwningStore = $user->hasRole('store') && $transactions->store_id === $user->store?->id;
-            $isAdmin = $user->hasRole('admin');
-
-            if (! $isOwningBuyer && ! $isOwningStore && ! $isAdmin) {
+            if (Auth::user()->cannot('view', $transactions)) {
                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
@@ -190,6 +180,10 @@ class TransactionController extends Controller implements HasMiddleware
 
             if (! $transactions) {
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            if (Auth::user()->cannot('view', $transactions)) {
+                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', new TransactionResource($transactions), 200);
@@ -210,6 +204,10 @@ class TransactionController extends Controller implements HasMiddleware
 
             if (! $transactions) {
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            if (Auth::user()->cannot('update', $transactions)) {
+                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
             $transaction = $this->transactionRepository->updateStatus($id, $request);
@@ -235,9 +233,7 @@ class TransactionController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
-            // Authorization: Ensure user is the buyer
-            $user = Auth::user();
-            if (! $user->buyer || $transaction->buyer_id !== $user->buyer->id) {
+            if (Auth::user()->cannot('complete', $transaction)) {
                 return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
             }
 
@@ -297,14 +293,7 @@ class TransactionController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
-            // Authorization: prevent IDOR — only the buyer, the seller, or admin can check.
-            // Sama seperti show(): user dual-role harus lolos SALAH SATU guard, bukan keduanya.
-            $user = Auth::user();
-            $isOwningBuyer = $user->hasRole('buyer') && $transaction->buyer_id === $user->buyer?->id;
-            $isOwningStore = $user->hasRole('store') && $transaction->store_id === $user->store?->id;
-            $isAdmin = $user->hasRole('admin');
-
-            if (! $isOwningBuyer && ! $isOwningStore && ! $isAdmin) {
+            if (Auth::user()->cannot('checkPaymentStatus', $transaction)) {
                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
@@ -366,6 +355,10 @@ class TransactionController extends Controller implements HasMiddleware
 
             if (! $transactions) {
                 return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            if (Auth::user()->cannot('delete', $transactions)) {
+                return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
             $transaction = $this->transactionRepository->delete($id);
