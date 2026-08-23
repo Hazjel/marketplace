@@ -80,7 +80,7 @@ class Product extends Model
         return $this->hasMany(ProductVariantMongo::class, 'product_id', 'id');
     }
 
-    public function getTotalSoldAttribute()
+    public function getTotalSoldAttribute(): int
     {
         // Kalau query pemanggil sudah menyertakan withSum(), pakai hasilnya.
         // Tanpa ini setiap produk yang diserialisasi memicu satu SUM sendiri —
@@ -89,7 +89,10 @@ class Product extends Model
             return (int) $this->attributes['transaction_details_sum_qty'];
         }
 
-        return $this->transactionDetails()
+        // SUM() lewat PDO balik sebagai string, jadi endpoint yang lewat sini
+        // dulu mengirim "1" sementara listing mengirim 1. Klien yang mengurai
+        // angka ini secara ketat pecah di salah satu jalur; samakan ke int.
+        return (int) $this->transactionDetails()
             ->whereHas('transaction', function ($q) {
                 $q->where('payment_status', 'paid');
             })
