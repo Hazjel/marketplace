@@ -16,7 +16,10 @@ class ProductImageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'product_id' => new ProductResource($this->product),
+            // Dulu ini mengembalikan ProductResource lengkap dari produk induk:
+            // satu query per gambar, lalu kaskade store/user/kategori penuh di
+            // atasnya, dan payload berlipat — padahal nama fieldnya cuma id.
+            'product_id' => $this->product_id,
             'image' => str_starts_with($this->image, 'http') ? $this->image : asset('storage/'.$this->image),
             'is_thumbnail' => $this->is_thumbnail,
         ];
