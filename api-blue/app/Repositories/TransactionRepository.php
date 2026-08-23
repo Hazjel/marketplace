@@ -136,6 +136,46 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $query->first();
     }
 
+    /**
+     * Pembeli selalu user yang sedang login. Tidak ada alasan sah bagi client
+     * untuk menentukan siapa yang berbelanja.
+     */
+    private function resolveBuyerId(): string
+    {
+        $buyer = Auth::user()?->buyer;
+
+        if (! $buyer) {
+            throw new Exception('Akun ini belum memiliki profil pembeli.');
+        }
+
+        return $buyer->id;
+    }
+
+    /**
+     * Toko diturunkan dari produk yang dibeli, bukan dari payload, sekaligus
+     * menegakkan aturan satu transaksi hanya berisi produk dari satu toko.
+     * Tanpa ini sebuah pesanan bisa mencampur produk lintas toko sementara
+     * pembayarannya hanya masuk ke satu saldo penjual.
+     */
+    private function resolveStoreId(array $products): string
+    {
+        $productIds = array_column($products, 'product_id');
+
+        $storeIds = Product::whereIn('id', $productIds)
+            ->distinct()
+            ->pluck('store_id');
+
+        if ($storeIds->isEmpty()) {
+            throw new Exception('Produk tidak ditemukan.');
+        }
+
+        if ($storeIds->count() > 1) {
+            throw new Exception('Semua produk harus berasal dari toko yang sama.');
+        }
+
+        return $storeIds->first();
+    }
+
     public function create(array $data)
     {
         DB::beginTransaction();
@@ -143,6 +183,15 @@ class TransactionRepository implements TransactionRepositoryInterface
         try {
             Log::info('=== START CREATE TRANSACTION ===');
             Log::info('Input data:', ['data' => $data]);
+
+            // buyer_id dan store_id dulu diambil apa adanya dari payload, jadi
+            // pembeli yang sudah login bisa memesan atas nama buyer lain dan
+            // menempelkan pesanan ke toko mana pun. Keduanya sekarang
+            // diturunkan di server, dan $data ditimpa supaya seluruh jalur
+            // hilir -- validasi voucher, detail transaksi -- ikut memakai
+            // nilai yang sudah tepercaya, bukan kiriman client.
+            $data['buyer_id'] = $this->resolveBuyerId();
+            $data['store_id'] = $this->resolveStoreId($data['products']);
 
             $transaction = new Transaction;
 
