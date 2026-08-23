@@ -73,7 +73,18 @@ class ProductRepository implements ProductRepositoryInterface
                 $days = (int) $filters['created_since'];
                 $query->where('created_at', '>=', now()->subDays($days));
             }
-        })->with(['productImages', 'store', 'productCategory', 'variants']);
+        })->with([
+            'productImages',
+            'productCategory',
+            'variants',
+            // StoreResource ikut merender user (beserta roles/buyer) dan dua
+            // hitungan relasi. Tanpa eager-load di sini tiap produk memicu
+            // rentetan query sendiri-sendiri — N+1 yang menggandakan biaya
+            // listing katalog.
+            'store' => fn ($q) => $q->with([
+                'user.roles', 'user.permissions', 'user.store', 'user.buyer',
+            ])->withCount(['products', 'transaction']),
+        ]);
 
         // Removed implicit filtering by store_id for store role users to allow them to see all products in buyer mode
 

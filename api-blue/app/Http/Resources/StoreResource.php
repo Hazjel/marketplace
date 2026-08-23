@@ -31,8 +31,11 @@ class StoreResource extends JsonResource
             'distance_m' => $this->when(isset($this->distance_m), fn () => round((float) $this->distance_m)),
             'is_verified' => $this->is_verified,
             'ai_assistant_enabled' => $this->ai_assistant_enabled,
-            'product_count' => $this->products->count(),
-            'transaction_count' => $this->transaction->count(),
+            // Pakai hasil withCount() kalau query pemanggil sudah menyediakannya.
+            // Fallback ke COUNT(*) — tetap satu query, tapi tidak menghidrasi
+            // seluruh baris relasi hanya untuk diambil jumlahnya.
+            'product_count' => $this->products_count ?? $this->products()->count(),
+            'transaction_count' => $this->transaction_count ?? $this->transaction()->count(),
             'created_at' => $this->created_at,
         ];
     }
