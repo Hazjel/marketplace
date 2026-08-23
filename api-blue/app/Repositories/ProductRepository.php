@@ -73,10 +73,17 @@ class ProductRepository implements ProductRepositoryInterface
                 $days = (int) $filters['created_since'];
                 $query->where('created_at', '>=', now()->subDays($days));
             }
-        })->with([
+        })->withSum(['transactionDetails' => function ($q) {
+            $q->whereHas('transaction', function ($t) {
+                $t->where('payment_status', 'paid');
+            });
+        }], 'qty')->with([
             'productImages',
-            'productCategory',
             'variants',
+            // ProductCategoryResource menghitung produk kategori ini beserta
+            // anak-anaknya; sediakan hitungannya lewat withCount.
+            'productCategory' => fn ($q) => $q->withCount('products')
+                ->with(['childrens' => fn ($c) => $c->withCount('products')]),
             // StoreResource ikut merender user (beserta roles/buyer) dan dua
             // hitungan relasi. Tanpa eager-load di sini tiap produk memicu
             // rentetan query sendiri-sendiri — N+1 yang menggandakan biaya
@@ -102,11 +109,9 @@ class ProductRepository implements ProductRepositoryInterface
             } elseif ($filters['sort_by'] === 'created_at') {
                 $query->orderBy('created_at', $sortDirection);
             } elseif ($filters['sort_by'] === 'sold') {
-                $query->withSum(['transactionDetails' => function ($q) {
-                    $q->whereHas('transaction', function ($t) {
-                        $t->where('payment_status', 'paid');
-                    });
-                }], 'qty')->orderBy('transaction_details_sum_qty', $sortDirection);
+                // withSum-nya sudah dipasang di atas untuk semua query,
+                // di sini tinggal mengurutkan pakai kolom hasilnya.
+                $query->orderBy('transaction_details_sum_qty', $sortDirection);
             }
         } else {
             $query->orderBy('created_at', 'desc');

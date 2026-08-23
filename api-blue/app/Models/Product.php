@@ -82,6 +82,13 @@ class Product extends Model
 
     public function getTotalSoldAttribute()
     {
+        // Kalau query pemanggil sudah menyertakan withSum(), pakai hasilnya.
+        // Tanpa ini setiap produk yang diserialisasi memicu satu SUM sendiri —
+        // N+1 yang tidak kelihatan karena tersembunyi di balik accessor.
+        if (array_key_exists('transaction_details_sum_qty', $this->attributes)) {
+            return (int) $this->attributes['transaction_details_sum_qty'];
+        }
+
         return $this->transactionDetails()
             ->whereHas('transaction', function ($q) {
                 $q->where('payment_status', 'paid');
