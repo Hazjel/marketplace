@@ -30,7 +30,9 @@ if [ ! -f /var/www/storage/.initialized ]; then
     php artisan key:generate --force --no-interaction
     php artisan storage:link --force
     php artisan migrate --force --no-interaction
-    php artisan db:seed --force --no-interaction
+    # Hanya permission dan role. DatabaseSeeder ikut memanggil DemoSeeder,
+    # yang membuat admin/buyer/seller dengan password tertulis di repo.
+    php artisan db:seed --class=Database\Seeders\ProductionSeeder --force --no-interaction
     
     touch /var/www/storage/.initialized
     echo "✅ Setup complete"
