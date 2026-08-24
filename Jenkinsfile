@@ -2,7 +2,13 @@ pipeline {
     agent none
 
     options {
-        timeout(time: 30, unit: 'MINUTES')
+        // 30 menit tidak cukup: composer install + PHPUnit + npm ci + Vitest +
+        // build frontend + docker build tujuh service rutin melewatinya. Build
+        // #17 dan #19 keduanya berhenti di 30,5 menit dengan "Timeout has been
+        // exceeded" tepat setelah stage Deploy menghapus api/queue/reverb/
+        // scheduler dan sebelum sempat membuatnya kembali -- produksi mati dua
+        // kali karena ini, dan build-nya cuma tercatat ABORTED.
+        timeout(time: 60, unit: 'MINUTES')
         disableConcurrentBuilds()
         // JENKINS_HOME numpuk terus tiap build (workspace + build record) sampai
         // disk host hampir penuh — batasi histori biar otomatis kebersihin
@@ -113,12 +119,10 @@ pipeline {
                 // job Pipeline biasa (bukan Multibranch) tidak set env.BRANCH_NAME,
                 // jadi cek GIT_BRANCH dari step checkout sebagai gantinya.
                 //
-                // Nilainya tidak konsisten: pernah 'main', pernah 'origin/main',
-                // dan build #19 mencatat 'refs/remotes/origin/main'. Mencocokkan
-                // string persis sudah dua kali membuat stage ini terlewat diam-diam
-                // sementara build tetap hijau -- deploy dir sempat tertinggal
-                // delapan commit tanpa ada yang gagal. Cocokkan polanya, jangan
-                // satu bentuk tertentu.
+                // Perbandingan string persis pernah membuat stage ini terlewat
+                // (lihat commit 9d31303), dan build record menyimpan ref-nya
+                // sebagai 'refs/remotes/origin/main'. Cocokkan polanya supaya
+                // bentuk mana pun diterima, bukan satu ejaan tertentu.
                 expression {
                     (env.GIT_BRANCH ?: '') ==~ /^(refs\/remotes\/)?(origin\/)?main$/
                 }
@@ -199,9 +203,9 @@ pipeline {
                     docker image prune -af || true
 
                     # ---- verifikasi pasca-deploy ----
-                    # Tanpa ini build bisa hijau tanpa ada apa pun yang ter-deploy:
-                    # itu persis yang terjadi di #19, dan tidak ada yang tahu sampai
-                    # seseorang memeriksa direktori deploy secara manual.
+                    # Stage ini pernah berhenti di tengah jalan tanpa ada yang
+                    # menyadarinya sampai seseorang membuka situsnya. Pastikan
+                    # "hijau" benar-benar berarti kode baru sudah melayani.
 
                     DEPLOYED=$(git -C "$HOST_PROJECT_DIR" rev-parse HEAD)
                     if [ -n "$GIT_COMMIT" ] && [ "$DEPLOYED" != "$GIT_COMMIT" ]; then
