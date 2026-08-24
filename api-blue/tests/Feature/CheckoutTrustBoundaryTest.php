@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\ShippingGatewayInterface;
 use App\Models\Buyer;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -13,6 +14,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
 /**
@@ -66,6 +68,8 @@ class CheckoutTrustBoundaryTest extends TestCase
             'weight' => 1000,
             'stock' => 10,
         ]);
+        // Checkout menanyakan ongkir ke gateway; jangan sentuh Komerce asli.
+        $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
     }
 
     private function payload(array $overrides = []): array
@@ -136,6 +140,46 @@ class CheckoutTrustBoundaryTest extends TestCase
         $this->checkout($this->payload())->assertStatus(201);
 
         $this->assertSame($this->attacker->buyer->id, Transaction::firstOrFail()->buyer_id);
+    }
+
+    public function test_shipping_cost_from_the_payload_is_ignored(): void
+    {
+        // Gateway (di-fake) memberi harga 15000 untuk JNE REG.
+        $this->checkout($this->payload(['shipping_cost' => 0]))->assertStatus(201);
+
+        $this->assertSame(15000, (int) Transaction::firstOrFail()->shipping_cost);
+    }
+
+    public function test_an_inflated_shipping_cost_is_also_overridden(): void
+    {
+        // Bukan hanya nol: nilai apa pun dari client tidak dipakai, supaya
+        // penjual juga tidak bisa ditagihkan ongkir yang dikarang.
+        $this->checkout($this->payload(['shipping_cost' => 999999]))->assertStatus(201);
+
+        $this->assertSame(15000, (int) Transaction::firstOrFail()->shipping_cost);
+    }
+
+    public function test_checkout_works_without_shipping_cost_at_all(): void
+    {
+        $payload = $this->payload();
+        unset($payload['shipping_cost']);
+
+        $this->checkout($payload)->assertStatus(201);
+
+        $this->assertSame(15000, (int) Transaction::firstOrFail()->shipping_cost);
+    }
+
+    public function test_a_courier_the_gateway_does_not_offer_is_rejected(): void
+    {
+        // Kalau opsinya tidak ada di gateway, harganya tidak bisa
+        // dipertanggungjawabkan -- jangan diam-diam memakai angka client.
+        $this->checkout($this->payload([
+            'shipping' => 'KURIR-PALSU',
+            'shipping_type' => 'INSTAN',
+            'shipping_cost' => 1,
+        ]))->assertStatus(500);
+
+        $this->assertSame(0, Transaction::count());
     }
 
     public function test_products_from_two_different_stores_are_rejected(): void
