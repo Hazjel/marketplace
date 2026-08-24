@@ -27,7 +27,10 @@ echo "✅ MySQL ready"
 if [ ! -f /var/www/storage/.initialized ]; then
     echo "🔧 Running first-time setup..."
     
-    php artisan key:generate --force --no-interaction
+    # APP_KEY sengaja TIDAK di-generate di sini. Compose mewajibkannya lewat
+    # ${APP_KEY:?}, jadi key selalu datang dari luar dan sama untuk api, queue,
+    # scheduler, dan reverb. Generate di titik ini pernah berarti: hilangnya
+    # marker .initialized diam-diam mengganti kunci enkripsi produksi.
     php artisan storage:link --force
     php artisan migrate --force --no-interaction
     php artisan db:seed --force --no-interaction
