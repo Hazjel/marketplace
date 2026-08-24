@@ -4,8 +4,10 @@ namespace App\Repositories;
 
 use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\PaymentGatewayInterface;
+use App\Interfaces\ShippingGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Product;
+use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\Voucher;
 use App\Models\VoucherRedemption;
@@ -19,7 +21,8 @@ class TransactionRepository implements TransactionRepositoryInterface
 {
     public function __construct(
         private EscrowRepositoryInterface $escrowRepository,
-        private PaymentGatewayInterface $paymentGateway
+        private PaymentGatewayInterface $paymentGateway,
+        private ShippingGatewayInterface $shippingGateway
     ) {}
 
     public function getAll(?string $search, ?int $limit, bool $execute)
@@ -176,6 +179,67 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $storeIds->first();
     }
 
+    /**
+     * Ongkir diambil ulang dari gateway, bukan dari payload.
+     *
+     * Sebelumnya nilai ini dipakai apa adanya dari client, jadi pembeli bisa
+     * mengirim shipping_cost 0 dan tetap checkout. Yang dipercaya sekarang cuma
+     * PILIHAN kurirnya; harganya ditentukan server dengan memanggil gateway
+     * memakai asal (alamat toko), tujuan, dan berat yang dihitung sendiri.
+     *
+     * Gateway meng-cache satu jam per kombinasi asal/tujuan/berat, dan pembeli
+     * baru saja memuat daftar ini saat memilih kurir, jadi hampir selalu kena
+     * cache dan tidak menambah panggilan keluar.
+     */
+    private function resolveShippingCost(array $data): int
+    {
+        $store = Store::find($data['store_id']);
+        $originId = (int) ($store?->address_id ?? 0);
+        $destinationId = (int) ($data['address_id'] ?? 0);
+
+        if ($originId <= 0 || $destinationId <= 0) {
+            throw new Exception('Alamat pengiriman atau alamat toko belum lengkap.');
+        }
+
+        $couriers = $this->shippingGateway->calculateCosts(
+            $originId,
+            $destinationId,
+            $this->totalWeightGrams($data['products']),
+            $data['city'] ?? null
+        );
+
+        foreach ($couriers as $courier) {
+            $sameCourier = strcasecmp((string) ($courier['shipping_name'] ?? ''), (string) $data['shipping']) === 0;
+            $sameService = strcasecmp((string) ($courier['service_name'] ?? ''), (string) $data['shipping_type']) === 0;
+
+            if ($sameCourier && $sameService) {
+                return (int) round((float) ($courier['shipping_cost_net'] ?? 0));
+            }
+        }
+
+        // Gagal di sini lebih baik daripada diam-diam memakai angka kiriman
+        // client: kalau opsinya tidak ada, harganya tidak bisa dipertanggungjawabkan.
+        throw new Exception('Opsi pengiriman yang dipilih tidak tersedia. Silakan pilih ulang kurir.');
+    }
+
+    /**
+     * Berat produk tersimpan dalam kg; gateway meminta gram, dengan lantai
+     * yang sama seperti ShipmentController supaya harganya konsisten dengan
+     * yang tadi ditampilkan ke pembeli.
+     */
+    private function totalWeightGrams(array $products): int
+    {
+        $weights = Product::whereIn('id', array_column($products, 'product_id'))
+            ->pluck('weight', 'id');
+
+        $totalKg = 0.0;
+        foreach ($products as $item) {
+            $totalKg += ((float) ($weights[$item['product_id']] ?? 0)) * (int) $item['qty'];
+        }
+
+        return max(100, (int) round($totalKg * 1000));
+    }
+
     public function create(array $data)
     {
         DB::beginTransaction();
@@ -192,6 +256,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             // nilai yang sudah tepercaya, bukan kiriman client.
             $data['buyer_id'] = $this->resolveBuyerId();
             $data['store_id'] = $this->resolveStoreId($data['products']);
+            $data['shipping_cost'] = $this->resolveShippingCost($data);
 
             $transaction = new Transaction;
 
@@ -207,8 +272,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             $transaction->shipping = $data['shipping'];
             $transaction->shipping_type = $data['shipping_type'];
 
-            // ✅ Gunakan shipping_cost dari frontend
-            $transaction->shipping_cost = $data['shipping_cost'] ?? 0;
+            $transaction->shipping_cost = $data['shipping_cost'];
             $transaction->tax = 0;
             $transaction->grand_total = 0;
             $transaction->save();

@@ -37,7 +37,11 @@ class TransactionStoreRequest extends FormRequest
             'dest_longitude' => 'nullable|numeric|between:-180,180',
             'shipping' => 'required|string',
             'shipping_type' => 'required|string',
-            'shipping_cost' => 'required|numeric|min:0',
+            // Diterima demi kompatibilitas client lama tetapi diabaikan:
+            // TransactionRepository menanyakan ulang harganya ke gateway
+            // pengiriman. Yang dipercaya dari client hanya PILIHAN kurir
+            // (shipping + shipping_type), bukan nominalnya.
+            'shipping_cost' => 'nullable|numeric|min:0',
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.qty' => 'required|integer|min:1',

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\ShippingGatewayInterface;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
@@ -12,6 +13,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
 class VoucherTest extends TestCase
@@ -24,6 +26,8 @@ class VoucherTest extends TestCase
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $this->seed(PermissionSeeder::class);
         $this->seed(RoleSeeder::class);
+        // Checkout menanyakan ongkir ke gateway; jangan sentuh Komerce asli.
+        $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
     }
 
     private function makeStoreAndProduct(int $price = 10000, int $stock = 10): array
