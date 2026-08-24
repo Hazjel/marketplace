@@ -111,8 +111,17 @@ pipeline {
             agent any
             when {
                 // job Pipeline biasa (bukan Multibranch) tidak set env.BRANCH_NAME,
-                // jadi cek GIT_BRANCH dari step checkout sebagai gantinya
-                expression { env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main' }
+                // jadi cek GIT_BRANCH dari step checkout sebagai gantinya.
+                //
+                // Nilainya tidak konsisten: pernah 'main', pernah 'origin/main',
+                // dan build #19 mencatat 'refs/remotes/origin/main'. Mencocokkan
+                // string persis sudah dua kali membuat stage ini terlewat diam-diam
+                // sementara build tetap hijau -- deploy dir sempat tertinggal
+                // delapan commit tanpa ada yang gagal. Cocokkan polanya, jangan
+                // satu bentuk tertentu.
+                expression {
+                    (env.GIT_BRANCH ?: '') ==~ /^(refs\/remotes\/)?(origin\/)?main$/
+                }
             }
             steps {
                 // jalan dari /host-project (bind mount direktori host), BUKAN workspace
@@ -127,8 +136,22 @@ pipeline {
                     git config --global --add safe.directory "$HOST_PROJECT_DIR"
                     cd "$HOST_PROJECT_DIR"
                     git fetch origin main
+
+                    # Deploy persis commit yang barusan dites. "reset --hard
+                    # origin/main" mengambil tip terbaru, jadi commit yang
+                    # didorong selagi pipeline berjalan ikut terkirim tanpa
+                    # pernah melewati satu pun stage test.
+                    #
+                    # Kalau GIT_COMMIT ternyata kosong, jangan menggagalkan
+                    # deploy -- kembali ke perilaku lama dan bilang, supaya
+                    # tidak menukar "diam-diam terlewat" dengan "selalu gagal".
+                    TARGET="$GIT_COMMIT"
+                    if [ -z "$TARGET" ]; then
+                        echo "PERINGATAN: GIT_COMMIT kosong, memakai origin/main"
+                        TARGET="origin/main"
+                    fi
                     git checkout main
-                    git reset --hard origin/main
+                    git reset --hard "$TARGET"
 
                     # api_vendor named volume nge-override folder vendor/ dari bind mount
                     # ./api-blue (biar vendor gak ketiban bind-mount kosong dari host --
@@ -149,13 +172,22 @@ pipeline {
                     # "Class Kreait/Firebase/Messaging/CloudMessage not found"
                     # at runtime -- exactly the failure mode the comment above
                     # already warned about, just missing this one service.
+                    # Build lebih dulu, selagi container lama masih melayani.
+                    # Urutan sebelumnya stop+rm dulu baru "up --build", jadi satu
+                    # build yang gagal berarti api/queue/reverb/scheduler sudah
+                    # terlanjur hilang dan API mati sampai ada yang memulihkannya
+                    # manual -- itu betulan terjadi. Dengan urutan ini, build yang
+                    # gagal membuat stage berhenti tanpa produksi pernah turun,
+                    # dan downtime menyusut jadi sebatas waktu start container.
+                    docker compose -p marketplace build api queue reverb scheduler frontend chat-service recommendation-service
+
                     if [ "$BACKEND_CHANGED" = "true" ]; then
                         docker compose -p marketplace stop api queue reverb scheduler || true
                         docker compose -p marketplace rm -f api queue reverb scheduler || true
                         docker volume rm marketplace_api_vendor || true
                     fi
 
-                    docker compose -p marketplace up -d --build api queue reverb scheduler frontend chat-service recommendation-service
+                    docker compose -p marketplace up -d --no-build api queue reverb scheduler frontend chat-service recommendation-service
                     # nginx sendiri jarang berubah -> compose gak recreate dia, tapi upstream
                     # (blue-api dkk) di atas barusan direcreate dan dapet IP Docker baru.
                     # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi
@@ -165,6 +197,37 @@ pipeline {
                     # tiap --build bikin image baru, image lama nganggur numpuk terus
                     # (disk sempat 93% penuh) -- bersihin image gak kepake tiap abis deploy
                     docker image prune -af || true
+
+                    # ---- verifikasi pasca-deploy ----
+                    # Tanpa ini build bisa hijau tanpa ada apa pun yang ter-deploy:
+                    # itu persis yang terjadi di #19, dan tidak ada yang tahu sampai
+                    # seseorang memeriksa direktori deploy secara manual.
+
+                    DEPLOYED=$(git -C "$HOST_PROJECT_DIR" rev-parse HEAD)
+                    if [ -n "$GIT_COMMIT" ] && [ "$DEPLOYED" != "$GIT_COMMIT" ]; then
+                        echo "GAGAL: direktori deploy ada di $DEPLOYED, bukan commit yang dites $GIT_COMMIT"
+                        exit 1
+                    fi
+                    echo "commit ter-deploy: $DEPLOYED"
+
+                    # API harus benar-benar melayani lagi. Container baru butuh
+                    # waktu start, jadi tunggu -- tapi jangan selamanya.
+                    healthy=""
+                    for i in $(seq 1 36); do
+                        code=$(curl -s -o /dev/null -w '%{http_code}' https://blukios.store/api/health || echo 000)
+                        if [ "$code" = "200" ]; then
+                            healthy="yes"
+                            echo "API sehat setelah $((i * 5)) detik"
+                            break
+                        fi
+                        sleep 5
+                    done
+
+                    if [ -z "$healthy" ]; then
+                        echo "GAGAL: API tidak mengembalikan 200 dalam 3 menit setelah deploy"
+                        docker compose -p marketplace ps
+                        exit 1
+                    fi
                 '''
             }
         }
