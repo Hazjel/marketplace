@@ -60,7 +60,11 @@ class TransactionTest extends TestCase
 
         // Node 7: Return 422 Unprocessable Entity
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['buyer_id', 'store_id', 'products']);
+            ->assertJsonValidationErrors(['address', 'shipping', 'products']);
+
+        // buyer_id dan store_id sengaja tidak lagi wajib: keduanya diturunkan
+        // di server, jadi ketiadaannya bukan lagi error validasi.
+        $response->assertJsonMissingValidationErrors(['buyer_id', 'store_id']);
     }
 
     /**

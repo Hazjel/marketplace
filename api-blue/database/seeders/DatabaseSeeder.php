@@ -14,17 +14,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Dipanggil manual saat pengembangan, jadi tetap mengisi data contoh.
+        // Deployment memanggil ProductionSeeder langsung -- lihat
+        // docker-entrypoint.sh -- supaya akun demo tidak pernah ikut terbuat.
         $this->call([
-            PermissionSeeder::class,
-            RoleSeeder::class,
-            UserSeeder::class,
-            StoreSeeder::class,
-            BuyerSeeder::class,
-            ProductCategorySeeder::class,
-            ProductSeeder::class,
-            // TransactionSeeder disabled sementara — TransactionDetailFactory bikin
-            // Product::factory() baru pakai nama Latin generic, ngerusak katalog demo
-            // TransactionSeeder::class,
+            ProductionSeeder::class,
+            DemoSeeder::class,
         ]);
     }
 }

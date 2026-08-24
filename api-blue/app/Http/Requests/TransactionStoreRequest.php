@@ -23,8 +23,12 @@ class TransactionStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'buyer_id' => 'required|exists:buyers,id',
-            'store_id' => 'required|exists:stores,id',
+            // Diterima demi kompatibilitas client lama, tetapi nilainya
+            // diabaikan: TransactionRepository menurunkan pembeli dari sesi
+            // dan toko dari produk yang dibeli. Dibiarkan nullable supaya web
+            // dan mobile bisa berhenti mengirimnya tanpa jadi breaking change.
+            'buyer_id' => 'nullable|exists:buyers,id',
+            'store_id' => 'nullable|exists:stores,id',
             'address_id' => 'required|integer',
             'address' => 'required|string',
             'city' => 'required|string',
