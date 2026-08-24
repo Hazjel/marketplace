@@ -199,8 +199,16 @@ pipeline {
                     docker compose -p marketplace up -d --force-recreate nginx
 
                     # tiap --build bikin image baru, image lama nganggur numpuk terus
-                    # (disk sempat 93% penuh) -- bersihin image gak kepake tiap abis deploy
-                    docker image prune -af || true
+                    # (disk sempat 93% penuh) -- bersihin tiap abis deploy.
+                    #
+                    # TANPA -a. "prune -af" membuang setiap image yang tidak
+                    # sedang dipakai container, termasuk image tooling build ini
+                    # sendiri: build #21 gagal dengan "no such object: composer:2"
+                    # karena deploy sebelumnya baru saja menghapusnya, dan
+                    # marketplace-api:latest juga pernah hilang begitu. Deploy
+                    # jadi menyabotase build berikutnya. Dangling saja sudah
+                    # cukup untuk membereskan layer sisa rebuild.
+                    docker image prune -f || true
 
                     # ---- verifikasi pasca-deploy ----
                     # Stage ini pernah berhenti di tengah jalan tanpa ada yang
