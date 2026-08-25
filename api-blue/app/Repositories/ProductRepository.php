@@ -73,25 +73,30 @@ class ProductRepository implements ProductRepositoryInterface
                 $days = (int) $filters['created_since'];
                 $query->where('created_at', '>=', now()->subDays($days));
             }
-        })->withSum(['transactionDetails' => function ($q) {
-            $q->whereHas('transaction', function ($t) {
-                $t->where('payment_status', 'paid');
-            });
-        }], 'qty')->with([
-            'productImages',
-            'variants',
-            // ProductCategoryResource menghitung produk kategori ini beserta
-            // anak-anaknya; sediakan hitungannya lewat withCount.
-            'productCategory' => fn ($q) => $q->withCount('products')
-                ->with(['childrens' => fn ($c) => $c->withCount('products')]),
-            // StoreResource ikut merender user (beserta roles/buyer) dan dua
-            // hitungan relasi. Tanpa eager-load di sini tiap produk memicu
-            // rentetan query sendiri-sendiri — N+1 yang menggandakan biaya
-            // listing katalog.
-            'store' => fn ($q) => $q->with([
-                'user.roles', 'user.permissions', 'user.store', 'user.buyer',
-            ])->withCount(['products', 'transaction']),
-        ]);
+        })
+            // Produk dari toko yang pemiliknya menghapus akun tidak ikut
+            // terhapus (toko tetap ada demi riwayat transaksi), tapi tidak
+            // boleh muncul lagi di katalog atau bisa dibeli.
+            ->whereHas('store', fn ($q) => $q->where('is_active', true))
+            ->withSum(['transactionDetails' => function ($q) {
+                $q->whereHas('transaction', function ($t) {
+                    $t->where('payment_status', 'paid');
+                });
+            }], 'qty')->with([
+                'productImages',
+                'variants',
+                // ProductCategoryResource menghitung produk kategori ini beserta
+                // anak-anaknya; sediakan hitungannya lewat withCount.
+                'productCategory' => fn ($q) => $q->withCount('products')
+                    ->with(['childrens' => fn ($c) => $c->withCount('products')]),
+                // StoreResource ikut merender user (beserta roles/buyer) dan dua
+                // hitungan relasi. Tanpa eager-load di sini tiap produk memicu
+                // rentetan query sendiri-sendiri — N+1 yang menggandakan biaya
+                // listing katalog.
+                'store' => fn ($q) => $q->with([
+                    'user.roles', 'user.permissions', 'user.store', 'user.buyer',
+                ])->withCount(['products', 'transaction']),
+            ]);
 
         // Removed implicit filtering by store_id for store role users to allow them to see all products in buyer mode
 

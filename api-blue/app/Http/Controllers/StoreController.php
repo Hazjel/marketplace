@@ -127,7 +127,10 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getById($id);
 
-            if (! $store) {
+            // Rute publik, tidak diautentikasi -- toko yang pemiliknya
+            // menghapus akun tetap ada di database (lihat is_active), tapi
+            // tidak boleh terlihat atau bisa dibeli di sini.
+            if (! $store || ! $store->is_active) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
@@ -142,7 +145,7 @@ class StoreController extends Controller implements HasMiddleware
         try {
             $store = $this->storeRepository->getByUsername($username);
 
-            if (! $store) {
+            if (! $store || ! $store->is_active) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 

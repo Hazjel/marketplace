@@ -15,4 +15,6 @@ interface AuthRepositoryInterface
     public function updateSettings(array $data);
 
     public function logout();
+
+    public function deleteAccount();
 }

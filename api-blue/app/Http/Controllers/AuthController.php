@@ -131,6 +131,22 @@ class AuthController extends Controller
     }
 
     /**
+     * Hapus akun user yang sedang login. Selalu menargetkan Auth::user(),
+     * tidak pernah menerima id dari client -- lihat AuthRepository::deleteAccount()
+     * untuk kenapa ini soft-delete, bukan hard-delete.
+     */
+    public function deleteAccount()
+    {
+        try {
+            $this->authRepository->deleteAccount();
+
+            return ResponseHelper::jsonResponse(true, 'Akun berhasil dihapus', null, 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::exceptionResponse($e);
+        }
+    }
+
+    /**
      * SSO — dipanggil dari domain A (user sudah login) untuk mendapatkan token
      * exchange sekali-pakai yang dibawa lewat redirect ke domain B (blukios.store
      * <-> seller.blukios.store). Dipakai bukan cookie shared-domain karena kedua
