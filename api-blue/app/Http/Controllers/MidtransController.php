@@ -48,55 +48,97 @@ class MidtransController extends Controller
             return response()->json(['message' => 'Invalid signature key'], 403);
         }
 
-        $transactionStatus = $request->transaction_status;
         $transactionCode = $request->order_id;
 
-        // Lock the transaction row to prevent concurrent duplicate webhook processing
-        $transaction = Transaction::where('code', $transactionCode)->lockForUpdate()->first();
+        // Semua pembacaan dan penulisan berada dalam SATU transaksi database,
+        // dengan lock baris di dalamnya.
+        //
+        // Sebelumnya lockForUpdate() dipanggil di luar transaksi mana pun. Di
+        // MySQL, SELECT ... FOR UPDATE pada mode autocommit melepas lock-nya
+        // begitu statement selesai, jadi lock itu tidak menahan apa pun. Dua
+        // webhook yang datang berdekatan sama-sama membaca payment_status
+        // "unpaid", sama-sama lolos guard duplikat, lalu sama-sama mengkredit
+        // saldo penjual.
+        $events = [];
 
-        if (! $transaction) {
+        $outcome = DB::transaction(function () use ($request, $transactionCode, &$events) {
+            $transaction = Transaction::where('code', $transactionCode)->lockForUpdate()->first();
+
+            if (! $transaction) {
+                return 'not_found';
+            }
+
+            // Pertahanan berlapis: signature sudah mencakup nominal, tapi
+            // cocokkan lagi dengan yang tersimpan.
+            $expectedAmount = (int) round((float) $transaction->grand_total);
+            $receivedAmount = (int) round((float) ($request->gross_amount ?? 0));
+
+            if ($expectedAmount !== $receivedAmount) {
+                Log::error('Midtrans amount mismatch', [
+                    'expected' => $expectedAmount,
+                    'received' => $receivedAmount,
+                    'transaction' => $transactionCode,
+                ]);
+
+                return 'amount_mismatch';
+            }
+
+            $newStatus = MidtransPaymentStatusInterpreter::interpret(
+                $request->transaction_status,
+                $request->payment_type,
+                $request->fraud_status
+            );
+
+            if ($newStatus === null) {
+                return 'ignored';
+            }
+
+            // Webhook tidak selalu datang berurutan. Transaksi yang sudah
+            // dibayar tidak boleh mundur: webhook "failed" yang telat dulu bisa
+            // menimpanya menjadi failed lalu mengembalikan stok, padahal saldo
+            // penjual sudah terlanjur dikredit.
+            if ($transaction->payment_status === 'paid' && $newStatus !== 'paid') {
+                Log::warning('Webhook telat diabaikan: transaksi sudah dibayar', [
+                    'transaction' => $transactionCode,
+                    'status_diminta' => $newStatus,
+                ]);
+
+                return 'ignored';
+            }
+
+            if ($newStatus === 'paid') {
+                if ($transaction->payment_status === 'paid') {
+                    Log::info('Duplicate webhook ignored for: '.$transactionCode);
+
+                    return 'ignored';
+                }
+
+                $transaction->update(['payment_status' => 'paid']);
+                $this->escrowRepository->credit($transaction);
+            } elseif ($newStatus === 'unpaid') {
+                $transaction->update(['payment_status' => 'unpaid']);
+            } elseif ($newStatus === 'failed') {
+                $transaction->update(['payment_status' => 'failed']);
+                $this->transactionRepository->restoreStock($transaction);
+            }
+
+            // Event ditahan sampai commit. Dipancarkan di dalam transaksi,
+            // pendengarnya bisa menyiarkan status yang ternyata di-rollback.
+            $events[] = new TransactionStatusUpdated($transaction->fresh());
+
+            return 'updated';
+        });
+
+        foreach ($events as $event) {
+            event($event);
+        }
+
+        if ($outcome === 'not_found') {
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 
-        // Defense-in-depth: verify amount matches DB (signature already covers this)
-        $expectedAmount = (int) round((float) $transaction->grand_total);
-        $receivedAmount = (int) round((float) ($request->gross_amount ?? 0));
-        if ($expectedAmount !== $receivedAmount) {
-            Log::error('Midtrans amount mismatch', [
-                'expected' => $expectedAmount,
-                'received' => $receivedAmount,
-                'transaction' => $transactionCode,
-            ]);
-
+        if ($outcome === 'amount_mismatch') {
             return response()->json(['message' => 'Amount mismatch'], 403);
-        }
-
-        $newStatus = MidtransPaymentStatusInterpreter::interpret(
-            $transactionStatus,
-            $request->payment_type,
-            $request->fraud_status
-        );
-
-        if ($newStatus === null) {
-            // no-op (mis. capture non-credit_card)
-        } elseif ($newStatus === 'paid') {
-            // Guard: skip if already paid (prevents double-credit on duplicate webhook)
-            if ($transaction->payment_status === 'paid') {
-                Log::info('Duplicate webhook ignored for: '.$transactionCode);
-            } else {
-                $transaction->update(['payment_status' => 'paid']);
-                event(new TransactionStatusUpdated($transaction->fresh()));
-                $this->escrowRepository->credit($transaction);
-            }
-        } elseif ($newStatus === 'unpaid') {
-            $transaction->update(['payment_status' => 'unpaid']);
-            event(new TransactionStatusUpdated($transaction->fresh()));
-        } elseif ($newStatus === 'failed') {
-            DB::transaction(function () use ($transaction) {
-                $transaction->update(['payment_status' => 'failed']);
-                event(new TransactionStatusUpdated($transaction->fresh()));
-                $this->transactionRepository->restoreStock($transaction);
-            });
         }
 
         // always return 200 after processing so Midtrans considers callback successful
