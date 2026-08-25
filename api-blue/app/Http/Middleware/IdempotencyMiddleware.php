@@ -8,18 +8,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Idempotency Middleware — Antigravity Standard.
+ * Mencegah satu operasi terkirim dua kali karena klik ganda, jaringan labil,
+ * atau retry aplikasi. Setiap request mutasi wajib membawa header
+ * `X-Idempotency-Key`.
  *
- * Prevents duplicate transaction submissions caused by double-clicks,
- * unstable networks, or mobile app retries. Every non-GET mutating request
- * should include an `X-Idempotency-Key` header with a unique UUID.
- *
- * The key is stored in Redis with a TTL of 24 hours. If the same key
- * arrives again within that window, the previous cached response is
- * returned immediately — no DB hit, no double-charge.
+ * Kuncinya dipesan secara ATOMIK. Versi sebelumnya memeriksa Cache::has lalu
+ * memproses lalu Cache::put — tiga langkah terpisah, sehingga dua request yang
+ * datang nyaris bersamaan sama-sama melihat kunci kosong dan sama-sama lolos.
+ * Untuk checkout artinya dua transaksi, stok terpotong dua kali, dan pembeli
+ * ditagih dua kali. Cache::add pada Redis adalah SET NX, jadi hanya satu
+ * request yang bisa memenangkannya.
  */
 class IdempotencyMiddleware
 {
+    /**
+     * Selama request masih diproses, kuncinya ditahan sebentar saja. Kalau
+     * proses mati di tengah tanpa sempat membereskan, penahan ini kedaluwarsa
+     * sendiri sehingga pembeli tidak terkunci 24 jam.
+     */
+    private const IN_FLIGHT_TTL_MINUTES = 5;
+
+    private const RESULT_TTL_HOURS = 24;
+
     public function handle(Request $request, Closure $next): mixed
     {
         $idempotencyKey = $request->header('X-Idempotency-Key');
@@ -35,27 +45,90 @@ class IdempotencyMiddleware
 
         $cacheKey = 'idempotency:'.auth()->id().':'.$idempotencyKey;
 
-        // If this key already exists in Redis, return the cached response
-        if (Cache::has($cacheKey)) {
-            $cachedResponse = Cache::get($cacheKey);
-
-            return response()->json($cachedResponse, $cachedResponse['code'] ?? 200)
-                ->header('X-Idempotency-Replayed', 'true');
+        if ($replay = $this->replayOf(Cache::get($cacheKey))) {
+            return $replay;
         }
 
-        $response = $next($request);
+        // Pemesanan atomik: hanya satu request yang mendapat true.
+        $reserved = Cache::add(
+            $cacheKey,
+            ['state' => 'in_flight'],
+            now()->addMinutes(self::IN_FLIGHT_TTL_MINUTES)
+        );
 
-        // Only cache successful responses (2xx) so failed requests can be retried
-        $statusCode = $response->getStatusCode();
-        if ($statusCode >= 200 && $statusCode < 300) {
-            $responseData = json_decode($response->getContent(), true);
-            if ($responseData) {
-                $responseData['code'] = $statusCode;
-                // Store for 24 hours
-                Cache::put($cacheKey, $responseData, now()->addHours(24));
+        if (! $reserved) {
+            // Kalah balapan. Kalau pemenangnya sudah selesai, putar ulang
+            // hasilnya; kalau masih berjalan, tolak alih-alih memproses ganda.
+            if ($replay = $this->replayOf(Cache::get($cacheKey))) {
+                return $replay;
             }
+
+            return ResponseHelper::jsonResponse(
+                false,
+                'Permintaan dengan kunci yang sama sedang diproses. Mohon tunggu sebentar.',
+                null,
+                409
+            );
         }
+
+        try {
+            $response = $next($request);
+        } catch (\Throwable $e) {
+            // Jangan sandera kunci karena kegagalan — pembeli harus bisa
+            // mencoba lagi dengan kunci yang sama.
+            Cache::forget($cacheKey);
+
+            throw $e;
+        }
+
+        $statusCode = $response->getStatusCode();
+        $responseData = json_decode($response->getContent(), true);
+
+        if ($statusCode >= 200 && $statusCode < 300 && $responseData) {
+            $responseData['code'] = $statusCode;
+
+            Cache::put(
+                $cacheKey,
+                ['state' => 'done', 'response' => $responseData],
+                now()->addHours(self::RESULT_TTL_HOURS)
+            );
+
+            return $response;
+        }
+
+        // Respons gagal tidak disimpan supaya bisa diulang.
+        Cache::forget($cacheKey);
 
         return $response;
+    }
+
+    /**
+     * Mengubah entri cache menjadi respons ulangan, kalau entri itu memang
+     * hasil yang sudah selesai.
+     *
+     * Entri dari versi lama middleware ini tidak punya 'state' dan menyimpan
+     * body-nya di level atas, jadi tetap dikenali agar kunci yang sudah beredar
+     * tidak mendadak diproses ulang setelah deploy.
+     */
+    private function replayOf(mixed $cached): mixed
+    {
+        if (! is_array($cached)) {
+            return null;
+        }
+
+        if (($cached['state'] ?? null) === 'in_flight') {
+            return null;
+        }
+
+        $body = ($cached['state'] ?? null) === 'done'
+            ? $cached['response']
+            : $cached;
+
+        if (! is_array($body)) {
+            return null;
+        }
+
+        return response()->json($body, $body['code'] ?? 200)
+            ->header('X-Idempotency-Replayed', 'true');
     }
 }
