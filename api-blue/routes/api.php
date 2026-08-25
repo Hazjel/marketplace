@@ -89,6 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::put('profile', [AuthController::class, 'updateProfile']);
     Route::put('profile/settings', [AuthController::class, 'updateSettings']);
+    Route::delete('profile', [AuthController::class, 'deleteAccount']);
     Route::post('logout', [AuthController::class, 'logout']);
 
     // SSO cross-domain (blukios.store <-> seller.blukios.store) — dipanggil

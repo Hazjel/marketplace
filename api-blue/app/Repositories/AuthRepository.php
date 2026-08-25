@@ -232,6 +232,49 @@ class AuthRepository implements AuthRepositoryInterface
         }
     }
 
+    /**
+     * Hapus akun milik user yang sedang login.
+     *
+     * Ini SOFT delete (User pakai trait SoftDeletes) -- baris user hanya
+     * ditandai deleted_at, jadi FK cascade dari stores/buyers ke products,
+     * transactions, store_balance_histories, dan withdrawals tidak pernah
+     * terpicu. Query normal (login, Auth::user(), resolusi token Sanctum)
+     * otomatis menyembunyikan baris ini lewat global scope bawaan Eloquent,
+     * jadi akun langsung tidak bisa dipakai begitu transaksi ini commit.
+     *
+     * Toko ditandai is_active=false alih-alih ikut dihapus: produk dan
+     * riwayat transaksinya tetap utuh untuk kebutuhan akuntansi/audit,
+     * tapi berhenti tampil dan tidak bisa dibeli lagi (lihat filter
+     * is_active di StoreRepository/ProductRepository, dan guard di
+     * TransactionRepository::resolveStoreId untuk cart yang sudah telanjur
+     * berisi produknya).
+     *
+     * Anonimisasi PII (nama/email) sengaja belum dilakukan di sini --
+     * itu tahap lanjutan yang perlu dipisah dari histori transaksi (mis.
+     * alamat pengiriman yang sudah tersimpan di transaksi lama tidak boleh
+     * ikut tersentuh hanya karena akun pembelinya dihapus).
+     */
+    public function deleteAccount(): User
+    {
+        return DB::transaction(function () {
+            if (! Auth::check()) {
+                throw new Exception('Unauthorized');
+            }
+
+            $user = Auth::user();
+
+            $user->tokens()->delete();
+
+            if ($user->store) {
+                $user->store->update(['is_active' => false]);
+            }
+
+            $user->delete();
+
+            return $user;
+        });
+    }
+
     public function logout()
     {
         DB::beginTransaction();

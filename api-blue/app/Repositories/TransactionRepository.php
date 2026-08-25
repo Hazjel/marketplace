@@ -176,7 +176,16 @@ class TransactionRepository implements TransactionRepositoryInterface
             throw new Exception('Semua produk harus berasal dari toko yang sama.');
         }
 
-        return $storeIds->first();
+        $storeId = $storeIds->first();
+
+        // Katalog publik sudah menyaring toko nonaktif, tapi cart bisa
+        // menyimpan produk yang ditambahkan sebelum pemilik toko menghapus
+        // akunnya. Jangan sampai checkout tetap lolos lewat jalur itu.
+        if (! Store::where('id', $storeId)->where('is_active', true)->exists()) {
+            throw new Exception('Toko ini sudah tidak aktif.');
+        }
+
+        return $storeId;
     }
 
     /**

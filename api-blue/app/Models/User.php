@@ -7,6 +7,7 @@ use App\Traits\UUID;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -15,7 +16,16 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, HasRoles, Notifiable, UUID;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes, UUID;
+
+    /**
+     * SoftDeletes tidak pernah mengeluarkan SQL DELETE, jadi cascade dari
+     * stores/buyers ke products, transactions, store_balance_histories dan
+     * withdrawals tidak pernah terpicu -- hapus akun cukup menandai
+     * deleted_at. Query normal (login, Auth::user(), resolusi token
+     * Sanctum) otomatis menyembunyikan baris ini lewat global scope
+     * bawaan Eloquent, jadi akun langsung tidak bisa dipakai tanpa perlu
+     * guard tambahan di tiap tempat.
 
     /**
      * Default preferensi notifikasi (dipakai saat kolom masih null).

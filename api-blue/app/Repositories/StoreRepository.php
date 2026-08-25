@@ -23,7 +23,15 @@ class StoreRepository implements StoreRepositoryInterface
             if ($isVerified !== null) {
                 $query->where('is_verified', $isVerified);
             }
-        })->with(['user']);
+        })
+            // Toko yang pemiliknya menghapus akun tidak ikut dihapus (lihat
+            // migrasi is_active) supaya riwayat transaksi tetap utuh, tapi
+            // harus berhenti tampil dan bisa dibeli. Endpoint ini dipakai
+            // storefront publik dan store/all/paginated -- yang kedua cuma
+            // dijaga auth:sanctum, bukan permission admin -- jadi tidak ada
+            // "jalur admin" yang perlu dikecualikan dari filter ini.
+            ->where('is_active', true)
+            ->with(['user']);
 
         if ($nearLat !== null && $nearLng !== null) {
             // Urutkan berdasarkan jarak; toko tanpa koordinat tampil paling akhir

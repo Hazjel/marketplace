@@ -24,11 +24,13 @@ class Store extends Model
         'latitude',
         'longitude',
         'is_verified',
+        'is_active',
         'ai_assistant_enabled',
     ];
 
     protected $casts = [
         'is_verified' => 'boolean',
+        'is_active' => 'boolean',
         'ai_assistant_enabled' => 'boolean',
         'latitude' => 'float',
         'longitude' => 'float',
