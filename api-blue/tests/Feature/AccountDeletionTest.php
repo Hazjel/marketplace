@@ -171,6 +171,46 @@ class AccountDeletionTest extends TestCase
         $this->assertSame(0, $user->tokens()->count());
     }
 
+    public function test_the_email_is_freed_for_reuse_after_deletion(): void
+    {
+        // users.email punya unique index di level database, dan MySQL
+        // tidak punya partial/filtered unique index -- soft-delete saja
+        // meninggalkan baris lama yang tetap menahan email itu selamanya.
+        // Dikonfirmasi langsung sebelum diperbaiki: pendaftaran kedua
+        // dengan email yang sama gagal dengan
+        // UniqueConstraintViolationException, bukan pesan validasi biasa.
+        $user = User::factory()->create(['email' => 'reuse-test@example.test']);
+        $user->assignRole('buyer');
+        Buyer::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user, 'sanctum')->deleteJson('/api/profile')->assertStatus(200);
+
+        $response = $this->postJson('/api/register', [
+            'name' => 'Pengguna Baru',
+            'email' => 'reuse-test@example.test',
+            'password' => 'Password123',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('users', [
+            'id' => $response->json('data.id'),
+            'email' => 'reuse-test@example.test',
+        ]);
+    }
+
+    public function test_the_deleted_users_row_keeps_a_synthetic_email_not_the_real_one(): void
+    {
+        $user = User::factory()->create(['email' => 'privasi@example.test']);
+        $user->assignRole('buyer');
+        Buyer::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user, 'sanctum')->deleteJson('/api/profile');
+
+        $stored = User::withTrashed()->find($user->id);
+        $this->assertNotSame('privasi@example.test', $stored->email);
+        $this->assertStringContainsString('deleted.invalid', $stored->email);
+    }
+
     public function test_delete_profile_always_targets_the_authenticated_user(): void
     {
         // Endpoint ini tidak menerima id apa pun dari client -- tidak ada
