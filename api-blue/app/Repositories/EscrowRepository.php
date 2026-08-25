@@ -34,6 +34,9 @@ class EscrowRepository implements EscrowRepositoryInterface
             'type' => 'pending_income',
             'reference_id' => $transaction->id,
             'reference_type' => Transaction::class,
+            // Unique di database: satu transaksi hanya boleh menghasilkan satu
+            // kredit escrow, berapa kali pun webhook Midtrans datang.
+            'unique_ref' => 'pending_income:'.$transaction->id,
             'amount' => $sellerAmount,
             'remarks' => 'Pembayaran diterima (ditahan) dari transaksi '.$transaction->code.' — akan dirilis setelah pesanan selesai',
         ]);
@@ -64,6 +67,7 @@ class EscrowRepository implements EscrowRepositoryInterface
             'type' => 'released',
             'reference_id' => $transaction->id,
             'reference_type' => Transaction::class,
+            'unique_ref' => 'released:'.$transaction->id,
             'amount' => $sellerAmount,
             'remarks' => 'Dana dirilis ke saldo tersedia — pesanan '.$transaction->code.' selesai',
         ]);
@@ -94,6 +98,7 @@ class EscrowRepository implements EscrowRepositoryInterface
             'type' => 'refunded',
             'reference_id' => $transaction->id,
             'reference_type' => Transaction::class,
+            'unique_ref' => 'refunded:'.$transaction->id,
             'amount' => -$sellerAmount,
             'remarks' => 'Escrow dibatalkan (refund) — pesanan '.$transaction->code.' dibatalkan',
         ]);

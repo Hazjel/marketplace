@@ -37,6 +37,7 @@ class StoreBalanceHistory extends Model
         'type',
         'reference_id',
         'reference_type',
+        'unique_ref',
         'amount',
         'remarks',
     ];

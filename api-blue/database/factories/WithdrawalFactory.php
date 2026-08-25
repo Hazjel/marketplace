@@ -37,22 +37,17 @@ class WithdrawalFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Withdrawal $withdrawal) {
-            // Histori permintaan penarikan (pending)
+            // Satu penarikan = satu baris debit. Sebelumnya factory ini
+            // menulis dua baris dengan nominal negatif yang sama, sehingga
+            // data demo menggambarkan saldo terdebit dua kali untuk satu
+            // permintaan -- dan itulah satu-satunya sumber baris duplikat di
+            // tabel ini.
             $withdrawal->storeBalance->storeBalanceHistories()->create([
-                'type' => 'withdraw',
+                'type' => 'withdrawal',
                 'reference_id' => $withdrawal->id,
                 'reference_type' => Withdrawal::class,
                 'amount' => -$withdrawal->amount,
-                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number}",
-            ]);
-
-            // Penarikan dana
-            $withdrawal->storeBalance->storeBalanceHistories()->create([
-                'type' => 'withdraw',
-                'reference_id' => $withdrawal->id,
-                'reference_type' => Withdrawal::class,
-                'amount' => -$withdrawal->amount,
-                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number} telah di proses",
+                'remarks' => "Permintaan penarikan dana ke {$withdrawal->bank_name} - {$withdrawal->bank_account_number} telah diproses",
             ]);
 
             $withdrawal->update([
