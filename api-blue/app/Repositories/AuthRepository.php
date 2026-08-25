@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\AuthRepositoryInterface;
 use App\Models\User;
+use App\Services\AccountDeletionService;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class AuthRepository implements AuthRepositoryInterface
 {
+    public function __construct(private AccountDeletionService $accountDeletionService) {}
+
     public function register(array $data)
     {
         DB::beginTransaction();
@@ -256,23 +259,15 @@ class AuthRepository implements AuthRepositoryInterface
      */
     public function deleteAccount(): User
     {
-        return DB::transaction(function () {
-            if (! Auth::check()) {
-                throw new Exception('Unauthorized');
-            }
+        if (! Auth::check()) {
+            throw new Exception('Unauthorized');
+        }
 
-            $user = Auth::user();
-
-            $user->tokens()->delete();
-
-            if ($user->store) {
-                $user->store->update(['is_active' => false]);
-            }
-
-            $user->delete();
-
-            return $user;
-        });
+        // Logika hapus akun (revoke token, nonaktifkan toko, soft-delete)
+        // hidup di satu tempat -- dipakai sama persis oleh admin lewat
+        // UserRepository::delete(), supaya keduanya tidak diam-diam
+        // berbeda perilaku.
+        return $this->accountDeletionService->delete(Auth::user());
     }
 
     public function logout()

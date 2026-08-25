@@ -4,11 +4,14 @@ namespace App\Repositories;
 
 use App\Interfaces\UserRepositoryInterface;
 use App\Models\User;
+use App\Services\AccountDeletionService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
 class UserRepository implements UserRepositoryInterface
 {
+    public function __construct(private AccountDeletionService $accountDeletionService) {}
+
     public function getAll(?string $search, ?int $limit, bool $execute, ?string $roles = null)
     {
         $query = User::with(['roles'])->where(function ($query) use ($search) {
@@ -103,18 +106,20 @@ class UserRepository implements UserRepositoryInterface
 
     public function delete(string $id)
     {
-        DB::beginTransaction();
-
         try {
             $user = User::find($id);
-            $user->delete();
 
-            DB::commit();
+            if (! $user) {
+                throw new Exception('Data user tidak ditemukan.');
+            }
 
-            return $user;
+            // Sama persis dengan jalur self-service (AuthRepository::deleteAccount)
+            // -- revoke token, nonaktifkan toko, soft-delete. Dulu di sini cuma
+            // $user->delete(): amannya (soft-delete) tetap terjadi begitu
+            // SoftDeletes dipasang di model, tapi tokonya tidak pernah ikut
+            // dinonaktifkan, jadi tetap tampil dan bisa dibeli.
+            return $this->accountDeletionService->delete($user);
         } catch (Exception $e) {
-            DB::rollBack();
-
             throw new Exception($e->getMessage());
         }
     }
