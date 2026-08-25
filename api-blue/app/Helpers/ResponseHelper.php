@@ -2,8 +2,12 @@
 
 namespace App\Helpers;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Throwable;
 
 class ResponseHelper
 {
@@ -38,6 +42,42 @@ class ResponseHelper
         }
 
         return response()->json($response, $code);
+    }
+
+    /**
+     * Titik tunggal untuk blok `catch (\Exception $e)` di controller yang
+     * dulu langsung mengembalikan $e->getMessage() ke client.
+     *
+     * Codebase ini punya idiom yang disengaja: repository melempar
+     * `throw new Exception('pesan aman berbahasa Indonesia')` justru supaya
+     * pesannya sampai ke pengguna lewat jalur ini -- itu tetap dipertahankan
+     * di sini. Yang ditutup cuma satu celah nyata: QueryException bisa
+     * membawa SQL mentah beserta binding-nya di getMessage(), dan itu tidak
+     * pernah dimaksudkan untuk dilihat client.
+     *
+     * Detail lengkap selalu dicatat ke log dengan request id, supaya
+     * kegagalan generik tetap bisa ditelusuri tanpa membocorkan apa pun ke
+     * response. Request id juga dikirim lewat header (bukan body), supaya
+     * bentuk response untuk web/mobile yang sudah ada tidak berubah.
+     */
+    public static function exceptionResponse(Throwable $e, int $code = 500): JsonResponse
+    {
+        $requestId = (string) Str::uuid();
+
+        Log::error('Unhandled exception', [
+            'request_id' => $requestId,
+            'exception' => get_class($e),
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+
+        $message = $e instanceof QueryException
+            ? 'Terjadi kesalahan pada server.'
+            : $e->getMessage();
+
+        return self::jsonResponse(false, $message, null, $code)
+            ->header('X-Request-Id', $requestId);
     }
 
     public static function paginated(LengthAwarePaginator $paginator, $resource, string $message = 'Data berhasil diambil'): JsonResponse

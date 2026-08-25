@@ -68,7 +68,7 @@ class DashboardController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'success', new SellerDashboardResource($data), 200);
         } catch (\Throwable $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -87,7 +87,7 @@ class DashboardController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'success', new BuyerDashboardResource($data), 200);
         } catch (\Throwable $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -114,7 +114,7 @@ class DashboardController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'success', new AdminDashboardResource($data), 200);
         } catch (\Throwable $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

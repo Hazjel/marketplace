@@ -46,7 +46,7 @@ class ProductController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', ProductResource::collection($products), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -101,7 +101,7 @@ class ProductController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', $data, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -118,7 +118,7 @@ class ProductController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Produk Berhasil Ditambahkan', new ProductResource($product), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -136,7 +136,7 @@ class ProductController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', new ProductResource($product), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -151,7 +151,7 @@ class ProductController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', new ProductResource($product), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -178,7 +178,7 @@ class ProductController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diupdate', new ProductResource($product), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -203,7 +203,7 @@ class ProductController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Dihapus', new ProductResource($product), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

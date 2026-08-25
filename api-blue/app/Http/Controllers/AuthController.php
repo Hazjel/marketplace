@@ -78,7 +78,7 @@ class AuthController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Profile Berhasil Diambil', new UserResource($user), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -97,7 +97,7 @@ class AuthController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Profile Berhasil Diupdate', new UserResource($user), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -115,7 +115,7 @@ class AuthController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Pengaturan Berhasil Disimpan', new UserResource($user), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -126,7 +126,7 @@ class AuthController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Logout Berhasil', new UserResource($user), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 

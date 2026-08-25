@@ -42,7 +42,7 @@ class BuyerController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Pembeli Berhasil Diambil', BuyerResource::collection($buyers), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -58,7 +58,7 @@ class BuyerController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Pembeli Berhasil Diambil', PaginateResource::make($buyers, BuyerResource::class), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -74,7 +74,7 @@ class BuyerController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Pembeli Berhasil Ditambahkan', new BuyerResource($buyer), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -92,7 +92,7 @@ class BuyerController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Pembeli Berhasil Diambil', new BuyerResource($buyer), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -114,7 +114,7 @@ class BuyerController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Pembeli Berhasil Diupdate', new BuyerResource($buyer), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -134,7 +134,7 @@ class BuyerController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Pembeli Berhasil Dihapus', new BuyerResource($buyer), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

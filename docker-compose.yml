@@ -97,12 +97,23 @@ services:
       - api_vendor:/var/www/vendor
     environment:
       APP_NAME: Blukios
-      APP_ENV: local
+      # Default aman: production/matikan debug kalau tidak di-override.
+      # Sebelumnya production sungguhan berjalan dengan APP_ENV=local dan
+      # APP_DEBUG=true karena nilainya hardcode di sini -- setiap exception
+      # tak tertangani (bukan cuma yang eksplisit di-catch) mengembalikan
+      # halaman debug Laravel lengkap dengan stack trace ke client yang
+      # tidak terautentikasi. bootstrap/app.php sudah punya fallback yang
+      # menyembunyikannya (! app()->hasDebugModeEnabled()), tapi itu
+      # dilumpuhkan selama APP_DEBUG bernilai true di sini.
+      #
+      # Dev lokal yang butuh Whoops/Ignition set APP_DEBUG=true dan
+      # APP_ENV=local di .env sendiri -- itu meng-override default ini.
+      APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
       # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
       APP_CONFIG_CACHE: /tmp/laravel-config.php
       APP_ROUTES_CACHE: /tmp/laravel-routes.php
-      APP_DEBUG: "true"
+      APP_DEBUG: ${APP_DEBUG:-false}
       APP_URL: ${APP_URL:-http://localhost}
       APP_KEY: ${APP_KEY:?APP_KEY wajib diisi di .env}
       DB_CONNECTION: mysql
@@ -184,7 +195,7 @@ services:
       - api_vendor:/var/www/vendor
     environment:
       APP_NAME: Blukios
-      APP_ENV: local
+      APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
       # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
       APP_CONFIG_CACHE: /tmp/laravel-config.php
@@ -230,7 +241,7 @@ services:
       - api_vendor:/var/www/vendor
     environment:
       APP_NAME: Blukios
-      APP_ENV: local
+      APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
       # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
       APP_CONFIG_CACHE: /tmp/laravel-config.php
@@ -270,7 +281,7 @@ services:
       - api_vendor:/var/www/vendor
     environment:
       APP_NAME: Blukios
-      APP_ENV: local
+      APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
       # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
       APP_CONFIG_CACHE: /tmp/laravel-config.php
