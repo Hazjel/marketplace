@@ -32,6 +32,17 @@ class AccountDeletionService
                 $user->store->update(['is_active' => false]);
             }
 
+            // users.email punya unique index di level DATABASE, dan MySQL
+            // tidak punya partial/filtered unique index (tidak bisa
+            // "unique kecuali baris yang sudah dihapus"). Soft-delete saja
+            // tidak membebaskan email itu -- dikonfirmasi langsung: baris
+            // ter-soft-delete tetap membuat pendaftaran kedua dengan email
+            // yang sama gagal dengan UniqueConstraintViolationException,
+            // bukan pesan validasi yang ramah. Tulis ulang jadi placeholder
+            // yang mustahil bentrok supaya user bisa daftar ulang dengan
+            // email yang sama kalau mereka mau.
+            $user->update(['email' => "deleted+{$user->id}@deleted.invalid"]);
+
             // SoftDeletes: tidak mengeluarkan SQL DELETE, jadi FK cascade
             // dari stores/buyers ke products/transactions/store_balance_
             // histories/withdrawals tidak pernah terpicu. Lihat migrasi
