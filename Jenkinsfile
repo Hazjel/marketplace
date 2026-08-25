@@ -168,6 +168,30 @@ pipeline {
                     git checkout main
                     git reset --hard "$TARGET"
 
+                    # ---- migrasi segera setelah kode mendarat ----
+                    # ./api-blue di-bind-mount ke container, jadi begitu reset di
+                    # atas selesai kode baru LANGSUNG dilayani -- sementara
+                    # migrasinya baru jalan saat container di-recreate beberapa
+                    # menit kemudian lewat entrypoint. Di sela itu kode sudah
+                    # menulis kolom yang belum ada. Ini betulan terlihat saat
+                    # unique_ref ditambahkan: migrate:status masih "Pending"
+                    # sementara kode escrow sudah aktif; settlement yang masuk
+                    # saat itu akan gagal.
+                    #
+                    # Jendelanya tidak bisa hilang sepenuhnya dengan bind mount --
+                    # berkas migrasinya sendiri baru ada setelah reset -- tapi
+                    # menjalankannya di sini memperpendeknya dari menit jadi
+                    # detik, memakai container yang masih hidup.
+                    if docker compose -p marketplace ps --status running api 2>/dev/null | grep -q blue-api; then
+                        echo "Menjalankan migrasi sebelum container di-recreate..."
+                        if ! docker compose -p marketplace exec -T api php artisan migrate --force --no-interaction; then
+                            echo "GAGAL: migrasi tidak berhasil, deploy dihentikan sebelum menyentuh container"
+                            exit 1
+                        fi
+                    else
+                        echo "blue-api tidak berjalan; migrasi diserahkan ke entrypoint saat container start"
+                    fi
+
                     # api_vendor named volume nge-override folder vendor/ dari bind mount
                     # ./api-blue (biar vendor gak ketiban bind-mount kosong dari host --
                     # vendor/ digitignore, gak pernah ada fisik di host). Tapi volume ini
