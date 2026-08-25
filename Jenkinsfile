@@ -49,7 +49,18 @@ pipeline {
             agent {
                 docker {
                     image 'composer:2'
-                    args '-u root'
+                    // ENTRYPOINT composer:2 (/docker-entrypoint.sh) tidak
+                    // meneruskan perintah apa adanya. Jenkins menahan agent-nya
+                    // dengan "cat", tapi container malah menggantung sampai
+                    // dibunuh -- muncul sebagai "The container started but
+                    // didn't run the expected command", dan itu menggagalkan
+                    // build #23 (juga sempat terlihat di #18).
+                    //
+                    // Diverifikasi langsung di host: "docker run composer:2 echo
+                    // HALO" mencetak HALO lalu hang (exit 124); dengan
+                    // --entrypoint "" exit 0. Bentuknya harus dipisah spasi --
+                    // "--entrypoint=" (kosong setelah sama dengan) tetap hang.
+                    args '-u root --entrypoint ""'
                 }
             }
             when {
