@@ -63,7 +63,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', TransactionResource::collection($transactions), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -121,7 +121,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'success', $data, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -144,7 +144,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Ditambahkan', new TransactionResource($transaction), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -169,7 +169,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', new TransactionResource($transactions), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -188,7 +188,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diambil', new TransactionResource($transactions), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -216,7 +216,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diupdate', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -274,7 +274,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Pesanan Selesai — dana telah dirilis ke saldo toko', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -344,7 +344,7 @@ class TransactionController extends Controller implements HasMiddleware
             }
 
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -365,7 +365,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Dihapus', new TransactionResource($transactions), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

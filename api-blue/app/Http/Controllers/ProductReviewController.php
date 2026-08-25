@@ -39,7 +39,7 @@ class ProductReviewController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Success', ProductReviewResource::collection($productReviews), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -121,7 +121,7 @@ class ProductReviewController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Ulasan berhasil dikirim!', new ProductReviewResource($productReview), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

@@ -37,7 +37,7 @@ class ProductViewController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Produk view tercatat', null, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

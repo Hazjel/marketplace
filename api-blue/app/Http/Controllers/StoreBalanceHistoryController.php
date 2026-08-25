@@ -37,7 +37,7 @@ class StoreBalanceHistoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Riwayat Dompet Toko Berhasil Diambil', StoreBalanceHistoryResource::collection($storeBalanceHistories), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -53,7 +53,7 @@ class StoreBalanceHistoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Riwayat Dompet Toko Berhasil Diambil', PaginateResource::make($storeBalanceHistories, StoreBalanceHistoryResource::class), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -71,7 +71,7 @@ class StoreBalanceHistoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Riwayat Dompet Toko Berhasil Diambil', new StoreBalanceHistoryResource($storeBalanceHistory), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

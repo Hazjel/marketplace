@@ -33,7 +33,7 @@ class ChatController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -45,7 +45,7 @@ class ChatController extends Controller
             return ResponseHelper::jsonResponse(true, 'Contacts fetched successfully', $contacts, 200);
 
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -60,7 +60,7 @@ class ChatController extends Controller
             return ResponseHelper::jsonResponse(true, 'Messages fetched successfully', $messages, 200);
 
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -104,7 +104,7 @@ class ChatController extends Controller
             return ResponseHelper::jsonResponse(true, 'Message sent successfully', $message->load('sender'), 201);
 
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

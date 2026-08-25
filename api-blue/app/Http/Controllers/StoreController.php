@@ -70,7 +70,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', StoreResource::collection($stores), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -87,7 +87,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', PaginateResource::make($stores, StoreResource::class), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -98,7 +98,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Lokasi Berhasil Diambil', $locations, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -115,7 +115,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Ditambahkan', new StoreResource($store), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -133,7 +133,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', new StoreResource($store), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -148,7 +148,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', new StoreResource($store), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -163,7 +163,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diambil', new StoreResource($store), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -180,7 +180,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Store Categories Fetched', ProductCategoryResource::collection($categories), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -197,7 +197,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diverifikasi', new StoreResource($store), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -220,7 +220,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Diupdate', new StoreResource($store), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -241,7 +241,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Dihapus', new StoreResource($store), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -305,7 +305,7 @@ class StoreController extends Controller implements HasMiddleware
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -317,7 +317,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Berhasil mengikuti toko', null, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -329,7 +329,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Berhasil berhenti mengikuti toko', null, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -344,7 +344,7 @@ class StoreController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Check Success', ['is_following' => $status], 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -361,7 +361,7 @@ class StoreController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(true, 'Review Toko Berhasil Diambil', PaginateResource::make($reviews, ProductReviewResource::class), 200);
 
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

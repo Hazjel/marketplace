@@ -52,7 +52,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', ProductCategoryResource::collection($productCategories), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -70,7 +70,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', PaginateResource::make($productCategories, ProductCategoryResource::class), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -87,7 +87,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Ditambahkan', new ProductCategoryResource($productCategory), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -105,7 +105,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', new ProductCategoryResource($productCategory), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -120,7 +120,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diambil', new ProductCategoryResource($productCategory), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -143,7 +143,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Diupdate', new ProductCategoryResource($productCategory), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -164,7 +164,7 @@ class ProductCategoryController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Kategori Produk Berhasil Dihapus', new ProductCategoryResource($productCategory), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

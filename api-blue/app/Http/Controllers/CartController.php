@@ -38,7 +38,7 @@ class CartController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Data Cart Berhasil Diambil', $grouped, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -60,7 +60,7 @@ class CartController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Produk berhasil ditambahkan ke keranjang', new CartResource($cart), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -81,7 +81,7 @@ class CartController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Jumlah berhasil diperbarui', new CartResource($cart), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -96,7 +96,7 @@ class CartController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Produk berhasil dihapus dari keranjang', null, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -107,7 +107,7 @@ class CartController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Keranjang berhasil dikosongkan', null, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -141,7 +141,7 @@ class CartController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Cart berhasil disinkronisasi', $grouped, 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -169,7 +169,7 @@ class CartController extends Controller
                 200
             );
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }

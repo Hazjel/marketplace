@@ -25,7 +25,7 @@ class WishlistController extends Controller
 
             return ResponseHelper::jsonResponse(true, 'Data Wishlist Berhasil Diambil', ProductResource::collection($products), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 
@@ -41,7 +41,7 @@ class WishlistController extends Controller
 
             return ResponseHelper::jsonResponse(true, $message, ['status' => $status], 200);
         } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, 500);
+            return ResponseHelper::exceptionResponse($e);
         }
     }
 }
