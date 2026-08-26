@@ -213,7 +213,7 @@ pipeline {
             }
         }
 
-        stage('Recommendation Service: Lint & Audit') {
+        stage('Recommendation Service: Lint, Audit & Test') {
             agent {
                 docker {
                     // Sama dengan FROM di Dockerfile production kedua service
@@ -229,14 +229,16 @@ pipeline {
             }
             steps {
                 dir('recommendation-service') {
-                    // Belum ada test suite di service ini sama sekali (beda
-                    // dari chat-service) -- di luar cakupan hardening ini
-                    // untuk menulis test baru dari nol tanpa dites dulu
-                    // terhadap kode yang sudah ada. Lint + dependency audit
-                    // saja untuk sekarang.
+                    // KOREKSI: komentar di sini sebelumnya bilang "belum ada
+                    // test suite sama sekali" -- itu jadi basi begitu
+                    // tests/test_internal_auth.py ditambahkan (commit
+                    // 1f291aab), tapi stage ini tidak ikut diupdate untuk
+                    // benar-benar menjalankan pytest. Test-nya ada di repo
+                    // sejak itu tapi Jenkins tidak pernah menjalankannya.
                     sh '''
-                        pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit
+                        pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
                         ruff check .
+                        pytest tests/ -v
                     '''
                     sh 'pip-audit -r requirements.txt --desc'
                 }
