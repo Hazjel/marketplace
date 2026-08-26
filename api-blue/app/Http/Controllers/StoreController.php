@@ -11,6 +11,7 @@ use App\Http\Resources\ProductReviewResource;
 use App\Http\Resources\StoreResource;
 use App\Http\Resources\UserResource;
 use App\Interfaces\StoreRepositoryInterface;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -109,12 +110,28 @@ class StoreController extends Controller implements HasMiddleware
     {
         $request = $request->validated();
 
-        // 'user_id' divalidasi cuma 'exists:users,id' -- permission
-        // 'store-create' dipegang SEMUA seller (role 'store', bukan
-        // admin-only, lihat RoleSeeder), jadi tanpa pengecekan ini seller
-        // mana pun bisa membuat toko atas nama user_id ORANG LAIN.
+        // KOREKSI dari fix sebelumnya: memaksa user_id ke pemanggil tetap
+        // membiarkan non-admin membuat toko KEDUA. Domain model ini
+        // single-store per user (User::store() adalah hasOne, tanpa unique
+        // constraint di DB), dan onboarding resmi lewat register-store()
+        // sudah menolak user yang hasRole('store'). Store kedua diam-diam
+        // merusak asumsi single-store di tempat lain: SellerVoucherController
+        // pakai Auth::user()->store?->id (ambigu kalau ada >1),
+        // AccountDeletionService cuma menonaktifkan $user->store (singular,
+        // toko lain tetap aktif), dan seller yang toko-nya dinonaktifkan
+        // admin masih bisa bikin toko baru lewat endpoint ini karena
+        // permission 'store-create' tidak dicabut bareng is_active.
+        //
+        // Endpoint ini sekarang admin-only. register-store() tetap
+        // satu-satunya jalur onboarding untuk seller.
         if (! auth()->user()->hasRole('admin')) {
-            $request['user_id'] = auth()->id();
+            return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+        }
+
+        // Admin pun tidak boleh membuat toko kedua untuk user yang sudah
+        // punya satu -- domain model ini memang single-store per user.
+        if (Store::where('user_id', $request['user_id'])->exists()) {
+            return ResponseHelper::jsonResponse(false, 'User ini sudah memiliki toko', null, 409);
         }
 
         try {
@@ -272,6 +289,12 @@ class StoreController extends Controller implements HasMiddleware
 
             $store = $this->storeRepository->delete($id);
             Cache::tags(['stores'])->flush();
+            // ProductController::index() cache listing tanpa filter selama
+            // 600 detik (Cache::tags(['products'])->remember(...)) --
+            // tanpa flush ini, katalog yang sudah warm bisa tetap
+            // menampilkan produk toko yang baru dinonaktifkan sampai ±10
+            // menit walau stores.is_active sudah false.
+            Cache::tags(['products'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Dihapus', new StoreResource($store), 200);
         } catch (\Exception $e) {

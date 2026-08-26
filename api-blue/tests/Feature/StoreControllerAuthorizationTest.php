@@ -49,13 +49,18 @@ class StoreControllerAuthorizationTest extends TestCase
         return [$user, $store];
     }
 
-    public function test_seller_cannot_create_store_owned_by_another_user(): void
+    public function test_seller_cannot_use_admin_store_create_endpoint(): void
     {
-        [$sellerA] = $this->seller();
+        // KOREKSI: fix sebelumnya memaksa user_id ke pemanggil, yang
+        // secara diam-diam mengizinkan seller membuat TOKO KEDUA (domain
+        // model ini single-store per user -- User::store() hasOne, tanpa
+        // unique constraint di DB). Endpoint ini sekarang admin-only;
+        // register-store() tetap satu-satunya jalur onboarding seller.
+        [$sellerA] = $this->seller(); // sellerA SUDAH punya store
         $victim = User::factory()->create();
 
         $response = $this->actingAs($sellerA, 'sanctum')->postJson('/api/store', [
-            'user_id' => $victim->id, // titip kepemilikan ke user LAIN
+            'user_id' => $victim->id,
             'name' => 'Toko Titipan',
             'logo' => UploadedFile::fake()->image('logo.png'),
             'about' => 'Deskripsi',
@@ -66,10 +71,52 @@ class StoreControllerAuthorizationTest extends TestCase
             'postal_code' => '12345',
         ]);
 
-        $response->assertStatus(201);
-        // Toko baru harus jatuh ke pemanggil (sellerA), BUKAN victim.
-        $this->assertDatabaseHas('stores', ['name' => 'Toko Titipan', 'user_id' => $sellerA->id]);
-        $this->assertDatabaseMissing('stores', ['name' => 'Toko Titipan', 'user_id' => $victim->id]);
+        $response->assertStatus(403);
+        $this->assertDatabaseMissing('stores', ['name' => 'Toko Titipan']);
+    }
+
+    public function test_seller_with_deactivated_store_cannot_create_replacement_store(): void
+    {
+        [$seller, $store] = $this->seller();
+        $store->update(['is_active' => false]); // mis. dinonaktifkan admin
+
+        // Role 'store' (dan permission 'store-create'-nya) tidak dicabut
+        // bareng is_active -- tanpa fix ini, seller yang toko-nya
+        // dinonaktifkan bisa langsung bikin toko baru lewat endpoint ini.
+        $this->actingAs($seller, 'sanctum')->postJson('/api/store', [
+            'user_id' => $seller->id,
+            'name' => 'Toko Pengganti',
+            'logo' => UploadedFile::fake()->image('logo.png'),
+            'about' => 'Deskripsi',
+            'phone' => '081200000000',
+            'address_id' => 1,
+            'city' => 'Jakarta',
+            'address' => 'Jl Sudirman',
+            'postal_code' => '12345',
+        ])->assertStatus(403);
+
+        $this->assertDatabaseMissing('stores', ['name' => 'Toko Pengganti']);
+    }
+
+    public function test_admin_cannot_create_second_store_for_a_user_who_already_has_one(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        [$seller] = $this->seller(); // sudah punya satu store
+
+        $this->actingAs($admin, 'sanctum')->postJson('/api/store', [
+            'user_id' => $seller->id,
+            'name' => 'Toko Kedua Dari Admin',
+            'logo' => UploadedFile::fake()->image('logo.png'),
+            'about' => 'Deskripsi',
+            'phone' => '081200000000',
+            'address_id' => 1,
+            'city' => 'Jakarta',
+            'address' => 'Jl Sudirman',
+            'postal_code' => '12345',
+        ])->assertStatus(409);
+
+        $this->assertDatabaseMissing('stores', ['name' => 'Toko Kedua Dari Admin']);
     }
 
     public function test_seller_cannot_update_another_sellers_store(): void
