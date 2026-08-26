@@ -9,8 +9,17 @@ from api.recommend import router as recommend_router
 from collaborative.scheduler import cf_retrain_loop, retrain_once
 from collaborative.svd import load_model_from_disk
 from config import CORS_ALLOWED_ORIGINS
-from utils.cache import get_cached_products, product_cache_refresh_loop, refresh_product_cache
-from utils.metrics import CF_MODEL_TRAINED, PRODUCTS_CACHED, REQUEST_COUNT, REQUEST_LATENCY
+from utils.cache import (
+    get_cached_products,
+    product_cache_refresh_loop,
+    refresh_product_cache,
+)
+from utils.metrics import (
+    CF_MODEL_TRAINED,
+    PRODUCTS_CACHED,
+    REQUEST_COUNT,
+    REQUEST_LATENCY,
+)
 
 
 async def _startup_fetch_with_retry(retries: int = 5, delay_seconds: float = 3.0) -> None:

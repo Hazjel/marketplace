@@ -38,9 +38,11 @@ pipeline {
                     // build pertama / histori dangkal -> HEAD~1 gak ada -> anggap semua berubah
                     env.BACKEND_CHANGED  = (changed == 'ALL' || changed.contains('api-blue/')).toString()
                     env.FRONTEND_CHANGED = (changed == 'ALL' || changed.contains('fe-blue/')).toString()
+                    env.CHAT_SERVICE_CHANGED = (changed == 'ALL' || changed.contains('chat-service/')).toString()
+                    env.RECOMMENDATION_CHANGED = (changed == 'ALL' || changed.contains('recommendation-service/')).toString()
 
                     echo "File berubah:\n${changed}"
-                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED}"
+                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED} | Chat service changed: ${env.CHAT_SERVICE_CHANGED} | Recommendation service changed: ${env.RECOMMENDATION_CHANGED}"
                 }
             }
         }
@@ -138,6 +140,63 @@ pipeline {
                     // sampai ke browser pengguna.
                     sh 'npm audit --omit=dev'
                     sh 'npm audit --only=dev || true'
+                }
+            }
+        }
+
+        stage('Chat Service: Lint, Audit & Test') {
+            agent {
+                docker {
+                    image 'python:3.12-slim'
+                }
+            }
+            when {
+                expression { env.CHAT_SERVICE_CHANGED == 'true' }
+            }
+            steps {
+                dir('chat-service') {
+                    sh '''
+                        pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
+                        ruff check .
+                        pytest tests/ -v
+                    '''
+                    // chromadb (PYSEC-2026-311, CVE-2026-45830/45831/45833) --
+                    // semuanya di REST API server ChromaDB. Kode ini cuma
+                    // pakai chromadb.PersistentClient (embedded, in-process,
+                    // baca/tulis langsung ke direktori lokal) -- diverifikasi
+                    // ke rag/vectorstore.py, tidak pernah menjalankan server
+                    // HTTP/REST ChromaDB sama sekali, jadi endpoint yang
+                    // rentan tidak pernah ada untuk diserang. Belum ada
+                    // patched version dari upstream per commit ini. Ditandai
+                    // non-blocking dengan alasan spesifik ini, bukan
+                    // diabaikan buta -- kalau pip-audit menemukan CVE BARU di
+                    // paket lain, itu tetap harus diperiksa manual dari log.
+                    sh 'pip-audit -r requirements.txt --desc || true'
+                }
+            }
+        }
+
+        stage('Recommendation Service: Lint & Audit') {
+            agent {
+                docker {
+                    image 'python:3.12-slim'
+                }
+            }
+            when {
+                expression { env.RECOMMENDATION_CHANGED == 'true' }
+            }
+            steps {
+                dir('recommendation-service') {
+                    // Belum ada test suite di service ini sama sekali (beda
+                    // dari chat-service) -- di luar cakupan hardening ini
+                    // untuk menulis test baru dari nol tanpa dites dulu
+                    // terhadap kode yang sudah ada. Lint + dependency audit
+                    // saja untuk sekarang.
+                    sh '''
+                        pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit
+                        ruff check .
+                    '''
+                    sh 'pip-audit -r requirements.txt --desc'
                 }
             }
         }

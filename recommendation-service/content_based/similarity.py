@@ -11,7 +11,6 @@ baru, dipakai juga sebagai fallback kalau data CF belum cukup):
 - Rating & popularitas (total_sold): boost kecil, produk laris/rating
   bagus diprioritaskan di antara kandidat yang sama-sama mirip
 """
-import math
 
 
 def _price_similarity(price_a: float, price_b: float) -> float:

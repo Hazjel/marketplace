@@ -1,0 +1,22 @@
+line-length = 120
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = [
+    # 20 kejadian di utils/redis_helper.py -- catch-all Exception di sekitar
+    # panggilan Redis, sengaja fail-open (cache/session miss dianggap non-fatal,
+    # bukan meruntuhkan request). Memperbaikinya jadi exception spesifik per
+    # panggilan adalah refactor tersendiri, di luar cakupan hardening ini --
+    # bukan celah keamanan, exception yang ditangkap tidak pernah membocorkan
+    # apa pun ke caller (cuma di-print ke log lokal).
+    "BLE001",
+    # Cosmetic saja (f-string SSE panjang di api/chat.py) -- tidak diaktifkan
+    # supaya hardening pass ini tidak melebar ke refactor style yang tidak
+    # berkaitan.
+    "E501",
+    # zip(strict=True) MENGUBAH perilaku (raise ValueError kalau panjang
+    # list beda), bukan cuma cosmetic -- tidak di-auto-fix tanpa memahami
+    # dulu apakah metadatas/distances/documents di rag/vectorstore.py dan
+    # api/admin.py dijamin selalu sama panjang. Di luar cakupan hardening ini.
+    "B905",
+]

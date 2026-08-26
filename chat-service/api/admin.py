@@ -5,12 +5,12 @@ from datetime import datetime, timezone
 
 import httpx
 from fastapi import APIRouter, Request, Response
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
-from rag import vectorstore as rag_module
-from config import FEEDBACK_KEY, SESSION_KEY, RAG_SIMILARITY_THRESHOLD, RAG_TOP_K, OLLAMA_BASE_URL
-from utils.metrics import FEEDBACK_RATING, FEEDBACK_TOTAL
+from config import FEEDBACK_KEY, OLLAMA_BASE_URL, RAG_SIMILARITY_THRESHOLD, RAG_TOP_K, SESSION_KEY
 from models import FeedbackRequest
+from rag import vectorstore as rag_module
+from utils.metrics import FEEDBACK_RATING, FEEDBACK_TOTAL
 from utils.redis_helper import _get_redis
 
 router = APIRouter()

@@ -8,15 +8,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from utils.limiter import limiter
-from config import CORS_ALLOWED_ORIGINS, REDIS_URL
-from utils.metrics import REQUEST_COUNT, REQUEST_LATENCY
-from rag.vectorstore import ProductVectorStore, init_vector_store
-from rag.refresh import rag_refresh_loop
-from utils.redis_helper import init_redis
 from api.admin import router as admin_router
 from api.chat import router as chat_router
 from api.store_assistant import router as store_assistant_router
+from config import CORS_ALLOWED_ORIGINS, REDIS_URL
+from rag.refresh import rag_refresh_loop
+from rag.vectorstore import ProductVectorStore, init_vector_store
+from utils.limiter import limiter
+from utils.metrics import REQUEST_COUNT, REQUEST_LATENCY
+from utils.redis_helper import init_redis
+
 
 # ---------------------------------------------------------------------------
 # LIFESPAN
