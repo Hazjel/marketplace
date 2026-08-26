@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -30,6 +31,13 @@ class AccountDeletionService
 
             if ($user->store) {
                 $user->store->update(['is_active' => false]);
+                // ProductController::index() cache listing tanpa filter
+                // 600 detik -- tanpa flush ini, katalog warm bisa tetap
+                // menampilkan produk toko yang baru nonaktif sampai ±10
+                // menit. Gap ini ada di SEMUA jalur hapus akun (self-service
+                // maupun admin), bukan cuma StoreController::destroy().
+                Cache::tags(['stores'])->flush();
+                Cache::tags(['products'])->flush();
             }
 
             // users.email punya unique index di level DATABASE, dan MySQL

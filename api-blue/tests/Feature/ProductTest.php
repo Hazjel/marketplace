@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
 use App\Models\User;
@@ -103,5 +104,39 @@ class ProductTest extends TestCase
         // Produk harus jatuh ke toko A (pemanggil), BUKAN toko B yang dititipkan.
         $this->assertDatabaseHas('products', ['name' => 'Produk Titipan', 'store_id' => $storeA->id]);
         $this->assertDatabaseMissing('products', ['name' => 'Produk Titipan', 'store_id' => $storeB->id]);
+    }
+
+    public function test_product_from_inactive_store_returns_404_via_direct_lookup(): void
+    {
+        // getById()/getBySlug() sendiri tidak memfilter store.is_active
+        // (dipakai bareng update()/destroy() untuk akses pemilik, yang
+        // sengaja is_active-agnostic) -- filternya ada di controller,
+        // pola sama seperti StoreController::show(). Tanpa ini, produk
+        // toko nonaktif tetap bisa dibuka langsung kalau ID/slug-nya
+        // diketahui, walau sudah hilang dari listing/search publik.
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
+
+        $seller = User::factory()->create();
+        $seller->assignRole('store');
+        $store = Store::factory()->create(['user_id' => $seller->id, 'is_active' => false]);
+
+        $parent = ProductCategory::create(['name' => 'G', 'slug' => 'g-inactive-store', 'description' => 'G']);
+        $category = ProductCategory::create([
+            'name' => 'H', 'slug' => 'h-inactive-store', 'description' => 'H', 'parent_id' => $parent->id,
+        ]);
+        $product = Product::create([
+            'store_id' => $store->id, 'product_category_id' => $category->id,
+            'name' => 'Produk Toko Nonaktif', 'slug' => 'produk-toko-nonaktif',
+            'description' => 'D', 'condition' => 'new', 'price' => 10000, 'weight' => 100, 'stock' => 1,
+        ]);
+
+        $this->getJson("/api/product/{$product->id}")
+            ->assertStatus(404)
+            ->assertJson(['success' => true, 'data' => null]);
+
+        $this->getJson("/api/product/slug/{$product->slug}")
+            ->assertStatus(404)
+            ->assertJson(['success' => true, 'data' => null]);
     }
 }

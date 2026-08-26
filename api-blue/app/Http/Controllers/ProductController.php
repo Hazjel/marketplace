@@ -144,7 +144,13 @@ class ProductController extends Controller implements HasMiddleware
         try {
             $product = $this->productRepository->getById($id);
 
-            if (! $product) {
+            // Rute publik -- pola sama seperti StoreController::show().
+            // getById() dipakai bareng update()/destroy() (akses pemilik,
+            // is_active-agnostic dengan sengaja), jadi filternya di sini,
+            // bukan di repository. Tanpa ini, produk toko yang sudah
+            // dinonaktifkan tetap bisa dibuka langsung kalau ID/slug-nya
+            // diketahui, walau sudah hilang dari listing/search.
+            if (! $product || ! $product->store?->is_active) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 
@@ -159,7 +165,7 @@ class ProductController extends Controller implements HasMiddleware
         try {
             $product = $this->productRepository->getBySlug($slug);
 
-            if (! $product) {
+            if (! $product || ! $product->store?->is_active) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 
