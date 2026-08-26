@@ -6,6 +6,7 @@ use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\StoreBalanceRepositoryInterface;
 use App\Models\Store;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EscrowRepository implements EscrowRepositoryInterface
@@ -26,20 +27,29 @@ class EscrowRepository implements EscrowRepositoryInterface
             return;
         }
 
-        $sellerAmount = $this->applyAdminFee($transaction);
+        // Dulu creditPending() (mutasi saldo) dan storeBalanceHistories()->create()
+        // (yang membawa unique_ref) berjalan sebagai dua statement lepas.
+        // Kalau caller tidak membungkusnya sendiri dalam DB::transaction --
+        // dan checkPaymentStatus() manual dulu tidak -- kegagalan unique_ref
+        // pada insert kedua TIDAK membatalkan mutasi saldo yang sudah
+        // ter-commit di statement pertama. Dibungkus di sini supaya method
+        // ini aman terlepas dari kedisiplinan caller.
+        $sellerAmount = DB::transaction(function () use ($transaction, $store) {
+            $sellerAmount = $this->applyAdminFee($transaction);
 
-        $this->storeBalanceRepository->creditPending($store->storeBalance->id, $sellerAmount);
+            $this->storeBalanceRepository->creditPending($store->storeBalance->id, $sellerAmount);
 
-        $store->storeBalance->storeBalanceHistories()->create([
-            'type' => 'pending_income',
-            'reference_id' => $transaction->id,
-            'reference_type' => Transaction::class,
-            // Unique di database: satu transaksi hanya boleh menghasilkan satu
-            // kredit escrow, berapa kali pun webhook Midtrans datang.
-            'unique_ref' => 'pending_income:'.$transaction->id,
-            'amount' => $sellerAmount,
-            'remarks' => 'Pembayaran diterima (ditahan) dari transaksi '.$transaction->code.' — akan dirilis setelah pesanan selesai',
-        ]);
+            $store->storeBalance->storeBalanceHistories()->create([
+                'type' => 'pending_income',
+                'reference_id' => $transaction->id,
+                'reference_type' => Transaction::class,
+                'unique_ref' => 'pending_income:'.$transaction->id,
+                'amount' => $sellerAmount,
+                'remarks' => 'Pembayaran diterima (ditahan) dari transaksi '.$transaction->code.' — akan dirilis setelah pesanan selesai',
+            ]);
+
+            return $sellerAmount;
+        });
 
         Log::info('Pending balance credited for store: '.$store->id, [
             'seller_amount' => $sellerAmount,
@@ -59,18 +69,22 @@ class EscrowRepository implements EscrowRepositoryInterface
             return;
         }
 
-        $sellerAmount = $this->sellerAmount($transaction);
+        $sellerAmount = DB::transaction(function () use ($transaction, $store) {
+            $sellerAmount = $this->sellerAmount($transaction);
 
-        $this->storeBalanceRepository->releasePending($store->storeBalance->id, $sellerAmount);
+            $this->storeBalanceRepository->releasePending($store->storeBalance->id, $sellerAmount);
 
-        $store->storeBalance->storeBalanceHistories()->create([
-            'type' => 'released',
-            'reference_id' => $transaction->id,
-            'reference_type' => Transaction::class,
-            'unique_ref' => 'released:'.$transaction->id,
-            'amount' => $sellerAmount,
-            'remarks' => 'Dana dirilis ke saldo tersedia — pesanan '.$transaction->code.' selesai',
-        ]);
+            $store->storeBalance->storeBalanceHistories()->create([
+                'type' => 'released',
+                'reference_id' => $transaction->id,
+                'reference_type' => Transaction::class,
+                'unique_ref' => 'released:'.$transaction->id,
+                'amount' => $sellerAmount,
+                'remarks' => 'Dana dirilis ke saldo tersedia — pesanan '.$transaction->code.' selesai',
+            ]);
+
+            return $sellerAmount;
+        });
 
         Log::info('Escrow released for transaction: '.$transaction->code, [
             'store_id' => $store->id,
@@ -90,18 +104,22 @@ class EscrowRepository implements EscrowRepositoryInterface
             return;
         }
 
-        $sellerAmount = $this->sellerAmount($transaction);
+        $sellerAmount = DB::transaction(function () use ($transaction, $store) {
+            $sellerAmount = $this->sellerAmount($transaction);
 
-        $this->storeBalanceRepository->refundPending($store->storeBalance->id, $sellerAmount);
+            $this->storeBalanceRepository->refundPending($store->storeBalance->id, $sellerAmount);
 
-        $store->storeBalance->storeBalanceHistories()->create([
-            'type' => 'refunded',
-            'reference_id' => $transaction->id,
-            'reference_type' => Transaction::class,
-            'unique_ref' => 'refunded:'.$transaction->id,
-            'amount' => -$sellerAmount,
-            'remarks' => 'Escrow dibatalkan (refund) — pesanan '.$transaction->code.' dibatalkan',
-        ]);
+            $store->storeBalance->storeBalanceHistories()->create([
+                'type' => 'refunded',
+                'reference_id' => $transaction->id,
+                'reference_type' => Transaction::class,
+                'unique_ref' => 'refunded:'.$transaction->id,
+                'amount' => -$sellerAmount,
+                'remarks' => 'Escrow dibatalkan (refund) — pesanan '.$transaction->code.' dibatalkan',
+            ]);
+
+            return $sellerAmount;
+        });
 
         Log::info('Escrow refunded for transaction: '.$transaction->code, [
             'store_id' => $store->id,

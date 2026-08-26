@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -262,19 +263,19 @@ class TransactionController extends Controller implements HasMiddleware
                 $receivingProof = 'upload/transactions/'.$filename;
             }
 
-            $transaction = $this->transactionRepository->updateStatus($id, [
-                'delivery_status' => 'completed',
-                'receiving_proof' => $receivingProof,
-            ]);
-
-            // ESCROW RELEASE: Pindahkan dana dari pending_balance ke available balance
-            $this->escrowRepository->release($transaction);
+            // Lock + validasi status + rilis escrow dalam satu transaksi --
+            // lihat TransactionRepository::completeTransaction(). Pengecekan
+            // delivery_status di atas (sebelum ini) hanya penolakan dini yang
+            // murah; yang otoritatif adalah pengecekan ulang di dalam lock,
+            // supaya dua panggilan complete() yang beririsan (atau beririsan
+            // dengan scheduler auto-complete) tidak sama-sama lolos merilis.
+            $transaction = $this->transactionRepository->completeTransaction($id, $receivingProof);
 
             event(new TransactionStatusUpdated($transaction));
 
             return ResponseHelper::jsonResponse(true, 'Pesanan Selesai — dana telah dirilis ke saldo toko', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::exceptionResponse($e);
+            return ResponseHelper::exceptionResponse($e, $e->getCode() ?: 500);
         }
     }
 
@@ -304,37 +305,56 @@ class TransactionController extends Controller implements HasMiddleware
             Config::$is3ds = config('midtrans.is3ds');
 
             try {
-                // Fetch status from Midtrans
+                // Panggilan keluar ke Midtrans TIDAK boleh terjadi sambil
+                // memegang row lock -- itu menahan lock selama durasi round-trip
+                // HTTP, mengunci request lain ke transaksi ini selama itu.
+                // Dilakukan dulu di luar transaksi, hasilnya baru dipakai di
+                // dalam blok terkunci di bawah.
                 $midtransStatus = \Midtrans\Transaction::status($transaction->code);
 
                 $transactionStatus = $midtransStatus->transaction_status;
                 $paymentType = $midtransStatus->payment_type;
                 $fraudStatus = $midtransStatus->fraud_status;
 
-                // Interpreter sama dengan yang dipakai webhook callback — no-op (null)
-                // berarti status tetap seperti sekarang (mis. capture non-credit_card).
-                $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus)
-                    ?? $transaction->payment_status;
+                // Sebelumnya blok ini membaca-putuskan-simpan tanpa DB::transaction
+                // atau lockForUpdate sama sekali -- webhook Midtrans dan endpoint
+                // manual ini bisa saling tumpang tindih pada transaksi yang sama
+                // dan sama-sama lolos mengkredit escrow. EscrowRepository::credit()
+                // sekarang membungkus dirinya sendiri, tapi lock di sini tetap
+                // perlu supaya keputusan "apakah perlu update" konsisten dengan apa
+                // yang benar-benar tersimpan saat lock didapat, bukan snapshot basi
+                // dari sebelum panggilan Midtrans.
+                $transaction = DB::transaction(function () use ($id, $transactionStatus, $paymentType, $fraudStatus) {
+                    $locked = Transaction::where('id', $id)->lockForUpdate()->first();
 
-                if ($newStatus === 'paid' && $transaction->payment_status !== 'paid') {
-                    $transaction->payment_status = 'paid';
-                    $transaction->save();
+                    $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus)
+                        ?? $locked->payment_status;
 
-                    event(new TransactionStatusUpdated($transaction->fresh()));
-
-                    // Credit ke pending_balance (escrow) — sama seperti Midtrans callback
-                    $this->escrowRepository->credit($transaction);
-                } elseif ($newStatus !== $transaction->payment_status) {
-                    $transaction->payment_status = $newStatus;
-                    $transaction->save();
-
-                    event(new TransactionStatusUpdated($transaction->fresh()));
-
-                    // Restore stock if payment failed/expired/cancelled
-                    if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
-                        $this->transactionRepository->restoreStock($transaction);
+                    // Transaksi yang sudah paid tidak boleh mundur -- webhook yang
+                    // telat atau panggilan manual yang beririsan tidak boleh
+                    // membatalkan pembayaran yang sudah dikredit ke escrow.
+                    if ($locked->payment_status === 'paid' && $newStatus !== 'paid') {
+                        return $locked;
                     }
-                }
+
+                    if ($newStatus === 'paid' && $locked->payment_status !== 'paid') {
+                        $locked->payment_status = 'paid';
+                        $locked->save();
+
+                        $this->escrowRepository->credit($locked);
+                    } elseif ($newStatus !== $locked->payment_status) {
+                        $locked->payment_status = $newStatus;
+                        $locked->save();
+
+                        if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
+                            $this->transactionRepository->restoreStock($locked);
+                        }
+                    }
+
+                    return $locked;
+                });
+
+                event(new TransactionStatusUpdated($transaction->fresh()));
 
                 return ResponseHelper::jsonResponse(true, 'Status Payment Berhasil Diupdate', new TransactionResource($transaction), 200);
 

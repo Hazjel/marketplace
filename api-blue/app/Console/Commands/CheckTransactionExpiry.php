@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Transaction;
 use App\Repositories\TransactionRepository;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CheckTransactionExpiry extends Command
@@ -46,12 +47,24 @@ class CheckTransactionExpiry extends Command
                 $this->info("Processing Expired Transaction: {$transaction->code}");
                 Log::info("SCHEDULER: Expiring Transaction {$transaction->code}");
 
-                // 1. Mark as Failed
-                $transaction->payment_status = 'failed';
-                $transaction->save();
+                // Kandidat di atas diambil tanpa lock. Sebelum benar-benar
+                // menandai failed + mengembalikan stok, kunci baris ini dan
+                // baca ulang -- kalau webhook Midtrans atau checkPaymentStatus
+                // manual sudah mengubahnya jadi paid di antara query di atas
+                // dan baris ini, jangan sampai scheduler menimpanya balik
+                // jadi failed dan mengembalikan stok barang yang sudah terjual.
+                DB::transaction(function () use ($transaction, $transactionRepository) {
+                    $locked = Transaction::where('id', $transaction->id)->lockForUpdate()->first();
 
-                // 2. Restore Stock
-                $transactionRepository->restoreStock($transaction);
+                    if (! $locked || ! in_array($locked->payment_status, ['pending', 'unpaid'])) {
+                        return;
+                    }
+
+                    $locked->payment_status = 'failed';
+                    $locked->save();
+
+                    $transactionRepository->restoreStock($locked);
+                });
 
                 $this->info("Transaction {$transaction->code} expired and stock restored.");
             } catch (\Exception $e) {

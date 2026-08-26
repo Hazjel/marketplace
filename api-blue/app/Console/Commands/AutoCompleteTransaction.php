@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Interfaces\EscrowRepositoryInterface;
+use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Transaction;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +26,7 @@ class AutoCompleteTransaction extends Command
     /**
      * Execute the console command.
      */
-    public function handle(EscrowRepositoryInterface $escrowRepository)
+    public function handle(TransactionRepositoryInterface $transactionRepository)
     {
         $this->info('Checking for auto-completable transactions...');
         Log::info('SCHEDULER: Checking for auto-completable transactions...');
@@ -50,12 +50,14 @@ class AutoCompleteTransaction extends Command
                 $this->info("Auto-completing transaction: {$transaction->code}");
                 Log::info("SCHEDULER: Auto-completing transaction {$transaction->code}");
 
-                // 1. Update delivery status ke completed
-                $transaction->delivery_status = 'completed';
-                $transaction->save();
-
-                // 2. Release escrow: pindahkan pending_balance ke available balance
-                $escrowRepository->release($transaction);
+                // Method yang sama dipakai TransactionController::complete() --
+                // lock, validasi ulang delivery_status di dalam lock, lalu
+                // rilis escrow, satu transaksi. Sebelumnya scheduler ini
+                // melakukan update+release sendiri tanpa lock sama sekali,
+                // yang bisa tumpang tindih dengan buyer yang menekan
+                // "selesai" untuk transaksi yang sama pada saat bersamaan
+                // dan sama-sama lolos merilis dana.
+                $transactionRepository->completeTransaction($transaction->id);
 
                 $this->info("Escrow released for {$transaction->code}");
                 Log::info("SCHEDULER: Escrow released for {$transaction->code}");
