@@ -21,4 +21,6 @@ interface TransactionRepositoryInterface
     public function delete(string $id);
 
     public function restoreStock(Transaction $transaction);
+
+    public function completeTransaction(string $id, ?string $receivingProof = null): Transaction;
 }

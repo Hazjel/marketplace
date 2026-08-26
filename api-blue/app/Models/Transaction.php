@@ -41,6 +41,7 @@ class Transaction extends Model
         'grand_total' => 'decimal:2',
         'admin_fee' => 'decimal:2',
         'discount_amount' => 'decimal:2',
+        'stock_restored_at' => 'datetime',
     ];
 
     public function scopeSearch($query, $search)

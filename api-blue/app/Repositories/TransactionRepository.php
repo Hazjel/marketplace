@@ -440,14 +440,32 @@ class TransactionRepository implements TransactionRepositoryInterface
         }
     }
 
-    public function restoreStock(Transaction $transaction)
+    /**
+     * Mengembalikan stok satu transaksi. Idempoten dan mengunci dirinya
+     * sendiri, supaya aman dipanggil dari jalur mana pun (webhook,
+     * checkPaymentStatus manual, updateStatus saat seller membatalkan,
+     * scheduler transaction:check-expiry) tanpa bergantung pada caller
+     * mengingat untuk mengunci lebih dulu.
+     *
+     * Sebelumnya lockForUpdate() hanya pada baris Product -- benar untuk
+     * aritmatika +=, tapi tidak mencegah transaksi yang SAMA di-restore
+     * dua kali oleh dua caller berbeda yang kebetulan tumpang tindih.
+     * Metode ini dulu juga menelan semua exception jadi Log::error, jadi
+     * caller yang membungkusnya dalam DB::transaction sendiri tidak
+     * pernah tahu ada kegagalan untuk di-rollback.
+     */
+    public function restoreStock(Transaction $transaction): void
     {
-        try {
-            Log::info('Start restoring stock for transaction: '.$transaction->id);
-            $transaction->load('transactionDetails');
+        DB::transaction(function () use ($transaction) {
+            $locked = Transaction::where('id', $transaction->id)->lockForUpdate()->first();
 
-            foreach ($transaction->transactionDetails as $detail) {
-                // Pessimistic lock prevents double-restore from concurrent cancel + webhook
+            if (! $locked || $locked->stock_restored_at !== null) {
+                return;
+            }
+
+            $locked->load('transactionDetails');
+
+            foreach ($locked->transactionDetails as $detail) {
                 $product = Product::where('id', $detail->product_id)->lockForUpdate()->first();
                 if ($product) {
                     $product->stock += $detail->qty;
@@ -455,9 +473,15 @@ class TransactionRepository implements TransactionRepositoryInterface
                     Log::info("Product {$product->id} RESTORED: Stock -> {$product->stock}");
                 }
             }
-        } catch (\Throwable $e) {
-            Log::error('Error restoring stock: '.$e->getMessage());
-        }
+
+            $locked->stock_restored_at = now();
+            $locked->save();
+
+            // Sinkronkan instance yang dipegang caller supaya perubahan
+            // yang mereka simpan setelah pemanggilan ini (mis. payment_status)
+            // tidak menimpa balik stock_restored_at dengan versi lama di memori.
+            $transaction->stock_restored_at = $locked->stock_restored_at;
+        });
     }
 
     public function updateStatus(string $id, array $data)
@@ -465,7 +489,11 @@ class TransactionRepository implements TransactionRepositoryInterface
         DB::beginTransaction();
 
         try {
-            $transaction = Transaction::find($id);
+            // Lock: seller bisa mengirim update shipping dua kali nyaris
+            // bersamaan (double-klik, retry jaringan), dan jalur cancel di
+            // bawah memicu restoreStock + refund escrow -- keduanya harus
+            // serial per transaksi, bukan berdasar baca tanpa kunci.
+            $transaction = Transaction::where('id', $id)->lockForUpdate()->first();
 
             if (isset($data['tracking_number'])) {
                 $transaction->tracking_number = $data['tracking_number'];
@@ -511,5 +539,49 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             throw new Exception($e->getMessage());
         }
+    }
+
+    /**
+     * Selesaikan pesanan dan rilis escrow dalam SATU transaksi terkunci.
+     *
+     * Sebelumnya controller memanggil updateStatus() (commit sendiri) lalu
+     * escrowRepository->release() sebagai operasi terpisah setelahnya, dan
+     * scheduler transaction:auto-complete melakukan urutan yang sama tanpa
+     * lock sama sekali. Kalau proses mati di antara keduanya, atau dua
+     * caller (buyer klik selesai + scheduler auto-complete) tumpang tindih
+     * pada transaksi yang sama, delivery_status bisa jadi "completed"
+     * sementara dana belum pernah dirilis, atau dirilis dua kali.
+     *
+     * Dipakai oleh TransactionController::complete() (buyer) dan
+     * AutoCompleteTransaction (scheduler harian) -- satu tempat, bukan dua
+     * implementasi yang bisa diam-diam berbeda.
+     */
+    public function completeTransaction(string $id, ?string $receivingProof = null): Transaction
+    {
+        return DB::transaction(function () use ($id, $receivingProof) {
+            $transaction = Transaction::where('id', $id)->lockForUpdate()->first();
+
+            if (! $transaction) {
+                throw new Exception('Data Transaksi Tidak Ditemukan', 404);
+            }
+
+            if ($transaction->delivery_status !== 'delivering') {
+                throw new Exception('Hanya status delivering yang bisa diselesaikan', 400);
+            }
+
+            $transaction->delivery_status = 'completed';
+            if ($receivingProof !== null) {
+                $transaction->receiving_proof = $receivingProof;
+            }
+            $transaction->save();
+
+            $this->escrowRepository->release($transaction);
+
+            return $transaction->fresh([
+                'buyer.user',
+                'store.user',
+                'transactionDetails.product',
+            ]);
+        });
     }
 }
