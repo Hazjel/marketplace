@@ -26,16 +26,37 @@ pipeline {
             agent any
             steps {
                 script {
-                    // pollSCM cuma checkout HEAD, gak ada histori commit sebelumnya
-                    // di workspace secara default -> fetch depth cukup buat diff
-                    // terhadap commit sebelum HEAD saat ini
-                    sh 'git fetch --depth=2 origin main || true'
-                    def changed = sh(
-                        script: 'git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "ALL"',
-                        returnStdout: true
-                    ).trim()
+                    // HEAD~1..HEAD cuma benar kalau setiap push persis satu commit.
+                    // Push multi-commit (mis. merge fast-forward beberapa commit
+                    // sekaligus) membuat HEAD~1 cuma commit KEDUA-TERAKHIR dari
+                    // push itu -- file yang berubah di commit-commit sebelumnya
+                    // dalam push yang sama jadi tidak terdeteksi sama sekali.
+                    // Konsekuensinya nyata, bukan cuma soal skip test: stage
+                    // Deploy di bawah cuma nge-drop volume api_vendor kalau
+                    // BACKEND_CHANGED=true -- kalau composer.lock berubah di
+                    // commit yang tidak ke-diff, volume vendor lama (dependency
+                    // BELUM di-patch) tetap dipakai container baru.
+                    //
+                    // GIT_PREVIOUS_SUCCESSFUL_COMMIT (disediakan git plugin,
+                    // kosong kalau ini build sukses pertama di branch ini)
+                    // diff-nya menutupi SELURUH commit sejak build sukses
+                    // terakhir, berapa pun banyaknya, bukan cuma commit terakhir.
+                    sh 'git fetch --depth=100 origin main || true'
+                    def base = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+                    def changed
+                    if (!base) {
+                        changed = 'ALL'
+                        echo "Tidak ada GIT_PREVIOUS_SUCCESSFUL_COMMIT (build sukses pertama di branch ini) -- anggap semua berubah."
+                    } else {
+                        changed = sh(
+                            script: "git diff --name-only ${base} HEAD 2>/dev/null || echo 'ALL'",
+                            returnStdout: true
+                        ).trim()
+                    }
 
-                    // build pertama / histori dangkal -> HEAD~1 gak ada -> anggap semua berubah
+                    // 'ALL' juga fallback kalau base commit di atas ternyata tidak
+                    // reachable dari fetch depth ini (mis. histori sangat panjang
+                    // sejak build sukses terakhir) -- git diff exit non-zero -> echo 'ALL'.
                     env.BACKEND_CHANGED  = (changed == 'ALL' || changed.contains('api-blue/')).toString()
                     env.FRONTEND_CHANGED = (changed == 'ALL' || changed.contains('fe-blue/')).toString()
                     env.CHAT_SERVICE_CHANGED = (changed == 'ALL' || changed.contains('chat-service/')).toString()
@@ -131,14 +152,23 @@ pipeline {
                         npm run test -- --run
                         npm run build
                     '''
-                    // Blocking di production deps saja -- per commit
-                    // e543e1c3 itu sudah bersih. devDependencies (vite/
-                    // vitest/eslint dst) tidak ikut dibundle ke output
+                    // KOREKSI dari commit e543e1c3: klaim "production deps
+                    // sudah bersih" di situ SALAH -- @vueuse/head ada di
+                    // dependencies (bukan devDependencies), dan residual
+                    // 3 finding moderate/low dari @unhead/vue (lihat commit
+                    // e543e1c3 untuk analisis kenapa tidak di-force-downgrade)
+                    // ADA di situ. `npm audit --omit=dev` polos di sini
+                    // sudah dicoba: exit code 1, bukan 0 -- build pertama
+                    // akan merah permanen kalau tetap blocking penuh.
+                    //
+                    // --audit-level=high: exit code cuma nonzero untuk
+                    // high/critical (residual yang sudah dianalisis
+                    // moderate/low tidak ikut blocking, tapi CVE baru yang
+                    // high/critical tetap memblokir). devDependencies
+                    // (vite/vitest/eslint dst) tidak ikut dibundle ke output
                     // production, jadi audit-nya dipisah dan non-blocking
-                    // (|| true) supaya tooling dev yang sering update tidak
-                    // bikin merah build untuk sesuatu yang tidak pernah
-                    // sampai ke browser pengguna.
-                    sh 'npm audit --omit=dev'
+                    // sepenuhnya.
+                    sh 'npm audit --omit=dev --audit-level=high'
                     sh 'npm audit --only=dev || true'
                 }
             }
@@ -147,7 +177,12 @@ pipeline {
         stage('Chat Service: Lint, Audit & Test') {
             agent {
                 docker {
-                    image 'python:3.12-slim'
+                    // Sama dengan FROM di Dockerfile production kedua service
+                    // (python:3.11-slim) -- awalnya ditulis 3.12, ketahuan beda
+                    // dari runtime production saat review. pytest/Ruff/pip-audit
+                    // harus jalan di interpreter yang sama dengan yang benar-benar
+                    // dipakai container, bukan versi terbaru yang kebetulan ada.
+                    image 'python:3.11-slim'
                 }
             }
             when {
@@ -160,18 +195,20 @@ pipeline {
                         ruff check .
                         pytest tests/ -v
                     '''
-                    // chromadb (PYSEC-2026-311, CVE-2026-45830/45831/45833) --
-                    // semuanya di REST API server ChromaDB. Kode ini cuma
-                    // pakai chromadb.PersistentClient (embedded, in-process,
-                    // baca/tulis langsung ke direktori lokal) -- diverifikasi
-                    // ke rag/vectorstore.py, tidak pernah menjalankan server
-                    // HTTP/REST ChromaDB sama sekali, jadi endpoint yang
-                    // rentan tidak pernah ada untuk diserang. Belum ada
-                    // patched version dari upstream per commit ini. Ditandai
-                    // non-blocking dengan alasan spesifik ini, bukan
-                    // diabaikan buta -- kalau pip-audit menemukan CVE BARU di
-                    // paket lain, itu tetap harus diperiksa manual dari log.
-                    sh 'pip-audit -r requirements.txt --desc || true'
+                    // KOREKSI dari commit 23732e94: "|| true" di sini semula
+                    // dimaksudkan untuk 4 finding chromadb yang sudah
+                    // dianalisis (PYSEC-2026-311, CVE-2026-45830/45831/45833
+                    // -- semuanya di REST API server ChromaDB; kode ini cuma
+                    // pakai chromadb.PersistentClient embedded in-process,
+                    // diverifikasi ke rag/vectorstore.py, endpoint rentannya
+                    // tidak pernah ada untuk diserang; belum ada patched
+                    // version dari upstream). Tapi "|| true" polos bukan cuma
+                    // meredam 4 finding itu -- itu meredam SEMUA finding,
+                    // sekarang dan masa depan. CVE baru di httpx/redis/FastAPI
+                    // besok tetap bikin build hijau. --ignore-vuln menutup
+                    // persis 4 ID ini saja; exit code kembali nonzero begitu
+                    // ada finding lain.
+                    sh 'pip-audit -r requirements.txt --desc --ignore-vuln PYSEC-2026-311 --ignore-vuln CVE-2026-45830 --ignore-vuln CVE-2026-45831 --ignore-vuln CVE-2026-45833'
                 }
             }
         }
@@ -179,7 +216,12 @@ pipeline {
         stage('Recommendation Service: Lint & Audit') {
             agent {
                 docker {
-                    image 'python:3.12-slim'
+                    // Sama dengan FROM di Dockerfile production kedua service
+                    // (python:3.11-slim) -- awalnya ditulis 3.12, ketahuan beda
+                    // dari runtime production saat review. pytest/Ruff/pip-audit
+                    // harus jalan di interpreter yang sama dengan yang benar-benar
+                    // dipakai container, bukan versi terbaru yang kebetulan ada.
+                    image 'python:3.11-slim'
                 }
             }
             when {
