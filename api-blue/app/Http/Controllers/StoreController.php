@@ -109,6 +109,14 @@ class StoreController extends Controller implements HasMiddleware
     {
         $request = $request->validated();
 
+        // 'user_id' divalidasi cuma 'exists:users,id' -- permission
+        // 'store-create' dipegang SEMUA seller (role 'store', bukan
+        // admin-only, lihat RoleSeeder), jadi tanpa pengecekan ini seller
+        // mana pun bisa membuat toko atas nama user_id ORANG LAIN.
+        if (! auth()->user()->hasRole('admin')) {
+            $request['user_id'] = auth()->id();
+        }
+
         try {
             $store = $this->storeRepository->create($request);
             Cache::tags(['stores'])->flush();
@@ -190,6 +198,15 @@ class StoreController extends Controller implements HasMiddleware
     public function updateVerifiedStatus(string $id)
     {
         try {
+            // Rute ini cuma di dalam grup auth:sanctum -- tidak ada
+            // PermissionMiddleware/HasMiddleware sama sekali untuk action
+            // ini (beda dari store/update/destroy di atas), jadi tanpa
+            // pengecekan eksplisit ini SIAPA PUN yang login (termasuk buyer
+            // tanpa toko) bisa memverifikasi toko mana pun.
+            if (! auth()->user()->hasRole('admin')) {
+                return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+            }
+
             $store = $this->storeRepository->getById($id);
 
             if (! $store) {
@@ -218,6 +235,14 @@ class StoreController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
+            // Sebelumnya tidak ada pengecekan sama sekali -- seller mana
+            // pun yang punya permission 'store-edit' (SEMUA seller) bisa
+            // update toko MANAPUN via ID, bukan cuma toko sendiri. Pola
+            // sama seperti ProductController::update().
+            if (! auth()->user()->hasRole('admin') && $store->user_id !== auth()->id()) {
+                return ResponseHelper::jsonResponse(false, 'Tidak diizinkan mengubah toko lain', null, 403);
+            }
+
             $store = $this->storeRepository->update($id, $request);
             Cache::tags(['stores'])->flush();
 
@@ -237,6 +262,12 @@ class StoreController extends Controller implements HasMiddleware
 
             if (! $store) {
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
+            }
+
+            // Sama seperti update() di atas -- sebelumnya seller mana pun
+            // bisa MENGHAPUS toko kompetitor lewat ID.
+            if (! auth()->user()->hasRole('admin') && $store->user_id !== auth()->id()) {
+                return ResponseHelper::jsonResponse(false, 'Tidak diizinkan menghapus toko lain', null, 403);
             }
 
             $store = $this->storeRepository->delete($id);

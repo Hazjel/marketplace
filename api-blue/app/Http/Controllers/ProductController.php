@@ -112,6 +112,20 @@ class ProductController extends Controller implements HasMiddleware
     {
         $request = $request->validated();
 
+        // store_id divalidasi cuma 'exists:stores,id' -- permission
+        // 'product-create' dipegang SEMUA seller (role 'store', bukan
+        // admin-only, lihat RoleSeeder), jadi tanpa pengecekan ini seller
+        // A bisa titip store_id milik seller B dan produk (spam/palsu)
+        // muncul di toko kompetitor. update()/destroy() di bawah sudah
+        // punya pengecekan serupa -- store() sebelumnya tidak.
+        if (! auth()->user()->hasRole('admin')) {
+            $ownStoreId = auth()->user()->store?->id;
+            if (! $ownStoreId) {
+                return ResponseHelper::jsonResponse(false, 'Anda belum memiliki toko', null, 403);
+            }
+            $request['store_id'] = $ownStoreId;
+        }
+
         try {
             $product = $this->productRepository->create($request);
             Cache::tags(['products'])->flush();
