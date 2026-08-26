@@ -1,0 +1,11 @@
+title = "Blukios gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Midtrans client key -- didesain publik oleh Midtrans (dibundle ke JS frontend apa pun caranya, beda dari server key). Server key TIDAK ada di sini -- itu selalu lewat env var/.env yang gitignored."
+regexTarget = "match"
+regexes = [
+  '''Mid-client-[A-Za-z0-9]+''',
+]

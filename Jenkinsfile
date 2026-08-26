@@ -68,7 +68,15 @@ pipeline {
             }
             steps {
                 dir('api-blue') {
-                    sh 'composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-mongodb'
+                    sh 'composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-mongodb --ignore-platform-req=ext-sodium'
+                    // composer audit sengaja di sini (bukan stage terpisah) --
+                    // butuh composer.lock yang baru diresolve, dan agent ini
+                    // sudah punya composer binary-nya. Blocking: per commit
+                    // e543e1c3, composer audit sudah bersih (0 advisory) --
+                    // kalau kembali merah di sini artinya dependency BARU
+                    // yang punya CVE, bukan technical debt lama yang perlu
+                    // baseline seperti PHPStan.
+                    sh 'composer audit --no-interaction'
                     stash name: 'backend-vendor', includes: 'vendor/**'
                 }
             }
@@ -95,6 +103,7 @@ pipeline {
                         pecl install mongodb-2.3.3 redis-6.3.0 >/dev/null 2>&1
                         docker-php-ext-enable mongodb redis
                         vendor/bin/pint --test
+                        vendor/bin/phpstan analyse --memory-limit=1G --no-progress
                         cp .env.example .env
                         php artisan key:generate
                         php artisan test
@@ -120,7 +129,49 @@ pipeline {
                         npm run test -- --run
                         npm run build
                     '''
+                    // Blocking di production deps saja -- per commit
+                    // e543e1c3 itu sudah bersih. devDependencies (vite/
+                    // vitest/eslint dst) tidak ikut dibundle ke output
+                    // production, jadi audit-nya dipisah dan non-blocking
+                    // (|| true) supaya tooling dev yang sering update tidak
+                    // bikin merah build untuk sesuatu yang tidak pernah
+                    // sampai ke browser pengguna.
+                    sh 'npm audit --omit=dev'
+                    sh 'npm audit --only=dev || true'
                 }
+            }
+        }
+
+        stage('Security: Secret Scan') {
+            agent {
+                docker {
+                    // Base image alpine + ENTRYPOINT ["gitleaks"] (dicek
+                    // langsung ke Dockerfile upstream) -- entrypoint tetap
+                    // perlu di-override kosong seperti composer:2 di atas
+                    // supaya Jenkins bisa menyuntikkan step shell-nya sendiri.
+                    image 'zricethezav/gitleaks:latest'
+                    args '--entrypoint ""'
+                }
+            }
+            steps {
+                // NON-BLOCKING untuk sekarang ("|| true") -- belum pernah
+                // dijalankan sungguhan di Jenkins (Docker Desktop tidak
+                // jalan di mesin dev, jadi tidak bisa dites lokal). Repo ini
+                // punya setidaknya satu string yang BENTUKNYA seperti secret
+                // tapi memang sengaja publik: Midtrans client key di
+                // docker-compose.yml (VITE_MIDTRANS_CLIENT_KEY) -- client
+                // key Midtrans didesain publik (ke-bundle ke JS frontend
+                // apa pun caranya), beda dari server key. Setelah build
+                // pertama menunjukkan hasil scan bersih atau semua temuan
+                // sudah di-allowlist (.gitleaks.toml), hapus "|| true" di
+                // sini supaya stage ini betul-betul blocking.
+                //
+                // 'dir' (bukan 'detect' yang deprecated sejak v8.19.0) --
+                // scan working tree checkout ini apa adanya, bukan git log
+                // (history lama sudah ditangani lewat rotasi APP_KEY
+                // sebelumnya, bukan lewat CI scan). --redact: kalau ketemu,
+                // jangan cetak secret asli ke log Jenkins.
+                sh 'gitleaks dir . -v --redact || true'
             }
         }
 
