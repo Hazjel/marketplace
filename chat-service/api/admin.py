@@ -4,16 +4,27 @@ import time
 from datetime import datetime, timezone
 
 import httpx
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
-from config import FEEDBACK_KEY, OLLAMA_BASE_URL, RAG_SIMILARITY_THRESHOLD, RAG_TOP_K, SESSION_KEY
+from config import FEEDBACK_KEY, INTERNAL_SERVICE_KEY, OLLAMA_BASE_URL, RAG_SIMILARITY_THRESHOLD, RAG_TOP_K, SESSION_KEY
 from models import FeedbackRequest
 from rag import vectorstore as rag_module
 from utils.metrics import FEEDBACK_RATING, FEEDBACK_TOTAL
 from utils.redis_helper import _get_redis
 
 router = APIRouter()
+
+
+def _require_internal_key(x_internal_key: str | None = Header(default=None)) -> None:
+    """Dependency yang dipakai endpoint admin/debug -- pola sama dengan
+    api/store_assistant.py. /admin/reindex, /eval, dan /debug/search
+    sebelumnya bisa diakses SIAPA PUN tanpa autentikasi sama sekali, baik
+    lewat nginx (/ai/* di-proxy penuh) maupun langsung ke port container.
+    /debug/search bahkan bisa membocorkan embedding vector penuh lewat
+    show_vectors=true."""
+    if not INTERNAL_SERVICE_KEY or x_internal_key != INTERNAL_SERVICE_KEY:
+        raise HTTPException(status_code=403, detail="Akses ditolak")
 
 
 # ---------------------------------------------------------------------------
@@ -45,7 +56,7 @@ async def submit_feedback(request: Request, body: FeedbackRequest) -> dict:
 # POST /admin/reindex  — Trigger manual RAG re-index tanpa restart
 # ---------------------------------------------------------------------------
 @router.post("/admin/reindex")
-async def admin_reindex() -> dict:
+async def admin_reindex(_: None = Depends(_require_internal_key)) -> dict:
     """Trigger re-indexing semua produk dari Laravel API ke ChromaDB."""
     vs = rag_module.get_vector_store()
     if vs is None:
@@ -87,7 +98,7 @@ def metrics() -> Response:
 # GET /eval  — Statistik evaluasi RAG + feedback
 # ---------------------------------------------------------------------------
 @router.get("/eval")
-async def eval_stats() -> dict:
+async def eval_stats(_: None = Depends(_require_internal_key)) -> dict:
     try:
         redis_client = _get_redis()
 
@@ -133,7 +144,9 @@ async def eval_stats() -> dict:
 # GET /debug/search  — Trace lengkap RAG pipeline
 # ---------------------------------------------------------------------------
 @router.get("/debug/search")
-async def debug_search(q: str, n: int = 10, show_vectors: bool = False) -> dict:
+async def debug_search(
+    q: str, n: int = 10, show_vectors: bool = False, _: None = Depends(_require_internal_key)
+) -> dict:
     """Trace RAG pipeline secara transparan, termasuk embedding vector."""
     vs = rag_module.get_vector_store()
     if not vs:

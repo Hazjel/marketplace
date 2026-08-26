@@ -2,13 +2,13 @@ import asyncio
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.recommend import router as recommend_router
 from collaborative.scheduler import cf_retrain_loop, retrain_once
 from collaborative.svd import load_model_from_disk
-from config import CORS_ALLOWED_ORIGINS
+from config import CORS_ALLOWED_ORIGINS, INTERNAL_SERVICE_KEY
 from utils.cache import (
     get_cached_products,
     product_cache_refresh_loop,
@@ -110,8 +110,16 @@ async def health():
     }
 
 
+def _require_internal_key(x_internal_key: str | None = Header(default=None)) -> None:
+    """Sebelumnya endpoint ini bisa dipicu SIAPA PUN -- reachable langsung
+    lewat port 8002 yang masih dipublish ke host (C1 Docker hardening belum
+    di-deploy). Pola sama dengan chat-service/api/store_assistant.py."""
+    if not INTERNAL_SERVICE_KEY or x_internal_key != INTERNAL_SERVICE_KEY:
+        raise HTTPException(status_code=403, detail="Akses ditolak")
+
+
 @app.post("/internal/retrain")
-async def trigger_retrain():
+async def trigger_retrain(_: None = Depends(_require_internal_key)):
     """Trigger retrain manual (testing/debug) -- bukan dipanggil rutin, ada scheduler-nya sendiri."""
     trained = await retrain_once()
     return {"trained": trained}
