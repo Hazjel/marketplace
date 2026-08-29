@@ -353,6 +353,7 @@ onMounted(async () => {
     transaction.value.buyer_id = user.value?.buyer?.id
     transaction.value.products = store.products.map((p) => ({
       product_id: p.id,
+      variant_id: p.variant_id || null,
       qty: p.quantity
     }))
   }

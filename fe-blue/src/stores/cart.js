@@ -157,7 +157,17 @@ export const useCartStore = defineStore('cart', {
         this.carts.push(storeCart)
       }
 
-      const existing = storeCart.products.find((p) => p.id === product.id)
+      // Cocokkan product_id DAN variant_id -- sebelumnya cuma p.id, jadi
+      // menambahkan Varian A lalu Varian B dari produk yang SAMA
+      // ke-merge jadi satu baris (quantity dijumlahkan), tetap memakai
+      // variant_id/price dari yang pertama kali ditambahkan. Backend
+      // sekarang mewajibkan variant_id eksplisit untuk produk bervarian
+      // (lihat TransactionRepository::resolveVariant()), jadi baris cart
+      // yang keliru begini bisa membuat checkout menagih/mengambil stok
+      // varian yang salah.
+      const existing = storeCart.products.find(
+        (p) => p.id === product.id && (p.variant_id || null) === (product.variant_id || null)
+      )
 
       if (existing) {
         existing.quantity += qty
@@ -170,15 +180,26 @@ export const useCartStore = defineStore('cart', {
       this.save()
     },
 
+    // Cocokkan product_id DAN variant_id -- product.id saja cukup dulu
+    // karena _addToLocalCart menjamin cuma satu baris per product_id. Sejak
+    // dua varian dari produk yang sama boleh jadi dua baris terpisah,
+    // matcher yang sama dipakai di sini supaya +/-/hapus/update quantity
+    // tidak diam-diam menyasar baris varian yang salah.
+    _findCartLine(storeId, productId, variantId) {
+      const store = this.carts.find((s) => s.storeId === storeId)
+      return store?.products.find(
+        (p) => p.id === productId && (p.variant_id || null) === (variantId || null)
+      )
+    },
+
     // ─── Remove ───────────────────────────────────────────
-    async removeFromCart(storeId, productId) {
+    async removeFromCart(storeId, productId, variantId = null) {
       const store = this.carts.find((s) => s.storeId === storeId)
       if (!store) return
 
-      const product = store.products.find((p) => p.id === productId)
-      const variantId = product?.variant_id || null
-
-      store.products = store.products.filter((p) => p.id !== productId)
+      store.products = store.products.filter(
+        (p) => !(p.id === productId && (p.variant_id || null) === (variantId || null))
+      )
 
       if (store.products.length === 0) {
         this.carts = this.carts.filter((s) => s.storeId !== storeId)
@@ -199,9 +220,8 @@ export const useCartStore = defineStore('cart', {
     },
 
     // ─── Quantity ─────────────────────────────────────────
-    async decreaseQuantity(storeId, productId) {
-      const store = this.carts.find((s) => s.storeId === storeId)
-      const product = store?.products.find((p) => p.id === productId)
+    async decreaseQuantity(storeId, productId, variantId = null) {
+      const product = this._findCartLine(storeId, productId, variantId)
 
       if (product && product.quantity > 1) {
         product.quantity--
@@ -210,9 +230,8 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    async increaseQuantity(storeId, productId) {
-      const store = this.carts.find((s) => s.storeId === storeId)
-      const product = store?.products.find((p) => p.id === productId)
+    async increaseQuantity(storeId, productId, variantId = null) {
+      const product = this._findCartLine(storeId, productId, variantId)
       if (product) {
         product.quantity++
         this.save()
@@ -220,9 +239,8 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    async updateQuantity(storeId, productId, qty) {
-      const store = this.carts.find((s) => s.storeId === storeId)
-      const product = store?.products.find((p) => p.id === productId)
+    async updateQuantity(storeId, productId, qty, variantId = null) {
+      const product = this._findCartLine(storeId, productId, variantId)
       if (product) {
         product.quantity = qty
         this.save()
@@ -397,7 +415,11 @@ export const useCartStore = defineStore('cart', {
         if (this.stockValidation?.items) {
           for (const result of this.stockValidation.items) {
             for (const store of this.carts) {
-              const product = store.products.find((p) => p.id === result.product_id)
+              const product = store.products.find(
+                (p) =>
+                  p.id === result.product_id &&
+                  (p.variant_id || null) === (result.variant_id || null)
+              )
               if (product) {
                 product.stock = result.available
                 product._stockValid = result.valid
