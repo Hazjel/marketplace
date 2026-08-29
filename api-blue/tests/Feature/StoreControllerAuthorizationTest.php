@@ -119,6 +119,43 @@ class StoreControllerAuthorizationTest extends TestCase
         $this->assertDatabaseMissing('stores', ['name' => 'Toko Kedua Dari Admin']);
     }
 
+    public function test_register_store_blocks_a_second_store_created_via_admin_path(): void
+    {
+        // Cross-path hole: admin POST /api/store membuat Store + StoreBalance
+        // untuk target user_id, tapi TIDAK memberi role 'store' ke user itu
+        // (assignRole('store') cuma ada di registerStore()). Guard lama di
+        // registerStore() cuma cek hasRole('store') -- buyer yang toko-nya
+        // dibuatkan admin masih lolos guard itu dan bisa registerStore()
+        // lagi, menghasilkan toko kedua. Source of truth-nya sekarang
+        // keberadaan row Store (user->store()->exists()), bukan role.
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $buyer = User::factory()->create();
+
+        $this->actingAs($admin, 'sanctum')->postJson('/api/store', [
+            'user_id' => $buyer->id,
+            'name' => 'Toko Dibuatkan Admin',
+            'logo' => UploadedFile::fake()->image('logo.png'),
+            'about' => 'Deskripsi',
+            'phone' => '081200000000',
+            'address_id' => 1,
+            'city' => 'Jakarta',
+            'address' => 'Jl Sudirman',
+            'postal_code' => '12345',
+        ])->assertStatus(201);
+
+        // Buyer belum punya role 'store' -- konfirmasi premis skenario ini.
+        $this->assertFalse($buyer->fresh()->hasRole('store'));
+
+        $this->actingAs($buyer, 'sanctum')->postJson('/api/register-store', [
+            'name' => 'Toko Kedua Buyer',
+            'phone' => '081200000001',
+        ])->assertStatus(400);
+
+        $this->assertSame(1, Store::where('user_id', $buyer->id)->count());
+        $this->assertDatabaseMissing('stores', ['name' => 'Toko Kedua Buyer']);
+    }
+
     public function test_seller_cannot_update_another_sellers_store(): void
     {
         [$sellerA, $storeA] = $this->seller();
@@ -199,6 +236,40 @@ class StoreControllerAuthorizationTest extends TestCase
 
         // Toko nonaktif harus hilang dari storefront publik.
         $this->getJson("/api/store/{$store->id}")->assertJson(['success' => true, 'data' => null]);
+    }
+
+    public function test_store_destroy_flushes_the_product_listing_cache(): void
+    {
+        // KOREKSI catatan sebelumnya: product/all/paginated SUDAH aktif
+        // (routes/api.php:65), bukan dead code seperti yang salah
+        // disimpulkan di commit 547b78e0 -- cache 600 detik-nya live.
+        // getAll() query-nya sendiri sudah benar memfilter
+        // store.is_active, jadi satu-satunya cara produk toko nonaktif
+        // tetap muncul di sini adalah lewat CACHE yang belum di-flush.
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        [$seller, $store] = $this->seller();
+
+        $parent = ProductCategory::create(['name' => 'G', 'slug' => 'g-cache-flush', 'description' => 'G']);
+        $category = ProductCategory::create([
+            'name' => 'H', 'slug' => 'h-cache-flush', 'description' => 'H', 'parent_id' => $parent->id,
+        ]);
+        Product::create([
+            'store_id' => $store->id, 'product_category_id' => $category->id,
+            'name' => 'Produk Sebelum Nonaktif', 'slug' => 'produk-sebelum-nonaktif',
+            'description' => 'D', 'condition' => 'new', 'price' => 10000, 'weight' => 100, 'stock' => 1,
+        ]);
+
+        // Warm cache-nya selagi toko masih aktif.
+        $this->getJson('/api/product/all/paginated?row_per_page=10')
+            ->assertJsonFragment(['name' => 'Produk Sebelum Nonaktif']);
+
+        $this->actingAs($admin, 'sanctum')->deleteJson("/api/store/{$store->id}")->assertStatus(200);
+
+        // Tanpa flush, ini akan tetap mengembalikan hasil cache lama
+        // (produk yang sekarang harusnya sudah tersembunyi).
+        $this->getJson('/api/product/all/paginated?row_per_page=10')
+            ->assertJsonMissing(['name' => 'Produk Sebelum Nonaktif']);
     }
 
     public function test_non_admin_cannot_verify_a_store(): void

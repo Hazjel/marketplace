@@ -314,13 +314,21 @@ class StoreController extends Controller implements HasMiddleware
             'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
+        $user = Auth::user();
+
+        // Source of truth-nya keberadaan row Store, bukan role 'store'.
+        // Admin POST /api/store (lihat store() di atas) membuat Store +
+        // StoreBalance tapi TIDAK memberi role 'store' ke target user --
+        // jadi buyer yang toko-nya dibuatkan admin masih lolos hasRole()
+        // check di sini dan bisa registerStore() lagi, menghasilkan toko
+        // kedua persis skenario yang barusan ditutup di store(). Role
+        // check dipertahankan sebagai defense tambahan, bukan diganti.
+        if ($user->store()->exists() || $user->hasRole('store')) {
+            return ResponseHelper::jsonResponse(false, 'Anda sudah memiliki toko.', null, 400);
+        }
+
         try {
             DB::beginTransaction();
-            $user = Auth::user();
-
-            if ($user->hasRole('store')) {
-                return ResponseHelper::jsonResponse(false, 'Anda sudah memiliki toko.', null, 400);
-            }
 
             // Create Store
             $store = $user->store()->create([
