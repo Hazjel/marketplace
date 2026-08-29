@@ -195,14 +195,21 @@ pipeline {
                             for required in \
                                 node_modules/.bin/eslint \
                                 node_modules/.bin/vitest \
-                                node_modules/.bin/vite \
-                                node_modules/@eslint/js/index.js
+                                node_modules/.bin/vite
                             do
                                 if [ ! -e "$required" ]; then
                                     echo "npm ci integrity check gagal: missing $required"
                                     install_ok=false
                                 fi
                             done
+
+                            if ! node --input-type=module \
+                                -e "await import('@eslint/js')" \
+                                >/dev/null 2>&1
+                            then
+                                echo "npm ci integrity check gagal: @eslint/js tidak dapat di-import"
+                                install_ok=false
+                            fi
 
                             if [ "$install_ok" = true ]; then
                                 break
