@@ -25,7 +25,7 @@ class TransactionDetailRepository implements TransactionDetailRepositoryInterfac
             // resolved dari varian yang dibeli (lewat resolveVariant()) --
             // JANGAN derive ulang dari $product->price di sini, itu selalu
             // harga varian termurah kalau produknya punya varian.
-            $unitPrice = $data['unit_price'] ?? Product::find($data['product_id'])?->price ?? 0;
+            $unitPrice = $data['unit_price'] ?? Product::find($data['product_id'])->price ?? 0;
             $transactionDetail->subtotal = $unitPrice * $data['qty'];
 
             $transactionDetail->save();

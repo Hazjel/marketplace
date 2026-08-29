@@ -6,6 +6,7 @@ use App\Interfaces\ProductRepositoryInterface;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductVariantMongo;
+use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -302,11 +303,16 @@ class ProductRepository implements ProductRepositoryInterface
                 // varian yang TERSISA) jadi permanen lebih rendah dari yang
                 // seharusnya, tanpa ada error yang terlihat di mana pun.
                 if (! empty($idsToDelete)) {
+                    // Subquery eksplisit, bukan whereHas('transaction', ...) --
+                    // Larastan tidak mengenali relation TransactionDetail::
+                    // transaction() dari metadata model saat ini. Semantiknya
+                    // sama persis: variant direferensikan AND transaksinya
+                    // belum stock_restored_at AND belum completed.
                     $blockingReference = TransactionDetail::whereIn('variant_id', $idsToDelete)
-                        ->whereHas('transaction', function ($q) {
-                            $q->whereNull('stock_restored_at')
-                                ->where('delivery_status', '!=', 'completed');
-                        })
+                        ->whereIn('transaction_id', Transaction::query()
+                            ->select('id')
+                            ->whereNull('stock_restored_at')
+                            ->where('delivery_status', '!=', 'completed'))
                         ->exists();
 
                     if ($blockingReference) {

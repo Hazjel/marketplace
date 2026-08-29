@@ -1255,12 +1255,6 @@ parameters:
 			path: app/Repositories/BuyerRepository.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\ProductVariantMongo\:\:\$stock\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/CartRepository.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
 			identifier: property.notFound
 			count: 4

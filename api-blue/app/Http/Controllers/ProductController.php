@@ -8,6 +8,7 @@ use App\Http\Requests\ProductUpdateRequest;
 use App\Http\Resources\PaginateResource;
 use App\Http\Resources\ProductResource;
 use App\Interfaces\ProductRepositoryInterface;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -119,7 +120,7 @@ class ProductController extends Controller implements HasMiddleware
         // muncul di toko kompetitor. update()/destroy() di bawah sudah
         // punya pengecekan serupa -- store() sebelumnya tidak.
         if (! auth()->user()->hasRole('admin')) {
-            $ownStoreId = auth()->user()->store?->id;
+            $ownStoreId = Store::where('user_id', auth()->id())->value('id');
             if (! $ownStoreId) {
                 return ResponseHelper::jsonResponse(false, 'Anda belum memiliki toko', null, 403);
             }
