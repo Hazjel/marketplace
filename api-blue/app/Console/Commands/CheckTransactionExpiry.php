@@ -43,6 +43,14 @@ class CheckTransactionExpiry extends Command
         }
 
         foreach ($expiredTransactions as $transaction) {
+            // Kalau restoreStock() di bawah mengubah Mongo lalu sesuatu
+            // SETELAHNYA di closure ini gagal (atau closure itu sendiri
+            // gagal setelah restoreStock() sukses), DB::transaction() di
+            // bawah rollback SQL tapi TIDAK menyentuh Mongo -- restoreStock()
+            // sendiri tidak lagi jadi compensation boundary mandiri, lihat
+            // docblock-nya. Kompensasi jadi tanggung jawab try/catch ini.
+            $mongoAdjustments = [];
+
             try {
                 $this->info("Processing Expired Transaction: {$transaction->code}");
                 Log::info("SCHEDULER: Expiring Transaction {$transaction->code}");
@@ -53,7 +61,7 @@ class CheckTransactionExpiry extends Command
                 // manual sudah mengubahnya jadi paid di antara query di atas
                 // dan baris ini, jangan sampai scheduler menimpanya balik
                 // jadi failed dan mengembalikan stok barang yang sudah terjual.
-                DB::transaction(function () use ($transaction, $transactionRepository) {
+                DB::transaction(function () use ($transaction, $transactionRepository, &$mongoAdjustments) {
                     $locked = Transaction::where('id', $transaction->id)->lockForUpdate()->first();
 
                     if (! $locked || ! in_array($locked->payment_status, ['pending', 'unpaid'])) {
@@ -63,11 +71,12 @@ class CheckTransactionExpiry extends Command
                     $locked->payment_status = 'failed';
                     $locked->save();
 
-                    $transactionRepository->restoreStock($locked);
+                    $transactionRepository->restoreStock($locked, $mongoAdjustments);
                 });
 
                 $this->info("Transaction {$transaction->code} expired and stock restored.");
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
+                $transactionRepository->compensateStockRestoreRollback($mongoAdjustments);
                 Log::error("SCHEDULER ERROR processing {$transaction->code}: ".$e->getMessage());
                 $this->error("Error processing {$transaction->code}: ".$e->getMessage());
             }

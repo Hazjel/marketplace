@@ -319,6 +319,19 @@ class TransactionRepository implements TransactionRepositoryInterface
         }
     }
 
+    /**
+     * Public entry point untuk caller restoreStock() mengompensasi Mongo
+     * setelah OUTER transaction mereka sendiri rollback -- lihat docblock
+     * restoreStock() untuk kenapa restoreStock() sendiri tidak lagi boleh
+     * jadi compensation boundary mandiri. $sign selalu -1 di sini (restoreStock
+     * menaikkan stok varian; rollback harus menurunkannya lagi) supaya
+     * caller tidak perlu tahu/salah pilih arah sign.
+     */
+    public function compensateStockRestoreRollback(array $mongoAdjustments): void
+    {
+        $this->compensateMongoStock($mongoAdjustments, sign: -1);
+    }
+
     public function create(array $data)
     {
         DB::beginTransaction();
@@ -519,8 +532,17 @@ class TransactionRepository implements TransactionRepositoryInterface
             return $transaction->fresh(['buyer', 'store', 'transactionDetails.product']);
 
         } catch (\Throwable $e) {
-            DB::rollBack();
+            // Kompensasi Mongo SEBELUM rollback SQL, bukan sesudah --
+            // DB::rollBack() melepas row lock Product yang dipegang di loop
+            // atas, dan lock itu satu-satunya penjamin serialisasi mutasi
+            // Mongo (lihat komentar di loop). Kalau rollback jalan dulu,
+            // transaksi lain bisa mengunci Product, membaca stok Mongo yang
+            // masih "salah" (belum dikompensasi), dan mutasinya sendiri bisa
+            // ketiban timpa oleh compensateMongoStock() di bawah -- lost
+            // update, karena mutasi Mongo di sini read -> modify -> save(),
+            // bukan atomic increment.
             $this->compensateMongoStock($mongoAdjustments, sign: 1); // decrement gagal -> kembalikan (+)
+            DB::rollBack();
             $errorMsg = 'REPO FATAL ERROR: '.$e->getMessage()."\n".$e->getTraceAsString();
             Log::error($errorMsg);
             // file_put_contents(storage_path('logs/debug.txt'), $errorMsg, FILE_APPEND); // Reverted original or comment out
@@ -531,13 +553,14 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function delete(string $id)
     {
         DB::beginTransaction();
+        $mongoAdjustments = [];
 
         try {
             $transaction = Transaction::find($id);
 
             // Restore stock if transaction is being deleted and was holding stock (pending/unpaid)
             if (in_array($transaction->payment_status, ['pending', 'unpaid'])) {
-                $this->restoreStock($transaction);
+                $this->restoreStock($transaction, $mongoAdjustments);
             }
 
             $transaction->delete();
@@ -545,8 +568,9 @@ class TransactionRepository implements TransactionRepositoryInterface
             DB::commit();
 
             return $transaction;
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
+            $this->compensateStockRestoreRollback($mongoAdjustments);
 
             throw new Exception($e->getMessage());
         }
@@ -562,70 +586,82 @@ class TransactionRepository implements TransactionRepositoryInterface
      * Sebelumnya lockForUpdate() hanya pada baris Product -- benar untuk
      * aritmatika +=, tapi tidak mencegah transaksi yang SAMA di-restore
      * dua kali oleh dua caller berbeda yang kebetulan tumpang tindih.
-     * Metode ini dulu juga menelan semua exception jadi Log::error, jadi
-     * caller yang membungkusnya dalam DB::transaction sendiri tidak
-     * pernah tahu ada kegagalan untuk di-rollback.
+     *
+     * PENTING soal Mongo compensation: method ini TIDAK LAGI jadi
+     * compensation boundary mandiri untuk mutasi stok varian yang
+     * dilakukannya. Semua caller (delete(), updateStatus(), webhook
+     * Midtrans, checkPaymentStatus, scheduler transaction:check-expiry)
+     * memanggil ini dari DALAM transaksi SQL milik mereka sendiri yang
+     * masih punya operasi lain SETELAHNYA (refund escrow, save status,
+     * dst). Kalau restoreStock() sendiri yang mengompensasi begitu method
+     * ini kembali sukses, lalu OPERASI SETELAHNYA di caller gagal dan
+     * OUTER transaction rollback, mutasi Mongo yang sudah dikompensasi
+     * (atau belum -- tergantung timing) jadi tidak sinkron dengan SQL
+     * yang barusan di-rollback: stok varian Mongo tetap ter-restore
+     * permanen padahal seluruh transaksi termasuk stock_restored_at-nya
+     * batal.
+     *
+     * Kontrak baru: caller WAJIB menyediakan array $mongoAdjustments
+     * (passed by reference, dipakai untuk logging/kompensasi), dan WAJIB
+     * memanggil compensateStockRestoreRollback($mongoAdjustments) di
+     * blok catch mereka sendiri SETELAH DB::rollBack() kalau operasi
+     * OUTER (bukan cuma restoreStock() ini) gagal -- lihat updateStatus()
+     * untuk contoh. restoreStock() sendiri tidak menangkap exception apa
+     * pun lagi; propagate apa adanya ke caller, yang memang sudah dalam
+     * try/catch mereka masing-masing.
      */
-    public function restoreStock(Transaction $transaction): void
+    public function restoreStock(Transaction $transaction, array &$mongoAdjustments): void
     {
-        // Gap sama seperti create() (lihat compensateMongoStock) tapi
-        // arah kebalikan: kalau baris SQL SETELAH satu varian sudah
-        // di-increment gagal, DB::transaction() di bawah rollback sisi
-        // MySQL saja -- stock_restored_at gagal tersimpan, jadi transaksi
-        // ini masih eligible di-retry (mis. scheduler jalan lagi) dan
-        // varian yang sama bisa ke-increment DUA KALI (stok mengembang).
-        $mongoAdjustments = [];
+        DB::transaction(function () use ($transaction, &$mongoAdjustments) {
+            $locked = Transaction::where('id', $transaction->id)->lockForUpdate()->first();
 
-        try {
-            DB::transaction(function () use ($transaction, &$mongoAdjustments) {
-                $locked = Transaction::where('id', $transaction->id)->lockForUpdate()->first();
+            if (! $locked || $locked->stock_restored_at !== null) {
+                return;
+            }
 
-                if (! $locked || $locked->stock_restored_at !== null) {
-                    return;
+            $locked->load('transactionDetails');
+
+            foreach ($locked->transactionDetails as $detail) {
+                $product = Product::where('id', $detail->product_id)->lockForUpdate()->first();
+                if ($product) {
+                    $product->stock += $detail->qty;
+                    $product->save();
+                    Log::info("Product {$product->id} RESTORED: Stock -> {$product->stock}");
                 }
 
-                $locked->load('transactionDetails');
-
-                foreach ($locked->transactionDetails as $detail) {
-                    $product = Product::where('id', $detail->product_id)->lockForUpdate()->first();
-                    if ($product) {
-                        $product->stock += $detail->qty;
-                        $product->save();
-                        Log::info("Product {$product->id} RESTORED: Stock -> {$product->stock}");
-                    }
-
-                    // Simetris dengan pengurangan stok varian di create() --
-                    // tanpa ini, pembatalan/expiry transaksi yang membeli
-                    // varian tertentu cuma mengembalikan agregat produk,
-                    // stok varian spesifiknya tetap hilang permanen.
-                    if ($detail->variant_id) {
-                        $variant = ProductVariantMongo::find($detail->variant_id);
-                        if ($variant) {
-                            $variant->stock += $detail->qty;
-                            $variant->save();
-                            $mongoAdjustments[] = ['variant_id' => $variant->id, 'qty' => $detail->qty];
-                            Log::info("Variant {$variant->id} RESTORED: Stock -> {$variant->stock}");
-                        }
+                // Simetris dengan pengurangan stok varian di create() --
+                // tanpa ini, pembatalan/expiry transaksi yang membeli
+                // varian tertentu cuma mengembalikan agregat produk,
+                // stok varian spesifiknya tetap hilang permanen.
+                if ($detail->variant_id) {
+                    $variant = ProductVariantMongo::find($detail->variant_id);
+                    if ($variant) {
+                        $variant->stock += $detail->qty;
+                        $variant->save();
+                        $mongoAdjustments[] = ['variant_id' => $variant->id, 'qty' => $detail->qty];
+                        Log::info("Variant {$variant->id} RESTORED: Stock -> {$variant->stock}");
                     }
                 }
+            }
 
-                $locked->stock_restored_at = now();
-                $locked->save();
+            $locked->stock_restored_at = now();
+            $locked->save();
 
-                // Sinkronkan instance yang dipegang caller supaya perubahan
-                // yang mereka simpan setelah pemanggilan ini (mis. payment_status)
-                // tidak menimpa balik stock_restored_at dengan versi lama di memori.
-                $transaction->stock_restored_at = $locked->stock_restored_at;
-            });
-        } catch (\Throwable $e) {
-            $this->compensateMongoStock($mongoAdjustments, sign: -1); // increment gagal -> kurangi lagi
-            throw $e;
-        }
+            // Sinkronkan instance yang dipegang caller supaya perubahan
+            // yang mereka simpan setelah pemanggilan ini (mis. payment_status)
+            // tidak menimpa balik stock_restored_at dengan versi lama di memori.
+            $transaction->stock_restored_at = $locked->stock_restored_at;
+        });
     }
 
     public function updateStatus(string $id, array $data)
     {
         DB::beginTransaction();
+        // Dipakai kalau restoreStock() di bawah mengubah Mongo lalu operasi
+        // SETELAHNYA di transaksi outer ini (refund escrow, save) gagal --
+        // lihat docblock restoreStock() untuk kenapa restoreStock() sendiri
+        // tidak lagi mengompensasi dirinya sendiri.
+        $mongoAdjustments = [];
 
         try {
             // Lock: seller bisa mengirim update shipping dua kali nyaris
@@ -647,7 +683,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 in_array($data['delivery_status'], ['cancelled', 'failed']) &&
                 ! in_array($transaction->delivery_status, ['cancelled', 'failed'])) {
 
-                $this->restoreStock($transaction);
+                $this->restoreStock($transaction, $mongoAdjustments);
 
                 // Refund escrow: kembalikan pending_balance jika payment sudah paid
                 if ($transaction->payment_status === 'paid') {
@@ -673,8 +709,9 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'store.user',
                 'transactionDetails.product',
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
+            $this->compensateStockRestoreRollback($mongoAdjustments);
 
             throw new Exception($e->getMessage());
         }

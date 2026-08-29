@@ -20,7 +20,9 @@ interface TransactionRepositoryInterface
 
     public function delete(string $id);
 
-    public function restoreStock(Transaction $transaction);
+    public function restoreStock(Transaction $transaction, array &$mongoAdjustments);
+
+    public function compensateStockRestoreRollback(array $mongoAdjustments);
 
     public function completeTransaction(string $id, ?string $receivingProof = null): Transaction;
 }

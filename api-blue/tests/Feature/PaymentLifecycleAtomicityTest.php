@@ -126,8 +126,9 @@ class PaymentLifecycleAtomicityTest extends TestCase
         $stockAfterCheckout = $this->product->fresh()->stock;
 
         $repo = app(TransactionRepositoryInterface::class);
-        $repo->restoreStock($transaction->fresh());
-        $repo->restoreStock($transaction->fresh());
+        $mongoAdjustments = [];
+        $repo->restoreStock($transaction->fresh(), $mongoAdjustments);
+        $repo->restoreStock($transaction->fresh(), $mongoAdjustments);
 
         $this->assertSame($stockAfterCheckout + 2, $this->product->fresh()->stock);
     }
@@ -136,7 +137,8 @@ class PaymentLifecycleAtomicityTest extends TestCase
     {
         $transaction = $this->makeTransaction('LIFE_002', 'failed');
 
-        app(TransactionRepositoryInterface::class)->restoreStock($transaction);
+        $mongoAdjustments = [];
+        app(TransactionRepositoryInterface::class)->restoreStock($transaction, $mongoAdjustments);
 
         $this->assertNotNull($transaction->fresh()->stock_restored_at);
     }

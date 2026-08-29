@@ -60,74 +60,90 @@ class MidtransController extends Controller
         // "unpaid", sama-sama lolos guard duplikat, lalu sama-sama mengkredit
         // saldo penjual.
         $events = [];
+        // Kalau restoreStock() di bawah sukses mengubah Mongo lalu COMMIT
+        // closure DB::transaction() ini sendiri gagal (mis. deadlock saat
+        // commit), Laravel rollback SQL-nya tapi tidak menyentuh Mongo --
+        // restoreStock() tidak lagi jadi compensation boundary mandiri,
+        // lihat docblock-nya. try/catch di luar closure ini yang menutupnya.
+        $mongoAdjustments = [];
 
-        $outcome = DB::transaction(function () use ($request, $transactionCode, &$events) {
-            $transaction = Transaction::where('code', $transactionCode)->lockForUpdate()->first();
+        try {
+            $outcome = DB::transaction(function () use ($request, $transactionCode, &$events, &$mongoAdjustments) {
+                $transaction = Transaction::where('code', $transactionCode)->lockForUpdate()->first();
 
-            if (! $transaction) {
-                return 'not_found';
-            }
+                if (! $transaction) {
+                    return 'not_found';
+                }
 
-            // Pertahanan berlapis: signature sudah mencakup nominal, tapi
-            // cocokkan lagi dengan yang tersimpan.
-            $expectedAmount = (int) round((float) $transaction->grand_total);
-            $receivedAmount = (int) round((float) ($request->gross_amount ?? 0));
+                // Pertahanan berlapis: signature sudah mencakup nominal, tapi
+                // cocokkan lagi dengan yang tersimpan.
+                $expectedAmount = (int) round((float) $transaction->grand_total);
+                $receivedAmount = (int) round((float) ($request->gross_amount ?? 0));
 
-            if ($expectedAmount !== $receivedAmount) {
-                Log::error('Midtrans amount mismatch', [
-                    'expected' => $expectedAmount,
-                    'received' => $receivedAmount,
-                    'transaction' => $transactionCode,
-                ]);
+                if ($expectedAmount !== $receivedAmount) {
+                    Log::error('Midtrans amount mismatch', [
+                        'expected' => $expectedAmount,
+                        'received' => $receivedAmount,
+                        'transaction' => $transactionCode,
+                    ]);
 
-                return 'amount_mismatch';
-            }
+                    return 'amount_mismatch';
+                }
 
-            $newStatus = MidtransPaymentStatusInterpreter::interpret(
-                $request->transaction_status,
-                $request->payment_type,
-                $request->fraud_status
-            );
+                $newStatus = MidtransPaymentStatusInterpreter::interpret(
+                    $request->transaction_status,
+                    $request->payment_type,
+                    $request->fraud_status
+                );
 
-            if ($newStatus === null) {
-                return 'ignored';
-            }
+                if ($newStatus === null) {
+                    return 'ignored';
+                }
 
-            // Webhook tidak selalu datang berurutan. Transaksi yang sudah
-            // dibayar tidak boleh mundur: webhook "failed" yang telat dulu bisa
-            // menimpanya menjadi failed lalu mengembalikan stok, padahal saldo
-            // penjual sudah terlanjur dikredit.
-            if ($transaction->payment_status === 'paid' && $newStatus !== 'paid') {
-                Log::warning('Webhook telat diabaikan: transaksi sudah dibayar', [
-                    'transaction' => $transactionCode,
-                    'status_diminta' => $newStatus,
-                ]);
-
-                return 'ignored';
-            }
-
-            if ($newStatus === 'paid') {
-                if ($transaction->payment_status === 'paid') {
-                    Log::info('Duplicate webhook ignored for: '.$transactionCode);
+                // Webhook tidak selalu datang berurutan. Transaksi yang sudah
+                // dibayar tidak boleh mundur: webhook "failed" yang telat dulu bisa
+                // menimpanya menjadi failed lalu mengembalikan stok, padahal saldo
+                // penjual sudah terlanjur dikredit.
+                if ($transaction->payment_status === 'paid' && $newStatus !== 'paid') {
+                    Log::warning('Webhook telat diabaikan: transaksi sudah dibayar', [
+                        'transaction' => $transactionCode,
+                        'status_diminta' => $newStatus,
+                    ]);
 
                     return 'ignored';
                 }
 
-                $transaction->update(['payment_status' => 'paid']);
-                $this->escrowRepository->credit($transaction);
-            } elseif ($newStatus === 'unpaid') {
-                $transaction->update(['payment_status' => 'unpaid']);
-            } elseif ($newStatus === 'failed') {
-                $transaction->update(['payment_status' => 'failed']);
-                $this->transactionRepository->restoreStock($transaction);
-            }
+                if ($newStatus === 'paid') {
+                    if ($transaction->payment_status === 'paid') {
+                        Log::info('Duplicate webhook ignored for: '.$transactionCode);
 
-            // Event ditahan sampai commit. Dipancarkan di dalam transaksi,
-            // pendengarnya bisa menyiarkan status yang ternyata di-rollback.
-            $events[] = new TransactionStatusUpdated($transaction->fresh());
+                        return 'ignored';
+                    }
 
-            return 'updated';
-        });
+                    $transaction->update(['payment_status' => 'paid']);
+                    $this->escrowRepository->credit($transaction);
+                } elseif ($newStatus === 'unpaid') {
+                    $transaction->update(['payment_status' => 'unpaid']);
+                } elseif ($newStatus === 'failed') {
+                    $transaction->update(['payment_status' => 'failed']);
+                    $this->transactionRepository->restoreStock($transaction, $mongoAdjustments);
+                }
+
+                // Event ditahan sampai commit. Dipancarkan di dalam transaksi,
+                // pendengarnya bisa menyiarkan status yang ternyata di-rollback.
+                $events[] = new TransactionStatusUpdated($transaction->fresh());
+
+                return 'updated';
+            });
+        } catch (\Throwable $e) {
+            $this->transactionRepository->compensateStockRestoreRollback($mongoAdjustments);
+            Log::error('Midtrans callback gagal setelah restoreStock() -- Mongo dikompensasi', [
+                'transaction' => $transactionCode,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
 
         foreach ($events as $event) {
             event($event);

@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\ShippingGatewayInterface;
+use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductVariantMongo;
 use App\Models\Store;
+use App\Models\Transaction;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -14,6 +17,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Support\ExplodingRefundEscrowRepository;
 use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
@@ -276,5 +280,97 @@ class VariantCheckoutTest extends TestCase
         $this->assertSame(5, ProductVariantMongo::find($ctx['variantMahal']->id)->stock); // TIDAK berkurang
         $this->assertSame(15, $ctx['product']->fresh()->stock); // agregat juga tidak berkurang
         $this->assertSame(1, $lowStock->fresh()->stock);
+    }
+
+    /**
+     * restoreStock() sendiri BUKAN lagi compensation boundary mandiri --
+     * kalau ia sukses (Mongo variant stock sudah di-increment, SQL sudah
+     * commit lewat DB::transaction() bersarangnya) tetapi operasi
+     * SETELAHNYA di transaksi outer yang sama gagal (di sini: escrow
+     * refund di TransactionRepository::updateStatus()), seluruh outer
+     * transaction rollback -- termasuk stock_restored_at dan products.stock
+     * SQL. Tanpa perbaikan ini, mutasi Mongo yang sudah dibuat restoreStock()
+     * tetap permanen walau transaksinya sendiri batal dan stock_restored_at
+     * tidak pernah tersimpan (transaksi masih "eligible" di-restore lagi).
+     */
+    /**
+     * ProductVariantMongo casts price sebagai 'decimal:2' -- Laravel decimal
+     * cast SELALU mengembalikan string ("150000.00"), bukan angka, baik di
+     * PHP maupun (sebelum perbaikan ini) di JSON response ProductVariantResource.
+     * Mobile mem-parsing price varian dengan int.tryParse() yang gagal untuk
+     * string berdesimal ("150000.00" -> null -> fallback 0), jadi Product
+     * Detail varian bisa tampil Rp0. ProductResource sudah menormalisasi ini
+     * untuk products.price ((float)(string)$this->price); ProductVariantResource
+     * dulu tidak.
+     */
+    public function test_variant_price_in_product_detail_response_is_numeric_not_a_decimal_string(): void
+    {
+        $ctx = $this->checkoutContext();
+
+        $response = $this->getJson("/api/product/slug/{$ctx['product']->slug}");
+
+        $response->assertStatus(200);
+        $variants = collect($response->json('data.variants'));
+        $this->assertCount(2, $variants);
+
+        $mahal = $variants->firstWhere('id', (string) $ctx['variantMahal']->id);
+        $this->assertNotNull($mahal, 'Varian mahal harus ada di response.');
+        // json_encode() PHP membuang ".0" untuk float tanpa pecahan (tanpa
+        // JSON_PRESERVE_ZERO_FRACTION), jadi 150000.0 bisa ke-decode balik
+        // sebagai PHP int di sisi test -- yang penting BUKAN string decimal
+        // seperti "150000.00" (bug aslinya), bukan soal int-vs-float.
+        $this->assertIsNotString($mahal['price'], 'price varian harus numeric, bukan decimal string seperti "150000.00".');
+        $this->assertEquals(150000, $mahal['price']);
+        $this->assertIsInt($mahal['stock']);
+        $this->assertSame(5, $mahal['stock']);
+    }
+
+    public function test_outer_transaction_failure_after_restore_stock_succeeds_still_compensates_mongo(): void
+    {
+        $ctx = $this->checkoutContext();
+
+        $payload = $this->basePayload() + [
+            'products' => [
+                ['product_id' => $ctx['product']->id, 'variant_id' => $ctx['variantMahal']->id, 'qty' => 2],
+            ],
+        ];
+        $checkoutResponse = $this->actingAs($ctx['buyerUser'], 'sanctum')
+            ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
+            ->postJson('/api/transaction', $payload);
+        $checkoutResponse->assertStatus(201);
+
+        $this->assertSame(3, ProductVariantMongo::find($ctx['variantMahal']->id)->stock); // 5 - 2
+        $this->assertSame(13, $ctx['product']->fresh()->stock); // 15 - 2
+
+        $transactionId = $checkoutResponse->json('data.id');
+
+        // Delivery cancel + payment_status paid memicu updateStatus() ->
+        // restoreStock() (Mongo 3 -> 5, SUKSES) lalu escrow refund (DILEDAKKAN
+        // di sini oleh fake) -- seluruh method harus melempar, dan Mongo
+        // harus balik ke 5, bukan tetap di angka hasil restoreStock().
+        DB::table('transactions')->where('id', $transactionId)->update(['payment_status' => 'paid']);
+
+        $this->app->bind(EscrowRepositoryInterface::class, fn () => new ExplodingRefundEscrowRepository);
+        $repo = app(TransactionRepositoryInterface::class);
+
+        $threw = false;
+        try {
+            $repo->updateStatus($transactionId, ['delivery_status' => 'cancelled']);
+        } catch (\Throwable) {
+            $threw = true;
+        }
+
+        $this->assertTrue($threw, 'updateStatus() seharusnya melempar exception dari refund escrow yang diledakkan');
+
+        // Baris paling penting -- seluruh updateStatus() batal (SQL rollback,
+        // assert di bawah membuktikannya), jadi Mongo harus kembali ke
+        // state SEBELUM updateStatus() dipanggil (3), BUKAN tetap di 5
+        // (hasil restoreStock() yang sukses sendiri, tapi jadi tidak
+        // konsisten dengan SQL yang barusan di-rollback ke agregat 13).
+        // Tanpa perbaikan ini Mongo tetap nyangkut di 5.
+        $this->assertSame(3, ProductVariantMongo::find($ctx['variantMahal']->id)->stock);
+        $this->assertSame(13, $ctx['product']->fresh()->stock); // SQL rollback: tetap agregat sebelum updateStatus()
+        $this->assertNull(Transaction::find($transactionId)->stock_restored_at); // SQL rollback
+        $this->assertSame('paid', Transaction::find($transactionId)->payment_status); // delivery_status/save() juga rollback
     }
 }

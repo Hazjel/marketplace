@@ -304,6 +304,14 @@ class TransactionController extends Controller implements HasMiddleware
             Config::$isSanitized = config('midtrans.isSanitized');
             Config::$is3ds = config('midtrans.is3ds');
 
+            // Kalau restoreStock() di bawah sukses mengubah Mongo lalu COMMIT
+            // closure DB::transaction() ini sendiri gagal, rollback SQL tidak
+            // menyentuh Mongo -- restoreStock() tidak lagi jadi compensation
+            // boundary mandiri, lihat docblock-nya. catch di bawah menutupnya;
+            // aman dipanggil kosong kalau kegagalan terjadi sebelum
+            // restoreStock() sempat jalan sama sekali.
+            $mongoAdjustments = [];
+
             try {
                 // Panggilan keluar ke Midtrans TIDAK boleh terjadi sambil
                 // memegang row lock -- itu menahan lock selama durasi round-trip
@@ -324,7 +332,7 @@ class TransactionController extends Controller implements HasMiddleware
                 // perlu supaya keputusan "apakah perlu update" konsisten dengan apa
                 // yang benar-benar tersimpan saat lock didapat, bukan snapshot basi
                 // dari sebelum panggilan Midtrans.
-                $transaction = DB::transaction(function () use ($id, $transactionStatus, $paymentType, $fraudStatus) {
+                $transaction = DB::transaction(function () use ($id, $transactionStatus, $paymentType, $fraudStatus, &$mongoAdjustments) {
                     $locked = Transaction::where('id', $id)->lockForUpdate()->first();
 
                     $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus)
@@ -347,7 +355,7 @@ class TransactionController extends Controller implements HasMiddleware
                         $locked->save();
 
                         if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
-                            $this->transactionRepository->restoreStock($locked);
+                            $this->transactionRepository->restoreStock($locked, $mongoAdjustments);
                         }
                     }
 
@@ -359,6 +367,8 @@ class TransactionController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Status Payment Berhasil Diupdate', new TransactionResource($transaction), 200);
 
             } catch (\Exception $e) {
+                $this->transactionRepository->compensateStockRestoreRollback($mongoAdjustments);
+
                 // If Midtrans throws error (e.g. transaction not found there yet), Just return current.
                 return ResponseHelper::jsonResponse(true, 'Gagal cek Midtrans: '.$e->getMessage(), new TransactionResource($transaction), 200);
             }
