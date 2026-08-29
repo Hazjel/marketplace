@@ -16,7 +16,9 @@ class StoreUpdateRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'logo' => 'nullable|mimes:png,jpg|max:2048',
+            // Lihat komentar di StoreStoreRequest -- 'image' wajib di sini
+            // juga, bukan cuma 'mimes'.
+            'logo' => 'nullable|image|mimes:png,jpg|max:2048',
             'about' => 'required|string',
             'phone' => 'required|numeric|regex:/^08[0-9]{8,13}$/',
             'address_id' => 'required',

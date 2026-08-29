@@ -1,0 +1,10 @@
+line-length = 120
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = [
+    # Sama seperti chat-service/ruff.toml -- semua catch-all Exception di
+    # sini ada di startup retry/background retrain job, sengaja fail-open
+    # (log + lanjut, bukan meruntuhkan proses). Bukan celah keamanan.
+    "BLE001",
+]

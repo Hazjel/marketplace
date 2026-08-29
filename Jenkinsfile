@@ -26,21 +26,44 @@ pipeline {
             agent any
             steps {
                 script {
-                    // pollSCM cuma checkout HEAD, gak ada histori commit sebelumnya
-                    // di workspace secara default -> fetch depth cukup buat diff
-                    // terhadap commit sebelum HEAD saat ini
-                    sh 'git fetch --depth=2 origin main || true'
-                    def changed = sh(
-                        script: 'git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "ALL"',
-                        returnStdout: true
-                    ).trim()
+                    // HEAD~1..HEAD cuma benar kalau setiap push persis satu commit.
+                    // Push multi-commit (mis. merge fast-forward beberapa commit
+                    // sekaligus) membuat HEAD~1 cuma commit KEDUA-TERAKHIR dari
+                    // push itu -- file yang berubah di commit-commit sebelumnya
+                    // dalam push yang sama jadi tidak terdeteksi sama sekali.
+                    // Konsekuensinya nyata, bukan cuma soal skip test: stage
+                    // Deploy di bawah cuma nge-drop volume api_vendor kalau
+                    // BACKEND_CHANGED=true -- kalau composer.lock berubah di
+                    // commit yang tidak ke-diff, volume vendor lama (dependency
+                    // BELUM di-patch) tetap dipakai container baru.
+                    //
+                    // GIT_PREVIOUS_SUCCESSFUL_COMMIT (disediakan git plugin,
+                    // kosong kalau ini build sukses pertama di branch ini)
+                    // diff-nya menutupi SELURUH commit sejak build sukses
+                    // terakhir, berapa pun banyaknya, bukan cuma commit terakhir.
+                    sh 'git fetch --depth=100 origin main || true'
+                    def base = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+                    def changed
+                    if (!base) {
+                        changed = 'ALL'
+                        echo "Tidak ada GIT_PREVIOUS_SUCCESSFUL_COMMIT (build sukses pertama di branch ini) -- anggap semua berubah."
+                    } else {
+                        changed = sh(
+                            script: "git diff --name-only ${base} HEAD 2>/dev/null || echo 'ALL'",
+                            returnStdout: true
+                        ).trim()
+                    }
 
-                    // build pertama / histori dangkal -> HEAD~1 gak ada -> anggap semua berubah
+                    // 'ALL' juga fallback kalau base commit di atas ternyata tidak
+                    // reachable dari fetch depth ini (mis. histori sangat panjang
+                    // sejak build sukses terakhir) -- git diff exit non-zero -> echo 'ALL'.
                     env.BACKEND_CHANGED  = (changed == 'ALL' || changed.contains('api-blue/')).toString()
                     env.FRONTEND_CHANGED = (changed == 'ALL' || changed.contains('fe-blue/')).toString()
+                    env.CHAT_SERVICE_CHANGED = (changed == 'ALL' || changed.contains('chat-service/')).toString()
+                    env.RECOMMENDATION_CHANGED = (changed == 'ALL' || changed.contains('recommendation-service/')).toString()
 
                     echo "File berubah:\n${changed}"
-                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED}"
+                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED} | Chat service changed: ${env.CHAT_SERVICE_CHANGED} | Recommendation service changed: ${env.RECOMMENDATION_CHANGED}"
                 }
             }
         }
@@ -68,7 +91,15 @@ pipeline {
             }
             steps {
                 dir('api-blue') {
-                    sh 'composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-mongodb'
+                    sh 'composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-mongodb --ignore-platform-req=ext-sodium'
+                    // composer audit sengaja di sini (bukan stage terpisah) --
+                    // butuh composer.lock yang baru diresolve, dan agent ini
+                    // sudah punya composer binary-nya. Blocking: per commit
+                    // e543e1c3, composer audit sudah bersih (0 advisory) --
+                    // kalau kembali merah di sini artinya dependency BARU
+                    // yang punya CVE, bukan technical debt lama yang perlu
+                    // baseline seperti PHPStan.
+                    sh 'composer audit --no-interaction'
                     stash name: 'backend-vendor', includes: 'vendor/**'
                 }
             }
@@ -95,6 +126,7 @@ pipeline {
                         pecl install mongodb-2.3.3 redis-6.3.0 >/dev/null 2>&1
                         docker-php-ext-enable mongodb redis
                         vendor/bin/pint --test
+                        vendor/bin/phpstan analyse --memory-limit=1G --no-progress
                         cp .env.example .env
                         php artisan key:generate
                         php artisan test
@@ -120,7 +152,129 @@ pipeline {
                         npm run test -- --run
                         npm run build
                     '''
+                    // KOREKSI dari commit e543e1c3: klaim "production deps
+                    // sudah bersih" di situ SALAH -- @vueuse/head ada di
+                    // dependencies (bukan devDependencies), dan residual
+                    // 3 finding moderate/low dari @unhead/vue (lihat commit
+                    // e543e1c3 untuk analisis kenapa tidak di-force-downgrade)
+                    // ADA di situ. `npm audit --omit=dev` polos di sini
+                    // sudah dicoba: exit code 1, bukan 0 -- build pertama
+                    // akan merah permanen kalau tetap blocking penuh.
+                    //
+                    // --audit-level=high: exit code cuma nonzero untuk
+                    // high/critical (residual yang sudah dianalisis
+                    // moderate/low tidak ikut blocking, tapi CVE baru yang
+                    // high/critical tetap memblokir). devDependencies
+                    // (vite/vitest/eslint dst) tidak ikut dibundle ke output
+                    // production, jadi audit-nya dipisah dan non-blocking
+                    // sepenuhnya.
+                    sh 'npm audit --omit=dev --audit-level=high'
+                    sh 'npm audit --only=dev || true'
                 }
+            }
+        }
+
+        stage('Chat Service: Lint, Audit & Test') {
+            agent {
+                docker {
+                    // Sama dengan FROM di Dockerfile production kedua service
+                    // (python:3.11-slim) -- awalnya ditulis 3.12, ketahuan beda
+                    // dari runtime production saat review. pytest/Ruff/pip-audit
+                    // harus jalan di interpreter yang sama dengan yang benar-benar
+                    // dipakai container, bukan versi terbaru yang kebetulan ada.
+                    image 'python:3.11-slim'
+                }
+            }
+            when {
+                expression { env.CHAT_SERVICE_CHANGED == 'true' }
+            }
+            steps {
+                dir('chat-service') {
+                    sh '''
+                        pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
+                        ruff check .
+                        pytest tests/ -v
+                    '''
+                    // KOREKSI dari commit 23732e94: "|| true" di sini semula
+                    // dimaksudkan untuk 4 finding chromadb yang sudah
+                    // dianalisis (PYSEC-2026-311, CVE-2026-45830/45831/45833
+                    // -- semuanya di REST API server ChromaDB; kode ini cuma
+                    // pakai chromadb.PersistentClient embedded in-process,
+                    // diverifikasi ke rag/vectorstore.py, endpoint rentannya
+                    // tidak pernah ada untuk diserang; belum ada patched
+                    // version dari upstream). Tapi "|| true" polos bukan cuma
+                    // meredam 4 finding itu -- itu meredam SEMUA finding,
+                    // sekarang dan masa depan. CVE baru di httpx/redis/FastAPI
+                    // besok tetap bikin build hijau. --ignore-vuln menutup
+                    // persis 4 ID ini saja; exit code kembali nonzero begitu
+                    // ada finding lain.
+                    sh 'pip-audit -r requirements.txt --desc --ignore-vuln PYSEC-2026-311 --ignore-vuln CVE-2026-45830 --ignore-vuln CVE-2026-45831 --ignore-vuln CVE-2026-45833'
+                }
+            }
+        }
+
+        stage('Recommendation Service: Lint, Audit & Test') {
+            agent {
+                docker {
+                    // Sama dengan FROM di Dockerfile production kedua service
+                    // (python:3.11-slim) -- awalnya ditulis 3.12, ketahuan beda
+                    // dari runtime production saat review. pytest/Ruff/pip-audit
+                    // harus jalan di interpreter yang sama dengan yang benar-benar
+                    // dipakai container, bukan versi terbaru yang kebetulan ada.
+                    image 'python:3.11-slim'
+                }
+            }
+            when {
+                expression { env.RECOMMENDATION_CHANGED == 'true' }
+            }
+            steps {
+                dir('recommendation-service') {
+                    // KOREKSI: komentar di sini sebelumnya bilang "belum ada
+                    // test suite sama sekali" -- itu jadi basi begitu
+                    // tests/test_internal_auth.py ditambahkan (commit
+                    // 1f291aab), tapi stage ini tidak ikut diupdate untuk
+                    // benar-benar menjalankan pytest. Test-nya ada di repo
+                    // sejak itu tapi Jenkins tidak pernah menjalankannya.
+                    sh '''
+                        pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
+                        ruff check .
+                        pytest tests/ -v
+                    '''
+                    sh 'pip-audit -r requirements.txt --desc'
+                }
+            }
+        }
+
+        stage('Security: Secret Scan') {
+            agent {
+                docker {
+                    // Base image alpine + ENTRYPOINT ["gitleaks"] (dicek
+                    // langsung ke Dockerfile upstream) -- entrypoint tetap
+                    // perlu di-override kosong seperti composer:2 di atas
+                    // supaya Jenkins bisa menyuntikkan step shell-nya sendiri.
+                    image 'zricethezav/gitleaks:latest'
+                    args '--entrypoint ""'
+                }
+            }
+            steps {
+                // NON-BLOCKING untuk sekarang ("|| true") -- belum pernah
+                // dijalankan sungguhan di Jenkins (Docker Desktop tidak
+                // jalan di mesin dev, jadi tidak bisa dites lokal). Repo ini
+                // punya setidaknya satu string yang BENTUKNYA seperti secret
+                // tapi memang sengaja publik: Midtrans client key di
+                // docker-compose.yml (VITE_MIDTRANS_CLIENT_KEY) -- client
+                // key Midtrans didesain publik (ke-bundle ke JS frontend
+                // apa pun caranya), beda dari server key. Setelah build
+                // pertama menunjukkan hasil scan bersih atau semua temuan
+                // sudah di-allowlist (.gitleaks.toml), hapus "|| true" di
+                // sini supaya stage ini betul-betul blocking.
+                //
+                // 'dir' (bukan 'detect' yang deprecated sejak v8.19.0) --
+                // scan working tree checkout ini apa adanya, bukan git log
+                // (history lama sudah ditangani lewat rotasi APP_KEY
+                // sebelumnya, bukan lewat CI scan). --redact: kalau ketemu,
+                // jangan cetak secret asli ke log Jenkins.
+                sh 'gitleaks dir . -v --redact || true'
             }
         }
 

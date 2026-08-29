@@ -4,7 +4,7 @@ from typing import Any
 
 import httpx
 
-from config import OLLAMA_BASE_URL, OLLAMA_CONTEXT_LENGTH, OLLAMA_MODEL, OLLAMA_MAX_RETRIES, OLLAMA_TIMEOUT_S
+from config import OLLAMA_BASE_URL, OLLAMA_CONTEXT_LENGTH, OLLAMA_MAX_RETRIES, OLLAMA_MODEL, OLLAMA_TIMEOUT_S
 
 _client: httpx.AsyncClient | None = None
 

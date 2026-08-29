@@ -1,6 +1,5 @@
-import re
 import hashlib
-
+import re
 
 # ---------------------------------------------------------------------------
 # Layer 1: Sapaan/closing eksplisit — match exact, langsung skip RAG
@@ -98,8 +97,7 @@ def rewrite_query(query: str) -> str:
         "carikan", "coba", "bantu", "tampilkan", "lihat", "lihatkan",
         "produk", "barang", "item", "bernama", "namanya", "nama",
         "yang", "dengan", "untuk", "dari", "ke", "di", "dan", "atau",
-        "apa", "gimana", "bagaimana", "berapa", "dimana", "apakah",
-        "saya", "aku", "gue", "kamu", "kalian",
+        "apa", "gimana", "bagaimana", "berapa", "dimana", "saya", "aku", "gue", "kamu", "kalian",
         "ingin", "mau", "butuh", "perlu", "pengen",
         "rekomendasi", "rekomendasikan", "saran", "sarankan",
         "dong", "deh", "ya", "yuk", "nih", "lah", "sih",
@@ -127,17 +125,21 @@ def extract_metadata_filters(query: str) -> dict | None:
 
     def _to_rupiah(value: str, unit: str) -> int:
         v = float(value.replace(",", "."))
-        if "juta" in unit:    return int(v * 1_000_000)
-        if any(u in unit for u in ("ribu", "rb", "k")): return int(v * 1_000)
+        if "juta" in unit:
+            return int(v * 1_000_000)
+        if any(u in unit for u in ("ribu", "rb", "k")):
+            return int(v * 1_000)
         return int(v)
 
     # Price — bawah/kurang
     m = re.search(r"(?:di bawah|kurang dari|max|maksimal|under)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?", q)
-    if m: clauses.append({"price": {"$lte": _to_rupiah(m.group(1), m.group(2) or "juta")}})
+    if m:
+        clauses.append({"price": {"$lte": _to_rupiah(m.group(1), m.group(2) or "juta")}})
 
     # Price — atas/lebih
     m = re.search(r"(?:di atas|lebih dari|min|minimal|above|over)\s+(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?", q)
-    if m: clauses.append({"price": {"$gte": _to_rupiah(m.group(1), m.group(2) or "juta")}})
+    if m:
+        clauses.append({"price": {"$gte": _to_rupiah(m.group(1), m.group(2) or "juta")}})
 
     # Price — range X-Y
     m = re.search(r"(\d+(?:[.,]\d+)?)\s*(?:-|sampai|hingga|s/d)\s*(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?", q)
@@ -165,8 +167,10 @@ def extract_metadata_filters(query: str) -> dict | None:
             clauses.append({"category": {"$eq": category}})
             break
 
-    if not clauses:      return None
-    if len(clauses) == 1: return clauses[0]
+    if not clauses:
+        return None
+    if len(clauses) == 1:
+        return clauses[0]
     return {"$and": clauses}
 
 

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Header, HTTPException, Request
 
 from config import INTERNAL_SERVICE_KEY, RATE_LIMIT_PER_MINUTE
-from models import StoreAssistantRequest, StoreAssistantResponse
 from llm.ollama import ollama_chat
 from llm.output_filter import sanitize_reply
+from models import StoreAssistantRequest, StoreAssistantResponse
 from utils.limiter import limiter
 
 router = APIRouter()

@@ -112,6 +112,20 @@ class ProductController extends Controller implements HasMiddleware
     {
         $request = $request->validated();
 
+        // store_id divalidasi cuma 'exists:stores,id' -- permission
+        // 'product-create' dipegang SEMUA seller (role 'store', bukan
+        // admin-only, lihat RoleSeeder), jadi tanpa pengecekan ini seller
+        // A bisa titip store_id milik seller B dan produk (spam/palsu)
+        // muncul di toko kompetitor. update()/destroy() di bawah sudah
+        // punya pengecekan serupa -- store() sebelumnya tidak.
+        if (! auth()->user()->hasRole('admin')) {
+            $ownStoreId = auth()->user()->store?->id;
+            if (! $ownStoreId) {
+                return ResponseHelper::jsonResponse(false, 'Anda belum memiliki toko', null, 403);
+            }
+            $request['store_id'] = $ownStoreId;
+        }
+
         try {
             $product = $this->productRepository->create($request);
             Cache::tags(['products'])->flush();
@@ -130,7 +144,13 @@ class ProductController extends Controller implements HasMiddleware
         try {
             $product = $this->productRepository->getById($id);
 
-            if (! $product) {
+            // Rute publik -- pola sama seperti StoreController::show().
+            // getById() dipakai bareng update()/destroy() (akses pemilik,
+            // is_active-agnostic dengan sengaja), jadi filternya di sini,
+            // bukan di repository. Tanpa ini, produk toko yang sudah
+            // dinonaktifkan tetap bisa dibuka langsung kalau ID/slug-nya
+            // diketahui, walau sudah hilang dari listing/search.
+            if (! $product || ! $product->store?->is_active) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 
@@ -145,7 +165,7 @@ class ProductController extends Controller implements HasMiddleware
         try {
             $product = $this->productRepository->getBySlug($slug);
 
-            if (! $product) {
+            if (! $product || ! $product->store?->is_active) {
                 return ResponseHelper::jsonResponse(true, 'Data Produk Tidak Ditemukan', null, 404);
             }
 

@@ -213,7 +213,17 @@ class StoreRepository implements StoreRepositoryInterface
 
         try {
             $store = Store::find($id);
-            $store->delete();
+
+            // Deaktivasi, BUKAN hard delete -- products.store_id,
+            // store_balances.store_id, DAN transactions.store_id semuanya
+            // onDelete('cascade'). Store model juga tidak SoftDeletes.
+            // $store->delete() sebelumnya berarti menghapus toko juga
+            // menghapus seluruh riwayat transaksi PEMBELI LAIN yang pernah
+            // belanja di toko ini, plus saldo toko. Pola sama seperti
+            // AccountDeletionService untuk User -- preserve data
+            // finansial/transaksi, jangan cascade-delete.
+            $store->is_active = false;
+            $store->save();
 
             DB::commit();
 

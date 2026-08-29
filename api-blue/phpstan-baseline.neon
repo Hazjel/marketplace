@@ -1,0 +1,1603 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#2 \$red of function imagecolorallocate expects int\<0, 255\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Helpers/ImageHelper/ImageHelper.php
+
+		-
+			message: '#^Parameter \#3 \$green of function imagecolorallocate expects int\<0, 255\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Helpers/ImageHelper/ImageHelper.php
+
+		-
+			message: '#^Parameter \#4 \$blue of function imagecolorallocate expects int\<0, 255\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Helpers/ImageHelper/ImageHelper.php
+
+		-
+			message: '#^Parameter \#4 \$x of function imagettftext expects int, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Helpers/ImageHelper/ImageHelper.php
+
+		-
+			message: '#^Parameter \#5 \$y of function imagettftext expects int, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Helpers/ImageHelper/ImageHelper.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 3
+			path: app/Helpers/ImageHelper/ImageHelper.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$token\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuthController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Support\\HigherOrderCollectionProxy\<string, Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\>\:\:\$permissions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuthController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ChatController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/ChatController.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Models\\User model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ChatController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\User\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/ChatController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>balance" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>pending_balance" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$token\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/GoogleAuthController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Support\\HigherOrderCollectionProxy\<string, Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\>\:\:\$permissions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/GoogleAuthController.php
+
+		-
+			message: '#^Call to an undefined method Laravel\\Socialite\\Contracts\\Provider\:\:redirectUrl\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/GoogleAuthController.php
+
+		-
+			message: '#^Call to an undefined method Laravel\\Socialite\\Contracts\\Provider\:\:stateless\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/GoogleAuthController.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Http/Controllers/GoogleAuthController.php
+
+		-
+			message: '#^Property App\\Models\\User\:\:\$permissions is not writable\.$#'
+			identifier: assign.propertyReadOnly
+			count: 1
+			path: app/Http/Controllers/GoogleAuthController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\TransactionDetail\:\:\$transaction\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InternalController.php
+
+		-
+			message: '#^Relation ''transaction'' is not found in App\\Models\\TransactionDetail model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Http/Controllers/InternalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductCategoryController\:\:middleware\(\) should return array\<int, Closure\|Illuminate\\Routing\\Controllers\\Middleware\|string\> but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: app/Http/Controllers/ProductCategoryController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:middleware\(\) should return array\<int, Closure\|Illuminate\\Routing\\Controllers\\Middleware\|string\> but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Relation ''buyer'' is not found in App\\Models\\Transaction model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ProductReviewController.php
+
+		-
+			message: '#^Relation ''productImages'' is not found in App\\Models\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Models\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SellerVoucherController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$buyer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/StoreController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$token\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/StoreController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\StoreController\:\:middleware\(\) should return array\<int, Closure\|Illuminate\\Routing\\Controllers\\Middleware\|string\> but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: app/Http/Controllers/StoreController.php
+
+		-
+			message: '#^Cannot access property \$fraud_status on array\<mixed\>\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Cannot access property \$payment_type on array\<mixed\>\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Cannot access property \$transaction_status on array\<mixed\>\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 2
+			path: app/Http/Controllers/VerificationController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$buyer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/VoucherController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/WithdrawalController.php
+
+		-
+			message: '#^Cannot call method diffInMinutes\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Middleware/UpdateLastSeen.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$role\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Requests/ProductUpdateRequest.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Requests/ProductUpdateRequest.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\BuyerResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/BuyerResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\BuyerResource\:\:\$phone_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/BuyerResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\BuyerResource\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/BuyerResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CartResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CartResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CartResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CartResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CartResource\:\:\$note\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CartResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CartResource\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CartResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CartResource\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CartResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CartResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CartResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\CartResource\:\:\$variant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CartResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\PaginateResource\:\:currentPage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/PaginateResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\PaginateResource\:\:firstItem\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/PaginateResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\PaginateResource\:\:items\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/PaginateResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\PaginateResource\:\:lastItem\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/PaginateResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\PaginateResource\:\:lastPage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/PaginateResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\PaginateResource\:\:path\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/PaginateResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\PaginateResource\:\:perPage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/PaginateResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\PaginateResource\:\:total\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/PaginateResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductCategoryResource\:\:\$childrens\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductCategoryResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductCategoryResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductCategoryResource\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductCategoryResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductCategoryResource\:\:\$parent_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductCategoryResource\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductCategoryResource\:\:\$tagline\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\ProductCategoryResource\:\:childrens\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\ProductCategoryResource\:\:products\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\ProductCategoryResource\:\:relationLoaded\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/ProductCategoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductImageResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductImageResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductImageResource\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Resources/ProductImageResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductImageResource\:\:\$is_thumbnail\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductImageResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductImageResource\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductImageResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$condition\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$has_variants\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$productCategory\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$productImages\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$total_sold\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$variants\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductResource\:\:\$weight\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductReviewResource\:\:\$attachments\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductReviewResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductReviewResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductReviewResource\:\:\$is_anonymous\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductReviewResource\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductReviewResource\:\:\$rating\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductReviewResource\:\:\$review\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductReviewResource\:\:\$transaction\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 6
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>profile_picture" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/ProductReviewResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductVariantResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductVariantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductVariantResource\:\:\$image\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductVariantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductVariantResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductVariantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductVariantResource\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductVariantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductVariantResource\:\:\$sku\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductVariantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductVariantResource\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductVariantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ProductVariantResource\:\:\$variant_attributes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ProductVariantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceHistoryResource\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceHistoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceHistoryResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceHistoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceHistoryResource\:\:\$reference_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceHistoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceHistoryResource\:\:\$reference_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceHistoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceHistoryResource\:\:\$remarks\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceHistoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceHistoryResource\:\:\$storeBalance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceHistoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceHistoryResource\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceHistoryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceResource\:\:\$balance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceResource\:\:\$pending_balance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreBalanceResource\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreBalanceResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$about\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$address_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$ai_assistant_enabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$city\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$distance_m\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$is_verified\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$latitude\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$longitude\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$postal_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\StoreResource\:\:\$username\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\StoreResource\:\:products\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\StoreResource\:\:transaction\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/StoreResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionDetailResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionDetailResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionDetailResource\:\:\$product\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionDetailResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionDetailResource\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionDetailResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionDetailResource\:\:\$qty\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionDetailResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionDetailResource\:\:\$subtotal\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionDetailResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$address_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$buyer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$city\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$delivery_proof\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$delivery_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$dest_latitude\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$dest_longitude\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$grand_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$payment_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$postal_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$shipping\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$shipping_cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$shipping_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$snap_token\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$tracking_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$transactionDetails\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$voucher\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\TransactionResource\:\:\$voucher_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/TransactionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$buyer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$email_verified_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$last_seen_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$permissions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$profile_picture\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$roles\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$token\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$username\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$expires_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$max_discount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$min_purchase\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$starts_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$store_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$usage_limit\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$usage_limit_per_buyer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\VoucherResource\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\VoucherResource\:\:redemptions\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/VoucherResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\WithdrawalResource\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/WithdrawalResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\WithdrawalResource\:\:\$bank_account_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/WithdrawalResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\WithdrawalResource\:\:\$bank_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/WithdrawalResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\WithdrawalResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/WithdrawalResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\WithdrawalResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/WithdrawalResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\WithdrawalResource\:\:\$proof\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/WithdrawalResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\WithdrawalResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/WithdrawalResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\WithdrawalResource\:\:\$storeBalance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/WithdrawalResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Store\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/GenerateAiChatReplyJob.php
+
+		-
+			message: '#^Relation ''user'' is not found in App\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Jobs/GenerateAiChatReplyJob.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/Jobs/ProcessProductImageJob.php
+
+		-
+			message: '#^Match arm comparison between ''unpaid'' and ''expired'' is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Listeners/SendPushOnTransactionStatusUpdated.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Notifications/ResetPasswordNotification.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$buyer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/TransactionPolicy.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/TransactionPolicy.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$token\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/AuthRepository.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Support\\HigherOrderCollectionProxy\<string, Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\>\:\:\$permissions\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/AuthRepository.php
+
+		-
+			message: '#^Relation ''user'' is not found in App\\Models\\Buyer model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/BuyerRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ProductVariantMongo\:\:\$stock\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/CartRepository.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Repositories/CartRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\CartRepository\:\:addOrUpdate\(\) should return App\\Models\\Cart but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/CartRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\CartRepository\:\:updateQuantity\(\) should return App\\Models\\Cart but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/CartRepository.php
+
+		-
+			message: '#^Relation ''product'' is not found in App\\Models\\Cart model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/CartRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$last_message\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/ChatRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$unread_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/ChatRepository.php
+
+		-
+			message: '#^Relation ''receiver'' is not found in App\\Models\\Message model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/ChatRepository.php
+
+		-
+			message: '#^Relation ''sender'' is not found in App\\Models\\Message model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/ChatRepository.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>created_at" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Repositories/ChatRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Store\:\:\$storeBalance\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Repositories/EscrowRepository.php
+
+		-
+			message: '#^Relation ''childrens'' is not found in App\\Models\\ProductCategory model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Repositories/ProductCategoryRepository.php
+
+		-
+			message: '#^Relation ''productCategory'' is not found in App\\Models\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/ProductRepository.php
+
+		-
+			message: '#^Relation ''productImages'' is not found in App\\Models\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/ProductRepository.php
+
+		-
+			message: '#^Relation ''productReviews'' is not found in App\\Models\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Repositories/ProductRepository.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Models\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Repositories/ProductRepository.php
+
+		-
+			message: '#^Relation ''variants'' is not found in App\\Models\\Product model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/ProductRepository.php
+
+		-
+			message: '#^Relation ''product'' is not found in App\\Models\\ProductReview model\.$#'
+			identifier: larastan.relationExistence
+			count: 4
+			path: app/Repositories/ProductReviewRepository.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\StoreBalanceHistory\>\:\:search\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/StoreBalanceHistoryRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/StoreBalanceRepository.php
+
+		-
+			message: '#^Binary operation "\+" between numeric\-string and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: app/Repositories/StoreBalanceRepository.php
+
+		-
+			message: '#^Binary operation "\-" between numeric\-string and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: app/Repositories/StoreBalanceRepository.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Models\\StoreBalance model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/StoreBalanceRepository.php
+
+		-
+			message: '#^Relation ''storeBalanceHistories'' is not found in App\\Models\\StoreBalance model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Repositories/StoreBalanceRepository.php
+
+		-
+			message: '#^Relation ''attachments'' is not found in App\\Models\\ProductReview model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/StoreRepository.php
+
+		-
+			message: '#^Relation ''followers'' is not found in App\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Repositories/StoreRepository.php
+
+		-
+			message: '#^Relation ''product'' is not found in App\\Models\\ProductReview model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Repositories/StoreRepository.php
+
+		-
+			message: '#^Relation ''products'' is not found in App\\Models\\ProductCategory model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/StoreRepository.php
+
+		-
+			message: '#^Relation ''user'' is not found in App\\Models\\ProductReview model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/StoreRepository.php
+
+		-
+			message: '#^Relation ''user'' is not found in App\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Repositories/StoreRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$cancelled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$completed\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$delivered\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$delivering\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$failed\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$orders\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$paid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$pending\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$revenue\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$total_revenue\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$total_transaction\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$unpaid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$buyer\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Repositories/TransactionAnalyticsRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Transaction\:\:\$transactionDetails\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TransactionRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$buyer\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Repositories/TransactionRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/TransactionRepository.php
+
+		-
+			message: '#^Relation ''buyer'' is not found in App\\Models\\Transaction model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/TransactionRepository.php
+
+		-
+			message: '#^Relation ''transactionDetails'' is not found in App\\Models\\Transaction model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/TransactionRepository.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>address_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Repositories/TransactionRepository.php
+
+		-
+			message: '#^Relation ''product'' is not found in App\\Models\\Wishlist model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Repositories/WishlistRepository.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Repositories/WithdrawalRepository.php
+
+		-
+			message: '#^Relation ''storeBalance'' is not found in App\\Models\\Withdrawal model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Repositories/WithdrawalRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/AccountDeletionService.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Services/MidtransPaymentGateway.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>email" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/MidtransPaymentGateway.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/MidtransPaymentGateway.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Store\:\:\$storeBalance\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/TransactionService.php

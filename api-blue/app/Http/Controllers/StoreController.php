@@ -11,6 +11,7 @@ use App\Http\Resources\ProductReviewResource;
 use App\Http\Resources\StoreResource;
 use App\Http\Resources\UserResource;
 use App\Interfaces\StoreRepositoryInterface;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -109,6 +110,30 @@ class StoreController extends Controller implements HasMiddleware
     {
         $request = $request->validated();
 
+        // KOREKSI dari fix sebelumnya: memaksa user_id ke pemanggil tetap
+        // membiarkan non-admin membuat toko KEDUA. Domain model ini
+        // single-store per user (User::store() adalah hasOne, tanpa unique
+        // constraint di DB), dan onboarding resmi lewat register-store()
+        // sudah menolak user yang hasRole('store'). Store kedua diam-diam
+        // merusak asumsi single-store di tempat lain: SellerVoucherController
+        // pakai Auth::user()->store?->id (ambigu kalau ada >1),
+        // AccountDeletionService cuma menonaktifkan $user->store (singular,
+        // toko lain tetap aktif), dan seller yang toko-nya dinonaktifkan
+        // admin masih bisa bikin toko baru lewat endpoint ini karena
+        // permission 'store-create' tidak dicabut bareng is_active.
+        //
+        // Endpoint ini sekarang admin-only. register-store() tetap
+        // satu-satunya jalur onboarding untuk seller.
+        if (! auth()->user()->hasRole('admin')) {
+            return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+        }
+
+        // Admin pun tidak boleh membuat toko kedua untuk user yang sudah
+        // punya satu -- domain model ini memang single-store per user.
+        if (Store::where('user_id', $request['user_id'])->exists()) {
+            return ResponseHelper::jsonResponse(false, 'User ini sudah memiliki toko', null, 409);
+        }
+
         try {
             $store = $this->storeRepository->create($request);
             Cache::tags(['stores'])->flush();
@@ -190,6 +215,15 @@ class StoreController extends Controller implements HasMiddleware
     public function updateVerifiedStatus(string $id)
     {
         try {
+            // Rute ini cuma di dalam grup auth:sanctum -- tidak ada
+            // PermissionMiddleware/HasMiddleware sama sekali untuk action
+            // ini (beda dari store/update/destroy di atas), jadi tanpa
+            // pengecekan eksplisit ini SIAPA PUN yang login (termasuk buyer
+            // tanpa toko) bisa memverifikasi toko mana pun.
+            if (! auth()->user()->hasRole('admin')) {
+                return ResponseHelper::jsonResponse(false, 'Unauthorized', null, 403);
+            }
+
             $store = $this->storeRepository->getById($id);
 
             if (! $store) {
@@ -218,6 +252,14 @@ class StoreController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
+            // Sebelumnya tidak ada pengecekan sama sekali -- seller mana
+            // pun yang punya permission 'store-edit' (SEMUA seller) bisa
+            // update toko MANAPUN via ID, bukan cuma toko sendiri. Pola
+            // sama seperti ProductController::update().
+            if (! auth()->user()->hasRole('admin') && $store->user_id !== auth()->id()) {
+                return ResponseHelper::jsonResponse(false, 'Tidak diizinkan mengubah toko lain', null, 403);
+            }
+
             $store = $this->storeRepository->update($id, $request);
             Cache::tags(['stores'])->flush();
 
@@ -239,8 +281,20 @@ class StoreController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(true, 'Data Toko Tidak Ditemukan', null, 404);
             }
 
+            // Sama seperti update() di atas -- sebelumnya seller mana pun
+            // bisa MENGHAPUS toko kompetitor lewat ID.
+            if (! auth()->user()->hasRole('admin') && $store->user_id !== auth()->id()) {
+                return ResponseHelper::jsonResponse(false, 'Tidak diizinkan menghapus toko lain', null, 403);
+            }
+
             $store = $this->storeRepository->delete($id);
             Cache::tags(['stores'])->flush();
+            // ProductController::index() cache listing tanpa filter selama
+            // 600 detik (Cache::tags(['products'])->remember(...)) --
+            // tanpa flush ini, katalog yang sudah warm bisa tetap
+            // menampilkan produk toko yang baru dinonaktifkan sampai ±10
+            // menit walau stores.is_active sudah false.
+            Cache::tags(['products'])->flush();
 
             return ResponseHelper::jsonResponse(true, 'Data Toko Berhasil Dihapus', new StoreResource($store), 200);
         } catch (\Exception $e) {
@@ -260,13 +314,21 @@ class StoreController extends Controller implements HasMiddleware
             'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
+        $user = Auth::user();
+
+        // Source of truth-nya keberadaan row Store, bukan role 'store'.
+        // Admin POST /api/store (lihat store() di atas) membuat Store +
+        // StoreBalance tapi TIDAK memberi role 'store' ke target user --
+        // jadi buyer yang toko-nya dibuatkan admin masih lolos hasRole()
+        // check di sini dan bisa registerStore() lagi, menghasilkan toko
+        // kedua persis skenario yang barusan ditutup di store(). Role
+        // check dipertahankan sebagai defense tambahan, bukan diganti.
+        if ($user->store()->exists() || $user->hasRole('store')) {
+            return ResponseHelper::jsonResponse(false, 'Anda sudah memiliki toko.', null, 400);
+        }
+
         try {
             DB::beginTransaction();
-            $user = Auth::user();
-
-            if ($user->hasRole('store')) {
-                return ResponseHelper::jsonResponse(false, 'Anda sudah memiliki toko.', null, 400);
-            }
 
             // Create Store
             $store = $user->store()->create([

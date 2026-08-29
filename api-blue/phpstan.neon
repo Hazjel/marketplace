@@ -1,0 +1,19 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app/
+        - routes/
+
+    # Level 5 dipilih sebagai titik awal pragmatis untuk codebase yang
+    # belum pernah dianalisis statis sama sekali -- level lebih tinggi
+    # (mis. 9) akan menghasilkan ratusan finding sekaligus yang sebagian
+    # besar bukan bug nyata (missing generic types, dst). Baseline
+    # menangkap SEMUA temuan level 5 saat ini supaya build tidak langsung
+    # merah; kenaikan level jadi kerja terpisah, bukan bagian hardening ini.
+    level: 5
+
+    databaseMigrationsPath:
+        - database/migrations
