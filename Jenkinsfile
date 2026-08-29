@@ -169,7 +169,31 @@ pipeline {
             steps {
                 dir('fe-blue') {
                     sh '''
-                        npm ci
+                        attempt=1
+                        while true; do
+                            if npm ci > /tmp/npm-ci.log 2>&1; then
+                                cat /tmp/npm-ci.log
+                                break
+                            else
+                                rc=$?
+                            fi
+
+                            cat /tmp/npm-ci.log
+
+                            if ! grep -Eq 'EAI_AGAIN|ENOTFOUND|ECONNRESET|ETIMEDOUT|ECONNREFUSED|EHOSTUNREACH|ENETUNREACH' /tmp/npm-ci.log; then
+                                exit "$rc"
+                            fi
+
+                            if [ "$attempt" -ge 3 ]; then
+                                echo "npm ci tetap gagal setelah 3 percobaan."
+                                exit "$rc"
+                            fi
+
+                            echo "npm ci gagal karena network/DNS; retry dalam 10 detik..."
+                            attempt=$((attempt + 1))
+                            sleep 10
+                        done
+
                         npx eslint . --max-warnings=200
                         npm run test -- --run
                         npm run build
@@ -190,7 +214,34 @@ pipeline {
                     // (vite/vitest/eslint dst) tidak ikut dibundle ke output
                     // production, jadi audit-nya dipisah dan non-blocking
                     // sepenuhnya.
-                    sh 'npm audit --omit=dev --audit-level=high'
+                    sh '''
+                        attempt=1
+                        while true; do
+                            if npm audit --omit=dev --audit-level=high > /tmp/npm-audit.log 2>&1; then
+                                cat /tmp/npm-audit.log
+                                break
+                            else
+                                rc=$?
+                            fi
+
+                            cat /tmp/npm-audit.log
+
+                            if ! grep -Eq 'EAI_AGAIN|ENOTFOUND|ECONNRESET|ETIMEDOUT|ECONNREFUSED|EHOSTUNREACH|ENETUNREACH|audit endpoint returned an error' /tmp/npm-audit.log; then
+                                # Bukan network failure. Misalnya high/critical vulnerability
+                                # sungguhan: tetap blocking dan jangan di-retry.
+                                exit "$rc"
+                            fi
+
+                            if [ "$attempt" -ge 3 ]; then
+                                echo "npm audit tetap gagal setelah 3 percobaan."
+                                exit "$rc"
+                            fi
+
+                            echo "npm audit gagal karena network/DNS; retry dalam 10 detik..."
+                            attempt=$((attempt + 1))
+                            sleep 10
+                        done
+                    '''
                     sh 'npm audit --only=dev || true'
                 }
             }
