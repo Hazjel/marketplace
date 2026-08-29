@@ -171,30 +171,60 @@ pipeline {
                     sh '''
                         attempt=1
                         while true; do
+                            rm -rf node_modules
+
                             if npm ci > /tmp/npm-ci.log 2>&1; then
-                                cat /tmp/npm-ci.log
-                                break
+                                rc=0
                             else
                                 rc=$?
                             fi
 
                             cat /tmp/npm-ci.log
 
-                            if ! grep -Eq 'EAI_AGAIN|ENOTFOUND|ECONNRESET|ETIMEDOUT|ECONNREFUSED|EHOSTUNREACH|ENETUNREACH' /tmp/npm-ci.log; then
+                            install_ok=true
+
+                            if [ "$rc" -ne 0 ]; then
+                                install_ok=false
+                            fi
+
+                            if grep -Fq 'Exit handler never called!' /tmp/npm-ci.log; then
+                                echo "npm ci mengalami internal npm failure."
+                                install_ok=false
+                            fi
+
+                            for required in \
+                                node_modules/.bin/eslint \
+                                node_modules/.bin/vitest \
+                                node_modules/.bin/vite \
+                                node_modules/@eslint/js/index.js
+                            do
+                                if [ ! -e "$required" ]; then
+                                    echo "npm ci integrity check gagal: missing $required"
+                                    install_ok=false
+                                fi
+                            done
+
+                            if [ "$install_ok" = true ]; then
+                                break
+                            fi
+
+                            if [ "$rc" -ne 0 ] &&
+                            ! grep -Eq 'EAI_AGAIN|ENOTFOUND|ECONNRESET|ETIMEDOUT|ECONNREFUSED|EHOSTUNREACH|ENETUNREACH|Exit handler never called!' /tmp/npm-ci.log; then
                                 exit "$rc"
                             fi
 
                             if [ "$attempt" -ge 3 ]; then
-                                echo "npm ci tetap gagal setelah 3 percobaan."
-                                exit "$rc"
+                                echo "npm ci tetap gagal/incomplete setelah 3 percobaan."
+                                [ "$rc" -ne 0 ] && exit "$rc"
+                                exit 1
                             fi
 
-                            echo "npm ci gagal karena network/DNS; retry dalam 10 detik..."
+                            echo "npm ci gagal atau incomplete; retry dalam 10 detik..."
                             attempt=$((attempt + 1))
                             sleep 10
                         done
 
-                        npx eslint . --max-warnings=200
+                        ./node_modules/.bin/eslint . --max-warnings=200
                         npm run test -- --run
                         npm run build
                     '''
