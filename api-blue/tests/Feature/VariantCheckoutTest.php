@@ -15,6 +15,7 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Support\ExplodingRefundEscrowRepository;
@@ -372,5 +373,71 @@ class VariantCheckoutTest extends TestCase
         $this->assertSame(13, $ctx['product']->fresh()->stock); // SQL rollback: tetap agregat sebelum updateStatus()
         $this->assertNull(Transaction::find($transactionId)->stock_restored_at); // SQL rollback
         $this->assertSame('paid', Transaction::find($transactionId)->payment_status); // delivery_status/save() juga rollback
+    }
+
+    /**
+     * Test di atas cuma membuktikan final state SATU thread setelah
+     * rollback -- tidak membuktikan bahwa kompensasi Mongo terjadi SAAT
+     * row lock Product/Transaction masih dipegang. Kalau urutannya kebalik
+     * (DB::rollBack() dulu, baru kompensasi), lock terlepas SEBELUM Mongo
+     * dikompensasi -- caller lain (mis. checkout produk yang sama) bisa
+     * mengunci baris itu di antaranya dan membaca stok Mongo yang masih
+     * "salah" (hasil restoreStock() yang belum dikompensasi), lalu
+     * mutasinya sendiri tertimpa balik oleh kompensasi yang jalan
+     * belakangan -- lost update, karena mutasi Mongo di sini
+     * read -> modify -> save(), bukan atomic increment.
+     *
+     * Test sungguhan dengan dua koneksi DB paralel tidak bisa dilakukan di
+     * sini (test suite jalan di atas SQLite in-memory, bukan MySQL --
+     * lockForUpdate() tidak benar-benar mengunci lintas koneksi seperti di
+     * produksi). DB::transactionLevel() dipakai sebagai bukti struktural:
+     * kalau kompensasi terjadi SAAT level masih > 0, transaksi SQL (dan
+     * lock yang dipegangnya) belum di-rollback -- persis urutan yang
+     * dijamin kode ini sekarang. Test ini FAIL kalau urutan compensate/
+     * rollback kebalik lagi.
+     */
+    public function test_mongo_compensation_runs_while_the_sql_transaction_is_still_open(): void
+    {
+        $ctx = $this->checkoutContext();
+
+        $payload = $this->basePayload() + [
+            'products' => [
+                ['product_id' => $ctx['product']->id, 'variant_id' => $ctx['variantMahal']->id, 'qty' => 2],
+            ],
+        ];
+        $checkoutResponse = $this->actingAs($ctx['buyerUser'], 'sanctum')
+            ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
+            ->postJson('/api/transaction', $payload);
+        $checkoutResponse->assertStatus(201);
+        $transactionId = $checkoutResponse->json('data.id');
+
+        DB::table('transactions')->where('id', $transactionId)->update(['payment_status' => 'paid']);
+        $this->app->bind(EscrowRepositoryInterface::class, fn () => new ExplodingRefundEscrowRepository);
+
+        // RefreshDatabase sendiri membungkus SELURUH test dalam satu
+        // transaksi (dirollback saat teardown), jadi transactionLevel()
+        // TIDAK PERNAH 0 selama test ini berjalan -- baseline-nya di sini,
+        // BUKAN 0, yang jadi pembanding di bawah.
+        $baselineTransactionLevel = DB::transactionLevel();
+
+        $transactionLevelDuringCompensation = null;
+        Log::listen(function ($event) use (&$transactionLevelDuringCompensation) {
+            if (str_contains((string) $event->message, 'Kompensasi stok varian Mongo setelah rollback SQL')) {
+                $transactionLevelDuringCompensation = DB::transactionLevel();
+            }
+        });
+
+        try {
+            app(TransactionRepositoryInterface::class)->updateStatus($transactionId, ['delivery_status' => 'cancelled']);
+        } catch (\Throwable) {
+            // diharapkan -- refund escrow diledakkan.
+        }
+
+        $this->assertNotNull($transactionLevelDuringCompensation, 'Kompensasi Mongo tidak pernah terjadi -- test ini salah setup.');
+        $this->assertGreaterThan(
+            $baselineTransactionLevel,
+            $transactionLevelDuringCompensation,
+            'Kompensasi Mongo terjadi SETELAH transaksi SQL updateStatus() rollback -- row lock sudah lepas duluan, jendela race dengan caller lain terbuka.'
+        );
     }
 }

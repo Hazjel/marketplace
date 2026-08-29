@@ -569,8 +569,9 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             return $transaction;
         } catch (\Throwable $e) {
-            DB::rollBack();
+            // Kompensasi SEBELUM rollback -- lihat docblock restoreStock().
             $this->compensateStockRestoreRollback($mongoAdjustments);
+            DB::rollBack();
 
             throw new Exception($e->getMessage());
         }
@@ -603,12 +604,23 @@ class TransactionRepository implements TransactionRepositoryInterface
      *
      * Kontrak baru: caller WAJIB menyediakan array $mongoAdjustments
      * (passed by reference, dipakai untuk logging/kompensasi), dan WAJIB
-     * memanggil compensateStockRestoreRollback($mongoAdjustments) di
-     * blok catch mereka sendiri SETELAH DB::rollBack() kalau operasi
-     * OUTER (bukan cuma restoreStock() ini) gagal -- lihat updateStatus()
-     * untuk contoh. restoreStock() sendiri tidak menangkap exception apa
-     * pun lagi; propagate apa adanya ke caller, yang memang sudah dalam
-     * try/catch mereka masing-masing.
+     * memanggil compensateStockRestoreRollback($mongoAdjustments) di blok
+     * catch mereka sendiri SEBELUM DB::rollBack() -- BUKAN sesudah. Row
+     * lock Product yang diambil restoreStock() ini (lockForUpdate() di
+     * loop di bawah) satu-satunya penjamin serialisasi mutasi stok
+     * varian Mongo (Mongo sendiri tidak punya SELECT ... FOR UPDATE);
+     * lock itu baru benar-benar lepas saat SQL rollback/commit terjadi
+     * di caller, TIDAK oleh commit transaksi bersarang milik
+     * restoreStock() ini sendiri. Kalau DB::rollBack() dijalankan lebih
+     * dulu, lock terlepas SEBELUM kompensasi -- caller lain bisa
+     * mengunci Product itu di antaranya, membaca stok Mongo yang masih
+     * "salah" (belum dikompensasi), lalu mutasinya sendiri tertimpa
+     * balik oleh compensateMongoStock() yang jalan belakangan (lost
+     * update, karena mutasi Mongo di sini read -> modify -> save(),
+     * bukan atomic increment) -- lihat updateStatus() untuk contoh
+     * urutan yang benar. restoreStock() sendiri tidak menangkap
+     * exception apa pun lagi; propagate apa adanya ke caller, yang
+     * memang sudah dalam try/catch mereka masing-masing.
      */
     public function restoreStock(Transaction $transaction, array &$mongoAdjustments): void
     {
@@ -710,8 +722,9 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'transactionDetails.product',
             ]);
         } catch (\Throwable $e) {
-            DB::rollBack();
+            // Kompensasi SEBELUM rollback -- lihat docblock restoreStock().
             $this->compensateStockRestoreRollback($mongoAdjustments);
+            DB::rollBack();
 
             throw new Exception($e->getMessage());
         }
