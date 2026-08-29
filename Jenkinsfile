@@ -120,11 +120,33 @@ pipeline {
                     unstash 'backend-vendor'
                     sh '''
                         apt-get update -qq
-                        apt-get install -y -qq git unzip libsqlite3-dev libzip-dev libssl-dev libpng-dev libjpeg-dev libfreetype6-dev libwebp-dev libonig-dev >/dev/null
+                        apt-get install -y -qq git unzip curl libsqlite3-dev libzip-dev libssl-dev libpng-dev libjpeg-dev libfreetype6-dev libwebp-dev libonig-dev >/dev/null
                         docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp >/dev/null
                         docker-php-ext-install pdo_sqlite zip bcmath gd exif mbstring >/dev/null
                         pecl install mongodb-2.3.3 redis-6.3.0 >/dev/null 2>&1
                         docker-php-ext-enable mongodb redis
+
+                        # Stage ini sebelum B3.0 tidak pernah butuh MongoDB --
+                        # sekarang VariantCheckoutTest/CartValidateStockTest/dst
+                        # sungguhan menulis ke ProductVariantMongo, dan gagal
+                        # dengan "connection refused calling hello on
+                        # 127.0.0.1:27017" tanpa ini (build #37). mongod
+                        # dijalankan sebagai proses lokal DI DALAM container
+                        # test yang sama -- 127.0.0.1:27017 sesuai default
+                        # DB_MONGO_HOST di .env.example/config/database.php --
+                        # sama pola dengan SQLite in-memory untuk sisi MySQL,
+                        # bukan sibling container/service Docker Pipeline
+                        # terpisah, supaya stage ini tetap satu agent tunggal.
+                        # Static binary (bukan apt repo MongoDB) dipilih karena
+                        # tidak butuh GPG key/repo setup yang bisa basi
+                        # mengikuti versi Debian base image php:8.4-cli.
+                        # Diverifikasi langsung di host: mongod --fork jalan
+                        # bersih di image ini, port 27017 kebuka dalam <15 detik.
+                        curl -fsSL -o /tmp/mongo.tgz https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-debian12-7.0.14.tgz
+                        mkdir -p /opt/mongo /data/mongo-ci
+                        tar -xzf /tmp/mongo.tgz -C /opt/mongo --strip-components=1
+                        /opt/mongo/bin/mongod --dbpath /data/mongo-ci --bind_ip 127.0.0.1 --port 27017 --fork --logpath /var/log/mongod.log
+
                         vendor/bin/pint --test
                         vendor/bin/phpstan analyse --memory-limit=1G --no-progress
                         cp .env.example .env
