@@ -351,22 +351,40 @@ export const useCartStore = defineStore('cart', {
         storeAddressId: group.store_address_id,
         storeName: group.store_name,
         storeLogo: group.store_logo,
-        products: group.items.map((item) => ({
-          id: item.product_id,
-          variant_id: item.variant_id,
-          quantity: item.quantity,
-          note: item.note,
-          name: item.product?.name,
-          price: item.product?.price,
-          stock: item.product?.stock,
-          weight: item.product?.weight,
-          slug: item.product?.slug,
-          condition: item.product?.condition,
-          product_category: item.product?.product_category,
-          product_images: item.product?.product_images,
-          store: item.product?.store,
-          thumbnail: item.product?.product_images?.find((i) => i.is_thumbnail)?.image || null
-        }))
+        products: group.items.map((item) => {
+          // item.product.price/stock adalah AGREGAT (harga varian
+          // termurah/total stok lintas varian, lihat
+          // ProductRepository::create()) -- untuk produk bervarian itu
+          // BUKAN harga/stok baris cart ini. item.product.variants sudah
+          // ikut ter-embed (ProductResource::getVariantsSafely()), jadi
+          // varian yang sebenarnya dibeli dicari di sana. Tanpa ini,
+          // cart/checkout preview kembali menampilkan harga varian
+          // termurah setiap kali cart di-refresh/fetchCart() dari server
+          // -- checkout backend tetap menagih benar (resolveVariant()),
+          // tapi preview-nya menyesatkan.
+          const variant = item.variant_id
+            ? item.product?.variants?.find((v) => v.id === item.variant_id)
+            : null
+
+          return {
+            id: item.product_id,
+            variant_id: item.variant_id,
+            variant_name: variant?.name,
+            variant_attributes: variant?.variant_attributes,
+            quantity: item.quantity,
+            note: item.note,
+            name: item.product?.name,
+            price: variant?.price ?? item.product?.price,
+            stock: variant?.stock ?? item.product?.stock,
+            weight: item.product?.weight,
+            slug: item.product?.slug,
+            condition: item.product?.condition,
+            product_category: item.product?.product_category,
+            product_images: item.product?.product_images,
+            store: item.product?.store,
+            thumbnail: item.product?.product_images?.find((i) => i.is_thumbnail)?.image || null
+          }
+        })
       }))
 
       this.save()
