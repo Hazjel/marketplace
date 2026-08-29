@@ -304,6 +304,8 @@ class TransactionController extends Controller implements HasMiddleware
             Config::$isSanitized = config('midtrans.isSanitized');
             Config::$is3ds = config('midtrans.is3ds');
 
+            $mongoAdjustments = [];
+
             try {
                 // Panggilan keluar ke Midtrans TIDAK boleh terjadi sambil
                 // memegang row lock -- itu menahan lock selama durasi round-trip
@@ -324,7 +326,19 @@ class TransactionController extends Controller implements HasMiddleware
                 // perlu supaya keputusan "apakah perlu update" konsisten dengan apa
                 // yang benar-benar tersimpan saat lock didapat, bukan snapshot basi
                 // dari sebelum panggilan Midtrans.
-                $transaction = DB::transaction(function () use ($id, $transactionStatus, $paymentType, $fraudStatus) {
+                //
+                // DB::transaction(closure) TIDAK dipakai di sini dengan sengaja --
+                // ia rollback SQL (melepas row lock Transaction) SEBELUM exception
+                // sampai ke catch, jadi kompensasi Mongo di catch itu selalu
+                // terlambat. begin/commit/rollBack manual + catch bersarang di
+                // bawah menjamin kompensasi jalan SAAT lock masih dipegang --
+                // lihat docblock TransactionRepository::restoreStock(). catch
+                // ini rethrow (bukan menangani sendiri) supaya tetap jatuh ke
+                // catch terluar yang mengembalikan response "Gagal cek Midtrans"
+                // seperti sebelumnya, tanpa mengompensasi dua kali di sana.
+                DB::beginTransaction();
+
+                try {
                     $locked = Transaction::where('id', $id)->lockForUpdate()->first();
 
                     $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus)
@@ -334,10 +348,8 @@ class TransactionController extends Controller implements HasMiddleware
                     // telat atau panggilan manual yang beririsan tidak boleh
                     // membatalkan pembayaran yang sudah dikredit ke escrow.
                     if ($locked->payment_status === 'paid' && $newStatus !== 'paid') {
-                        return $locked;
-                    }
-
-                    if ($newStatus === 'paid' && $locked->payment_status !== 'paid') {
+                        // no-op -- biarkan $locked apa adanya
+                    } elseif ($newStatus === 'paid' && $locked->payment_status !== 'paid') {
                         $locked->payment_status = 'paid';
                         $locked->save();
 
@@ -347,19 +359,28 @@ class TransactionController extends Controller implements HasMiddleware
                         $locked->save();
 
                         if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
-                            $this->transactionRepository->restoreStock($locked);
+                            $this->transactionRepository->restoreStock($locked, $mongoAdjustments);
                         }
                     }
 
-                    return $locked;
-                });
+                    DB::commit();
+                    $transaction = $locked;
+                } catch (\Throwable $e) {
+                    // Kompensasi SEBELUM rollback -- lihat docblock restoreStock().
+                    $this->transactionRepository->compensateStockRestoreRollback($mongoAdjustments);
+                    DB::rollBack();
+
+                    throw $e;
+                }
 
                 event(new TransactionStatusUpdated($transaction->fresh()));
 
                 return ResponseHelper::jsonResponse(true, 'Status Payment Berhasil Diupdate', new TransactionResource($transaction), 200);
 
             } catch (\Exception $e) {
-                // If Midtrans throws error (e.g. transaction not found there yet), Just return current.
+                // If Midtrans throws error (e.g. transaction not found there yet),
+                // or the inner transaction above failed (already compensated and
+                // rolled back), just return current state gracefully.
                 return ResponseHelper::jsonResponse(true, 'Gagal cek Midtrans: '.$e->getMessage(), new TransactionResource($transaction), 200);
             }
 

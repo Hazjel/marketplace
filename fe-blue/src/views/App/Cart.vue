@@ -25,32 +25,37 @@ const {
 const { decreaseQuantity, increaseQuantity, removeFromCart, toggleStoreSelection, updateQuantity } =
   cart
 
-const handleIncreaseQuantity = (storeId, productId) => {
+const findCartLine = (storeId, productId, variantId) => {
   const store = carts.value.find((s) => s.storeId === storeId)
-  const product = store?.products.find((p) => p.id === productId)
+  return store?.products.find(
+    (p) => p.id === productId && (p.variant_id || null) === (variantId || null)
+  )
+}
+
+const handleIncreaseQuantity = (storeId, productId, variantId = null) => {
+  const product = findCartLine(storeId, productId, variantId)
   if (product) {
     if (product.quantity < product.stock) {
-      increaseQuantity(storeId, productId)
+      increaseQuantity(storeId, productId, variantId)
     } else {
       toast.error('Maksimal stok tercapai')
     }
   }
 }
 
-const handleUpdateQuantity = (storeId, productId, event) => {
+const handleUpdateQuantity = (storeId, productId, variantId, event) => {
   const value = parseInt(event.target.value)
-  const store = carts.value.find((s) => s.storeId === storeId)
-  const product = store?.products.find((p) => p.id === productId)
+  const product = findCartLine(storeId, productId, variantId)
 
   if (product) {
     if (value > product.stock) {
       toast.error(`Stok tidak cukup. Maksimal stok ${product.stock}`)
       event.target.value = product.stock
-      updateQuantity(storeId, productId, product.stock)
+      updateQuantity(storeId, productId, product.stock, variantId)
     } else if (value < 1) {
-      updateQuantity(storeId, productId, 1)
+      updateQuantity(storeId, productId, 1, variantId)
     } else {
-      updateQuantity(storeId, productId, value)
+      updateQuantity(storeId, productId, value, variantId)
     }
   }
 }
@@ -117,7 +122,7 @@ src="@/assets/images/icons/checkbox.svg"
           </div>
           <div class="cart-items-container flex flex-col pl-[10px]">
             <div
-v-for="product in store.products" :key="product.id"
+v-for="product in store.products" :key="product.id + '-' + (product.variant_id || 'none')"
               class="items group flex w-full border-b border-gray-100 dark:border-white/5 last:border-0 pb-6 mb-6 last:pb-0 last:mb-0">
               <div class="items-detail flex flex-col w-full gap-4">
                 <div class="flex items-start gap-4">
@@ -179,7 +184,7 @@ class="flex items-center gap-1 text-custom-grey hover:text-custom-blue transitio
                   <div class="flex items-center gap-4">
                     <button
                       class="flex items-center gap-1 text-custom-grey hover:text-custom-red transition-colors mr-2"
-                      type="button" @click="removeFromCart(store.storeId, product.id)">
+                      type="button" @click="removeFromCart(store.storeId, product.id, product.variant_id)">
                       <i class="fa-regular fa-trash-can"></i>
                     </button>
 
@@ -188,17 +193,17 @@ class="flex items-center gap-1 text-custom-grey hover:text-custom-blue transitio
                       <button
 type="button"
                         class="subtract size-7 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 disabled:opacity-50 transition-all dark:text-white"
-                        :disabled="product.quantity <= 1" @click="decreaseQuantity(store.storeId, product.id)">
+                        :disabled="product.quantity <= 1" @click="decreaseQuantity(store.storeId, product.id, product.variant_id)">
                         <i class="fa-solid fa-minus text-xs"></i>
                       </button>
                       <input
 type="number"
                         class="amount appearance-none w-10 text-center font-medium text-sm outline-none bg-transparent dark:text-white"
-                        :value="product.quantity" min="1" :max="product.stock" @change="handleUpdateQuantity(store.storeId, product.id, $event)" />
+                        :value="product.quantity" min="1" :max="product.stock" @change="handleUpdateQuantity(store.storeId, product.id, product.variant_id, $event)" />
                       <button
 type="button"
                         class="add size-7 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-all dark:text-white"
-                        @click="handleIncreaseQuantity(store.storeId, product.id)">
+                        @click="handleIncreaseQuantity(store.storeId, product.id, product.variant_id)">
                         <i class="fa-solid fa-plus text-xs"></i>
                       </button>
                     </div>

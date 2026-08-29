@@ -338,7 +338,7 @@ const addToCart = () => {
     const existingProduct = storeCart.products.find((p) => {
       // Match by Product ID AND Variant (if applicable)
       if (selectedVariant.value) {
-        return p.id === product.value.id && p.variantId === selectedVariant.value.id
+        return p.id === product.value.id && p.variant_id === selectedVariant.value.id
       }
       return p.id === product.value.id
     })

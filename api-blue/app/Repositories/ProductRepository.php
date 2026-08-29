@@ -6,6 +6,7 @@ use App\Interfaces\ProductRepositoryInterface;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductVariantMongo;
+use App\Models\TransactionDetail;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -255,7 +256,16 @@ class ProductRepository implements ProductRepositoryInterface
         DB::beginTransaction();
 
         try {
-            $product = Product::find($id);
+            // lockForUpdate(): checkout (TransactionRepository::create())
+            // menjadikan lock baris Product ini sebagai satu-satunya
+            // serialisasi untuk mutasi stok varian Mongo (MongoDB sendiri
+            // tidak punya SELECT ... FOR UPDATE). Tanpa lock yang sama di
+            // sini, seller edit produk (baca-ubah-simpan Mongo tanpa lock
+            // apa pun) dan buyer checkout bisa saling menimpa: keduanya
+            // baca stok Mongo yang sama sebelum salah satu selesai menulis,
+            // yang lebih lambat menulis balik nilai stale dan diam-diam
+            // membatalkan hasil yang lain.
+            $product = Product::where('id', $id)->lockForUpdate()->firstOrFail();
             $product->store_id = $data['store_id'];
             $product->product_category_id = $data['product_category_id'];
             $product->name = $data['name'];
@@ -270,6 +280,39 @@ class ProductRepository implements ProductRepositoryInterface
             if (isset($data['variants'])) {
                 // Get existing IDs from request (if any)
                 $sentIds = array_filter(array_column($data['variants'], 'id'));
+
+                // Varian yang akan dihapus (tidak ikut dikirim di request
+                // ini) -- dihitung sebelum eksekusi delete() di bawah.
+                $existingVariantIds = ProductVariantMongo::where('product_id', (string) $product->id)
+                    ->get()
+                    ->map(fn ($v) => (string) $v->id)
+                    ->toArray();
+                $idsToDelete = empty($sentIds)
+                    ? $existingVariantIds
+                    : array_diff($existingVariantIds, $sentIds);
+
+                // Jangan hard-delete varian yang masih direferensikan
+                // transaction_details dari order yang stoknya masih mungkin
+                // direstore (belum stock_restored_at, belum completed).
+                // ProductRepository::update() menghapus varian Mongo secara
+                // permanen; kalau order itu nanti dibatalkan/kedaluwarsa,
+                // restoreStock() memanggil ProductVariantMongo::find() yang
+                // sudah tidak ketemu apa-apa dan diam-diam SKIP restorasi
+                // varian itu -- products.stock (agregat, dihitung ulang dari
+                // varian yang TERSISA) jadi permanen lebih rendah dari yang
+                // seharusnya, tanpa ada error yang terlihat di mana pun.
+                if (! empty($idsToDelete)) {
+                    $blockingReference = TransactionDetail::whereIn('variant_id', $idsToDelete)
+                        ->whereHas('transaction', function ($q) {
+                            $q->whereNull('stock_restored_at')
+                                ->where('delivery_status', '!=', 'completed');
+                        })
+                        ->exists();
+
+                    if ($blockingReference) {
+                        throw new Exception('Tidak bisa menghapus varian yang masih direferensikan pesanan yang belum selesai. Selesaikan atau batalkan pesanan tersebut terlebih dahulu.');
+                    }
+                }
 
                 // Delete variants not in request
                 if (! empty($sentIds)) {
