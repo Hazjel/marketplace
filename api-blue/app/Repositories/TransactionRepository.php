@@ -7,6 +7,7 @@ use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ShippingGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Product;
+use App\Models\ProductVariantMongo;
 use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\Voucher;
@@ -249,6 +250,31 @@ class TransactionRepository implements TransactionRepositoryInterface
         return max(100, (int) round($totalKg * 1000));
     }
 
+    /**
+     * Kalau produk punya varian, variant_id WAJIB ada dan harus benar-benar
+     * milik produk itu -- diam-diam jatuh ke null (lalu memakai
+     * products.price/stock, yaitu varian termurah) persis bug yang lagi
+     * ditutup di sini, bukan fallback yang aman.
+     */
+    private function resolveVariant(Product $product, ?string $variantId): ?ProductVariantMongo
+    {
+        if (! $product->has_variants) {
+            return null;
+        }
+
+        if (! $variantId) {
+            throw new Exception("Produk {$product->name} punya varian -- pilih varian terlebih dahulu.");
+        }
+
+        $variant = ProductVariantMongo::find($variantId);
+
+        if (! $variant || $variant->product_id !== $product->id) {
+            throw new Exception('Varian yang dipilih tidak ditemukan.');
+        }
+
+        return $variant;
+    }
+
     public function create(array $data)
     {
         DB::beginTransaction();
@@ -309,7 +335,36 @@ class TransactionRepository implements TransactionRepositoryInterface
                     throw new Exception('Insufficient stock for product: '.$product->name);
                 }
 
-                // Deduct Stock
+                // products.price adalah harga varian TERMURAH (lihat
+                // ProductRepository::create/update -- collect($variants)->min('price')),
+                // bukan harga produk yang sesungguhnya kalau produk ini
+                // punya varian. variant_id sebelumnya sama sekali tidak
+                // sampai ke sini (payload cuma product_id+qty), jadi
+                // pembelian varian mana pun selalu ditagih harga varian
+                // termurah, dan stok yang berkurang cuma agregat produk --
+                // stok varian spesifik (Mongo) tidak pernah tersentuh, jadi
+                // varian yang sudah habis tetap bisa "dibeli" selama
+                // agregat produk masih > 0. resolveVariant() di bawah
+                // menutup keduanya sekaligus.
+                $variant = $this->resolveVariant($product, $productData['variant_id'] ?? null);
+                $unitPrice = $variant ? (float) $variant->price : (float) $product->price;
+
+                if ($variant) {
+                    if ($variant->stock < $productData['qty']) {
+                        throw new Exception("Stok varian tidak cukup untuk produk: {$product->name}");
+                    }
+                    $variant->stock -= $productData['qty'];
+                    $variant->save();
+                }
+
+                // Agregat products.stock tetap dikurangi seperti sebelumnya
+                // (dashboard/listing lain bergantung padanya sebagai total
+                // lintas varian) -- lock MySQL pada baris Product di atas
+                // yang jadi satu-satunya penjamin serialisasi juga untuk
+                // mutasi stok varian di Mongo, karena MongoDB sendiri tidak
+                // punya SELECT ... FOR UPDATE. Dua pembeli yang bersamaan
+                // checkout varian BEDA dari produk yang SAMA tetap serial
+                // lewat lock Product ini, bukan lewat Mongo.
                 $oldStock = $product->stock;
                 $product->stock -= $productData['qty'];
                 $product->save();
@@ -319,7 +374,9 @@ class TransactionRepository implements TransactionRepositoryInterface
                 $detail = $transactionDetailRepository->create([
                     'transaction_id' => $transaction->id,
                     'product_id' => $productData['product_id'],
+                    'variant_id' => $variant?->id,
                     'qty' => $productData['qty'],
+                    'unit_price' => $unitPrice,
                 ]);
 
                 $detail->load('product');
@@ -471,6 +528,19 @@ class TransactionRepository implements TransactionRepositoryInterface
                     $product->stock += $detail->qty;
                     $product->save();
                     Log::info("Product {$product->id} RESTORED: Stock -> {$product->stock}");
+                }
+
+                // Simetris dengan pengurangan stok varian di create() --
+                // tanpa ini, pembatalan/expiry transaksi yang membeli
+                // varian tertentu cuma mengembalikan agregat produk,
+                // stok varian spesifiknya tetap hilang permanen.
+                if ($detail->variant_id) {
+                    $variant = ProductVariantMongo::find($detail->variant_id);
+                    if ($variant) {
+                        $variant->stock += $detail->qty;
+                        $variant->save();
+                        Log::info("Variant {$variant->id} RESTORED: Stock -> {$variant->stock}");
+                    }
                 }
             }
 

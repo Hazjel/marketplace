@@ -44,6 +44,10 @@ class TransactionStoreRequest extends FormRequest
             'shipping_cost' => 'nullable|numeric|min:0',
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
+            // exists: tidak bisa dipakai -- varian ada di MongoDB, bukan
+            // MySQL. Kepemilikan/stok divalidasi di TransactionRepository
+            // (butuh lock+transaksi yang sama dengan pengecekan stok produk).
+            'products.*.variant_id' => 'nullable|string',
             'products.*.qty' => 'required|integer|min:1',
             'voucher_code' => 'nullable|string|exists:vouchers,code',
         ];
