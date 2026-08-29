@@ -297,7 +297,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         foreach ($adjustments as $adjustment) {
             try {
-                $variant = ProductVariantMongo::find($adjustment['variant_id']);
+                $variant = ProductVariantMongo::find((string) $adjustment['variant_id']);
                 if ($variant) {
                     $variant->stock += $sign * $adjustment['qty'];
                     $variant->save();
@@ -646,7 +646,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 // varian tertentu cuma mengembalikan agregat produk,
                 // stok varian spesifiknya tetap hilang permanen.
                 if ($detail->variant_id) {
-                    $variant = ProductVariantMongo::find($detail->variant_id);
+                    $variant = ProductVariantMongo::find((string) $detail->variant_id);
                     if ($variant) {
                         $variant->stock += $detail->qty;
                         $variant->save();

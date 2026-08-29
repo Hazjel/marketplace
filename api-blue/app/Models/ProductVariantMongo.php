@@ -4,6 +4,11 @@ namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
 
+/**
+ * @property string $product_id
+ * @property numeric-string $price
+ * @property int $stock
+ */
 class ProductVariantMongo extends Model
 {
     protected $connection = 'mongodb';
