@@ -234,4 +234,47 @@ class VariantCheckoutTest extends TestCase
         $this->assertSame(5, ProductVariantMongo::find($ctx['variantMahal']->id)->stock); // dikembalikan penuh
         $this->assertSame(15, $ctx['product']->fresh()->stock);
     }
+
+    public function test_variant_stock_decrement_is_compensated_when_a_later_product_in_the_same_checkout_fails(): void
+    {
+        // MongoDB tidak ikut DB::beginTransaction() MySQL di create() --
+        // koneksi terpisah, bukan distributed transaction. Produk varian
+        // diproses PERTAMA (Mongo stock berkurang + commit ke Mongo),
+        // produk kedua (non-varian, stok sengaja tidak cukup) diproses
+        // SETELAHNYA dan gagal -- tanpa compensateMongoStock(),
+        // DB::rollBack() cuma membatalkan sisi MySQL, decrement Mongo yang
+        // sudah ter-apply tetap ada walau seluruh checkout gagal.
+        $ctx = $this->checkoutContext();
+        $lowStock = Product::create([
+            'store_id' => $ctx['store']->id, 'product_category_id' => $ctx['product']->product_category_id,
+            'name' => 'Stok Terbatas', 'slug' => 'stok-terbatas-'.uniqid(),
+            'description' => 'D', 'condition' => 'new',
+            'has_variants' => false, 'price' => 5000, 'stock' => 1, 'weight' => 100,
+        ]);
+
+        $payload = $this->basePayload() + [
+            'products' => [
+                // Varian diproses lebih dulu (urutan array = urutan loop
+                // di TransactionRepository::create()) supaya Mongo-nya
+                // benar-benar ter-decrement SEBELUM produk kedua gagal.
+                ['product_id' => $ctx['product']->id, 'variant_id' => $ctx['variantMahal']->id, 'qty' => 2],
+                ['product_id' => $lowStock->id, 'qty' => 5], // stok cuma 1 -- pasti gagal
+            ],
+        ];
+
+        $this->actingAs($ctx['buyerUser'], 'sanctum')
+            ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
+            ->postJson('/api/transaction', $payload)
+            ->assertStatus(500);
+
+        $this->assertDatabaseCount('transaction_details', 0);
+        $this->assertDatabaseMissing('transactions', ['buyer_id' => $ctx['buyer']->id]);
+
+        // Baris paling penting -- SQL rollback otomatis Laravel tidak
+        // pernah menyentuh Mongo, jadi ini yang membuktikan
+        // compensateMongoStock() benar-benar bekerja.
+        $this->assertSame(5, ProductVariantMongo::find($ctx['variantMahal']->id)->stock); // TIDAK berkurang
+        $this->assertSame(15, $ctx['product']->fresh()->stock); // agregat juga tidak berkurang
+        $this->assertSame(1, $lowStock->fresh()->stock);
+    }
 }
