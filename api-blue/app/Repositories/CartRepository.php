@@ -140,14 +140,18 @@ class CartRepository implements CartRepositoryInterface
             ->toArray();
 
         $variants = [];
+        $mongoUnavailable = false;
         if (! empty($variantIds)) {
             try {
                 $variants = ProductVariantMongo::whereIn('_id', $variantIds)
                     ->get()
                     ->keyBy(fn ($v) => (string) $v->_id);
             } catch (\Exception) {
-                // MongoDB unavailable — gracefully skip variant stock check
-                $variants = [];
+                // MongoDB unavailable -- fail closed below, do NOT silently
+                // fall back to the product's aggregate stock (that number is
+                // cheapest-variant price / summed stock across ALL variants,
+                // not this line's actual stock).
+                $mongoUnavailable = true;
             }
         }
 
@@ -155,11 +159,12 @@ class CartRepository implements CartRepositoryInterface
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
             $requestedQty = (int) ($item['quantity'] ?? 1);
+            $variantId = $item['variant_id'] ?? null;
 
             if (! $product) {
                 $results[] = [
                     'product_id' => $item['product_id'],
-                    'variant_id' => $item['variant_id'] ?? null,
+                    'variant_id' => $variantId,
                     'available' => 0,
                     'requested' => $requestedQty,
                     'valid' => false,
@@ -169,18 +174,46 @@ class CartRepository implements CartRepositoryInterface
                 continue;
             }
 
-            // Determine available stock: variant stock takes precedence
-            $availableStock = $product->stock;
-            if (! empty($item['variant_id']) && isset($variants[$item['variant_id']])) {
-                $availableStock = $variants[$item['variant_id']]->stock;
+            $base = [
+                'product_id' => $item['product_id'],
+                'variant_id' => $variantId,
+                'product_name' => $product->name,
+                'requested' => $requestedQty,
+            ];
+
+            if ($product->has_variants) {
+                if ($variantId === null) {
+                    $results[] = $base + ['available' => 0, 'valid' => false, 'reason' => 'variant_required'];
+
+                    continue;
+                }
+
+                if ($mongoUnavailable) {
+                    $results[] = $base + ['available' => 0, 'valid' => false, 'reason' => 'unavailable'];
+
+                    continue;
+                }
+
+                $variant = $variants[$variantId] ?? null;
+                if (! $variant) {
+                    $results[] = $base + ['available' => 0, 'valid' => false, 'reason' => 'variant_not_found'];
+
+                    continue;
+                }
+
+                if ($variant->product_id !== $product->id) {
+                    $results[] = $base + ['available' => 0, 'valid' => false, 'reason' => 'invalid_variant'];
+
+                    continue;
+                }
+
+                $availableStock = $variant->stock;
+            } else {
+                $availableStock = $product->stock;
             }
 
-            $results[] = [
-                'product_id' => $item['product_id'],
-                'variant_id' => $item['variant_id'] ?? null,
-                'product_name' => $product->name,
+            $results[] = $base + [
                 'available' => $availableStock,
-                'requested' => $requestedQty,
                 'valid' => $requestedQty <= $availableStock,
                 'reason' => $requestedQty > $availableStock ? 'insufficient_stock' : null,
             ];
