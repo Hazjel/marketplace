@@ -109,7 +109,7 @@ pipeline {
             agent {
                 docker {
                     image 'php:8.4-cli'
-                    args '-u root'
+                    args '-u root --dns 192.168.210.226 --dns 192.168.210.207'
                 }
             }
             when {
