@@ -160,7 +160,7 @@ pipeline {
         stage('Frontend: Install & Test') {
             agent {
                 docker {
-                    image 'node:20-alpine'
+                    image 'node:20-bookworm-slim'
                 }
             }
             when {
