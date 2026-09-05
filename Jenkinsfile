@@ -142,7 +142,7 @@ pipeline {
                         # mengikuti versi Debian base image php:8.4-cli.
                         # Diverifikasi langsung di host: mongod --fork jalan
                         # bersih di image ini, port 27017 kebuka dalam <15 detik.
-                        curl -fsSL -o /tmp/mongo.tgz https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-debian12-7.0.14.tgz
+                        curl -4 -fsSL -o /tmp/mongo.tgz https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-debian12-7.0.14.tgz
                         mkdir -p /opt/mongo /data/mongo-ci
                         tar -xzf /tmp/mongo.tgz -C /opt/mongo --strip-components=1
                         /opt/mongo/bin/mongod --dbpath /data/mongo-ci --bind_ip 127.0.0.1 --port 27017 --fork --logpath /var/log/mongod.log
