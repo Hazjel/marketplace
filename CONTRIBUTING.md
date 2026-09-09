@@ -77,7 +77,7 @@ Body: what changed and why. Reference the sprint/task id if there is one.
 | Python | Ruff (`ruff.toml` per service). |
 | Naming | See `CLAUDE.md` (if present) or match the surrounding code. |
 | Language | UI text, validation and error messages are in **Bahasa Indonesia**. |
-| IDs | UUID v4 on all tables. No soft deletes except `users`. |
+| IDs | Core domain entities predominantly use UUID v4; some supporting tables (`jobs`, `addresses`, `store_followers`) use integer IDs. No soft deletes except `users`. |
 | Money | Never do ad-hoc float arithmetic on currency. Use `App\ValueObjects\Money`; rounding only at percentage boundaries. See `api-blue/docs/money-contract.md`. |
 
 ## Tests
@@ -96,5 +96,6 @@ Body: what changed and why. Reference the sprint/task id if there is one.
 ## Security
 
 - Never commit secrets. `.env`, credential JSON, and Postman
-  globals/environments are gitignored; gitleaks runs in CI.
+  globals/environments are gitignored; gitleaks runs in Jenkins on `main` and
+  is currently non-blocking.
 - Report vulnerabilities privately — see [`SECURITY.md`](SECURITY.md).
