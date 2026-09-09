@@ -413,7 +413,11 @@ class TransactionRepository implements TransactionRepositoryInterface
                 // agregat produk masih > 0. resolveVariant() di bawah
                 // menutup keduanya sekaligus.
                 $variant = $this->resolveVariant($product, $productData['variant_id'] ?? null);
-                $unitPrice = $variant ? (float) $variant->price : (float) $product->price;
+                // Raw decimal string, not (float): TransactionDetailRepository
+                // parses it with Money::fromDecimalString() (B3.1). Casting
+                // through float here would both re-admit imprecision and
+                // hide a fractional-rupiah price behind "10500.5".
+                $unitPrice = (string) ($variant ? $variant->price : $product->price);
 
                 if ($variant) {
                     if ($variant->stock < $productData['qty']) {
@@ -453,8 +457,12 @@ class TransactionRepository implements TransactionRepositoryInterface
             Log::info('Transaction details created:', ['count' => count($transactionDetails)]);
 
             // ✅ Hitung subtotal dari produk saja
+            //
+            // detail->subtotal kini Money (B3.1 pilot). Checkout math di
+            // bawah masih skalar integer — migrasinya B3.2 — jadi di sini
+            // Money dikembalikan ke int rupiah lewat ->minor().
             $subtotal = array_reduce($transactionDetails, function ($carry, $item) {
-                return $carry + $item->subtotal;
+                return $carry + $item->subtotal->minor();
             }, 0);
 
             Log::info('Subtotal calculated:', ['subtotal' => $subtotal]);

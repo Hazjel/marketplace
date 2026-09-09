@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -59,13 +60,14 @@ class TransactionFactory extends Factory
             for ($i = 0; $i < $numberOfDetails; $i++) {
                 $product = Product::factory()->create(['store_id' => $transaction->store_id]);
                 $qty = $this->faker->numberBetween(1, 5);
-                $subtotal += $product->price * $qty;
+                $lineSubtotal = Money::fromDecimalString((string) $product->price)->multiplyByQty($qty);
+                $subtotal += $lineSubtotal->minor();
 
                 TransactionDetail::factory()->create([
                     'transaction_id' => $transaction->id,
                     'product_id' => $product->id,
                     'qty' => $qty,
-                    'subtotal' => $product->price * $qty,
+                    'subtotal' => $lineSubtotal,
                 ]);
             }
 
