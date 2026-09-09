@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
     && pecl install redis-6.3.0 \
-    && pecl install mongodb-2.3.3 \
+    && pecl install mongodb-2.4.1 \
     && docker-php-ext-enable redis mongodb \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
