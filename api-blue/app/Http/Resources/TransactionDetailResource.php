@@ -19,7 +19,10 @@ class TransactionDetailResource extends JsonResource
             'product_id' => $this->product_id,
             'product' => $this->product ? new ProductResource($this->product) : null,
             'qty' => $this->qty,
-            'subtotal' => (float) (string) $this->subtotal,
+            // subtotal is a Money value object (MoneyCast). Emitted as an
+            // integer number of rupiah — same value as the old
+            // (float) cast, narrower type. See docs/money-contract.md.
+            'subtotal' => $this->subtotal->minor(),
         ];
     }
 }
