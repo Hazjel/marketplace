@@ -34,17 +34,18 @@ see [License](#license).
 
 ## Overview
 
-One codebase, four backend services, two frontend builds:
+One monorepo: three backend services, plus one frontend codebase that builds
+into two apps.
 
-| Service | Role |
+| Component | Role |
 |---|---|
 | `api-blue` | Laravel 12 REST API — auth, catalog, cart, checkout, escrow payments, chat, vouchers |
-| `fe-blue` | Vue 3 SPA — built twice: **buyer app** (`blukios.store`) and **seller app** (`seller.blukios.store`) from `VITE_APP_TARGET` |
 | `chat-service` | FastAPI assistant "Ri" — Ollama LLM + RAG (Chroma) over the product catalog |
 | `recommendation-service` | FastAPI — content-based similarity + collaborative filtering (SVD) |
+| `fe-blue` | Vue 3 SPA (frontend) — built twice: **buyer app** (`blukios.store`) and **seller app** (`seller.blukios.store`) from `VITE_APP_TARGET` |
 
 Supporting containers: Laravel Reverb (WebSocket), a database queue worker, a
-scheduler, nginx (single entry point), MySQL, MongoDB, Redis, Ollama.
+scheduler, nginx (HTTP ingress), MySQL, MongoDB, Redis, Ollama.
 
 ## Features
 
@@ -101,8 +102,11 @@ bearer token), so moving between apps uses a one-time token exchange:
 
 ### Request routing (nginx)
 
-A single nginx container is the only published port. Both server blocks proxy to
-the same Laravel API:
+nginx is the primary HTTP application ingress — in a hardened deployment it is
+the only port that should be published. (The default `docker-compose.yml` also
+publishes MySQL, MongoDB, Redis, Ollama, the Python services, phpMyAdmin and
+mongo-express to the host — see [Security](#security).) Both server blocks proxy
+to the same Laravel API:
 
 | Path | Upstream |
 |---|---|
@@ -126,7 +130,9 @@ the same Laravel API:
   messages in Bahasa Indonesia.
 - **Idempotency** — `X-Idempotency-Key` header required on transaction creation;
   cached in Redis for 24h.
-- **UUID v4** primary keys on every table; no soft deletes except `users`.
+- Core domain entities predominantly use **UUID v4** primary keys; a few
+  supporting tables (`jobs`, `addresses`, `store_followers`) use integer IDs.
+  No soft deletes except `users`.
 - **Money** — `App\ValueObjects\Money` fixed-point value object (whole rupiah,
   scale 0). Pilot column: `transaction_details.subtotal`. Full calculation
   migration is in progress — see [roadmap](#project-status--roadmap).
@@ -156,7 +162,18 @@ the same Laravel API:
 - PHP 8.2+ and Composer — only if running artisan commands outside the container
 - Python 3.11 — only if running the Python services outside Docker
 
-### 1. Bring up the stack
+### 1. Root `.env`
+
+Compose requires `APP_KEY` and `INTERNAL_SERVICE_KEY` (`${VAR:?}` — it aborts
+without them). Everything else has a local default.
+
+```bash
+cp .env.example .env
+# set APP_KEY (php artisan key:generate --show, or generate any base64:… key)
+# set INTERNAL_SERVICE_KEY to any long random string
+```
+
+### 2. Bring up the stack
 
 ```bash
 docker compose up -d --build
@@ -171,7 +188,7 @@ chat-service, recommendation-service, MySQL, MongoDB, Redis and Ollama.
 > phpMyAdmin / mongo-express are exposed without credentials. Do **not** deploy
 > it unchanged. See [Security](#security).
 
-### 2. Run migrations & seed
+### 3. Run migrations & seed
 
 ```bash
 docker exec blue-api php artisan migrate --seed
@@ -180,7 +197,7 @@ docker exec blue-api php artisan migrate --seed
 `ProductionSeeder` creates roles/permissions only (no demo accounts). Use
 `db:seed --class=...` for catalog fixtures in development.
 
-### 3. Frontend dev server (hot reload)
+### 4. Frontend dev server (hot reload)
 
 ```bash
 cd fe-blue
@@ -235,10 +252,13 @@ Each service has its own `.env.example`:
 - `recommendation-service/.env.example` — `LARAVEL_API_URL`,
   `INTERNAL_SERVICE_KEY` (must match `api-blue`), CF/CBF tuning.
 
-The Compose file supplies inter-container values (internal hostnames, mandatory
-DB/Redis credentials for a hardened deployment) via its own environment / an
-`.env` at the repo root — the per-service `.env.example` files above are aimed at
-running a service directly on the host.
+The Compose file supplies inter-container values (internal hostnames, and a
+handful of variables from a root `.env` — see `.env.example`). Only `APP_KEY`
+and `INTERNAL_SERVICE_KEY` are enforced; the rest fall back to local-dev
+defaults. **The current Compose hardcodes an empty MySQL password,
+`REDIS_PASSWORD=null`, and no MongoDB auth** — it does not yet accept
+credentials for those from the root `.env`. The per-service `.env.example`
+files above are for running a service directly on the host, not via Compose.
 
 ## Testing
 
@@ -255,7 +275,9 @@ running a service directly on the host.
 
 ## CI/CD (Jenkins)
 
-`Jenkinsfile` — declarative pipeline, triggered on SCM change. Stages:
+`Jenkinsfile` — a single declarative pipeline, **`pollSCM` every 5 minutes**
+(no GitHub webhook — Jenkins is not publicly reachable), `disableConcurrentBuilds`.
+It tracks `main`; it does **not** run per-PR checks. Stages:
 
 1. **Detect Changes** — path filter; each service's stage runs only if its files changed
 2. **Backend: Install** — `composer install`, `composer audit`
@@ -263,21 +285,30 @@ running a service directly on the host.
 4. **Frontend: Install & Test** — `npm ci`, ESLint, Vitest, `npm run build`, `npm audit --omit=dev --audit-level=high`
 5. **Chat Service: Lint, Audit & Test** — Ruff, pip-audit, pytest
 6. **Recommendation Service: Lint, Audit & Test** — Ruff, pip-audit, pytest
-7. **Security: Secret Scan** — gitleaks (`.gitleaks.toml`)
+7. **Security: Secret Scan** — gitleaks (`.gitleaks.toml`); currently **non-blocking** (`|| true`)
 8. **Deploy** — on `main` only: fetch the tested commit, `artisan migrate --force`,
    rebuild & recreate the app containers, verify the deployed SHA, health-check
    `https://blukios.store/api/health`
 
-GitHub Actions is **not** used — the pipeline lives entirely in `Jenkinsfile`.
+GitHub Actions is **not** used. Because the pipeline runs post-merge on `main`,
+**a PR's gate is the local checks** (Pint / PHPStan / tests / build) plus review —
+Jenkins then validates and deploys the merge commit.
+
+The repo ships an optional Jenkins container (`--profile cd`) for running this
+pipeline; how the production Jenkins controller is actually hosted is an
+operational detail not defined here.
 
 ## Production deployment
 
-- Jenkins runs on the production host (`--profile cd`) and deploys in place:
-  `docker compose -p marketplace build/up -d api queue reverb scheduler frontend
+Deploy is in-place, driven by the `Deploy` stage on `main`:
+
+- `docker compose -p marketplace build/up -d api queue reverb scheduler frontend
   chat-service recommendation-service` + `--force-recreate nginx`.
 - Only the application containers are rebuilt per deploy; MySQL / MongoDB / Redis /
-  Ollama are long-lived.
+  Ollama are long-lived (started once, outside the deploy).
 - A failed migration aborts the deploy before any container is touched.
+- Every merge to `main` deploys — including docs-only changes (the app
+  containers are still rebuilt).
 - Post-deploy: the deployed working-tree SHA is checked against the tested commit,
   then the API must return `200` from `/api/health` within 3 minutes or the stage
   fails.
@@ -297,8 +328,9 @@ GitHub Actions is **not** used — the pipeline lives entirely in `Jenkinsfile`.
 - Prometheus scrapes the chat service and the Laravel `/metrics` exporter
   (15s interval, 15-day retention).
 - Grafana auto-provisions dashboards (`monitoring/grafana/`) and alerting rules.
-- Both run under `--profile monitoring`; Grafana requires
-  `GRAFANA_ADMIN_PASSWORD`.
+- Both run under `--profile monitoring`. Grafana currently ships a hardcoded
+  `admin` / `admin` login in the Compose file — a local-only insecure default
+  that must be changed for any exposed deployment.
 
 ## Security
 
@@ -306,16 +338,26 @@ GitHub Actions is **not** used — the pipeline lives entirely in `Jenkinsfile`.
 - Checkout is server-authoritative: buyer id, store id, shipping cost and voucher
   discount are all re-derived/re-validated server-side; client values are ignored.
 - Escrow ledger has DB-level uniqueness so a webhook replay can't double-credit.
-- gitleaks runs in CI; secrets live only in `.env` (gitignored) and
-  `FIREBASE_CREDENTIALS` JSON (gitignored).
+- gitleaks runs in the Jenkins pipeline on `main` (currently non-blocking);
+  secrets live only in `.env` (gitignored) and `FIREBASE_CREDENTIALS` JSON
+  (gitignored).
 - Midtrans keys in `.env` are sandbox by default (`MIDTRANS_IS_PRODUCTION=false`).
 
-**Deployment hardening is not automatic.** The committed `docker-compose.yml` is a
-local-development configuration: empty MySQL root password, no Redis/MongoDB auth,
-phpMyAdmin and mongo-express exposed without credentials, and infra ports
-published to the host. A production host must override these (mandatory
-credentials, no published infra ports, tools behind a profile + auth, host
-firewall) before running the stack.
+**Deployment hardening is not automatic — and not yet done.** The committed
+`docker-compose.yml` is a local-development configuration:
+
+- MySQL: `MYSQL_ALLOW_EMPTY_PASSWORD=yes`, port published to the host
+- Redis: no `requirepass`, port published
+- MongoDB: no authentication, port published
+- phpMyAdmin (`root` / no password) and mongo-express (`BASICAUTH=false`):
+  always on, ports published, not behind a profile
+- Grafana: `admin` / `admin`
+
+Only Prometheus / Grafana (`monitoring`), k6 (`loadtest`) and Jenkins (`cd`) are
+profile-gated. A deployment must add mandatory credentials, drop the published
+infra ports, put the admin tools behind a profile + auth, and rely on a host
+firewall. That hardening is a tracked task, not part of this documentation
+change.
 
 To report a vulnerability, see [`SECURITY.md`](SECURITY.md) — do not open a public
 issue.
@@ -332,20 +374,22 @@ Actively developed. Production is live and CI-gated.
 
 - **Done** — two-domain buyer/seller split, escrow payments, server-authoritative
   checkout, variant-aware pricing/stock, cross-DB (MySQL↔MongoDB) compensation,
-  RAG chat, collaborative recommendations, Jenkins pipeline, production hardening
-  of the CVE surface.
+  RAG chat, collaborative recommendations, Jenkins pipeline, dependency-CVE fixes
+  (MongoDB PHP ext, `maplibre-gl`).
 - **In progress — money refactor (Sprint B)** — `Money` fixed-point primitive
   landed (`B3.1`, pilot on `transaction_details.subtotal`). Next: `B3.2`
   migrate tax / voucher / admin-fee calculations onto the primitive and close
   the known rounding gaps (`api-blue/docs/money-contract.md` §6).
-- **Backlog** — end-to-end Midtrans Snap payment verification; `products.price`
-  integer validation; `decimal` → `bigint` column migration (deferred).
+- **Backlog** — Compose / deployment hardening (see [Security](#security));
+  end-to-end Midtrans Snap payment verification; `products.price` integer
+  validation; make the gitleaks stage blocking; `decimal` → `bigint` column
+  migration (deferred).
 
 ## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). In short: branch off `main`, keep
-changes scoped, run Pint / PHPStan / tests locally, open a PR, let Jenkins gate
-it, squash-merge. `main` auto-deploys.
+changes scoped, run Pint / PHPStan / tests locally, open a PR for review, then
+merge. Jenkins validates and deploys the merge commit on `main`.
 
 ## License
 

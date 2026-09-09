@@ -34,7 +34,9 @@ physical access.
 ## Handling of secrets
 
 - Secrets live only in `.env` files and credential JSON, all gitignored.
-- `gitleaks` runs in CI on every push (`.gitleaks.toml`).
+- `gitleaks` executes in the Jenkins pipeline on `main` (`.gitleaks.toml`) and
+  is currently **non-blocking** (`|| true`) — making it blocking is a tracked
+  CI task.
 - Midtrans is in sandbox mode by default (`MIDTRANS_IS_PRODUCTION=false`).
 
 ## Known hardening gap

@@ -3,20 +3,27 @@
 ## Workflow
 
 ```
-branch off main  →  commit  →  push  →  open PR  →  Jenkins  →  squash-merge  →  auto-deploy
+branch off main  →  local checks  →  push  →  open PR  →  review  →  merge commit
+      →  Jenkins polls main  →  build + test + deploy  →  verify production
 ```
 
 1. **Branch** off the latest `main`. Naming: `feat/…`, `fix/…`, `ci/…`,
    `docs/…`, `chore/…`, `security/…`.
 2. **Keep it scoped.** One concern per PR. If a change touches many services,
    say why in the description.
-3. **Run the checks locally** before pushing (see below).
-4. **Open a PR** against `main`. Fill in the template.
-5. **Jenkins** runs on every push. It must be green before merge.
-6. **Squash-merge.** `main` is the deploy branch — every merge triggers a
-   production deploy via the `Deploy` stage.
+3. **Run the checks locally** before pushing (see below) — this is the real
+   pre-merge gate.
+4. **Open a PR** against `main`. Fill in the template. Get a review.
+5. **Merge** (a merge commit, not squash — matches the existing history).
+6. **Jenkins** picks up `main` on its next SCM poll (every ~5 min; there is no
+   webhook), runs the full pipeline, and — if green — deploys the merge commit
+   and health-checks production. Watch that run; a red pipeline on `main` means
+   production may be affected.
 
-There is no long-lived `develop` branch. `main` is always deployable.
+Jenkins does **not** run per-PR. Nothing automated gates the PR itself, so the
+local checks and the review are what protect `main`. There is no long-lived
+`develop` branch — `main` is always deployable, and every merge deploys
+(docs-only changes included).
 
 ## Local checks
 

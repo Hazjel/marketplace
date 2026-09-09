@@ -16,7 +16,8 @@ changes. The first tagged release will be `v0.1.0`.
 - `api-blue/docs/money-contract.md` — frozen money contract and the list of
   known calculation gaps to migrate in B3.2.
 - Repository documentation: `README.md` rewrite, `CONTRIBUTING.md`,
-  `SECURITY.md`, this changelog, GitHub PR/issue templates.
+  `SECURITY.md`, this changelog, GitHub PR/issue templates, and a root
+  `.env.example` for the Compose stack.
 
 ### Changed
 - `TransactionDetailResource` emits `subtotal` as an integer (was a float);
