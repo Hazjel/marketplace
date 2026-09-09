@@ -114,9 +114,17 @@ final class Money implements JsonSerializable
      *
      * The only method that rounds. HALF_UP = ties away from zero.
      *
-     * Overflow-safe: the amount is decomposed as q * 10_000 + r before
-     * multiplying, so the intermediate magnitude stays near
-     * max(|amount|, 10_000 * basisPoints) rather than |amount| * basisPoints.
+     * Overflow-safe with no float and no BCMath: BOTH operands are split
+     * into a 10_000-quotient and remainder, so
+     *
+     *   amount * bp / 10_000
+     *     = aQ*bQ*10_000 + aQ*bR + aR*bQ          (integer "whole" part)
+     *     + aR*bR / 10_000                        (the only rounded term)
+     *
+     * where |aR|, bR < 10_000, so `aR*bR` (< 1e8) can never overflow.
+     * Each product in the whole part is range-checked: if the true
+     * result exceeds PHP_INT_MAX it throws RangeException; if it fits,
+     * it is computed exactly regardless of how large `basisPoints` is.
      */
     public function percentage(int $basisPoints, RoundingMode $mode = RoundingMode::HALF_UP): self
     {
@@ -124,31 +132,31 @@ final class Money implements JsonSerializable
             throw new InvalidArgumentException("Basis points harus >= 0, dapat {$basisPoints}.");
         }
 
-        // $mode is HALF_UP-only today; the parameter pins the semantics
-        // at the call site and leaves room for more modes without a
-        // signature change.
-        unset($mode);
+        $overflow = 'Perhitungan persentase Money melampaui jangkauan PHP int.';
 
-        $q = intdiv($this->minor, 10_000);
-        $r = $this->minor - $q * 10_000; // same sign as $this->minor, |r| < 10_000
+        $amountQ = intdiv($this->minor, 10_000);
+        $amountR = $this->minor % 10_000;     // sign of $minor, |.| < 10_000
+        $bpQ = intdiv($basisPoints, 10_000);
+        $bpR = $basisPoints % 10_000;         // 0 .. 9_999 ($basisPoints >= 0)
 
-        $whole = self::guardInt(
-            $q * $basisPoints,
-            'Perkalian persentase Money melampaui jangkauan PHP int.'
-        );
+        $whole = self::guardInt($amountQ * $bpQ, $overflow);
+        $whole = self::guardInt($whole * 10_000, $overflow);
+        $whole = self::guardInt($whole + self::guardInt($amountQ * $bpR, $overflow), $overflow);
+        $whole = self::guardInt($whole + self::guardInt($amountR * $bpQ, $overflow), $overflow);
 
-        $fractionNumerator = $r * $basisPoints; // |.| < 10_000 * basisPoints
-        $fraction = intdiv($fractionNumerator, 10_000);
-        $remainder = $fractionNumerator - $fraction * 10_000;
+        $smallNumerator = $amountR * $bpR;    // |.| < 10_000 * 10_000 = 1e8, cannot overflow
+        $fraction = intdiv($smallNumerator, 10_000);
+        $remainder = $smallNumerator % 10_000;
 
-        if (abs($remainder) * 2 >= 10_000) {
-            $fraction += $fractionNumerator >= 0 ? 1 : -1;
+        $roundAwayFromZero = match ($mode) {
+            RoundingMode::HALF_UP => abs($remainder) * 2 >= 10_000,
+        };
+
+        if ($roundAwayFromZero) {
+            $fraction += $smallNumerator >= 0 ? 1 : -1;
         }
 
-        return new self(self::guardInt(
-            $whole + $fraction,
-            'Hasil persentase Money melampaui jangkauan PHP int.'
-        ));
+        return new self(self::guardInt($whole + $fraction, $overflow));
     }
 
     public function clampMin(self $floor): self

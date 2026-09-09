@@ -42,6 +42,15 @@ and quantity multiplication are always exact — a non-integer intermediate
 is impossible at scale 0 and a range overflow is an error, not a rounding
 opportunity.
 
+`percentage()` is overflow-safe with no float and no BCMath: **both**
+the amount and the basis points are split into a 10_000-quotient and
+remainder, so `amount * bp / 10_000` becomes
+`aQ*bQ*10_000 + aQ*bR + aR*bQ + aR*bR/10_000`. The `aR*bR` term (`< 1e8`)
+is the only rounded part and cannot overflow; each product in the whole
+part is range-checked. If the true result fits in a PHP int it is
+computed exactly no matter how large `basisPoints` is; only a result
+that genuinely exceeds `PHP_INT_MAX` throws.
+
 ### Rounding mode
 
 `App\Enums\RoundingMode::HALF_UP` — ties away from zero, matching PHP's

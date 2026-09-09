@@ -222,6 +222,34 @@ class MoneyTest extends TestCase
         );
     }
 
+    #[DataProvider('inRangeResultsWithOverflowingIntermediate')]
+    public function test_percentage_computes_when_result_fits_even_if_a_naive_intermediate_would_overflow(
+        int $amount,
+        int $basisPoints,
+        int $expected
+    ): void {
+        // 9999 * PHP_INT_MAX overflows, but 9999 * PHP_INT_MAX / 10_000
+        // fits in an int — the double decomposition must compute it, not
+        // throw, and never let a float reach intdiv().
+        $this->assertSame($expected, Money::rupiah($amount)->percentage($basisPoints)->minor());
+    }
+
+    public static function inRangeResultsWithOverflowingIntermediate(): array
+    {
+        return [
+            'positive' => [9_999, PHP_INT_MAX, 9_222_449_699_651_090_329],
+            'negative' => [-9_999, PHP_INT_MAX, -9_222_449_699_651_090_329],
+            'large in-range rate' => [250, 1_000_000, 25_000], // 10_000% = 100x
+        ];
+    }
+
+    public function test_percentage_throws_range_exception_when_the_true_result_overflows(): void
+    {
+        // amountQ * bpQ ~ (9.2e14)^2 — the result genuinely does not fit.
+        $this->expectException(RangeException::class);
+        Money::rupiah(PHP_INT_MAX)->percentage(PHP_INT_MAX);
+    }
+
     // --- clampMin -----------------------------------------------------
 
     public function test_clamp_min(): void
