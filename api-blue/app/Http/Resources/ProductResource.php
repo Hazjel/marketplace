@@ -23,7 +23,8 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'condition' => $this->condition,
-            'price' => (float) (string) $this->price,
+            // price is whole rupiah (Sprint B3.2a); weight is kg, not money.
+            'price' => (int) $this->price,
             'weight' => (float) (string) $this->weight,
             'stock' => $this->stock,
             'total_sold' => $this->total_sold,
