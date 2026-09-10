@@ -89,6 +89,41 @@ describe('cart store — variant-aware line matching', () => {
   })
 })
 
+describe('cart store — money totals match the backend boundary (B3.2e)', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    setActivePinia(createPinia())
+  })
+
+  const line = (overrides = {}) => ({
+    id: 'product-x',
+    store: { id: 'store-1', address_id: '1', name: 'Toko', logo: null },
+    quantity: 1,
+    price: 100000,
+    ...overrides
+  })
+
+  it('rounds PPN HALF_UP at the tax step, then adds exactly', async () => {
+    const cart = useCartStore()
+    // subtotal 100_005 -> 11% = 11_000.55 -> round -> 11_001
+    await cart.addToCart(line({ price: 100005 }))
+    cart.toggleStoreSelection('store-1')
+
+    expect(cart.subtotalSelected).toBe(100005)
+    expect(cart.ppnSelected).toBe(11001)
+    expect(cart.grandTotalSelected).toBe(111006)
+  })
+
+  it('Cart grand total and Checkout total-with-delivery agree for the same order', async () => {
+    const cart = useCartStore()
+    await cart.addToCart(line({ price: 100005 }))
+    cart.toggleStoreSelection('store-1')
+
+    const delivery = 15000
+    expect(cart.grandTotalWithDelivery(delivery)).toBe(cart.grandTotalSelected + delivery)
+  })
+})
+
 describe('cart store — server hydration resolves the selected variant, not the cheapest', () => {
   beforeEach(() => {
     window.localStorage.clear()
