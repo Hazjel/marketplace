@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\VoucherResource;
 use App\Models\Voucher;
+use App\ValueObjects\Money;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 /**
  * Seller-facing voucher CRUD, scoped to the caller's own store —
@@ -27,13 +29,27 @@ class SellerVoucherController extends Controller
                 Rule::unique('vouchers', 'code')->ignore($voucherId),
             ],
             'type' => 'required|in:fixed,percentage',
-            // A fixed-type value is a rupiah amount and must be whole
-            // (Money is scale 0); a percentage value keeps 2 decimals.
+            // A fixed-type value is a rupiah amount: it must parse as
+            // whole-rupiah Money (the exact check the checkout will run —
+            // no float). A percentage value is a rate capped at 2 decimal
+            // places, matching the basis-point parser.
             'value' => [
                 'required', 'numeric', 'min:0',
                 function ($attribute, $value, $fail) {
-                    if (request('type') === 'fixed' && floor((float) $value) !== (float) $value) {
-                        $fail('Nilai voucher tetap harus rupiah bulat.');
+                    $string = is_string($value) ? $value : (string) $value;
+
+                    if (request('type') === 'fixed') {
+                        try {
+                            Money::fromDecimalString($string);
+                        } catch (Throwable) {
+                            $fail('Nilai voucher tetap harus rupiah bulat dalam jangkauan.');
+                        }
+
+                        return;
+                    }
+
+                    if (preg_match('/^\d+(\.\d{1,2})?$/', $string) !== 1) {
+                        $fail('Persentase voucher maksimal 2 angka desimal.');
                     }
                 },
             ],

@@ -9,7 +9,30 @@ changes.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+- **Money calculation migration (Sprint B3.2).** Checkout tax, voucher
+  discount and the platform admin fee are now computed on
+  `App\ValueObjects\Money` with basis-point rates and HALF_UP rounding
+  only at the percentage step:
+  - tax = `subtotal->percentage(1100)` (11% PPN), shipping untaxed;
+  - `Voucher::validateFor()` takes and returns `Money`; percentage rate
+    parsed to exact basis points from the `decimal:2` string; fixed value
+    capped at the subtotal;
+  - admin fee = `netSales->percentage(admin_fee_basis_points)`, locked at
+    credit; release/refund reuse the locked value.
+- `products.price` and `variants.*.price` must be whole rupiah (`integer`
+  validation on create and update). Voucher `min_purchase` / `max_discount`
+  likewise; a fixed voucher `value` must parse as whole-rupiah Money, a
+  percentage `value` is capped at 2 decimal places.
+- Frontend `cart.js` totals mirror the backend boundary — PPN rounded at
+  the tax step, then exact — so the Cart and Checkout totals agree.
+- Config: `marketplace.admin_fee_percentage` (float `0.10`) →
+  `marketplace.admin_fee_basis_points` (int `1000`), env
+  `ADMIN_FEE_BASIS_POINTS`.
+
+### Removed
+- `App\Services\TransactionService` — dead code, and the second divergent
+  seller-amount implementation.
 
 ## [0.1.0] - 2026-09-10
 
