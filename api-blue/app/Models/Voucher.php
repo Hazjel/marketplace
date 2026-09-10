@@ -6,6 +6,8 @@ use App\Traits\UUID;
 use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
+use RangeException;
 
 class Voucher extends Model
 {
@@ -129,15 +131,47 @@ class Voucher extends Model
         return $value->greaterThan($subtotal) ? $subtotal : $value;
     }
 
-    /**
-     * `value` (a decimal:2 percentage like "10.50") as exact basis points:
-     * "10.50" -> 1050, "11.00" -> 1100, "0.01" -> 1. No float.
-     */
     private function percentageBasisPoints(): int
     {
-        [$whole, $fraction] = array_pad(explode('.', (string) $this->value, 2), 2, '0');
-        $fraction = str_pad(substr($fraction, 0, 2), 2, '0');
+        return self::parsePercentageBasisPoints((string) $this->value);
+    }
 
-        return ((int) $whole) * 100 + (int) $fraction;
+    /**
+     * A percentage rate string ("10.50", "11", "0.01") as exact basis
+     * points — "10.50" -> 1050, "11" -> 1100, "0.01" -> 1. No float.
+     *
+     * Shared by the seller-voucher write validation and the checkout read
+     * path so they can never disagree. Rejects a non-2dp format and, since
+     * vouchers.value is decimal(26,2) (far wider than a PHP int worth of
+     * basis points), a rate whose basis points would overflow — the
+     * largest representable is 92233720368547758.07 %.
+     */
+    public static function parsePercentageBasisPoints(string $value): int
+    {
+        if (preg_match('/^\d+(?:\.\d{1,2})?$/', $value) !== 1) {
+            throw new InvalidArgumentException("Persentase voucher tidak sah: '{$value}'.");
+        }
+
+        [$whole, $fraction] = array_pad(explode('.', $value, 2), 2, '0');
+        $fraction = (int) str_pad(substr($fraction, 0, 2), 2, '0');
+
+        $wholeInt = self::wholeDigitsToInt(ltrim($whole, '0') ?: '0', $value);
+
+        $overflow = "Persentase voucher di luar jangkauan basis points: '{$value}'.";
+        $hundred = Money::guardInt($wholeInt * 100, $overflow);
+
+        return Money::guardInt($hundred + $fraction, $overflow);
+    }
+
+    private static function wholeDigitsToInt(string $digits, string $original): int
+    {
+        $max = (string) PHP_INT_MAX;
+
+        if (strlen($digits) > strlen($max)
+            || (strlen($digits) === strlen($max) && strcmp($digits, $max) > 0)) {
+            throw new RangeException("Persentase voucher di luar jangkauan basis points: '{$original}'.");
+        }
+
+        return (int) $digits;
     }
 }

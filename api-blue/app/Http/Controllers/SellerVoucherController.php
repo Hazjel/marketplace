@@ -48,8 +48,11 @@ class SellerVoucherController extends Controller
                         return;
                     }
 
-                    if (preg_match('/^\d+(\.\d{1,2})?$/', $string) !== 1) {
-                        $fail('Persentase voucher maksimal 2 angka desimal.');
+                    // Same parser the checkout read path uses.
+                    try {
+                        Voucher::parsePercentageBasisPoints($string);
+                    } catch (Throwable) {
+                        $fail('Persentase voucher tidak sah (maks. 2 desimal, dalam jangkauan).');
                     }
                 },
             ],

@@ -207,8 +207,10 @@ final class Money implements JsonSerializable
     /**
      * PHP promotes 64-bit integer overflow to float instead of wrapping,
      * so a non-int arithmetic result is exactly the overflow signal.
+     * Public so other exact-integer arithmetic (e.g. the voucher
+     * basis-point parser) can lean on the same guard.
      */
-    private static function guardInt(int|float $value, string $overflowMessage): int
+    public static function guardInt(int|float $value, string $overflowMessage): int
     {
         if (is_int($value)) {
             return $value;
