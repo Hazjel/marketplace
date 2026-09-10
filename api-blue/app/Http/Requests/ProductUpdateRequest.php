@@ -31,7 +31,8 @@ class ProductUpdateRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'condition' => 'required|string|in:new,second',
-            'price' => 'required|numeric|min:0',
+            // Whole rupiah only — see ProductStoreRequest / money-contract.md.
+            'price' => 'required|integer|min:0',
             'weight' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'product_images' => 'nullable|array',
@@ -40,7 +41,7 @@ class ProductUpdateRequest extends FormRequest
             'variants' => 'nullable|array',
             'variants.*.id' => 'nullable|string',
             'variants.*.name' => 'required_with:variants|string',
-            'variants.*.price' => 'required_with:variants|numeric|min:0',
+            'variants.*.price' => 'required_with:variants|integer|min:0',
             'variants.*.stock' => 'required_with:variants|integer|min:0',
             'variants.*.sku' => 'nullable|string',
             'variants.*.variant_attributes' => 'nullable|array',
