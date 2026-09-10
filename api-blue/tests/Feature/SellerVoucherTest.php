@@ -182,6 +182,64 @@ class SellerVoucherTest extends TestCase
         $this->assertDatabaseHas('vouchers', ['id' => $voucher->id]);
     }
 
+    public function test_fixed_voucher_value_must_be_whole_rupiah(): void
+    {
+        [$seller] = $this->makeSeller();
+
+        $this->actingAs($seller, 'sanctum')->postJson('/api/my-store/vouchers', [
+            'code' => 'FRAC', 'type' => 'fixed', 'value' => 10000.50,
+        ])->assertStatus(422)->assertJsonValidationErrors('value');
+    }
+
+    public function test_fixed_voucher_value_out_of_int_range_is_rejected(): void
+    {
+        [$seller] = $this->makeSeller();
+
+        $this->actingAs($seller, 'sanctum')->postJson('/api/my-store/vouchers', [
+            'code' => 'HUGE', 'type' => 'fixed', 'value' => '99999999999999999999',
+        ])->assertStatus(422)->assertJsonValidationErrors('value');
+    }
+
+    public function test_percentage_voucher_value_capped_at_two_decimals(): void
+    {
+        [$seller] = $this->makeSeller();
+
+        $this->actingAs($seller, 'sanctum')->postJson('/api/my-store/vouchers', [
+            'code' => 'P3DP', 'type' => 'percentage', 'value' => 10.555,
+        ])->assertStatus(422)->assertJsonValidationErrors('value');
+
+        $this->actingAs($seller, 'sanctum')->postJson('/api/my-store/vouchers', [
+            'code' => 'P2DP', 'type' => 'percentage', 'value' => 10.5,
+        ])->assertStatus(201);
+    }
+
+    public function test_percentage_voucher_value_out_of_basis_point_range_is_rejected(): void
+    {
+        [$seller] = $this->makeSeller();
+
+        // stored fine in decimal(26,2), but its basis points overflow a PHP int
+        $this->actingAs($seller, 'sanctum')->postJson('/api/my-store/vouchers', [
+            'code' => 'PHUGE', 'type' => 'percentage', 'value' => '92233720368547758.08',
+        ])->assertStatus(422)->assertJsonValidationErrors('value');
+
+        $this->actingAs($seller, 'sanctum')->postJson('/api/my-store/vouchers', [
+            'code' => 'PMAX', 'type' => 'percentage', 'value' => '92233720368547758.07',
+        ])->assertStatus(201);
+    }
+
+    public function test_min_purchase_and_max_discount_must_be_whole_rupiah(): void
+    {
+        [$seller] = $this->makeSeller();
+
+        $this->actingAs($seller, 'sanctum')->postJson('/api/my-store/vouchers', [
+            'code' => 'MINFRAC', 'type' => 'fixed', 'value' => 1000, 'min_purchase' => 50000.5,
+        ])->assertStatus(422)->assertJsonValidationErrors('min_purchase');
+
+        $this->actingAs($seller, 'sanctum')->postJson('/api/my-store/vouchers', [
+            'code' => 'MAXFRAC', 'type' => 'percentage', 'value' => 10, 'max_discount' => 5000.5,
+        ])->assertStatus(422)->assertJsonValidationErrors('max_discount');
+    }
+
     public function test_index_only_lists_own_stores_vouchers()
     {
         [$sellerA, $storeA] = $this->makeSeller();

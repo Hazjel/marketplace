@@ -70,8 +70,12 @@ export const useCartStore = defineStore('cart', {
       )
     },
 
+    // PPN 11% dari subtotal produk saja (ongkir tidak kena PPN), dibulatkan
+    // DI SINI -- meniru boundary backend (Money::percentage, HALF_UP).
+    // Math.round untuk nilai non-negatif = pembulatan menjauh dari nol =
+    // sama dengan HALF_UP di backend. Semua langkah setelah ini eksak.
     ppnSelected() {
-      return this.subtotalSelected * 0.11
+      return Math.round(this.subtotalSelected * 0.11)
     },
 
     discountSelected() {
@@ -82,13 +86,13 @@ export const useCartStore = defineStore('cart', {
       return this.subtotalSelected + this.ppnSelected - this.discountSelected
     },
 
-    // Single source of truth untuk total termasuk ongkir -- dipakai Checkout.vue
-    // supaya "Grand Total" di Cart.vue dan "Total Tagihan" di Checkout.vue tidak
-    // pernah menampilkan angka berbeda untuk pesanan yang sama. PPN dihitung dari
-    // subtotal produk saja (ongkir tidak kena PPN), rounding hanya sekali di akhir.
+    // Total termasuk ongkir -- dipakai Checkout.vue supaya "Grand Total" di
+    // Cart.vue dan "Total Tagihan" di Checkout.vue selalu sama untuk pesanan
+    // yang sama. ppnSelected sudah dibulatkan; subtotal & ongkir rupiah bulat,
+    // jadi di sini murni penjumlahan/pengurangan eksak.
     grandTotalWithDelivery() {
       return (deliveryFee = 0) =>
-        Math.round(this.subtotalSelected + deliveryFee + this.ppnSelected - this.discountSelected)
+        this.subtotalSelected + deliveryFee + this.ppnSelected - this.discountSelected
     },
 
     hasSelectedStores: (state) => {

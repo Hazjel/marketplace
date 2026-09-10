@@ -55,13 +55,13 @@ class TransactionFactory extends Factory
     {
         return $this->afterCreating(function (Transaction $transaction) {
             $numberOfDetails = $this->faker->numberBetween(1, 5);
-            $subtotal = 0;
+            $subtotal = Money::zero();
 
             for ($i = 0; $i < $numberOfDetails; $i++) {
                 $product = Product::factory()->create(['store_id' => $transaction->store_id]);
                 $qty = $this->faker->numberBetween(1, 5);
                 $lineSubtotal = Money::fromDecimalString((string) $product->price)->multiplyByQty($qty);
-                $subtotal += $lineSubtotal->minor();
+                $subtotal = $subtotal->add($lineSubtotal);
 
                 TransactionDetail::factory()->create([
                     'transaction_id' => $transaction->id,
@@ -71,13 +71,16 @@ class TransactionFactory extends Factory
                 ]);
             }
 
-            $tax = round($subtotal * 0.11);
-
-            $grandTotal = $subtotal + $tax + $transaction->shipping_cost;
+            // Same boundary as TransactionRepository (B3.2b): tax is the
+            // only rounded step, everything else exact Money arithmetic.
+            $tax = $subtotal->percentage(1100);
+            $grandTotal = $subtotal
+                ->add($tax)
+                ->add(Money::rupiah((int) $transaction->shipping_cost));
 
             $transaction->update([
-                'tax' => $tax,
-                'grand_total' => $grandTotal,
+                'tax' => $tax->minor(),
+                'grand_total' => $grandTotal->minor(),
             ]);
         });
     }

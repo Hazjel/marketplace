@@ -12,6 +12,7 @@ use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\Voucher;
 use App\Models\VoucherRedemption;
+use App\ValueObjects\Money;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -456,34 +457,39 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             Log::info('Transaction details created:', ['count' => count($transactionDetails)]);
 
-            // ✅ Hitung subtotal dari produk saja
-            //
-            // detail->subtotal kini Money (B3.1 pilot). Checkout math di
-            // bawah masih skalar integer — migrasinya B3.2 — jadi di sini
-            // Money dikembalikan ke int rupiah lewat ->minor().
-            $subtotal = array_reduce($transactionDetails, function ($carry, $item) {
-                return $carry + $item->subtotal->minor();
-            }, 0);
+            // Subtotal stays a Money value object all the way to the
+            // persistence boundary (B3.2b). detail->subtotal is Money
+            // (B3.1 pilot); tax is the only rounded step.
+            $subtotal = array_reduce(
+                $transactionDetails,
+                fn (Money $carry, $item) => $carry->add($item->subtotal),
+                Money::zero()
+            );
 
-            Log::info('Subtotal calculated:', ['subtotal' => $subtotal]);
+            Log::info('Subtotal calculated:', ['subtotal' => $subtotal->minor()]);
 
-            // ✅ Hitung tax dan grand total (TIDAK pakai API lagi)
-            $tax = round($subtotal * 0.11);
-            $grandTotal = round($subtotal + $tax + $transaction->shipping_cost);
+            // PPN 11%, HALF_UP, on the product subtotal only (shipping is
+            // not taxed). Basis points: 1100 = 11%.
+            $tax = $subtotal->percentage(1100);
+
+            // shipping_cost was resolved server-side as whole rupiah.
+            $grandTotal = $subtotal
+                ->add($tax)
+                ->add(Money::rupiah((int) $data['shipping_cost']));
 
             // Voucher: re-validate server-side against the SAME rules as
             // VoucherController::validateCode (Voucher::validateFor) — never
             // trust a client-supplied discount amount. A validate-then-checkout
             // race (e.g. usage_limit exhausted in between) is closed here
             // because this whole method runs inside one DB transaction.
-            $discountAmount = 0;
+            $discount = Money::zero();
             $voucher = null;
             if (! empty($data['voucher_code'])) {
                 $voucher = Voucher::where('code', $data['voucher_code'])->first();
                 if ($voucher) {
-                    $result = $voucher->validateFor($data['buyer_id'], $data['store_id'], (float) $subtotal);
+                    $result = $voucher->validateFor($data['buyer_id'], $data['store_id'], $subtotal);
                     if ($result['valid']) {
-                        $discountAmount = $result['discount_amount'];
+                        $discount = $result['discount_amount'];
                     } else {
                         Log::warning('Voucher no longer valid at checkout time, ignoring:', [
                             'code' => $data['voucher_code'],
@@ -494,12 +500,12 @@ class TransactionRepository implements TransactionRepositoryInterface
                 }
             }
 
-            $grandTotal = max(0, round($grandTotal - $discountAmount));
+            $grandTotal = $grandTotal->subtract($discount)->clampMin(Money::zero());
 
-            $transaction->tax = $tax;
-            $transaction->grand_total = $grandTotal;
+            $transaction->tax = $tax->minor();
+            $transaction->grand_total = $grandTotal->minor();
             $transaction->voucher_id = $voucher?->id;
-            $transaction->discount_amount = $discountAmount;
+            $transaction->discount_amount = $discount->minor();
             $transaction->save();
 
             if ($voucher) {
@@ -512,11 +518,11 @@ class TransactionRepository implements TransactionRepositoryInterface
             }
 
             Log::info('Transaction updated with costs:', [
-                'subtotal' => $subtotal,
+                'subtotal' => $subtotal->minor(),
                 'shipping_cost' => $transaction->shipping_cost,
-                'tax' => $tax,
-                'discount_amount' => $discountAmount,
-                'grand_total' => $grandTotal,
+                'tax' => $tax->minor(),
+                'discount_amount' => $discount->minor(),
+                'grand_total' => $grandTotal->minor(),
             ]);
 
             DB::commit();

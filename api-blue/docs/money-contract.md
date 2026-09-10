@@ -1,7 +1,8 @@
-# Money contract (Sprint B3.1)
+# Money contract (Sprint B3)
 
-Status: **frozen 2026-09-10**. This document is the reference the money
-primitive and every later calculation-migration ticket must conform to.
+Status: **frozen 2026-09-10** (B3.1 primitive) / **B3.2 calculation
+migration complete** — see §6. This document is the reference the money
+primitive and every calculation that touches currency must conform to.
 
 ## 1. Canonical representation
 
@@ -133,33 +134,42 @@ decision.
 
 No frontend changes.
 
-## 6. Known calculation gaps — recorded here, fixed in B3.2+
+## 6. Calculation migration — B3.2 (done)
 
-These are **not** addressed by B3.1. B3.1 delivers the primitive and one
-persistence proof; the migrations below consume it afterward, so a
-primitive bug stays distinguishable from a calculation-migration bug.
+B3.1 delivered the primitive and one persistence proof. B3.2 migrated the
+calculation layer onto it, one increment per commit, so a primitive bug
+stayed distinguishable from a calculation bug. All six gaps below are
+closed.
 
-1. **FE `ppnSelected` / `grandTotalSelected` unrounded** (`cart.js`) —
-   the display getters don't round; only `grandTotalWithDelivery()`
-   does. Two totals for one order can disagree by a rupiah.
-2. **`admin_fee` never rounded** — `TransactionService::calculateSellerAmount`
-   and `EscrowRepository::applyAdminFee` both do `$netSales * 0.10`
-   with no rounding.
-3. **Two divergent seller-amount implementations** —
-   `TransactionService::calculateSellerAmount` recomputes the fee from
-   config on every call; `EscrowRepository` locks it at credit time and
-   reuses it. They disagree if the config changes between events.
-4. **Rates are float literals, not basis points** — `0.11`, `0.10`,
-   `voucher.value / 100`.
-5. **Voucher discount rounded to 2 dp, not integer** —
-   `Voucher::validateFor` does `round($discount, 2)`.
-6. **`products.price` / variant price not integer-constrained** —
-   `ProductStoreRequest` allows `numeric`, so `X.50` prices are
-   accepted and stored. Under B3.1 fork **A**, such a product becomes
-   un-checkoutable (the pilot writer throws). A read-only production
-   check (`price != FLOOR(price)` on `products` and product variants)
-   must return **0** before the pilot is merged/deployed; a `price`
-   integer validation rule + any needed backfill is the first B3.2 item.
+| # | Gap (as of B3.1) | Resolution | Commit |
+|---|---|---|---|
+| 1 | FE `ppnSelected` / `grandTotalSelected` unrounded; `grandTotalWithDelivery` rounded once at the end — two totals for one order could disagree. | `cart.js`: PPN rounded HALF_UP at the tax step, then exact add/subtract; `grandTotalWithDelivery` drops its trailing `Math.round`. Display-only — the server still recomputes. | B3.2e |
+| 2 | `admin_fee` never rounded — `$netSales * 0.10` with no rounding. | `EscrowRepository::applyAdminFee` uses `Money->percentage(admin_fee_basis_points)` (HALF_UP), locked into `transactions.admin_fee`. | B3.2d |
+| 3 | Two divergent seller-amount implementations (`TransactionService` recomputed from config; `EscrowRepository` locked at credit). | `App\Services\TransactionService` was dead code — deleted. `EscrowRepository` is the single source; `sellerAmount()` reads the locked fee and never recomputes. | B3.2d |
+| 4 | Rates are float literals — `0.11`, `0.10`, `voucher.value / 100`. | Basis points everywhere: tax `1100`, admin fee `1000` (`config('marketplace.admin_fee_basis_points')`), voucher rate parsed exactly from the `decimal:2` string (`"10.50"` → `1050`). | B3.2b–d |
+| 5 | Voucher discount `round($discount, 2)`, not integer. | `Voucher::validateFor(string, string, Money): array` — discount is `Money` via `percentage(bp)` / whole-rupiah fixed value, capped at the subtotal by Money comparison. | B3.2c |
+| 6 | `products.price` / variant price not integer-constrained. | `ProductStoreRequest` + `ProductUpdateRequest`: `price` and `variants.*.price` rules `numeric` → `integer`. | B3.2a |
+
+**Merge/deploy gates** (fork A — a fractional legacy value throws at the
+Money boundary). Each must return **0** in production before deploy:
+
+- **B3.2a** — `Product::whereRaw('price != FLOOR(price)')->count()` and the
+  `ProductVariantMongo` equivalent.
+- **B3.2c** — any `Voucher` with a fractional `min_purchase` / `max_discount`,
+  or a `type = fixed` voucher with a fractional `value`.
+
+**Not migrated in B3.2** (deliberate, still scalar / `decimal:2`):
+
+- `transactions.{tax, grand_total, shipping_cost, admin_fee, discount_amount}`
+  columns keep the `decimal:2` cast; the calculations produce `Money` and
+  persist `->minor()`. `TransactionResource` still emits `(float)(string)`
+  (whole values, so integer JSON in practice).
+- `store_balances`, `store_balance_histories`, `withdrawals` — the escrow
+  ledger runs on scalars.
+- `EscrowRepository::sellerAmount()` reads the locked `admin_fee` without
+  going through `Money`, so a pre-B3.2d transaction whose fee is still
+  fractional can still be released/refunded.
+- `decimal` → `bigint` column migration — still deferred.
 
 ## 7. API / naming
 

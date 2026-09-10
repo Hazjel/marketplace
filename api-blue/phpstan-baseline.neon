@@ -1590,8 +1590,3 @@ parameters:
 			count: 1
 			path: app/Services/MidtransPaymentGateway.php
 
-		-
-			message: '#^Access to an undefined property App\\Models\\Store\:\:\$storeBalance\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Services/TransactionService.php

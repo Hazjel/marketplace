@@ -6,6 +6,7 @@ use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\StoreBalanceRepositoryInterface;
 use App\Models\Store;
 use App\Models\Transaction;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -128,24 +129,30 @@ class EscrowRepository implements EscrowRepositoryInterface
     }
 
     /**
-     * Hitung admin_fee, simpan ke transaksi, return sellerAmount.
+     * Hitung admin_fee, simpan ke transaksi, return sellerAmount (rupiah bulat).
      * Dipanggil sekali saat credit — admin_fee dikunci di kolom transaksi.
+     *
+     * B3.2d: fee = net sales x admin_fee_basis_points (HALF_UP), via Money.
+     * Ongkir tidak kena fee.
      */
-    private function applyAdminFee(Transaction $transaction): float
+    private function applyAdminFee(Transaction $transaction): int
     {
-        $netSales = $transaction->grand_total - $transaction->shipping_cost;
-        $adminFee = $netSales * config('marketplace.admin_fee_percentage');
-        $sellerAmount = $netSales - $adminFee;
+        $netSales = Money::fromDecimalString((string) $transaction->grand_total)
+            ->subtract(Money::fromDecimalString((string) $transaction->shipping_cost));
 
-        $transaction->admin_fee = $adminFee;
+        $adminFee = $netSales->percentage((int) config('marketplace.admin_fee_basis_points'));
+
+        $transaction->admin_fee = $adminFee->minor();
         $transaction->save();
 
-        return $sellerAmount;
+        return $netSales->subtract($adminFee)->minor();
     }
 
     /**
-     * sellerAmount dari admin_fee yang sudah dikunci saat credit (release/refund
-     * tidak boleh recompute — admin_fee bisa saja beda kalau config berubah).
+     * sellerAmount dari admin_fee yang sudah DIKUNCI saat credit — release/refund
+     * tidak boleh recompute (fee bisa berbeda kalau config berubah). Membaca
+     * nilai tersimpan apa adanya; tidak lewat Money supaya transaksi lama yang
+     * admin_fee-nya masih pecahan (pra-B3.2d) tetap bisa dirilis.
      */
     private function sellerAmount(Transaction $transaction): float
     {

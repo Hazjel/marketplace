@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\VoucherResource;
 use App\Models\Voucher;
+use App\ValueObjects\Money;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 /**
  * Seller-facing voucher CRUD, scoped to the caller's own store —
@@ -27,9 +29,35 @@ class SellerVoucherController extends Controller
                 Rule::unique('vouchers', 'code')->ignore($voucherId),
             ],
             'type' => 'required|in:fixed,percentage',
-            'value' => 'required|numeric|min:0',
-            'min_purchase' => 'nullable|numeric|min:0',
-            'max_discount' => 'nullable|numeric|min:0',
+            // A fixed-type value is a rupiah amount: it must parse as
+            // whole-rupiah Money (the exact check the checkout will run —
+            // no float). A percentage value is a rate capped at 2 decimal
+            // places, matching the basis-point parser.
+            'value' => [
+                'required', 'numeric', 'min:0',
+                function ($attribute, $value, $fail) {
+                    $string = is_string($value) ? $value : (string) $value;
+
+                    if (request('type') === 'fixed') {
+                        try {
+                            Money::fromDecimalString($string);
+                        } catch (Throwable) {
+                            $fail('Nilai voucher tetap harus rupiah bulat dalam jangkauan.');
+                        }
+
+                        return;
+                    }
+
+                    // Same parser the checkout read path uses.
+                    try {
+                        Voucher::parsePercentageBasisPoints($string);
+                    } catch (Throwable) {
+                        $fail('Persentase voucher tidak sah (maks. 2 desimal, dalam jangkauan).');
+                    }
+                },
+            ],
+            'min_purchase' => 'nullable|integer|min:0',
+            'max_discount' => 'nullable|integer|min:0',
             'usage_limit' => 'nullable|integer|min:1',
             'usage_limit_per_buyer' => 'nullable|integer|min:1',
             'starts_at' => 'nullable|date',
