@@ -2,10 +2,11 @@
 
 return [
     /*
-     * Platform fee yang dipotong dari setiap transaksi seller.
-     * Default: 10% (0.10). Bisa di-override via env ADMIN_FEE_PERCENTAGE.
+     * Platform fee yang dipotong dari setiap transaksi seller, dalam basis
+     * points (1000 = 10%). Integer — dipakai App\ValueObjects\Money::percentage().
+     * Bisa di-override via env ADMIN_FEE_BASIS_POINTS.
      */
-    'admin_fee_percentage' => (float) env('ADMIN_FEE_PERCENTAGE', 0.10),
+    'admin_fee_basis_points' => (int) env('ADMIN_FEE_BASIS_POINTS', 1000),
 
     /*
      * Minimum jumlah penarikan saldo (dalam rupiah).
