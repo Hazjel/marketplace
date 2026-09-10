@@ -27,9 +27,18 @@ class SellerVoucherController extends Controller
                 Rule::unique('vouchers', 'code')->ignore($voucherId),
             ],
             'type' => 'required|in:fixed,percentage',
-            'value' => 'required|numeric|min:0',
-            'min_purchase' => 'nullable|numeric|min:0',
-            'max_discount' => 'nullable|numeric|min:0',
+            // A fixed-type value is a rupiah amount and must be whole
+            // (Money is scale 0); a percentage value keeps 2 decimals.
+            'value' => [
+                'required', 'numeric', 'min:0',
+                function ($attribute, $value, $fail) {
+                    if (request('type') === 'fixed' && floor((float) $value) !== (float) $value) {
+                        $fail('Nilai voucher tetap harus rupiah bulat.');
+                    }
+                },
+            ],
+            'min_purchase' => 'nullable|integer|min:0',
+            'max_discount' => 'nullable|integer|min:0',
             'usage_limit' => 'nullable|integer|min:1',
             'usage_limit_per_buyer' => 'nullable|integer|min:1',
             'starts_at' => 'nullable|date',

@@ -482,14 +482,14 @@ class TransactionRepository implements TransactionRepositoryInterface
             // trust a client-supplied discount amount. A validate-then-checkout
             // race (e.g. usage_limit exhausted in between) is closed here
             // because this whole method runs inside one DB transaction.
-            $discountAmount = 0;
+            $discount = Money::zero();
             $voucher = null;
             if (! empty($data['voucher_code'])) {
                 $voucher = Voucher::where('code', $data['voucher_code'])->first();
                 if ($voucher) {
-                    $result = $voucher->validateFor($data['buyer_id'], $data['store_id'], (float) $subtotal->minor());
+                    $result = $voucher->validateFor($data['buyer_id'], $data['store_id'], $subtotal);
                     if ($result['valid']) {
-                        $discountAmount = $result['discount_amount'];
+                        $discount = $result['discount_amount'];
                     } else {
                         Log::warning('Voucher no longer valid at checkout time, ignoring:', [
                             'code' => $data['voucher_code'],
@@ -500,15 +500,12 @@ class TransactionRepository implements TransactionRepositoryInterface
                 }
             }
 
-            // Voucher discount migration is B3.2c; for now the discount is
-            // still the scalar returned by validateFor(). Subtract it and
-            // clamp at zero.
-            $grandTotalMinor = max(0, (int) round($grandTotal->minor() - $discountAmount));
+            $grandTotal = $grandTotal->subtract($discount)->clampMin(Money::zero());
 
             $transaction->tax = $tax->minor();
-            $transaction->grand_total = $grandTotalMinor;
+            $transaction->grand_total = $grandTotal->minor();
             $transaction->voucher_id = $voucher?->id;
-            $transaction->discount_amount = $discountAmount;
+            $transaction->discount_amount = $discount->minor();
             $transaction->save();
 
             if ($voucher) {
@@ -524,8 +521,8 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'subtotal' => $subtotal->minor(),
                 'shipping_cost' => $transaction->shipping_cost,
                 'tax' => $tax->minor(),
-                'discount_amount' => $discountAmount,
-                'grand_total' => $grandTotalMinor,
+                'discount_amount' => $discount->minor(),
+                'grand_total' => $grandTotal->minor(),
             ]);
 
             DB::commit();

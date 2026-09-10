@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
 use App\Models\Voucher;
+use App\ValueObjects\Money;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,7 +24,7 @@ class VoucherController extends Controller
         $request->validate([
             'code' => 'required|string',
             'store_id' => 'required|exists:stores,id',
-            'subtotal' => 'required|numeric|min:0',
+            'subtotal' => 'required|integer|min:0',
         ]);
 
         $buyer = Auth::user()->buyer;
@@ -36,7 +37,11 @@ class VoucherController extends Controller
             return ResponseHelper::jsonResponse(false, 'Kode voucher tidak ditemukan', null, 404);
         }
 
-        $result = $voucher->validateFor($buyer->id, $request->store_id, (float) $request->subtotal);
+        $result = $voucher->validateFor(
+            $buyer->id,
+            $request->store_id,
+            Money::rupiah((int) $request->subtotal)
+        );
 
         if (! $result['valid']) {
             return ResponseHelper::jsonResponse(false, $result['message'], null, 422);
@@ -45,7 +50,7 @@ class VoucherController extends Controller
         return ResponseHelper::jsonResponse(true, 'Voucher berlaku', [
             'voucher_id' => $voucher->id,
             'code' => $voucher->code,
-            'discount_amount' => $result['discount_amount'],
+            'discount_amount' => $result['discount_amount']->minor(),
         ], 200);
     }
 }

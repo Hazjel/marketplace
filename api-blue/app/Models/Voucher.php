@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\UUID;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -50,11 +51,16 @@ class Voucher extends Model
      * same method rather than re-implementing the rules, otherwise the two
      * call sites can disagree and a discount-bypass bug becomes possible.
      *
-     * Returns ['valid' => bool, 'message' => ?string, 'discount_amount' => ?float].
+     * Returns ['valid' => bool, 'message' => ?string, 'discount_amount' => ?Money].
      * On failure, 'message' explains which specific rule failed (shown
      * directly to the buyer) rather than a generic "invalid voucher".
+     *
+     * B3.2c: `$subtotal` and the returned discount are Money. Percentage
+     * rates are parsed to exact basis points (no float); fixed value and
+     * max_discount are whole-rupiah Money (a fractional legacy value
+     * throws — see api-blue/docs/money-contract.md).
      */
-    public function validateFor(string $buyerId, string $storeId, float $subtotal): array
+    public function validateFor(string $buyerId, string $storeId, Money $subtotal): array
     {
         if (! $this->is_active) {
             return ['valid' => false, 'message' => 'Voucher tidak aktif', 'discount_amount' => null];
@@ -72,7 +78,8 @@ class Voucher extends Model
             return ['valid' => false, 'message' => 'Voucher tidak berlaku untuk toko ini', 'discount_amount' => null];
         }
 
-        if ($this->min_purchase !== null && $subtotal < (float) $this->min_purchase) {
+        if ($this->min_purchase !== null
+            && $subtotal->lessThan(Money::fromDecimalString((string) $this->min_purchase))) {
             return [
                 'valid' => false,
                 'message' => 'Minimal belanja Rp'.number_format((float) $this->min_purchase, 0, ',', '.').' untuk memakai voucher ini',
@@ -95,9 +102,42 @@ class Voucher extends Model
         }
 
         $discount = $this->type === 'percentage'
-            ? min($subtotal * ((float) $this->value / 100), $this->max_discount !== null ? (float) $this->max_discount : INF)
-            : min((float) $this->value, $subtotal);
+            ? $this->percentageDiscount($subtotal)
+            : $this->fixedDiscount($subtotal);
 
-        return ['valid' => true, 'message' => null, 'discount_amount' => round($discount, 2)];
+        return ['valid' => true, 'message' => null, 'discount_amount' => $discount];
+    }
+
+    private function percentageDiscount(Money $subtotal): Money
+    {
+        $discount = $subtotal->percentage($this->percentageBasisPoints());
+
+        if ($this->max_discount !== null) {
+            $cap = Money::fromDecimalString((string) $this->max_discount);
+            if ($discount->greaterThan($cap)) {
+                return $cap;
+            }
+        }
+
+        return $discount;
+    }
+
+    private function fixedDiscount(Money $subtotal): Money
+    {
+        $value = Money::fromDecimalString((string) $this->value);
+
+        return $value->greaterThan($subtotal) ? $subtotal : $value;
+    }
+
+    /**
+     * `value` (a decimal:2 percentage like "10.50") as exact basis points:
+     * "10.50" -> 1050, "11.00" -> 1100, "0.01" -> 1. No float.
+     */
+    private function percentageBasisPoints(): int
+    {
+        [$whole, $fraction] = array_pad(explode('.', (string) $this->value, 2), 2, '0');
+        $fraction = str_pad(substr($fraction, 0, 2), 2, '0');
+
+        return ((int) $whole) * 100 + (int) $fraction;
     }
 }
