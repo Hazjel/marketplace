@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
 use App\Models\User;
+use App\Models\Voucher;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -83,6 +84,64 @@ class CheckoutTaxMoneyTest extends TestCase
             'shipping_cost' => 15_000,
             'tax' => 11_006,
             'grand_total' => 100_050 + 11_006 + 15_000, // 126_056
+        ]);
+    }
+
+    public function test_full_pipeline_odd_tax_plus_capped_percentage_voucher(): void
+    {
+        $seller = User::factory()->create();
+        $seller->assignRole('store');
+        $store = Store::create([
+            'user_id' => $seller->id, 'name' => 'Toko Full', 'username' => 'toko-full',
+            'logo' => 'default.png', 'about' => 'A', 'phone' => '0812',
+            'address_id' => '1', 'city' => 'Jakarta', 'address' => 'Jl. S',
+            'postal_code' => '12345', 'is_verified' => true,
+        ]);
+        $store->storeBalance()->create(['balance' => 0]);
+
+        $category = ProductCategory::create(['name' => 'G', 'slug' => 'g-full', 'description' => 'G']);
+        $product = Product::create([
+            'store_id' => $store->id, 'product_category_id' => $category->id,
+            'name' => 'P', 'slug' => 'p-full-'.uniqid(),
+            'description' => 'D', 'condition' => 'new',
+            'has_variants' => false, 'price' => 100_050, 'stock' => 10, 'weight' => 200,
+        ]);
+
+        // 25% of 100_050 = 25_012.5 but capped at 20_000
+        Voucher::create([
+            'code' => 'CAP20K', 'store_id' => null, 'type' => 'percentage',
+            'value' => 25, 'max_discount' => 20_000, 'is_active' => true,
+        ]);
+
+        $buyerUser = User::factory()->create();
+        $buyerUser->assignRole('buyer');
+        $buyer = $buyerUser->buyer()->create([
+            'phone_number' => '0898', 'city' => 'Bandung', 'address' => 'Jl. B',
+        ]);
+
+        $payload = [
+            'address_id' => 101, 'address' => 'Jl. Kirim', 'city' => 'Surabaya',
+            'postal_code' => '60000', 'shipping' => 'JNE', 'shipping_type' => 'REG',
+            'voucher_code' => 'CAP20K',
+            'products' => [
+                ['product_id' => $product->id, 'qty' => 1],
+            ],
+        ];
+
+        $this->actingAs($buyerUser, 'sanctum')
+            ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
+            ->postJson('/api/transaction', $payload)
+            ->assertStatus(201)
+            // subtotal 100_050 + tax 11_006 + shipping 15_000 - discount 20_000
+            ->assertJsonPath('data.tax', 11_006)
+            ->assertJsonPath('data.discount_amount', 20_000)
+            ->assertJsonPath('data.grand_total', 106_056);
+
+        $this->assertDatabaseHas('transactions', [
+            'buyer_id' => $buyer->id,
+            'tax' => 11_006,
+            'discount_amount' => 20_000,
+            'grand_total' => 106_056,
         ]);
     }
 }
