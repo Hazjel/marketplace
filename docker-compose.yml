@@ -33,18 +33,6 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:alpine
-    container_name: blue-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
   mongo-express:
     image: mongo-express:latest
     container_name: blue-mongo-express
@@ -88,10 +76,16 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      redis:
-        condition: service_healthy
       mongodb:
         condition: service_healthy
+    # Sprint C2.1B: Redis is now the shared-infra instance outside this
+    # compose project (see docs/c2-1b-shared-redis-cutover.md) -- Compose
+    # can't `depends_on` a service it doesn't own, so app startup must
+    # tolerate shared Redis being briefly unavailable via the normal
+    # client reconnect/failure path instead of a startup gate.
+    networks:
+      - default
+      - shared-infra
     volumes:
       - ./api-blue:/var/www
       - api_vendor:/var/www/vendor
@@ -126,9 +120,16 @@ services:
       DB_MONGO_HOST: mongodb
       DB_MONGO_PORT: 27017
       DB_MONGO_DATABASE: blukios_mongo
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: "null"
+      # Shared Redis (Sprint C2.1B) -- see docs/c2-1b-shared-redis-cutover.md.
+      # USERNAME/PASSWORD are required (no default): the shared instance is
+      # authenticated, unlike the retired local blue-redis.
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_USERNAME: ${REDIS_USERNAME:?REDIS_USERNAME wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      # Key-namespace boundary, bukan Redis logical DB -- shared instance
+      # sudah punya workload lain (mis. prefix `asynq:`) di db yang sama.
+      REDIS_PREFIX: ${REDIS_PREFIX:-blukios:}
       REDIS_CLIENT: predis
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
@@ -190,6 +191,9 @@ services:
     command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=90"]
     depends_on:
       - api
+    networks:
+      - default
+      - shared-infra
     volumes:
       - ./api-blue:/var/www
       - api_vendor:/var/www/vendor
@@ -207,9 +211,12 @@ services:
       DB_DATABASE: api_blue
       DB_USERNAME: root
       DB_PASSWORD: ""
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: "null"
+      # Shared Redis (Sprint C2.1B) -- see docs/c2-1b-shared-redis-cutover.md.
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_USERNAME: ${REDIS_USERNAME:?REDIS_USERNAME wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_PREFIX: ${REDIS_PREFIX:-blukios:}
       REDIS_CLIENT: predis
       QUEUE_CONNECTION: redis
       BROADCAST_CONNECTION: reverb
@@ -236,6 +243,9 @@ services:
     command: ["sh", "-c", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
     depends_on:
       - api
+    networks:
+      - default
+      - shared-infra
     volumes:
       - ./api-blue:/var/www
       - api_vendor:/var/www/vendor
@@ -253,9 +263,12 @@ services:
       DB_DATABASE: api_blue
       DB_USERNAME: root
       DB_PASSWORD: ""
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: "null"
+      # Shared Redis (Sprint C2.1B) -- see docs/c2-1b-shared-redis-cutover.md.
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_USERNAME: ${REDIS_USERNAME:?REDIS_USERNAME wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_PREFIX: ${REDIS_PREFIX:-blukios:}
       REDIS_CLIENT: predis
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
@@ -276,6 +289,9 @@ services:
     command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
     depends_on:
       - api
+    networks:
+      - default
+      - shared-infra
     volumes:
       - ./api-blue:/var/www
       - api_vendor:/var/www/vendor
@@ -290,9 +306,12 @@ services:
       REVERB_APP_ID: "543210123"
       REVERB_APP_KEY: ${REVERB_APP_KEY:-reverbkey}
       REVERB_APP_SECRET: ${REVERB_APP_SECRET:-reverbsecret}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: "null"
+      # Shared Redis (Sprint C2.1B) -- see docs/c2-1b-shared-redis-cutover.md.
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_USERNAME: ${REDIS_USERNAME:?REDIS_USERNAME wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_PREFIX: ${REDIS_PREFIX:-blukios:}
       REDIS_CLIENT: predis
       CACHE_STORE: redis
 
@@ -366,8 +385,12 @@ services:
     depends_on:
       ollama:
         condition: service_started
-      redis:
-        condition: service_healthy
+    # Sprint C2.1B: Redis is now shared-infra's instance, outside this
+    # compose project -- Compose can't `depends_on` a service it doesn't
+    # own (see docs/c2-1b-shared-redis-cutover.md).
+    networks:
+      - default
+      - shared-infra
     command: python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload --reload-delay 1 --proxy-headers --forwarded-allow-ips='*'
     ports:
       - "8001:8001"
@@ -384,8 +407,14 @@ services:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://lab-hajel.tail03faae.ts.net,http://192.168.1.29,http://localhost:5173,http://localhost:3000}
       RATE_LIMIT_PER_MINUTE: 20
       SESSION_TTL_MINUTES: 60
-      # Tier 3 — Redis persistent session
-      REDIS_URL: redis://redis:6379/0
+      # Shared Redis (Sprint C2.1B) -- built from components, not a
+      # credential-bearing URL (see chat-service/config.py).
+      REDIS_HOST: ${REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_USERNAME: ${REDIS_USERNAME:?REDIS_USERNAME wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD wajib diisi di .env -- shared Redis tidak lagi unauthenticated}
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_KEY_PREFIX: ${REDIS_PREFIX:-blukios:}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY wajib diisi di .env}
 
   # ─────────────────────────────────────────
@@ -519,3 +548,12 @@ volumes:
   fe_dist:
   fe_dist_seller:    # Build seller app (seller.blukios.store)
   reco_models:       # Model SVD terlatih (recommendation-service)
+
+networks:
+  # Sprint C2.1B: shared Redis lives outside this compose project, in
+  # /opt/shared-infra's own stack -- see docs/c2-1b-shared-redis-cutover.md.
+  # This network must already exist on the host (created by shared-infra);
+  # Compose only attaches to it here, never creates or manages it.
+  shared-infra:
+    external: true
+    name: shared-infra-net

@@ -11,12 +11,12 @@ from slowapi.errors import RateLimitExceeded
 from api.admin import router as admin_router
 from api.chat import router as chat_router
 from api.store_assistant import router as store_assistant_router
-from config import CORS_ALLOWED_ORIGINS, REDIS_URL
+from config import CORS_ALLOWED_ORIGINS
 from rag.refresh import rag_refresh_loop
 from rag.vectorstore import ProductVectorStore, init_vector_store
 from utils.limiter import limiter
 from utils.metrics import REQUEST_COUNT, REQUEST_LATENCY
-from utils.redis_helper import init_redis
+from utils.redis_helper import init_redis, redis_connection_kwargs, redis_connection_summary
 
 
 # ---------------------------------------------------------------------------
@@ -24,11 +24,13 @@ from utils.redis_helper import init_redis
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(application: FastAPI):
-    # Redis
-    r = aioredis.from_url(REDIS_URL, decode_responses=True)
+    # Redis — built from components (host/port/username/password/db), never
+    # a credential-bearing URL, so a password never exists as a loggable
+    # string. See utils/redis_helper.redis_connection_kwargs().
+    r = aioredis.Redis(**redis_connection_kwargs())
     try:
         await r.ping()  # type: ignore[misc]  # redis-py 7.x stubs incorrectly typed
-        print(f"[Startup] Redis connected: {REDIS_URL}")
+        print(f"[Startup] Redis connected: {redis_connection_summary()}")
     except Exception as e:
         print(f"[Startup] WARNING: Redis tidak bisa dikoneksi: {e}")
     init_redis(r)

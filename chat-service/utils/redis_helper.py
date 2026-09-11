@@ -2,6 +2,7 @@ import json
 
 import redis.asyncio as aioredis
 
+import config
 from config import (
     LLM_CACHE_KEY,
     LLM_CACHE_TTL_SECONDS,
@@ -28,6 +29,34 @@ def _get_redis() -> aioredis.Redis:
     if _redis is None:
         raise RuntimeError("Redis belum terkoneksi.")
     return _redis
+
+
+# ---------------------------------------------------------------------------
+# Connection construction (Sprint C2.1B — shared Redis)
+#
+# `import config` (not `from config import REDIS_HOST, ...`) is deliberate:
+# reading `config.REDIS_HOST` etc. at call time, not at module-import time,
+# is what lets tests monkeypatch these onto the config module and see it
+# reflected here.
+# ---------------------------------------------------------------------------
+def redis_connection_kwargs() -> dict:
+    """kwargs for `redis.asyncio.Redis(...)` — built from components, never
+    a `redis://user:pass@host/db` URL, so a credential string never has to
+    exist just to construct the client."""
+    return {
+        "host": config.REDIS_HOST,
+        "port": config.REDIS_PORT,
+        "username": config.REDIS_USERNAME,
+        "password": config.REDIS_PASSWORD,
+        "db": config.REDIS_DB,
+        "decode_responses": True,
+    }
+
+
+def redis_connection_summary() -> str:
+    """Safe-to-log connection description — deliberately excludes username
+    and password so a startup log line can never leak the credential."""
+    return f"{config.REDIS_HOST}:{config.REDIS_PORT}/{config.REDIS_DB}"
 
 
 # ---------------------------------------------------------------------------
