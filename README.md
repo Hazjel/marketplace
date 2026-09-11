@@ -380,8 +380,13 @@ Actively developed. Production is live and CI-gated. First tagged release:
   primitive (`B3.1`) and the full calculation migration (`B3.2`): tax, voucher
   discount and admin fee on `Money` with basis-point rates, whole-rupiah price
   validation, FE total parity. All six gaps in `api-blue/docs/money-contract.md`
-  §6 closed. The API emits every whole-rupiah amount as an integer —
-  `api-blue/docs/money-json-contract.md`.
+  §6 closed. The C1-contracted transactional money fields (product price,
+  transaction tax/shipping/grand-total/discount, voucher amounts) emit
+  whole rupiah as integers, parsed with a checked boundary that fails
+  loudly on a fractional legacy value instead of truncating it — see
+  `api-blue/docs/money-json-contract.md` for the exact field list and its
+  documented exceptions (a percentage voucher rate, the escrow ledger,
+  and the un-normalized dashboard/pagination sums).
 - **Next — Sprint C (production maturity)**:
 
   | | |

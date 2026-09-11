@@ -23,13 +23,16 @@ use Tests\TestCase;
 
 /**
  * Sprint C1 — the money JSON contract. After B3.2 every rupiah amount is
- * whole, and the API must emit it as an integer, not a `decimal:2` string
- * ("150000.00") or a float. A client doing int.tryParse() must get the
- * value.
+ * whole, and the C1-contracted fields must emit it as an integer, not a
+ * `decimal:2` string ("150000.00") or a float. A JSON integer decodes as
+ * a native int in any client language — no string parsing needed.
  *
  * Exceptions (still decimal, documented in docs/money-json-contract.md):
- * a percentage voucher's `value` (a rate, not rupiah); the escrow ledger
- * (`store_balances`, histories, `withdrawals`) and `weight`.
+ * a percentage voucher's `value` (a rate, not rupiah); `weight`; the
+ * escrow ledger (`store_balances`, histories, `withdrawals`); and the
+ * un-normalized dashboard/pagination sums (`AdminDashboardResource`,
+ * `BuyerDashboardResource.total_expense`, the paginated transaction
+ * endpoint's `meta.{total_revenue,total_admin_fee}`).
  */
 class MoneyJsonContractTest extends TestCase
 {
