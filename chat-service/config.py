@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -54,11 +55,57 @@ SESSION_TTL_SECONDS   = int(os.getenv("SESSION_TTL_SECONDS", "3600"))
 # treats a None password as "no AUTH"), which keeps a bare local Redis
 # working without requiring credentials in dev.
 # ---------------------------------------------------------------------------
-REDIS_HOST     = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT     = int(os.getenv("REDIS_PORT", "6379"))
-REDIS_USERNAME = os.getenv("REDIS_USERNAME") or None
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD") or None
-REDIS_DB       = int(os.getenv("REDIS_DB", "0"))
+def _resolve_redis_config(env: dict) -> dict:
+    """Resolves the Redis connection from environment variables.
+
+    REDIS_HOST/PORT/USERNAME/PASSWORD/DB are authoritative whenever
+    REDIS_HOST is present. REDIS_URL is parsed only as a **transitional,
+    cutover-window-only fallback** for when REDIS_HOST is absent but a
+    legacy REDIS_URL is: the production chat-service container runs
+    uvicorn --reload against a bind-mounted checkout, and Jenkins updates
+    that checkout (git reset) *before* rebuilding/recreating the
+    container. That means the still-running old process can reload this
+    new source while its container environment still only has the OLD
+    REDIS_URL var -- without this fallback it would silently fall through
+    to the "localhost" default and lose Redis for the rest of the build
+    window, even though the old Redis it names is still up and reachable
+    at that point (nothing removes it until deploy finishes).
+
+    Never logs the URL or any parsed credential -- see
+    redis_helper.redis_connection_summary(). Safe to delete once every
+    environment (dev included) has migrated to the component vars and no
+    running container still only sets REDIS_URL.
+    """
+    host     = env.get("REDIS_HOST")
+    port     = env.get("REDIS_PORT")
+    username = env.get("REDIS_USERNAME")
+    password = env.get("REDIS_PASSWORD")
+    db       = env.get("REDIS_DB")
+
+    legacy_url = env.get("REDIS_URL")
+    if host is None and legacy_url:
+        parsed   = urlparse(legacy_url)
+        host     = parsed.hostname
+        port     = port or (str(parsed.port) if parsed.port is not None else None)
+        username = username or parsed.username
+        password = password or parsed.password
+        db       = db or (parsed.path.lstrip("/") or None)
+
+    return {
+        "host": host or "localhost",
+        "port": int(port or "6379"),
+        "username": username or None,
+        "password": password or None,
+        "db": int(db or "0"),
+    }
+
+
+_redis_config  = _resolve_redis_config(os.environ)
+REDIS_HOST     = _redis_config["host"]
+REDIS_PORT     = _redis_config["port"]
+REDIS_USERNAME = _redis_config["username"]
+REDIS_PASSWORD = _redis_config["password"]
+REDIS_DB       = _redis_config["db"]
 # Key-namespace boundary on shared Redis -- NOT the same thing as REDIS_DB.
 # Production sets this to "blukios:" so every key this service writes stays
 # inside the ACL-restricted `blukios:*` pattern instead of relying on the
@@ -82,9 +129,13 @@ LLM_CACHE_TTL_SECONDS = 300   # cache response LLM 5 menit
 
 
 def _prefixed_key(name: str, prefix: str = REDIS_KEY_PREFIX) -> str:
-    """Applies REDIS_KEY_PREFIX exactly once. All Redis key constants below
-    are built through this — one place to change if the prefix scheme ever
-    changes, instead of prepending it at every call site."""
+    """Prepends `prefix` to `name`. Not idempotent in general -- calling it
+    on an already-prefixed string would double up -- but every call site
+    below passes one of the fixed, never-prefixed "chat:*" literals, so in
+    this module each of SESSION_KEY/SUMMARY_KEY/LLM_CACHE_KEY/FEEDBACK_KEY
+    ends up carrying exactly one REDIS_KEY_PREFIX. One place to change if
+    the prefix scheme ever changes, instead of prepending it at every call
+    site that builds a Redis key."""
     return f"{prefix}{name}"
 
 
