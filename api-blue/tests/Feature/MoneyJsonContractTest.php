@@ -16,6 +16,8 @@ use App\Models\Voucher;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -103,6 +105,25 @@ class MoneyJsonContractTest extends TestCase
             ->getContent();
         $this->assertMatchesRegularExpression('/"tax":11006,/', $json);
         $this->assertStringNotContainsString('"grand_total":"', $json);
+    }
+
+    /**
+     * Review fix: pre-B3.2c, a percentage voucher's discount was
+     * `round($discount, 2)` — a legacy transaction can have a fractional
+     * discount_amount ("10000.50"). The resource must throw on it, never
+     * silently truncate to "10000" and misreport financial history.
+     */
+    public function test_a_legacy_fractional_discount_amount_throws_instead_of_truncating(): void
+    {
+        $this->category();
+        $transaction = Transaction::factory()->create(['payment_status' => 'paid']);
+        // bypass the app layer to plant a value only pre-B3.2c code could write
+        DB::table('transactions')
+            ->where('id', $transaction->id)
+            ->update(['discount_amount' => '10000.50']);
+
+        $this->expectException(InvalidArgumentException::class);
+        (new TransactionResource($transaction->fresh()))->toArray(request());
     }
 
     public function test_voucher_rupiah_fields_are_integers_percentage_value_is_a_rate(): void

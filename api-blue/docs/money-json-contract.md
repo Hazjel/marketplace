@@ -10,15 +10,20 @@ format** only.
 
 Every field that holds a **whole-rupiah amount** is emitted as a JSON
 **integer** — never a `decimal:2` string (`"150000.00"`) and never a
-float. A client can `int.tryParse()` / `Integer(...)` it directly.
+float. A JSON integer decodes natively as an int in any client language
+(Dart, Kotlin, Swift, JS `Number`) — no string parsing needed.
 
 ```json
 { "price": 150000, "tax": 11006, "grand_total": 126056 }
 ```
 
 The database columns are still `decimal(26,2)` (that migration is Sprint
-C9); the API layer casts them to `int` on the way out because the value
-is always whole after B3.2.
+C9); each resource below parses the stored value with
+`Money::fromDecimalString(...)->minor()` on the way out — the same
+checked boundary the domain uses everywhere else. A fractional legacy
+value (a pre-B3.2c `discount_amount` could be `"10000.50"`) **throws**
+rather than silently truncating to `10000` and misreporting financial
+history.
 
 ## Integer fields
 
@@ -35,16 +40,23 @@ is always whole after B3.2.
 
 | Field | Type | Why |
 |---|---|---|
-| `ProductResource.weight`, `ProductVariantResource` weight | number (2 dp) | kilograms, not money |
-| `VoucherResource.value` when `type = "percentage"` | number (≤ 2 dp) | a **rate** (`10.5` = 10.5%), not a rupiah amount. Parsed internally to basis points. |
+| `ProductResource.weight` | number (2 dp) | kilograms, not money — `ProductVariantResource` has no `weight` field at all |
+| `VoucherResource.value` when `type = "percentage"` | number (≤ 2 dp) | a **rate** (`10.5` = 10.5%), not a rupiah amount. Parsed internally to exact basis points, never narrowed. |
 | `StoreBalanceResource.{balance, pending_balance}` | number (2 dp) | escrow ledger — a pre-B3.2d `pending_balance` can be fractional |
 | `StoreBalanceHistoryResource.amount` | number (2 dp) | escrow ledger |
 | `WithdrawalResource.amount` | number (2 dp) | escrow ledger |
 | `SellerDashboardResource.{balance, pending_balance}` | number (2 dp) | reads the escrow ledger |
-| `BuyerDashboardResource.total_expense`, dashboard chart revenue | number | aggregate `SUM(grand_total)`; whole in practice but not yet contract-guaranteed |
+| `AdminDashboardResource.{total_revenue, total_admin_fee}` | `(float)` | raw `SUM(grand_total)` / `SUM(admin_fee)`, not narrowed |
+| `GET /api/transaction/all/paginated` → `meta.{total_revenue, total_admin_fee}` | unnormalized | `TransactionController` puts `TransactionAnalyticsRepository::getTotalRevenue()/getTotalAdminFee()` straight into the pagination `meta` block — **no Resource in the path at all**, so the wire type is whatever the DB driver's `SUM()` returns (typically a numeric string) |
+| `BuyerDashboardResource.total_expense` | `(float)` | same `SUM(grand_total)` path as `AdminDashboardResource` |
 
-The escrow-ledger and dashboard money fields move to integers in **C9**,
-alongside the column migration.
+Not an exception, despite also being a `SUM`: the dashboard **chart**
+series (`TransactionAnalyticsRepository::getChartData()` →
+`chart[].total_revenue`) is already `(int)`-cast at the repository.
+
+The escrow-ledger fields, and the un-normalized dashboard/`meta` sums
+above, move to integers in **C9**, alongside the column migration — they
+are out of scope for C1.
 
 ## Request side
 
@@ -60,9 +72,13 @@ Write endpoints require whole rupiah where the value is money:
 
 ## Client guidance
 
-- Parse the integer money fields as integers. Do not divide by 100.
+- Decode the integer money fields as a native int (Dart's `jsonDecode`
+  already does this for a JSON integer — no `int.tryParse()` needed;
+  that method is for parsing a `String`, and these fields are never one).
 - For a percentage voucher, `value` is a percentage — apply as
   `amount * value / 100` for display, but the server is authoritative on
   the actual discount.
-- The escrow-ledger fields (`balance`, `pending_balance`, `amount`) may
-  carry two decimals until C9 — parse them as decimals / doubles.
+- The escrow-ledger fields (`balance`, `pending_balance`, `amount`) and
+  the dashboard/`meta` sums listed above may carry decimals or arrive as
+  a numeric string until C9 — parse them defensively (decimal/double,
+  tolerate a string).

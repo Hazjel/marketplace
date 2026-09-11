@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\ValueObjects\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -23,8 +24,10 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'condition' => $this->condition,
-            // price is whole rupiah (Sprint B3.2a); weight is kg, not money.
-            'price' => (int) $this->price,
+            // price is whole rupiah (Sprint B3.2a); a fractional legacy
+            // value throws rather than silently truncating. weight is kg,
+            // not money.
+            'price' => Money::fromDecimalString((string) $this->price)->minor(),
             'weight' => (float) (string) $this->weight,
             'stock' => $this->stock,
             'total_sold' => $this->total_sold,

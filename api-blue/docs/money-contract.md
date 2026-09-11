@@ -167,6 +167,17 @@ returned **0** before B3.2 was deployed (2026-09-10):
    `value < 0` or `value > 92233720368547758.07` (the largest rate whose
    basis points fit a PHP int — `Voucher::parsePercentageBasisPoints()`).
 
+**C1 gate (`money-json-contract.md`'s integer resources):** before C1
+deploys, run `Money::fromDecimalString()` over every `Transaction` row's
+`shipping_cost`, `tax`, `grand_total` and `discount_amount` — must return
+**0** for all four. `shipping_cost`/`tax`/`grand_total` were always
+`round()`-ed to whole even pre-B3.2 and so were never actually at risk;
+`discount_amount` is the one field a pre-B3.2c percentage voucher could
+have left fractional (`round($discount, 2)`), and is the reason
+`TransactionResource` parses it with the checked boundary instead of a
+raw `(int)` cast — a value that fails this gate throws in the resource
+rather than silently truncating.
+
 **Not migrated in B3.2** (deliberate, still scalar / `decimal:2`):
 
 - `transactions.{tax, grand_total, shipping_cost, admin_fee, discount_amount}`
