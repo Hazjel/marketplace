@@ -12,7 +12,9 @@ class HealthController extends Controller
         $health = [
             'status' => 'ok',
             'timestamp' => now()->toIso8601String(),
-            'version' => config('app.version', '1.0.0'),
+            // Set APP_VERSION at deploy time (e.g. `git describe --tags`).
+            // Unset -> "undefined" rather than a stale hardcoded number.
+            'version' => config('app.version') ?: 'undefined',
             'services' => [],
         ];
 

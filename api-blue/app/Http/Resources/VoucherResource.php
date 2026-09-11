@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\ValueObjects\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,14 +13,29 @@ class VoucherResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $type = $this->type;
+        $value = $this->value;
+
         return [
             'id' => $this->id,
             'code' => $this->code,
             'store_id' => $this->store_id,
-            'type' => $this->type,
-            'value' => (float) (string) $this->value,
-            'min_purchase' => $this->min_purchase !== null ? (float) (string) $this->min_purchase : null,
-            'max_discount' => $this->max_discount !== null ? (float) (string) $this->max_discount : null,
+            'type' => $type,
+            // A fixed value is whole rupiah, parsed via the same checked
+            // boundary the domain uses (a fractional legacy value throws
+            // rather than silently truncating). A percentage value is a
+            // rate with up to 2 decimals — never narrowed. min_purchase /
+            // max_discount are whole rupiah (Sprint B3.2c). See
+            // docs/money-json-contract.md.
+            'value' => $type === 'fixed'
+                ? Money::fromDecimalString((string) $value)->minor()
+                : (float) (string) $value,
+            'min_purchase' => $this->min_purchase !== null
+                ? Money::fromDecimalString((string) $this->min_purchase)->minor()
+                : null,
+            'max_discount' => $this->max_discount !== null
+                ? Money::fromDecimalString((string) $this->max_discount)->minor()
+                : null,
             'usage_limit' => $this->usage_limit,
             'usage_limit_per_buyer' => $this->usage_limit_per_buyer,
             // Redeemed-so-far count — sellers need this to gauge how close a

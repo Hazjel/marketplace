@@ -150,22 +150,43 @@ closed.
 | 5 | Voucher discount `round($discount, 2)`, not integer. | `Voucher::validateFor(string, string, Money): array` — discount is `Money` via `percentage(bp)` / whole-rupiah fixed value, capped at the subtotal by Money comparison. | B3.2c |
 | 6 | `products.price` / variant price not integer-constrained. | `ProductStoreRequest` + `ProductUpdateRequest`: `price` and `variants.*.price` rules `numeric` → `integer`. | B3.2a |
 
-**Merge/deploy gates** (fork A — a fractional legacy value throws at the
-Money boundary). Each must return **0** in production before deploy:
+**Merge/deploy gates** (fork A — a value that won't parse as `Money`
+throws at the boundary). These were run against production and each
+returned **0** before B3.2 was deployed (2026-09-10):
 
-- **B3.2a** — `Product::whereRaw('price != FLOOR(price)')->count()` and the
-  `ProductVariantMongo` equivalent.
-- **B3.2c** — any `Voucher` with a fractional `min_purchase` / `max_discount`,
-  or a `type = fixed` voucher with a fractional `value`.
+1. **Admin-fee config** — `config('marketplace.admin_fee_percentage')` on
+   the still-old production code returned `0.1`, confirming the effective
+   rate is 10% and the new `admin_fee_basis_points` default of `1000`
+   preserves it.
+2. **Product / variant price** — `App\ValueObjects\Money::fromDecimalString()`
+   over every `Product::price` and `ProductVariantMongo::price` — count of
+   values that throw.
+3. **Voucher rupiah fields** — the same parser over every `type = fixed`
+   voucher `value`, and every `min_purchase` / `max_discount`.
+4. **Percentage voucher range** — any `type = percentage` voucher with
+   `value < 0` or `value > 92233720368547758.07` (the largest rate whose
+   basis points fit a PHP int — `Voucher::parsePercentageBasisPoints()`).
+
+**C1 gate (`money-json-contract.md`'s integer resources):** before C1
+deploys, run `Money::fromDecimalString()` over every `Transaction` row's
+`shipping_cost`, `tax`, `grand_total` and `discount_amount` — must return
+**0** for all four. `shipping_cost`/`tax`/`grand_total` were always
+`round()`-ed to whole even pre-B3.2 and so were never actually at risk;
+`discount_amount` is the one field a pre-B3.2c percentage voucher could
+have left fractional (`round($discount, 2)`), and is the reason
+`TransactionResource` parses it with the checked boundary instead of a
+raw `(int)` cast — a value that fails this gate throws in the resource
+rather than silently truncating.
 
 **Not migrated in B3.2** (deliberate, still scalar / `decimal:2`):
 
 - `transactions.{tax, grand_total, shipping_cost, admin_fee, discount_amount}`
   columns keep the `decimal:2` cast; the calculations produce `Money` and
-  persist `->minor()`. `TransactionResource` still emits `(float)(string)`
-  (whole values, so integer JSON in practice).
+  persist `->minor()`. The API resources emit these as **integers**
+  (Sprint C1) — see `money-json-contract.md`.
 - `store_balances`, `store_balance_histories`, `withdrawals` — the escrow
-  ledger runs on scalars.
+  ledger runs on scalars, and their API fields stay decimal (a pre-B3.2d
+  `pending_balance` can hold a fractional value).
 - `EscrowRepository::sellerAmount()` reads the locked `admin_fee` without
   going through `Money`, so a pre-B3.2d transaction whose fee is still
   fractional can still be released/refunded.

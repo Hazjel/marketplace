@@ -370,20 +370,40 @@ gitignored). It consumes the same `api-blue` REST API.
 
 ## Project status & roadmap
 
-Actively developed. Production is live and CI-gated.
+Actively developed. Production is live and CI-gated. First tagged release:
+`v0.1.0`.
 
 - **Done** — two-domain buyer/seller split, escrow payments, server-authoritative
   checkout, variant-aware pricing/stock, cross-DB (MySQL↔MongoDB) compensation,
-  RAG chat, collaborative recommendations, Jenkins pipeline, dependency-CVE fixes
-  (MongoDB PHP ext, `maplibre-gl`).
-- **In progress — money refactor (Sprint B)** — `Money` fixed-point primitive
-  landed (`B3.1`, pilot on `transaction_details.subtotal`). Next: `B3.2`
-  migrate tax / voucher / admin-fee calculations onto the primitive and close
-  the known rounding gaps (`api-blue/docs/money-contract.md` §6).
-- **Backlog** — Compose / deployment hardening (see [Security](#security));
-  end-to-end Midtrans Snap payment verification; `products.price` integer
-  validation; make the gitleaks stage blocking; `decimal` → `bigint` column
-  migration (deferred).
+  RAG chat, collaborative recommendations, Jenkins pipeline, dependency-CVE fixes.
+- **Done — money refactor (Sprint B3)** — `App\ValueObjects\Money` fixed-point
+  primitive (`B3.1`) and the full calculation migration (`B3.2`): tax, voucher
+  discount and admin fee on `Money` with basis-point rates, whole-rupiah price
+  validation, FE total parity. All six gaps in `api-blue/docs/money-contract.md`
+  §6 closed. The C1-contracted transactional money fields (product price,
+  transaction tax/shipping/grand-total/discount, voucher amounts) emit
+  whole rupiah as integers, parsed with a checked boundary that fails
+  loudly on a fractional legacy value instead of truncating it — see
+  `api-blue/docs/money-json-contract.md` for the exact field list and its
+  documented exceptions (a percentage voucher rate, the escrow ledger,
+  and the un-normalized dashboard/pagination sums).
+- **Next — Sprint C (production maturity)**:
+
+  | | |
+  |---|---|
+  | **C1** | API contract stabilization + mobile parity (this doc set; integer money JSON; `/api/health` version) |
+  | **C2** | production infra hardening — split prod compose, DB/Redis/Mongo credentials, close infra ports, gitleaks blocking |
+  | **C3** | payment/order end-to-end verification (Midtrans Snap → webhook → escrow → release) |
+  | **C4** | full mobile buyer + seller parity |
+  | **C5** | observability — business-path metrics, structured logging, alerting |
+  | **C6** | security & dependency debt (`unhead` chain, dependency scanning, auth/rate-limit review) |
+  | **C7** | mobile release engineering — signed AAB, approval-gated internal testing |
+  | **C8** | AI / recommendation quality (measured, not just "works") |
+  | **C9** | `decimal` → `bigint` money-column migration (backfill + rollback + gates) |
+  | **C10** | v1 production maturity — load test, backup/DR, SLOs |
+
+- **Deferred** — the `decimal(26,2)` money columns stay as-is until **C9**; the
+  calculation layer already runs on `Money` regardless of storage type.
 
 ## Contributing
 
