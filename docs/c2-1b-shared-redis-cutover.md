@@ -53,11 +53,13 @@ Do not merge until every gate below has passed, in order.
 3. ✅ **Done.** Create a dedicated `blukios` ACL identity — its own
    username and password, never reusing `default`'s credential.
 4. ✅ **Done.** Key restriction: `~blukios:*`. This is the actual
-   isolation boundary, not the Redis logical DB — `db0` holds ~9,605
-   other keys (`asynq:*`, another service's workload) and `db5` holds 1
-   more; Redis ACL key patterns aren't scoped per logical DB, and both
-   survived the cutover work unchanged. Verified: `blukios` gets
-   `NOPERM` reading an existing `asynq:*` key.
+   isolation boundary, not the Redis logical DB — at the verification
+   checkpoint `db0` had 9,605 keys and `db5` had 1 (both survived the
+   cutover work unchanged); the independently observed `asynq:*`
+   workload (another service's) was present in `db0`, not counted as
+   necessarily all 9,605 of those keys. Redis ACL key patterns aren't
+   scoped per logical DB either way. Verified: `blukios` gets `NOPERM`
+   reading an existing `asynq:*` key.
 5. ✅ **Done.** Channel restriction: `&blukios:*` (Blukios doesn't
    currently use Redis pub/sub, restricted defensively anyway).
 6. ✅ **Done — and hardened further than originally planned.** See
@@ -65,15 +67,28 @@ Do not merge until every gate below has passed, in order.
    why it also denies `SCAN`/`RANDOMKEY`/`PUBSUB` on top of the
    originally-planned admin-command denials — that wasn't part of the
    original plan and was added after testing found a real gap.
-7. ✅ **Done.** ACL persisted via `--aclfile /data/users.acl` on a
-   persistent named Docker volume — verified the ACL (both `default` and
-   `blukios`, including the hardening in step 6) survives a `shared-redis`
-   container recreate, not just an in-memory `ACL SETUSER`. File is
-   `redis:redis`, mode `0600`, contains password **hashes**, not
-   plaintext. A pre-hardening and a post-hardening copy of the ACL file
-   are both kept outside this repo under `/opt/shared-infra/backups/`
-   (root-only, `0600`, SHA-256 recorded) — no credential or hash is
-   committed here.
+7. ✅ **Done — in two stages, with different proof for each.**
+   `shared-redis` was recreated onto `redis-server --aclfile
+   /data/users.acl` on a persistent named Docker volume; **that
+   recreate** is what's actually been proven to survive a container
+   recreate — both `default` and the original `blukios` (key/channel
+   restriction, `+@all -@dangerous`) authenticated afterward, `ACL USERS`
+   listed both, and the existing keyspace was intact. The
+   `-scan`/`-randomkey`/`-pubsub` hardening (step 6) was added **after**
+   that recreate, in response to a gap found during testing — it was
+   never itself put through a second recreate. What's actually verified
+   for the hardening: `ACL SAVE` returned `OK`, direct inspection of
+   `/data/users.acl` shows the three deny tokens present, and the
+   runtime tests in step 10 confirm they're enforced. No second
+   `shared-redis` recreate was performed after adding them — a repeat
+   restart of a shared instance wasn't judged worth the disruption once
+   the persisted file was directly inspected and the behavior confirmed
+   live. Effective ACL state (both stages) lives in `/data/users.acl` on
+   the shared-infra Redis volume, mode `0600`, owned `redis:redis`,
+   containing password **hashes** — no plaintext credential or hash is
+   committed to this repo. A pre-hardening and a post-hardening copy of
+   that file are both kept outside this repo under
+   `/opt/shared-infra/backups/` (root-only, `0600`, SHA-256 recorded).
 8. ✅ **Done.** Tested the `blukios` credential from a disposable
    container attached to `shared-infra-net` — not from a marketplace
    container, not from this repo's scripts (this PR still does not and
@@ -91,11 +106,17 @@ Do not merge until every gate below has passed, in order.
    ```
 9. ✅ **Done.** Verified `blukios` can `PING`/`SET`/`GET` under
    `blukios:*`.
-10. ✅ **Done.** Verified `blukios` cannot read/write the existing
-    `asynq:*` keys (`NOPERM`), and — after the hardening in step 6 —
-    cannot `SCAN`, `RANDOMKEY`, `PUBSUB CHANNELS`, or `INFO` either. This
-    is the actual proof the isolation works, not just that the happy
-    path works.
+10. ✅ **Done.** Runtime-tested, not just policy-inferred: `blukios`
+    gets `NOPERM` reading an existing `asynq:*` key, and — after the
+    hardening in step 6 — `NOPERM` on `SCAN`, `RANDOMKEY`, `PUBSUB
+    CHANNELS`, and `INFO`. The rest of `@dangerous` (`CONFIG`, `DEBUG`,
+    `MODULE`, `FLUSHALL`, `FLUSHDB`, `SHUTDOWN`, `ACL`, `KEYS`,
+    `MIGRATE`, `RESTORE`, and others per `ACL CAT dangerous` on this
+    Redis 7 instance) is denied by the `-@dangerous` policy the same way
+    `INFO` is, but wasn't individually smoke-tested one-by-one against
+    production — see "Final ACL policy" below for the exact
+    tested-vs-category-denied distinction. This is still the actual
+    proof the isolation works, not just that the happy path works.
 11. **Stop the `api` container** (`docker compose -p marketplace stop
     api`) — **do not stop `queue` yet.** See "Producer quiescence" below
     for why this, not Laravel maintenance mode, is what actually closes
@@ -151,14 +172,18 @@ Do not merge until every gate below has passed, in order.
 
 ## Final ACL policy (as provisioned)
 
-The `blukios` ACL identity's effective policy, conceptually (no password
-or password hash belongs in this repo — the real `ACL SETUSER` line lives
-only in `/opt/shared-infra`, never here):
+The `blukios` ACL identity's effective policy, conceptually. No plaintext
+credential or password hash belongs in this repo, and none is here: the
+plaintext password currently exists only in the operator's shell and will
+be written to marketplace production's gitignored `.env`; Redis itself
+only ever stores its **hash**, and the effective ACL state (this policy,
+in force) is persisted in `/data/users.acl` on the shared-infra Redis
+volume — not a plaintext `ACL SETUSER` command sitting somewhere:
 
 ```
 reset
 on
-<dedicated password, set only in /opt/shared-infra>
+<dedicated password, never committed>
 ~blukios:*
 &blukios:*
 +@all
@@ -170,9 +195,14 @@ on
 
 `+@all -@dangerous` is the "remove dangerous admin commands, tighten
 later from observed usage" starting point steps 6/10 originally called
-for — `@dangerous` covers `CONFIG`, `DEBUG`, `MODULE`, `FLUSHALL`,
-`FLUSHDB`, `SHUTDOWN`, `ACL`, and similar. Verified: `INFO` and those
-commands all return `NOPERM` for `blukios`.
+for. On this Redis 7 instance, `ACL CAT dangerous` lists `CONFIG`,
+`DEBUG`, `MODULE`, `FLUSHALL`, `FLUSHDB`, `SHUTDOWN`, `ACL`, `KEYS`,
+`MIGRATE`, `RESTORE`, `INFO`, and others as members of that category —
+`-@dangerous` denies all of them by category membership. **Only `INFO`
+was individually runtime-tested** against production (`NOPERM`,
+confirmed); the rest of the category is a policy guarantee inferred from
+`ACL CAT dangerous`, not something each command was separately executed
+against production to confirm.
 
 **`-scan`, `-randomkey`, and `-pubsub` were not part of the original
 plan — they were added after production testing found a real gap.**
@@ -190,11 +220,23 @@ equivalent for channel names. These three explicit denies close that
 metadata-enumeration path — `blukios` now cannot learn anything about
 what else lives on the shared instance, not just fail to access it.
 
-Verified after hardening (persisted via `ACL SAVE` into
-`/data/users.acl`, confirmed to survive a `shared-redis` recreate):
-`SCAN`/`RANDOMKEY`/`PUBSUB CHANNELS` → `NOPERM`; normal `PING`/`SET`/`GET`
-on `blukios:*` → still works; `EXISTS` on an `asynq:*` key → still
-`NOPERM`.
+**Exact sequence, since the distinction matters:** `shared-redis` was
+recreated onto `--aclfile /data/users.acl` first, with `default` and the
+original `blukios` (key/channel restriction, `+@all -@dangerous`, no
+`SCAN`/`RANDOMKEY`/`PUBSUB` denial yet) — that recreate is what's proven:
+both users authenticated afterward and the keyspace was intact. The
+`SCAN`/`RANDOMKEY`/`PUBSUB` gap was found *after* that, from testing
+against the running instance, and the three denies were added to
+`blukios` at that point — persisted with `ACL SAVE` (`OK`), confirmed
+present by directly inspecting `/data/users.acl` afterward, and confirmed
+enforced by runtime tests: `SCAN`/`RANDOMKEY`/`PUBSUB CHANNELS` →
+`NOPERM`; normal `PING`/`SET`/`GET` on `blukios:*` → still works;
+`EXISTS` on an `asynq:*` key → still `NOPERM`. **No second `shared-redis`
+recreate was performed after adding these three denies** — a repeat
+restart of a shared instance wasn't judged worth the disruption once the
+persisted file was directly inspected and the live behavior confirmed;
+the file-persistence mechanism itself was already proven by the earlier
+recreate.
 
 **Consequence for this runbook: `blukios` cannot run the `SCAN`-based
 post-cutover verification originally written into steps 18–19.** See
