@@ -4,49 +4,84 @@ Sprint C2.1B removes `marketplace`'s own Redis (`blue-redis`) and points
 every Redis-using service at a shared Redis instance (`shared-redis`)
 running outside this repo, in `/opt/shared-infra`.
 
-## ⚠️ Merge is forbidden until the shared ACL user exists
+## Status (2026-09-11)
 
-Merging this PR into `main` auto-deploys via Jenkins (`pollSCM`, no manual
-gate). This compose file requires `REDIS_USERNAME`/`REDIS_PASSWORD`
-(`${VAR:?...}` — compose refuses to start without them) and assumes an
-external Docker network named `shared-infra-net` already exists on the
-host. **If either the `blukios` ACL user or the network doesn't exist yet
-when this merges, the very next deploy fails to bring the API back up.**
+The shared-infra ACL provisioning gate (steps 1–10 below) has been
+**completed and verified in production**, independently of this PR's
+code — see "Final ACL policy (as provisioned)" below for exactly what
+was set up. What has **not** happened yet:
+
+- Marketplace production `.env` has **not** been switched to shared
+  Redis — `api`/`queue`/`scheduler`/`reverb`/`chat-service` are still
+  running against `blue-redis`.
+- `api` has **not** been stopped for the queue/idempotency quiescence
+  gates (steps 11–13).
+- **PR #20 is still open and unmerged.** No marketplace deploy driven by
+  this PR has occurred.
+- No credential or password hash is committed to this repo at any point
+  in this process — the `blukios` password lives only in the operator's
+  shell and, eventually, production's gitignored `.env`.
+- The shared `default` credential was **not** rotated as part of this —
+  out of scope, see step 22.
+
+This PR's code has not changed since `a0300c6` — this revision is a
+documentation reconciliation only, to make the runbook match what
+`/opt/shared-infra` actually looks like now, and to fix a verification
+step that the final ACL policy makes impossible as originally written
+(see "Post-cutover namespace verification" below).
+
+## ⚠️ Merge is still forbidden until production `.env` is wired
+
+The ACL gate passing doesn't change this: merging this PR into `main`
+auto-deploys via Jenkins (`pollSCM`, no manual gate). This compose file
+requires `REDIS_USERNAME`/`REDIS_PASSWORD` (`${VAR:?...}` — compose
+refuses to start without them). **If production `.env` isn't updated
+with real `blukios` credentials before this merges, the very next deploy
+fails to bring the API back up.**
 
 Do not merge until every gate below has passed, in order.
 
 ## Sequence
 
-1. **Prepare persistent Redis ACL configuration in `/opt/shared-infra`.**
-   Not part of this PR — a separate, manual change to the shared-infra
-   stack, reviewed independently.
-2. **Preserve the existing `default` user/credential.** Other applications
-   already depend on it; this cutover must not touch or rotate it.
-3. **Create a dedicated `blukios` ACL identity** — its own username and
-   password, never reusing `default`'s credential.
-4. **Key restriction: `~blukios:*`.** This is the actual isolation
-   boundary, not the Redis logical DB — `db0` already holds another
-   service's `asynq:*` keys, and Redis ACL key patterns aren't scoped per
-   logical DB.
-5. **Channel restriction**, if pub/sub channels are used: `&blukios:*`
-   (Blukios doesn't currently use Redis pub/sub, but restrict this
-   defensively rather than leaving channels unrestricted).
-6. **No administrative capability** — the `blukios` user must not be able
-   to run `ACL`, `CONFIG`, `DEBUG`, `MODULE`, `FLUSHALL`, `FLUSHDB`, or
-   `SHUTDOWN`. Do not otherwise hand-craft a restrictive command allowlist
-   before confirming what Laravel's queue/cache/lock operations and
-   chat-service actually issue — start from "remove dangerous admin
-   commands" and tighten later from observed command usage, not the
-   reverse.
-7. **Make the ACL persistent** (`aclfile` or equivalent) so it survives a
-   container recreate or host reboot — an in-memory-only `ACL SETUSER`
-   disappears on the next `shared-redis` restart.
-8. **Test the `blukios` credential from a disposable container** attached
-   to `shared-infra-net` — never from a marketplace container, and never
-   from this repo's scripts. This PR does not and must not provision ACL
-   state itself. Do **not** pass the password via `-a` (it lands in shell
-   history and is visible to anyone who can run `ps` on the host while the
-   command executes); use `REDISCLI_AUTH` instead:
+1. ✅ **Done (2026-09-11).** Prepare persistent Redis ACL configuration in
+   `/opt/shared-infra`. Not part of this PR — a separate, manual change
+   to the shared-infra stack, reviewed independently.
+2. ✅ **Done.** Preserve the existing `default` user/credential. Other
+   applications already depend on it; verified it survived
+   `shared-redis`'s recreate onto the new `--aclfile` startup, and was
+   **not** rotated.
+3. ✅ **Done.** Create a dedicated `blukios` ACL identity — its own
+   username and password, never reusing `default`'s credential.
+4. ✅ **Done.** Key restriction: `~blukios:*`. This is the actual
+   isolation boundary, not the Redis logical DB — `db0` holds ~9,605
+   other keys (`asynq:*`, another service's workload) and `db5` holds 1
+   more; Redis ACL key patterns aren't scoped per logical DB, and both
+   survived the cutover work unchanged. Verified: `blukios` gets
+   `NOPERM` reading an existing `asynq:*` key.
+5. ✅ **Done.** Channel restriction: `&blukios:*` (Blukios doesn't
+   currently use Redis pub/sub, restricted defensively anyway).
+6. ✅ **Done — and hardened further than originally planned.** See
+   "Final ACL policy (as provisioned)" below for the exact policy and
+   why it also denies `SCAN`/`RANDOMKEY`/`PUBSUB` on top of the
+   originally-planned admin-command denials — that wasn't part of the
+   original plan and was added after testing found a real gap.
+7. ✅ **Done.** ACL persisted via `--aclfile /data/users.acl` on a
+   persistent named Docker volume — verified the ACL (both `default` and
+   `blukios`, including the hardening in step 6) survives a `shared-redis`
+   container recreate, not just an in-memory `ACL SETUSER`. File is
+   `redis:redis`, mode `0600`, contains password **hashes**, not
+   plaintext. A pre-hardening and a post-hardening copy of the ACL file
+   are both kept outside this repo under `/opt/shared-infra/backups/`
+   (root-only, `0600`, SHA-256 recorded) — no credential or hash is
+   committed here.
+8. ✅ **Done.** Tested the `blukios` credential from a disposable
+   container attached to `shared-infra-net` — not from a marketplace
+   container, not from this repo's scripts (this PR still does not and
+   must not provision ACL state itself). Verified unauthenticated `PING`
+   returns `NOAUTH` and `blukios` authenticates successfully. Password
+   passed via `REDISCLI_AUTH`, never `-a` (which would land in shell
+   history and be visible to anyone running `ps` on the host during the
+   command):
    ```sh
    read -rs REDISCLI_AUTH   # paste the password, it won't echo
    export REDISCLI_AUTH
@@ -54,10 +89,13 @@ Do not merge until every gate below has passed, in order.
      redis:7-alpine redis-cli -h shared-redis --user blukios PING
    unset REDISCLI_AUTH
    ```
-9. **Verify `blukios` can read/write `blukios:*`.**
-10. **Verify `blukios` cannot read/write the existing `asynq:*` keys** (or
-    anything outside `blukios:*`) — this is the actual proof the
-    isolation works, not just that the happy path works.
+9. ✅ **Done.** Verified `blukios` can `PING`/`SET`/`GET` under
+   `blukios:*`.
+10. ✅ **Done.** Verified `blukios` cannot read/write the existing
+    `asynq:*` keys (`NOPERM`), and — after the hardening in step 6 —
+    cannot `SCAN`, `RANDOMKEY`, `PUBSUB CHANNELS`, or `INFO` either. This
+    is the actual proof the isolation works, not just that the happy
+    path works.
 11. **Stop the `api` container** (`docker compose -p marketplace stop
     api`) — **do not stop `queue` yet.** See "Producer quiescence" below
     for why this, not Laravel maintenance mode, is what actually closes
@@ -92,13 +130,13 @@ Do not merge until every gate below has passed, in order.
     200 normally); also check `queue` processing a job, `scheduler`'s
     next tick, `reverb` broadcasting, `chat-service` session/summary/cache
     round-tripping.
-18. **Verify new keys are `blukios:*`** — `redis-cli --user blukios ...
-    SCAN 0 MATCH 'blukios:*'` (never `KEYS` on a shared production
-    instance with an unknown/large key count — `KEYS` blocks the whole
-    server while it runs; `SCAN` doesn't).
-19. **Verify the existing `asynq:*` workload is untouched** — same
-    `SCAN`/sampling approach as the original inventory, comparing before
-    and after.
+18. **Verify the app is actually writing under `blukios:*`** using
+    real application behavior, not `SCAN` as `blukios` — the final ACL
+    denies that command to this identity by design. See "Post-cutover
+    namespace verification" below for the corrected procedure.
+19. **Verify the existing `asynq:*` workload is untouched** — an
+    administrator-credential-only check, same as step 18's note; see
+    below.
 20. **Keep the orphaned `blue-redis` container as a rollback path** until
     production verification (17–19) passes. See "Rollback: what
     `blue-redis` actually gives you" below — its persistence guarantee is
@@ -110,6 +148,58 @@ Do not merge until every gate below has passed, in order.
 22. **Shared `default` credential rotation is a separate, later,
     coordinated operation** — out of scope here entirely; this cutover
     must not require or trigger it.
+
+## Final ACL policy (as provisioned)
+
+The `blukios` ACL identity's effective policy, conceptually (no password
+or password hash belongs in this repo — the real `ACL SETUSER` line lives
+only in `/opt/shared-infra`, never here):
+
+```
+reset
+on
+<dedicated password, set only in /opt/shared-infra>
+~blukios:*
+&blukios:*
++@all
+-@dangerous
+-scan
+-randomkey
+-pubsub
+```
+
+`+@all -@dangerous` is the "remove dangerous admin commands, tighten
+later from observed usage" starting point steps 6/10 originally called
+for — `@dangerous` covers `CONFIG`, `DEBUG`, `MODULE`, `FLUSHALL`,
+`FLUSHDB`, `SHUTDOWN`, `ACL`, and similar. Verified: `INFO` and those
+commands all return `NOPERM` for `blukios`.
+
+**`-scan`, `-randomkey`, and `-pubsub` were not part of the original
+plan — they were added after production testing found a real gap.**
+Redis's key-pattern ACL (`~blukios:*`) correctly denies *reading or
+writing* a key outside that pattern (confirmed: `blukios` gets `NOPERM`
+touching an existing `asynq:*` key). It does **not**, by itself, stop
+`SCAN` from *enumerating the names* of keys outside the pattern — `SCAN`
+walks the whole keyspace and only key-pattern-filters what it returns if
+you ask it to with `MATCH`, and even then the command itself isn't
+namespace-restricted. A `blukios`-authenticated client could `SCAN` and
+see that keys named `asynq:...` exist (metadata: names, not values or
+access) even though it could never read their contents. `RANDOMKEY` has
+the same shape of leak for a single key. `PUBSUB CHANNELS` is the
+equivalent for channel names. These three explicit denies close that
+metadata-enumeration path — `blukios` now cannot learn anything about
+what else lives on the shared instance, not just fail to access it.
+
+Verified after hardening (persisted via `ACL SAVE` into
+`/data/users.acl`, confirmed to survive a `shared-redis` recreate):
+`SCAN`/`RANDOMKEY`/`PUBSUB CHANNELS` → `NOPERM`; normal `PING`/`SET`/`GET`
+on `blukios:*` → still works; `EXISTS` on an `asynq:*` key → still
+`NOPERM`.
+
+**Consequence for this runbook: `blukios` cannot run the `SCAN`-based
+post-cutover verification originally written into steps 18–19.** See
+"Post-cutover namespace verification" below for the corrected procedure
+— do not weaken this ACL to make the old command work.
 
 ## Producer quiescence (why this is `docker compose stop api`, not `php artisan down`)
 
@@ -287,6 +377,42 @@ echo "idempotency_keys_db1=$count"
      wants zero risk here — real complexity, only worth building if this
      gate is actually failing, not speculatively ahead of time.
 
+## Post-cutover namespace verification
+
+The final ACL (see "Final ACL policy" above) denies `blukios` the
+`SCAN`/`RANDOMKEY`/`PUBSUB` commands on purpose. **Do not weaken the ACL
+to make a `SCAN`-as-`blukios` verification command work** — that command
+was only ever a convenience for confirming the cutover worked, and the
+whole point of denying it to this identity is that the application
+itself should never be able to enumerate what else lives on shared
+Redis.
+
+**Application-identity verification (step 18)** — use real application
+behavior instead of introspection:
+- A known-key smoke test: `SET`/`GET` one specific `blukios:`-prefixed
+  key as `blukios` directly (you already know its exact name, so no
+  `SCAN` is needed to find it).
+- Actual behavior: hit `/api/health`, log in and confirm a cache-backed
+  read works, submit a chat message and confirm `chat-service`'s session
+  round-trips, watch `queue` process a real job.
+
+**Namespace inventory (if an operator wants one) — administrator
+identity only, never `blukios`:**
+
+```sh
+read -rs REDISCLI_AUTH   # the shared-infra *administrator* credential, not blukios
+export REDISCLI_AUTH
+docker exec -e REDISCLI_AUTH shared-redis \
+  redis-cli --scan --pattern 'blukios:*' | wc -l
+unset REDISCLI_AUTH
+```
+
+Same shape for confirming the existing `asynq:*` workload is untouched
+(step 19) — administrator credential, count only, same
+before/after-sampling approach as the original inventory. `blukios` is
+never expected to perform this comparison; it structurally can't, and
+that's correct.
+
 ## chat-service reload window (why config.py has a legacy REDIS_URL fallback)
 
 The production `chat-service` container runs `uvicorn --reload` against a
@@ -366,15 +492,26 @@ something that happens for free. If a future change adds
 `--remove-orphans` to the Deploy stage, this assumption breaks — recheck
 this section before doing so.
 
-## What this PR does and doesn't do
+## What this PR's code does and doesn't do
 
-This PR only prepares `marketplace` to *consume* a shared Redis identity
-that doesn't exist yet. It does not:
+This PR's *code* only prepares `marketplace` to *consume* a shared Redis
+identity — it contains no infrastructure-provisioning automation and
+embeds no production credential. That remains true regardless of what's
+happened operationally outside the repo (see "Status" at the top). This
+PR's code does not, and never will:
 
 - touch `/opt/shared-infra` or its compose file
-- create, modify, or test any real Redis ACL user
+- create, modify, or store any real Redis ACL user or credential
 - change production `.env`
 - deploy, or merge itself
+
+Separately, and *not* part of this PR's diff: as of 2026-09-11,
+`shared-redis` **has** been manually provisioned with the persistent
+`blukios` ACL identity described above, as an operational change to
+`/opt/shared-infra` reviewed and verified independently of this PR. The
+existing shared `default` credential was preserved, not rotated.
+Marketplace production `.env` has **not** been switched over yet, and
+this PR (#20) is still unmerged — no deploy driven by it has happened.
 
 ## Redis consumers in this repo
 
