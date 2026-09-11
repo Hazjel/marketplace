@@ -58,39 +58,69 @@ Do not merge until every gate below has passed, in order.
 10. **Verify `blukios` cannot read/write the existing `asynq:*` keys** (or
     anything outside `blukios:*`) — this is the actual proof the
     isolation works, not just that the happy path works.
-11. **Inventory and quiesce Redis-dependent state still on `blue-redis`
-    before flipping any endpoint.** See "Redis state before cutover"
-    below — this step is not optional, and a non-empty queue backlog is a
-    hard stop, not a warning.
-12. **Set marketplace's production `REDIS_HOST`, `REDIS_PORT`,
+11. **Enter maintenance mode** (`docker compose -p marketplace exec -T api
+    php artisan down`) — see "Producer quiescence" below for why this,
+    not "traffic is probably low," is what actually closes the
+    queue/idempotency race.
+12. **Inventory Redis-dependent state still on `blue-redis`, with the app
+    quiesced.** See "Redis state before cutover" below — this step is not
+    optional, and a non-empty queue backlog or an unexpectedly large
+    idempotency-key count on db1 is a hard stop, not a warning.
+13. **Set marketplace's production `REDIS_HOST`, `REDIS_PORT`,
     `REDIS_USERNAME`, `REDIS_PASSWORD`, `REDIS_PREFIX` in the production
     `.env`** (gitignored, never committed).
-13. **Only after 1–12 pass**, merge this PR.
-14. Jenkins picks it up (`pollSCM`) and deploys — this rebuilds
+14. **Only after 1–13 pass**, merge this PR.
+15. Jenkins picks it up (`pollSCM`) and deploys — this rebuilds
     `api`/`queue`/`reverb`/`scheduler`/`chat-service` and attaches them to
     `shared-infra-net`. See "chat-service reload window" below for a
     subtlety specific to this deploy's bind-mount + `--reload` setup.
-15. **Verify each service actually reconnected**: `api` health check,
+16. **Verify each service actually reconnected**: `api` health check,
     `queue` processing a job, `scheduler`'s next tick, `reverb`
     broadcasting, `chat-service` session/summary/cache round-tripping.
-16. **Verify new keys are `blukios:*`** — `redis-cli --user blukios ...
+17. **Verify new keys are `blukios:*`** — `redis-cli --user blukios ...
     SCAN 0 MATCH 'blukios:*'` (never `KEYS` on a shared production
     instance with an unknown/large key count — `KEYS` blocks the whole
     server while it runs; `SCAN` doesn't).
-17. **Verify the existing `asynq:*` workload is untouched** — same
+18. **Verify the existing `asynq:*` workload is untouched** — same
     `SCAN`/sampling approach as the original inventory, comparing before
     and after.
-18. **Keep the orphaned `blue-redis` container as a rollback path** until
-    production verification (15–17) passes. See "Rollback: what
+19. **Only after 16–18 pass, exit maintenance mode** (`php artisan up`).
+    The app stays quiesced from step 11 until this point — that's the
+    entire point of bracketing the cutover in maintenance mode.
+20. **Keep the orphaned `blue-redis` container as a rollback path** until
+    production verification (16–18) passes. See "Rollback: what
     `blue-redis` actually gives you" below — its persistence guarantee is
     weaker than "a volume," and rollback isn't free once shared Redis has
     accepted new queue work.
-19. **Only then** retire `marketplace`-local Redis (stop/remove
+21. **Only then** retire `marketplace`-local Redis (stop/remove
     `blue-redis`, eventually reclaim its writable layer) — a separate,
     later change, not part of this PR or this deploy.
-20. **Shared `default` credential rotation is a separate, later,
+22. **Shared `default` credential rotation is a separate, later,
     coordinated operation** — out of scope here entirely; this cutover
     must not require or trigger it.
+
+## Producer quiescence (why "low-traffic risk is small" isn't the policy)
+
+Both the queue gate and the idempotency gate below are point-in-time
+counts. A count of 0 taken while the app can still accept requests proves
+nothing about the moment the deploy actually flips `REDIS_HOST` — a
+checkout arriving in between re-populates exactly the state the gate just
+confirmed was empty. Reducing `queue` worker consumers doesn't help either:
+it slows draining, but does nothing to stop the `api` container from still
+accepting requests that dispatch new jobs or write new idempotency
+results.
+
+The deterministic fix already built into Laravel: `php artisan down`
+before checking anything, `php artisan up` after post-deploy verification
+passes (steps 11 and 19). While down, `api` returns 503 to normal traffic
+(a `--secret=<token>` bypass exists for verifying `/api/health` yourself
+during the window if needed) — no new HTTP request can dispatch a job or
+write an idempotency-cached result for the entire merge → deploy → verify
+sequence. This does not stop the `scheduler` container's own
+`schedule:run` loop, but the two scheduled commands
+(`transaction:check-expiry`, `transaction:auto-complete`) run their logic
+directly against MySQL and don't dispatch to the Redis queue, so they
+don't reopen either gate.
 
 ## Redis state before cutover
 
@@ -104,19 +134,18 @@ kind before cutover, don't assume:
 | State | Where | Disposition |
 |---|---|---|
 | Laravel queue (`queues:default`, `:delayed`, `:reserved`) | `api`/`queue`, `default` Redis connection (db0) | **Must be drained to empty before cutover — see gate below.** Jobs left behind in `blue-redis` are silently abandoned; nothing re-delivers them once the app stops looking at that instance. |
+| **Idempotency locks/results (`IdempotencyMiddleware`)** | `api`, `cache` Redis connection (**db1**, not db0) | **Must be inventoried before cutover — see gate below. Not disposable.** A completed transaction's result is cached for **24 hours** specifically so a client retry replays it instead of re-processing — that's the double-charge/double-stock-decrement protection the middleware's own docblock describes. Losing an active entry mid-window doesn't just lose a cache hit: a legitimate client retry with the same `X-Idempotency-Key` after cutover would see no matching lock at all on the new instance and get processed as a brand-new request. This is *not* equivalent to an ordinary deploy — an ordinary deploy doesn't swap Redis instances, `blue-redis` stays up and reachable across it. |
 | chat-service session/summary/LLM cache | `chat-service` | Deliberately reset. TTL-bound already (`SESSION_TTL_SECONDS`=1h, LLM cache=5min) — losing it mid-conversation is a minor UX blip (history restarts), not a data-loss or correctness issue. No migration needed. |
 | Laravel application cache (`cache` connection, db1) | `api` | Deliberately reset. Derived/rebuildable data (e.g. the product listing cache) — repopulates on next request/write. No migration needed. |
 | Rate-limit counters | `api`, same cache store | Deliberately reset. Losing them just means every client's rate-limit window restarts at zero-used, which is *more* permissive briefly, not less — not a security regression. |
-| Idempotency locks (`IdempotencyMiddleware`, `idempotency:*`) | `api`, same cache store | Deliberately reset, same as any other Laravel deploy already does. Recreating the `api` container kills in-flight PHP-FPM workers regardless of Redis — a request truly in flight at that instant is already interrupted by the deploy itself, cutover or not. Standard mitigation is the same as any deploy: do it during a low-traffic window, not a new requirement this PR introduces. |
 
 ### Queue drain gate (mandatory, blocks merge if non-empty)
 
 The repo currently has two `ShouldQueue` jobs (`ProcessProductImageJob`,
-`GenerateAiChatReplyJob`) on the default Redis queue connection.
-Immediately before cutover — against the **currently-live `blue-redis`**,
-i.e. run this before touching production `REDIS_*` — inventory pending,
-delayed, and reserved (in-flight) jobs using Laravel itself rather than
-hand-rolling prefixed key names against `blue-redis`:
+`GenerateAiChatReplyJob`) on the default Redis queue connection. With the
+app in maintenance mode (step 11) — inventory pending, delayed, and
+reserved (in-flight) jobs using Laravel itself rather than hand-rolling
+prefixed key names against `blue-redis`:
 
 ```sh
 docker compose -p marketplace exec -T api php artisan tinker --execute="
@@ -132,23 +161,62 @@ echo 'reserved: ' . \$c->zcard('queues:default:reserved') . PHP_EOL;
 automatically — this doesn't need to know or guess what `REDIS_PREFIX` is
 currently set to on `blue-redis`.)
 
-- **All three must read 0** before merging. The `queue` container is
-  already running `queue:work` continuously (not `--once`), so in the
-  common case waiting for it to naturally finish its backlog and
-  re-checking is enough.
-- If a backlog won't drain (a stuck/failing job), that's a decision point,
-  not something to script around here: either fix/discard the stuck job
-  through normal `failed_jobs` handling, or explicitly decide + document
-  an app-level replay (e.g. re-dispatching `ProcessProductImageJob` for
-  the affected products after cutover) before proceeding. Do not merge
-  with a known non-empty backlog on the assumption it'll "still be there."
-- This is a point-in-time check, not a lock — new jobs can still be
-  dispatched against `blue-redis` after you check and before the deploy
-  actually recreates `queue` with the new Redis endpoint. For a low-traffic
-  cutover window this risk is small; if it matters for your deployment,
-  pause whatever dispatches these jobs (or scale `queue`'s consumers down
-  intentionally) for the duration of the merge → deploy → verify sequence,
-  then resume.
+- **All three must read 0** before merging. **Verified in production
+  2026-09-11 (pre-maintenance-mode, informational only — re-run this
+  inside the actual maintenance-mode window at real cutover time, not
+  carried forward from this reading): `pending=0, delayed=0, reserved=0`.**
+- With maintenance mode active (step 11) this is now an actual guarantee,
+  not a snapshot — nothing can enqueue a new job while `api` is down, so a
+  0 reading here stays 0 until you bring the app back up in step 19.
+- If a backlog won't drain (a stuck/failing job) even with the worker
+  still running before you enter maintenance mode, that's a decision
+  point, not something to script around here: either fix/discard the
+  stuck job through normal `failed_jobs` handling, or explicitly decide +
+  document an app-level replay (e.g. re-dispatching
+  `ProcessProductImageJob` for the affected products after cutover)
+  before proceeding. Do not merge with a known non-empty backlog on the
+  assumption it'll "still be there."
+
+### Idempotency & cache state gate (db1, mandatory)
+
+With the app still in maintenance mode, count active idempotency entries
+on the `cache` connection's database — read-only, counts only, never
+prints a key name or a cached response body (a cached idempotent result
+is the actual response payload of a past transaction):
+
+```sh
+docker exec blue-redis sh -lc '
+count=$(redis-cli -n 1 --scan --pattern "*idempotency:*" | wc -l)
+echo "idempotency_keys_db1=$count"
+'
+```
+
+- **Verified in production 2026-09-11: `idempotency_keys_db1=0`.** Same
+  caveat as the queue gate — this is a snapshot from the review, not a
+  standing guarantee; re-run it inside the actual maintenance-mode window
+  at cutover time.
+- **If the count is 0** (as it was here): no active replay-protection
+  entries would be stranded — proceed.
+- **If the count is `> 0`**: this is a hard stop, not a judgment call to
+  wave through. A non-zero count means at least one client has a
+  legitimate reason to retry with the same idempotency key sometime in
+  the next 24 hours and expects that retry to replay, not reprocess.
+  Options, in order of preference:
+  1. Wait — maintenance mode is already blocking new requests, so the
+     count can only fall from here; if it's small, waiting a few minutes
+     inside the same window may be enough for the relevant clients'
+     retries to already have landed against the old instance.
+  2. If it isn't converging quickly, this needs a deliberate, reviewed
+     decision (not something to automate from this doc): either extend
+     the maintenance window, or accept and *document* the specific
+     narrow-window risk before proceeding (which specific transactions,
+     what the actual exposure is), rather than silently discarding it.
+  3. Migrating the entries to `shared-redis` (`RESTORE`/`DUMP`-based
+     copy, or a one-off script that reads db1 on `blue-redis` and writes
+     the equivalent keys under `blukios:` on `shared-redis`) is possible
+     but adds real complexity for what should be a short-lived, low-count
+     window — only worth it if the count is consistently non-trivial;
+     don't build this speculatively.
 
 ## chat-service reload window (why config.py has a legacy REDIS_URL fallback)
 
@@ -224,7 +292,7 @@ Compose treats it as an orphaned container it no longer manages — it does
 actually worth — see above) alongside the new `shared-redis`-backed
 containers.
 
-This means **retiring it is a deliberate, separate step (§19 above)**, not
+This means **retiring it is a deliberate, separate step (§21 above)**, not
 something that happens for free. If a future change adds
 `--remove-orphans` to the Deploy stage, this assumption breaks — recheck
 this section before doing so.
@@ -256,3 +324,18 @@ every Redis connection — default *and* cache — uniformly), so no PHP code
 changed. chat-service's `config.py`/`utils/redis_helper.py` were refactored
 to build the client from components instead of a credential-bearing
 `REDIS_URL`, and to prefix every `chat:*` key through one shared helper.
+
+**Confirmed in production (2026-09-11) that two separate prefix layers
+exist, not one:** `config('database.redis.options.prefix')` (what
+`REDIS_PREFIX` controls — applied by the Redis client itself, outermost,
+to every raw command on every connection) currently reads
+`blukios-database-`, while `config('cache.prefix')` (a completely
+separate Laravel cache-repository layer, applied in PHP *before* the key
+reaches the client) reads `blukios-cache-`. A cache/idempotency key's
+actual wire-level name is therefore `{REDIS_PREFIX}{cache.prefix}{key}` —
+e.g. `blukios:blukios-cache-idempotency:...` once `REDIS_PREFIX=blukios:`
+is set. Since the client-level prefix is applied last (outermost), the
+ACL pattern `~blukios:*` still correctly covers it — `cache.prefix` is an
+internal Laravel namespacing detail, not a second isolation boundary to
+account for separately, and this PR doesn't need to (and doesn't) touch
+`CACHE_PREFIX`.
