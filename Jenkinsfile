@@ -60,9 +60,19 @@ pipeline {
                     env.FRONTEND_CHANGED = (changed == 'ALL' || changed.contains('fe-blue/')).toString()
                     env.CHAT_SERVICE_CHANGED = (changed == 'ALL' || changed.contains('chat-service/')).toString()
                     env.RECOMMENDATION_CHANGED = (changed == 'ALL' || changed.contains('recommendation-service/')).toString()
+                    def deployConfigChanged = changed == 'ALL' || changed.readLines().any {
+                        it == 'docker-compose.yml' || it == '.env.example' || it.startsWith('docker/')
+                    }
+                    env.DEPLOY_REQUIRED = (
+                        env.BACKEND_CHANGED == 'true' ||
+                        env.FRONTEND_CHANGED == 'true' ||
+                        env.CHAT_SERVICE_CHANGED == 'true' ||
+                        env.RECOMMENDATION_CHANGED == 'true' ||
+                        deployConfigChanged
+                    ).toString()
 
                     echo "File berubah:\n${changed}"
-                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED} | Chat service changed: ${env.CHAT_SERVICE_CHANGED} | Recommendation service changed: ${env.RECOMMENDATION_CHANGED}"
+                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED} | Chat service changed: ${env.CHAT_SERVICE_CHANGED} | Recommendation service changed: ${env.RECOMMENDATION_CHANGED} | Deploy required: ${env.DEPLOY_REQUIRED}"
                 }
             }
         }
@@ -380,6 +390,10 @@ pipeline {
             options {
                 retry(3)
             }
+            when {
+                beforeAgent true
+                expression { env.DEPLOY_REQUIRED == 'true' }
+            }
             steps {
                 // NON-BLOCKING untuk sekarang ("|| true") -- belum pernah
                 // dijalankan sungguhan di Jenkins (Docker Desktop tidak
@@ -405,6 +419,9 @@ pipeline {
         stage('Deploy') {
             agent any
             when {
+                // Jangan alokasikan node deploy bila tidak ada artefak/config
+                // Blukios yang perlu diterapkan.
+                beforeAgent true
                 // job Pipeline biasa (bukan Multibranch) tidak set env.BRANCH_NAME,
                 // jadi cek GIT_BRANCH dari step checkout sebagai gantinya.
                 //
@@ -413,6 +430,7 @@ pipeline {
                 // sebagai 'refs/remotes/origin/main'. Cocokkan polanya supaya
                 // bentuk mana pun diterima, bukan satu ejaan tertentu.
                 expression {
+                    env.DEPLOY_REQUIRED == 'true' &&
                     (env.GIT_BRANCH ?: '') ==~ /^(refs\/remotes\/)?(origin\/)?main$/
                 }
             }
