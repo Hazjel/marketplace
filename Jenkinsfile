@@ -529,17 +529,10 @@ pipeline {
                     # -> 502 connect() failed. Paksa restart biar re-resolve IP yang baru.
                     docker compose -p marketplace up -d --force-recreate nginx
 
-                    # tiap --build bikin image baru, image lama nganggur numpuk terus
-                    # (disk sempat 93% penuh) -- bersihin tiap abis deploy.
-                    #
-                    # TANPA -a. "prune -af" membuang setiap image yang tidak
-                    # sedang dipakai container, termasuk image tooling build ini
-                    # sendiri: build #21 gagal dengan "no such object: composer:2"
-                    # karena deploy sebelumnya baru saja menghapusnya, dan
-                    # marketplace-api:latest juga pernah hilang begitu. Deploy
-                    # jadi menyabotase build berikutnya. Dangling saja sudah
-                    # cukup untuk membereskan layer sisa rebuild.
-                    docker image prune -f || true
+                    # Jangan jalankan `docker image prune` dari pipeline ini.
+                    # Daemon Docker dipakai bersama workload lain dan prune bersifat
+                    # global, bukan terbatas pada image milik project marketplace.
+                    # Pembersihan image harus dilakukan maintenance host terpisah.
 
                     # ---- verifikasi pasca-deploy ----
                     # Stage ini pernah berhenti di tengah jalan tanpa ada yang
