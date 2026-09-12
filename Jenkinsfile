@@ -398,7 +398,6 @@ pipeline {
         stage('Deploy') {
             agent any
             when {
-                beforeAgent true
                 // job Pipeline biasa (bukan Multibranch) tidak set env.BRANCH_NAME,
                 // jadi cek GIT_BRANCH dari step checkout sebagai gantinya.
                 //
