@@ -2,13 +2,11 @@ pipeline {
     agent none
 
     options {
-        // 30 menit tidak cukup: composer install + PHPUnit + npm ci + Vitest +
-        // build frontend + docker build tujuh service rutin melewatinya. Build
-        // #17 dan #19 keduanya berhenti di 30,5 menit dengan "Timeout has been
-        // exceeded" tepat setelah stage Deploy menghapus api/queue/reverb/
-        // scheduler dan sebelum sempat membuatnya kembali -- produksi mati dua
-        // kali karena ini, dan build-nya cuma tercatat ABORTED.
-        timeout(time: 60, unit: 'MINUTES')
+        // Shared host bisa mengalami I/O contention berat. Build #66 melewati
+        // seluruh backend test (308 test) dan chat test (25 test), tetapi timeout
+        // 60 menit habis saat cleanup container chat sebelum secret scan/deploy.
+        // Beri ruang untuk cleanup Docker yang memang sengaja punya timeout 600s.
+        timeout(time: 120, unit: 'MINUTES')
         disableConcurrentBuilds()
         // JENKINS_HOME numpuk terus tiap build (workspace + build record) sampai
         // disk host hampir penuh — batasi histori biar otomatis kebersihin
@@ -87,6 +85,7 @@ pipeline {
                 }
             }
             when {
+                beforeAgent true
                 expression { env.BACKEND_CHANGED == 'true' }
             }
             steps {
@@ -113,6 +112,7 @@ pipeline {
                 }
             }
             when {
+                beforeAgent true
                 expression { env.BACKEND_CHANGED == 'true' }
             }
             steps {
@@ -164,6 +164,7 @@ pipeline {
                 }
             }
             when {
+                beforeAgent true
                 expression { env.FRONTEND_CHANGED == 'true' }
             }
             steps {
@@ -296,6 +297,7 @@ pipeline {
                 }
             }
             when {
+                beforeAgent true
                 expression { env.CHAT_SERVICE_CHANGED == 'true' }
             }
             steps {
@@ -304,6 +306,11 @@ pipeline {
                         pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
                         ruff check .
                         pytest tests/ -v
+                        pip-audit -r requirements.txt --desc \
+                            --ignore-vuln PYSEC-2026-311 \
+                            --ignore-vuln CVE-2026-45830 \
+                            --ignore-vuln CVE-2026-45831 \
+                            --ignore-vuln CVE-2026-45833
                     '''
                     // KOREKSI dari commit 23732e94: "|| true" di sini semula
                     // dimaksudkan untuk 4 finding chromadb yang sudah
@@ -318,7 +325,6 @@ pipeline {
                     // besok tetap bikin build hijau. --ignore-vuln menutup
                     // persis 4 ID ini saja; exit code kembali nonzero begitu
                     // ada finding lain.
-                    sh 'pip-audit -r requirements.txt --desc --ignore-vuln PYSEC-2026-311 --ignore-vuln CVE-2026-45830 --ignore-vuln CVE-2026-45831 --ignore-vuln CVE-2026-45833'
                 }
             }
         }
@@ -335,6 +341,7 @@ pipeline {
                 }
             }
             when {
+                beforeAgent true
                 expression { env.RECOMMENDATION_CHANGED == 'true' }
             }
             steps {
@@ -349,8 +356,8 @@ pipeline {
                         pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
                         ruff check .
                         pytest tests/ -v
+                        pip-audit -r requirements.txt --desc
                     '''
-                    sh 'pip-audit -r requirements.txt --desc'
                 }
             }
         }
@@ -391,6 +398,7 @@ pipeline {
         stage('Deploy') {
             agent any
             when {
+                beforeAgent true
                 // job Pipeline biasa (bukan Multibranch) tidak set env.BRANCH_NAME,
                 // jadi cek GIT_BRANCH dari step checkout sebagai gantinya.
                 //
