@@ -5,8 +5,9 @@ pipeline {
         // Shared host bisa mengalami I/O contention berat. Build #66 melewati
         // seluruh backend test (308 test) dan chat test (25 test), tetapi timeout
         // 60 menit habis saat cleanup container chat sebelum secret scan/deploy.
-        // Beri ruang untuk cleanup Docker yang memang sengaja punya timeout 600s.
-        timeout(time: 120, unit: 'MINUTES')
+        // Tunggu I/O shared host pulih tanpa mengubah timeout Jenkins global atau
+        // mengganggu workload lain. Batas ini hanya berlaku untuk pipeline Blukios.
+        timeout(time: 360, unit: 'MINUTES')
         disableConcurrentBuilds()
         // JENKINS_HOME numpuk terus tiap build (workspace + build record) sampai
         // disk host hampir penuh — batasi histori biar otomatis kebersihin
@@ -372,6 +373,12 @@ pipeline {
                     image 'zricethezav/gitleaks:latest'
                     args '--entrypoint ""'
                 }
+            }
+            // Retry seluruh stage termasuk alokasi Docker agent. Ini khusus
+            // Blukios dan menangani docker run/stop/rm yang timeout saat I/O
+            // shared host padat; tidak mengubah konfigurasi Jenkins global.
+            options {
+                retry(3)
             }
             steps {
                 // NON-BLOCKING untuk sekarang ("|| true") -- belum pernah
