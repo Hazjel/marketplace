@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class CartRepository implements CartRepositoryInterface
 {
     /**
-     * Scope helper: match variant_id (handles NULL correctly for MySQL).
+     * Scope helper: match variant_id (handles NULL correctly in SQL).
      */
     private function scopeVariant(Builder $query, ?string $variantId): Builder
     {

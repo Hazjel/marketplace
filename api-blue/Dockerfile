@@ -4,9 +4,9 @@ FROM php:8.4-fpm
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
     libonig-dev libxml2-dev libzip-dev libssl-dev pkg-config \
-    default-mysql-client \
+    libpq-dev postgresql-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip \
     && pecl install redis-6.3.0 \
     && pecl install mongodb-2.4.1 \
     && docker-php-ext-enable redis mongodb \

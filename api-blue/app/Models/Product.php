@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PostgresSearch;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,21 +34,23 @@ class Product extends Model
 
     public function scopeSearch($query, $search)
     {
-        // MATCH...AGAINST is MySQL-only syntax — sqlite (used by the test
-        // suite) doesn't understand it at all and throws a raw SQL syntax
-        // error, which meant this scope was never actually exercised by any
-        // test with a 3+ char term. LIKE-only here isn't a downgrade for
-        // testing purposes (still validates the matching behavior itself,
-        // just without MySQL's relevance ranking), and production keeps its
-        // real FULLTEXT index.
-        if (mb_strlen($search) >= 3 && $query->getConnection()->getDriverName() === 'mysql') {
-            $safeTerm = preg_replace('/[+\-*"<>()~@]+/', '', $search);
-            if (mb_strlen(trim($safeTerm)) >= 3) {
-                return $query->whereRaw('MATCH(name, description) AGAINST(? IN BOOLEAN MODE)', ['+'.$safeTerm.'*']);
+        // Full-text search hanya ada di Postgres — sqlite (dipakai test suite)
+        // tidak paham to_tsvector/to_tsquery dan langsung melempar syntax
+        // error, jadi di sana scope ini jatuh ke LIKE. Itu bukan penurunan
+        // untuk keperluan test (perilaku pencocokannya tetap teruji, hanya
+        // tanpa peringkat relevansi), dan produksi tetap memakai index GIN
+        // dari migrasi add_fulltext_indexes_to_products_and_stores.
+        if (mb_strlen($search) >= 3 && $query->getConnection()->getDriverName() === 'pgsql') {
+            $tsQuery = PostgresSearch::tsQuery($search);
+            if ($tsQuery !== null) {
+                return $query->whereRaw(
+                    PostgresSearch::tsVector(['name', 'description'])." @@ to_tsquery('".PostgresSearch::CONFIG."', ?)",
+                    [$tsQuery]
+                );
             }
         }
 
-        return $query->where('name', 'like', '%'.$search.'%');
+        return $query->where('name', PostgresSearch::likeOperator(), '%'.$search.'%');
     }
 
     public function store()

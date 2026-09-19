@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Schema;
  * mustahil tersimpan, apa pun yang terjadi di atasnya.
  *
  * Kolomnya nullable dan hanya diisi oleh mutasi yang memang harus sekali
- * saja. MySQL mengecualikan NULL dari unique index, jadi baris lama -- dan
+ * saja. Postgres mengecualikan NULL dari unique index, jadi baris lama -- dan
  * tipe yang wajar berulang -- tidak terganggu. Ini juga sebabnya constraint
  * tidak dipasang langsung pada (reference_type, reference_id, type):
  * WithdrawalFactory menulis dua baris 'withdraw' per penarikan untuk data

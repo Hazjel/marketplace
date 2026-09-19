@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PostgresSearch;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -46,7 +47,7 @@ class Transaction extends Model
 
     public function scopeSearch($query, $search)
     {
-        return $query->where('code', 'like', '%'.$search.'%');
+        return $query->where('code', PostgresSearch::likeOperator(), '%'.$search.'%');
     }
 
     public function buyer()

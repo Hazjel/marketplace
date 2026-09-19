@@ -40,9 +40,16 @@ class AccountDeletionService
                 Cache::tags(['products'])->flush();
             }
 
-            // users.email punya unique index di level DATABASE, dan MySQL
-            // tidak punya partial/filtered unique index (tidak bisa
-            // "unique kecuali baris yang sudah dihapus"). Soft-delete saja
+            // users.email punya unique index di level DATABASE. Alasan asli
+            // penulisan ulang ini adalah MySQL, yang tidak punya partial/
+            // filtered unique index (tidak bisa "unique kecuali baris yang
+            // sudah dihapus"). Postgres SEBENARNYA punya -- sebuah
+            // `CREATE UNIQUE INDEX ... WHERE deleted_at IS NULL` akan
+            // membebaskan email tanpa placeholder sama sekali. Itu belum
+            // dikerjakan: migrasi ke Postgres sengaja tidak mengubah
+            // perilaku, jadi jalur di bawah dipertahankan apa adanya dan
+            // penyederhanaannya ditinggalkan sebagai pekerjaan tersendiri.
+            // Soft-delete saja
             // tidak membebaskan email itu -- dikonfirmasi langsung: baris
             // ter-soft-delete tetap membuat pendaftaran kedua dengan email
             // yang sama gagal dengan UniqueConstraintViolationException,

@@ -45,7 +45,8 @@ into two apps.
 | `fe-blue` | Vue 3 SPA (frontend) — built twice: **buyer app** (`blukios.store`) and **seller app** (`seller.blukios.store`) from `VITE_APP_TARGET` |
 
 Supporting containers: Laravel Reverb (WebSocket), a database queue worker, a
-scheduler, nginx (HTTP ingress), MySQL, MongoDB, Redis, Ollama.
+scheduler, nginx (HTTP ingress), Ollama; PostgreSQL, MongoDB and Redis live
+in `/opt/shared-infra`, outside this compose project.
 
 ## Features
 
@@ -104,8 +105,9 @@ bearer token), so moving between apps uses a one-time token exchange:
 
 nginx is the primary HTTP application ingress — in a hardened deployment it is
 the only port that should be published. (The default `docker-compose.yml` also
-publishes MySQL, MongoDB, Redis, Ollama, the Python services, phpMyAdmin and
-mongo-express to the host — see [Security](#security).) Both server blocks proxy
+publishes Ollama, the Python services and mongo-express to the host, and
+`docker-compose.local.yml` adds PostgreSQL, MongoDB and Redis — see
+[Security](#security).) Both server blocks proxy
 to the same Laravel API:
 
 | Path | Upstream |
@@ -142,7 +144,7 @@ to the same Laravel API:
 | Layer | Stack |
 |---|---|
 | API | Laravel 12, PHP 8.2+, Sanctum, Spatie Permission, Reverb, Socialite |
-| API data | MySQL 8 (primary), MongoDB 7 (product variants via `mongodb/laravel-mongodb`), Redis (idempotency, cache) |
+| API data | PostgreSQL 17 (primary), MongoDB 8 (product variants via `mongodb/laravel-mongodb`), Redis (idempotency, cache) |
 | Payments / logistics | Midtrans, Komerce (shipping tariffs & tracking) |
 | Frontend | Vue 3.5 `<script setup>`, Vite 7, Vue Router 4, Pinia 3, Tailwind CSS v4, CVA, Radix Vue, Axios, Laravel Echo + Pusher JS, Lucide |
 | Chat service | FastAPI, Python 3.11, Ollama (`qwen3:1.7b`), ChromaDB (RAG), slowapi, httpx |
@@ -176,17 +178,26 @@ cp .env.example .env
 ### 2. Bring up the stack
 
 ```bash
-docker compose up -d --build
+docker network create shared-infra-net      # once per machine
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
 docker compose exec -T ollama ollama pull qwen3:1.7b   # first run only
 ```
 
 This starts nginx, the API (PHP-FPM), queue, scheduler, Reverb, both frontends,
-chat-service, recommendation-service, MySQL, MongoDB, Redis and Ollama.
+chat-service, recommendation-service, Ollama, and — from the second compose
+file — local Postgres, MongoDB and Redis.
 
-> **Note:** the default `docker-compose.yml` is tuned for local development —
-> MySQL runs with an empty root password, Redis and MongoDB have no auth, and
-> phpMyAdmin / mongo-express are exposed without credentials. Do **not** deploy
-> it unchanged. See [Security](#security).
+`docker-compose.yml` alone assumes the datastores already exist outside the
+project, on the external network `shared-infra-net`: that is how production
+runs, against `/opt/shared-infra`. `docker-compose.local.yml` supplies stand-ins
+with the same container names so nothing else has to change. It is deliberately
+**not** called `docker-compose.override.yml`, since Compose would then load it
+automatically — including on the Jenkins agent, where it would shadow the real
+datastores.
+
+> **Note:** mongo-express is exposed without credentials, and the local
+> datastores use whatever passwords you put in `.env`. Do **not** deploy this
+> overlay. See [Security](#security).
 
 ### 3. Run migrations & seed
 
@@ -215,11 +226,10 @@ is host-only.
 |---|---|
 | Web + API (nginx) | `http://localhost` (`${NGINX_HOST_PORT:-80}`) |
 | Vue dev server (buyer / seller) | `http://localhost:5173` / `:5174` |
-| MySQL | `localhost:${DB_HOST_PORT:-3306}` |
-| MongoDB | `localhost:27018` |
-| Redis | `localhost:6379` |
+| PostgreSQL | `localhost:${DB_HOST_PORT:-5432}` — `docker-compose.local.yml` only |
+| MongoDB | `localhost:27018` — `docker-compose.local.yml` only |
+| Redis | `localhost:6379` — `docker-compose.local.yml` only |
 | Ollama | `http://localhost:11435` |
-| phpMyAdmin | `http://localhost:8080` |
 | mongo-express | `http://localhost:8081` |
 | Prometheus | `http://localhost:9090` — profile `monitoring` |
 | Grafana | `http://localhost:3000` — profile `monitoring` |
@@ -244,7 +254,7 @@ cd fe-blue && npm run lint && npm run test       # frontend checks
 
 Each service has its own `.env.example`:
 
-- `api-blue/.env.example` — Laravel: DB (MySQL + MongoDB), Redis, Sanctum,
+- `api-blue/.env.example` — Laravel: DB (PostgreSQL + MongoDB), Redis, Sanctum,
   Midtrans keys, Google OAuth, Reverb, Komerce/RajaOngkir keys,
   `INTERNAL_SERVICE_KEY` (shared secret for `/internal/*`), `FIREBASE_CREDENTIALS`.
 - `chat-service/.env.example` — `OLLAMA_BASE_URL`, `OLLAMA_MODEL`,
@@ -253,12 +263,13 @@ Each service has its own `.env.example`:
   `INTERNAL_SERVICE_KEY` (must match `api-blue`), CF/CBF tuning.
 
 The Compose file supplies inter-container values (internal hostnames, and a
-handful of variables from a root `.env` — see `.env.example`). Only `APP_KEY`
-and `INTERNAL_SERVICE_KEY` are enforced; the rest fall back to local-dev
-defaults. **The current Compose hardcodes an empty MySQL password,
-`REDIS_PASSWORD=null`, and no MongoDB auth** — it does not yet accept
-credentials for those from the root `.env`. The per-service `.env.example`
-files above are for running a service directly on the host, not via Compose.
+handful of variables from a root `.env` — see `.env.example`). Six variables
+are enforced with no fallback, so Compose refuses to start without them:
+`APP_KEY`, `INTERNAL_SERVICE_KEY`, `REDIS_USERNAME`, `REDIS_PASSWORD`,
+`DB_USERNAME` and `DB_PASSWORD`, plus `DB_MONGO_USERNAME` / `DB_MONGO_PASSWORD`
+for the services that talk to Mongo. The rest fall back to local-dev defaults.
+The per-service `.env.example` files above are for running a service directly
+on the host, not via Compose.
 
 ## Testing
 
@@ -304,7 +315,7 @@ Deploy is in-place, driven by the `Deploy` stage on `main`:
 
 - `docker compose -p marketplace build/up -d api queue reverb scheduler frontend
   chat-service recommendation-service` + `--force-recreate nginx`.
-- Only the application containers are rebuilt per deploy; MySQL / MongoDB / Redis /
+- Only the application containers are rebuilt per deploy; PostgreSQL / MongoDB / Redis /
   Ollama are long-lived (started once, outside the deploy).
 - A failed migration aborts the deploy before any container is touched.
 - Every merge to `main` deploys — including docs-only changes (the app
@@ -346,11 +357,13 @@ Deploy is in-place, driven by the `Deploy` stage on `main`:
 **Deployment hardening is not automatic — and not yet done.** The committed
 `docker-compose.yml` is a local-development configuration:
 
-- MySQL: `MYSQL_ALLOW_EMPTY_PASSWORD=yes`, port published to the host
-- Redis: no `requirepass`, port published
-- MongoDB: no authentication, port published
-- phpMyAdmin (`root` / no password) and mongo-express (`BASICAUTH=false`):
-  always on, ports published, not behind a profile
+- PostgreSQL, MongoDB and Redis are no longer part of this compose project;
+  they live in `/opt/shared-infra`, all three authenticated, and the
+  credentials come from the root `.env` with no defaults
+- `docker-compose.local.yml` recreates them for local development only, with
+  their ports published to the host — never deploy that overlay
+- mongo-express (`BASICAUTH=false`): always on, port published, not behind a
+  profile
 - Grafana: `admin` / `admin`
 
 Only Prometheus / Grafana (`monitoring`), k6 (`loadtest`) and Jenkins (`cd`) are
@@ -374,7 +387,7 @@ Actively developed. Production is live and CI-gated. First tagged release:
 `v0.1.0`.
 
 - **Done** — two-domain buyer/seller split, escrow payments, server-authoritative
-  checkout, variant-aware pricing/stock, cross-DB (MySQL↔MongoDB) compensation,
+  checkout, variant-aware pricing/stock, cross-DB (PostgreSQL↔MongoDB) compensation,
   RAG chat, collaborative recommendations, Jenkins pipeline, dependency-CVE fixes.
 - **Done — money refactor (Sprint B3)** — `App\ValueObjects\Money` fixed-point
   primitive (`B3.1`) and the full calculation migration (`B3.2`): tax, voucher

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PostgresSearch;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,17 +39,24 @@ class Store extends Model
 
     public function scopeSearch($query, $search)
     {
-        if (mb_strlen($search) >= 3) {
-            $safeTerm = preg_replace('/[+\-*"<>()~@]+/', '', $search);
-            if (mb_strlen(trim($safeTerm)) >= 3) {
-                return $query->where(function ($q) use ($safeTerm, $search) {
-                    $q->whereRaw('MATCH(name) AGAINST(? IN BOOLEAN MODE)', ['+'.$safeTerm.'*'])
-                        ->orWhere('phone', 'like', '%'.$search.'%');
+        // Guard driver-nya wajib: sebelum ini scope memakai MATCH...AGAINST
+        // tanpa cek apa pun, jadi sqlite di test suite pun ikut kena sintaks
+        // yang tidak dipahaminya. Sekarang hanya Postgres yang memakai FTS,
+        // sisanya jatuh ke LIKE di bawah.
+        if (mb_strlen($search) >= 3 && $query->getConnection()->getDriverName() === 'pgsql') {
+            $tsQuery = PostgresSearch::tsQuery($search);
+            if ($tsQuery !== null) {
+                return $query->where(function ($q) use ($tsQuery, $search) {
+                    $q->whereRaw(
+                        PostgresSearch::tsVector(['name'])." @@ to_tsquery('".PostgresSearch::CONFIG."', ?)",
+                        [$tsQuery]
+                    )->orWhere('phone', PostgresSearch::likeOperator(), '%'.$search.'%');
                 });
             }
         }
 
-        return $query->where('name', 'like', '%'.$search.'%')->orWhere('phone', 'like', '%'.$search.'%');
+        return $query->where('name', PostgresSearch::likeOperator(), '%'.$search.'%')
+            ->orWhere('phone', PostgresSearch::likeOperator(), '%'.$search.'%');
     }
 
     public function user()

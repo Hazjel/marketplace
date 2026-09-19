@@ -17,11 +17,21 @@ if [ -f /var/www/.env.docker ]; then
     echo "✅ Docker env overrides applied"
 fi
 
-echo "⏳ Waiting for MySQL..."
-while ! mysqladmin ping -h"mysql" -u root --skip-ssl --silent 2>/dev/null; do
+# Host/kredensial dibaca dari env container, bukan dihardcode seperti dulu
+# ("mysql" + root tanpa password): shared-postgres hidup di luar compose
+# project ini, jadi nama host dan user-nya bisa berbeda per lingkungan.
+DB_HOST="${DB_HOST:-shared-postgres}"
+DB_PORT="${DB_PORT:-5432}"
+DB_USERNAME="${DB_USERNAME:-blukios_app}"
+
+echo "⏳ Waiting for PostgreSQL at ${DB_HOST}:${DB_PORT}..."
+# pg_isready hanya mengecek apakah server menerima koneksi -- tidak login,
+# jadi tidak perlu password di sini. Kegagalan autentikasi akan muncul di
+# langkah migrate berikutnya, dengan pesan yang jauh lebih jelas.
+while ! pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME" -q 2>/dev/null; do
     sleep 2
 done
-echo "✅ MySQL ready"
+echo "✅ PostgreSQL ready"
 
 # First-time setup
 if [ ! -f /var/www/storage/.initialized ]; then
