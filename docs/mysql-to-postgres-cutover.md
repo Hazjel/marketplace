@@ -263,65 +263,203 @@ unset PW BMPW
 grep -oE '^DB[A-Z_]*=' .env        # key names only, no values
 ```
 
-## Phase C — cutover (this is the downtime window)
+## What went wrong on the first attempt
+
+Recorded because each failure was avoidable, and the ordering below exists
+to make them impossible rather than unlikely.
+
+1. **`git checkout` failed halfway.** 26,118 files in the deployment
+   working tree were owned by root, so the checkout switched branches but
+   could not replace 22 files or create 4 new ones — including
+   `PostgresSearch.php` and the new migration. The `.git` directory had
+   the same problem earlier in the session and was fixed; the working
+   tree was never checked, although the cause (`git` run under `sudo`)
+   obviously applied to both.
+
+2. **The image never built.** `docker compose build api` printed
+   `[+] build 0/1` and `NotFound: forwarding Ping: no such job …`, and
+   the run continued anyway. The containers were then stopped and
+   restarted from the *old* image, which has no `pdo_pgsql` — hence
+   `could not find driver`. The build result was never checked before
+   the writers were stopped.
+
+3. **pgloader cannot authenticate to MySQL 8.** It failed with
+   `Condition QMYND:MYSQL-UNSUPPORTED-AUTHENTICATION was signalled`:
+   its Lisp client speaks only `mysql_native_password`, while this
+   server's `root` uses `caching_sha2_password` (verified:
+   `SELECT plugin FROM mysql.user`). The tool was chosen for its type
+   handling without checking that it could connect at all.
+
+Nothing was corrupted: `TRUNCATE migrations` only touched the still-empty
+`blukios`, and pgloader failed before writing anything. The site was down
+for roughly fifteen minutes and was restored by
+`git checkout -f main`, restoring `.env` from its backup, and
+`docker compose -p marketplace up -d`.
+
+## Phase C1 — prepare, with no downtime
+
+Nothing here stops a container. Every step must pass before Phase C3.
 
 ```bash
 cd /home/fatihtesting/testingDeploy/marketplace
+
+# Files the containers own (storage, bootstrap/cache) stay as they are;
+# only what git needs to write has to belong to this account.
+sudo chown -R fatihtesting:fatihtesting /home/fatihtesting/testingDeploy/marketplace
+sudo chown -R www-data:www-data api-blue/storage api-blue/bootstrap/cache
+
 git fetch origin
-git checkout chore/postgres-migration    # the branch, NOT main — Jenkins only polls main
+git checkout -f chore/postgres-migration
 git pull --ff-only
 
-# C1. Build the new image (pdo_pgsql). Running containers are untouched.
-docker compose -p marketplace build api
-
-# C2. Stop every writer. The site is down from here.
-docker compose -p marketplace stop api queue scheduler reverb
-
-# C3. Create the schema in the empty database.
-docker compose -p marketplace run --rm --no-deps --entrypoint "" api \
-  php artisan migrate --force --no-interaction
-
-# C4. Clear the migrations table so the copy below can bring MySQL's own rows
-#     across without colliding on the primary key. The one migration that
-#     exists only in the new code is re-applied in C6, and it is idempotent.
-docker exec shared-postgres psql -U postgres -d blukios -c "TRUNCATE migrations"
-
-# C5. Copy the data. pgloader is used rather than a dumped-and-edited SQL file
-#     because MySQL and Postgres disagree on things a text substitution gets
-#     silently wrong: tinyint(1) has to become a real boolean (Postgres
-#     rejects INSERT ... VALUES (0) into a boolean column), and MySQL escapes
-#     quotes with backslashes, which Postgres reads literally. Connecting as
-#     the superuser is what allows "disable triggers", which is what makes
-#     foreign-key ordering across 36 tables a non-issue.
-PGPW=$(sudo grep '^POSTGRES_ROOT_PASSWORD=' /opt/shared-infra/.env | cut -d= -f2-)
-docker run --rm --network host dimitri/pgloader:latest pgloader \
-  --with "data only" --with "disable triggers" \
-  mysql://root@127.0.0.1:3307/api_blue \
-  "postgresql://postgres:$PGPW@127.0.0.1:20029/blukios"
-unset PGPW
-
-# C6. Re-apply the one migration whose record C4 erased.
-docker compose -p marketplace run --rm --no-deps --entrypoint "" api \
-  php artisan migrate --force --no-interaction
+# The checkout must be complete. Anything printed here means it is not,
+# and Phase C3 must not be attempted.
+test -f api-blue/app/Support/PostgresSearch.php || echo "MISSING PostgresSearch.php"
+test -f api-blue/database/migrations/2026_09_20_000001_enable_postgres_geo_extensions.php \
+  || echo "MISSING geo extensions migration"
+git status --short | grep -vE 'storage/|bootstrap/cache|\.env\.bak' || echo "worktree clean"
 ```
 
-Verify the copy before bringing anything up — compare both sides table by
-table, do not eyeball a total:
+Now build, and **verify the result** rather than trusting the exit code:
+
+```bash
+docker compose -p marketplace build api
+
+# The image is only usable if it can actually talk to PostgreSQL.
+docker run --rm --entrypoint "" marketplace-api php -r \
+  'echo in_array("pgsql", PDO::getAvailableDrivers()) ? "pdo_pgsql OK\n" : "PDO_PGSQL MISSING\n";'
+```
+
+`PDO_PGSQL MISSING` means the build silently failed again. Stop; the site
+is still up and nothing has been lost.
+
+## Phase C2 — rehearse the copy, still with no downtime
+
+The data is copied into a throwaway database first, so that the method is
+proven before the site is taken down. This is what the first attempt
+skipped.
+
+```bash
+# pgloader speaks only mysql_native_password, so it gets a read-only user
+# of its own. The password never reaches the shell history: it is read
+# into a variable and the SQL goes in over stdin.
+PGLPW=$(openssl rand -hex 24)
+docker exec -i blue-mysql mysql -uroot <<SQL
+CREATE USER IF NOT EXISTS 'pgloader'@'%' IDENTIFIED WITH mysql_native_password BY '$PGLPW';
+ALTER USER 'pgloader'@'%' IDENTIFIED WITH mysql_native_password BY '$PGLPW';
+GRANT SELECT ON api_blue.* TO 'pgloader'@'%';
+FLUSH PRIVILEGES;
+SQL
+
+# A scratch copy of the schema, built by the same migrations.
+PGPW=$(sudo grep '^POSTGRES_ROOT_PASSWORD=' /opt/shared-infra/.env | cut -d= -f2-)
+docker exec shared-postgres psql -U postgres -c "DROP DATABASE IF EXISTS blukios_rehearsal"
+docker exec shared-postgres psql -U postgres -c "CREATE DATABASE blukios_rehearsal OWNER blukios_app"
+docker exec -i shared-postgres psql -U postgres -d blukios_rehearsal -q <<'SQL'
+CREATE EXTENSION IF NOT EXISTS cube;
+CREATE EXTENSION IF NOT EXISTS earthdistance;
+SQL
+
+docker compose -p marketplace run --rm --no-deps --entrypoint "" \
+  -e DB_DATABASE=blukios_rehearsal api \
+  php artisan migrate --force --no-interaction
+
+docker exec shared-postgres psql -U postgres -d blukios_rehearsal -c "TRUNCATE migrations"
+
+docker run --rm --network host dimitri/pgloader:latest pgloader \
+  --with "data only" --with "disable triggers" \
+  "mysql://pgloader:$PGLPW@127.0.0.1:3307/api_blue" \
+  "postgresql://postgres:$PGPW@127.0.0.1:20029/blukios_rehearsal"
+```
+
+Compare every table. This is the gate for Phase C3:
 
 ```bash
 for t in $(docker exec blue-mysql mysql -uroot api_blue -N \
              -e "SELECT table_name FROM information_schema.tables \
                  WHERE table_schema='api_blue' ORDER BY table_name"); do
   m=$(docker exec blue-mysql mysql -uroot api_blue -N -e "SELECT COUNT(*) FROM \`$t\`")
-  p=$(docker exec shared-postgres psql -U postgres -d blukios -At \
+  p=$(docker exec shared-postgres psql -U postgres -d blukios_rehearsal -At \
         -c "SELECT COUNT(*) FROM \"$t\"" 2>/dev/null || echo MISSING)
   if [ "$m" = "$p" ]; then echo "ok    $t $m"; else echo "DIFF  $t mysql=$m pg=$p"; fi
 done
 ```
 
-`migrations` is expected to differ by one (52 in Postgres, 51 in MySQL).
-Every other line must read `ok`. If anything else differs, stop and go to
-Rollback rather than starting the site.
+Everything except `migrations` must read `ok`. Spot-check that the types
+survived, since row counts alone would not catch a boolean or a decimal
+arriving wrong:
+
+```bash
+docker exec shared-postgres psql -U postgres -d blukios_rehearsal -c \
+  "SELECT id, name, price, weight, has_variants FROM products LIMIT 3"
+docker exec shared-postgres psql -U postgres -d blukios_rehearsal -c \
+  "SELECT count(*) FILTER (WHERE has_variants) AS with_variants, count(*) FROM products"
+```
+
+Then throw the rehearsal away:
+
+```bash
+docker exec shared-postgres psql -U postgres -c "DROP DATABASE blukios_rehearsal"
+```
+
+Keep `$PGLPW` in the shell — Phase C3 reuses it. If the shell is lost,
+re-run the `ALTER USER` above with a fresh value.
+
+## Phase C3 — the real cutover (this is the downtime window)
+
+Only if C1 and C2 both passed. The site goes down at the first line here
+and comes back in Phase D.
+
+```bash
+cd /home/fatihtesting/testingDeploy/marketplace
+cp .env ".env.bak.$(date +%Y%m%d-%H%M%S)"
+
+docker compose -p marketplace stop api queue scheduler reverb
+
+docker compose -p marketplace run --rm --no-deps --entrypoint "" api \
+  php artisan migrate --force --no-interaction
+
+docker exec shared-postgres psql -U postgres -d blukios -c "TRUNCATE migrations"
+
+docker run --rm --network host dimitri/pgloader:latest pgloader \
+  --with "data only" --with "disable triggers" \
+  "mysql://pgloader:$PGLPW@127.0.0.1:3307/api_blue" \
+  "postgresql://postgres:$PGPW@127.0.0.1:20029/blukios"
+
+docker compose -p marketplace run --rm --no-deps --entrypoint "" api \
+  php artisan migrate --force --no-interaction
+```
+
+Run the same table-by-table comparison as in C2, against `blukios` this
+time. `migrations` differs by one (52 against 51); everything else must
+read `ok`, or go to Rollback.
+
+## Rolling back from Phase C3
+
+`blue-mysql` and `blue-mongo` are still running with their data intact, so
+this is a checkout and a file copy, not a restore:
+
+```bash
+cd /home/fatihtesting/testingDeploy/marketplace
+git checkout -f main
+cp .env.bak.<the backup written at the top of C3> .env
+docker compose -p marketplace up -d
+```
+
+Then confirm the site is actually serving, not merely running:
+
+```bash
+curl -s http://127.0.0.1:8888/api/health
+```
+
+`{"status":"ok", … "database":"connected"}` is the answer to look for.
+
+Clean up the pgloader user once the cutover has succeeded or been
+abandoned:
+
+```bash
+docker exec -i blue-mysql mysql -uroot -e "DROP USER IF EXISTS 'pgloader'@'%'"
+```
 
 ## Phase D — bring it back up
 
@@ -378,9 +516,7 @@ the new database is being backed up.
 
 ## Rollback
 
-MySQL is removed from the code outright, so rolling back means moving the
-deployment back to a commit that still has it — `d08c8f4` or earlier — and
-restoring `.env` from the `.env.bak.*` written in Phase B. `blue-mysql`
-and its volume survive until Phase E, so as long as that container has not
-been removed, no restore from the dump is needed. Once it has, the dump in
-`~/marketplace-pg-cutover/` is the only way back.
+See "Rolling back from Phase C3" above. Once Phase E has removed
+`blue-mysql` and its volume, that route is gone and the dump in
+`~/marketplace-pg-cutover/` is the only way back — which is why Phase E
+waits for a backup cycle to prove the new database is being backed up.
