@@ -283,12 +283,15 @@ to make them impossible rather than unlikely.
    `could not find driver`. The build result was never checked before
    the writers were stopped.
 
-3. **pgloader cannot authenticate to MySQL 8.** It failed with
-   `Condition QMYND:MYSQL-UNSUPPORTED-AUTHENTICATION was signalled`:
-   its Lisp client speaks only `mysql_native_password`, while this
-   server's `root` uses `caching_sha2_password` (verified:
-   `SELECT plugin FROM mysql.user`). The tool was chosen for its type
-   handling without checking that it could connect at all.
+3. **pgloader cannot authenticate to MySQL 8 at all.** It failed with
+   `Condition QMYND:MYSQL-UNSUPPORTED-AUTHENTICATION was signalled`.
+   Giving it a dedicated `mysql_native_password` account did not help --
+   verified, the account really did have that plugin and pgloader still
+   refused -- because its Lisp client rejects the `caching_sha2_password`
+   the server advertises in the opening handshake, before any per-account
+   auth switch can happen. The only fix for pgloader would be changing
+   the server default and restarting production MySQL. It was replaced
+   by `scripts/copy-mysql-to-postgres.py` instead.
 
 Nothing was corrupted: `TRUNCATE migrations` only touched the still-empty
 `blukios`, and pgloader failed before writing anything. The site was down
@@ -340,17 +343,6 @@ proven before the site is taken down. This is what the first attempt
 skipped.
 
 ```bash
-# pgloader speaks only mysql_native_password, so it gets a read-only user
-# of its own. The password never reaches the shell history: it is read
-# into a variable and the SQL goes in over stdin.
-PGLPW=$(openssl rand -hex 24)
-docker exec -i blue-mysql mysql -uroot <<SQL
-CREATE USER IF NOT EXISTS 'pgloader'@'%' IDENTIFIED WITH mysql_native_password BY '$PGLPW';
-ALTER USER 'pgloader'@'%' IDENTIFIED WITH mysql_native_password BY '$PGLPW';
-GRANT SELECT ON api_blue.* TO 'pgloader'@'%';
-FLUSH PRIVILEGES;
-SQL
-
 # A scratch copy of the schema, built by the same migrations.
 PGPW=$(sudo grep '^POSTGRES_ROOT_PASSWORD=' /opt/shared-infra/.env | cut -d= -f2-)
 docker exec shared-postgres psql -U postgres -c "DROP DATABASE IF EXISTS blukios_rehearsal"
@@ -366,10 +358,14 @@ docker compose -p marketplace run --rm --no-deps --entrypoint "" \
 
 docker exec shared-postgres psql -U postgres -d blukios_rehearsal -c "TRUNCATE migrations"
 
-docker run --rm --network host dimitri/pgloader:latest pgloader \
-  --with "data only" --with "disable triggers" \
-  "mysql://pgloader:$PGLPW@127.0.0.1:3307/api_blue" \
-  "postgresql://postgres:$PGPW@127.0.0.1:20029/blukios_rehearsal"
+docker run --rm --network host \
+  -v "$PWD/scripts/copy-mysql-to-postgres.py:/app/copy.py:ro" \
+  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3307 -e MYSQL_USER=root -e MYSQL_PASSWORD= \
+  -e MYSQL_DB=api_blue \
+  -e PG_HOST=127.0.0.1 -e PG_PORT=20029 -e PG_USER=postgres -e PG_PASSWORD="$PGPW" \
+  -e PG_DB=blukios_rehearsal \
+  python:3.12-slim \
+  sh -c 'pip install -q pymysql cryptography "psycopg[binary]" && python /app/copy.py'
 ```
 
 Compare every table. This is the gate for Phase C3:
@@ -402,8 +398,8 @@ Then throw the rehearsal away:
 docker exec shared-postgres psql -U postgres -c "DROP DATABASE blukios_rehearsal"
 ```
 
-Keep `$PGLPW` in the shell — Phase C3 reuses it. If the shell is lost,
-re-run the `ALTER USER` above with a fresh value.
+Keep `$PGPW` in the shell — Phase C3 reuses it. If the shell is lost,
+re-read it from `/opt/shared-infra/.env`.
 
 ## Phase C3 — the real cutover (this is the downtime window)
 
@@ -421,10 +417,14 @@ docker compose -p marketplace run --rm --no-deps --entrypoint "" api \
 
 docker exec shared-postgres psql -U postgres -d blukios -c "TRUNCATE migrations"
 
-docker run --rm --network host dimitri/pgloader:latest pgloader \
-  --with "data only" --with "disable triggers" \
-  "mysql://pgloader:$PGLPW@127.0.0.1:3307/api_blue" \
-  "postgresql://postgres:$PGPW@127.0.0.1:20029/blukios"
+docker run --rm --network host \
+  -v "$PWD/scripts/copy-mysql-to-postgres.py:/app/copy.py:ro" \
+  -e MYSQL_HOST=127.0.0.1 -e MYSQL_PORT=3307 -e MYSQL_USER=root -e MYSQL_PASSWORD= \
+  -e MYSQL_DB=api_blue \
+  -e PG_HOST=127.0.0.1 -e PG_PORT=20029 -e PG_USER=postgres -e PG_PASSWORD="$PGPW" \
+  -e PG_DB=blukios \
+  python:3.12-slim \
+  sh -c 'pip install -q pymysql cryptography "psycopg[binary]" && python /app/copy.py'
 
 docker compose -p marketplace run --rm --no-deps --entrypoint "" api \
   php artisan migrate --force --no-interaction
@@ -454,12 +454,6 @@ curl -s http://127.0.0.1:8888/api/health
 
 `{"status":"ok", … "database":"connected"}` is the answer to look for.
 
-Clean up the pgloader user once the cutover has succeeded or been
-abandoned:
-
-```bash
-docker exec -i blue-mysql mysql -uroot -e "DROP USER IF EXISTS 'pgloader'@'%'"
-```
 
 ## Phase D — bring it back up
 
