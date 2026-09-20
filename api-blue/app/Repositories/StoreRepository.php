@@ -44,7 +44,16 @@ class StoreRepository implements StoreRepositoryInterface
                     'earth_distance(ll_to_earth(latitude, longitude), ll_to_earth(?, ?)) as distance_m',
                     [$nearLat, $nearLng]
                 )
-                ->orderByRaw('distance_m IS NULL, distance_m ASC');
+                // NULLS LAST, bukan 'distance_m IS NULL, distance_m ASC'.
+                // Postgres hanya mengenali alias kolom keluaran di ORDER BY
+                // kalau ditulis telanjang; begitu alias dipakai DI DALAM
+                // ekspresi seperti `distance_m IS NULL`, ia harus kolom
+                // sungguhan dan query gagal dengan
+                // "column \"distance_m\" does not exist". MySQL menerimanya,
+                // yang menyembunyikan ini sampai cutover. NULLS LAST memberi
+                // urutan yang sama -- toko tanpa koordinat paling akhir --
+                // dan dipahami sqlite 3.30+ juga.
+                ->orderByRaw('distance_m ASC NULLS LAST');
         } elseif ($random) {
             $query->inRandomOrder();
         } else {
