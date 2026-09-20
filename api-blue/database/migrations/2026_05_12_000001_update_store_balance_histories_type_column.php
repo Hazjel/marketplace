@@ -26,8 +26,14 @@ return new class extends Migration
                 $table->string('type')->after('store_balance_id');
             });
         } else {
-            // MySQL: ALTER COLUMN to expand enum values
-            DB::statement('ALTER TABLE store_balance_histories MODIFY COLUMN `type` VARCHAR(50) NOT NULL');
+            // Postgres: $table->enum() di migrasi asal menghasilkan VARCHAR
+            // plus CHECK constraint, bukan tipe enum tersendiri. Jadi yang
+            // perlu dilepas adalah constraint-nya dulu, baru tipe kolomnya
+            // dilebarkan -- kalau urutannya dibalik, ALTER TYPE ditolak
+            // karena nilai baru melanggar CHECK yang masih terpasang.
+            DB::statement('ALTER TABLE store_balance_histories DROP CONSTRAINT IF EXISTS store_balance_histories_type_check');
+            DB::statement('ALTER TABLE store_balance_histories ALTER COLUMN type TYPE VARCHAR(50)');
+            DB::statement('ALTER TABLE store_balance_histories ALTER COLUMN type SET NOT NULL');
         }
     }
 
@@ -37,7 +43,8 @@ return new class extends Migration
     public function down(): void
     {
         if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE store_balance_histories MODIFY COLUMN `type` ENUM('income', 'withdraw', 'initial') NOT NULL");
+            DB::statement('ALTER TABLE store_balance_histories ALTER COLUMN type TYPE VARCHAR(255)');
+            DB::statement("ALTER TABLE store_balance_histories ADD CONSTRAINT store_balance_histories_type_check CHECK (type IN ('income', 'withdraw', 'initial'))");
         }
     }
 };

@@ -10,6 +10,33 @@ changes.
 ## [Unreleased]
 
 ### Changed
+- **MySQL → PostgreSQL, and both remaining datastores moved to
+  shared-infra.** `blue-mysql` (MySQL 8, root with an empty password) and
+  `blue-mongo` (MongoDB 7, unauthenticated) are gone; the app now runs on
+  `shared-postgres` (PostgreSQL 17, database `blukios`, role
+  `blukios_app`) and `shared-mongo`, both in `/opt/shared-infra`, joining
+  the shared Redis from Sprint C2.1B. Marketplace no longer owns a
+  datastore. See `docs/mysql-to-postgres-cutover.md`.
+  - Search: `MATCH … AGAINST` → `to_tsvector @@ to_tsquery` with GIN
+    indexes; the 12 `LIKE` call sites became `ILIKE` on Postgres, since
+    MySQL matched case-insensitively via `utf8mb4_unicode_ci` and
+    Postgres does not — without this, search silently stops matching on
+    case rather than failing.
+  - Geo: `ST_Distance_Sphere(POINT(lng, lat), …)` →
+    `earth_distance(ll_to_earth(lat, lng), …)` (extensions `cube` and
+    `earthdistance`, created by a superuser at provisioning time).
+  - Analytics: `DATE(x)` → `CAST(x AS DATE)` on Postgres; sqlite keeps
+    the function form, which is why this is driver-conditional.
+  - `Store::scopeSearch` had no driver guard at all and leaked MySQL-only
+    syntax into the sqlite test suite; it has one now.
+  - Compose: `mysql`, `mongodb` and `phpmyadmin` services removed;
+    `DB_USERNAME`/`DB_PASSWORD` and `DB_MONGO_USERNAME`/`DB_MONGO_PASSWORD`
+    are now required with no defaults, the same pattern C2.1B introduced
+    for Redis.
+  - New `docker-compose.local.yml` supplies local stand-ins for all three
+    shared datastores. It is deliberately not named
+    `docker-compose.override.yml`, which Compose would load automatically
+    — including on the Jenkins agent.
 - **Money calculation migration (Sprint B3.2).** Checkout tax, voucher
   discount and the platform admin fee are now computed on
   `App\ValueObjects\Money` with basis-point rates and HALF_UP rounding

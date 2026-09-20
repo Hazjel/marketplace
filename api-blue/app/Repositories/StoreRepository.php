@@ -35,12 +35,25 @@ class StoreRepository implements StoreRepositoryInterface
 
         if ($nearLat !== null && $nearLng !== null) {
             // Urutkan berdasarkan jarak; toko tanpa koordinat tampil paling akhir
+            // earth_distance() dari extension earthdistance mengembalikan meter,
+            // sama seperti ST_Distance_Sphere() di MySQL sebelum migrasi ini.
+            // Perhatikan urutan argumennya terbalik dari MySQL: ll_to_earth()
+            // menerima (lat, lng), sedangkan POINT() menerima (lng, lat).
             $query->select('stores.*')
                 ->selectRaw(
-                    'ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) as distance_m',
-                    [$nearLng, $nearLat]
+                    'earth_distance(ll_to_earth(latitude, longitude), ll_to_earth(?, ?)) as distance_m',
+                    [$nearLat, $nearLng]
                 )
-                ->orderByRaw('distance_m IS NULL, distance_m ASC');
+                // NULLS LAST, bukan 'distance_m IS NULL, distance_m ASC'.
+                // Postgres hanya mengenali alias kolom keluaran di ORDER BY
+                // kalau ditulis telanjang; begitu alias dipakai DI DALAM
+                // ekspresi seperti `distance_m IS NULL`, ia harus kolom
+                // sungguhan dan query gagal dengan
+                // "column \"distance_m\" does not exist". MySQL menerimanya,
+                // yang menyembunyikan ini sampai cutover. NULLS LAST memberi
+                // urutan yang sama -- toko tanpa koordinat paling akhir --
+                // dan dipahami sqlite 3.30+ juga.
+                ->orderByRaw('distance_m ASC NULLS LAST');
         } elseif ($random) {
             $query->inRandomOrder();
         } else {

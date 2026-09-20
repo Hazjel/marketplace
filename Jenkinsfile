@@ -145,7 +145,7 @@ pipeline {
                         # dijalankan sebagai proses lokal DI DALAM container
                         # test yang sama -- 127.0.0.1:27017 sesuai default
                         # DB_MONGO_HOST di .env.example/config/database.php --
-                        # sama pola dengan SQLite in-memory untuk sisi MySQL,
+                        # sama pola dengan SQLite in-memory untuk sisi Postgres,
                         # bukan sibling container/service Docker Pipeline
                         # terpisah, supaya stage ini tetap satu agent tunggal.
                         # Static binary (bukan apt repo MongoDB) dipilih karena

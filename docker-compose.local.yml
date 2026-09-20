@@ -1,0 +1,84 @@
+# Datastore untuk dev lokal.
+#
+# Produksi memakai Postgres, Mongo, dan Redis milik /opt/shared-infra, yang
+# hidup di luar compose project ini dan disambung lewat network eksternal
+# `shared-infra-net`. Di laptop tidak ada stack itu, jadi file ini menyalakan
+# tiga container setara dengan nama host yang sama persis -- shared-postgres,
+# shared-mongo, shared-redis -- supaya docker-compose.yml tidak perlu tahu
+# bedanya dan tidak ada satu pun nilai default yang berbeda antar lingkungan.
+#
+# File ini SENGAJA tidak bernama docker-compose.override.yml: Compose memuat
+# nama itu secara otomatis, dan Jenkins menjalankan `docker compose` dari
+# workspace yang berisi repo ini juga -- override otomatis akan ikut terbawa
+# ke produksi dan menimpa datastore asli. Pakai secara eksplisit:
+#
+#   docker network create shared-infra-net      # sekali saja
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+#
+services:
+  shared-postgres-local:
+    image: postgres:17-alpine
+    container_name: shared-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME wajib diisi di .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD wajib diisi di .env}
+      POSTGRES_DB: ${DB_DATABASE:-blukios}
+    ports:
+      - "${DB_HOST_PORT:-5432}:5432"
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+      # cube dan earthdistance bukan extension "trusted", jadi role aplikasi
+      # tidak boleh membuatnya sendiri. Script ini jalan sebagai superuser
+      # saat volume masih kosong, meniru provisioning di shared-postgres.
+      - ./docker/postgres/init-extensions.sql:/docker-entrypoint-initdb.d/10-extensions.sql:ro
+    networks:
+      - shared-infra
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE:-blukios} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shared-mongo-local:
+    image: mongo:8
+    container_name: shared-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_MONGO_USERNAME:?DB_MONGO_USERNAME wajib diisi di .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_MONGO_PASSWORD:?DB_MONGO_PASSWORD wajib diisi di .env}
+    ports:
+      - "27018:27017"
+    volumes:
+      - local_mongo_data:/data/db
+    networks:
+      - shared-infra
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shared-redis-local:
+    image: redis:7-alpine
+    container_name: shared-redis
+    restart: unless-stopped
+    # Produksi memakai ACL file dengan user `blukios`; di lokal cukup password
+    # pada user `default`, yang cocok dengan REDIS_USERNAME=default di .env.
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD wajib diisi di .env}"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - local_redis_data:/data
+    networks:
+      - shared-infra
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} --no-auth-warning ping | grep -q PONG || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  local_postgres_data:
+  local_mongo_data:
+  local_redis_data:

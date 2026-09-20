@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PostgresSearch;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,7 @@ class Buyer extends Model
     public function scopeSearch($query, $search)
     {
         return $query->whereHas('user', function ($q) use ($search) {
-            $q->where('name', 'LIKE', '%'.$search.'%');
+            $q->where('name', PostgresSearch::likeOperator(), '%'.$search.'%');
         });
     }
 

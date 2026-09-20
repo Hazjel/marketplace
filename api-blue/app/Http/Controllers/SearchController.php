@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\PostgresSearch;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
@@ -36,19 +37,19 @@ class SearchController extends Controller
         $products = Product::search($q)
             // Exact-prefix matches ("iph" -> "iPhone 15") read as more useful
             // suggestions than a mid-string match, so surface those first.
-            ->orderByRaw('CASE WHEN name LIKE ? THEN 0 ELSE 1 END', [$q.'%'])
+            ->orderByRaw('CASE WHEN name '.PostgresSearch::likeOperator().' ? THEN 0 ELSE 1 END', [$q.'%'])
             ->orderBy('created_at', 'desc')
             ->with(['productImages', 'store'])
             ->limit(6)
             ->get();
 
-        $categories = ProductCategory::where('name', 'like', '%'.$q.'%')
-            ->orderByRaw('CASE WHEN name LIKE ? THEN 0 ELSE 1 END', [$q.'%'])
+        $categories = ProductCategory::where('name', PostgresSearch::likeOperator(), '%'.$q.'%')
+            ->orderByRaw('CASE WHEN name '.PostgresSearch::likeOperator().' ? THEN 0 ELSE 1 END', [$q.'%'])
             ->limit(4)
             ->get(['id', 'name', 'slug']);
 
-        $stores = Store::where('name', 'like', '%'.$q.'%')
-            ->orderByRaw('CASE WHEN name LIKE ? THEN 0 ELSE 1 END', [$q.'%'])
+        $stores = Store::where('name', PostgresSearch::likeOperator(), '%'.$q.'%')
+            ->orderByRaw('CASE WHEN name '.PostgresSearch::likeOperator().' ? THEN 0 ELSE 1 END', [$q.'%'])
             ->limit(4)
             ->get(['id', 'name', 'username', 'logo']);
 

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('transaction_details', function (Blueprint $table) {
             // String, bukan uuid()/foreignId() -- variant tersimpan di
-            // MongoDB (ProductVariantMongo), bukan MySQL, jadi tidak ada FK
+            // MongoDB (ProductVariantMongo), bukan Postgres, jadi tidak ada FK
             // lintas-database yang bisa dipasang. Nullable karena produk
             // tanpa varian (has_variants=false) tetap checkout normal
             // lewat products.price seperti sebelumnya.

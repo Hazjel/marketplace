@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PostgresSearch;
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,7 +33,7 @@ class ProductCategory extends Model
 
     public function scopeSearch($query, $search)
     {
-        return $query->where('name', 'like', '%'.$search.'%');
+        return $query->where('name', PostgresSearch::likeOperator(), '%'.$search.'%');
     }
 
     public function parent()

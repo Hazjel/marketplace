@@ -2,65 +2,24 @@ services:
   # ─────────────────────────────────────────
   # Infrastructure
   # ─────────────────────────────────────────
-  mysql:
-    image: mysql:8.0
-    container_name: blue-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: api_blue
-    ports:
-      - "${DB_HOST_PORT:-3306}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  mongodb:
-    image: mongo:7
-    container_name: blue-mongo
-    restart: unless-stopped
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   mongo-express:
     image: mongo-express:latest
     container_name: blue-mongo-express
     restart: unless-stopped
-    depends_on:
-      mongodb:
-        condition: service_healthy
+    # shared-mongo hidup di luar compose project ini, jadi tidak bisa
+    # di-depends_on; mongo-express sendiri sudah retry koneksi saat start.
     ports:
       - "8081:8081"
+    networks:
+      - default
+      - shared-infra
     environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_SERVER: ${DB_MONGO_HOST:-shared-mongo}
+      ME_CONFIG_MONGODB_PORT: ${DB_MONGO_PORT:-27017}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DB_MONGO_USERNAME:?DB_MONGO_USERNAME wajib diisi di .env -- shared Mongo memakai auth}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${DB_MONGO_PASSWORD:?DB_MONGO_PASSWORD wajib diisi di .env -- shared Mongo memakai auth}
       ME_CONFIG_BASICAUTH: "false"
-
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: blue-phpmyadmin
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
-    ports:
-      - "8080:80"
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: ""
 
   # ─────────────────────────────────────────
   # Backend API (Laravel + Nginx)
@@ -73,16 +32,11 @@ services:
     entrypoint: ["bash", "/var/www/docker-entrypoint.sh"]
     expose:
       - "9000"
-    depends_on:
-      mysql:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-    # Sprint C2.1B: Redis is now the shared-infra instance outside this
-    # compose project (see docs/c2-1b-shared-redis-cutover.md) -- Compose
-    # can't `depends_on` a service it doesn't own, so app startup must
-    # tolerate shared Redis being briefly unavailable via the normal
-    # client reconnect/failure path instead of a startup gate.
+    # Ketiga datastore (Postgres, Mongo, Redis) sekarang tinggal di
+    # /opt/shared-infra, di luar compose project ini -- Compose tidak bisa
+    # `depends_on` service yang bukan miliknya, jadi startup aplikasi harus
+    # tahan kalau salah satunya sesaat belum siap, lewat jalur reconnect
+    # klien biasa, bukan lewat gate startup.
     networks:
       - default
       - shared-infra
@@ -104,22 +58,29 @@ services:
       # APP_ENV=local di .env sendiri -- itu meng-override default ini.
       APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
-      # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
+      # berisi DB_HOST=shared-postgres bocor ke host dan merusak `php artisan test` lokal
       APP_CONFIG_CACHE: /tmp/laravel-config.php
       APP_ROUTES_CACHE: /tmp/laravel-routes.php
       APP_DEBUG: ${APP_DEBUG:-false}
       APP_URL: ${APP_URL:-http://localhost}
       APP_KEY: ${APP_KEY:?APP_KEY wajib diisi di .env}
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: api_blue
-      DB_USERNAME: root
-      DB_PASSWORD: ""
+      # Shared Postgres -- pola yang sama dengan shared Redis di C2.1B:
+      # instance-nya hidup di /opt/shared-infra, punya auth, dan tidak
+      # menyediakan user anonim. Karena itu kredensialnya tidak diberi
+      # default sama sekali; compose menolak start kalau .env belum diisi.
+      DB_CONNECTION: pgsql
+      DB_HOST: ${DB_HOST:-shared-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_DATABASE: ${DB_DATABASE:-blukios}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME wajib diisi di .env -- shared Postgres tidak punya user anonim}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD wajib diisi di .env -- shared Postgres tidak punya user anonim}
       DB_MONGO_CONNECTION: mongodb
-      DB_MONGO_HOST: mongodb
-      DB_MONGO_PORT: 27017
-      DB_MONGO_DATABASE: blukios_mongo
+      DB_MONGO_HOST: ${DB_MONGO_HOST:-shared-mongo}
+      DB_MONGO_PORT: ${DB_MONGO_PORT:-27017}
+      DB_MONGO_DATABASE: ${DB_MONGO_DATABASE:-blukios_mongo}
+      DB_MONGO_USERNAME: ${DB_MONGO_USERNAME:?DB_MONGO_USERNAME wajib diisi di .env -- shared Mongo memakai auth}
+      DB_MONGO_PASSWORD: ${DB_MONGO_PASSWORD:?DB_MONGO_PASSWORD wajib diisi di .env -- shared Mongo memakai auth}
+      DB_MONGO_AUTHENTICATION_DATABASE: ${DB_MONGO_AUTHENTICATION_DATABASE:-admin}
       # Shared Redis (Sprint C2.1B) -- see docs/c2-1b-shared-redis-cutover.md.
       # USERNAME/PASSWORD are required (no default): the shared instance is
       # authenticated, unlike the retired local blue-redis.
@@ -201,16 +162,20 @@ services:
       APP_NAME: Blukios
       APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
-      # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
+      # berisi DB_HOST=shared-postgres bocor ke host dan merusak `php artisan test` lokal
       APP_CONFIG_CACHE: /tmp/laravel-config.php
       APP_ROUTES_CACHE: /tmp/laravel-routes.php
       APP_KEY: ${APP_KEY:?APP_KEY wajib diisi di .env}
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: api_blue
-      DB_USERNAME: root
-      DB_PASSWORD: ""
+      # Shared Postgres -- pola yang sama dengan shared Redis di C2.1B:
+      # instance-nya hidup di /opt/shared-infra, punya auth, dan tidak
+      # menyediakan user anonim. Karena itu kredensialnya tidak diberi
+      # default sama sekali; compose menolak start kalau .env belum diisi.
+      DB_CONNECTION: pgsql
+      DB_HOST: ${DB_HOST:-shared-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_DATABASE: ${DB_DATABASE:-blukios}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME wajib diisi di .env -- shared Postgres tidak punya user anonim}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD wajib diisi di .env -- shared Postgres tidak punya user anonim}
       # Shared Redis (Sprint C2.1B) -- see docs/c2-1b-shared-redis-cutover.md.
       REDIS_HOST: ${REDIS_HOST:-shared-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
@@ -253,16 +218,20 @@ services:
       APP_NAME: Blukios
       APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
-      # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
+      # berisi DB_HOST=shared-postgres bocor ke host dan merusak `php artisan test` lokal
       APP_CONFIG_CACHE: /tmp/laravel-config.php
       APP_ROUTES_CACHE: /tmp/laravel-routes.php
       APP_KEY: ${APP_KEY:?APP_KEY wajib diisi di .env}
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: api_blue
-      DB_USERNAME: root
-      DB_PASSWORD: ""
+      # Shared Postgres -- pola yang sama dengan shared Redis di C2.1B:
+      # instance-nya hidup di /opt/shared-infra, punya auth, dan tidak
+      # menyediakan user anonim. Karena itu kredensialnya tidak diberi
+      # default sama sekali; compose menolak start kalau .env belum diisi.
+      DB_CONNECTION: pgsql
+      DB_HOST: ${DB_HOST:-shared-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_DATABASE: ${DB_DATABASE:-blukios}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME wajib diisi di .env -- shared Postgres tidak punya user anonim}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD wajib diisi di .env -- shared Postgres tidak punya user anonim}
       # Shared Redis (Sprint C2.1B) -- see docs/c2-1b-shared-redis-cutover.md.
       REDIS_HOST: ${REDIS_HOST:-shared-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
@@ -299,7 +268,7 @@ services:
       APP_NAME: Blukios
       APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
-      # berisi DB_HOST=mysql bocor ke host dan merusak `php artisan test` lokal
+      # berisi DB_HOST=shared-postgres bocor ke host dan merusak `php artisan test` lokal
       APP_CONFIG_CACHE: /tmp/laravel-config.php
       APP_ROUTES_CACHE: /tmp/laravel-routes.php
       APP_KEY: ${APP_KEY:?APP_KEY wajib diisi di .env}
@@ -511,7 +480,7 @@ services:
     restart: unless-stopped
     user: root  # perlu akses /var/run/docker.sock milik root di host
     ports:
-      - "8082:8080"   # web UI — beda dari phpmyadmin (8080)
+      - "8082:8080"   # web UI — beda dari mongo-express (8081)
       - "50000:50000" # agent port (tidak dipakai untuk built-in node, aman dibiarkan)
     environment:
       JAVA_OPTS: "-Xmx512m -Duser.timezone=Asia/Jakarta"
@@ -535,8 +504,6 @@ services:
       - ${PWD}:${PWD}
 
 volumes:
-  mysql_data:
-  mongo_data:
   ollama:
   grafana:
   prometheus_data:   # Prometheus histori metrics

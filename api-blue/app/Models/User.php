@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PostgresSearch;
 use App\Notifications\ResetPasswordNotification;
 use App\Traits\UUID;
 use Database\Factories\UserFactory;
@@ -104,9 +105,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', '%'.$search.'%')->orWhere(
+            $q->where('name', PostgresSearch::likeOperator(), '%'.$search.'%')->orWhere(
                 'email',
-                'like',
+                PostgresSearch::likeOperator(),
                 '%'.$search.'%',
             );
         });

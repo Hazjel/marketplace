@@ -54,7 +54,7 @@ class MidtransController extends Controller
         // dengan lock baris di dalamnya.
         //
         // Sebelumnya lockForUpdate() dipanggil di luar transaksi mana pun. Di
-        // MySQL, SELECT ... FOR UPDATE pada mode autocommit melepas lock-nya
+        // Postgres, SELECT ... FOR UPDATE pada mode autocommit melepas lock-nya
         // begitu statement selesai, jadi lock itu tidak menahan apa pun. Dua
         // webhook yang datang berdekatan sama-sama membaca payment_status
         // "unpaid", sama-sama lolos guard duplikat, lalu sama-sama mengkredit

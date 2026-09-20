@@ -104,9 +104,17 @@ class TransactionAnalyticsRepository implements TransactionAnalyticsRepositoryIn
         $startDate = now('Asia/Jakarta')->subDays($days - 1)->startOfDay();
         $period = CarbonPeriod::create($startDate, $endDate);
 
+        // Postgres tidak punya fungsi DATE(); ekspresi setara adalah cast ke
+        // tipe date. sqlite (test suite) justru sebaliknya -- tidak punya tipe
+        // date untuk di-cast, tapi punya fungsi date(). Jadi ekspresinya
+        // dipilih per driver, bukan disamakan.
+        $dateExpr = $query->getConnection()->getDriverName() === 'pgsql'
+            ? 'CAST(created_at AS DATE)'
+            : 'DATE(created_at)';
+
         $transactions = (clone $query)
             ->select(
-                DB::raw('DATE(created_at) as date'),
+                DB::raw($dateExpr.' as date'),
                 DB::raw('SUM(grand_total) as total_revenue'),
                 DB::raw('COUNT(*) as total_transaction')
             )

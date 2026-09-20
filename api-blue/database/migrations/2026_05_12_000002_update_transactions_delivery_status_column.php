@@ -22,8 +22,12 @@ return new class extends Migration
                 $table->string('delivery_status')->default('pending')->after('tracking_number');
             });
         } else {
-            // MySQL: expand enum
-            DB::statement("ALTER TABLE transactions MODIFY COLUMN `delivery_status` ENUM('pending', 'processing', 'delivering', 'completed', 'cancelled', 'failed') DEFAULT 'pending'");
+            // Postgres: enum Laravel = VARCHAR + CHECK constraint. Memperluas
+            // daftar nilai berarti mengganti constraint-nya, bukan mengubah
+            // tipe kolom. DEFAULT 'pending' dari migrasi asal tidak disentuh
+            // supaya tidak ikut hilang.
+            DB::statement('ALTER TABLE transactions DROP CONSTRAINT IF EXISTS transactions_delivery_status_check');
+            DB::statement("ALTER TABLE transactions ADD CONSTRAINT transactions_delivery_status_check CHECK (delivery_status IN ('pending', 'processing', 'delivering', 'completed', 'cancelled', 'failed'))");
         }
     }
 
@@ -33,7 +37,8 @@ return new class extends Migration
     public function down(): void
     {
         if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE transactions MODIFY COLUMN `delivery_status` ENUM('pending', 'processing', 'delivering', 'completed') DEFAULT 'pending'");
+            DB::statement('ALTER TABLE transactions DROP CONSTRAINT IF EXISTS transactions_delivery_status_check');
+            DB::statement("ALTER TABLE transactions ADD CONSTRAINT transactions_delivery_status_check CHECK (delivery_status IN ('pending', 'processing', 'delivering', 'completed'))");
         }
     }
 };

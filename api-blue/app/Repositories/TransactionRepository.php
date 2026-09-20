@@ -281,7 +281,7 @@ class TransactionRepository implements TransactionRepositoryInterface
      * memuatnya gagal. MongoDB tidak ikut DB::beginTransaction()/
      * DB::transaction() Laravel -- koneksi terpisah, bukan distributed
      * transaction -- jadi rollback otomatis Laravel cuma membatalkan sisi
-     * MySQL. Kalau statement SQL SETELAH satu mutasi Mongo dalam operasi
+     * Postgres. Kalau statement SQL SETELAH satu mutasi Mongo dalam operasi
      * yang sama gagal (create(): produk kedua kehabisan stok setelah
      * produk pertama/varian sukses dikurangi; restoreStock(): baris
      * setelah satu varian sudah dikembalikan gagal), mutasi Mongo yang
@@ -341,7 +341,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         // di atas -- koneksi terpisah, tidak ada distributed transaction.
         // Kalau produk KEDUA dalam loop di bawah gagal (mis. insufficient
         // stock) setelah produk PERTAMA (varian) sudah mengurangi stok
-        // Mongo-nya, DB::rollBack() di catch cuma membatalkan sisi MySQL --
+        // Mongo-nya, DB::rollBack() di catch cuma membatalkan sisi Postgres --
         // decrement Mongo yang sudah ter-apply tetap ada selamanya tanpa
         // kompensasi ini. Dicatat di sini, dikembalikan manual di catch.
         $mongoAdjustments = [];
@@ -431,7 +431,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
                 // Agregat products.stock tetap dikurangi seperti sebelumnya
                 // (dashboard/listing lain bergantung padanya sebagai total
-                // lintas varian) -- lock MySQL pada baris Product di atas
+                // lintas varian) -- lock Postgres pada baris Product di atas
                 // yang jadi satu-satunya penjamin serialisasi juga untuk
                 // mutasi stok varian di Mongo, karena MongoDB sendiri tidak
                 // punya SELECT ... FOR UPDATE. Dua pembeli yang bersamaan
