@@ -108,7 +108,13 @@ class TransactionAnalyticsRepository implements TransactionAnalyticsRepositoryIn
         // tipe date. sqlite (test suite) justru sebaliknya -- tidak punya tipe
         // date untuk di-cast, tapi punya fungsi date(). Jadi ekspresinya
         // dipilih per driver, bukan disamakan.
-        $dateExpr = $query->getConnection()->getDriverName() === 'pgsql'
+        //
+        // Driver dibaca dari DB::connection(), bukan $query->getConnection():
+        // yang terakhir dideklarasikan mengembalikan ConnectionInterface, dan
+        // getDriverName() tidak ada di interface itu -- PHPStan menolaknya
+        // dengan method.notFound. Keduanya menunjuk koneksi yang sama di sini
+        // karena repositori ini tidak pernah berpindah koneksi.
+        $dateExpr = DB::connection()->getDriverName() === 'pgsql'
             ? 'CAST(created_at AS DATE)'
             : 'DATE(created_at)';
 
