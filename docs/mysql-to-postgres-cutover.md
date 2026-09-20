@@ -326,15 +326,33 @@ git status --short | grep -vE 'storage/|bootstrap/cache|\.env\.bak' || echo "wor
 Now build, and **verify the result** rather than trusting the exit code:
 
 ```bash
-docker compose -p marketplace build api
-
-# The image is only usable if it can actually talk to PostgreSQL.
-docker run --rm --entrypoint "" marketplace-api php -r \
-  'echo in_array("pgsql", PDO::getAvailableDrivers()) ? "pdo_pgsql OK\n" : "PDO_PGSQL MISSING\n";'
+docker compose -p marketplace build api queue scheduler reverb
 ```
 
-`PDO_PGSQL MISSING` means the build silently failed again. Stop; the site
-is still up and nothing has been lost.
+Four services build from `./api-blue` -- `api`, `queue`, `scheduler` and
+`reverb` -- and Compose gives each one its own image. Building only `api`
+leaves the other three on the previous image, which carries `pdo_mysql`
+and not `pdo_pgsql`. They start, they log nothing obviously wrong, and
+every scheduled command and queued job then fails with `could not find
+driver` while the site itself looks perfectly healthy.
+
+Verify the driver inside each **running** container, not just in the image:
+
+```bash
+for c in blue-api blue-queue blue-scheduler blue-reverb; do
+  echo -n "$c: "
+  docker exec $c php -r 'echo in_array("pgsql", PDO::getAvailableDrivers()) ? "pdo_pgsql OK" : "MISSING"; echo PHP_EOL;'
+done
+```
+
+Anything other than four times `pdo_pgsql OK` means Phase C3 must not be
+attempted. The site is still up and nothing has been lost.
+
+`docker compose logs scheduler` printing `DONE` after each run does **not**
+mean the command succeeded: that is the scheduler reporting it dispatched
+the command, and the command's own output goes to `/dev/null`. Look for
+`Scheduled command ... failed with exit code [1]` in
+`storage/logs/laravel.log` instead.
 
 ## Phase C2 — rehearse the copy, still with no downtime
 
