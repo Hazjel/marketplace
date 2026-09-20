@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Support\PostgresSearch;
 use App\Notifications\ResetPasswordNotification;
+use App\Support\PostgresSearch;
 use App\Traits\UUID;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;

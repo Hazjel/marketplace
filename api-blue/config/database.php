@@ -43,7 +43,6 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
-
         'mongodb' => [
             'driver' => 'mongodb',
             'host' => env('DB_MONGO_HOST', '127.0.0.1'),
@@ -55,7 +54,6 @@ return [
                 'database' => env('DB_MONGO_AUTHENTICATION_DATABASE', 'admin'),
             ],
         ],
-
 
         'pgsql' => [
             'driver' => 'pgsql',

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\PostgresSearch;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
+use App\Support\PostgresSearch;
 use Illuminate\Http\Request;
 
 /**
