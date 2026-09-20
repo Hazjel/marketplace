@@ -72,6 +72,14 @@ class PrometheusMetrics
         $adapter = new RedisAdapter([
             'host' => config('database.redis.default.host'),
             'port' => (int) config('database.redis.default.port'),
+            // Sprint C2.1B memindahkan Redis ke instance shared yang memakai
+            // ACL, dan sejak itu kredensialnya sepasang: user + password.
+            // Adapter ini hanya mengirim password, jadi Redis mencobanya
+            // sebagai user `default` dan menolak dengan WRONGPASS -- setiap
+            // request menulis satu baris error ke log dan metrics tidak
+            // pernah terkumpul sama sekali. Middleware-nya menelan error itu
+            // supaya request tetap jalan, yang justru membuatnya tak terlihat.
+            'user' => config('database.redis.default.username') ?: null,
             'password' => config('database.redis.default.password') ?: null,
             'timeout' => 0.1,
             'read_timeout' => 10,
