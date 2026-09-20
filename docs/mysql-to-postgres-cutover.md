@@ -457,6 +457,14 @@ curl -s http://127.0.0.1:8888/api/health
 
 ## Phase D — bring it back up
 
+Use `up -d`, not `restart`. `docker compose restart` gives the application
+containers new IP addresses, and nginx resolves its `fastcgi_pass` upstream
+once at config load — so it keeps dialling the old address and every request
+returns 502 with `connect() failed (111: Connection refused) while
+connecting to upstream`. If anything is ever restarted on its own,
+`docker compose -p marketplace restart nginx` afterwards is what clears it.
+
+
 ```bash
 cd /home/fatihtesting/testingDeploy/marketplace
 docker compose -p marketplace up -d
