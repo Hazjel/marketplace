@@ -56,6 +56,38 @@ def target_tables(pg):
         return {row[0] for row in cur.fetchall()}
 
 
+
+def reset_sequences(pg):
+    """Move every sequence past the ids that were just inserted.
+
+    Rows are copied with their MySQL ids intact, which does not advance the
+    PostgreSQL sequences behind `$table->id()` columns -- they stay unused,
+    and the next INSERT hands out id 1 and collides with a copied row.
+    pgloader does this as part of its own run; doing the copy by hand means
+    doing it here too.
+    """
+    fixed = []
+    with pg.cursor() as cur:
+        cur.execute(
+            "SELECT t.relname, a.attname, s.oid::regclass::text "
+            "FROM pg_class s "
+            "JOIN pg_depend d ON d.objid = s.oid AND d.deptype = 'a' "
+            "JOIN pg_class t ON t.oid = d.refobjid "
+            "JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = d.refobjsubid "
+            "WHERE s.relkind = 'S'"
+        )
+        for table, column, sequence in cur.fetchall():
+            cur.execute('SELECT COALESCE(MAX("{}"), 0) FROM "{}"'.format(column, table))
+            maxid = cur.fetchone()[0]
+            # is_called=False on an empty table so the first id handed out is 1.
+            cur.execute(
+                "SELECT setval(%s, GREATEST(%s, 1), %s)",
+                (sequence, maxid, maxid > 0),
+            )
+            fixed.append((table, maxid))
+    return fixed
+
+
 def main():
     my = pymysql.connect(
         host=os.environ["MYSQL_HOST"],
@@ -136,6 +168,10 @@ def main():
         for line in failures:
             print("  " + line)
         return 1
+
+    for table, maxid in reset_sequences(pg):
+        if maxid:
+            print("seq    {} -> {}".format(table, maxid))
 
     pg.commit()
 
