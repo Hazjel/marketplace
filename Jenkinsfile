@@ -1,28 +1,5 @@
-// Menjalankan script di dalam container build, dengan start DAN stop
-// container terjadi di dalam step `sh`.
-//
-// Kenapa tidak `agent { docker { ... } }`: plugin docker-workflow menjalankan
-// `docker run` / `docker stop` untuk agent itu langsung di thread CPS milik
-// Jenkins (thread yang mengeksekusi Groovy pipeline), dan workflow-cps
-// memotong setiap potongan kerja di thread itu setelah 5 menit -- batas yang
-// tidak bisa diatur dari Jenkinsfile dan tidak ikut longgar oleh
-// timeout(360 MINUTES) di bawah. Disk host ini bisa butuh >1 detik per fsync,
-// sehingga `docker stop` kadang >5 menit: build #75 lulus seluruh stage
-// Backend: Install (16 menit) lalu tetap FAILURE dengan InterruptedException
-// di WithContainerStep.destroy saat container composer dimatikan. Build #66
-// gagal dengan pola yang sama saat cleanup container chat.
-//
-// Proses di dalam `sh` adalah durable task: boleh lambat berapa pun, hanya
-// dibatasi timeout pipeline. Jadi lambat tetap lambat, tapi tidak lagi
-// berubah jadi gagal.
-//
-// Perilaku yang dipertahankan dari agent docker:
-// - --volumes-from container Jenkins: path workspace di dalam container build
-//   sama persis dengan di Jenkins, jadi stash/unstash dan dir() tetap berlaku.
-// - -u uid:gid Jenkins (default agent docker); stage bisa menimpanya lewat args.
-// - --entrypoint sh untuk semua image: composer:2 dan gitleaks punya
-//   ENTRYPOINT yang tidak meneruskan perintah apa adanya (lihat build #18/#23).
-// - Script dijalankan dengan `sh -xe`, sama seperti step `sh` Jenkins.
+// Pengganti agent { docker }: docker-workflow menjalankan docker stop di thread CPS yang dipotong
+// setelah 5 menit, dan di host ini docker stop bisa lebih lama (#66, #75). Di dalam `sh` tidak ada batas itu.
 def runInContainer(Map opts) {
     String name = "blukios-ci-${env.BUILD_NUMBER}-${opts.name}"
     String scriptDir = "${env.WORKSPACE}@tmp/ci"
@@ -40,9 +17,7 @@ def runInContainer(Map opts) {
                 '${opts.image}' -xe '${scriptDir}/${opts.name}.sh'
         """
     } finally {
-        // --rm sudah menghapus container kalau docker run selesai normal.
-        // Ini untuk build yang di-abort/timeout: docker CLI-nya mati, tapi
-        // container-nya tetap jalan kalau tidak dihapus eksplisit.
+        // Build yang di-abort membunuh docker CLI, bukan container-nya; --rm tidak sempat jalan.
         sh "docker rm -f '${name}' >/dev/null 2>&1 || true"
     }
 }
@@ -51,11 +26,7 @@ pipeline {
     agent none
 
     options {
-        // Shared host bisa mengalami I/O contention berat, jadi batas atas
-        // pipeline dibuat longgar. Batas ini hanya berlaku untuk pipeline
-        // Blukios dan hanya melindungi kerja di dalam step `sh` -- start/stop
-        // container build sengaja dijalankan di sana (lihat runInContainer)
-        // karena batas 5 menit thread CPS tidak ikut longgar oleh timeout ini.
+        // Longgar karena disk host lambat. Hanya berlaku untuk step `sh`, bukan thread CPS (lihat runInContainer).
         timeout(time: 360, unit: 'MINUTES')
         disableConcurrentBuilds()
         // JENKINS_HOME numpuk terus tiap build (workspace + build record) sampai
@@ -150,7 +121,6 @@ pipeline {
                             composer audit --no-interaction
                         '''
                     )
-                    stash name: 'backend-vendor', includes: 'vendor/**'
                 }
             }
         }
@@ -163,7 +133,8 @@ pipeline {
             }
             steps {
                 dir('api-blue') {
-                    unstash 'backend-vendor'
+                    // vendor/ dari Backend: Install sudah ada di workspace ini (Jenkins hanya satu node).
+                    // Tanpa stash/unstash: menulis ulang 13 ribu file itu makan 94 menit di #76.
                     runInContainer(
                         name: 'backend-test',
                         image: 'php:8.4-cli',
@@ -216,11 +187,7 @@ pipeline {
             }
             steps {
                 dir('fe-blue') {
-                    // Install, test, build, dan kedua audit berjalan dalam satu
-                    // container -- sama seperti satu agent docker sebelumnya --
-                    // supaya tidak membayar start/stop container tiga kali di
-                    // host yang disk-nya lambat. Urutan dan fail-fast-nya sama:
-                    // `sh -xe` berhenti di perintah pertama yang gagal.
+                    // Satu container untuk semua step: start/stop container mahal di disk host ini.
                     //
                     // KOREKSI dari commit e543e1c3: klaim "production deps
                     // sudah bersih" di situ SALAH -- @vueuse/head ada di
@@ -343,11 +310,7 @@ pipeline {
         }
 
         stage('Chat Service: Lint, Audit & Test') {
-            // Image python:3.11-slim sama dengan FROM di Dockerfile production
-            // kedua service -- awalnya ditulis 3.12, ketahuan beda dari runtime
-            // production saat review. pytest/Ruff/pip-audit harus jalan di
-            // interpreter yang sama dengan yang benar-benar dipakai container,
-            // bukan versi terbaru yang kebetulan ada.
+            // python:3.11-slim harus sama dengan FROM di Dockerfile production service ini.
             agent any
             when {
                 beforeAgent true
@@ -387,11 +350,7 @@ pipeline {
         }
 
         stage('Recommendation Service: Lint, Audit & Test') {
-            // Image python:3.11-slim sama dengan FROM di Dockerfile production
-            // kedua service -- awalnya ditulis 3.12, ketahuan beda dari runtime
-            // production saat review. pytest/Ruff/pip-audit harus jalan di
-            // interpreter yang sama dengan yang benar-benar dipakai container,
-            // bukan versi terbaru yang kebetulan ada.
+            // python:3.11-slim harus sama dengan FROM di Dockerfile production service ini.
             agent any
             when {
                 beforeAgent true
@@ -420,10 +379,7 @@ pipeline {
         }
 
         stage('Security: Secret Scan') {
-            // Tidak ada retry(3) lagi: retry itu dulu menambal docker
-            // run/stop yang terpotong batas 5 menit thread CPS saat disk host
-            // lambat. Start/stop container sekarang di dalam `sh` (lihat
-            // runInContainer), jadi penyebabnya sudah tidak ada.
+            // Tanpa retry(3): yang dulu di-retry adalah docker stop yang terpotong, sudah dicegah runInContainer.
             agent any
             when {
                 beforeAgent true
