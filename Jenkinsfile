@@ -1,12 +1,61 @@
+// Menjalankan script di dalam container build, dengan start DAN stop
+// container terjadi di dalam step `sh`.
+//
+// Kenapa tidak `agent { docker { ... } }`: plugin docker-workflow menjalankan
+// `docker run` / `docker stop` untuk agent itu langsung di thread CPS milik
+// Jenkins (thread yang mengeksekusi Groovy pipeline), dan workflow-cps
+// memotong setiap potongan kerja di thread itu setelah 5 menit -- batas yang
+// tidak bisa diatur dari Jenkinsfile dan tidak ikut longgar oleh
+// timeout(360 MINUTES) di bawah. Disk host ini bisa butuh >1 detik per fsync,
+// sehingga `docker stop` kadang >5 menit: build #75 lulus seluruh stage
+// Backend: Install (16 menit) lalu tetap FAILURE dengan InterruptedException
+// di WithContainerStep.destroy saat container composer dimatikan. Build #66
+// gagal dengan pola yang sama saat cleanup container chat.
+//
+// Proses di dalam `sh` adalah durable task: boleh lambat berapa pun, hanya
+// dibatasi timeout pipeline. Jadi lambat tetap lambat, tapi tidak lagi
+// berubah jadi gagal.
+//
+// Perilaku yang dipertahankan dari agent docker:
+// - --volumes-from container Jenkins: path workspace di dalam container build
+//   sama persis dengan di Jenkins, jadi stash/unstash dan dir() tetap berlaku.
+// - -u uid:gid Jenkins (default agent docker); stage bisa menimpanya lewat args.
+// - --entrypoint sh untuk semua image: composer:2 dan gitleaks punya
+//   ENTRYPOINT yang tidak meneruskan perintah apa adanya (lihat build #18/#23).
+// - Script dijalankan dengan `sh -xe`, sama seperti step `sh` Jenkins.
+def runInContainer(Map opts) {
+    String name = "blukios-ci-${env.BUILD_NUMBER}-${opts.name}"
+    String scriptDir = "${env.WORKSPACE}@tmp/ci"
+    dir(scriptDir) {
+        writeFile file: "${opts.name}.sh", text: opts.script
+    }
+    try {
+        sh """
+            docker run --rm --name '${name}' \\
+                --volumes-from "\$(cat /etc/hostname)" \\
+                -u "\$(id -u):\$(id -g)" \\
+                -w "\$(pwd)" \\
+                --entrypoint sh \\
+                ${opts.args ?: ''} \\
+                '${opts.image}' -xe '${scriptDir}/${opts.name}.sh'
+        """
+    } finally {
+        // --rm sudah menghapus container kalau docker run selesai normal.
+        // Ini untuk build yang di-abort/timeout: docker CLI-nya mati, tapi
+        // container-nya tetap jalan kalau tidak dihapus eksplisit.
+        sh "docker rm -f '${name}' >/dev/null 2>&1 || true"
+    }
+}
+
 pipeline {
     agent none
 
     options {
-        // Shared host bisa mengalami I/O contention berat. Build #66 melewati
-        // seluruh backend test (308 test) dan chat test (25 test), tetapi timeout
-        // 60 menit habis saat cleanup container chat sebelum secret scan/deploy.
-        // Tunggu I/O shared host pulih tanpa mengubah timeout Jenkins global atau
-        // mengganggu workload lain. Batas ini hanya berlaku untuk pipeline Blukios.
+        // Shared host bisa mengalami I/O contention berat, jadi batas atas
+        // pipeline dibuat longgar. Batas ini hanya berlaku untuk pipeline
+        // Blukios dan hanya melindungi kerja di dalam step `sh` -- start/stop
+        // container build sengaja dijalankan di sana (lihat runInContainer)
+        // karena batas 5 menit thread CPS tidak ikut longgar oleh timeout ini.
         timeout(time: 360, unit: 'MINUTES')
         disableConcurrentBuilds()
         // JENKINS_HOME numpuk terus tiap build (workspace + build record) sampai
@@ -78,30 +127,13 @@ pipeline {
         }
 
         stage('Backend: Install') {
-            agent {
-                docker {
-                    image 'composer:2'
-                    // ENTRYPOINT composer:2 (/docker-entrypoint.sh) tidak
-                    // meneruskan perintah apa adanya. Jenkins menahan agent-nya
-                    // dengan "cat", tapi container malah menggantung sampai
-                    // dibunuh -- muncul sebagai "The container started but
-                    // didn't run the expected command", dan itu menggagalkan
-                    // build #23 (juga sempat terlihat di #18).
-                    //
-                    // Diverifikasi langsung di host: "docker run composer:2 echo
-                    // HALO" mencetak HALO lalu hang (exit 124); dengan
-                    // --entrypoint "" exit 0. Bentuknya harus dipisah spasi --
-                    // "--entrypoint=" (kosong setelah sama dengan) tetap hang.
-                    args '-u root --entrypoint ""'
-                }
-            }
+            agent any
             when {
                 beforeAgent true
                 expression { env.BACKEND_CHANGED == 'true' }
             }
             steps {
                 dir('api-blue') {
-                    sh 'composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-mongodb --ignore-platform-req=ext-sodium'
                     // composer audit sengaja di sini (bukan stage terpisah) --
                     // butuh composer.lock yang baru diresolve, dan agent ini
                     // sudah punya composer binary-nya. Blocking: per commit
@@ -109,19 +141,22 @@ pipeline {
                     // kalau kembali merah di sini artinya dependency BARU
                     // yang punya CVE, bukan technical debt lama yang perlu
                     // baseline seperti PHPStan.
-                    sh 'composer audit --no-interaction'
+                    runInContainer(
+                        name: 'backend-install',
+                        image: 'composer:2',
+                        args: '-u root',
+                        script: '''
+                            composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-mongodb --ignore-platform-req=ext-sodium
+                            composer audit --no-interaction
+                        '''
+                    )
                     stash name: 'backend-vendor', includes: 'vendor/**'
                 }
             }
         }
 
         stage('Backend: Lint & Test') {
-            agent {
-                docker {
-                    image 'php:8.4-cli'
-                    args '-u root --dns 192.168.210.226 --dns 192.168.210.207'
-                }
-            }
+            agent any
             when {
                 beforeAgent true
                 expression { env.BACKEND_CHANGED == 'true' }
@@ -129,7 +164,11 @@ pipeline {
             steps {
                 dir('api-blue') {
                     unstash 'backend-vendor'
-                    sh '''
+                    runInContainer(
+                        name: 'backend-test',
+                        image: 'php:8.4-cli',
+                        args: '-u root --dns 192.168.210.226 --dns 192.168.210.207',
+                        script: '''
                         apt-get update -qq
                         apt-get install -y -qq git unzip curl libsqlite3-dev libzip-dev libssl-dev libpng-dev libjpeg-dev libfreetype6-dev libwebp-dev libonig-dev >/dev/null
                         docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp >/dev/null
@@ -164,23 +203,45 @@ pipeline {
                         php artisan key:generate
                         php artisan test
                     '''
+                    )
                 }
             }
         }
 
         stage('Frontend: Install & Test') {
-            agent {
-                docker {
-                    image 'node:20-bookworm-slim'
-                }
-            }
+            agent any
             when {
                 beforeAgent true
                 expression { env.FRONTEND_CHANGED == 'true' }
             }
             steps {
                 dir('fe-blue') {
-                    sh '''
+                    // Install, test, build, dan kedua audit berjalan dalam satu
+                    // container -- sama seperti satu agent docker sebelumnya --
+                    // supaya tidak membayar start/stop container tiga kali di
+                    // host yang disk-nya lambat. Urutan dan fail-fast-nya sama:
+                    // `sh -xe` berhenti di perintah pertama yang gagal.
+                    //
+                    // KOREKSI dari commit e543e1c3: klaim "production deps
+                    // sudah bersih" di situ SALAH -- @vueuse/head ada di
+                    // dependencies (bukan devDependencies), dan residual
+                    // 3 finding moderate/low dari @unhead/vue (lihat commit
+                    // e543e1c3 untuk analisis kenapa tidak di-force-downgrade)
+                    // ADA di situ. `npm audit --omit=dev` polos di sini
+                    // sudah dicoba: exit code 1, bukan 0 -- build pertama
+                    // akan merah permanen kalau tetap blocking penuh.
+                    //
+                    // --audit-level=high: exit code cuma nonzero untuk
+                    // high/critical (residual yang sudah dianalisis
+                    // moderate/low tidak ikut blocking, tapi CVE baru yang
+                    // high/critical tetap memblokir). devDependencies
+                    // (vite/vitest/eslint dst) tidak ikut dibundle ke output
+                    // production, jadi audit-nya dipisah dan non-blocking
+                    // sepenuhnya.
+                    runInContainer(
+                        name: 'frontend',
+                        image: 'node:20-bookworm-slim',
+                        script: '''
                         attempt=1
                         while true; do
                             rm -rf node_modules
@@ -246,24 +307,7 @@ pipeline {
                         ./node_modules/.bin/eslint . --max-warnings=200
                         npm run test -- --run
                         npm run build
-                    '''
-                    // KOREKSI dari commit e543e1c3: klaim "production deps
-                    // sudah bersih" di situ SALAH -- @vueuse/head ada di
-                    // dependencies (bukan devDependencies), dan residual
-                    // 3 finding moderate/low dari @unhead/vue (lihat commit
-                    // e543e1c3 untuk analisis kenapa tidak di-force-downgrade)
-                    // ADA di situ. `npm audit --omit=dev` polos di sini
-                    // sudah dicoba: exit code 1, bukan 0 -- build pertama
-                    // akan merah permanen kalau tetap blocking penuh.
-                    //
-                    // --audit-level=high: exit code cuma nonzero untuk
-                    // high/critical (residual yang sudah dianalisis
-                    // moderate/low tidak ikut blocking, tapi CVE baru yang
-                    // high/critical tetap memblokir). devDependencies
-                    // (vite/vitest/eslint dst) tidak ikut dibundle ke output
-                    // production, jadi audit-nya dipisah dan non-blocking
-                    // sepenuhnya.
-                    sh '''
+
                         attempt=1
                         while true; do
                             if npm audit --omit=dev --audit-level=high > /tmp/npm-audit.log 2>&1; then
@@ -290,30 +334,31 @@ pipeline {
                             attempt=$((attempt + 1))
                             sleep 10
                         done
+
+                        npm audit --only=dev || true
                     '''
-                    sh 'npm audit --only=dev || true'
+                    )
                 }
             }
         }
 
         stage('Chat Service: Lint, Audit & Test') {
-            agent {
-                docker {
-                    // Sama dengan FROM di Dockerfile production kedua service
-                    // (python:3.11-slim) -- awalnya ditulis 3.12, ketahuan beda
-                    // dari runtime production saat review. pytest/Ruff/pip-audit
-                    // harus jalan di interpreter yang sama dengan yang benar-benar
-                    // dipakai container, bukan versi terbaru yang kebetulan ada.
-                    image 'python:3.11-slim'
-                }
-            }
+            // Image python:3.11-slim sama dengan FROM di Dockerfile production
+            // kedua service -- awalnya ditulis 3.12, ketahuan beda dari runtime
+            // production saat review. pytest/Ruff/pip-audit harus jalan di
+            // interpreter yang sama dengan yang benar-benar dipakai container,
+            // bukan versi terbaru yang kebetulan ada.
+            agent any
             when {
                 beforeAgent true
                 expression { env.CHAT_SERVICE_CHANGED == 'true' }
             }
             steps {
                 dir('chat-service') {
-                    sh '''
+                    runInContainer(
+                        name: 'chat-service',
+                        image: 'python:3.11-slim',
+                        script: '''
                         pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
                         ruff check .
                         pytest tests/ -v
@@ -323,6 +368,7 @@ pipeline {
                             --ignore-vuln CVE-2026-45831 \
                             --ignore-vuln CVE-2026-45833
                     '''
+                    )
                     // KOREKSI dari commit 23732e94: "|| true" di sini semula
                     // dimaksudkan untuk 4 finding chromadb yang sudah
                     // dianalisis (PYSEC-2026-311, CVE-2026-45830/45831/45833
@@ -341,16 +387,12 @@ pipeline {
         }
 
         stage('Recommendation Service: Lint, Audit & Test') {
-            agent {
-                docker {
-                    // Sama dengan FROM di Dockerfile production kedua service
-                    // (python:3.11-slim) -- awalnya ditulis 3.12, ketahuan beda
-                    // dari runtime production saat review. pytest/Ruff/pip-audit
-                    // harus jalan di interpreter yang sama dengan yang benar-benar
-                    // dipakai container, bukan versi terbaru yang kebetulan ada.
-                    image 'python:3.11-slim'
-                }
-            }
+            // Image python:3.11-slim sama dengan FROM di Dockerfile production
+            // kedua service -- awalnya ditulis 3.12, ketahuan beda dari runtime
+            // production saat review. pytest/Ruff/pip-audit harus jalan di
+            // interpreter yang sama dengan yang benar-benar dipakai container,
+            // bukan versi terbaru yang kebetulan ada.
+            agent any
             when {
                 beforeAgent true
                 expression { env.RECOMMENDATION_CHANGED == 'true' }
@@ -363,33 +405,26 @@ pipeline {
                     // 1f291aab), tapi stage ini tidak ikut diupdate untuk
                     // benar-benar menjalankan pytest. Test-nya ada di repo
                     // sejak itu tapi Jenkins tidak pernah menjalankannya.
-                    sh '''
+                    runInContainer(
+                        name: 'recommendation-service',
+                        image: 'python:3.11-slim',
+                        script: '''
                         pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
                         ruff check .
                         pytest tests/ -v
                         pip-audit -r requirements.txt --desc
                     '''
+                    )
                 }
             }
         }
 
         stage('Security: Secret Scan') {
-            agent {
-                docker {
-                    // Base image alpine + ENTRYPOINT ["gitleaks"] (dicek
-                    // langsung ke Dockerfile upstream) -- entrypoint tetap
-                    // perlu di-override kosong seperti composer:2 di atas
-                    // supaya Jenkins bisa menyuntikkan step shell-nya sendiri.
-                    image 'zricethezav/gitleaks:latest'
-                    args '--entrypoint ""'
-                }
-            }
-            // Retry seluruh stage termasuk alokasi Docker agent. Ini khusus
-            // Blukios dan menangani docker run/stop/rm yang timeout saat I/O
-            // shared host padat; tidak mengubah konfigurasi Jenkins global.
-            options {
-                retry(3)
-            }
+            // Tidak ada retry(3) lagi: retry itu dulu menambal docker
+            // run/stop yang terpotong batas 5 menit thread CPS saat disk host
+            // lambat. Start/stop container sekarang di dalam `sh` (lihat
+            // runInContainer), jadi penyebabnya sudah tidak ada.
+            agent any
             when {
                 beforeAgent true
                 expression { env.DEPLOY_REQUIRED == 'true' }
@@ -412,7 +447,11 @@ pipeline {
                 // (history lama sudah ditangani lewat rotasi APP_KEY
                 // sebelumnya, bukan lewat CI scan). --redact: kalau ketemu,
                 // jangan cetak secret asli ke log Jenkins.
-                sh 'gitleaks dir . -v --redact || true'
+                runInContainer(
+                    name: 'secret-scan',
+                    image: 'zricethezav/gitleaks:latest',
+                    script: 'gitleaks dir . -v --redact || true'
+                )
             }
         }
 
