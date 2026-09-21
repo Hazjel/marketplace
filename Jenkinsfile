@@ -28,6 +28,8 @@ pipeline {
     options {
         // Longgar karena disk host lambat. Hanya berlaku untuk step `sh`, bukan thread CPS (lihat runInContainer).
         timeout(time: 360, unit: 'MINUTES')
+        // Checkout otomatis per stage mengambil ujung main terbaru; di #76 stage belakang dapat commit yang belum dites.
+        skipDefaultCheckout()
         disableConcurrentBuilds()
         // JENKINS_HOME numpuk terus tiap build (workspace + build record) sampai
         // disk host hampir penuh — batasi histori biar otomatis kebersihin
@@ -45,6 +47,11 @@ pipeline {
             agent any
             steps {
                 script {
+                    // Satu-satunya checkout di build ini: stage lain memakai workspace yang sama, Deploy memakai BUILD_COMMIT.
+                    def scmVars = checkout scm
+                    env.BUILD_COMMIT = scmVars.GIT_COMMIT
+                    env.BUILD_BRANCH = scmVars.GIT_BRANCH
+
                     // HEAD~1..HEAD cuma benar kalau setiap push persis satu commit.
                     // Push multi-commit (mis. merge fast-forward beberapa commit
                     // sekaligus) membuat HEAD~1 cuma commit KEDUA-TERAKHIR dari
@@ -56,17 +63,19 @@ pipeline {
                     // commit yang tidak ke-diff, volume vendor lama (dependency
                     // BELUM di-patch) tetap dipakai container baru.
                     //
-                    // GIT_PREVIOUS_SUCCESSFUL_COMMIT (disediakan git plugin,
-                    // kosong kalau ini build sukses pertama di branch ini)
-                    // diff-nya menutupi SELURUH commit sejak build sukses
-                    // terakhir, berapa pun banyaknya, bukan cuma commit terakhir.
+                    // Pembanding = commit yang sedang jalan di produksi, bukan build sukses terakhir:
+                    // build sukses yang tidak deploy (#76) membuat perubahannya tidak pernah terkirim.
                     sh 'git fetch --depth=100 origin main || true'
-                    def base = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+                    def base = sh(
+                        script: 'git -c safe.directory="$HOST_PROJECT_DIR" -C "$HOST_PROJECT_DIR" rev-parse HEAD 2>/dev/null || true',
+                        returnStdout: true
+                    ).trim() ?: scmVars.GIT_PREVIOUS_SUCCESSFUL_COMMIT
                     def changed
                     if (!base) {
                         changed = 'ALL'
-                        echo "Tidak ada GIT_PREVIOUS_SUCCESSFUL_COMMIT (build sukses pertama di branch ini) -- anggap semua berubah."
+                        echo "Commit produksi dan build sukses sebelumnya tidak diketahui -- anggap semua berubah."
                     } else {
+                        echo "Pembanding perubahan: ${base}"
                         changed = sh(
                             script: "git diff --name-only ${base} HEAD 2>/dev/null || echo 'ALL'",
                             returnStdout: true
@@ -418,7 +427,8 @@ pipeline {
                 // Blukios yang perlu diterapkan.
                 beforeAgent true
                 // job Pipeline biasa (bukan Multibranch) tidak set env.BRANCH_NAME,
-                // jadi cek GIT_BRANCH dari step checkout sebagai gantinya.
+                // jadi cek BUILD_BRANCH dari Detect Changes. GIT_BRANCH tidak terlihat di sini
+                // karena beforeAgent mengevaluasi kondisi sebelum checkout stage (Deploy terlewat di #76).
                 //
                 // Perbandingan string persis pernah membuat stage ini terlewat
                 // (lihat commit 9d31303), dan build record menyimpan ref-nya
@@ -426,7 +436,7 @@ pipeline {
                 // bentuk mana pun diterima, bukan satu ejaan tertentu.
                 expression {
                     env.DEPLOY_REQUIRED == 'true' &&
-                    (env.GIT_BRANCH ?: '') ==~ /^(refs\/remotes\/)?(origin\/)?main$/
+                    (env.BUILD_BRANCH ?: '') ==~ /^(refs\/remotes\/)?(origin\/)?main$/
                 }
             }
             steps {
@@ -448,12 +458,12 @@ pipeline {
                     # didorong selagi pipeline berjalan ikut terkirim tanpa
                     # pernah melewati satu pun stage test.
                     #
-                    # Kalau GIT_COMMIT ternyata kosong, jangan menggagalkan
+                    # Kalau BUILD_COMMIT ternyata kosong, jangan menggagalkan
                     # deploy -- kembali ke perilaku lama dan bilang, supaya
                     # tidak menukar "diam-diam terlewat" dengan "selalu gagal".
-                    TARGET="$GIT_COMMIT"
+                    TARGET="$BUILD_COMMIT"
                     if [ -z "$TARGET" ]; then
-                        echo "PERINGATAN: GIT_COMMIT kosong, memakai origin/main"
+                        echo "PERINGATAN: BUILD_COMMIT kosong, memakai origin/main"
                         TARGET="origin/main"
                     fi
                     git checkout main
@@ -535,8 +545,8 @@ pipeline {
                     # "hijau" benar-benar berarti kode baru sudah melayani.
 
                     DEPLOYED=$(git -C "$HOST_PROJECT_DIR" rev-parse HEAD)
-                    if [ -n "$GIT_COMMIT" ] && [ "$DEPLOYED" != "$GIT_COMMIT" ]; then
-                        echo "GAGAL: direktori deploy ada di $DEPLOYED, bukan commit yang dites $GIT_COMMIT"
+                    if [ -n "$BUILD_COMMIT" ] && [ "$DEPLOYED" != "$BUILD_COMMIT" ]; then
+                        echo "GAGAL: direktori deploy ada di $DEPLOYED, bukan commit yang dites $BUILD_COMMIT"
                         exit 1
                     fi
                     echo "commit ter-deploy: $DEPLOYED"
