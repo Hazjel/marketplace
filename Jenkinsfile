@@ -99,9 +99,17 @@ pipeline {
                         env.RECOMMENDATION_CHANGED == 'true' ||
                         deployConfigChanged
                     ).toString()
+                    // Perubahan pipeline menjalankan semua stage test yang ia definisikan, tanpa ikut memicu deploy.
+                    env.CI_CHANGED = (changed == 'ALL' || changed.readLines().any {
+                        it == 'Jenkinsfile' || it.startsWith('ci/')
+                    }).toString()
+                    env.CI_PHP_IMAGE = 'blukios-ci-php:' + sh(
+                        script: 'sha256sum ci/php/Dockerfile | cut -c1-12',
+                        returnStdout: true
+                    ).trim()
 
                     echo "File berubah:\n${changed}"
-                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED} | Chat service changed: ${env.CHAT_SERVICE_CHANGED} | Recommendation service changed: ${env.RECOMMENDATION_CHANGED} | Deploy required: ${env.DEPLOY_REQUIRED}"
+                    echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED} | Chat service changed: ${env.CHAT_SERVICE_CHANGED} | Recommendation service changed: ${env.RECOMMENDATION_CHANGED} | CI changed: ${env.CI_CHANGED} | Deploy required: ${env.DEPLOY_REQUIRED}"
                 }
             }
         }
@@ -110,7 +118,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.BACKEND_CHANGED == 'true' }
+                expression { env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
                 dir('api-blue') {
@@ -138,24 +146,19 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.BACKEND_CHANGED == 'true' }
+                expression { env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
+                // --network host: DNS daemon (8.8.8.8) tidak terjangkau dari jaringan ini, resolv host yang jalan.
+                sh 'docker image inspect "$CI_PHP_IMAGE" >/dev/null 2>&1 || docker build --network host -t "$CI_PHP_IMAGE" ci/php'
                 dir('api-blue') {
                     // vendor/ dari Backend: Install sudah ada di workspace ini (Jenkins hanya satu node).
                     // Tanpa stash/unstash: menulis ulang 13 ribu file itu makan 94 menit di #76.
                     runInContainer(
                         name: 'backend-test',
-                        image: 'php:8.4-cli',
+                        image: env.CI_PHP_IMAGE,
                         args: '-u root --dns 192.168.210.226 --dns 192.168.210.207',
                         script: '''
-                        apt-get update -qq
-                        apt-get install -y -qq git unzip curl libsqlite3-dev libzip-dev libssl-dev libpng-dev libjpeg-dev libfreetype6-dev libwebp-dev libonig-dev >/dev/null
-                        docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp >/dev/null
-                        docker-php-ext-install pdo_sqlite zip bcmath gd exif mbstring >/dev/null
-                        pecl install mongodb-2.4.1 redis-6.3.0 >/dev/null 2>&1
-                        docker-php-ext-enable mongodb redis
-
                         # Stage ini sebelum B3.0 tidak pernah butuh MongoDB --
                         # sekarang VariantCheckoutTest/CartValidateStockTest/dst
                         # sungguhan menulis ke ProductVariantMongo, dan gagal
@@ -167,14 +170,9 @@ pipeline {
                         # sama pola dengan SQLite in-memory untuk sisi Postgres,
                         # bukan sibling container/service Docker Pipeline
                         # terpisah, supaya stage ini tetap satu agent tunggal.
-                        # Static binary (bukan apt repo MongoDB) dipilih karena
-                        # tidak butuh GPG key/repo setup yang bisa basi
-                        # mengikuti versi Debian base image php:8.4-cli.
+                        # Binary-nya dipasang di ci/php/Dockerfile.
                         # Diverifikasi langsung di host: mongod --fork jalan
                         # bersih di image ini, port 27017 kebuka dalam <15 detik.
-                        curl -4 -fsSL -o /tmp/mongo.tgz https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-debian12-7.0.14.tgz
-                        mkdir -p /opt/mongo /data/mongo-ci
-                        tar -xzf /tmp/mongo.tgz -C /opt/mongo --strip-components=1
                         /opt/mongo/bin/mongod --dbpath /data/mongo-ci --bind_ip 127.0.0.1 --port 27017 --fork --logpath /var/log/mongod.log
 
                         vendor/bin/pint --test
@@ -192,7 +190,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.FRONTEND_CHANGED == 'true' }
+                expression { env.FRONTEND_CHANGED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
                 dir('fe-blue') {
@@ -323,7 +321,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.CHAT_SERVICE_CHANGED == 'true' }
+                expression { env.CHAT_SERVICE_CHANGED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
                 dir('chat-service') {
@@ -363,7 +361,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.RECOMMENDATION_CHANGED == 'true' }
+                expression { env.RECOMMENDATION_CHANGED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
                 dir('recommendation-service') {
@@ -392,7 +390,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.DEPLOY_REQUIRED == 'true' }
+                expression { env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
                 // NON-BLOCKING untuk sekarang ("|| true") -- belum pernah
