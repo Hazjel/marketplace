@@ -525,7 +525,8 @@ pipeline {
                         docker volume rm marketplace_api_vendor || true
                     fi
 
-                    docker compose -p marketplace up -d --no-build api queue reverb scheduler frontend chat-service recommendation-service
+                    # mongo-express ikut agar perubahan config-nya (mis. port) benar-benar sampai ke server.
+                    docker compose -p marketplace up -d --no-build api queue reverb scheduler frontend chat-service recommendation-service mongo-express
                     # nginx sendiri jarang berubah -> compose gak recreate dia, tapi upstream
                     # (blue-api dkk) di atas barusan direcreate dan dapet IP Docker baru.
                     # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi

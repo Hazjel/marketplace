@@ -43,7 +43,7 @@ physical access.
 
 The committed `docker-compose.yml` is a **local-development** configuration:
 empty MySQL root password, no Redis/MongoDB authentication, phpMyAdmin and
-mongo-express exposed without credentials, infra ports published to the host.
+mongo-express without credentials (bound to 127.0.0.1), infra ports published to the host.
 A production deployment must override all of this. This is tracked and is not a
 reportable vulnerability in itself — but a production host found running the
 unmodified compose file is.

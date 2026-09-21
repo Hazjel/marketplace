@@ -105,7 +105,8 @@ bearer token), so moving between apps uses a one-time token exchange:
 
 nginx is the primary HTTP application ingress — in a hardened deployment it is
 the only port that should be published. (The default `docker-compose.yml` also
-publishes Ollama, the Python services and mongo-express to the host, and
+publishes Ollama and the Python services to the host, mongo-express on
+loopback only, and
 `docker-compose.local.yml` adds PostgreSQL, MongoDB and Redis — see
 [Security](#security).) Both server blocks proxy
 to the same Laravel API:
@@ -195,7 +196,7 @@ with the same container names so nothing else has to change. It is deliberately
 automatically — including on the Jenkins agent, where it would shadow the real
 datastores.
 
-> **Note:** mongo-express is exposed without credentials, and the local
+> **Note:** mongo-express has no login (it is bound to 127.0.0.1), and the local
 > datastores use whatever passwords you put in `.env`. Do **not** deploy this
 > overlay. See [Security](#security).
 
@@ -230,7 +231,7 @@ is host-only.
 | MongoDB | `localhost:27018` — `docker-compose.local.yml` only |
 | Redis | `localhost:6379` — `docker-compose.local.yml` only |
 | Ollama | `http://localhost:11435` |
-| mongo-express | `http://localhost:8081` |
+| mongo-express | `http://localhost:8081`, loopback only. On the server: `ssh -L 8081:127.0.0.1:8081 <user>@<host>` |
 | Prometheus | `http://localhost:9090` — profile `monitoring` |
 | Grafana | `http://localhost:3000` — profile `monitoring` |
 | Jenkins | `http://localhost:8082` — profile `cd` |
@@ -362,8 +363,8 @@ Deploy is in-place, driven by the `Deploy` stage on `main`:
   credentials come from the root `.env` with no defaults
 - `docker-compose.local.yml` recreates them for local development only, with
   their ports published to the host — never deploy that overlay
-- mongo-express (`BASICAUTH=false`): always on, port published, not behind a
-  profile
+- mongo-express (`BASICAUTH=false`): always on, not behind a profile, published
+  on 127.0.0.1 only because it holds the shared-mongo credentials
 - Grafana: `admin` / `admin`
 
 Only Prometheus / Grafana (`monitoring`), k6 (`loadtest`) and Jenkins (`cd`) are

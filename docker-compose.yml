@@ -9,8 +9,9 @@ services:
     restart: unless-stopped
     # shared-mongo hidup di luar compose project ini, jadi tidak bisa
     # di-depends_on; mongo-express sendiri sudah retry koneksi saat start.
+    # Tanpa login dan memegang kredensial shared-mongo: hanya loopback, akses lewat SSH tunnel.
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     networks:
       - default
       - shared-infra
