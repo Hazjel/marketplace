@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Backup harian database Blukios di shared-infra: Postgres (pg_dump -Fc) dan Mongo (mongodump --archive --gzip).
-# Terpasang di crontab user deploy: 0 2 * * * ~/bin/backup-databases.sh >> ~/backups/blukios/backup.log 2>&1
+# Belum dijadwalkan. Untuk harian, salin ke ~/bin lalu tambahkan ke crontab user deploy:
+#   0 2 * * * $HOME/bin/backup-databases.sh >> $HOME/backups/blukios/backup.log 2>&1
 set -euo pipefail
 
 ENV_FILE=${ENV_FILE:-/home/fatihtesting/testingDeploy/marketplace/.env}
