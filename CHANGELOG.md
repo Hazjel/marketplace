@@ -10,6 +10,12 @@ changes.
 ## [Unreleased]
 
 ### Changed
+- Prometheus and Grafana are no longer part of the deployed Compose file. On the
+  server, monitoring is the ops stack (`/opt/ops-monitoring`); Blukios only exposes
+  metrics. Local dev keeps both in `docker-compose.local.yml`. The ops-side setup is
+  `monitoring/ops/apply-on-ops.sh`, described in `docs/monitoring-on-ops.md`.
+- `MAIL_HOST` and `MAIL_PORT` come from `.env` (default still Gmail); they were
+  hard-coded in Compose, and process env wins over `.env` in Laravel.
 - **MySQL → PostgreSQL, and both remaining datastores moved to
   shared-infra.** `blue-mysql` (MySQL 8, root with an empty password) and
   `blue-mongo` (MongoDB 7, unauthenticated) are gone; the app now runs on
@@ -56,6 +62,15 @@ changes.
 - Config: `marketplace.admin_fee_percentage` (float `0.10`) →
   `marketplace.admin_fee_basis_points` (int `1000`), env
   `ADMIN_FEE_BASIS_POINTS`.
+
+### Fixed
+- Laravel metrics were never collected on the shared Redis. Its ACL only allows keys
+  under `<REDIS_PREFIX>` and rejected the library's `PROMETHEUS_` keys with `NOPERM`;
+  reading them also used `KEYS`, which the ACL rejects. Metrics now live under
+  `<REDIS_PREFIX>prometheus:` and Summary reading (unused here) is skipped. The earlier
+  `WRONGPASS` fix was only checked in the log, not against the endpoint.
+- `/metrics` and `/ai/metrics` answered public requests. nginx now returns 404 when
+  Cloudflare's `CF-Connecting-IP` header is present; scrapers on the host are unaffected.
 
 ### Removed
 - `App\Services\TransactionService` — dead code, and the second divergent

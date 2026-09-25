@@ -420,47 +420,9 @@ services:
       CF_RETRAIN_INTERVAL_HOURS: 24
       CF_MODEL_PATH: /app/models/svd_model.pkl
 
-  # ─────────────────────────────────────────
-  # Monitoring (optional profile)
-  # ─────────────────────────────────────────
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: blue-prometheus
-    profiles: ["monitoring"]
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.retention.time=15d"   # simpan 15 hari histori
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus               # persist data antar restart
-    depends_on:
-      - chat-service
-      - nginx
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: blue-grafana
-    profiles: ["monitoring"]
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_SMTP_ENABLED: "true"
-      GF_SMTP_HOST: ${MAIL_HOST:-smtp.gmail.com}:${MAIL_PORT:-587}
-      GF_SMTP_USER: ${MAIL_USERNAME:-}
-      GF_SMTP_PASSWORD: ${MAIL_PASSWORD:-}
-      GF_SMTP_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@blukios.com}
-      GF_SMTP_FROM_NAME: "Blukios Alerting"
-      GF_UNIFIED_ALERTING_ENABLED: "true"
-    volumes:
-      - grafana:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    depends_on:
-      - prometheus
+  # Prometheus dan Grafana tidak ada di compose ini: monitoring memakai stack ops
+  # di server (/opt/ops-monitoring), lihat docs/monitoring-on-ops.md. Untuk dev
+  # lokal keduanya ada di docker-compose.local.yml.
 
   k6:
     image: grafana/k6:latest
@@ -507,8 +469,6 @@ services:
 
 volumes:
   ollama:
-  grafana:
-  prometheus_data:   # Prometheus histori metrics
   chroma_data:       # ChromaDB RAG vector index
   jenkins_home:      # Jenkins config, job history, plugin
   chroma_cache:      # ONNX model all-MiniLM-L6-v2 cache (79MB)

@@ -71,7 +71,7 @@ in `/opt/shared-infra`, outside this compose project.
 ├── chat-service/             FastAPI "Ri" — Ollama + RAG (Chroma)
 ├── recommendation-service/   FastAPI — content-based + collaborative (SVD)
 ├── docker/nginx/             nginx site config (two server blocks)
-├── monitoring/               Prometheus config, Grafana dashboards, k6 scripts
+├── monitoring/               Grafana dashboards, ops scrape job, local Prometheus config, k6 scripts
 ├── postman/                  Postman collection
 ├── docker-compose.yml        all services + infra + tools
 └── Jenkinsfile               CI/CD pipeline
@@ -152,7 +152,7 @@ to the same Laravel API:
 | Recommendation service | FastAPI, NumPy/Pandas/scikit-learn, scikit-surprise (SVD), APScheduler |
 | Real-time | Laravel Reverb (WebSocket broadcasting) |
 | Maps | Leaflet + OpenStreetMap |
-| Observability | Prometheus, Grafana, k6 |
+| Observability | Prometheus and Grafana (ops stack on the server), k6 |
 | CI/CD | Jenkins (declarative pipeline) |
 | Code style | Laravel Pint (PSR-12), PHPStan/Larastan level 5, ESLint 9 + Prettier, Ruff |
 
@@ -232,12 +232,12 @@ is host-only.
 | Redis | `localhost:6379` — `docker-compose.local.yml` only |
 | Ollama | `http://localhost:11435` |
 | mongo-express | `http://localhost:8081`, loopback only. On the server: `ssh -L 8081:127.0.0.1:8081 <user>@<host>` |
-| Prometheus | `http://localhost:9090` — profile `monitoring` |
-| Grafana | `http://localhost:3000` — profile `monitoring` |
+| Prometheus | `http://localhost:9090` (`docker-compose.local.yml`, profile `monitoring`) |
+| Grafana | `http://localhost:3000` (`docker-compose.local.yml`, profile `monitoring`) |
 | Jenkins | `http://localhost:8082` — profile `cd` |
 | k6 load test | profile `loadtest` |
 
-Profile-gated services: `docker compose --profile monitoring up -d`,
+Profile-gated services: `--profile monitoring` (with `docker-compose.local.yml`),
 `--profile loadtest run --rm k6`, `--profile cd up -d jenkins`.
 
 ### Common commands
@@ -337,12 +337,18 @@ Deploy is in-place, driven by the `Deploy` stage on `main`:
 
 ## Monitoring
 
-- Prometheus scrapes the chat service and the Laravel `/metrics` exporter
-  (15s interval, 15-day retention).
-- Grafana auto-provisions dashboards (`monitoring/grafana/`) and alerting rules.
-- Both run under `--profile monitoring`. Grafana currently ships a hardcoded
-  `admin` / `admin` login in the Compose file — a local-only insecure default
-  that must be changed for any exposed deployment.
+On the server, Prometheus and Grafana belong to the ops stack (`/opt/ops-monitoring`),
+not to this Compose project. Blukios only exposes metrics (Laravel `/metrics`, chat
+service, recommendation service); ops scrapes them and shows the dashboards in
+`monitoring/grafana/dashboards/`. Grafana is at `https://ops.fthstack.my.id`;
+Prometheus has no public hostname (SSH tunnel to `127.0.0.1:10014`). Setup, access and
+rollback: [`docs/monitoring-on-ops.md`](docs/monitoring-on-ops.md).
+
+`/metrics` and `/ai/metrics` answer 404 to public traffic (nginx checks for the
+`CF-Connecting-IP` header Cloudflare adds); scrapers on the host are not affected.
+
+For local development, `docker-compose.local.yml` brings back a Prometheus and Grafana
+(`--profile monitoring`). Its Grafana ships `admin` / `admin`, which is only fit for a laptop.
 
 ## Security
 
@@ -365,10 +371,9 @@ Deploy is in-place, driven by the `Deploy` stage on `main`:
   their ports published to the host — never deploy that overlay
 - mongo-express (`BASICAUTH=false`): always on, not behind a profile, published
   on 127.0.0.1 only because it holds the shared-mongo credentials
-- Grafana: `admin` / `admin`
+- Grafana in `docker-compose.local.yml`: `admin` / `admin` (local overlay only)
 
-Only Prometheus / Grafana (`monitoring`), k6 (`loadtest`) and Jenkins (`cd`) are
-profile-gated. A deployment must add mandatory credentials, drop the published
+Only k6 (`loadtest`) and Jenkins (`cd`) are profile-gated in the main Compose file. A deployment must add mandatory credentials, drop the published
 infra ports, put the admin tools behind a profile + auth, and rely on a host
 firewall. That hardening is a tracked task, not part of this documentation
 change.
