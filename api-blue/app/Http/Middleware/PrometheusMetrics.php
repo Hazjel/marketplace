@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\PrometheusRedisStorage as RedisAdapter;
 use Closure;
 use Illuminate\Http\Request;
 use Prometheus\CollectorRegistry;
-use Prometheus\Storage\Redis as RedisAdapter;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -67,8 +67,19 @@ class PrometheusMetrics
         return $response;
     }
 
+    /**
+     * ACL Redis bersama hanya mengizinkan key di namespace aplikasi (REDIS_PREFIX,
+     * mis. `blukios:`). Prefix bawaan library, `PROMETHEUS_`, ditolak NOPERM.
+     */
+    public function storagePrefix(): string
+    {
+        return (string) config('database.redis.options.prefix').'prometheus:';
+    }
+
     public function registry(): CollectorRegistry
     {
+        RedisAdapter::setPrefix($this->storagePrefix());
+
         $adapter = new RedisAdapter([
             'host' => config('database.redis.default.host'),
             'port' => (int) config('database.redis.default.port'),
