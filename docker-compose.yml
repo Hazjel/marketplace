@@ -97,8 +97,9 @@ services:
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: database
       MAIL_MAILER: smtp
-      MAIL_HOST: smtp.gmail.com
-      MAIL_PORT: 587
+      # Default tetap Gmail. Skema mengikuti port (465 = smtps), lihat MailManager.
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@blukios.com}
@@ -448,7 +449,7 @@ services:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_SMTP_ENABLED: "true"
-      GF_SMTP_HOST: smtp.gmail.com:587
+      GF_SMTP_HOST: ${MAIL_HOST:-smtp.gmail.com}:${MAIL_PORT:-587}
       GF_SMTP_USER: ${MAIL_USERNAME:-}
       GF_SMTP_PASSWORD: ${MAIL_PASSWORD:-}
       GF_SMTP_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@blukios.com}
