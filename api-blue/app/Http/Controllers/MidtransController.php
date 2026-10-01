@@ -39,10 +39,12 @@ class MidtransController extends Controller
             'transaction_status' => $request->transaction_status ?? null,
         ]);
 
-        if ($hashedKey !== ($request->signature_key ?? '')) {
+        if (! hash_equals($hashedKey, (string) ($request->signature_key ?? ''))) {
+            // Never log $hashedKey: it is the valid signature for the order_id,
+            // status_code and gross_amount the caller chose, so anyone who can
+            // read the logs could replay it to mark that order paid.
             Log::warning('Midtrans signature mismatch', [
-                'computed' => $hashedKey,
-                'received' => $request->signature_key ?? null,
+                'order_id' => $request->order_id ?? null,
             ]);
 
             return response()->json(['message' => 'Invalid signature key'], 403);

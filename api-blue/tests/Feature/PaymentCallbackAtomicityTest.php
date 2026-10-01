@@ -14,6 +14,7 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -191,5 +192,27 @@ class PaymentCallbackAtomicityTest extends TestCase
 
         $this->assertSame('unpaid', Transaction::where('code', 'ATOMIC_005')->first()->payment_status);
         $this->assertSame(0.0, (float) $this->storeBalance->fresh()->pending_balance);
+    }
+
+    public function test_a_rejected_signature_does_not_leak_the_valid_one_to_the_log(): void
+    {
+        $this->makeTransaction('ATOMIC_006');
+        $valid = hash('sha512', 'ATOMIC_006'.'200'.'126000.00'.config('midtrans.serverKey'));
+        Log::spy();
+
+        $this->postJson('/api/midtrans-callback', [
+            'order_id' => 'ATOMIC_006',
+            'status_code' => '200',
+            'gross_amount' => '126000.00',
+            'signature_key' => str_repeat('0', 128),
+            'transaction_status' => 'settlement',
+            'payment_type' => 'bank_transfer',
+        ])->assertStatus(403);
+
+        Log::shouldHaveReceived('warning')->withArgs(
+            fn ($message, $context = []) => $message === 'Midtrans signature mismatch'
+                && ! str_contains(json_encode($context), $valid)
+        )->once();
+        $this->assertSame('unpaid', Transaction::where('code', 'ATOMIC_006')->first()->payment_status);
     }
 }
