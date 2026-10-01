@@ -414,7 +414,7 @@ Actively developed. Production is live and CI-gated. First tagged release:
   | | |
   |---|---|
   | **C1** | API contract stabilization + mobile parity (this doc set; integer money JSON; `/api/health` version) |
-  | **C2** | production infra hardening — split prod compose, DB/Redis/Mongo credentials, close infra ports, gitleaks blocking |
+  | **C2** | **done** — production infra hardening: `docker-compose.prod.yml`, required DB/Redis/Mongo/Reverb secrets, no `0.0.0.0` ports, blocking gitleaks |
   | **C3** | payment/order end-to-end verification (Midtrans Snap → webhook → escrow → release) |
   | **C4** | full mobile buyer + seller parity |
   | **C5** | observability — business-path metrics, structured logging, alerting |
