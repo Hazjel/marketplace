@@ -10,5 +10,10 @@ if [ -n "$HOST_UID" ] && [ -n "$HOST_GID" ]; then
     chown -R "$HOST_UID:$HOST_GID" /app
 fi
 
+RELOAD=""
+if [ "$UVICORN_RELOAD" = "true" ]; then
+    RELOAD="--reload --reload-delay 1"
+fi
+
 echo "🚀 Starting Recommendation Service..."
-exec python -m uvicorn main:app --host 0.0.0.0 --port 8002 --reload --reload-delay 1 --proxy-headers --forwarded-allow-ips='*'
+exec python -m uvicorn main:app --host 0.0.0.0 --port 8002 $RELOAD --proxy-headers --forwarded-allow-ips='*'

@@ -366,7 +366,9 @@ services:
     networks:
       - default
       - shared-infra
-    command: python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload --reload-delay 1 --proxy-headers --forwarded-allow-ips='*'
+    # Tanpa --reload: kode baru masuk lewat image yang di-build ulang saat Deploy
+    # (COPY . .), lalu up -d me-recreate container. Dev lokal: docker-compose.local.yml.
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8001 --proxy-headers --forwarded-allow-ips='*'
     ports:
       - "127.0.0.1:8001:8001"
     volumes:
