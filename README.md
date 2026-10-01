@@ -297,7 +297,8 @@ It tracks `main`; it does **not** run per-PR checks. Stages:
 4. **Frontend: Install & Test** — `npm ci`, ESLint, Vitest, `npm run build`, `npm audit --omit=dev --audit-level=high`
 5. **Chat Service: Lint, Audit & Test** — Ruff, pip-audit, pytest
 6. **Recommendation Service: Lint, Audit & Test** — Ruff, pip-audit, pytest
-7. **Security: Secret Scan** — gitleaks (`.gitleaks.toml`); currently **non-blocking** (`|| true`)
+7. **Security: Secret Scan** — gitleaks `v8.30.1` (pinned) with `.gitleaks.toml`; **blocking**,
+   any finding stops the build before Deploy. Third-party `vendor/` and `node_modules/` are allowlisted
 8. **Deploy** — on `main` only: fetch the tested commit, `artisan migrate --force`,
    rebuild & recreate the app containers, verify the deployed SHA, health-check
    `https://blukios.store/api/health`
@@ -356,7 +357,7 @@ For local development, `docker-compose.local.yml` brings back a Prometheus and G
 - Checkout is server-authoritative: buyer id, store id, shipping cost and voucher
   discount are all re-derived/re-validated server-side; client values are ignored.
 - Escrow ledger has DB-level uniqueness so a webhook replay can't double-credit.
-- gitleaks runs in the Jenkins pipeline on `main` (currently non-blocking);
+- gitleaks runs in the Jenkins pipeline on `main` and blocks the deploy on any finding;
   secrets live only in `.env` (gitignored) and `FIREBASE_CREDENTIALS` JSON
   (gitignored).
 - Midtrans keys in `.env` are sandbox by default (`MIDTRANS_IS_PRODUCTION=false`).

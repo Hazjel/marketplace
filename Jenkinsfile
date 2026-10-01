@@ -101,7 +101,7 @@ pipeline {
                     ).toString()
                     // Perubahan pipeline menjalankan semua stage test yang ia definisikan, tanpa ikut memicu deploy.
                     env.CI_CHANGED = (changed == 'ALL' || changed.readLines().any {
-                        it == 'Jenkinsfile' || it.startsWith('ci/')
+                        it == 'Jenkinsfile' || it == '.gitleaks.toml' || it.startsWith('ci/')
                     }).toString()
                     env.CI_PHP_IMAGE = 'blukios-ci-php:' + sh(
                         script: 'sha256sum ci/php/Dockerfile | cut -c1-12',
@@ -393,17 +393,15 @@ pipeline {
                 expression { env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
-                // NON-BLOCKING untuk sekarang ("|| true") -- belum pernah
-                // dijalankan sungguhan di Jenkins (Docker Desktop tidak
-                // jalan di mesin dev, jadi tidak bisa dites lokal). Repo ini
-                // punya setidaknya satu string yang BENTUKNYA seperti secret
-                // tapi memang sengaja publik: Midtrans client key di
-                // docker-compose.yml (VITE_MIDTRANS_CLIENT_KEY) -- client
-                // key Midtrans didesain publik (ke-bundle ke JS frontend
-                // apa pun caranya), beda dari server key. Setelah build
-                // pertama menunjukkan hasil scan bersih atau semua temuan
-                // sudah di-allowlist (.gitleaks.toml), hapus "|| true" di
-                // sini supaya stage ini betul-betul blocking.
+                // BLOCKING: temuan apa pun menggagalkan build sebelum Deploy.
+                // Temuan yang sengaja publik (Midtrans client key) dan
+                // dependensi pihak ketiga di workspace (vendor/, node_modules/)
+                // di-allowlist di .gitleaks.toml; selain itu workspace bersih
+                // per build #87.
+                //
+                // Versi di-pin, bukan :latest -- rilis gitleaks baru bisa
+                // membawa rule baru yang tiba-tiba memblokir deploy tanpa ada
+                // perubahan kode. Naikkan versinya dengan sengaja.
                 //
                 // 'dir' (bukan 'detect' yang deprecated sejak v8.19.0) --
                 // scan working tree checkout ini apa adanya, bukan git log
@@ -412,8 +410,8 @@ pipeline {
                 // jangan cetak secret asli ke log Jenkins.
                 runInContainer(
                     name: 'secret-scan',
-                    image: 'zricethezav/gitleaks:latest',
-                    script: 'gitleaks dir . -v --redact || true'
+                    image: 'zricethezav/gitleaks:v8.30.1',
+                    script: 'gitleaks dir . -v --redact'
                 )
             }
         }

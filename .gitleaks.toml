@@ -9,3 +9,11 @@ regexTarget = "match"
 regexes = [
   '''Mid-client-[A-Za-z0-9]+''',
 ]
+
+# Blok terpisah: di dalam satu blok, paths dan regexes digabung OR, jadi path
+# ini tidak boleh ikut melonggarkan aturan Midtrans di atas.
+[[allowlists]]
+description = "Dependensi pihak ketiga yang dipasang CI di workspace (gitignored, bukan kode kita). dist/ sengaja tetap dipindai: secret yang bocor lewat VITE_* muncul di sana."
+paths = [
+  '''(^|/)(vendor|node_modules|venv|\.venv|__pycache__)/''',
+]
