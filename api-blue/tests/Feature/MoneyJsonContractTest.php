@@ -182,4 +182,20 @@ class MoneyJsonContractTest extends TestCase
         // APP_VERSION is unset in the test env -> "undefined", never a stale number
         $this->assertSame('undefined', $response->json('version'));
     }
+
+    public function test_health_reports_the_commit_written_by_deploy(): void
+    {
+        $path = storage_path('app/deployed-commit');
+        $sha = '0123456789abcdef0123456789abcdef01234567';
+
+        try {
+            file_put_contents($path, $sha."\n");
+            $this->assertSame($sha, $this->getJson('/api/health')->json('version'));
+
+            file_put_contents($path, "not a sha\n");
+            $this->assertSame('undefined', $this->getJson('/api/health')->json('version'));
+        } finally {
+            @unlink($path);
+        }
+    }
 }

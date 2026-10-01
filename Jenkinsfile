@@ -465,6 +465,12 @@ pipeline {
                     git checkout main
                     git reset --hard "$TARGET"
 
+                    # /api/health melaporkan commit ini sebagai "version".
+                    # storage/app di-gitignore dan ikut bind mount, jadi tidak
+                    # tersentuh reset dan langsung terbaca oleh container.
+                    git rev-parse HEAD > api-blue/storage/app/deployed-commit.tmp
+                    mv api-blue/storage/app/deployed-commit.tmp api-blue/storage/app/deployed-commit
+
                     # ---- migrasi segera setelah kode mendarat ----
                     # ./api-blue di-bind-mount ke container, jadi begitu reset di
                     # atas selesai kode baru LANGSUNG dilayani -- sementara
