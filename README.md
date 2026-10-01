@@ -316,7 +316,9 @@ operational detail not defined here.
 Deploy is in-place, driven by the `Deploy` stage on `main`:
 
 - `docker compose -p marketplace build/up -d api queue reverb scheduler frontend
-  chat-service recommendation-service` + `--force-recreate nginx`.
+  chat-service recommendation-service` + `--force-recreate nginx`, with
+  `COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml` (set the same variable for
+  manual compose commands on the server, or the ops-scrape port bindings are dropped).
 - Only the application containers are rebuilt per deploy; PostgreSQL / MongoDB / Redis /
   Ollama are long-lived (started once, outside the deploy).
 - A failed migration aborts the deploy before any container is touched.

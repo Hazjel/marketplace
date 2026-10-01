@@ -90,7 +90,7 @@ pipeline {
                     env.CHAT_SERVICE_CHANGED = (changed == 'ALL' || changed.contains('chat-service/')).toString()
                     env.RECOMMENDATION_CHANGED = (changed == 'ALL' || changed.contains('recommendation-service/')).toString()
                     def deployConfigChanged = changed == 'ALL' || changed.readLines().any {
-                        it == 'docker-compose.yml' || it == '.env.example' || it.startsWith('docker/')
+                        it == 'docker-compose.yml' || it == 'docker-compose.prod.yml' || it == '.env.example' || it.startsWith('docker/')
                     }
                     env.DEPLOY_REQUIRED = (
                         env.BACKEND_CHANGED == 'true' ||
@@ -447,6 +447,7 @@ pipeline {
                 sh '''
                     git config --global --add safe.directory "$HOST_PROJECT_DIR"
                     cd "$HOST_PROJECT_DIR"
+                    export COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
                     git fetch origin main
 
                     # Deploy persis commit yang barusan dites. "reset --hard
@@ -529,8 +530,8 @@ pipeline {
                         docker volume rm marketplace_api_vendor || true
                     fi
 
-                    # mongo-express ikut agar perubahan config-nya (mis. port) benar-benar sampai ke server.
-                    docker compose -p marketplace up -d --no-build api queue reverb scheduler frontend chat-service recommendation-service mongo-express
+                    # mongo-express dan ollama ikut agar perubahan config-nya (mis. port) benar-benar sampai ke server.
+                    docker compose -p marketplace up -d --no-build api queue reverb scheduler frontend chat-service recommendation-service mongo-express ollama
                     # nginx sendiri jarang berubah -> compose gak recreate dia, tapi upstream
                     # (blue-api dkk) di atas barusan direcreate dan dapet IP Docker baru.
                     # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi

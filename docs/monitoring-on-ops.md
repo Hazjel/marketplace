@@ -25,7 +25,8 @@ akun sendiri ke pemilik ops daripada memakai `admin`.
 
 - Laravel mengeluarkan `/metrics`, chat-service dan recommendation-service masing-masing
   `/metrics`. Port yang dipublikasikan: nginx `8888`, chat-service `8001`,
-  recommendation-service `8002`.
+  recommendation-service `8002`, hanya di `127.0.0.1` dan `172.17.0.1` (bridge Docker,
+  lewat `docker-compose.prod.yml`), tidak di LAN atau tailnet.
 - Storage metrik Laravel ada di Redis bersama dengan prefix `<REDIS_PREFIX>prometheus:`.
   ACL Redis bersama hanya mengizinkan key di namespace aplikasi, dan library memakai
   `KEYS` untuk membaca Summary, yang ditolak; `App\Support\PrometheusRedisStorage`
@@ -85,5 +86,5 @@ curl -X POST http://127.0.0.1:10014/-/reload
 
 - Query dashboard tidak memfilter `job`. Kalau project lain kelak mengekspor metrik dengan
   nama yang sama (misalnya `http_requests_total`), panel bisa bercampur.
-- Port `8001` dan `8002` dipublikasikan ke jaringan server (bukan lewat Cloudflare).
-  Scraper memakainya; itu tidak berubah dari sebelumnya.
+- Scraper menjangkau `8888`, `8001`, dan `8002` lewat `host.docker.internal` = `172.17.0.1`.
+  Kalau bridge Docker di host berganti IP, ubah `docker-compose.prod.yml` juga.

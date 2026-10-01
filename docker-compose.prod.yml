@@ -1,0 +1,22 @@
+# Tambahan khusus produksi, dipakai tahap Deploy lewat
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+# Perintah compose manual di server juga perlu file ini, kalau tidak binding di
+# bawah hilang saat container di-recreate (situs tetap jalan, scrape berhenti).
+#
+# Prometheus ops (/opt/ops-monitoring) berjalan di network-nya sendiri dan
+# men-scrape lewat host.docker.internal -> host-gateway = docker0 (172.17.0.1).
+# Port di-bind ke IP itu, bukan 0.0.0.0, supaya tetap terjangkau dari container
+# di host tapi tidak dari LAN atau tailnet. Target scrape-nya ada di
+# monitoring/ops/blukios-scrape.yml.
+services:
+  nginx:
+    ports:
+      - "172.17.0.1:${NGINX_HOST_PORT:-80}:80"
+
+  chat-service:
+    ports:
+      - "172.17.0.1:8001:8001"
+
+  recommendation-service:
+    ports:
+      - "172.17.0.1:8002:8002"

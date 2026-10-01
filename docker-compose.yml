@@ -135,7 +135,9 @@ services:
       - frontend
       - frontend-seller
     ports:
-      - "${NGINX_HOST_PORT:-80}:80"
+      # Loopback saja: cloudflared di host menjangkau localhost. Binding untuk
+      # scraper ops (bridge Docker) ada di docker-compose.prod.yml.
+      - "127.0.0.1:${NGINX_HOST_PORT:-80}:80"
     volumes:
       - ./api-blue:/var/www
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
@@ -343,8 +345,10 @@ services:
     image: ollama/ollama:latest
     container_name: blue-ollama
     restart: unless-stopped
-    ports:
-      - "11435:11434"
+    # Tanpa port host: Ollama tidak punya autentikasi, dan port yang dulu
+    # terbuka di 0.0.0.0 bisa dipakai siapa pun di LAN/tailnet untuk inferensi,
+    # pull, atau hapus model. chat-service memanggilnya lewat ollama:11434.
+    # Dev lokal: port 11435 ada di docker-compose.local.yml.
     volumes:
       - ollama:/root/.ollama
 
@@ -364,7 +368,7 @@ services:
       - shared-infra
     command: python -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload --reload-delay 1 --proxy-headers --forwarded-allow-ips='*'
     ports:
-      - "8001:8001"
+      - "127.0.0.1:8001:8001"
     volumes:
       - ./chat-service:/app
       - chroma_data:/app/chroma_db        # RAG vector index
@@ -399,7 +403,7 @@ services:
     depends_on:
       - nginx
     ports:
-      - "8002:8002"
+      - "127.0.0.1:8002:8002"
     volumes:
       - ./recommendation-service:/app
       - reco_models:/app/models   # model SVD terlatih -- persist antar restart, gak perlu retrain dari nol

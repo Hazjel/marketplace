@@ -122,6 +122,12 @@ services:
     depends_on:
       - prometheus
 
+  # Produksi tidak mempublikasikan port Ollama; di laptop chat-service yang
+  # dijalankan di luar Docker memanggilnya lewat localhost:11435.
+  ollama:
+    ports:
+      - "127.0.0.1:11435:11434"
+
 volumes:
   local_postgres_data:
   local_mongo_data:

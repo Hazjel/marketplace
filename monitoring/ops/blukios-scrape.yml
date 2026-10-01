@@ -2,9 +2,9 @@
 # Ditambahkan di bawah `scrape_configs:` di prometheus/prometheus.yml; apply-on-ops.sh
 # melakukannya otomatis.
 #
-# Target lewat host.docker.internal (sudah dipetakan ke host di compose ops) ke port
-# yang dipublikasikan container Blukios: 8888 nginx, 8001 chat-service, 8002
-# recommendation-service. Di 8888, /metrics hanya dilayani untuk request tanpa header
+# Target lewat host.docker.internal (sudah dipetakan ke host-gateway di compose ops) ke
+# port yang dipublikasikan container Blukios di 172.17.0.1 (docker-compose.prod.yml),
+# tidak di 0.0.0.0: 8888 nginx, 8001 chat-service, 8002 recommendation-service. Di 8888, /metrics hanya dilayani untuk request tanpa header
 # CF-Connecting-IP, jadi scraper lolos sementara trafik publik lewat Cloudflare ditolak.
   - job_name: 'blukios-laravel-api'
     metrics_path: /metrics
