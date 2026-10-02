@@ -75,12 +75,13 @@ class CheckoutTaxMoneyTest extends TestCase
             ->postJson('/api/transaction', $payload)
             ->assertStatus(201);
 
-        // shipping is 15_000 (FakeShippingGateway)
+        // shipping is 15_000 (FakeShippingGateway), service fee 1_000 (config)
         $this->assertDatabaseHas('transactions', [
             'store_id' => $store->id,
             'shipping_cost' => 15_000,
             'tax' => 0,
-            'grand_total' => 100_050 + 15_000, // 115_050
+            'service_fee' => 1_000,
+            'grand_total' => 100_050 + 15_000 + 1_000, // 116_050
         ]);
     }
 
@@ -129,16 +130,19 @@ class CheckoutTaxMoneyTest extends TestCase
             ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
             ->postJson('/api/transaction', $payload)
             ->assertStatus(201)
-            // subtotal 100_050 + shipping 15_000 - discount 20_000
+            // subtotal 100_050 + shipping 15_000 - discount 20_000 + service fee 1_000
+            // (the voucher never reduces the service fee)
             ->assertJsonPath('data.tax', 0)
+            ->assertJsonPath('data.service_fee', 1_000)
             ->assertJsonPath('data.discount_amount', 20_000)
-            ->assertJsonPath('data.grand_total', 95_050);
+            ->assertJsonPath('data.grand_total', 96_050);
 
         $this->assertDatabaseHas('transactions', [
             'buyer_id' => $buyer->id,
             'tax' => 0,
+            'service_fee' => 1_000,
             'discount_amount' => 20_000,
-            'grand_total' => 95_050,
+            'grand_total' => 96_050,
         ]);
     }
 }

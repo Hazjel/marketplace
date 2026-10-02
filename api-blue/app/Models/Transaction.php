@@ -28,6 +28,7 @@ class Transaction extends Model
         'delivery_proof',
         'delivery_status',
         'tax',
+        'service_fee',
         'grand_total',
         'payment_status',
         'receiving_proof',
@@ -40,6 +41,7 @@ class Transaction extends Model
     protected $casts = [
         'shipping_cost' => 'decimal:2',
         'tax' => 'decimal:2',
+        'service_fee' => 'decimal:2',
         'grand_total' => 'decimal:2',
         'admin_fee' => 'decimal:2',
         'seller_amount' => 'decimal:2',

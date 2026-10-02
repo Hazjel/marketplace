@@ -84,16 +84,17 @@ class MoneyJsonContractTest extends TestCase
         $this->category();
         $transaction = Transaction::factory()->create(['payment_status' => 'paid']);
         $transaction->forceFill([
-            'shipping_cost' => 15_000, 'tax' => 11_006,
+            'shipping_cost' => 15_000, 'tax' => 11_006, 'service_fee' => 1_000,
             'discount_amount' => 20_000, 'grand_total' => 100_050,
         ])->save();
 
         $t = (new TransactionResource($transaction->fresh()->load('transactionDetails')))->toArray(request());
 
-        foreach (['shipping_cost', 'tax', 'grand_total', 'discount_amount'] as $key) {
+        foreach (['shipping_cost', 'tax', 'service_fee', 'grand_total', 'discount_amount'] as $key) {
             $this->assertIsInt($t[$key], "$key must be an integer");
         }
         $this->assertSame(11_006, $t['tax']);
+        $this->assertSame(1_000, $t['service_fee']);
         $this->assertSame(100_050, $t['grand_total']);
 
         // nested transaction_details[].subtotal integer emission is pinned

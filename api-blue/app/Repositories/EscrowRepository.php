@@ -142,7 +142,8 @@ class EscrowRepository implements EscrowRepositoryInterface
         $shipping = Money::fromDecimalString((string) $transaction->shipping_cost);
         $goods = Money::fromDecimalString((string) $transaction->grand_total)
             ->subtract($shipping)
-            ->subtract(Money::fromDecimalString((string) $transaction->tax));
+            ->subtract(Money::fromDecimalString((string) $transaction->tax))
+            ->subtract(Money::fromDecimalString((string) ($transaction->service_fee ?? 0)));
 
         $adminFee = $goods->percentage((int) config('marketplace.admin_fee_basis_points'));
         $sellerAmount = $goods->subtract($adminFee)->add($shipping);

@@ -502,7 +502,12 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             $grandTotal = $grandTotal->subtract($discount)->clampMin(Money::zero());
 
+            // Added after the discount so a voucher never reduces it.
+            $serviceFee = Money::rupiah((int) config('marketplace.buyer_service_fee'));
+            $grandTotal = $grandTotal->add($serviceFee);
+
             $transaction->tax = $tax->minor();
+            $transaction->service_fee = $serviceFee->minor();
             $transaction->grand_total = $grandTotal->minor();
             $transaction->voucher_id = $voucher?->id;
             $transaction->discount_amount = $discount->minor();

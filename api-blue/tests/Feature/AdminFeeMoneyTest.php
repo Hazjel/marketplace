@@ -113,6 +113,18 @@ class AdminFeeMoneyTest extends TestCase
         $this->assertSame(105_000, (int) $transaction->fresh()->seller_amount);
     }
 
+    public function test_the_buyer_service_fee_stays_with_the_platform(): void
+    {
+        // grand total 116_000 = goods 100_000 + shipping 15_000 + service fee 1_000
+        $transaction = $this->transaction(grandTotal: 116_000, shippingCost: 15_000);
+        $transaction->update(['service_fee' => 1_000]);
+
+        app(EscrowRepositoryInterface::class)->credit($transaction->fresh());
+
+        $this->assertSame(10_000, (int) $transaction->fresh()->admin_fee);
+        $this->assertSame(105_000, (int) $transaction->fresh()->seller_amount);
+    }
+
     public function test_release_pays_the_seller_amount_locked_at_credit(): void
     {
         $transaction = $this->transaction(grandTotal: 126_005, shippingCost: 15_000);

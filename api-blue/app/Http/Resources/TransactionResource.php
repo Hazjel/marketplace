@@ -38,6 +38,7 @@ class TransactionResource extends JsonResource
             'delivery_proof' => $this->delivery_proof,
             'delivery_status' => $this->delivery_status,
             'tax' => Money::fromDecimalString((string) $this->tax)->minor(),
+            'service_fee' => Money::fromDecimalString((string) ($this->service_fee ?? 0))->minor(),
             'grand_total' => Money::fromDecimalString((string) $this->grand_total)->minor(),
             'voucher_id' => $this->voucher_id,
             'voucher_code' => $this->voucher?->code,
