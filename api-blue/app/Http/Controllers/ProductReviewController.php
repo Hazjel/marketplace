@@ -107,10 +107,10 @@ class ProductReviewController extends Controller implements HasMiddleware
                     }
                     $type = str_starts_with($mime, 'video') ? 'video' : 'image';
                     $filename = time().'_'.Str::random(16).'.'.$allowedMimes[$mime];
-                    $file->move(public_path('upload/reviews'), $filename);
+                    // public disk: www-data cannot write to the public/ bind mount.
                     ProductReviewAttachment::create([
                         'product_review_id' => $productReview->id,
-                        'file_path' => 'upload/reviews/'.$filename,
+                        'file_path' => 'storage/'.$file->storeAs('reviews', $filename, 'public'),
                         'file_type' => $type,
                     ]);
                 }

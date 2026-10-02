@@ -231,7 +231,7 @@ class TransactionController extends Controller implements HasMiddleware
             $transaction = $this->transactionRepository->getById($id);
 
             if (! $transaction) {
-                return ResponseHelper::jsonResponse(true, 'Data Transaksi Tidak Ditemukan', null, 404);
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
             }
 
             if (Auth::user()->cannot('complete', $transaction)) {
@@ -259,8 +259,10 @@ class TransactionController extends Controller implements HasMiddleware
                     return ResponseHelper::jsonResponse(false, 'Tipe file tidak diizinkan.', null, 422);
                 }
                 $filename = time().'_'.Str::random(16).'.'.$allowedMimes[$mime];
-                $file->move(public_path('upload/transactions'), $filename);
-                $receivingProof = 'upload/transactions/'.$filename;
+                // public disk, not public/upload: public/ is the host-owned
+                // bind mount that www-data cannot write to, which made every
+                // completion fail. nginx serves /storage from this disk.
+                $receivingProof = 'storage/'.$file->storeAs('transactions', $filename, 'public');
             }
 
             // Lock + validasi status + rilis escrow dalam satu transaksi --

@@ -15,6 +15,7 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -241,6 +242,7 @@ class EscrowPaymentTest extends TestCase
         $this->storeBalance->update(['pending_balance' => $sellerAmount]);
 
         // Act: buyer confirms receipt
+        Storage::fake('public');
         $file = UploadedFile::fake()->image('proof.jpg');
 
         $response = $this->actingAs($this->buyerUser, 'sanctum')
@@ -258,6 +260,11 @@ class EscrowPaymentTest extends TestCase
         // Verify: delivery_status = completed
         $transaction->refresh();
         $this->assertEquals('completed', $transaction->delivery_status);
+
+        // The proof lives on the public disk: public/ is a host-owned bind
+        // mount in production that the PHP worker cannot write to.
+        $this->assertStringStartsWith('storage/transactions/', $transaction->receiving_proof);
+        Storage::disk('public')->assertExists(substr($transaction->receiving_proof, strlen('storage/')));
 
         // Verify: funds moved from pending to available
         $this->storeBalance->refresh();
