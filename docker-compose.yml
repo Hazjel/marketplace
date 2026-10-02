@@ -1,3 +1,18 @@
+# URL dan mail untuk setiap container Laravel. Sebelumnya hanya api yang
+# mendapatkannya; queue membaca api-blue/.env lama (domain mati, SMTP Gmail),
+# jadi email reset password yang di-queue berisi link yang tidak bisa dibuka.
+x-app-mail-env: &app-mail-env
+  APP_URL: ${APP_URL:-http://localhost}
+  FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+  MAIL_MAILER: smtp
+  # Default tetap Gmail. Skema mengikuti port (465 = smtps), lihat MailManager.
+  MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+  MAIL_PORT: ${MAIL_PORT:-587}
+  MAIL_USERNAME: ${MAIL_USERNAME:-}
+  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+  MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@blukios.com}
+  MAIL_FROM_NAME: Blukios
+
 services:
   # ─────────────────────────────────────────
   # Infrastructure
@@ -45,6 +60,7 @@ services:
       - ./api-blue:/var/www
       - api_vendor:/var/www/vendor
     environment:
+      <<: *app-mail-env
       APP_NAME: Blukios
       # Default aman: production/matikan debug kalau tidak di-override.
       # Sebelumnya production sungguhan berjalan dengan APP_ENV=local dan
@@ -63,7 +79,6 @@ services:
       APP_CONFIG_CACHE: /tmp/laravel-config.php
       APP_ROUTES_CACHE: /tmp/laravel-routes.php
       APP_DEBUG: ${APP_DEBUG:-false}
-      APP_URL: ${APP_URL:-http://localhost}
       APP_KEY: ${APP_KEY:?APP_KEY wajib diisi di .env}
       # Shared Postgres -- pola yang sama dengan shared Redis di C2.1B:
       # instance-nya hidup di /opt/shared-infra, punya auth, dan tidak
@@ -96,18 +111,9 @@ services:
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: database
-      MAIL_MAILER: smtp
-      # Default tetap Gmail. Skema mengikuti port (465 = smtps), lihat MailManager.
-      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@blukios.com}
-      MAIL_FROM_NAME: Blukios
       MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
       MIDTRANS_IS_PRODUCTION: "false"
       KEY_RAJA_ONGKIR: ${KEY_RAJA_ONGKIR:-}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
       # Dua domain FE (buyer + seller) -- lihat config/cors.php, fallback
       # ke FRONTEND_URL tunggal kalau var ini belum di-set di .env.
       FRONTEND_URLS: ${FRONTEND_URLS:-}
@@ -163,6 +169,7 @@ services:
       - ./api-blue:/var/www
       - api_vendor:/var/www/vendor
     environment:
+      <<: *app-mail-env
       APP_NAME: Blukios
       APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
@@ -219,6 +226,7 @@ services:
       - ./api-blue:/var/www
       - api_vendor:/var/www/vendor
     environment:
+      <<: *app-mail-env
       APP_NAME: Blukios
       APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
@@ -269,6 +277,7 @@ services:
       - ./api-blue:/var/www
       - api_vendor:/var/www/vendor
     environment:
+      <<: *app-mail-env
       APP_NAME: Blukios
       APP_ENV: ${APP_ENV:-production}
       # Cache config/route container ke luar bind mount — kalau tidak, cache
