@@ -23,10 +23,17 @@ class RefundCancelledTransactionJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 3;
+    // Refund QRIS/e-wallet butuh dana yang sudah cair di saldo merchant:
+    // Midtrans menjawab 414 "insufficient funds" sampai pembayaran settle
+    // (satu-dua hari). Terus coba selama itu sebelum dialihkan ke manual.
+    // Setelah 21600 jeda terakhir berulang: 12 percobaan ~1,8 hari.
+    public int $tries = 12;
 
     /** @var array<int, int> */
-    public array $backoff = [60, 300];
+    public array $backoff = [60, 300, 1800, 3600, 21600];
+
+    // Kode Midtrans yang layak dicoba lagi; 4xx lain tidak akan berubah.
+    private const RETRYABLE_CODES = [414, 429];
 
     public function __construct(private readonly string $transactionId) {}
 
@@ -38,7 +45,17 @@ class RefundCancelledTransactionJob implements ShouldQueue
             return;
         }
 
-        $result = $gateway->refund($transaction, $transaction->refund_reason ?? 'Pesanan dibatalkan penjual');
+        try {
+            $result = $gateway->refund($transaction, $transaction->refund_reason ?? 'Pesanan dibatalkan penjual');
+        } catch (Throwable $e) {
+            if ($this->isRetryable($e)) {
+                throw $e;
+            }
+
+            $this->fallBackToManual($transaction, $e);
+
+            return;
+        }
 
         if ($result === PaymentGatewayInterface::REFUND_DONE) {
             $transaction->update([
@@ -66,10 +83,21 @@ class RefundCancelledTransactionJob implements ShouldQueue
     {
         $transaction = Transaction::find($this->transactionId);
 
-        if (! $transaction || $transaction->refund_status !== 'processing') {
-            return;
+        if ($transaction && $transaction->refund_status === 'processing') {
+            $this->fallBackToManual($transaction, $e);
         }
+    }
 
+    // Gangguan jaringan (kode 0) dan 5xx Midtrans juga sementara.
+    private function isRetryable(Throwable $e): bool
+    {
+        $code = (int) $e->getCode();
+
+        return $code === 0 || $code >= 500 || in_array($code, self::RETRYABLE_CODES, true);
+    }
+
+    private function fallBackToManual(Transaction $transaction, Throwable $e): void
+    {
         $transaction->update([
             'refund_status' => 'manual_required',
             'refund_method' => 'manual',

@@ -122,6 +122,11 @@ class SellerCancelRefundTest extends TestCase
             throw new RuntimeException('Midtrans unreachable');
         }
 
+        if (str_starts_with($this->gatewayResult, 'http:')) {
+            $code = (int) substr($this->gatewayResult, 5);
+            throw new RuntimeException("Midtrans HTTP {$code}", $code);
+        }
+
         return $this->gatewayResult;
     }
 
@@ -264,6 +269,35 @@ class SellerCancelRefundTest extends TestCase
 
         $this->assertStringContainsString('Midtrans unreachable', $transaction->fresh()->refund_note);
         $this->assertEquals(0, (float) $this->storeBalance->fresh()->pending_balance);
+    }
+
+    public function test_insufficient_merchant_funds_is_retried_not_sent_to_manual(): void
+    {
+        $transaction = $this->paidOrder('BLK_REFUND_010');
+        $transaction->update(['refund_status' => 'processing']);
+        $this->gatewayResult = 'http:414';
+
+        try {
+            (new RefundCancelledTransactionJob($transaction->id))->handle(app(PaymentGatewayInterface::class));
+            $this->fail('A 414 must be rethrown so the queue retries it');
+        } catch (RuntimeException $e) {
+            $this->assertSame(414, $e->getCode());
+        }
+
+        $this->assertSame('processing', $transaction->fresh()->refund_status);
+    }
+
+    public function test_permanent_gateway_rejection_goes_straight_to_manual(): void
+    {
+        $transaction = $this->paidOrder('BLK_REFUND_011');
+        $transaction->update(['refund_status' => 'processing']);
+        $this->gatewayResult = 'http:412';
+
+        (new RefundCancelledTransactionJob($transaction->id))->handle(app(PaymentGatewayInterface::class));
+
+        $transaction->refresh();
+        $this->assertSame('manual_required', $transaction->refund_status);
+        $this->assertStringContainsString('Midtrans HTTP 412', $transaction->refund_note);
     }
 
     public function test_failed_automatic_refund_becomes_manual_with_the_reason(): void

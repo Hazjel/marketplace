@@ -228,8 +228,11 @@ service fee and shipping included. The platform absorbs the Midtrans fee.
 
 - `processing`: `RefundCancelledTransactionJob` calls Midtrans (card void
   before settlement, `/refund` after; card, GoPay, ShopeePay, QRIS, Akulaku).
+  Midtrans answers 414 (insufficient funds) until the payment has settled
+  into the merchant balance, so 414, 429, 5xx and network errors are retried
+  for ~1.8 days; any other rejection is final.
 - `manual_required`: bank VA and other methods Midtrans cannot refund, or an
-  API refund that failed 3 times (`refund_note` says why). The buyer submits
+  API refund that was rejected or kept failing (`refund_note` says why). The buyer submits
   a bank account (`/refund-account`, stored encrypted, hidden from the
   seller); an admin transfers and calls `/mark-refunded`.
 - `refunded`: done (`refund_method` `midtrans` or `manual`). A Midtrans
