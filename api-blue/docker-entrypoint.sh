@@ -66,7 +66,10 @@ php artisan route:cache
 # aman dibetulkan di sini tiap start daripada nunggu error tempnam()/permission
 # denied muncul dulu baru fix manual
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+# X, not 775: execute bits only on directories, not on every file.
+# storage/app/public stays world-readable for nginx; logs do not.
+chmod -R u+rwX,g+rwX,o+rX,o-w /var/www/storage /var/www/bootstrap/cache
+chmod -R o-rwx /var/www/storage/logs
 
 echo "🚀 Starting PHP-FPM..."
 exec php-fpm -F
