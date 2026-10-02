@@ -5,13 +5,14 @@ Blukios tidak menjalankan Prometheus dan Grafana sendiri. Server punya stack ops
 `/opt/shared-infra`. Blukios hanya mengeluarkan metrik; ops yang mengumpulkan dan
 menampilkannya.
 
-> **Status 2026-10-03:** stack ops mati sejak 2026-09-27 21:42 WIB. `ops-prometheus`
-> dan `ops-cadvisor` dihentikan dengan tertib (bukan crash) dan `restart: no`, jadi tidak
-> hidup lagi sendiri; `ops-grafana` gagal karena database SQLite-nya terkunci. Tepat
-> sebelumnya cAdvisor butuh 22 menit untuk satu pemindaian disk Docker. Menyalakannya
-> lagi keputusan pemilik root; tanpa cAdvisor bebannya jauh lebih ringan. Kontainer
-> `dash-prometheus`/`dash-grafana` yang jalan milik proyek lain (`/opt/Dash-Siem`).
-> Sampai stack ops hidup lagi, yang menjaga Blukios adalah alert dari aplikasi di bawah.
+> **Status 2026-10-03:** stack ops sempat mati 2026-09-27 21:42 WIB sampai 2026-10-03:
+> `ops-prometheus` dan `ops-cadvisor` dihentikan dengan tertib dengan `restart: no`, dan
+> `ops-grafana` gagal karena database SQLite-nya terkunci. Tepat sebelumnya cAdvisor butuh
+> 22 menit untuk satu pemindaian disk Docker. Prometheus dan Grafana dinyalakan lagi
+> dengan `restart: unless-stopped`; **cAdvisor sengaja dibiarkan mati** (target
+> `cadvisor` akan `down`, itu wajar). Kontainer `dash-prometheus`/`dash-grafana` milik
+> proyek lain (`/opt/Dash-Siem`). Kalau stack ini mati lagi, alert dari aplikasi di bawah
+> tetap berjalan.
 
 ## Alert dari aplikasi (`ops:check`)
 
