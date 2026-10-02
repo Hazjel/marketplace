@@ -7,6 +7,7 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -35,6 +36,23 @@ class AuthTest extends TestCase
             ->assertJsonStructure(['data' => ['token', 'id', 'name', 'email']]);
 
         $this->assertDatabaseHas('users', ['email' => 'test@blukios.com']);
+    }
+
+    public function test_https_signed_verification_link_works_behind_the_tls_proxy(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => null]);
+        URL::forceScheme('https');
+        $signed = URL::temporarySignedRoute('verification.verify', now()->addHour(), [
+            'id' => $user->id,
+            'hash' => sha1($user->getEmailForVerification()),
+        ]);
+
+        // Cloudflare terminates TLS: PHP receives plain http plus X-Forwarded-Proto.
+        $this->withHeader('X-Forwarded-Proto', 'https')
+            ->get(str_replace('https://', 'http://', $signed))
+            ->assertRedirect();
+
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
     }
 
     public function test_user_can_login()

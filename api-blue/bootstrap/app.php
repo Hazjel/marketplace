@@ -10,6 +10,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -27,6 +28,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'midtrans-callback',
             'logistics/webhook',
         ]);
+        // TLS ends at Cloudflare, so PHP sees http:// and every signed URL
+        // (email verification) failed with 403. Only the scheme is trusted:
+        // trusting X-Forwarded-For too would let clients spoof the IP used
+        // by the per-IP rate limiters. nginx is reachable only through the
+        // tunnel, and Cloudflare always overwrites X-Forwarded-Proto.
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_PROTO);
         $middleware->append(HandleCors::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->append(UpdateLastSeen::class);
