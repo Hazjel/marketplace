@@ -17,12 +17,10 @@ use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
 /**
- * B3.2b: checkout tax is now `Money->percentage(1100)` (11% PPN, HALF_UP,
- * on the product subtotal only — shipping is not taxed), and subtotal /
- * grand-total arithmetic runs on Money to the persistence boundary.
- *
- * This pins the rounding at a subtotal whose 11% lands exactly on a .5
- * tie, so a regression to truncation or banker's rounding is caught.
+ * Checkout adds no tax: goods VAT belongs to PKP sellers inside their own
+ * price, not to a marketplace surcharge. Earlier transactions keep the 11%
+ * they were charged (B3.2b). Subtotal / grand-total arithmetic still runs
+ * on Money to the persistence boundary.
  */
 class CheckoutTaxMoneyTest extends TestCase
 {
@@ -37,7 +35,7 @@ class CheckoutTaxMoneyTest extends TestCase
         $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
     }
 
-    public function test_tax_is_eleven_percent_half_up_and_shipping_is_untaxed(): void
+    public function test_checkout_adds_no_tax_to_goods_or_shipping(): void
     {
         $seller = User::factory()->create();
         $seller->assignRole('store');
@@ -51,7 +49,6 @@ class CheckoutTaxMoneyTest extends TestCase
 
         $category = ProductCategory::create(['name' => 'G', 'slug' => 'g-tax', 'description' => 'G']);
 
-        // 100_050 * 11% = 11_005.5  -> HALF_UP -> 11_006
         $product = Product::create([
             'store_id' => $store->id, 'product_category_id' => $category->id,
             'name' => 'P', 'slug' => 'p-tax-'.uniqid(),
@@ -78,16 +75,16 @@ class CheckoutTaxMoneyTest extends TestCase
             ->postJson('/api/transaction', $payload)
             ->assertStatus(201);
 
-        // shipping is 15_000 (FakeShippingGateway) and must not be taxed
+        // shipping is 15_000 (FakeShippingGateway)
         $this->assertDatabaseHas('transactions', [
             'store_id' => $store->id,
             'shipping_cost' => 15_000,
-            'tax' => 11_006,
-            'grand_total' => 100_050 + 11_006 + 15_000, // 126_056
+            'tax' => 0,
+            'grand_total' => 100_050 + 15_000, // 115_050
         ]);
     }
 
-    public function test_full_pipeline_odd_tax_plus_capped_percentage_voucher(): void
+    public function test_full_pipeline_capped_percentage_voucher_without_tax(): void
     {
         $seller = User::factory()->create();
         $seller->assignRole('store');
@@ -132,16 +129,16 @@ class CheckoutTaxMoneyTest extends TestCase
             ->withHeaders(['X-Idempotency-Key' => (string) Str::uuid()])
             ->postJson('/api/transaction', $payload)
             ->assertStatus(201)
-            // subtotal 100_050 + tax 11_006 + shipping 15_000 - discount 20_000
-            ->assertJsonPath('data.tax', 11_006)
+            // subtotal 100_050 + shipping 15_000 - discount 20_000
+            ->assertJsonPath('data.tax', 0)
             ->assertJsonPath('data.discount_amount', 20_000)
-            ->assertJsonPath('data.grand_total', 106_056);
+            ->assertJsonPath('data.grand_total', 95_050);
 
         $this->assertDatabaseHas('transactions', [
             'buyer_id' => $buyer->id,
-            'tax' => 11_006,
+            'tax' => 0,
             'discount_amount' => 20_000,
-            'grand_total' => 106_056,
+            'grand_total' => 95_050,
         ]);
     }
 }

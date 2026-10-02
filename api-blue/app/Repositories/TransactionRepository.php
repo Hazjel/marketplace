@@ -468,13 +468,13 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             Log::info('Subtotal calculated:', ['subtotal' => $subtotal->minor()]);
 
-            // PPN 11%, HALF_UP, on the product subtotal only (shipping is
-            // not taxed). Basis points: 1100 = 11%.
-            $tax = $subtotal->percentage(1100);
+            // No tax on the buyer: goods VAT is the seller's obligation (only
+            // PKP sellers charge it, inside their own price), not a marketplace
+            // surcharge. The column stays for older transactions that had it.
+            $tax = Money::zero();
 
             // shipping_cost was resolved server-side as whole rupiah.
             $grandTotal = $subtotal
-                ->add($tax)
                 ->add(Money::rupiah((int) $data['shipping_cost']));
 
             // Voucher: re-validate server-side against the SAME rules as

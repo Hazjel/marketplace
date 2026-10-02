@@ -177,9 +177,9 @@ class VoucherTest extends TestCase
 
         $response->assertStatus(201);
 
-        // subtotal 100000, tax 11% = 11000, shipping 15000 => 126000 - 20000 discount = 106000
+        // subtotal 100000 + shipping 15000 - 20000 discount = 95000 (no buyer tax)
         $response->assertJsonPath('data.discount_amount', 20000)
-            ->assertJsonPath('data.grand_total', 106000)
+            ->assertJsonPath('data.grand_total', 95000)
             ->assertJsonPath('data.voucher_id', $voucher->id);
 
         $this->assertDatabaseHas('voucher_redemptions', [
