@@ -304,16 +304,6 @@ class StoreController extends Controller implements HasMiddleware
 
     public function registerStore(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|unique:stores,name',
-            'phone' => 'required|numeric|regex:/^08[0-9]{8,13}$/',
-            'city' => 'nullable|string',
-            'address' => 'nullable|string',
-            'postal_code' => 'nullable|string',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
-        ]);
-
         $user = Auth::user();
 
         // Source of truth-nya keberadaan row Store, bukan role 'store'.
@@ -326,6 +316,21 @@ class StoreController extends Controller implements HasMiddleware
         if ($user->store()->exists() || $user->hasRole('store')) {
             return ResponseHelper::jsonResponse(false, 'Anda sudah memiliki toko.', null, 400);
         }
+
+        // city/address/postal_code are NOT NULL in stores (they 500'd when
+        // omitted), and address_id is the shipping origin: checkout quotes
+        // couriers from (int) $store->address_id, so a store saved with '-'
+        // could not be bought from until the seller re-edited it.
+        $request->validate([
+            'name' => 'required|string|unique:stores,name',
+            'phone' => 'required|numeric|regex:/^08[0-9]{8,13}$/',
+            'address_id' => 'required|integer|min:1',
+            'city' => 'required|string',
+            'address' => 'required|string',
+            'postal_code' => 'required|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+        ]);
 
         try {
             DB::beginTransaction();
@@ -343,7 +348,7 @@ class StoreController extends Controller implements HasMiddleware
                 'is_verified' => false,
                 'logo' => '',
                 'about' => '-',
-                'address_id' => '-',
+                'address_id' => (string) $request->address_id,
             ]);
 
             // Create Store Balance

@@ -22,6 +22,7 @@ const loadingAddress = ref(false)
 const form = ref({
   name: '',
   phone: '',
+  address_id: null,
   city: '',
   address: '',
   postal_code: ''
@@ -69,6 +70,7 @@ const centerMapOnCity = async (city) => {
 const handleAddressInput = debounce(async (search) => {
   if (!search.trim()) {
     showAddressOptions.value = false
+    form.value.address_id = null
     form.value.city = ''
     form.value.postal_code = ''
     return
@@ -95,6 +97,8 @@ const handleAddressInput = debounce(async (search) => {
 }, 500)
 
 const handleAddressSelect = (selected) => {
+  // Shipping origin for courier quotes at checkout.
+  form.value.address_id = selected.id
   form.value.city = selected.city_name
   form.value.postal_code = selected.zip_code
   // Pre-fill address text area with the label (District, City, Province)
@@ -113,6 +117,7 @@ const handleSubmit = async () => {
     const payload = {
       name: form.value.name,
       phone: form.value.phone,
+      address_id: form.value.address_id,
       city: form.value.city,
       address: form.value.address,
       postal_code: form.value.postal_code,
@@ -288,6 +293,7 @@ const handleSubmit = async () => {
                   </li>
                 </ul>
               </Transition>
+              <span v-if="errors.address_id" class="text-red-500 dark:text-red-400 text-xs font-medium ml-2">Pilih lokasi dari hasil pencarian.</span>
             </div>
 
             <!-- City & Postal Code (Grid) -->

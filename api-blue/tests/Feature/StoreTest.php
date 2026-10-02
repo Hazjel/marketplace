@@ -25,6 +25,7 @@ class StoreTest extends TestCase
         $payload = [
             'name' => 'Toko Bagus',
             'phone' => '081299998888',
+            'address_id' => 17601,
             'city' => 'Jakarta',
             'address' => 'Jl Sudirman',
             'postal_code' => '12345',
@@ -34,10 +35,28 @@ class StoreTest extends TestCase
 
         $response->assertStatus(201);
         // Username digenerate dari nama toko + suffix acak (mis. toko-bagus-Y84x8)
-        $this->assertDatabaseHas('stores', ['name' => 'Toko Bagus']);
+        $this->assertDatabaseHas('stores', ['name' => 'Toko Bagus', 'address_id' => '17601']);
 
         // User should now have 'store' role
         $this->assertTrue($user->fresh()->hasRole('store'));
+    }
+
+    public function test_registering_a_store_without_a_location_is_a_validation_error(): void
+    {
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'sanctum')->postJson('/api/register-store', [
+            'name' => 'Toko Tanpa Lokasi',
+            'phone' => '081299998888',
+        ])->assertStatus(422)
+            ->assertJsonValidationErrors(['address_id', 'city', 'address', 'postal_code']);
+
+        $this->assertDatabaseMissing('stores', ['name' => 'Toko Tanpa Lokasi']);
+        $this->assertFalse($user->fresh()->hasRole('store'));
     }
 
     public function test_store_logo_rejects_a_non_image_extension(): void
