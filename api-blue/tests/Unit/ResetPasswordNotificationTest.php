@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Notifications\ResetPasswordNotification;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use PHPUnit\Framework\TestCase;
 
@@ -20,5 +21,10 @@ class ResetPasswordNotificationTest extends TestCase
             ShouldQueue::class,
             new ResetPasswordNotification('dummy-token'),
         );
+    }
+
+    public function test_verification_notification_is_queued(): void
+    {
+        $this->assertInstanceOf(ShouldQueue::class, new VerifyEmailNotification);
     }
 }
