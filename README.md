@@ -423,7 +423,7 @@ Actively developed. Production is live and CI-gated. First tagged release:
   | **C2** | **done** — production infra hardening: `docker-compose.prod.yml`, required DB/Redis/Mongo/Reverb secrets, no `0.0.0.0` ports, blocking gitleaks |
   | **C3** | **done** — payment/order end-to-end verification in sandbox (card, BCA VA, QRIS: Snap → webhook → escrow → release), new money model (no buyer tax, Rp1.000 service fee), seller rejection with refunds |
   | **C4** | full mobile buyer + seller parity — mobile v1.2.0 matches checkout totals and refunds |
-  | **C5** | observability — **in progress**: business-path metrics and app-side email alerts (`ops:check`, see `docs/monitoring-on-ops.md`); structured logging still open |
+  | **C5** | **done** — observability: email alerts from the app (`ops:check`: queue, failed jobs, Midtrans webhooks, refunds, API 5xx, web/mobile crashes), business-path metrics, JSON logs with a per-request id; see `docs/monitoring-on-ops.md` |
   | **C6** | security & dependency debt (`unhead` chain, dependency scanning, auth/rate-limit review) |
   | **C7** | mobile release engineering — signed APK releases on GitHub (v1.2.0, new signing key); mobile Jenkins job still needs a Jenkins admin |
   | **C8** | AI / recommendation quality (measured, not just "works") |
