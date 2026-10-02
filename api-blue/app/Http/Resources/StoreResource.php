@@ -16,7 +16,7 @@ class StoreResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => new UserResource($this->user),
+            'user' => $this->owner($request),
             'name' => $this->name,
             'username' => $this->username,
             'logo' => empty($this->logo) ? null : (str_starts_with($this->logo, 'http') ? $this->logo : asset('storage/'.$this->logo)),
@@ -37,6 +37,30 @@ class StoreResource extends JsonResource
             'product_count' => $this->products_count ?? $this->products()->count(),
             'transaction_count' => $this->transaction_count ?? $this->transaction()->count(),
             'created_at' => $this->created_at,
+        ];
+    }
+
+    // Public store listings returned the owner's full UserResource: email,
+    // buyer profile (phone) and more, for every seller. Only the owner and
+    // admins get that; everyone else gets what a storefront shows.
+    private function owner(Request $request): mixed
+    {
+        $owner = $this->user;
+        if (! $owner) {
+            return null;
+        }
+
+        $viewer = $request->user();
+        if ($viewer && ($viewer->id === $owner->id || $viewer->hasRole('admin'))) {
+            return new UserResource($owner);
+        }
+
+        return [
+            'id' => $owner->id,
+            'name' => $owner->name,
+            'username' => $owner->username,
+            'profile_picture' => $owner->profile_picture,
+            'last_seen_at' => $owner->last_seen_at,
         ];
     }
 }

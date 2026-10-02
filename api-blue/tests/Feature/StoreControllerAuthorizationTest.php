@@ -156,6 +156,22 @@ class StoreControllerAuthorizationTest extends TestCase
         $this->assertDatabaseMissing('stores', ['name' => 'Toko Kedua Buyer']);
     }
 
+    public function test_public_store_responses_do_not_expose_the_owners_private_data(): void
+    {
+        [$seller, $store] = $this->seller();
+
+        $public = $this->getJson("/api/store/{$store->id}")->assertStatus(200);
+        $public->assertJsonPath('data.user.name', $seller->name)
+            ->assertJsonMissingPath('data.user.email')
+            ->assertJsonMissingPath('data.user.buyer');
+        $this->assertStringNotContainsString($seller->email, $public->getContent());
+
+        $this->actingAs($seller, 'sanctum')
+            ->getJson('/api/my-store')
+            ->assertStatus(200)
+            ->assertJsonPath('data.user.email', $seller->email);
+    }
+
     public function test_a_permission_denial_says_so_instead_of_reporting_a_server_error(): void
     {
         // Production renders through the debug-off fallback; sellers lack store-delete.
