@@ -129,19 +129,23 @@ class EscrowRepository implements EscrowRepositoryInterface
     }
 
     /**
-     * Hitung admin_fee, simpan ke transaksi, return sellerAmount (rupiah bulat).
-     * Dipanggil sekali saat credit — admin_fee dikunci di kolom transaksi.
+     * Hitung admin_fee dan sellerAmount, kunci keduanya di transaksi, return
+     * sellerAmount (rupiah bulat). Dipanggil sekali saat credit.
      *
-     * B3.2d: fee = net sales x admin_fee_basis_points (HALF_UP), via Money.
-     * Ongkir tidak kena fee.
+     * goods  = grand_total - ongkir - pajak  (harga barang setelah diskon;
+     *          voucher ditanggung seller, pajak hanya ada di transaksi lama)
+     * fee    = goods x admin_fee_basis_points (HALF_UP), via Money
+     * seller = goods - fee + ongkir  (seller yang membayar kurir)
      */
     private function applyAdminFee(Transaction $transaction): int
     {
-        $netSales = Money::fromDecimalString((string) $transaction->grand_total)
-            ->subtract(Money::fromDecimalString((string) $transaction->shipping_cost));
+        $shipping = Money::fromDecimalString((string) $transaction->shipping_cost);
+        $goods = Money::fromDecimalString((string) $transaction->grand_total)
+            ->subtract($shipping)
+            ->subtract(Money::fromDecimalString((string) $transaction->tax));
 
-        $adminFee = $netSales->percentage((int) config('marketplace.admin_fee_basis_points'));
-        $sellerAmount = $netSales->subtract($adminFee);
+        $adminFee = $goods->percentage((int) config('marketplace.admin_fee_basis_points'));
+        $sellerAmount = $goods->subtract($adminFee)->add($shipping);
 
         $transaction->admin_fee = $adminFee->minor();
         $transaction->seller_amount = $sellerAmount->minor();

@@ -78,8 +78,8 @@ class AdminFeeMoneyTest extends TestCase
         $this->assertSame('11101', (string) (int) $transaction->fresh()->admin_fee);
 
         $store = $transaction->store;
-        // seller amount = 111_005 - 11_101 = 99_904 sits in pending
-        $this->assertSame(99_904, (int) $store->storeBalance->fresh()->pending_balance);
+        // seller amount = goods 111_005 - fee 11_101 + shipping 15_000 = 114_904 sits in pending
+        $this->assertSame(114_904, (int) $store->storeBalance->fresh()->pending_balance);
     }
 
     public function test_release_reuses_the_locked_fee_and_does_not_recompute(): void
@@ -97,8 +97,20 @@ class AdminFeeMoneyTest extends TestCase
 
         $store = $transaction->store;
         $this->assertSame($lockedFee, (int) $transaction->fresh()->admin_fee);
-        $this->assertSame(99_904, (int) $store->storeBalance->fresh()->balance);
+        $this->assertSame(114_904, (int) $store->storeBalance->fresh()->balance);
         $this->assertSame(0, (int) $store->storeBalance->fresh()->pending_balance);
+    }
+
+    public function test_tax_on_an_older_transaction_is_neither_fee_base_nor_seller_share(): void
+    {
+        // grand total 126_000 = goods 100_000 + tax 11_000 + shipping 15_000
+        $transaction = $this->transaction(grandTotal: 126_000, shippingCost: 15_000);
+        $transaction->update(['tax' => 11_000]);
+
+        app(EscrowRepositoryInterface::class)->credit($transaction->fresh());
+
+        $this->assertSame(10_000, (int) $transaction->fresh()->admin_fee);
+        $this->assertSame(105_000, (int) $transaction->fresh()->seller_amount);
     }
 
     public function test_release_pays_the_seller_amount_locked_at_credit(): void
@@ -107,7 +119,7 @@ class AdminFeeMoneyTest extends TestCase
         $escrow = app(EscrowRepositoryInterface::class);
 
         $escrow->credit($transaction);
-        $this->assertSame(99_904, (int) $transaction->fresh()->seller_amount);
+        $this->assertSame(114_904, (int) $transaction->fresh()->seller_amount);
 
         // Any later change to how a seller's share is derived (the inputs here)
         // must not change what leaves escrow: release pays what was credited.
@@ -115,7 +127,7 @@ class AdminFeeMoneyTest extends TestCase
         $escrow->release($transaction->fresh());
 
         $store = $transaction->store;
-        $this->assertSame(99_904, (int) $store->storeBalance->fresh()->balance);
+        $this->assertSame(114_904, (int) $store->storeBalance->fresh()->balance);
         $this->assertSame(0, (int) $store->storeBalance->fresh()->pending_balance);
     }
 }
