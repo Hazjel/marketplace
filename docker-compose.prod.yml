@@ -8,7 +8,32 @@
 # Port di-bind ke IP itu, bukan 0.0.0.0, supaya tetap terjangkau dari container
 # di host tapi tidak dari LAN atau tailnet. Target scrape-nya ada di
 # monitoring/ops/blukios-scrape.yml.
+
+# Log Laravel produksi: satu file per hari, disimpan 14 hari (dulu satu file
+# yang tumbuh tanpa batas), level info (tanpa debug), dan satu objek JSON per
+# baris dengan request_id. Bisa ditimpa lewat .env server.
+x-prod-log-env: &prod-log-env
+  LOG_STACK: ${LOG_STACK:-daily}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  LOG_FORMAT: ${LOG_FORMAT:-json}
+
 services:
+  api:
+    environment:
+      <<: *prod-log-env
+
+  queue:
+    environment:
+      <<: *prod-log-env
+
+  scheduler:
+    environment:
+      <<: *prod-log-env
+
+  reverb:
+    environment:
+      <<: *prod-log-env
+
   nginx:
     ports:
       - "172.17.0.1:${NGINX_HOST_PORT:-80}:80"

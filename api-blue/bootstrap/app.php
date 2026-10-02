@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\IdempotencyMiddleware;
 use App\Http\Middleware\InternalServiceAuth;
 use App\Http\Middleware\PrometheusMetrics;
@@ -35,6 +36,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // by the per-IP rate limiters. nginx is reachable only through the
         // tunnel, and Cloudflare always overwrites X-Forwarded-Proto.
         $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_PROTO);
+        // First, so everything after it (including error responses) logs and
+        // returns the same id.
+        $middleware->prepend(AssignRequestId::class);
         $middleware->append(HandleCors::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->append(UpdateLastSeen::class);

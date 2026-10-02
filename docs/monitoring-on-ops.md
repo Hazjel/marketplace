@@ -32,6 +32,23 @@ bukan lewat antrean, karena salah satu yang dipantau adalah antrean itu sendiri.
 ada di `api-blue/config/ops.php`. Yang tidak terdeteksi: scheduler itu sendiri mati, atau
 seluruh server mati; itu butuh pemantau dari luar (mis. uptime check ke `/api/health`).
 
+## Log Laravel
+
+Produksi (`docker-compose.prod.yml`) menulis satu file per hari,
+`storage/logs/laravel-YYYY-MM-DD.log`, disimpan 14 hari, level `info`, satu objek JSON
+per baris. Setiap baris yang ditulis selama satu request, termasuk oleh job antrean
+yang di-dispatch-nya, membawa `request_id` yang sama, dan id itu dikembalikan ke client
+di header `X-Request-Id`. `storage/logs` hanya bisa dibaca dari dalam kontainer:
+
+```bash
+# error terakhir
+docker exec blue-api sh -c 'grep -h "\"level_name\":\"ERROR\"" storage/logs/laravel-*.log | tail -5'
+# semua log satu request (id dari header X-Request-Id atau dari baris error)
+docker exec blue-api sh -c 'grep -h "<request_id>" storage/logs/laravel-*.log'
+```
+
+`laravel.log` lama (format teks, sampai 2026-10-03) tetap ada sampai dihapus manual.
+
 `/metrics` Laravel juga mengeluarkan `api_business_events_total{event, detail}`:
 `order_created`, `payment_paid` (detail = metode bayar), `payment_failed`,
 `webhook_rejected` (`signature`/`amount`), `refund_requested`, `refund_done`

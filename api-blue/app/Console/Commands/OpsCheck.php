@@ -161,7 +161,8 @@ class OpsCheck extends Command
             (int) config('ops.server_error_threshold'),
             'Error server (HTTP 5xx) di API',
             fn (int $count) => "{$count} request gagal dengan error server sejak laporan terakhir. Dampaknya ke web dan aplikasi mobile.",
-            'Detail dan stack trace: `docker exec blue-api grep -A5 "production.ERROR" storage/logs/laravel.log | tail -50`.',
+            'Detail: `docker exec blue-api sh -c \'grep -h "\"level_name\":\"ERROR\"" storage/logs/laravel-*.log | tail -20\'`. '
+                .'Setiap baris punya request_id; semua log satu request: grep id itu.',
         );
     }
 
@@ -175,7 +176,7 @@ class OpsCheck extends Command
             (int) config('ops.client_error_threshold'),
             'Error di aplikasi pengguna (browser/mobile)',
             fn (int $count) => "{$count} error JavaScript/aplikasi dilaporkan dari perangkat pengguna sejak laporan terakhir.",
-            'Detail dan stack trace: `docker exec blue-api grep -A3 "Client error" storage/logs/laravel.log | tail -40`.',
+            'Detail dan stack trace: `docker exec blue-api sh -c \'grep -h "Client error" storage/logs/laravel-*.log | tail -20\'`.',
         );
     }
 

@@ -5,6 +5,7 @@ namespace App\Helpers;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -62,7 +63,10 @@ class ResponseHelper
      */
     public static function exceptionResponse(Throwable $e, int $code = 500): JsonResponse
     {
-        $requestId = (string) Str::uuid();
+        // The id AssignRequestId gave this request, so the header, this
+        // entry and everything else logged for the request match; outside
+        // HTTP (console, tests) a fresh one.
+        $requestId = (string) (Context::get('request_id') ?? Str::uuid());
 
         Log::error('Unhandled exception', [
             'request_id' => $requestId,

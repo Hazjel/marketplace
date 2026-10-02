@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -59,12 +60,16 @@ return [
         ],
 
         // 0640: logs carry user emails and errors; not for other host users.
+        // LOG_FORMAT=json writes one JSON object per line (production): the
+        // request_id from Context lands in "extra", so one grep finds every
+        // line of a failed request.
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
             'permission' => 0640,
+            'formatter' => env('LOG_FORMAT') === 'json' ? JsonFormatter::class : null,
         ],
 
         'daily' => [
@@ -74,6 +79,7 @@ return [
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
             'permission' => 0640,
+            'formatter' => env('LOG_FORMAT') === 'json' ? JsonFormatter::class : null,
         ],
 
         'slack' => [
