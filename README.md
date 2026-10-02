@@ -313,6 +313,12 @@ operational detail not defined here.
 
 ## Production deployment
 
+Jenkins on the project's own server is the only deploy path; `blukios.store` is served
+from there through a Cloudflare Tunnel. The old Netlify project from the "bluecommerce"
+days (`bluecommerce.netlify.app`) was deleted on 2026-10-03; it still built every push
+to this repo and used up the Netlify credits. Any other service connected to this repo
+(hosting, preview builds) belongs in this section.
+
 Deploy is in-place, driven by the `Deploy` stage on `main`:
 
 - `docker compose -p marketplace build/up -d api queue reverb scheduler frontend
