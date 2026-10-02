@@ -13,6 +13,7 @@ use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\Voucher;
 use App\Models\VoucherRedemption;
+use App\Support\BusinessMetrics;
 use App\ValueObjects\Money;
 use Exception;
 use Illuminate\Http\UploadedFile;
@@ -538,6 +539,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             ]);
 
             DB::commit();
+            BusinessMetrics::record('order_created');
 
             Log::info('=== BEFORE MIDTRANS ===');
 
@@ -852,6 +854,8 @@ class TransactionRepository implements TransactionRepositoryInterface
             throw $e;
         }
 
+        BusinessMetrics::record('refund_requested');
+
         try {
             RefundCancelledTransactionJob::dispatch($transaction->id);
         } catch (\Throwable $e) {
@@ -919,6 +923,8 @@ class TransactionRepository implements TransactionRepositoryInterface
             $transaction->refund_note = $note;
             $transaction->refunded_at = now();
             $transaction->save();
+
+            BusinessMetrics::record('refund_done', 'manual');
 
             return $transaction->fresh(['buyer.user', 'store.user', 'transactionDetails.product']);
         });

@@ -7,6 +7,8 @@ use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Transaction;
 use App\Services\MidtransPaymentStatusInterpreter;
+use App\Support\BusinessMetrics;
+use App\Support\OpsSignals;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -47,6 +49,9 @@ class MidtransController extends Controller
                 'order_id' => $request->order_id ?? null,
             ]);
 
+            OpsSignals::record(OpsSignals::MIDTRANS_REJECTED);
+            BusinessMetrics::record('webhook_rejected', 'signature');
+
             return response()->json(['message' => 'Invalid signature key'], 403);
         }
 
@@ -72,6 +77,8 @@ class MidtransController extends Controller
         // TransactionRepository::restoreStock().
         $mongoAdjustments = [];
         $outcome = null;
+        // [event, detail] for BusinessMetrics, recorded only after commit.
+        $metric = null;
         DB::beginTransaction();
 
         try {
@@ -105,6 +112,7 @@ class MidtransController extends Controller
                             'refunded_at' => now(),
                         ]);
                         $events[] = new TransactionStatusUpdated($transaction->fresh());
+                        $metric = ['refund_done', 'midtrans_webhook'];
                         $outcome = 'updated';
                     } else {
                         $outcome = 'ignored';
@@ -137,11 +145,13 @@ class MidtransController extends Controller
                     } else {
                         if ($newStatus === 'paid') {
                             $transaction->update(['payment_status' => 'paid']);
+                            $metric = ['payment_paid', (string) $request->payment_type];
                             $this->escrowRepository->credit($transaction);
                         } elseif ($newStatus === 'unpaid') {
                             $transaction->update(['payment_status' => 'unpaid']);
                         } elseif ($newStatus === 'failed') {
                             $transaction->update(['payment_status' => 'failed']);
+                            $metric = ['payment_failed', (string) $request->transaction_status];
                             $this->transactionRepository->restoreStock($transaction, $mongoAdjustments);
                         }
 
@@ -172,11 +182,18 @@ class MidtransController extends Controller
             event($event);
         }
 
+        if ($metric !== null) {
+            BusinessMetrics::record(...$metric);
+        }
+
         if ($outcome === 'not_found') {
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 
         if ($outcome === 'amount_mismatch') {
+            OpsSignals::record(OpsSignals::MIDTRANS_REJECTED);
+            BusinessMetrics::record('webhook_rejected', 'amount');
+
             return response()->json(['message' => 'Amount mismatch'], 403);
         }
 

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Events\TransactionStatusUpdated;
 use App\Interfaces\PaymentGatewayInterface;
 use App\Models\Transaction;
+use App\Support\BusinessMetrics;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -63,12 +64,14 @@ class RefundCancelledTransactionJob implements ShouldQueue
                 'refund_method' => 'midtrans',
                 'refunded_at' => now(),
             ]);
+            BusinessMetrics::record('refund_done', 'midtrans');
         } else {
             $transaction->update([
                 'refund_status' => 'manual_required',
                 'refund_method' => 'manual',
                 'refund_note' => 'Metode pembayaran tidak mendukung refund otomatis',
             ]);
+            BusinessMetrics::record('refund_manual_required', 'unsupported_method');
         }
 
         Log::info('Refund pesanan dibatalkan', [
@@ -103,6 +106,7 @@ class RefundCancelledTransactionJob implements ShouldQueue
             'refund_method' => 'manual',
             'refund_note' => 'Refund otomatis gagal: '.mb_substr($e->getMessage(), 0, 500),
         ]);
+        BusinessMetrics::record('refund_manual_required', 'gateway_error');
 
         Log::error('Refund otomatis gagal, dialihkan ke manual', [
             'transaction' => $transaction->code,

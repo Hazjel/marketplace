@@ -12,6 +12,8 @@ x-app-mail-env: &app-mail-env
   MAIL_PASSWORD: ${MAIL_PASSWORD:-}
   MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@blukios.com}
   MAIL_FROM_NAME: Blukios
+  # Penerima email ops:check (config/ops.php). Kosong = masalah hanya di log.
+  OPS_ALERT_EMAIL: ${OPS_ALERT_EMAIL:-}
 
 services:
   # ─────────────────────────────────────────
