@@ -443,9 +443,13 @@ v-else
               Rp {{ formatRupiah(transaction?.shipping_cost) }}
             </span>
           </div>
-          <div class="flex items-center justify-between">
+          <div v-if="transaction?.tax > 0" class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">PPN 11%</span>
             <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(transaction?.tax) }}</span>
+          </div>
+          <div v-if="transaction?.service_fee > 0" class="flex items-center justify-between">
+            <span class="text-sm text-custom-grey dark:text-gray-400">Biaya Layanan</span>
+            <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(transaction?.service_fee) }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">Diskon</span>

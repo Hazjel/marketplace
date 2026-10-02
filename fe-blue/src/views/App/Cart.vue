@@ -17,7 +17,7 @@ const {
   totalSelectedItems,
   totalSelectedQuantity,
   subtotalSelected,
-  ppnSelected,
+  serviceFeeSelected,
   discountSelected,
   grandTotalSelected,
   hasSelectedStores
@@ -245,9 +245,9 @@ type="button"
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
                 <img src="@/assets/images/icons/receipt-2-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                PPN 11%
+                Biaya Layanan
               </p>
-              <p class="font-medium text-lg leading-none dark:text-white">Rp {{ formatRupiah(ppnSelected) }}</p>
+              <p class="font-medium text-lg leading-none dark:text-white">Rp {{ formatRupiah(serviceFeeSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">

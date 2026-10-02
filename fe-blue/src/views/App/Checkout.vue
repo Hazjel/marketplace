@@ -30,7 +30,7 @@ const {
   totalSelectedItems,
   totalSelectedQuantity,
   subtotalSelected,
-  ppnSelected,
+  serviceFeeSelected,
   discountSelected
 } = storeToRefs(cart)
 const { error } = storeToRefs(transactionStore)
@@ -635,8 +635,8 @@ onMounted(async () => {
                   </span>
                 </div>
                 <div class="flex items-center justify-between">
-                  <span class="text-sm text-custom-grey dark:text-gray-400">PPN 11%</span>
-                  <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(ppnSelected) }}</span>
+                  <span class="text-sm text-custom-grey dark:text-gray-400">Biaya Layanan</span>
+                  <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(serviceFeeSelected) }}</span>
                 </div>
                 <div v-if="discountSelected > 0" class="flex items-center justify-between">
                   <span class="text-sm text-green-600">Diskon</span>

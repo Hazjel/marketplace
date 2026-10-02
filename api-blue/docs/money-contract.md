@@ -187,12 +187,35 @@ rather than silently truncating.
 - `store_balances`, `store_balance_histories`, `withdrawals` — the escrow
   ledger runs on scalars, and their API fields stay decimal (a pre-B3.2d
   `pending_balance` can hold a fractional value).
-- `EscrowRepository::sellerAmount()` reads the locked `admin_fee` without
-  going through `Money`, so a pre-B3.2d transaction whose fee is still
-  fractional can still be released/refunded.
+- `EscrowRepository::sellerAmount()` pays the `seller_amount` locked at
+  credit; only a row credited before that column existed falls back to
+  `grand_total - shipping_cost - admin_fee`, without going through `Money`.
 - `decimal` → `bigint` column migration — still deferred.
 
-## 7. API / naming
+## 7. Order money model (2026-10)
+
+Replaces the B3.2b model (11% "PPN" on every order, shipping kept by the
+platform, fee on goods + tax). Older transactions keep the `tax` and
+`seller_amount` they were created and credited with.
+
+```
+grand_total   = subtotal − discount + shipping_cost + service_fee   (tax = 0)
+goods         = grand_total − shipping_cost − tax − service_fee
+admin_fee     = goods × marketplace.admin_fee_basis_points  (HALF_UP)
+seller_amount = goods − admin_fee + shipping_cost
+platform      = admin_fee + service_fee   (pays the payment-gateway fee)
+```
+
+- No buyer tax: goods VAT belongs to PKP sellers inside their own price.
+- Shipping goes to the seller, who books and pays the courier.
+- Vouchers (store or platform) are funded by the seller; the discount never
+  reduces `service_fee`, which is added after it.
+- `service_fee` = `marketplace.buyer_service_fee` (Rp1.000, env
+  `BUYER_SERVICE_FEE`), once per order; checkout creates one order per store.
+- `admin_fee` and `seller_amount` are locked at escrow credit; release and
+  refund never recompute.
+
+## 8. API / naming
 
 - Value object: `App\ValueObjects\Money` (immutable domain VO, not a
   helper).

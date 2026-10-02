@@ -103,15 +103,14 @@ describe('cart store — money totals match the backend boundary (B3.2e)', () =>
     ...overrides
   })
 
-  it('rounds PPN HALF_UP at the tax step, then adds exactly', async () => {
+  it('adds no tax, only one flat service fee per store order', async () => {
     const cart = useCartStore()
-    // subtotal 100_005 -> 11% = 11_000.55 -> round -> 11_001
     await cart.addToCart(line({ price: 100005 }))
     cart.toggleStoreSelection('store-1')
 
     expect(cart.subtotalSelected).toBe(100005)
-    expect(cart.ppnSelected).toBe(11001)
-    expect(cart.grandTotalSelected).toBe(111006)
+    expect(cart.serviceFeeSelected).toBe(1000)
+    expect(cart.grandTotalSelected).toBe(101005)
   })
 
   it('Cart grand total and Checkout total-with-delivery agree for the same order', async () => {

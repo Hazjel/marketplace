@@ -5,6 +5,9 @@ import { logger } from '@/utils/logger'
 
 const STORAGE_KEY = 'grouped_cart'
 const SELECTED_STORES_KEY = 'selected_stores'
+// Display mirror of config('marketplace.buyer_service_fee'); the server
+// adds the authoritative value to each store's order.
+const BUYER_SERVICE_FEE = 1000
 
 /**
  * Hybrid cart store:
@@ -70,12 +73,10 @@ export const useCartStore = defineStore('cart', {
       )
     },
 
-    // PPN 11% dari subtotal produk saja (ongkir tidak kena PPN), dibulatkan
-    // DI SINI -- meniru boundary backend (Money::percentage, HALF_UP).
-    // Math.round untuk nilai non-negatif = pembulatan menjauh dari nol =
-    // sama dengan HALF_UP di backend. Semua langkah setelah ini eksak.
-    ppnSelected() {
-      return Math.round(this.subtotalSelected * 0.11)
+    // Tidak ada PPN untuk pembeli (harga produk sudah final). Biaya layanan
+    // flat dikenakan per pesanan, dan checkout membuat satu pesanan per toko.
+    serviceFeeSelected() {
+      return this.selectedCarts.length * BUYER_SERVICE_FEE
     },
 
     discountSelected() {
@@ -83,16 +84,15 @@ export const useCartStore = defineStore('cart', {
     },
 
     grandTotalSelected() {
-      return this.subtotalSelected + this.ppnSelected - this.discountSelected
+      return this.subtotalSelected + this.serviceFeeSelected - this.discountSelected
     },
 
     // Total termasuk ongkir -- dipakai Checkout.vue supaya "Grand Total" di
     // Cart.vue dan "Total Tagihan" di Checkout.vue selalu sama untuk pesanan
-    // yang sama. ppnSelected sudah dibulatkan; subtotal & ongkir rupiah bulat,
-    // jadi di sini murni penjumlahan/pengurangan eksak.
+    // yang sama. Semua nilai rupiah bulat, jadi murni penjumlahan eksak.
     grandTotalWithDelivery() {
       return (deliveryFee = 0) =>
-        this.subtotalSelected + deliveryFee + this.ppnSelected - this.discountSelected
+        this.subtotalSelected + deliveryFee + this.serviceFeeSelected - this.discountSelected
     },
 
     hasSelectedStores: (state) => {
