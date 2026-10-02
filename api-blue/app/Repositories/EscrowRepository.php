@@ -141,11 +141,13 @@ class EscrowRepository implements EscrowRepositoryInterface
             ->subtract(Money::fromDecimalString((string) $transaction->shipping_cost));
 
         $adminFee = $netSales->percentage((int) config('marketplace.admin_fee_basis_points'));
+        $sellerAmount = $netSales->subtract($adminFee);
 
         $transaction->admin_fee = $adminFee->minor();
+        $transaction->seller_amount = $sellerAmount->minor();
         $transaction->save();
 
-        return $netSales->subtract($adminFee)->minor();
+        return $sellerAmount->minor();
     }
 
     /**
@@ -156,6 +158,12 @@ class EscrowRepository implements EscrowRepositoryInterface
      */
     private function sellerAmount(Transaction $transaction): float
     {
+        if ($transaction->seller_amount !== null) {
+            return (float) $transaction->seller_amount;
+        }
+
+        // Credited by code older than the seller_amount column, during the
+        // seconds between the deploy's git reset and its migration.
         $netSales = $transaction->grand_total - $transaction->shipping_cost;
 
         return $netSales - $transaction->admin_fee;

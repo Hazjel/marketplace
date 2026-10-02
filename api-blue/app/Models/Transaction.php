@@ -32,6 +32,7 @@ class Transaction extends Model
         'payment_status',
         'receiving_proof',
         'admin_fee',
+        'seller_amount',
         'voucher_id',
         'discount_amount',
     ];
@@ -41,6 +42,7 @@ class Transaction extends Model
         'tax' => 'decimal:2',
         'grand_total' => 'decimal:2',
         'admin_fee' => 'decimal:2',
+        'seller_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'stock_restored_at' => 'datetime',
     ];
