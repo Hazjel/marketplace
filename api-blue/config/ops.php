@@ -22,6 +22,12 @@ return [
     // to manual. A refund still "processing" after this lost its job.
     'refund_processing_max_hours' => (int) env('OPS_REFUND_PROCESSING_MAX_HOURS', 48),
 
+    // Errors counted since the last email before one is sent. Any API 5xx
+    // is a bug; a single browser error is often an extension or a flaky
+    // network, so the web needs a few before it is worth a look.
+    'server_error_threshold' => (int) env('OPS_SERVER_ERROR_THRESHOLD', 1),
+    'client_error_threshold' => (int) env('OPS_CLIENT_ERROR_THRESHOLD', 3),
+
     // Manual refunds waiting on a transfer are reminded once a day.
     'manual_refund_reminder_minutes' => 24 * 60,
 ];

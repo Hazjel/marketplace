@@ -13,7 +13,9 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Tests\TestCase;
 
 class OpsCheckTest extends TestCase
@@ -230,6 +232,62 @@ class OpsCheckTest extends TestCase
             fn (OpsAlertNotification $n) => str_contains($n->problems[0]['lines'][0], '1 refund masih "processing"')
                 && str_contains($n->problems[0]['lines'][0], $stuck->code)
         );
+    }
+
+    public function test_api_server_errors_are_reported_with_their_route(): void
+    {
+        Route::get('api/_test/boom/{id}', fn () => throw new RuntimeException('boom'));
+
+        $this->getJson('/api/_test/boom/1')->assertStatus(500);
+        $this->getJson('/api/_test/boom/2')->assertStatus(500);
+        // 4xx is the client's problem, not a server error.
+        $this->getJson('/api/product/does-not-exist-'.Str::random(6))->assertStatus(404);
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Error server (HTTP 5xx) di API'], $this->alertedTitles());
+        Notification::assertSentOnDemand(OpsAlertNotification::class, function (OpsAlertNotification $n) {
+            $lines = $n->problems[0]['lines'];
+
+            return str_starts_with($lines[0], '2 request gagal')
+                && in_array('- GET api/_test/boom/{id} 500 (2x)', $lines, true);
+        });
+    }
+
+    public function test_web_errors_are_reported_once_a_few_arrive(): void
+    {
+        $report = fn (string $message) => $this->postJson('/api/client-errors', [
+            'source' => 'web',
+            'message' => $message,
+            'url' => 'https://blukios.store/auth/reset-password?token=secret-token&email=a@b.c',
+            'stack' => "TypeError: x\n    at setup (Checkout.vue:10)",
+        ])->assertNoContent();
+
+        $report("TypeError: Cannot read properties of undefined (reading 'id')");
+        $report("TypeError: Cannot read properties of undefined (reading 'id')");
+
+        // Below the threshold of 3: nothing yet.
+        $this->artisan('ops:check')->assertSuccessful();
+        Notification::assertNothingSent();
+
+        $report('ChunkLoadError: Loading chunk 12 failed');
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Error di aplikasi pengguna (browser/mobile)'], $this->alertedTitles());
+        Notification::assertSentOnDemand(OpsAlertNotification::class, function (OpsAlertNotification $n) {
+            $text = implode("\n", $n->problems[0]['lines']);
+
+            return str_contains($text, "- web: TypeError: Cannot read properties of undefined (reading 'id') @ /auth/reset-password (2x)")
+                // The query string (reset token, email) is never kept.
+                && ! str_contains($text, 'secret-token');
+        });
+    }
+
+    public function test_client_error_reports_are_validated(): void
+    {
+        $this->postJson('/api/client-errors', ['source' => 'desktop', 'message' => 'x'])->assertStatus(422);
+        $this->postJson('/api/client-errors', ['source' => 'web'])->assertStatus(422);
+        $this->postJson('/api/client-errors', ['source' => 'web', 'message' => str_repeat('x', 501)])->assertStatus(422);
     }
 
     public function test_without_a_recipient_problems_are_only_logged(): void

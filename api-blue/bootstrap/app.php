@@ -4,6 +4,7 @@ use App\Http\Middleware\IdempotencyMiddleware;
 use App\Http\Middleware\InternalServiceAuth;
 use App\Http\Middleware\PrometheusMetrics;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\TrackServerErrors;
 use App\Http\Middleware\UpdateLastSeen;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(SecurityHeaders::class);
         $middleware->append(UpdateLastSeen::class);
         $middleware->append(PrometheusMetrics::class);
+        $middleware->append(TrackServerErrors::class);
         $middleware->alias([
             'idempotent' => IdempotencyMiddleware::class,
             'internal' => InternalServiceAuth::class,

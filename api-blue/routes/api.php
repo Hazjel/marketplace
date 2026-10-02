@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ClientErrorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\ForgotPasswordController;
@@ -60,6 +61,10 @@ Route::get('product-category/{id}', [ProductCategoryController::class, 'show']);
 // results page below, throttled a bit tighter since it fires on every
 // keystroke (debounced client-side too, but don't rely on that alone).
 Route::middleware('throttle:60,1')->get('search/suggestions', [SearchController::class, 'suggestions']);
+
+// Crash reports from the web/mobile apps for ops:check alerts. Public: a page
+// can crash before login. The client sends at most a few per page load.
+Route::middleware('throttle:30,1')->post('client-errors', [ClientErrorController::class, 'store']);
 
 Route::get('product', [ProductController::class, 'index']);
 Route::get('product/all/paginated', [

@@ -37,6 +37,8 @@ class OpsCheck extends Command
     {
         $problems = array_values(array_filter([
             $this->queueWorker(),
+            $this->serverErrors(),
+            $this->clientErrors(),
             $this->failedJobs(),
             $this->rejectedWebhooks(),
             $this->stuckRefunds(),
@@ -147,6 +149,63 @@ class OpsCheck extends Command
             'Refund otomatis, email verifikasi/reset password, dan balasan AI tertahan sampai worker jalan lagi.',
             'Cek kontainer blue-queue: `docker ps -a | grep blue-queue` dan `docker logs --tail 50 blue-queue`.',
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function serverErrors(): ?array
+    {
+        return $this->signalProblem(
+            OpsSignals::SERVER_ERROR,
+            (int) config('ops.server_error_threshold'),
+            'Error server (HTTP 5xx) di API',
+            fn (int $count) => "{$count} request gagal dengan error server sejak laporan terakhir. Dampaknya ke web dan aplikasi mobile.",
+            'Detail dan stack trace: `docker exec blue-api grep -A5 "production.ERROR" storage/logs/laravel.log | tail -50`.',
+        );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function clientErrors(): ?array
+    {
+        return $this->signalProblem(
+            OpsSignals::CLIENT_ERROR,
+            (int) config('ops.client_error_threshold'),
+            'Error di aplikasi pengguna (browser/mobile)',
+            fn (int $count) => "{$count} error JavaScript/aplikasi dilaporkan dari perangkat pengguna sejak laporan terakhir.",
+            'Detail dan stack trace: `docker exec blue-api grep -A3 "Client error" storage/logs/laravel.log | tail -40`.',
+        );
+    }
+
+    /**
+     * A counted signal with its most frequent samples, e.g. "POST
+     * api/transaction 500 (3x)". Reported once the count reaches $threshold;
+     * the count resets only when an email went out.
+     *
+     * @param  Closure(int): string  $summary
+     * @return array<string, mixed>|null
+     */
+    private function signalProblem(string $signal, int $threshold, string $title, Closure $summary, string $hint): ?array
+    {
+        $count = OpsSignals::count($signal);
+        if ($count === 0 || $count < max(1, $threshold)) {
+            return null;
+        }
+
+        $lines = [$summary($count)];
+        foreach (array_slice(OpsSignals::samples($signal), 0, 5, true) as $sample => $times) {
+            $lines[] = "- {$sample} ({$times}x)";
+        }
+        $lines[] = $hint;
+
+        return $this->problem(
+            str_replace('_', '-', $signal),
+            $title,
+            $lines,
+            acknowledge: fn () => OpsSignals::pull($signal),
+        );
     }
 
     /**
