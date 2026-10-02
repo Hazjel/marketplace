@@ -31,6 +31,15 @@ class Transaction extends Model
         'service_fee',
         'grand_total',
         'payment_status',
+        'refund_status',
+        'refund_method',
+        'refund_amount',
+        'refund_reason',
+        'refund_note',
+        'refund_bank_name',
+        'refund_account_number',
+        'refund_account_name',
+        'refunded_at',
         'receiving_proof',
         'admin_fee',
         'seller_amount',
@@ -47,6 +56,9 @@ class Transaction extends Model
         'seller_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'stock_restored_at' => 'datetime',
+        'refund_amount' => 'decimal:2',
+        'refund_account_number' => 'encrypted',
+        'refunded_at' => 'datetime',
     ];
 
     public function scopeSearch($query, $search)

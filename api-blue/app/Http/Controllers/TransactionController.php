@@ -48,7 +48,7 @@ class TransactionController extends Controller implements HasMiddleware
             // Removed getAllPaginated from strict permissions list
             new Middleware(PermissionMiddleware::using(['transaction-list|transaction-create|transaction-edit|transaction-delete']), only: ['index', 'show']),
             new Middleware(PermissionMiddleware::using(['transaction-create']), only: ['store']),
-            new Middleware(PermissionMiddleware::using(['transaction-edit']), only: ['update']),
+            new Middleware(PermissionMiddleware::using(['transaction-edit']), only: ['update', 'cancel']),
             new Middleware(PermissionMiddleware::using(['transaction-delete']), only: ['destroy']),
             new Middleware('auth:sanctum', only: ['complete']),
         ];
@@ -282,8 +282,111 @@ class TransactionController extends Controller implements HasMiddleware
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Penjual menolak pesanan yang sudah dibayar. Uang pembeli dikembalikan
+     * lewat RefundCancelledTransactionJob (otomatis, atau manual untuk VA).
      */
+    public function cancel(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|min:5|max:255',
+        ], [], ['reason' => 'Alasan pembatalan']);
+
+        try {
+            $transaction = $this->transactionRepository->getById($id);
+
+            if (! $transaction) {
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            if ($request->user()->cannot('cancel', $transaction)) {
+                return ResponseHelper::jsonResponse(false, 'Anda tidak memiliki izin untuk membatalkan pesanan ini', null, 403);
+            }
+
+            $transaction = $this->transactionRepository->cancelPaidOrder($id, $validated['reason']);
+
+            event(new TransactionStatusUpdated($transaction));
+
+            return ResponseHelper::jsonResponse(true, 'Pesanan dibatalkan, dana pembeli sedang dikembalikan', new TransactionResource($transaction), 200);
+        } catch (\Exception $e) {
+            return $this->domainErrorResponse($e);
+        }
+    }
+
+    /**
+     * Pembeli mengisi rekening tujuan refund manual (pembayaran lewat VA bank).
+     */
+    public function refundAccount(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'refund_bank_name' => 'required|string|max:100',
+            'refund_account_number' => 'required|string|regex:/^[0-9]{5,30}$/',
+            'refund_account_name' => 'required|string|max:100',
+        ], [], [
+            'refund_bank_name' => 'Nama Bank',
+            'refund_account_number' => 'Nomor Rekening',
+            'refund_account_name' => 'Nama Pemilik Rekening',
+        ]);
+
+        try {
+            $transaction = $this->transactionRepository->getById($id);
+
+            if (! $transaction) {
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            if ($request->user()->cannot('submitRefundAccount', $transaction)) {
+                return ResponseHelper::jsonResponse(false, 'Anda tidak memiliki izin untuk melakukan aksi ini', null, 403);
+            }
+
+            $transaction = $this->transactionRepository->saveRefundAccount($id, $validated);
+
+            return ResponseHelper::jsonResponse(true, 'Rekening refund tersimpan', new TransactionResource($transaction), 200);
+        } catch (\Exception $e) {
+            return $this->domainErrorResponse($e);
+        }
+    }
+
+    /**
+     * Admin mencatat refund manual yang sudah ditransfer.
+     */
+    public function markRefunded(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'note' => 'required|string|max:255',
+        ], [], ['note' => 'Catatan transfer']);
+
+        try {
+            $transaction = $this->transactionRepository->getById($id);
+
+            if (! $transaction) {
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            if ($request->user()->cannot('markRefunded', $transaction)) {
+                return ResponseHelper::jsonResponse(false, 'Anda tidak memiliki izin untuk melakukan aksi ini', null, 403);
+            }
+
+            $transaction = $this->transactionRepository->markRefundTransferred($id, $validated['note']);
+
+            event(new TransactionStatusUpdated($transaction));
+
+            return ResponseHelper::jsonResponse(true, 'Refund ditandai selesai', new TransactionResource($transaction), 200);
+        } catch (\Exception $e) {
+            return $this->domainErrorResponse($e);
+        }
+    }
+
+    // Repository melempar Exception dengan kode 404/422 untuk penolakan
+    // bisnis; selain itu (DB, Mongo) tetap 500.
+    private function domainErrorResponse(\Exception $e)
+    {
+        if (in_array($e->getCode(), [404, 422], true)) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, $e->getCode());
+        }
+
+        return ResponseHelper::exceptionResponse($e);
+    }
+
     /**
      * Check payment status from Midtrans manually (for localhost/sync).
      */
@@ -349,7 +452,11 @@ class TransactionController extends Controller implements HasMiddleware
                     // Transaksi yang sudah paid tidak boleh mundur -- webhook yang
                     // telat atau panggilan manual yang beririsan tidak boleh
                     // membatalkan pembayaran yang sudah dikredit ke escrow.
-                    if ($locked->payment_status === 'paid' && $newStatus !== 'paid') {
+                    if ($locked->refund_status !== null) {
+                        // no-op -- dibatalkan penjual setelah bayar; Midtrans
+                        // masih "settlement" sampai refund diproses, dan itu
+                        // tidak boleh mengkredit escrow lagi.
+                    } elseif ($locked->payment_status === 'paid' && $newStatus !== 'paid') {
                         // no-op -- biarkan $locked apa adanya
                     } elseif ($newStatus === 'paid' && $locked->payment_status !== 'paid') {
                         $locked->payment_status = 'paid';

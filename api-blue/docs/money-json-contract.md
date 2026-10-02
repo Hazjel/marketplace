@@ -31,7 +31,7 @@ history.
 |---|---|
 | `ProductResource` | `price` |
 | `ProductVariantResource` | `price` |
-| `TransactionResource` | `shipping_cost`, `tax`, `service_fee`, `grand_total`, `discount_amount` |
+| `TransactionResource` | `shipping_cost`, `tax`, `service_fee`, `grand_total`, `discount_amount`, `refund_amount` (null when no refund is owed) |
 | `TransactionDetailResource` | `subtotal` (B3.1 — `Money` cast, emits `->minor()`) |
 | `VoucherResource` | `value` **when `type = "fixed"`**, `min_purchase`, `max_discount` |
 | `VoucherController::validateCode` response | `discount_amount` |

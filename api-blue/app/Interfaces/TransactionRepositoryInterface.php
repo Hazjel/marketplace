@@ -25,4 +25,10 @@ interface TransactionRepositoryInterface
     public function compensateStockRestoreRollback(array $mongoAdjustments);
 
     public function completeTransaction(string $id, ?string $receivingProof = null): Transaction;
+
+    public function cancelPaidOrder(string $id, string $reason): Transaction;
+
+    public function saveRefundAccount(string $id, array $account): Transaction;
+
+    public function markRefundTransferred(string $id, string $note): Transaction;
 }

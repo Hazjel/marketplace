@@ -235,6 +235,18 @@ Route::middleware('auth:sanctum')->group(function () {
         TransactionController::class,
         'checkPaymentStatus',
     ]);
+    Route::middleware('throttle:10,1')->post('transaction/{id}/cancel', [
+        TransactionController::class,
+        'cancel',
+    ]);
+    Route::middleware('throttle:10,1')->post('transaction/{id}/refund-account', [
+        TransactionController::class,
+        'refundAccount',
+    ]);
+    Route::post('transaction/{id}/mark-refunded', [
+        TransactionController::class,
+        'markRefunded',
+    ]);
     // Route::middleware(['throttle:10,1', 'verified'])->post('transaction', [TransactionController::class, 'store']);
     Route::middleware(['throttle:10,1', 'idempotent'])->post('transaction', [
         TransactionController::class,

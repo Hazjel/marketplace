@@ -46,6 +46,33 @@ class TransactionPolicy
         return $this->ownsAsBuyer($user, $transaction);
     }
 
+    /**
+     * Menolak pesanan yang sudah dibayar: penjual pemilik toko, atau admin.
+     */
+    public function cancel(User $user, Transaction $transaction): bool
+    {
+        return $this->ownsAsStore($user, $transaction) || $this->isAdmin($user);
+    }
+
+    /**
+     * Rekening refund milik pembeli: hanya dia yang mengisi, hanya dia dan
+     * admin (yang mentransfer) yang boleh melihatnya. Penjual tidak.
+     */
+    public function submitRefundAccount(User $user, Transaction $transaction): bool
+    {
+        return $this->ownsAsBuyer($user, $transaction);
+    }
+
+    public function viewRefundAccount(User $user, Transaction $transaction): bool
+    {
+        return $this->ownsAsBuyer($user, $transaction) || $this->isAdmin($user);
+    }
+
+    public function markRefunded(User $user, Transaction $transaction): bool
+    {
+        return $this->isAdmin($user);
+    }
+
     public function checkPaymentStatus(User $user, Transaction $transaction): bool
     {
         return $this->view($user, $transaction);

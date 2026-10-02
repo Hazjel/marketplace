@@ -93,6 +93,22 @@ class MidtransController extends Controller
                     ]);
 
                     $outcome = 'amount_mismatch';
+                } elseif ($transaction->refund_status !== null) {
+                    // Dibatalkan penjual setelah dibayar. Satu-satunya kabar
+                    // yang berarti adalah refund-nya selesai; "settlement"
+                    // ulang tidak boleh mengkredit escrow lagi.
+                    if (in_array($request->transaction_status, ['refund', 'partial_refund', 'cancel'], true)
+                        && $transaction->refund_status !== 'refunded') {
+                        $transaction->update([
+                            'refund_status' => 'refunded',
+                            'refund_method' => 'midtrans',
+                            'refunded_at' => now(),
+                        ]);
+                        $events[] = new TransactionStatusUpdated($transaction->fresh());
+                        $outcome = 'updated';
+                    } else {
+                        $outcome = 'ignored';
+                    }
                 } else {
                     $newStatus = MidtransPaymentStatusInterpreter::interpret(
                         $request->transaction_status,

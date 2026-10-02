@@ -6,6 +6,7 @@ use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ShippingGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
+use App\Jobs\RefundCancelledTransactionJob;
 use App\Models\Product;
 use App\Models\ProductVariantMongo;
 use App\Models\Store;
@@ -49,6 +50,12 @@ class TransactionRepository implements TransactionRepositoryInterface
         // scopeToMode tidak asumsikan role eksklusif seperti sebelumnya.
         if (! (Auth::check() && Auth::user()->hasRole('admin'))) {
             $this->scopeToMode($query, $mode);
+        }
+
+        // Antrean refund manual admin: ?refund_status=manual_required.
+        $refundStatus = request('refund_status');
+        if (in_array($refundStatus, ['processing', 'manual_required', 'refunded'], true)) {
+            $query->where('refund_status', $refundStatus);
         }
 
         $query->orderBy('created_at', 'desc');
@@ -790,6 +797,130 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'store.user',
                 'transactionDetails.product',
             ]);
+        });
+    }
+
+    /**
+     * Penjual menolak pesanan yang sudah dibayar, sebelum dikirim.
+     *
+     * Dalam satu transaksi terkunci: stok kembali, saldo tertahan penjual
+     * ditarik (EscrowRepository::refund), pesanan jadi cancelled, dan
+     * refund_status = processing. payment_status ikut jadi failed seperti
+     * pembatalan lain, supaya analitik omzet (payment_status = paid) tidak
+     * menghitungnya; nasib uang pembeli dicatat di kolom refund_*.
+     *
+     * Uang pembeli dikembalikan oleh RefundCancelledTransactionJob SETELAH
+     * commit: panggilan ke Midtrans tidak boleh terjadi untuk pembatalan yang
+     * ternyata di-rollback.
+     */
+    public function cancelPaidOrder(string $id, string $reason): Transaction
+    {
+        DB::beginTransaction();
+        $mongoAdjustments = [];
+
+        try {
+            $transaction = Transaction::where('id', $id)->lockForUpdate()->first();
+
+            if (! $transaction) {
+                throw new Exception('Data Transaksi Tidak Ditemukan', 404);
+            }
+
+            if ($transaction->payment_status !== 'paid') {
+                throw new Exception('Hanya pesanan yang sudah dibayar yang bisa ditolak', 422);
+            }
+
+            if (! in_array($transaction->delivery_status, ['pending', 'processing'], true)) {
+                throw new Exception('Pesanan yang sudah dikirim tidak bisa dibatalkan', 422);
+            }
+
+            $this->restoreStock($transaction, $mongoAdjustments);
+            $this->escrowRepository->refund($transaction);
+
+            $transaction->delivery_status = 'cancelled';
+            $transaction->payment_status = 'failed';
+            $transaction->refund_status = 'processing';
+            $transaction->refund_amount = $transaction->grand_total;
+            $transaction->refund_reason = $reason;
+            $transaction->save();
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            // Kompensasi SEBELUM rollback -- lihat docblock restoreStock().
+            $this->compensateStockRestoreRollback($mongoAdjustments);
+            DB::rollBack();
+
+            throw $e;
+        }
+
+        try {
+            RefundCancelledTransactionJob::dispatch($transaction->id);
+        } catch (\Throwable $e) {
+            // Pembatalan sudah commit; jangan biarkan refund menggantung di
+            // "processing" tanpa job yang akan menyelesaikannya.
+            Log::error('Refund job gagal didispatch, dialihkan ke manual', [
+                'transaction' => $transaction->code,
+                'error' => $e->getMessage(),
+            ]);
+            Transaction::where('id', $transaction->id)
+                ->where('refund_status', 'processing')
+                ->update([
+                    'refund_status' => 'manual_required',
+                    'refund_method' => 'manual',
+                    'refund_note' => 'Refund otomatis tidak bisa dijadwalkan: '.mb_substr($e->getMessage(), 0, 500),
+                ]);
+        }
+
+        return $transaction->fresh([
+            'buyer.user',
+            'store.user',
+            'transactionDetails.product',
+        ]);
+    }
+
+    /**
+     * Pembeli mengisi rekening tujuan untuk refund manual. Boleh diganti
+     * selama platform belum mentransfer.
+     *
+     * @param  array{refund_bank_name: string, refund_account_number: string, refund_account_name: string}  $account
+     */
+    public function saveRefundAccount(string $id, array $account): Transaction
+    {
+        return DB::transaction(function () use ($id, $account) {
+            $transaction = Transaction::where('id', $id)->lockForUpdate()->firstOrFail();
+
+            if ($transaction->refund_status !== 'manual_required') {
+                throw new Exception('Pesanan ini tidak membutuhkan rekening refund', 422);
+            }
+
+            $transaction->fill($account)->save();
+
+            return $transaction->fresh(['buyer.user', 'store.user', 'transactionDetails.product']);
+        });
+    }
+
+    /**
+     * Admin mencatat bahwa refund manual sudah ditransfer ke pembeli.
+     */
+    public function markRefundTransferred(string $id, string $note): Transaction
+    {
+        return DB::transaction(function () use ($id, $note) {
+            $transaction = Transaction::where('id', $id)->lockForUpdate()->firstOrFail();
+
+            if ($transaction->refund_status !== 'manual_required') {
+                throw new Exception('Pesanan ini tidak sedang menunggu refund manual', 422);
+            }
+
+            if (! $transaction->refund_account_number) {
+                throw new Exception('Pembeli belum mengisi rekening refund', 422);
+            }
+
+            $transaction->refund_status = 'refunded';
+            $transaction->refund_method = 'manual';
+            $transaction->refund_note = $note;
+            $transaction->refunded_at = now();
+            $transaction->save();
+
+            return $transaction->fresh(['buyer.user', 'store.user', 'transactionDetails.product']);
         });
     }
 }

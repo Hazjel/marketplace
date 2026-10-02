@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Transaction;
 use App\ValueObjects\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -44,10 +45,53 @@ class TransactionResource extends JsonResource
             'voucher_code' => $this->voucher?->code,
             'discount_amount' => Money::fromDecimalString((string) ($this->discount_amount ?? 0))->minor(),
             'payment_status' => $this->payment_status,
+            ...$this->refund(),
+            'refund_account' => $this->refundAccount($request),
             'snap_token' => $this->snap_token,
             'transaction_details' => TransactionDetailResource::collection($this->transactionDetails),
             'product_reviews' => ProductReviewResource::collection($this->whenLoaded('productReviews')),
             'created_at' => $this->created_at,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function refund(): array
+    {
+        /** @var Transaction $transaction */
+        $transaction = $this->resource;
+
+        return [
+            'refund_status' => $transaction->refund_status,
+            'refund_method' => $transaction->refund_method,
+            'refund_amount' => $transaction->refund_amount === null ? null : Money::fromDecimalString((string) $transaction->refund_amount)->minor(),
+            'refund_reason' => $transaction->refund_reason,
+            'refund_note' => $transaction->refund_note,
+            'refunded_at' => $transaction->refunded_at,
+        ];
+    }
+
+    /**
+     * Rekening tujuan refund manual: hanya pembeli pemiliknya dan admin yang
+     * mentransfer. Penjual melihat status refund, bukan rekeningnya.
+     *
+     * @return array{bank_name: ?string, account_number: string, account_name: ?string}|null
+     */
+    private function refundAccount(Request $request): ?array
+    {
+        /** @var Transaction $transaction */
+        $transaction = $this->resource;
+        $viewer = $request->user();
+
+        if (! $transaction->refund_account_number || ! $viewer || $viewer->cannot('viewRefundAccount', $transaction)) {
+            return null;
+        }
+
+        return [
+            'bank_name' => $transaction->refund_bank_name,
+            'account_number' => $transaction->refund_account_number,
+            'account_name' => $transaction->refund_account_name,
         ];
     }
 }

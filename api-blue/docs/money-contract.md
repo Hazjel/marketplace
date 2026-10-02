@@ -215,6 +215,26 @@ platform      = admin_fee + service_fee   (pays the payment-gateway fee)
 - `admin_fee` and `seller_amount` are locked at escrow credit; release and
   refund never recompute.
 
+### Seller cancels a paid order (refund)
+
+`POST /transaction/{id}/cancel` (seller or admin; only `paid` and
+`pending`/`processing`) restores stock, reverses the seller's
+`pending_balance` (`refunded` ledger entry), sets the order to
+`cancelled` / `payment_status = failed` (so revenue analytics skip it), and
+records `refund_amount = grand_total`: the buyer gets everything back,
+service fee and shipping included. The platform absorbs the Midtrans fee.
+
+`refund_status` then tracks the buyer's money:
+
+- `processing`: `RefundCancelledTransactionJob` calls Midtrans (card void
+  before settlement, `/refund` after; card, GoPay, ShopeePay, QRIS, Akulaku).
+- `manual_required`: bank VA and other methods Midtrans cannot refund, or an
+  API refund that failed 3 times (`refund_note` says why). The buyer submits
+  a bank account (`/refund-account`, stored encrypted, hidden from the
+  seller); an admin transfers and calls `/mark-refunded`.
+- `refunded`: done (`refund_method` `midtrans` or `manual`). A Midtrans
+  `refund` webhook also lands here.
+
 ## 8. API / naming
 
 - Value object: `App\ValueObjects\Money` (immutable domain VO, not a
