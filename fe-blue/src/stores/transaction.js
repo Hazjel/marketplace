@@ -161,6 +161,36 @@ export const useTransactionStore = defineStore('transaction', {
       } finally {
         this.loading = false
       }
+    },
+
+    // Seller rejects a paid order; the API refunds the buyer.
+    async cancelTransaction(id, reason) {
+      return this.postAction(`transaction/${id}/cancel`, { reason })
+    },
+
+    // Buyer's bank account for a manual (virtual account) refund.
+    async submitRefundAccount(id, payload) {
+      return this.postAction(`transaction/${id}/refund-account`, payload)
+    },
+
+    // Admin records a manual refund transfer.
+    async markRefunded(id, note) {
+      return this.postAction(`transaction/${id}/mark-refunded`, { note })
+    },
+
+    async postAction(url, payload) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await axiosInstance.post(url, payload)
+        this.success = response.data.message
+        return response.data.data
+      } catch (error) {
+        this.error = handleError(error)
+        throw error
+      } finally {
+        this.loading = false
+      }
     }
   }
 })

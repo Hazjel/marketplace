@@ -33,13 +33,16 @@ const statusFilters = [
   { key: 'processing', label: 'Diproses' },
   { key: 'delivering', label: 'Dikirim' },
   { key: 'completed', label: 'Selesai' },
-  { key: 'cancelled', label: 'Dibatalkan' }
+  { key: 'cancelled', label: 'Dibatalkan' },
+  { key: 'refund', label: 'Menunggu Refund' }
 ]
 
 const fetchData = async () => {
   await fetchTransactionsPaginated({
     ...serverOptions.value,
-    ...filters.value
+    ...filters.value,
+    // Server-side: refunds waiting for a manual transfer can be on any page.
+    ...(activeStatusFilter.value === 'refund' ? { refund_status: 'manual_required' } : {})
   })
 }
 
@@ -67,8 +70,9 @@ watch(
   },
   { deep: true }
 )
-watch(activeStatusFilter, () => {
+watch(activeStatusFilter, (value, previous) => {
   serverOptions.value.page = 1
+  if (value === 'refund' || previous === 'refund') fetchData()
 })
 watch(success, (value) => {
   if (value) {
@@ -94,6 +98,7 @@ const filteredByStatus = computed(() => {
     if (activeStatusFilter.value === 'delivering') return t.delivery_status === 'delivering'
     if (activeStatusFilter.value === 'completed') return t.delivery_status === 'completed'
     if (activeStatusFilter.value === 'cancelled') return t.delivery_status === 'cancelled' || isFailedTransaction(t)
+    if (activeStatusFilter.value === 'refund') return t.refund_status === 'manual_required'
     return true
   })
 })

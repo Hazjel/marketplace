@@ -10,6 +10,7 @@ import { useToast } from 'vue-toastification'
 import ReviewModal from '@/components/ReviewModal.vue'
 import TrackingMap from '@/components/TrackingMap.vue'
 import TransactionStatusBanner from '@/components/admin/transaction/TransactionStatusBanner.vue'
+import RefundPanel from '@/components/admin/transaction/RefundPanel.vue'
 import { logger } from '@/utils/logger'
 import { dashboardRoute } from '@/helpers/routeHelper'
 import { resolvePaymentStatus } from '@/composables/useTransactionStatus'
@@ -251,6 +252,13 @@ v-else-if="!transaction || !transaction.id"
     <div class="flex flex-col gap-5 w-full min-w-0">
       <!-- Status Banner -->
       <TransactionStatusBanner :status="transaction?.delivery_status" />
+
+      <RefundPanel
+        v-if="transaction?.refund_status"
+        :transaction="transaction"
+        :is-buyer="activeMode === 'buyer' && user?.role !== 'admin'"
+        :is-admin="user?.role === 'admin'"
+        @updated="(updated) => (transaction = updated)" />
 
       <section
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">

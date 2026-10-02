@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch, computed } from 'vue'
 import { formatRupiah, formatDate } from '@/helpers/format'
 import { useToast } from 'vue-toastification'
-import { resolvePaymentStatus, resolveDeliveryStatus } from '@/composables/useTransactionStatus'
+import { resolvePaymentStatus, resolveDeliveryStatus, resolveRefundStatus } from '@/composables/useTransactionStatus'
 
 const toast = useToast()
 const authStore = useAuthStore()
@@ -13,7 +13,7 @@ const { user } = storeToRefs(authStore)
 
 const transactionStore = useTransactionStore()
 const { transactions, loading, success, error } = storeToRefs(transactionStore)
-const { fetchTransactionsPaginated, updateTransaction } = transactionStore
+const { fetchTransactionsPaginated, updateTransaction, cancelTransaction } = transactionStore
 
 const activeTab = ref('all')
 const filters = ref({
@@ -91,13 +91,21 @@ const handleAccept = async (id) => {
 }
 
 const handleReject = async (id) => {
-  if (confirm('Apakah Anda yakin ingin menolak pesanan ini? Stok akan dikembalikan.')) {
-    await updateTransaction({
-      id: id,
-      delivery_status: 'cancelled'
-    })
-    fetchData()
+  const reason = prompt(
+    'Tolak pesanan ini? Stok dikembalikan dan dana pembeli direfund penuh.\n\nAlasan penolakan (dilihat pembeli):'
+  )
+  if (reason === null) return
+  if (reason.trim().length < 5) {
+    toast.error('Alasan penolakan minimal 5 karakter')
+    return
   }
+
+  try {
+    await cancelTransaction(id, reason.trim())
+  } catch {
+    // Pesan error sudah ditampilkan lewat watcher `error`.
+  }
+  fetchData()
 }
 
 const resolvePaymentBadge = (status) => resolvePaymentStatus({ payment_status: status }).style
@@ -169,7 +177,10 @@ watch(error, (val) => {
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="rounded-full px-2.5 py-1 text-[11px] font-medium capitalize" :class="resolvePaymentBadge(t.payment_status)">
+            <span v-if="resolveRefundStatus(t)" class="rounded-full px-2.5 py-1 text-[11px] font-medium" :class="resolveRefundStatus(t).style">
+              {{ resolveRefundStatus(t).label }}
+            </span>
+            <span v-else class="rounded-full px-2.5 py-1 text-[11px] font-medium capitalize" :class="resolvePaymentBadge(t.payment_status)">
               {{ resolvePaymentLabel(t.payment_status) }}
             </span>
             <span class="rounded-full px-2.5 py-1 text-[11px] font-medium capitalize" :class="resolveDeliveryBadge(t.delivery_status)">
@@ -247,6 +258,11 @@ watch(error, (val) => {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
                   </svg>
                   Input Resi
+                </button>
+                <button
+                  class="px-5 py-2.5 rounded-xl bg-red-50 text-red-600 font-medium text-sm hover:bg-red-100 transition-all dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 ring-1 ring-red-100 dark:ring-red-900/30"
+                  @click="handleReject(t.id)">
+                  Tolak
                 </button>
               </template>
 

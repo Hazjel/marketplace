@@ -48,6 +48,32 @@ const DELIVERY_ICONS = {
   cancelled: 'x-circle'
 }
 
+// refund_status: null (tidak ada refund) | processing | manual_required | refunded
+const REFUND_LABELS = {
+  processing: 'Refund Diproses',
+  manual_required: 'Menunggu Refund',
+  refunded: 'Dana Dikembalikan'
+}
+
+const REFUND_STYLES = {
+  processing: DELIVERY_STYLES.processing,
+  manual_required: PAYMENT_STYLES.unpaid,
+  refunded: DELIVERY_STYLES.completed
+}
+
+/**
+ * Status refund pesanan yang dibatalkan penjual setelah dibayar, atau null.
+ */
+export function resolveRefundStatus(transaction) {
+  const status = transaction?.refund_status
+  if (!status) return null
+
+  return {
+    label: REFUND_LABELS[status] ?? status,
+    style: REFUND_STYLES[status] ?? DEFAULT_STYLE
+  }
+}
+
 export function isFailedTransaction(transaction) {
   return FAILURE_STATUSES.includes(transaction?.payment_status)
 }
@@ -87,6 +113,13 @@ export function resolveDeliveryStatus(transaction) {
  * lalu belum-bayar, baru status pengiriman.
  */
 export function resolveTransactionStatus(transaction) {
+  // Dibatalkan penjual setelah bayar: payment_status ikut 'failed', tapi yang
+  // penting bagi pembeli adalah nasib uangnya, bukan "Gagal".
+  const refund = resolveRefundStatus(transaction)
+  if (refund) {
+    return { ...refund, icon: 'x-circle', isFailure: false }
+  }
+
   if (isFailedTransaction(transaction)) {
     return { label: 'Gagal', style: PAYMENT_STYLES.failed, icon: 'x-circle', isFailure: true }
   }
