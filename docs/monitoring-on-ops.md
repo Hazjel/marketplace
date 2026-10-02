@@ -5,6 +5,38 @@ Blukios tidak menjalankan Prometheus dan Grafana sendiri. Server punya stack ops
 `/opt/shared-infra`. Blukios hanya mengeluarkan metrik; ops yang mengumpulkan dan
 menampilkannya.
 
+> **Status 2026-10-03:** stack ops mati sejak 2026-09-27 21:42 WIB. `ops-prometheus`
+> dan `ops-cadvisor` dihentikan dengan tertib (bukan crash) dan `restart: no`, jadi tidak
+> hidup lagi sendiri; `ops-grafana` gagal karena database SQLite-nya terkunci. Tepat
+> sebelumnya cAdvisor butuh 22 menit untuk satu pemindaian disk Docker. Menyalakannya
+> lagi keputusan pemilik root; tanpa cAdvisor bebannya jauh lebih ringan. Kontainer
+> `dash-prometheus`/`dash-grafana` yang jalan milik proyek lain (`/opt/Dash-Siem`).
+> Sampai stack ops hidup lagi, yang menjaga Blukios adalah alert dari aplikasi di bawah.
+
+## Alert dari aplikasi (`ops:check`)
+
+Tidak bergantung pada stack ops. Scheduler menjalankan `php artisan ops:check` tiap 5
+menit dan mengirim email ke `OPS_ALERT_EMAIL` (`.env` server; kosong = hanya log):
+
+| Masalah | Kapan dikirim |
+|---|---|
+| Queue worker tidak memproses job | Heartbeat antrean (job tiap menit) lebih tua dari 10 menit |
+| Job antrean gagal permanen | Ada baris baru di `failed_jobs` |
+| Notifikasi Midtrans ditolak | Signature atau nominal tidak cocok (salah konfigurasi atau notifikasi palsu) |
+| Refund otomatis macet | `refund_status = processing` lebih dari 48 jam |
+| Refund manual menunggu transfer | Pembeli sudah mengisi rekening; pengingat sehari sekali |
+
+Masalah yang sama dikirim ulang paling cepat 60 menit kemudian. Email dikirim langsung,
+bukan lewat antrean, karena salah satu yang dipantau adalah antrean itu sendiri. Ambang
+ada di `api-blue/config/ops.php`. Yang tidak terdeteksi: scheduler itu sendiri mati, atau
+seluruh server mati; itu butuh pemantau dari luar (mis. uptime check ke `/api/health`).
+
+`/metrics` Laravel juga mengeluarkan `api_business_events_total{event, detail}`:
+`order_created`, `payment_paid` (detail = metode bayar), `payment_failed`,
+`webhook_rejected` (`signature`/`amount`), `refund_requested`, `refund_done`
+(`midtrans`/`manual`/`midtrans_webhook`), `refund_manual_required`. Terkumpul begitu
+Prometheus ops kembali menarik target Blukios.
+
 ## Ke mana membukanya
 
 | Layanan | Alamat | Cara masuk |

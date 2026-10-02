@@ -415,11 +415,11 @@ Actively developed. Production is live and CI-gated. First tagged release:
   |---|---|
   | **C1** | API contract stabilization + mobile parity (this doc set; integer money JSON; `/api/health` version) |
   | **C2** | **done** — production infra hardening: `docker-compose.prod.yml`, required DB/Redis/Mongo/Reverb secrets, no `0.0.0.0` ports, blocking gitleaks |
-  | **C3** | payment/order end-to-end verification (Midtrans Snap → webhook → escrow → release) |
-  | **C4** | full mobile buyer + seller parity |
-  | **C5** | observability — business-path metrics, structured logging, alerting |
+  | **C3** | **done** — payment/order end-to-end verification in sandbox (card, BCA VA, QRIS: Snap → webhook → escrow → release), new money model (no buyer tax, Rp1.000 service fee), seller rejection with refunds |
+  | **C4** | full mobile buyer + seller parity — mobile v1.2.0 matches checkout totals and refunds |
+  | **C5** | observability — **in progress**: business-path metrics and app-side email alerts (`ops:check`, see `docs/monitoring-on-ops.md`); structured logging still open |
   | **C6** | security & dependency debt (`unhead` chain, dependency scanning, auth/rate-limit review) |
-  | **C7** | mobile release engineering — signed AAB, approval-gated internal testing |
+  | **C7** | mobile release engineering — signed APK releases on GitHub (v1.2.0, new signing key); mobile Jenkins job still needs a Jenkins admin |
   | **C8** | AI / recommendation quality (measured, not just "works") |
   | **C9** | `decimal` → `bigint` money-column migration (backfill + rollback + gates) |
   | **C10** | v1 production maturity — load test, backup/DR, SLOs |
