@@ -81,15 +81,25 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        // Generic fallback for production — hide internal errors
+        // Generic fallback for production — hide internal errors. 4xx get a
+        // message that matches the status: a permission denial used to read
+        // as a server error.
         $exceptions->render(function (Throwable $e, $request) {
             if ($request->expectsJson() && ! app()->hasDebugModeEnabled()) {
                 $code = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+                $code = $code >= 400 && $code < 600 ? $code : 500;
+
+                $message = match (true) {
+                    $code === 403 => 'Anda tidak memiliki izin untuk melakukan aksi ini',
+                    $code === 429 => 'Terlalu banyak permintaan, coba lagi sebentar lagi',
+                    $code < 500 => 'Permintaan tidak dapat diproses',
+                    default => 'Terjadi kesalahan pada server',
+                };
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'Terjadi kesalahan pada server',
-                ], $code >= 400 && $code < 600 ? $code : 500);
+                    'message' => $message,
+                ], $code);
             }
         });
     })->create();

@@ -156,6 +156,18 @@ class StoreControllerAuthorizationTest extends TestCase
         $this->assertDatabaseMissing('stores', ['name' => 'Toko Kedua Buyer']);
     }
 
+    public function test_a_permission_denial_says_so_instead_of_reporting_a_server_error(): void
+    {
+        // Production renders through the debug-off fallback; sellers lack store-delete.
+        config(['app.debug' => false]);
+        [$seller, $store] = $this->seller();
+
+        $this->actingAs($seller, 'sanctum')
+            ->deleteJson("/api/store/{$store->id}")
+            ->assertStatus(403)
+            ->assertJsonPath('message', 'Anda tidak memiliki izin untuk melakukan aksi ini');
+    }
+
     public function test_seller_cannot_update_another_sellers_store(): void
     {
         [$sellerA, $storeA] = $this->seller();
