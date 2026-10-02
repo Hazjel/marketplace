@@ -17,7 +17,10 @@ class TransactionUpdateRequest extends FormRequest
         return [
             'tracking_number' => 'nullable|string',
             'delivery_proof' => 'nullable|image|mimes:png,jpg',
-            'delivery_status' => 'required|in:processing,delivering,completed',
+            // No 'completed': only the buyer's complete endpoint and the
+            // auto-complete job finish an order, and both release the escrow.
+            // Setting it here stranded the seller's pending balance for good.
+            'delivery_status' => 'required|in:processing,delivering',
         ];
     }
 

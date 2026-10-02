@@ -184,7 +184,7 @@ class TransactionAuthorizationTest extends TestCase
     {
         $this->actingAs($this->otherSeller, 'sanctum')
             ->putJson("/api/transaction/{$this->transaction->id}", [
-                'delivery_status' => 'completed',
+                'delivery_status' => 'delivering',
                 'tracking_number' => 'HIJACKED',
             ])
             ->assertStatus(403);
@@ -193,6 +193,19 @@ class TransactionAuthorizationTest extends TestCase
             'id' => $this->transaction->id,
             'tracking_number' => 'HIJACKED',
         ]);
+    }
+
+    public function test_the_seller_cannot_mark_an_order_completed_through_update(): void
+    {
+        // Completing skips the escrow release when done here, which strands the
+        // pending balance: buyer complete and auto-complete only take 'delivering'.
+        $before = $this->transaction->fresh()->delivery_status;
+
+        $this->actingAs($this->actor('owning seller'), 'sanctum')
+            ->putJson("/api/transaction/{$this->transaction->id}", ['delivery_status' => 'completed'])
+            ->assertStatus(422);
+
+        $this->assertSame($before, $this->transaction->fresh()->delivery_status);
     }
 
     public function test_only_the_owning_buyer_may_complete_an_order(): void
