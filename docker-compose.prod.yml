@@ -22,15 +22,23 @@ services:
     environment:
       <<: *prod-log-env
 
+  # queue, scheduler dan reverb berjalan sebagai www-data, sama dengan php-fpm
+  # di api. Sebagai root, siapa pun yang pertama menulis log hari itu (biasanya
+  # scheduler) membuat file laravel-<tanggal>.log milik root 0640, dan api tidak
+  # bisa menulis log sampai besok. storage/ sudah di-chown ke www-data oleh
+  # entrypoint api, yang start lebih dulu (depends_on).
   queue:
+    user: www-data
     environment:
       <<: *prod-log-env
 
   scheduler:
+    user: www-data
     environment:
       <<: *prod-log-env
 
   reverb:
+    user: www-data
     environment:
       <<: *prod-log-env
 
