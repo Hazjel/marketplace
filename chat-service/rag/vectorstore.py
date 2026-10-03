@@ -10,6 +10,7 @@ from config import (
     RAG_TOP_K,
 )
 from rag.ingestion import fetch_all_products
+from utils.metrics import RAG_INDEXED
 
 # ---------------------------------------------------------------------------
 # Singleton — diinisialisasi oleh lifespan di main.py
@@ -77,10 +78,6 @@ class ProductVectorStore:
     async def build_index(self) -> int:
         """Fetch semua produk dari Laravel, embed, simpan di ChromaDB."""
         products = await fetch_all_products()
-        if not products:
-            print("[RAG] Tidak ada produk untuk di-index.")
-            return 0
-
         print(f"[RAG] Embedding {len(products)} produk via onnxruntime...")
         texts     = [self._product_to_text(p) for p in products]
         ids       = [str(p.get("id", i)) for i, p in enumerate(products)]
@@ -103,12 +100,23 @@ class ProductVectorStore:
 
         # ChromaDB embedding + upsert harus sync → thread pool
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(
-            None,
-            lambda: self._collection.upsert(ids=ids, documents=texts, metadatas=metadatas),
-        )
+        if ids:
+            await loop.run_in_executor(
+                None,
+                lambda: self._collection.upsert(ids=ids, documents=texts, metadatas=metadatas),
+            )
+
+        # Upsert alone never removes anything: deleted products and products of
+        # deactivated stores stayed indexed and kept being recommended (64 of 70
+        # on 2026-10-03). fetch_all_products raises on a failed fetch, so this
+        # list is the whole live catalogue and anything else is stale.
+        stale = set(self._collection.get(include=[])["ids"]) - set(ids)
+        if stale:
+            self._collection.delete(ids=list(stale))
+            print(f"[RAG] {len(stale)} produk yang sudah tidak ada dihapus dari index.")
 
         count = self._collection.count()
+        RAG_INDEXED.set(count)
         print(f"[RAG] Index selesai: {count} produk tersimpan.")
         return count
 
