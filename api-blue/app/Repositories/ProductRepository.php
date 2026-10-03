@@ -205,7 +205,7 @@ class ProductRepository implements ProductRepositoryInterface
             $product->store_id = $data['store_id'];
             $product->product_category_id = $data['product_category_id'];
             $product->name = $data['name'];
-            $product->slug = Str::slug($data['name']).'-i'.rand(100000, 999999).'.'.rand(10000000, 9999999);
+            $product->slug = Str::slug($data['name']).'-i'.rand(100000, 999999).'.'.rand(1000000, 9999999);
             $product->description = $data['description'];
             $product->condition = $data['condition'];
             $product->weight = $data['weight'];
@@ -269,8 +269,13 @@ class ProductRepository implements ProductRepositoryInterface
             $product = Product::where('id', $id)->lockForUpdate()->firstOrFail();
             $product->store_id = $data['store_id'];
             $product->product_category_id = $data['product_category_id'];
+            // Keep the URL when only price/stock/etc. change: shared links,
+            // wishlists and the sitemap point at it. (rand's bounds used to be
+            // reversed, so the last part was a constant, not random.)
+            if ($product->name !== $data['name']) {
+                $product->slug = Str::slug($data['name']).'-i'.rand(100000, 999999).'.'.rand(1000000, 9999999);
+            }
             $product->name = $data['name'];
-            $product->slug = Str::slug($data['name']).'-i'.rand(100000, 999999).'.'.rand(10000000, 9999999);
             $product->description = $data['description'];
             $product->condition = $data['condition'];
             $product->price = $data['price'];
