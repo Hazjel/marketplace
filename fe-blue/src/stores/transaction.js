@@ -74,7 +74,8 @@ export const useTransactionStore = defineStore('transaction', {
       }
     },
 
-    async createTransaction(payload) {
+    // path 'transaction/checkout': one order per store, paid together (returns a list).
+    async createTransaction(payload, path = 'transaction') {
       this.loading = true
       this.error = null
 
@@ -82,7 +83,7 @@ export const useTransactionStore = defineStore('transaction', {
         // Idempotency: generate unique key per checkout attempt to prevent double-charge
         const idempotencyKey = crypto.randomUUID()
 
-        const response = await axiosInstance.post(`transaction`, payload, {
+        const response = await axiosInstance.post(path, payload, {
           headers: {
             'X-Idempotency-Key': idempotencyKey
           }

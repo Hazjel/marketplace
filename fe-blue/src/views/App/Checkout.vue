@@ -77,35 +77,40 @@ const selectSavedAddress = (addr) => {
 }
 
 // Transaction data
+// Shipping address, shared by every store's order.
 const transaction = ref({
-  buyer_id: null,
-  store_id: null,
   address_id: null,
   address: null,
   city: null,
   postal_code: null,
   dest_latitude: null,
-  dest_longitude: null,
-  shipping: null,
-  shipping_type: null,
-  shipping_cost: 0,
-  products: []
+  dest_longitude: null
 })
 
-// Delivery related state
+// Delivery: each store ships its own parcel, so each gets its own courier.
 const couriers = ref([])
-const selectedCourier = ref(null)
+const selectedCourier = ref(null) // the choice inside the open modal
 const showDeliveryModal = ref(false)
-const deliveryFee = ref(0)
+const activeStore = ref(null) // store whose courier the modal is choosing
+const shippingByStore = ref({}) // storeId -> chosen courier
+const storeSubtotal = (store) => store.products.reduce((sum, p) => sum + p.price * p.quantity, 0)
+const deliveryFee = computed(() =>
+  selectedCarts.value.reduce(
+    (sum, store) => sum + (shippingByStore.value[store.storeId]?.shipping_cost_net ?? 0),
+    0
+  )
+)
+const allShippingChosen = computed(
+  () =>
+    selectedCarts.value.length > 0 &&
+    selectedCarts.value.every((store) => shippingByStore.value[store.storeId])
+)
 
 // Reset kurir & ongkir yang sudah dipilih — dihitung berdasarkan alamat lama,
 // jadi begitu alamat ganti wajib dihitung ulang, bukan dibawa terus.
 const resetSelectedShipping = () => {
   selectedCourier.value = null
-  deliveryFee.value = 0
-  transaction.value.shipping = null
-  transaction.value.shipping_type = null
-  transaction.value.shipping_cost = 0
+  shippingByStore.value = {}
 }
 
 // Address search state
@@ -205,14 +210,13 @@ const handleAddressSelect = (selected) => {
 }
 
 // Delivery calculation functionality
-const handleDeliveryModal = async () => {
+const handleDeliveryModal = async (store) => {
   if (!transaction.value.address_id) {
     toast.error('Silakan pilih alamat terlebih dahulu')
     return
   }
 
   try {
-    const store = selectedCarts.value[0]
 
     if (!store.storeAddressId || store.storeAddressId === '-') {
       toast.error('Alamat toko tidak tersedia. Tidak bisa menghitung ongkir.')
@@ -220,9 +224,8 @@ const handleDeliveryModal = async () => {
     }
 
     const totalWeight = store.products.reduce((sum, p) => sum + p.weight * p.quantity, 0)
-    // deliveryFee belum diketahui di titik ini (baru mau cari opsi kurir),
-    // jadi nilai barang untuk perhitungan ongkir = subtotal produk saja.
-    const totalValue = subtotalSelected.value
+    // Nilai barang untuk ongkir = subtotal produk toko ini saja.
+    const totalValue = storeSubtotal(store)
 
     const response = await axiosInstance.get('/shipment/calculate', {
       params: {
@@ -244,6 +247,8 @@ const handleDeliveryModal = async () => {
       return
     }
 
+    activeStore.value = store
+    selectedCourier.value = shippingByStore.value[store.storeId] ?? null
     showDeliveryModal.value = true
   } catch {
     toast.error('Gagal menghitung ongkir. Silakan coba lagi.')
@@ -256,10 +261,10 @@ const handleCourierSubmit = () => {
     return
   }
 
-  transaction.value.shipping = selectedCourier.value.shipping_name
-  transaction.value.shipping_type = selectedCourier.value.service_name
-  transaction.value.shipping_cost = selectedCourier.value.shipping_cost_net
-  deliveryFee.value = selectedCourier.value.shipping_cost_net
+  shippingByStore.value = {
+    ...shippingByStore.value,
+    [activeStore.value.storeId]: selectedCourier.value
+  }
   showDeliveryModal.value = false
   toast.success('Kurir berhasil dipilih')
 }
@@ -268,15 +273,31 @@ const isProcessingPayment = ref(false)
 
 const handleSubmit = async () => {
   if (isProcessingPayment.value) return
-  if (!selectedCourier.value) {
-    toast.error('Silakan pilih kurir terlebih dahulu')
+  if (!allShippingChosen.value) {
+    toast.error('Pilih kurir untuk setiap toko terlebih dahulu')
     return
   }
 
   isProcessingPayment.value = true
 
   try {
-    const response = await createTransaction(transaction.value)
+    // One order per store, one payment for all of them.
+    const orders = await createTransaction(
+      {
+        ...transaction.value,
+        orders: selectedCarts.value.map((store) => ({
+          shipping: shippingByStore.value[store.storeId].shipping_name,
+          shipping_type: shippingByStore.value[store.storeId].service_name,
+          products: store.products.map((p) => ({
+            product_id: p.id,
+            variant_id: p.variant_id || null,
+            qty: p.quantity
+          }))
+        }))
+      },
+      'transaction/checkout'
+    )
+    const response = orders?.[0]
 
     if (!response || !response.snap_token) {
       toast.error('Gagal membuat transaksi. Silakan coba lagi.')
@@ -337,6 +358,7 @@ const handleSubmit = async () => {
 const closeModal = () => {
   showDeliveryModal.value = false
   selectedCourier.value = null
+  activeStore.value = null
 }
 
 onMounted(async () => {
@@ -345,17 +367,6 @@ onMounted(async () => {
   } catch (error) {
     logger.error('Midtrans load error:', error)
     toast.error('Gagal memuat sistem pembayaran. Silakan refresh halaman.')
-  }
-
-  if (selectedCarts.value.length > 0) {
-    const store = selectedCarts.value[0]
-    transaction.value.store_id = store.storeId
-    transaction.value.buyer_id = user.value?.buyer?.id
-    transaction.value.products = store.products.map((p) => ({
-      product_id: p.id,
-      variant_id: p.variant_id || null,
-      qty: p.quantity
-    }))
   }
 
   fetchSavedAddresses()
@@ -577,38 +588,40 @@ onMounted(async () => {
               </div>
             </div>
 
-            <div class="p-5">
-              <div v-if="!selectedCourier"
-                class="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] cursor-pointer hover:border-custom-blue/50 hover:bg-blue-50/30 transition-all"
-                @click="handleDeliveryModal">
-                <div class="size-12 rounded-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 flex items-center justify-center shrink-0">
-                  <svg class="size-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            <div class="p-5 flex flex-col gap-3">
+              <template v-for="store in selectedCarts" :key="store.storeId">
+                <div v-if="!shippingByStore[store.storeId]"
+                  class="flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] cursor-pointer hover:border-custom-blue/50 hover:bg-blue-50/30 transition-all"
+                  @click="handleDeliveryModal(store)">
+                  <div class="size-12 rounded-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 flex items-center justify-center shrink-0">
+                    <svg class="size-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-medium text-sm text-custom-black dark:text-white">Pilih Kurir · {{ store.storeName }}</p>
+                    <p class="text-xs text-custom-grey dark:text-gray-400">Klik untuk cek ongkir & pilih layanan pengiriman</p>
+                  </div>
+                  <svg class="size-5 text-custom-blue shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
-                <div class="flex-1">
-                  <p class="font-medium text-sm text-custom-black dark:text-white">Pilih Kurir</p>
-                  <p class="text-xs text-custom-grey dark:text-gray-400">Klik untuk cek ongkir & pilih layanan pengiriman</p>
-                </div>
-                <svg class="size-5 text-custom-blue shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
 
-              <div v-else
-                class="flex items-center gap-4 p-4 rounded-xl border-2 border-custom-blue/30 bg-blue-50/50 dark:bg-blue-900/10 cursor-pointer hover:shadow-md transition-all"
-                @click="handleDeliveryModal">
-                <div class="size-12 rounded-full bg-custom-blue/10 flex items-center justify-center shrink-0">
-                  <svg class="size-6 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+                <div v-else
+                  class="flex items-center gap-4 p-4 rounded-xl border-2 border-custom-blue/30 bg-blue-50/50 dark:bg-blue-900/10 cursor-pointer hover:shadow-md transition-all"
+                  @click="handleDeliveryModal(store)">
+                  <div class="size-12 rounded-full bg-custom-blue/10 flex items-center justify-center shrink-0">
+                    <svg class="size-6 text-custom-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-medium text-sm text-custom-black dark:text-white">{{ store.storeName }} · {{ shippingByStore[store.storeId].shipping_name }}</p>
+                    <p class="text-xs text-custom-grey dark:text-gray-400">{{ shippingByStore[store.storeId].service_name }} &middot; Rp {{ formatRupiah(shippingByStore[store.storeId].shipping_cost_net) }}</p>
+                  </div>
+                  <span class="text-xs font-medium text-custom-blue hover:underline">Ubah</span>
                 </div>
-                <div class="flex-1">
-                  <p class="font-medium text-sm text-custom-black dark:text-white">{{ selectedCourier.shipping_name }}</p>
-                  <p class="text-xs text-custom-grey dark:text-gray-400">{{ selectedCourier.service_name }} &middot; Rp {{ formatRupiah(selectedCourier.shipping_cost_net) }}</p>
-                </div>
-                <span class="text-xs font-medium text-custom-blue hover:underline">Ubah</span>
-              </div>
+              </template>
             </div>
           </div>
         </div>
@@ -654,14 +667,14 @@ onMounted(async () => {
               <!-- Pay Button -->
               <div class="px-5 pb-5">
                 <button id="Pay-Button" type="submit"
-                  :disabled="selectedCarts.length === 0 || !selectedCourier || isProcessingPayment || user?.role === 'admin'"
+                  :disabled="!allShippingChosen || isProcessingPayment || user?.role === 'admin'"
                   class="flex items-center justify-center w-full h-14 rounded-2xl font-medium text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  :class="selectedCarts.length > 0 && selectedCourier && !isProcessingPayment ? 'bg-custom-blue hover:bg-blue-700 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5' : 'bg-gray-300 dark:bg-gray-700'">
+                  :class="allShippingChosen && !isProcessingPayment ? 'bg-custom-blue hover:bg-blue-700 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5' : 'bg-gray-300 dark:bg-gray-700'">
                   <template v-if="isProcessingPayment">
                     <div class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                     Memproses...
                   </template>
-                  <template v-else-if="selectedCarts.length > 0 && selectedCourier">
+                  <template v-else-if="allShippingChosen">
                     <svg class="size-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
@@ -691,7 +704,7 @@ onMounted(async () => {
         <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/10">
           <div>
             <h3 class="font-medium text-lg text-custom-black dark:text-white">Pilih Kurir</h3>
-            <p class="text-xs text-custom-grey dark:text-gray-400">Pilih layanan pengiriman yang tersedia</p>
+            <p class="text-xs text-custom-grey dark:text-gray-400">Pengiriman dari {{ activeStore?.storeName }}</p>
           </div>
           <button type="button" class="size-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors" @click="closeModal">
             <svg class="size-4 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
