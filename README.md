@@ -463,7 +463,7 @@ Actively developed. Production is live and CI-gated. First tagged release:
   | **C5** | **done** — observability: email alerts from the app (`ops:check`: queue, failed jobs, Midtrans webhooks, refunds, API 5xx, web/mobile crashes), business-path metrics, JSON logs with a per-request id; see `docs/monitoring-on-ops.md` |
   | **C6** | **done** — real client IP from `CF-Connecting-IP` (per-visitor rate limits and login lockouts), `@unhead/vue` v2, Dependabot alerts on both repos plus the CI audits, password reset/change revokes old tokens, debug routes removed |
   | **C7** | **done** — mobile release engineering: signed APK releases on GitHub (v1.2.x, new signing key); Jenkins job `blukios-mobile-pipeline` runs analyze + test on every push |
-  | **C8** | AI / recommendation quality (measured, not just "works") |
+  | **C8** | **done** — AI quality measured: the chatbot's RAG index held 70 products for a 6-product catalogue (now pruned each refresh), question routing 9/15 → 16/16 and price parsing on a labeled set (`chat-service/tests/test_intent_eval.py`); collaborative filtering has never had enough data to train (15 interactions, needs 50), so every "for you" request is trending — revisit when real traffic exists |
   | **C9** | `decimal` → `bigint` money-column migration (backfill + rollback + gates) |
   | **C10** | v1 production maturity — weekly DB backups, restore-tested on every run, copied to the owner's laptop, with a staleness alert; load test and SLOs when traffic asks for them |
 
