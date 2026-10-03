@@ -337,8 +337,9 @@ Deploy is in-place, driven by the `Deploy` stage on `main`:
 ### Backups
 
 `scripts/backup-db.sh` dumps Blukios' own Postgres (`blukios`, custom format) and Mongo
-(`blukios_mongo`, gzipped archive) databases into `~/backups/blukios/<date>/` on the
-server, checks that each dump is readable, keeps 14 days, and then runs
+(`blukios_mongo`, gzipped archive) databases into `~/backups/blukios/latest/` on the
+server and checks that each dump is readable. Only one backup is kept: a verified run
+replaces the previous one, a failed run leaves it untouched. Then it runs
 `php artisan ops:backup-done`. `ops:check` emails `OPS_ALERT_EMAIL` once a day while no
 backup has succeeded in 26 hours (`OPS_BACKUP_STALE_HOURS`), including when the cron
 was never installed. Install it once, as the deploy user:
@@ -352,8 +353,8 @@ cd ~/testingDeploy/marketplace && sh scripts/backup-db.sh   # first run by hand
 Restore (into a scratch database first, never straight over production):
 
 ```bash
-docker exec -i shared-postgres pg_restore -U <DB_USERNAME> -d <scratch_db> --no-owner < ~/backups/blukios/<date>/postgres.dump
-docker exec -i shared-mongo mongorestore -u <user> -p --authenticationDatabase admin   --archive --gzip --nsFrom 'blukios_mongo.*' --nsTo '<scratch_db>.*' < ~/backups/blukios/<date>/mongo.archive.gz
+docker exec -i shared-postgres pg_restore -U <DB_USERNAME> -d <scratch_db> --no-owner < ~/backups/blukios/latest/postgres.dump
+docker exec -i shared-mongo mongorestore -u <user> -p --authenticationDatabase admin   --archive --gzip --nsFrom 'blukios_mongo.*' --nsTo '<scratch_db>.*' < ~/backups/blukios/latest/mongo.archive.gz
 ```
 
 The dumps live on the same disk as the databases: they cover a bad query or a dropped
