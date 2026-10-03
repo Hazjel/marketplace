@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Console\Commands\OpsCheck;
 use App\Jobs\QueueHeartbeatJob;
 use App\Models\Buyer;
 use App\Models\Store;
@@ -32,6 +33,8 @@ class OpsCheckTest extends TestCase
         Notification::fake();
         // A healthy worker unless a test says otherwise.
         Cache::put(QueueHeartbeatJob::CACHE_KEY, now()->getTimestamp());
+        // ...and last night's backup went through.
+        Cache::put(OpsCheck::BACKUP_DONE_AT, now()->subHours(5)->getTimestamp());
     }
 
     /**
@@ -109,6 +112,37 @@ class OpsCheckTest extends TestCase
         (new QueueHeartbeatJob)->handle();
 
         $this->assertEqualsWithDelta(now()->getTimestamp(), Cache::get(QueueHeartbeatJob::CACHE_KEY), 2);
+    }
+
+    public function test_backup_done_records_a_fresh_backup(): void
+    {
+        Cache::forget(OpsCheck::BACKUP_DONE_AT);
+
+        $this->artisan('ops:backup-done')->assertSuccessful();
+
+        $this->assertEqualsWithDelta(now()->getTimestamp(), Cache::get(OpsCheck::BACKUP_DONE_AT), 2);
+    }
+
+    public function test_a_stale_backup_alerts(): void
+    {
+        Cache::put(OpsCheck::BACKUP_DONE_AT, now()->subHours(30)->getTimestamp());
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Backup database tidak berjalan'], $this->alertedTitles());
+    }
+
+    public function test_no_backup_ever_alerts_once_a_day_not_every_hour(): void
+    {
+        // A cron that was never installed is as silent as one that broke.
+        Cache::forget(OpsCheck::BACKUP_DONE_AT);
+
+        $this->artisan('ops:check')->assertSuccessful();
+        $this->travel(2)->hours();
+        Cache::put(QueueHeartbeatJob::CACHE_KEY, now()->getTimestamp());
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Backup database tidak berjalan'], $this->alertedTitles());
     }
 
     public function test_a_stale_heartbeat_alerts_once_per_cooldown(): void
@@ -214,6 +248,7 @@ class OpsCheckTest extends TestCase
 
         $this->travel(1)->days();
         Cache::put(QueueHeartbeatJob::CACHE_KEY, now()->getTimestamp());
+        Cache::put(OpsCheck::BACKUP_DONE_AT, now()->getTimestamp());
         $this->artisan('ops:check')->assertSuccessful();
         $this->assertCount(2, $this->alertedTitles());
     }

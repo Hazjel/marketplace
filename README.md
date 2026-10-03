@@ -334,6 +334,31 @@ Deploy is in-place, driven by the `Deploy` stage on `main`:
   then the API must return `200` from `/api/health` within 3 minutes or the stage
   fails.
 
+### Backups
+
+`scripts/backup-db.sh` dumps Blukios' own Postgres (`blukios`, custom format) and Mongo
+(`blukios_mongo`, gzipped archive) databases into `~/backups/blukios/<date>/` on the
+server, checks that each dump is readable, keeps 14 days, and then runs
+`php artisan ops:backup-done`. `ops:check` emails `OPS_ALERT_EMAIL` once a day while no
+backup has succeeded in 26 hours (`OPS_BACKUP_STALE_HOURS`), including when the cron
+was never installed. Install it once, as the deploy user:
+
+```bash
+mkdir -p ~/backups/blukios && chmod 700 ~/backups ~/backups/blukios
+cd ~/testingDeploy/marketplace && sh scripts/backup-db.sh   # first run by hand
+( crontab -l; echo '20 2 * * * cd ~/testingDeploy/marketplace && sh scripts/backup-db.sh >> ~/backups/blukios/backup.log 2>&1' ) | crontab -
+```
+
+Restore (into a scratch database first, never straight over production):
+
+```bash
+docker exec -i shared-postgres pg_restore -U <DB_USERNAME> -d <scratch_db> --no-owner < ~/backups/blukios/<date>/postgres.dump
+docker exec -i shared-mongo mongorestore -u <user> -p --authenticationDatabase admin   --archive --gzip --nsFrom 'blukios_mongo.*' --nsTo '<scratch_db>.*' < ~/backups/blukios/<date>/mongo.archive.gz
+```
+
+The dumps live on the same disk as the databases: they cover a bad query or a dropped
+table, not a lost disk. Copying them off the server is the next step.
+
 ## API & Postman
 
 - REST, `Authorization: Bearer {sanctum_token}`.
@@ -425,10 +450,10 @@ Actively developed. Production is live and CI-gated. First tagged release:
   | **C4** | full mobile buyer + seller parity — mobile v1.2.0 matches checkout totals and refunds |
   | **C5** | **done** — observability: email alerts from the app (`ops:check`: queue, failed jobs, Midtrans webhooks, refunds, API 5xx, web/mobile crashes), business-path metrics, JSON logs with a per-request id; see `docs/monitoring-on-ops.md` |
   | **C6** | **done** — real client IP from `CF-Connecting-IP` (per-visitor rate limits and login lockouts), `@unhead/vue` v2, Dependabot alerts on both repos plus the CI audits, password reset/change revokes old tokens, debug routes removed |
-  | **C7** | mobile release engineering — signed APK releases on GitHub (v1.2.0, new signing key); mobile Jenkins pipeline ready (analyze + test per push), job still to be created once by any logged-in Jenkins user |
+  | **C7** | **done** — mobile release engineering: signed APK releases on GitHub (v1.2.x, new signing key); Jenkins job `blukios-mobile-pipeline` runs analyze + test on every push |
   | **C8** | AI / recommendation quality (measured, not just "works") |
   | **C9** | `decimal` → `bigint` money-column migration (backfill + rollback + gates) |
-  | **C10** | v1 production maturity — load test, backup/DR, SLOs |
+  | **C10** | v1 production maturity — nightly verified DB backups with a staleness alert (in progress: off-server copy); load test and SLOs when traffic asks for them |
 
 - **Deferred** — the `decimal(26,2)` money columns stay as-is until **C9**; the
   calculation layer already runs on `Money` regardless of storage type.

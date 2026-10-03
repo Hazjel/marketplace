@@ -28,6 +28,10 @@ return [
     'server_error_threshold' => (int) env('OPS_SERVER_ERROR_THRESHOLD', 1),
     'client_error_threshold' => (int) env('OPS_CLIENT_ERROR_THRESHOLD', 3),
 
+    // scripts/backup-db.sh runs nightly and records its success with
+    // `ops:backup-done`; no success for this long means no fresh backup.
+    'backup_stale_hours' => (int) env('OPS_BACKUP_STALE_HOURS', 26),
+
     // Manual refunds waiting on a transfer are reminded once a day.
     'manual_refund_reminder_minutes' => 24 * 60,
 ];

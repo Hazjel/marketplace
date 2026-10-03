@@ -33,10 +33,14 @@ class OpsCheck extends Command
 
     private const HEARTBEAT_MISSING_SINCE = 'ops:queue-heartbeat-missing-since';
 
+    /** Unix time of the last successful scripts/backup-db.sh run, set by `ops:backup-done`. */
+    public const BACKUP_DONE_AT = 'ops:backup-done-at';
+
     public function handle(): int
     {
         $problems = array_values(array_filter([
             $this->queueWorker(),
+            $this->backup(),
             $this->serverErrors(),
             $this->clientErrors(),
             $this->failedJobs(),
@@ -149,6 +153,29 @@ class OpsCheck extends Command
             'Refund otomatis, email verifikasi/reset password, dan balasan AI tertahan sampai worker jalan lagi.',
             'Cek kontainer blue-queue: `docker ps -a | grep blue-queue` dan `docker logs --tail 50 blue-queue`.',
         ]);
+    }
+
+    /**
+     * No record at all also alerts: a backup cron that was never installed
+     * fails exactly as silently as one that broke.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function backup(): ?array
+    {
+        $at = Cache::get(self::BACKUP_DONE_AT);
+        $hours = $at === null ? null : intdiv(now()->getTimestamp() - (int) $at, 3600);
+        if ($hours !== null && $hours < (int) config('ops.backup_stale_hours')) {
+            return null;
+        }
+
+        return $this->problem('backup', 'Backup database tidak berjalan', [
+            $hours === null
+                ? 'Belum ada backup database yang tercatat berhasil.'
+                : "Backup database terakhir berhasil {$hours} jam lalu.",
+            'Tanpa backup, disk rusak atau query keliru menghapus transaksi, escrow, dan saldo penjual secara permanen.',
+            'Cek di server: `tail -30 ~/backups/blukios/backup.log`. Cara pasang: README bagian "Backups".',
+        ], 24 * 60);
     }
 
     /**
