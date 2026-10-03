@@ -107,6 +107,15 @@ pipeline {
                         script: 'sha256sum ci/php/Dockerfile | cut -c1-12',
                         returnStdout: true
                     ).trim()
+                    // Python: dependensi service ada di dalam image (lihat ci/python/Dockerfile).
+                    env.CI_CHAT_IMAGE = 'blukios-ci-chat:' + sh(
+                        script: 'cat ci/python/Dockerfile chat-service/requirements.txt | sha256sum | cut -c1-12',
+                        returnStdout: true
+                    ).trim()
+                    env.CI_RECO_IMAGE = 'blukios-ci-reco:' + sh(
+                        script: 'cat ci/python/Dockerfile recommendation-service/requirements.txt | sha256sum | cut -c1-12',
+                        returnStdout: true
+                    ).trim()
 
                     echo "File berubah:\n${changed}"
                     echo "Backend changed: ${env.BACKEND_CHANGED} | Frontend changed: ${env.FRONTEND_CHANGED} | Chat service changed: ${env.CHAT_SERVICE_CHANGED} | Recommendation service changed: ${env.RECOMMENDATION_CHANGED} | CI changed: ${env.CI_CHANGED} | Deploy required: ${env.DEPLOY_REQUIRED}"
@@ -316,15 +325,15 @@ pipeline {
                 expression { env.CHAT_SERVICE_CHANGED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
+                sh 'docker image inspect "$CI_CHAT_IMAGE" >/dev/null 2>&1 || docker build --network host -t "$CI_CHAT_IMAGE" -f ci/python/Dockerfile chat-service'
                 dir('chat-service') {
                     runInContainer(
                         name: 'chat-service',
-                        image: 'python:3.11-slim',
+                        image: env.CI_CHAT_IMAGE,
                         script: '''
-                        pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
                         ruff check .
-                        pytest tests/ -v
-                        pip-audit -r requirements.txt --desc \
+                        pytest tests/ -v -p no:cacheprovider
+                        /opt/pip-audit/bin/pip-audit --path /usr/local/lib/python3.11/site-packages --desc \
                             --ignore-vuln PYSEC-2026-311 \
                             --ignore-vuln CVE-2026-45830 \
                             --ignore-vuln CVE-2026-45831 \
@@ -356,6 +365,7 @@ pipeline {
                 expression { env.RECOMMENDATION_CHANGED == 'true' || env.CI_CHANGED == 'true' }
             }
             steps {
+                sh 'docker image inspect "$CI_RECO_IMAGE" >/dev/null 2>&1 || docker build --network host -t "$CI_RECO_IMAGE" -f ci/python/Dockerfile recommendation-service'
                 dir('recommendation-service') {
                     // KOREKSI: komentar di sini sebelumnya bilang "belum ada
                     // test suite sama sekali" -- itu jadi basi begitu
@@ -365,12 +375,11 @@ pipeline {
                     // sejak itu tapi Jenkins tidak pernah menjalankannya.
                     runInContainer(
                         name: 'recommendation-service',
-                        image: 'python:3.11-slim',
+                        image: env.CI_RECO_IMAGE,
                         script: '''
-                        pip install --quiet --no-cache-dir -r requirements.txt ruff pip-audit pytest
                         ruff check .
-                        pytest tests/ -v
-                        pip-audit -r requirements.txt --desc
+                        pytest tests/ -v -p no:cacheprovider
+                        /opt/pip-audit/bin/pip-audit --path /usr/local/lib/python3.11/site-packages --desc
                     '''
                     )
                 }
