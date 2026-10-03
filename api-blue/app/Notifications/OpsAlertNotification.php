@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notification;
 class OpsAlertNotification extends Notification
 {
     /**
-     * @param  list<array{title: string, lines: list<string>}>  $problems
+     * @param  list<array{title: string, lines: list<string>, cooldown: int}>  $problems  cooldown in minutes
      */
     public function __construct(public readonly array $problems) {}
 
@@ -37,10 +37,11 @@ class OpsAlertNotification extends Notification
             foreach ($problem['lines'] as $line) {
                 $mail->line($line);
             }
+            // Each problem has its own cooldown (an hour for most, a day for backups and manual refunds).
+            $minutes = $problem['cooldown'];
+            $mail->line('_Tidak dikirim ulang sebelum '.($minutes % 60 === 0 && $minutes >= 120 ? ($minutes / 60).' jam' : $minutes.' menit').'._');
         }
 
-        return $mail
-            ->line('Masalah yang sama tidak dikirim ulang sebelum '.config('ops.alert_cooldown_minutes').' menit.')
-            ->salutation('ops:check, '.config('app.url'));
+        return $mail->salutation('ops:check, '.config('app.url'));
     }
 }

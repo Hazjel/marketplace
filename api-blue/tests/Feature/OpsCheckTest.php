@@ -145,6 +145,21 @@ class OpsCheckTest extends TestCase
         $this->assertSame(['Backup database tidak berjalan'], $this->alertedTitles());
     }
 
+    public function test_each_problem_in_the_email_states_its_own_cooldown(): void
+    {
+        Cache::put(QueueHeartbeatJob::CACHE_KEY, now()->subMinutes(15)->getTimestamp());
+        Cache::forget(OpsCheck::BACKUP_DONE_AT);
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        Notification::assertSentOnDemand(OpsAlertNotification::class, function (OpsAlertNotification $n) {
+            $lines = $n->toMail(new AnonymousNotifiable)->introLines;
+
+            return in_array('_Tidak dikirim ulang sebelum 60 menit._', $lines, true)
+                && in_array('_Tidak dikirim ulang sebelum 24 jam._', $lines, true);
+        });
+    }
+
     public function test_a_stale_heartbeat_alerts_once_per_cooldown(): void
     {
         Cache::put(QueueHeartbeatJob::CACHE_KEY, now()->subMinutes(15)->getTimestamp());

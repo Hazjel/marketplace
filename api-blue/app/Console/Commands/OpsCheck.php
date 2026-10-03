@@ -78,7 +78,7 @@ class OpsCheck extends Command
 
         try {
             Notification::route('mail', $email)->notifyNow(new OpsAlertNotification(
-                array_map(fn (array $p) => ['title' => $p['title'], 'lines' => $p['lines']], $due)
+                array_map(fn (array $p) => ['title' => $p['title'], 'lines' => $p['lines'], 'cooldown' => $p['cooldown']], $due)
             ));
         } catch (Throwable $e) {
             // Retry on the next run instead of going quiet for an hour.
