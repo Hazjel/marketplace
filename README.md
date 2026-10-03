@@ -425,7 +425,7 @@ Actively developed. Production is live and CI-gated. First tagged release:
   | **C4** | full mobile buyer + seller parity — mobile v1.2.0 matches checkout totals and refunds |
   | **C5** | **done** — observability: email alerts from the app (`ops:check`: queue, failed jobs, Midtrans webhooks, refunds, API 5xx, web/mobile crashes), business-path metrics, JSON logs with a per-request id; see `docs/monitoring-on-ops.md` |
   | **C6** | **done** — real client IP from `CF-Connecting-IP` (per-visitor rate limits and login lockouts), `@unhead/vue` v2, Dependabot alerts on both repos plus the CI audits, password reset/change revokes old tokens, debug routes removed |
-  | **C7** | mobile release engineering — signed APK releases on GitHub (v1.2.0, new signing key); mobile Jenkins job still needs a Jenkins admin |
+  | **C7** | mobile release engineering — signed APK releases on GitHub (v1.2.0, new signing key); mobile Jenkins pipeline ready (analyze + test per push), job still to be created once by any logged-in Jenkins user |
   | **C8** | AI / recommendation quality (measured, not just "works") |
   | **C9** | `decimal` → `bigint` money-column migration (backfill + rollback + gates) |
   | **C10** | v1 production maturity — load test, backup/DR, SLOs |
