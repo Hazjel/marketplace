@@ -20,4 +20,10 @@ return [
      * Default: 50000. Bisa di-override via env MIN_WITHDRAWAL_AMOUNT.
      */
     'min_withdrawal_amount' => (int) env('MIN_WITHDRAWAL_AMOUNT', 50000),
+
+    /*
+     * Public storefront URL (buyer web app), used for absolute links the API
+     * hands out, e.g. sitemap.xml. Not the seller app domain.
+     */
+    'storefront_url' => rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/'),
 ];

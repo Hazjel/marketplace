@@ -1,0 +1,22 @@
+# Storefront (blukios.store). seller.blukios.store answers its own
+# "Disallow: /" from nginx (docker/nginx/default.conf).
+User-agent: *
+Disallow: /admin
+Disallow: /auth
+Disallow: /sso/
+Disallow: /403
+Disallow: /open-store
+Disallow: /cart
+Disallow: /checkout
+Disallow: /wishlist
+Disallow: /search
+Disallow: /api/
+# Account pages live under /<username>/...
+Disallow: /*/dashboard
+Disallow: /*/edit-profile
+Disallow: /*/settings/
+Disallow: /*/transaction
+Disallow: /*/my-transactions
+Disallow: /*/chat
+
+Sitemap: https://blukios.store/sitemap.xml
