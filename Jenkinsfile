@@ -59,7 +59,7 @@ pipeline {
                     // dalam push yang sama jadi tidak terdeteksi sama sekali.
                     // Konsekuensinya nyata, bukan cuma soal skip test: stage
                     // Deploy di bawah cuma nge-drop volume api_vendor kalau
-                    // BACKEND_CHANGED=true -- kalau composer.lock berubah di
+                    // COMPOSER_CHANGED=true -- kalau composer.lock berubah di
                     // commit yang tidak ke-diff, volume vendor lama (dependency
                     // BELUM di-patch) tetap dipakai container baru.
                     //
@@ -89,6 +89,10 @@ pipeline {
                     env.FRONTEND_CHANGED = (changed == 'ALL' || changed.contains('fe-blue/')).toString()
                     env.CHAT_SERVICE_CHANGED = (changed == 'ALL' || changed.contains('chat-service/')).toString()
                     env.RECOMMENDATION_CHANGED = (changed == 'ALL' || changed.contains('recommendation-service/')).toString()
+                    // Only a dependency change needs a fresh api_vendor volume (see Deploy).
+                    env.COMPOSER_CHANGED = (changed == 'ALL' || changed.readLines().any {
+                        it in ['api-blue/composer.json', 'api-blue/composer.lock', 'api-blue/Dockerfile']
+                    }).toString()
                     def deployConfigChanged = changed == 'ALL' || changed.readLines().any {
                         it == 'docker-compose.yml' || it == 'docker-compose.prod.yml' || it == '.env.example' || it.startsWith('docker/')
                     }
@@ -504,8 +508,8 @@ pipeline {
                     # LAMA tetap dipasang ke container baru, jadi package baru "sukses"
                     # ke-install di image tapi container tetap pakai vendor basi (silent
                     # bug, ketauannya cuma lewat "Class not found" pas runtime). Hapus
-                    # volume sebelum build kalau ada perubahan di api-blue/, biar volume
-                    # dibuat ulang fresh dari image setiap kali dependency berubah.
+                    # volume kalau composer.json/lock (atau Dockerfile api) berubah, biar
+                    # volume dibuat ulang fresh dari image setiap kali dependency berubah.
                     # scheduler also mounts api_vendor (same PHP image) but was
                     # missing from the stop/rm list below, so it kept the
                     # volume locked -- "docker volume rm" failed silently
@@ -525,7 +529,14 @@ pipeline {
                     # dan downtime menyusut jadi sebatas waktu start container.
                     docker compose -p marketplace build api queue reverb scheduler frontend chat-service recommendation-service
 
-                    if [ "$BACKEND_CHANGED" = "true" ]; then
+                    # Only when dependencies changed (COMPOSER_CHANGED): refilling the
+                    # volume copies ~10k files on this disk and kept the API down for
+                    # 21 minutes in #128, a deploy that never touched composer.lock.
+                    # Otherwise "up -d" below recreates the containers on the new
+                    # image and keeps the volume; app code comes from the bind mount
+                    # and the image's autoloader is --optimize (not authoritative),
+                    # so new classes still resolve through PSR-4.
+                    if [ "$COMPOSER_CHANGED" = "true" ]; then
                         docker compose -p marketplace stop api queue reverb scheduler || true
                         docker compose -p marketplace rm -f api queue reverb scheduler || true
                         docker volume rm marketplace_api_vendor || true
