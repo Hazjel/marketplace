@@ -90,8 +90,9 @@ pipeline {
                     env.CHAT_SERVICE_CHANGED = (changed == 'ALL' || changed.contains('chat-service/')).toString()
                     env.RECOMMENDATION_CHANGED = (changed == 'ALL' || changed.contains('recommendation-service/')).toString()
                     // Only a dependency change needs a fresh api_vendor volume (see Deploy).
+                    // Not the Dockerfile: PHP extensions live in the image, not in vendor/.
                     env.COMPOSER_CHANGED = (changed == 'ALL' || changed.readLines().any {
-                        it in ['api-blue/composer.json', 'api-blue/composer.lock', 'api-blue/Dockerfile']
+                        it in ['api-blue/composer.json', 'api-blue/composer.lock']
                     }).toString()
                     def deployConfigChanged = changed == 'ALL' || changed.readLines().any {
                         it == 'docker-compose.yml' || it == 'docker-compose.prod.yml' || it == '.env.example' || it.startsWith('docker/')
@@ -508,7 +509,7 @@ pipeline {
                     # LAMA tetap dipasang ke container baru, jadi package baru "sukses"
                     # ke-install di image tapi container tetap pakai vendor basi (silent
                     # bug, ketauannya cuma lewat "Class not found" pas runtime). Hapus
-                    # volume kalau composer.json/lock (atau Dockerfile api) berubah, biar
+                    # volume kalau composer.json/lock berubah, biar
                     # volume dibuat ulang fresh dari image setiap kali dependency berubah.
                     # scheduler also mounts api_vendor (same PHP image) but was
                     # missing from the stop/rm list below, so it kept the

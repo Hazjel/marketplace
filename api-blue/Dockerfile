@@ -1,11 +1,14 @@
 FROM php:8.4-fpm
 
-# System deps for PHP extensions
+# System deps for PHP extensions.
+# gd --with-webp: ProcessProductImageJob converts every product photo to WebP
+# (imagewebp); without it each upload failed in production while the CI image
+# (ci/php/Dockerfile) already had WebP, so the tests passed.
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev \
+    git curl zip unzip libpng-dev libjpeg-dev libfreetype6-dev libwebp-dev \
     libonig-dev libxml2-dev libzip-dev libssl-dev pkg-config \
     libpq-dev postgresql-client \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip \
     && pecl install redis-6.3.0 \
     && pecl install mongodb-2.4.1 \
