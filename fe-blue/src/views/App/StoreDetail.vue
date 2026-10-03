@@ -5,6 +5,7 @@ import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
 import ReviewCard from '@/components/card/ReviewCard.vue'
 import StoreHeader from '@/components/store/StoreHeader.vue'
 import MapPreview from '@/components/Molecule/MapPreview.vue'
+import EmptyState from '@/components/Atom/EmptyState.vue'
 import { useProductStore } from '@/stores/product'
 import { useStoreStore } from '@/stores/store'
 import { storeToRefs } from 'pinia'
@@ -29,6 +30,9 @@ const { fetchProducts, fetchCategoriesByStore } = productStore
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
+// The API returned nothing: the store is inactive or the username is wrong.
+const notFound = ref(false)
+
 useHead({
   title: computed(() =>
     store.value?.name ? `${store.value.name} | Blukios` : 'Store Detail | Blukios'
@@ -41,7 +45,9 @@ useHead({
       )
     },
     { property: 'og:title', content: computed(() => store.value?.name || 'Store Detail') },
-    { property: 'og:image', content: computed(() => store.value?.logo || '') }
+    { property: 'og:image', content: computed(() => store.value?.logo || '') },
+    // A dead store URL answers 200 (SPA), so tell search engines to drop it.
+    { name: 'robots', content: computed(() => (notFound.value ? 'noindex' : 'index, follow')) }
   ]
 })
 
@@ -51,8 +57,11 @@ const selectedCategory = ref(null)
 const selectedSort = ref('default')
 
 const fetchStore = async () => {
+  notFound.value = false
   const response = await fetchStoreByUsername(route.params.username)
   store.value = response
+  // fetchStoreByUsername returns undefined on a 404 or a failed request.
+  notFound.value = !response
 
   if (user.value && store.value?.id) {
     isFollowing.value = await checkFollowStatus(store.value.id)
@@ -130,6 +139,7 @@ watch(activeTab, (newTab) => {
 onMounted(async () => {
   reviews.value = []
   await fetchStore()
+  if (notFound.value) return
 
   fetchProducts({
     limit: 12,
@@ -142,6 +152,15 @@ onMounted(async () => {
 </script>
 
 <template>
+  <section v-if="notFound" class="w-full max-w-[1280px] mx-auto px-4 md:px-[52px] py-16 flex flex-col items-center">
+    <EmptyState title="Toko tidak ditemukan" subtitle="Toko ini sudah tidak aktif, atau tautannya salah." />
+    <RouterLink
+      :to="{ name: 'app.home' }"
+      class="px-6 py-3 rounded-xl bg-custom-blue text-white font-medium text-sm hover:bg-blue-700 transition-colors">
+      Kembali ke Beranda
+    </RouterLink>
+  </section>
+  <template v-else>
   <!-- Breadcrumb Header -->
   <header class="bg-white dark:bg-surface-card border-b border-gray-100 dark:border-white/10">
     <div class="w-full max-w-[1280px] px-4 md:px-[52px] mx-auto py-4">
@@ -324,4 +343,5 @@ onMounted(async () => {
       </section>
     </div>
   </main>
+  </template>
 </template>

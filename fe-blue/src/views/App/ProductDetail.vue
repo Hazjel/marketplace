@@ -21,12 +21,16 @@ import { logger } from '@/utils/logger'
 import { useRecommendationStore } from '@/stores/recommendation'
 import { getGuestSessionId } from '@/utils/guestSession'
 import SkeletonProductCard from '@/components/skeleton/SkeletonProductCard.vue'
+import EmptyState from '@/components/Atom/EmptyState.vue'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
 const product = ref({})
+// The API returned nothing: the product was removed or its store is inactive
+// (crawlers still visit those URLs).
+const notFound = ref(false)
 
 useHead({
   title: computed(() =>
@@ -52,6 +56,11 @@ useHead({
       content: computed(
         () => product.value?.product_images?.find((img) => img.is_thumbnail)?.image || ''
       )
+    },
+    {
+      // A dead product URL answers 200 (SPA), so tell search engines to drop it.
+      name: 'robots',
+      content: computed(() => (notFound.value ? 'noindex' : 'index, follow'))
     }
   ]
 })
@@ -288,11 +297,19 @@ const handleChatSeller = () => {
 }
 
 const fetchProduct = async () => {
+  notFound.value = false
   const response = await fetchProductBySlug(route.params.slug)
+
+  // fetchProductBySlug returns undefined on a 404 or a failed request.
+  if (!response) {
+    product.value = {}
+    notFound.value = true
+    return
+  }
 
   product.value = response
 
-  product.value.product_images.sort((a, b) => {
+  product.value.product_images?.sort((a, b) => {
     return (b.is_thumbnail === true) - (a.is_thumbnail === true)
   })
 
@@ -458,6 +475,15 @@ const handleShare = async () => {
 </script>
 
 <template>
+  <section v-if="notFound" class="w-full max-w-7xl mx-auto px-4 md:px-13 py-16 flex flex-col items-center">
+    <EmptyState title="Produk tidak ditemukan" subtitle="Produk ini sudah tidak dijual, atau tautannya salah." />
+    <RouterLink
+      :to="{ name: 'app.home' }"
+      class="px-6 py-3 rounded-xl bg-custom-blue text-white font-medium text-sm hover:bg-blue-700 transition-colors">
+      Kembali ke Beranda
+    </RouterLink>
+  </section>
+  <template v-else>
   <header class="w-full max-w-480 mx-auto overflow-hidden bg-custom-background">
     <div class="flex flex-col w-full max-w-7xl py-4 md:py-6 px-4 md:px-13 gap-3 mx-auto">
       <div class="flex items-center gap-3">
@@ -930,4 +956,5 @@ type="button" :disabled="quantity >= (displayedStock || 0)"
       </div>
     </div>
   </Transition>
+  </template>
 </template>
