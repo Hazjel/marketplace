@@ -36,8 +36,8 @@ class PasswordChangeSessionTest extends TestCase
         $this->postJson('/api/password/reset', [
             'token' => Password::createToken($user),
             'email' => 'korban@blukios.com',
-            'password' => 'BaruSekali123',
-            'password_confirmation' => 'BaruSekali123',
+            'password' => 'Password456',
+            'password_confirmation' => 'Password456',
         ])->assertOk();
 
         $this->assertSame(0, $user->tokens()->count());
@@ -45,7 +45,7 @@ class PasswordChangeSessionTest extends TestCase
 
         $this->postJson('/api/login', [
             'email' => 'korban@blukios.com',
-            'password' => 'BaruSekali123',
+            'password' => 'Password456',
         ])->assertOk();
     }
 
@@ -70,7 +70,7 @@ class PasswordChangeSessionTest extends TestCase
         $this->withToken($current->plainTextToken)->putJson('/api/profile', [
             'name' => $user->name,
             'current_password' => 'Password123',
-            'password' => 'BaruSekali123',
+            'password' => 'Password456',
         ])->assertOk();
 
         $this->assertDatabaseHas('personal_access_tokens', ['id' => $current->accessToken->id]);
