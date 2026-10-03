@@ -125,7 +125,7 @@ class OpsCheckTest extends TestCase
 
     public function test_a_stale_backup_alerts(): void
     {
-        Cache::put(OpsCheck::BACKUP_DONE_AT, now()->subHours(30)->getTimestamp());
+        Cache::put(OpsCheck::BACKUP_DONE_AT, now()->subDays(8)->getTimestamp());
 
         $this->artisan('ops:check')->assertSuccessful();
 

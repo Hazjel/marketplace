@@ -336,29 +336,40 @@ Deploy is in-place, driven by the `Deploy` stage on `main`:
 
 ### Backups
 
-`scripts/backup-db.sh` dumps Blukios' own Postgres (`blukios`, custom format) and Mongo
-(`blukios_mongo`, gzipped archive) databases into `~/backups/blukios/latest/` on the
-server and checks that each dump is readable. Only one backup is kept: a verified run
-replaces the previous one, a failed run leaves it untouched. Then it runs
-`php artisan ops:backup-done`. `ops:check` emails `OPS_ALERT_EMAIL` once a day while no
-backup has succeeded in 26 hours (`OPS_BACKUP_STALE_HOURS`), including when the cron
-was never installed. Install it once, as the deploy user:
+Weekly, Sunday 02:20 (server cron). `scripts/backup-db.sh` dumps Blukios' own Postgres
+(`blukios`, custom format) and Mongo (`blukios_mongo`, gzipped archive) databases and
+**restores the Postgres dump into a throwaway container** (same image, no network,
+removed afterwards; `shared-postgres` is not touched) before it counts. Only one backup
+is kept, `~/backups/blukios/latest/`: a verified run replaces it, a failed run leaves it.
+Then `php artisan ops:backup-done`; `ops:check` emails `OPS_ALERT_EMAIL` once a day
+while no backup has succeeded for 170 hours (`OPS_BACKUP_STALE_HOURS`), including when
+the cron was never installed.
+
+The owner's laptop keeps the off-server copy: Task Scheduler task "Blukios backup pull"
+runs `scripts/pull-backup.ps1` on Mondays 10:00 (or at the next start-up if the laptop
+was off), copying `latest/` to `%USERPROFILE%ackupslukios` (log:
+`%USERPROFILE%ackupslukios-pull.log`). It needs the laptop's SSH key for the
+server and Tailscale up.
+
+Install on the server once, as the deploy user:
 
 ```bash
 mkdir -p ~/backups/blukios && chmod 700 ~/backups ~/backups/blukios
 cd ~/testingDeploy/marketplace && sh scripts/backup-db.sh   # first run by hand
-( crontab -l; echo '20 2 * * * cd ~/testingDeploy/marketplace && sh scripts/backup-db.sh >> ~/backups/blukios/backup.log 2>&1' ) | crontab -
+( crontab -l; echo '20 2 * * 0 cd ~/testingDeploy/marketplace && sh scripts/backup-db.sh >> ~/backups/blukios/backup.log 2>&1' ) | crontab -
 ```
 
-Restore (into a scratch database first, never straight over production):
+`scripts/` changes do not trigger a deploy (only app changes do): after changing a
+script, `git pull --ff-only` in the production checkout.
+
+Restore (into a scratch database first, never straight over production). The schema
+uses the `cube` and `earthdistance` extensions, so restore as a role that can create
+them:
 
 ```bash
-docker exec -i shared-postgres pg_restore -U <DB_USERNAME> -d <scratch_db> --no-owner < ~/backups/blukios/latest/postgres.dump
+docker exec -i shared-postgres pg_restore -U postgres -d <scratch_db> --no-owner --no-privileges < ~/backups/blukios/latest/postgres.dump
 docker exec -i shared-mongo mongorestore -u <user> -p --authenticationDatabase admin   --archive --gzip --nsFrom 'blukios_mongo.*' --nsTo '<scratch_db>.*' < ~/backups/blukios/latest/mongo.archive.gz
 ```
-
-The dumps live on the same disk as the databases: they cover a bad query or a dropped
-table, not a lost disk. Copying them off the server is the next step.
 
 ## API & Postman
 
@@ -454,7 +465,7 @@ Actively developed. Production is live and CI-gated. First tagged release:
   | **C7** | **done** — mobile release engineering: signed APK releases on GitHub (v1.2.x, new signing key); Jenkins job `blukios-mobile-pipeline` runs analyze + test on every push |
   | **C8** | AI / recommendation quality (measured, not just "works") |
   | **C9** | `decimal` → `bigint` money-column migration (backfill + rollback + gates) |
-  | **C10** | v1 production maturity — nightly verified DB backups with a staleness alert (in progress: off-server copy); load test and SLOs when traffic asks for them |
+  | **C10** | v1 production maturity — weekly DB backups, restore-tested on every run, copied to the owner's laptop, with a staleness alert; load test and SLOs when traffic asks for them |
 
 - **Deferred** — the `decimal(26,2)` money columns stay as-is until **C9**; the
   calculation layer already runs on `Money` regardless of storage type.

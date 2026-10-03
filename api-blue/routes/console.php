@@ -21,7 +21,7 @@ Schedule::command('transaction:auto-complete')->dailyAt('02:00');
 Schedule::job(new QueueHeartbeatJob)->everyMinute();
 Schedule::command('ops:check')->everyFiveMinutes()->withoutOverlapping();
 
-// Called by scripts/backup-db.sh (host cron) after a verified dump; ops:check
+// Called by scripts/backup-db.sh (weekly host cron) after a restored dump; ops:check
 // alerts when this goes stale.
 Artisan::command('ops:backup-done', function () {
     Cache::forever(OpsCheck::BACKUP_DONE_AT, now()->getTimestamp());
