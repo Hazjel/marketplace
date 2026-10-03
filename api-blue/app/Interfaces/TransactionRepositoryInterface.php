@@ -3,6 +3,7 @@
 namespace App\Interfaces;
 
 use App\Models\Transaction;
+use Illuminate\Support\Collection;
 
 interface TransactionRepositoryInterface
 {
@@ -15,6 +16,12 @@ interface TransactionRepositoryInterface
     public function getByCode(string $code);
 
     public function create(array $data);
+
+    /**
+     * @param  list<array<string, mixed>>  $orders  one per store, paid together
+     * @return Collection<int, Transaction>
+     */
+    public function checkout(array $orders);
 
     public function updateStatus(string $id, array $data);
 

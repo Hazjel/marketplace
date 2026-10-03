@@ -19,6 +19,8 @@ class TransactionResource extends JsonResource
         return [
             'id' => $this->id,
             'code' => $this->code,
+            // Shared by every order of one multi-store checkout; null otherwise.
+            'payment_code' => $this->payment_code,
             'buyer' => $this->buyer ? new BuyerResource($this->buyer) : null,
             'store' => $this->store ? new StoreResource($this->store) : null,
             'address_id' => $this->address_id,

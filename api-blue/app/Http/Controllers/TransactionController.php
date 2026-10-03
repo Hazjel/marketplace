@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\TransactionStatusUpdated;
 use App\Helpers\ResponseHelper;
+use App\Http\Requests\CheckoutRequest;
 use App\Http\Requests\TransactionStoreRequest;
 use App\Http\Requests\TransactionUpdateRequest;
 use App\Http\Resources\PaginateResource;
@@ -47,7 +48,7 @@ class TransactionController extends Controller implements HasMiddleware
         return [
             // Removed getAllPaginated from strict permissions list
             new Middleware(PermissionMiddleware::using(['transaction-list|transaction-create|transaction-edit|transaction-delete']), only: ['index', 'show']),
-            new Middleware(PermissionMiddleware::using(['transaction-create']), only: ['store']),
+            new Middleware(PermissionMiddleware::using(['transaction-create']), only: ['store', 'checkout']),
             new Middleware(PermissionMiddleware::using(['transaction-edit']), only: ['update', 'cancel']),
             new Middleware(PermissionMiddleware::using(['transaction-delete']), only: ['destroy']),
             new Middleware('auth:sanctum', only: ['complete']),
@@ -144,6 +145,28 @@ class TransactionController extends Controller implements HasMiddleware
             $transaction = $this->transactionRepository->create($request);
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Ditambahkan', new TransactionResource($transaction), 201);
+        } catch (\Exception $e) {
+            return ResponseHelper::exceptionResponse($e);
+        }
+    }
+
+    /**
+     * Orders from several stores, paid with one Midtrans payment. Each order
+     * comes back as its own transaction sharing payment_code and snap_token.
+     */
+    public function checkout(CheckoutRequest $request)
+    {
+        if ($request->user()->hasRole('admin')) {
+            return ResponseHelper::jsonResponse(false, 'Admin forbidden from creating transactions.', null, 403);
+        }
+
+        $shared = $request->safe()->except('orders');
+        $orders = array_map(fn (array $order) => $shared + $order, $request->validated('orders'));
+
+        try {
+            $transactions = $this->transactionRepository->checkout($orders);
+
+            return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Ditambahkan', TransactionResource::collection($transactions), 201);
         } catch (\Exception $e) {
             return ResponseHelper::exceptionResponse($e);
         }
@@ -417,7 +440,8 @@ class TransactionController extends Controller implements HasMiddleware
                 // HTTP, mengunci request lain ke transaksi ini selama itu.
                 // Dilakukan dulu di luar transaksi, hasilnya baru dipakai di
                 // dalam blok terkunci di bawah.
-                $midtransStatus = \Midtrans\Transaction::status($transaction->code);
+                // A multi-store checkout is one Midtrans payment under payment_code.
+                $midtransStatus = \Midtrans\Transaction::status($transaction->paymentCode());
 
                 $transactionStatus = $midtransStatus->transaction_status;
                 $paymentType = $midtransStatus->payment_type;
@@ -444,36 +468,39 @@ class TransactionController extends Controller implements HasMiddleware
                 DB::beginTransaction();
 
                 try {
-                    $locked = Transaction::where('id', $id)->lockForUpdate()->first();
+                    // The same status applies to every order paid under it.
+                    $group = Transaction::inPayment($transaction->paymentCode())->orderBy('id')->lockForUpdate()->get();
 
-                    $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus)
-                        ?? $locked->payment_status;
+                    foreach ($group as $locked) {
+                        $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus)
+                            ?? $locked->payment_status;
 
-                    // Transaksi yang sudah paid tidak boleh mundur -- webhook yang
-                    // telat atau panggilan manual yang beririsan tidak boleh
-                    // membatalkan pembayaran yang sudah dikredit ke escrow.
-                    if ($locked->refund_status !== null) {
-                        // no-op -- dibatalkan penjual setelah bayar; Midtrans
-                        // masih "settlement" sampai refund diproses, dan itu
-                        // tidak boleh mengkredit escrow lagi.
-                    } elseif ($locked->payment_status === 'paid' && $newStatus !== 'paid') {
-                        // no-op -- biarkan $locked apa adanya
-                    } elseif ($newStatus === 'paid' && $locked->payment_status !== 'paid') {
-                        $locked->payment_status = 'paid';
-                        $locked->save();
+                        // Transaksi yang sudah paid tidak boleh mundur -- webhook yang
+                        // telat atau panggilan manual yang beririsan tidak boleh
+                        // membatalkan pembayaran yang sudah dikredit ke escrow.
+                        if ($locked->refund_status !== null) {
+                            // no-op -- dibatalkan penjual setelah bayar; Midtrans
+                            // masih "settlement" sampai refund diproses, dan itu
+                            // tidak boleh mengkredit escrow lagi.
+                        } elseif ($locked->payment_status === 'paid' && $newStatus !== 'paid') {
+                            // no-op -- biarkan $locked apa adanya
+                        } elseif ($newStatus === 'paid' && $locked->payment_status !== 'paid') {
+                            $locked->payment_status = 'paid';
+                            $locked->save();
 
-                        $this->escrowRepository->credit($locked);
-                    } elseif ($newStatus !== $locked->payment_status) {
-                        $locked->payment_status = $newStatus;
-                        $locked->save();
+                            $this->escrowRepository->credit($locked);
+                        } elseif ($newStatus !== $locked->payment_status) {
+                            $locked->payment_status = $newStatus;
+                            $locked->save();
 
-                        if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
-                            $this->transactionRepository->restoreStock($locked, $mongoAdjustments);
+                            if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
+                                $this->transactionRepository->restoreStock($locked, $mongoAdjustments);
+                            }
                         }
                     }
 
                     DB::commit();
-                    $transaction = $locked;
+                    $transaction = $group->firstWhere('id', $id) ?? $transaction;
                 } catch (\Throwable $e) {
                     // Kompensasi SEBELUM rollback -- lihat docblock restoreStock().
                     $this->transactionRepository->compensateStockRestoreRollback($mongoAdjustments);
@@ -482,7 +509,9 @@ class TransactionController extends Controller implements HasMiddleware
                     throw $e;
                 }
 
-                event(new TransactionStatusUpdated($transaction->fresh()));
+                foreach ($group as $member) {
+                    event(new TransactionStatusUpdated($member->fresh()));
+                }
 
                 return ResponseHelper::jsonResponse(true, 'Status Payment Berhasil Diupdate', new TransactionResource($transaction), 200);
 

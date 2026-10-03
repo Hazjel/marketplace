@@ -17,6 +17,7 @@ use App\Support\BusinessMetrics;
 use App\ValueObjects\Money;
 use Exception;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -343,6 +344,21 @@ class TransactionRepository implements TransactionRepositoryInterface
 
     public function create(array $data)
     {
+        return $this->checkout([$data])->first();
+    }
+
+    /**
+     * One order per store, all created together and paid with ONE Midtrans
+     * payment. Each order stays a normal transaction (its own escrow, status,
+     * refund); a multi-store checkout only adds a shared payment_code, the
+     * order_id Midtrans knows them by. A single order keeps paying under its
+     * own code, exactly as before.
+     *
+     * @param  list<array<string, mixed>>  $orders
+     * @return Collection<int, Transaction>
+     */
+    public function checkout(array $orders): Collection
+    {
         DB::beginTransaction();
 
         // MongoDB (ProductVariantMongo) TIDAK ikut DB::beginTransaction()
@@ -353,211 +369,47 @@ class TransactionRepository implements TransactionRepositoryInterface
         // decrement Mongo yang sudah ter-apply tetap ada selamanya tanpa
         // kompensasi ini. Dicatat di sini, dikembalikan manual di catch.
         $mongoAdjustments = [];
+        $codes = [];
 
         try {
-            Log::info('=== START CREATE TRANSACTION ===');
-            Log::info('Input data:', ['data' => $data]);
-
-            // buyer_id dan store_id dulu diambil apa adanya dari payload, jadi
-            // pembeli yang sudah login bisa memesan atas nama buyer lain dan
-            // menempelkan pesanan ke toko mana pun. Keduanya sekarang
-            // diturunkan di server, dan $data ditimpa supaya seluruh jalur
-            // hilir -- validasi voucher, detail transaksi -- ikut memakai
-            // nilai yang sudah tepercaya, bukan kiriman client.
-            $data['buyer_id'] = $this->resolveBuyerId();
-            $data['store_id'] = $this->resolveStoreId($data['products']);
-            $data['shipping_cost'] = $this->resolveShippingCost($data);
-
-            $transaction = new Transaction;
-
-            $transaction->code = 'BLK'.now()->format('dmYHis').mt_rand(10, 99);
-            $transaction->buyer_id = $data['buyer_id'];
-            $transaction->store_id = $data['store_id'];
-            $transaction->address_id = $data['address_id'];
-            $transaction->address = $data['address'];
-            $transaction->city = $data['city'];
-            $transaction->postal_code = $data['postal_code'];
-            $transaction->dest_latitude = $data['dest_latitude'] ?? null;
-            $transaction->dest_longitude = $data['dest_longitude'] ?? null;
-            $transaction->shipping = $data['shipping'];
-            $transaction->shipping_type = $data['shipping_type'];
-
-            $transaction->shipping_cost = $data['shipping_cost'];
-            $transaction->tax = 0;
-            $transaction->grand_total = 0;
-            $transaction->save();
-
-            Log::info('Transaction created:', ['transaction_id' => $transaction->id]);
-
-            $transactionDetailRepository = new TransactionDetailRepository;
-            $transactionDetails = [];
-
-            foreach ($data['products'] as $productData) {
-                // Find Product with Lock for Atomic Update
-                Log::debug('REPO: Deduction loop for Product ID: '.$productData['product_id']);
-
-                $product = Product::where('id', $productData['product_id'])->lockForUpdate()->first();
-
-                if (! $product) {
-                    Log::error('REPO: Product NOT FOUND ID: '.$productData['product_id']);
-                    throw new Exception('Product not found: '.$productData['product_id']);
-                }
-
-                Log::debug("REPO: Found Prod {$product->id} | Stock: {$product->stock} | Qty: {$productData['qty']}");
-
-                if ($product->stock < $productData['qty']) {
-                    Log::error("REPO ERROR: Insufficient stock for {$product->id}. Has {$product->stock}, need {$productData['qty']}");
-                    throw new Exception('Insufficient stock for product: '.$product->name);
-                }
-
-                // products.price adalah harga varian TERMURAH (lihat
-                // ProductRepository::create/update -- collect($variants)->min('price')),
-                // bukan harga produk yang sesungguhnya kalau produk ini
-                // punya varian. variant_id sebelumnya sama sekali tidak
-                // sampai ke sini (payload cuma product_id+qty), jadi
-                // pembelian varian mana pun selalu ditagih harga varian
-                // termurah, dan stok yang berkurang cuma agregat produk --
-                // stok varian spesifik (Mongo) tidak pernah tersentuh, jadi
-                // varian yang sudah habis tetap bisa "dibeli" selama
-                // agregat produk masih > 0. resolveVariant() di bawah
-                // menutup keduanya sekaligus.
-                $variant = $this->resolveVariant($product, $productData['variant_id'] ?? null);
-                // Raw decimal string, not (float): TransactionDetailRepository
-                // parses it with Money::fromDecimalString() (B3.1). Casting
-                // through float here would both re-admit imprecision and
-                // hide a fractional-rupiah price behind "10500.5".
-                $unitPrice = (string) ($variant ? $variant->price : $product->price);
-
-                if ($variant) {
-                    if ($variant->stock < $productData['qty']) {
-                        throw new Exception("Stok varian tidak cukup untuk produk: {$product->name}");
-                    }
-                    $variant->stock -= $productData['qty'];
-                    $variant->save();
-                    $mongoAdjustments[] = ['variant_id' => $variant->id, 'qty' => $productData['qty']];
-                }
-
-                // Agregat products.stock tetap dikurangi seperti sebelumnya
-                // (dashboard/listing lain bergantung padanya sebagai total
-                // lintas varian) -- lock Postgres pada baris Product di atas
-                // yang jadi satu-satunya penjamin serialisasi juga untuk
-                // mutasi stok varian di Mongo, karena MongoDB sendiri tidak
-                // punya SELECT ... FOR UPDATE. Dua pembeli yang bersamaan
-                // checkout varian BEDA dari produk yang SAMA tetap serial
-                // lewat lock Product ini, bukan lewat Mongo.
-                $oldStock = $product->stock;
-                $product->stock -= $productData['qty'];
-                $product->save();
-
-                Log::debug("REPO: Updated Stock {$oldStock} -> {$product->stock}");
-
-                $detail = $transactionDetailRepository->create([
-                    'transaction_id' => $transaction->id,
-                    'product_id' => $productData['product_id'],
-                    'variant_id' => $variant?->id,
-                    'qty' => $productData['qty'],
-                    'unit_price' => $unitPrice,
-                ]);
-
-                $detail->load('product');
-                $transactionDetails[] = $detail;
+            // A loop, not collect()->map(fn ...): an arrow function captures
+            // $mongoAdjustments by value, so the catch below would never see
+            // what an earlier order took from Mongo stock.
+            /** @var Collection<int, Transaction> $transactions */
+            $transactions = new Collection;
+            foreach ($orders as $data) {
+                $transactions->push($this->createOrder($data, $mongoAdjustments, $codes));
             }
 
-            Log::info('Transaction details created:', ['count' => count($transactionDetails)]);
-
-            // Subtotal stays a Money value object all the way to the
-            // persistence boundary (B3.2b). detail->subtotal is Money
-            // (B3.1 pilot); tax is the only rounded step.
-            $subtotal = array_reduce(
-                $transactionDetails,
-                fn (Money $carry, $item) => $carry->add($item->subtotal),
-                Money::zero()
-            );
-
-            Log::info('Subtotal calculated:', ['subtotal' => $subtotal->minor()]);
-
-            // No tax on the buyer: goods VAT is the seller's obligation (only
-            // PKP sellers charge it, inside their own price), not a marketplace
-            // surcharge. The column stays for older transactions that had it.
-            $tax = Money::zero();
-
-            // shipping_cost was resolved server-side as whole rupiah.
-            $grandTotal = $subtotal
-                ->add(Money::rupiah((int) $data['shipping_cost']));
-
-            // Voucher: re-validate server-side against the SAME rules as
-            // VoucherController::validateCode (Voucher::validateFor) — never
-            // trust a client-supplied discount amount. A validate-then-checkout
-            // race (e.g. usage_limit exhausted in between) is closed here
-            // because this whole method runs inside one DB transaction.
-            $discount = Money::zero();
-            $voucher = null;
-            if (! empty($data['voucher_code'])) {
-                $voucher = Voucher::where('code', $data['voucher_code'])->first();
-                if ($voucher) {
-                    $result = $voucher->validateFor($data['buyer_id'], $data['store_id'], $subtotal);
-                    if ($result['valid']) {
-                        $discount = $result['discount_amount'];
-                    } else {
-                        Log::warning('Voucher no longer valid at checkout time, ignoring:', [
-                            'code' => $data['voucher_code'],
-                            'reason' => $result['message'],
-                        ]);
-                        $voucher = null;
-                    }
+            if ($transactions->count() > 1) {
+                $paymentCode = 'BLKP'.now()->format('dmYHis').mt_rand(100, 999);
+                foreach ($transactions as $transaction) {
+                    $transaction->payment_code = $paymentCode;
+                    $transaction->save();
                 }
             }
-
-            $grandTotal = $grandTotal->subtract($discount)->clampMin(Money::zero());
-
-            // Added after the discount so a voucher never reduces it.
-            $serviceFee = Money::rupiah((int) config('marketplace.buyer_service_fee'));
-            $grandTotal = $grandTotal->add($serviceFee);
-
-            $transaction->tax = $tax->minor();
-            $transaction->service_fee = $serviceFee->minor();
-            $transaction->grand_total = $grandTotal->minor();
-            $transaction->voucher_id = $voucher?->id;
-            $transaction->discount_amount = $discount->minor();
-            $transaction->save();
-
-            if ($voucher) {
-                VoucherRedemption::create([
-                    'voucher_id' => $voucher->id,
-                    'buyer_id' => $data['buyer_id'],
-                    'transaction_id' => $transaction->id,
-                    'redeemed_at' => now(),
-                ]);
-            }
-
-            Log::info('Transaction updated with costs:', [
-                'subtotal' => $subtotal->minor(),
-                'shipping_cost' => $transaction->shipping_cost,
-                'tax' => $tax->minor(),
-                'discount_amount' => $discount->minor(),
-                'grand_total' => $grandTotal->minor(),
-            ]);
 
             DB::commit();
-            BusinessMetrics::record('order_created');
-
-            Log::info('=== BEFORE MIDTRANS ===');
-
-            // Load Buyer & User for Midtrans
-            $transaction->load('buyer.user');
+            foreach ($transactions as $transaction) {
+                BusinessMetrics::record('order_created');
+            }
 
             // Transaksi sudah ter-commit; kegagalan gateway tidak boleh
             // membuat request 500 padahal order & stok sudah tercatat.
             // FE sudah menangani snap_token null dengan pesan yang jelas.
-            $snapToken = $this->paymentGateway->getSnapToken($transaction);
+            // One token for the whole payment (the gateway sums the group).
+            $first = $transactions->firstOrFail()->load('buyer.user');
+            $snapToken = $this->paymentGateway->getSnapToken($first);
             if ($snapToken !== null) {
-                $transaction->snap_token = $snapToken;
-                $transaction->save();
+                foreach ($transactions as $transaction) {
+                    $transaction->snap_token = $snapToken;
+                    $transaction->save();
+                }
             }
 
-            Log::info('=== TRANSACTION COMPLETED SUCCESSFULLY ===');
+            Log::info('=== CHECKOUT COMPLETED ===', ['orders' => $transactions->count()]);
 
-            return $transaction->fresh(['buyer', 'store', 'transactionDetails.product']);
+            return $transactions->map(fn (Transaction $t) => $t->fresh(['buyer', 'store', 'transactionDetails.product']));
 
         } catch (\Throwable $e) {
             // Kompensasi Mongo SEBELUM rollback SQL, bukan sesudah --
@@ -576,6 +428,204 @@ class TransactionRepository implements TransactionRepositoryInterface
             // file_put_contents(storage_path('logs/debug.txt'), $errorMsg, FILE_APPEND); // Reverted original or comment out
             throw new Exception($e->getMessage());
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  list<array<string, mixed>>  $mongoAdjustments
+     * @param  list<string>  $codes
+     */
+    private function createOrder(array $data, array &$mongoAdjustments, array &$codes): Transaction
+    {
+        Log::info('=== START CREATE TRANSACTION ===');
+        Log::info('Input data:', ['data' => $data]);
+
+        // buyer_id dan store_id dulu diambil apa adanya dari payload, jadi
+        // pembeli yang sudah login bisa memesan atas nama buyer lain dan
+        // menempelkan pesanan ke toko mana pun. Keduanya sekarang
+        // diturunkan di server, dan $data ditimpa supaya seluruh jalur
+        // hilir -- validasi voucher, detail transaksi -- ikut memakai
+        // nilai yang sudah tepercaya, bukan kiriman client.
+        $data['buyer_id'] = $this->resolveBuyerId();
+        $data['store_id'] = $this->resolveStoreId($data['products']);
+        $data['shipping_cost'] = $this->resolveShippingCost($data);
+
+        $transaction = new Transaction;
+
+        // Several orders are created in the same second; keep their codes apart.
+        do {
+            $code = 'BLK'.now()->format('dmYHis').mt_rand(10, 99);
+        } while (in_array($code, $codes, true));
+        $codes[] = $code;
+        $transaction->code = $code;
+        $transaction->buyer_id = $data['buyer_id'];
+        $transaction->store_id = $data['store_id'];
+        $transaction->address_id = $data['address_id'];
+        $transaction->address = $data['address'];
+        $transaction->city = $data['city'];
+        $transaction->postal_code = $data['postal_code'];
+        $transaction->dest_latitude = $data['dest_latitude'] ?? null;
+        $transaction->dest_longitude = $data['dest_longitude'] ?? null;
+        $transaction->shipping = $data['shipping'];
+        $transaction->shipping_type = $data['shipping_type'];
+
+        $transaction->shipping_cost = $data['shipping_cost'];
+        $transaction->tax = 0;
+        $transaction->grand_total = 0;
+        $transaction->save();
+
+        Log::info('Transaction created:', ['transaction_id' => $transaction->id]);
+
+        $transactionDetailRepository = new TransactionDetailRepository;
+        $transactionDetails = [];
+
+        foreach ($data['products'] as $productData) {
+            // Find Product with Lock for Atomic Update
+            Log::debug('REPO: Deduction loop for Product ID: '.$productData['product_id']);
+
+            $product = Product::where('id', $productData['product_id'])->lockForUpdate()->first();
+
+            if (! $product) {
+                Log::error('REPO: Product NOT FOUND ID: '.$productData['product_id']);
+                throw new Exception('Product not found: '.$productData['product_id']);
+            }
+
+            Log::debug("REPO: Found Prod {$product->id} | Stock: {$product->stock} | Qty: {$productData['qty']}");
+
+            if ($product->stock < $productData['qty']) {
+                Log::error("REPO ERROR: Insufficient stock for {$product->id}. Has {$product->stock}, need {$productData['qty']}");
+                throw new Exception('Insufficient stock for product: '.$product->name);
+            }
+
+            // products.price adalah harga varian TERMURAH (lihat
+            // ProductRepository::create/update -- collect($variants)->min('price')),
+            // bukan harga produk yang sesungguhnya kalau produk ini
+            // punya varian. variant_id sebelumnya sama sekali tidak
+            // sampai ke sini (payload cuma product_id+qty), jadi
+            // pembelian varian mana pun selalu ditagih harga varian
+            // termurah, dan stok yang berkurang cuma agregat produk --
+            // stok varian spesifik (Mongo) tidak pernah tersentuh, jadi
+            // varian yang sudah habis tetap bisa "dibeli" selama
+            // agregat produk masih > 0. resolveVariant() di bawah
+            // menutup keduanya sekaligus.
+            $variant = $this->resolveVariant($product, $productData['variant_id'] ?? null);
+            // Raw decimal string, not (float): TransactionDetailRepository
+            // parses it with Money::fromDecimalString() (B3.1). Casting
+            // through float here would both re-admit imprecision and
+            // hide a fractional-rupiah price behind "10500.5".
+            $unitPrice = (string) ($variant ? $variant->price : $product->price);
+
+            if ($variant) {
+                if ($variant->stock < $productData['qty']) {
+                    throw new Exception("Stok varian tidak cukup untuk produk: {$product->name}");
+                }
+                $variant->stock -= $productData['qty'];
+                $variant->save();
+                $mongoAdjustments[] = ['variant_id' => $variant->id, 'qty' => $productData['qty']];
+            }
+
+            // Agregat products.stock tetap dikurangi seperti sebelumnya
+            // (dashboard/listing lain bergantung padanya sebagai total
+            // lintas varian) -- lock Postgres pada baris Product di atas
+            // yang jadi satu-satunya penjamin serialisasi juga untuk
+            // mutasi stok varian di Mongo, karena MongoDB sendiri tidak
+            // punya SELECT ... FOR UPDATE. Dua pembeli yang bersamaan
+            // checkout varian BEDA dari produk yang SAMA tetap serial
+            // lewat lock Product ini, bukan lewat Mongo.
+            $oldStock = $product->stock;
+            $product->stock -= $productData['qty'];
+            $product->save();
+
+            Log::debug("REPO: Updated Stock {$oldStock} -> {$product->stock}");
+
+            $detail = $transactionDetailRepository->create([
+                'transaction_id' => $transaction->id,
+                'product_id' => $productData['product_id'],
+                'variant_id' => $variant?->id,
+                'qty' => $productData['qty'],
+                'unit_price' => $unitPrice,
+            ]);
+
+            $detail->load('product');
+            $transactionDetails[] = $detail;
+        }
+
+        Log::info('Transaction details created:', ['count' => count($transactionDetails)]);
+
+        // Subtotal stays a Money value object all the way to the
+        // persistence boundary (B3.2b). detail->subtotal is Money
+        // (B3.1 pilot); tax is the only rounded step.
+        $subtotal = array_reduce(
+            $transactionDetails,
+            fn (Money $carry, $item) => $carry->add($item->subtotal),
+            Money::zero()
+        );
+
+        Log::info('Subtotal calculated:', ['subtotal' => $subtotal->minor()]);
+
+        // No tax on the buyer: goods VAT is the seller's obligation (only
+        // PKP sellers charge it, inside their own price), not a marketplace
+        // surcharge. The column stays for older transactions that had it.
+        $tax = Money::zero();
+
+        // shipping_cost was resolved server-side as whole rupiah.
+        $grandTotal = $subtotal
+            ->add(Money::rupiah((int) $data['shipping_cost']));
+
+        // Voucher: re-validate server-side against the SAME rules as
+        // VoucherController::validateCode (Voucher::validateFor) — never
+        // trust a client-supplied discount amount. A validate-then-checkout
+        // race (e.g. usage_limit exhausted in between) is closed here
+        // because this whole method runs inside one DB transaction.
+        $discount = Money::zero();
+        $voucher = null;
+        if (! empty($data['voucher_code'])) {
+            $voucher = Voucher::where('code', $data['voucher_code'])->first();
+            if ($voucher) {
+                $result = $voucher->validateFor($data['buyer_id'], $data['store_id'], $subtotal);
+                if ($result['valid']) {
+                    $discount = $result['discount_amount'];
+                } else {
+                    Log::warning('Voucher no longer valid at checkout time, ignoring:', [
+                        'code' => $data['voucher_code'],
+                        'reason' => $result['message'],
+                    ]);
+                    $voucher = null;
+                }
+            }
+        }
+
+        $grandTotal = $grandTotal->subtract($discount)->clampMin(Money::zero());
+
+        // Added after the discount so a voucher never reduces it.
+        $serviceFee = Money::rupiah((int) config('marketplace.buyer_service_fee'));
+        $grandTotal = $grandTotal->add($serviceFee);
+
+        $transaction->tax = $tax->minor();
+        $transaction->service_fee = $serviceFee->minor();
+        $transaction->grand_total = $grandTotal->minor();
+        $transaction->voucher_id = $voucher?->id;
+        $transaction->discount_amount = $discount->minor();
+        $transaction->save();
+
+        if ($voucher) {
+            VoucherRedemption::create([
+                'voucher_id' => $voucher->id,
+                'buyer_id' => $data['buyer_id'],
+                'transaction_id' => $transaction->id,
+                'redeemed_at' => now(),
+            ]);
+        }
+
+        Log::info('Transaction updated with costs:', [
+            'subtotal' => $subtotal->minor(),
+            'shipping_cost' => $transaction->shipping_cost,
+            'tax' => $tax->minor(),
+            'discount_amount' => $discount->minor(),
+            'grand_total' => $grandTotal->minor(),
+        ]);
+
+        return $transaction;
     }
 
     public function delete(string $id)

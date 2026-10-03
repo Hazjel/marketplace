@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Transaction as MidtransTransaction;
+use RuntimeException;
 
 class MidtransPaymentGateway implements PaymentGatewayInterface
 {
@@ -19,10 +20,11 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
     {
         $this->configure();
 
+        // A multi-store checkout is one payment for all of its orders.
         $params = [
             'transaction_details' => [
-                'order_id' => $transaction->code,
-                'gross_amount' => (int) $transaction->grand_total,
+                'order_id' => $transaction->paymentCode(),
+                'gross_amount' => (int) Transaction::inPayment($transaction->paymentCode())->sum('grand_total'),
             ],
             'customer_details' => [
                 'first_name' => $transaction->buyer->user?->name ?? 'Customer',
@@ -59,7 +61,8 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
 
         // Metode bayar hanya diketahui Midtrans: Snap membiarkan pembeli memilih.
         // Library mendeklarasikan array, tapi json_decode-nya mengembalikan objek.
-        $status = (object) MidtransTransaction::status($transaction->code);
+        $orderId = $transaction->paymentCode();
+        $status = (object) MidtransTransaction::status($orderId);
         $paymentType = $status->payment_type ?? null;
         $transactionStatus = $status->transaction_status ?? null;
 
@@ -72,14 +75,21 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
             return self::REFUND_MANUAL;
         }
 
-        // Kartu yang belum settle dibatalkan (void), bukan direfund.
+        // Kartu yang belum settle dibatalkan (void), bukan direfund. A void
+        // cancels the whole payment, so an order sharing it with other stores
+        // waits for settlement and is refunded partially instead; 414 is the
+        // job's "not settled yet, retry later".
         if ($transactionStatus === 'capture') {
-            MidtransTransaction::cancel($transaction->code);
+            if ($transaction->payment_code !== null) {
+                throw new RuntimeException('Pembayaran gabungan belum settle; refund sebagian menunggu settlement.', 414);
+            }
+            MidtransTransaction::cancel($orderId);
 
             return self::REFUND_DONE;
         }
 
-        MidtransTransaction::refund($transaction->code, [
+        // Only this order's amount: other orders in a shared payment stay paid.
+        MidtransTransaction::refund($orderId, [
             'refund_key' => 'cancel-'.$transaction->code,
             'amount' => (int) $transaction->grand_total,
             'reason' => mb_substr($reason, 0, 255),

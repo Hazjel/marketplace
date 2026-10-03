@@ -13,6 +13,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'code',
+        'payment_code',
         'buyer_id',
         'store_id',
         'address',
@@ -64,6 +65,22 @@ class Transaction extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where('code', PostgresSearch::likeOperator(), '%'.$search.'%');
+    }
+
+    /** The Midtrans order_id this transaction was paid under. */
+    public function paymentCode(): string
+    {
+        return $this->payment_code ?? $this->code;
+    }
+
+    /**
+     * Every transaction paid under one Midtrans order_id: the orders of a
+     * multi-store checkout, or a single-store transaction by its own code.
+     */
+    public function scopeInPayment($query, string $paymentCode)
+    {
+        return $query->where(fn ($q) => $q->where('payment_code', $paymentCode)
+            ->orWhere(fn ($q) => $q->whereNull('payment_code')->where('code', $paymentCode)));
     }
 
     public function buyer()

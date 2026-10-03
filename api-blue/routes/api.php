@@ -257,6 +257,11 @@ Route::middleware('auth:sanctum')->group(function () {
         TransactionController::class,
         'store',
     ]);
+    // Several stores, one payment (TransactionRepository::checkout).
+    Route::middleware(['throttle:10,1', 'idempotent'])->post('transaction/checkout', [
+        TransactionController::class,
+        'checkout',
+    ]);
     Route::apiResource('transaction', TransactionController::class)->except([
         'store',
     ]);

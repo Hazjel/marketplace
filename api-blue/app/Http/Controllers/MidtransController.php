@@ -82,14 +82,16 @@ class MidtransController extends Controller
         DB::beginTransaction();
 
         try {
-            $transaction = Transaction::where('code', $transactionCode)->lockForUpdate()->first();
+            // Every transaction paid under this order_id: one, or all orders
+            // of a multi-store checkout. Locked together in id order.
+            $group = Transaction::inPayment($transactionCode)->orderBy('id')->lockForUpdate()->get();
 
-            if (! $transaction) {
+            if ($group->isEmpty()) {
                 $outcome = 'not_found';
             } else {
                 // Pertahanan berlapis: signature sudah mencakup nominal, tapi
-                // cocokkan lagi dengan yang tersimpan.
-                $expectedAmount = (int) round((float) $transaction->grand_total);
+                // cocokkan lagi dengan yang tersimpan (the sum, for a shared payment).
+                $expectedAmount = (int) round((float) $group->sum('grand_total'));
                 $receivedAmount = (int) round((float) ($request->gross_amount ?? 0));
 
                 if ($expectedAmount !== $receivedAmount) {
@@ -100,68 +102,12 @@ class MidtransController extends Controller
                     ]);
 
                     $outcome = 'amount_mismatch';
-                } elseif ($transaction->refund_status !== null) {
-                    // Dibatalkan penjual setelah dibayar. Satu-satunya kabar
-                    // yang berarti adalah refund-nya selesai; "settlement"
-                    // ulang tidak boleh mengkredit escrow lagi.
-                    if (in_array($request->transaction_status, ['refund', 'partial_refund', 'cancel'], true)
-                        && $transaction->refund_status !== 'refunded') {
-                        $transaction->update([
-                            'refund_status' => 'refunded',
-                            'refund_method' => 'midtrans',
-                            'refunded_at' => now(),
-                        ]);
-                        $events[] = new TransactionStatusUpdated($transaction->fresh());
-                        $metric = ['refund_done', 'midtrans_webhook'];
-                        $outcome = 'updated';
-                    } else {
-                        $outcome = 'ignored';
-                    }
                 } else {
-                    $newStatus = MidtransPaymentStatusInterpreter::interpret(
-                        $request->transaction_status,
-                        $request->payment_type,
-                        $request->fraud_status
-                    );
-
-                    // Webhook tidak selalu datang berurutan. Transaksi yang
-                    // sudah dibayar tidak boleh mundur: webhook "failed" yang
-                    // telat dulu bisa menimpanya menjadi failed lalu
-                    // mengembalikan stok, padahal saldo penjual sudah
-                    // terlanjur dikredit.
-                    if ($newStatus === null) {
-                        $outcome = 'ignored';
-                    } elseif ($transaction->payment_status === 'paid' && $newStatus !== 'paid') {
-                        Log::warning('Webhook telat diabaikan: transaksi sudah dibayar', [
-                            'transaction' => $transactionCode,
-                            'status_diminta' => $newStatus,
-                        ]);
-
-                        $outcome = 'ignored';
-                    } elseif ($newStatus === 'paid' && $transaction->payment_status === 'paid') {
-                        Log::info('Duplicate webhook ignored for: '.$transactionCode);
-
-                        $outcome = 'ignored';
-                    } else {
-                        if ($newStatus === 'paid') {
-                            $transaction->update(['payment_status' => 'paid']);
-                            $metric = ['payment_paid', (string) $request->payment_type];
-                            $this->escrowRepository->credit($transaction);
-                        } elseif ($newStatus === 'unpaid') {
-                            $transaction->update(['payment_status' => 'unpaid']);
-                        } elseif ($newStatus === 'failed') {
-                            $transaction->update(['payment_status' => 'failed']);
-                            $metric = ['payment_failed', (string) $request->transaction_status];
-                            $this->transactionRepository->restoreStock($transaction, $mongoAdjustments);
-                        }
-
-                        // Event ditahan sampai commit. Dipancarkan di dalam
-                        // transaksi, pendengarnya bisa menyiarkan status yang
-                        // ternyata di-rollback.
-                        $events[] = new TransactionStatusUpdated($transaction->fresh());
-
-                        $outcome = 'updated';
+                    $outcomes = [];
+                    foreach ($group as $transaction) {
+                        $outcomes[] = $this->applyNotification($transaction, $request, $group->count() > 1, $events, $metric, $mongoAdjustments);
                     }
+                    $outcome = in_array('updated', $outcomes, true) ? 'updated' : 'ignored';
                 }
             }
 
@@ -199,5 +145,93 @@ class MidtransController extends Controller
 
         // always return 200 after processing so Midtrans considers callback successful
         return response()->json(['message' => 'Payment Status updated successfully'], 200);
+    }
+
+    /**
+     * The per-transaction part of a notification. A multi-store checkout is one
+     * Midtrans payment for several transactions, each with its own escrow and
+     * status, so the same notification is applied to every one of them.
+     *
+     * @param  list<object>  $events
+     * @param  array<int, string>|null  $metric
+     * @param  list<array{variant_id: string, qty: int}>  $mongoAdjustments
+     */
+    private function applyNotification(Transaction $transaction, Request $request, bool $sharedPayment, array &$events, ?array &$metric, array &$mongoAdjustments): string
+    {
+        $transactionCode = $transaction->code;
+        $outcome = 'ignored';
+
+        // A refund notification on a shared payment does not say which
+        // order it was for; RefundCancelledTransactionJob records each
+        // order's refund itself once Midtrans accepts it.
+        if ($sharedPayment && $transaction->refund_status !== null) {
+            return 'ignored';
+        }
+
+        if ($transaction->refund_status !== null) {
+            // Dibatalkan penjual setelah dibayar. Satu-satunya kabar
+            // yang berarti adalah refund-nya selesai; "settlement"
+            // ulang tidak boleh mengkredit escrow lagi.
+            if (in_array($request->transaction_status, ['refund', 'partial_refund', 'cancel'], true)
+                && $transaction->refund_status !== 'refunded') {
+                $transaction->update([
+                    'refund_status' => 'refunded',
+                    'refund_method' => 'midtrans',
+                    'refunded_at' => now(),
+                ]);
+                $events[] = new TransactionStatusUpdated($transaction->fresh());
+                $metric = ['refund_done', 'midtrans_webhook'];
+                $outcome = 'updated';
+            } else {
+                $outcome = 'ignored';
+            }
+        } else {
+            $newStatus = MidtransPaymentStatusInterpreter::interpret(
+                $request->transaction_status,
+                $request->payment_type,
+                $request->fraud_status
+            );
+
+            // Webhook tidak selalu datang berurutan. Transaksi yang
+            // sudah dibayar tidak boleh mundur: webhook "failed" yang
+            // telat dulu bisa menimpanya menjadi failed lalu
+            // mengembalikan stok, padahal saldo penjual sudah
+            // terlanjur dikredit.
+            if ($newStatus === null) {
+                $outcome = 'ignored';
+            } elseif ($transaction->payment_status === 'paid' && $newStatus !== 'paid') {
+                Log::warning('Webhook telat diabaikan: transaksi sudah dibayar', [
+                    'transaction' => $transactionCode,
+                    'status_diminta' => $newStatus,
+                ]);
+
+                $outcome = 'ignored';
+            } elseif ($newStatus === 'paid' && $transaction->payment_status === 'paid') {
+                Log::info('Duplicate webhook ignored for: '.$transactionCode);
+
+                $outcome = 'ignored';
+            } else {
+                if ($newStatus === 'paid') {
+                    $transaction->update(['payment_status' => 'paid']);
+                    $metric = ['payment_paid', (string) $request->payment_type];
+                    $this->escrowRepository->credit($transaction);
+                } elseif ($newStatus === 'unpaid') {
+                    $transaction->update(['payment_status' => 'unpaid']);
+                } elseif ($newStatus === 'failed') {
+                    $transaction->update(['payment_status' => 'failed']);
+                    $metric = ['payment_failed', (string) $request->transaction_status];
+                    $this->transactionRepository->restoreStock($transaction, $mongoAdjustments);
+                }
+
+                // Event ditahan sampai commit. Dipancarkan di dalam
+                // transaksi, pendengarnya bisa menyiarkan status yang
+                // ternyata di-rollback.
+                $events[] = new TransactionStatusUpdated($transaction->fresh());
+
+                $outcome = 'updated';
+            }
+        }
+
+        return $outcome;
     }
 }
