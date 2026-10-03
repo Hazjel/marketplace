@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Interfaces\AuthRepositoryInterface;
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Services\AccountDeletionService;
 use Exception;
@@ -97,8 +98,7 @@ class AuthRepository implements AuthRepositoryInterface
                 throw new Exception('Email atau password salah.', 401);
             }
 
-            Cache::forget($attemptsKey);
-            Cache::forget($lockKey);
+            self::clearLoginLock($data['email']);
 
             $user = Auth::user();
             $user->token = $user->createToken('auth_token')->plainTextToken;
@@ -112,6 +112,17 @@ class AuthRepository implements AuthRepositoryInterface
 
             throw new Exception($e->getMessage(), $e->getCode());
         }
+    }
+
+    /**
+     * Hapus hitungan gagal + kunci login per-email. Dipanggil saat login sukses dan
+     * setelah reset password (pemilik yang sah tidak perlu menunggu kunci habis).
+     */
+    public static function clearLoginLock(string $email): void
+    {
+        $hash = md5(strtolower($email));
+        Cache::forget('login_attempts_'.$hash);
+        Cache::forget('login_locked_'.$hash);
     }
 
     public function updateProfile(array $data)
@@ -140,6 +151,12 @@ class AuthRepository implements AuthRepositoryInterface
 
             if (isset($data['password']) && ! empty($data['password'])) {
                 $user->password = bcrypt($data['password']);
+
+                // Ganti password = sesi di perangkat lain berakhir; sesi yang dipakai sekarang tetap.
+                $current = PersonalAccessToken::findToken((string) request()->bearerToken());
+                $user->tokens()
+                    ->when($current, fn ($q) => $q->whereKeyNot($current->getKey()))
+                    ->delete();
             }
 
             $user->save();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Repositories\AuthRepository;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -65,7 +66,7 @@ class ForgotPasswordController extends Controller
         $request->validate([
             'token' => 'required|string',
             'email' => 'required|email',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'string', 'min:8', 'regex:/^(?=.*[A-Z])(?=.*[0-9]).+$/', 'confirmed'],
             'password_confirmation' => 'required|string',
         ], [
             'token.required' => 'Token reset tidak valid.',
@@ -73,6 +74,7 @@ class ForgotPasswordController extends Controller
             'email.email' => 'Format email tidak valid.',
             'password.required' => 'Password baru wajib diisi.',
             'password.min' => 'Password minimal 8 karakter.',
+            'password.regex' => 'Password wajib mengandung minimal 1 huruf besar dan 1 angka.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'password_confirmation.required' => 'Konfirmasi password wajib diisi.',
         ]);
@@ -84,6 +86,11 @@ class ForgotPasswordController extends Controller
                     'password' => Hash::make($password),
                     'remember_token' => Str::random(60),
                 ])->save();
+
+                // Reset biasanya karena lupa ATAU karena akun dibobol: token lama (berlaku
+                // 30 hari) harus mati supaya pemegang sesi curian ikut terlempar keluar.
+                $user->tokens()->delete();
+                AuthRepository::clearLoginLock($user->email);
 
                 event(new PasswordReset($user));
             }

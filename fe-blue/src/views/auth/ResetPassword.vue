@@ -225,7 +225,7 @@ const handleSubmit = async () => {
             v-model="form.password"
             :type="showPassword ? 'text' : 'password'"
             class="w-full h-12 pl-12 pr-12 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-white/10 focus:border-custom-blue focus:ring-1 focus:ring-custom-blue/20 outline-none transition-all font-normal text-custom-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-            placeholder="Minimal 8 karakter"
+            placeholder="Min. 8 karakter, huruf besar &amp; angka"
             autocomplete="new-password"
             :class="{ '!border-red-500 !bg-red-50 dark:!bg-red-900/20': error?.password }"
             :disabled="loading"
