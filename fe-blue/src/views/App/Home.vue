@@ -12,7 +12,7 @@ import Container from '@/components/Molecule/Container.vue'
 import SectionHeader from '@/components/Molecule/SectionHeader.vue'
 import { RouterLink } from 'vue-router'
 
-import { useHead } from '@vueuse/head'
+import { useHead } from '@unhead/vue'
 import { ref, onMounted } from 'vue'
 import { useProductStore } from '@/stores/product'
 import { logger } from '@/utils/logger'

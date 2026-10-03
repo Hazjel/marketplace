@@ -196,22 +196,14 @@ pipeline {
                 dir('fe-blue') {
                     // Satu container untuk semua step: start/stop container mahal di disk host ini.
                     //
-                    // KOREKSI dari commit e543e1c3: klaim "production deps
-                    // sudah bersih" di situ SALAH -- @vueuse/head ada di
-                    // dependencies (bukan devDependencies), dan residual
-                    // 3 finding moderate/low dari @unhead/vue (lihat commit
-                    // e543e1c3 untuk analisis kenapa tidak di-force-downgrade)
-                    // ADA di situ. `npm audit --omit=dev` polos di sini
-                    // sudah dicoba: exit code 1, bukan 0 -- build pertama
-                    // akan merah permanen kalau tetap blocking penuh.
-                    //
-                    // --audit-level=high: exit code cuma nonzero untuk
-                    // high/critical (residual yang sudah dianalisis
-                    // moderate/low tidak ikut blocking, tapi CVE baru yang
-                    // high/critical tetap memblokir). devDependencies
+                    // Production deps bersih (0 advisory) sejak @vueuse/head diganti
+                    // @unhead/vue v2. --audit-level=high: CVE high/critical baru
+                    // memblokir deploy; moderate/low tidak, karena Dependabot alerts
+                    // di GitHub sudah mengirim email untuk semua level, termasuk
+                    // dependency yang tidak disentuh commit mana pun (stage ini
+                    // hanya jalan kalau fe-blue berubah). devDependencies
                     // (vite/vitest/eslint dst) tidak ikut dibundle ke output
-                    // production, jadi audit-nya dipisah dan non-blocking
-                    // sepenuhnya.
+                    // production, jadi audit-nya dipisah dan non-blocking.
                     runInContainer(
                         name: 'frontend',
                         image: 'node:20-bookworm-slim',

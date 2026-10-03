@@ -2,7 +2,7 @@ import '@/assets/style.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { createHead } from '@vueuse/head'
+import { createHead } from '@unhead/vue/client'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 

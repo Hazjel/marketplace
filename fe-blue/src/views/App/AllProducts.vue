@@ -5,7 +5,7 @@ import { useProductStore } from '@/stores/product'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, watch, ref } from 'vue'
-import { useHead } from '@vueuse/head'
+import { useHead } from '@unhead/vue'
 import PageHero from '@/components/Molecule/PageHero.vue'
 import Container from '@/components/Molecule/Container.vue'
 

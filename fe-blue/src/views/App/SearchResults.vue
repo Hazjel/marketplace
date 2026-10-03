@@ -11,7 +11,7 @@ import SkeletonStoreCard from '@/components/skeleton/SkeletonStoreCard.vue'
 import FilterSidebar from '@/components/App/FilterSidebar.vue'
 import PageHero from '@/components/Molecule/PageHero.vue'
 import Container from '@/components/Molecule/Container.vue'
-import { useHead } from '@vueuse/head'
+import { useHead } from '@unhead/vue'
 import { computed } from 'vue'
 
 const route = useRoute()

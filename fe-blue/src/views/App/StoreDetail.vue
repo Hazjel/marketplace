@@ -11,7 +11,7 @@ import { useStoreStore } from '@/stores/store'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useHead } from '@vueuse/head'
+import { useHead } from '@unhead/vue'
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
