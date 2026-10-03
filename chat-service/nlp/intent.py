@@ -37,6 +37,14 @@ _PRODUCT_INTENT_TOKENS = {
     "lg", "huawei", "nokia", "google", "dell", "msi", "corsair",
 }
 
+# Pertanyaan tentang platform, bukan barang: tanpa kata produk, ini tidak perlu RAG.
+_HELP_TOKENS = {
+    "cara", "bagaimana", "gimana", "aman", "penipuan", "refund", "pengembalian",
+    "pembayaran", "akun", "password", "login", "daftar", "verifikasi", "email",
+    "kebijakan", "privasi", "syarat", "kontak", "hubungi", "cs", "bantuan", "help",
+    "blukios",
+}
+
 # ---------------------------------------------------------------------------
 # Mapping natural language → nama kategori di database
 # ---------------------------------------------------------------------------
@@ -57,28 +65,27 @@ CATEGORY_MAP: dict[str, str] = {
 # ---------------------------------------------------------------------------
 def is_general_query(msg: str) -> bool:
     """
-    Dua lapis intent detection:
-    1. Regex layer: tangkap sapaan/closing eksplisit secara exact
-    2. Token scoring: jika tidak ada satu pun product-intent token → skip RAG
+    True only when a product search is clearly pointless:
+    1. Sapaan/closing eksplisit ('halo!', 'makasih')
+    2. Pertanyaan bantuan/kebijakan tanpa kata produk ('apakah blukios aman?',
+       'bagaimana cara pembayaran?')
 
-    Contoh skip RAG:
-      'halo!'              → layer 1 match
-      'apakah blukios aman?' → layer 2: tidak ada token produk
-      'bagaimana cara pembayaran?' → layer 2: tidak ada token produk
-
-    Contoh TIDAK skip (tetap jalankan RAG):
-      'cari laptop gaming'  → layer 2: ada 'cari', 'laptop', 'gaming'
-      'harga ASUS ROG berapa?' → layer 2: ada 'harga', 'asus'
+    Everything else searches the catalogue. The old rule (search only when a
+    word from _PRODUCT_INTENT_TOKENS appears) knew only gadgets, so 'ada
+    skincare?' or 'jual kemeja pria?' were answered without the catalogue
+    (6 of 15 product questions in tests/test_intent_eval.py). A needless
+    search costs one local embedding and its results still have to pass
+    RAG_SIMILARITY_THRESHOLD.
     """
     msg_clean = msg.strip()
 
-    # Layer 1: sapaan eksplisit (paling cepat)
     if _GREETING_PATTERN.match(msg_clean):
         return True
 
-    # Layer 2: tidak ada product-intent token sama sekali → general query
     tokens = set(re.sub(r"[^\w\s]", "", msg_clean.lower()).split())
-    return not bool(tokens & _PRODUCT_INTENT_TOKENS)
+    if tokens & _PRODUCT_INTENT_TOKENS:
+        return False
+    return bool(tokens & _HELP_TOKENS)
 
 
 # ---------------------------------------------------------------------------
@@ -125,7 +132,7 @@ def extract_metadata_filters(query: str) -> dict | None:
 
     def _to_rupiah(value: str, unit: str) -> int:
         v = float(value.replace(",", "."))
-        if "juta" in unit:
+        if unit in ("juta", "jt"):
             return int(v * 1_000_000)
         if any(u in unit for u in ("ribu", "rb", "k")):
             return int(v * 1_000)
@@ -141,10 +148,11 @@ def extract_metadata_filters(query: str) -> dict | None:
     if m:
         clauses.append({"price": {"$gte": _to_rupiah(m.group(1), m.group(2) or "juta")}})
 
-    # Price — range X-Y
-    m = re.search(r"(\d+(?:[.,]\d+)?)\s*(?:-|sampai|hingga|s/d)\s*(\d+(?:[.,]\d+)?)\s*(juta|ribu|rb|k)?", q)
+    # Price — range X-Y. The unit is required: a bare '13 sampai 15' or
+    # '3060 - 4060' is a model number (iPhone, RTX), not a price.
+    m = re.search(r"(\d+(?:[.,]\d+)?)\s*(?:-|sampai|hingga|s/d)\s*(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb|k)\b", q)
     if m:
-        unit = m.group(3) or "juta"
+        unit = m.group(3)
         clauses.append({"price": {"$gte": _to_rupiah(m.group(1), unit)}})
         clauses.append({"price": {"$lte": _to_rupiah(m.group(2), unit)}})
 
