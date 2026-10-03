@@ -456,10 +456,10 @@ Actively developed. Production is live and CI-gated. First tagged release:
 
   | | |
   |---|---|
-  | **C1** | API contract stabilization + mobile parity (this doc set; integer money JSON; `/api/health` version) |
+  | **C1** | **done** — API contract: whole-rupiah money as JSON integers (`api-blue/docs/money-json-contract.md`), parsed strictly by the mobile app, `/api/health` reports the deployed commit |
   | **C2** | **done** — production infra hardening: `docker-compose.prod.yml`, required DB/Redis/Mongo/Reverb secrets, no `0.0.0.0` ports, blocking gitleaks |
   | **C3** | **done** — payment/order end-to-end verification in sandbox (card, BCA VA, QRIS: Snap → webhook → escrow → release), new money model (no buyer tax, Rp1.000 service fee), seller rejection with refunds |
-  | **C4** | full mobile buyer + seller parity — mobile v1.2.0 matches checkout totals and refunds |
+  | **C4** | **done** — mobile buyer + seller parity: checkout totals and refunds (v1.2.0), all-stores list and the info pages; platform-admin pages stay web-only |
   | **C5** | **done** — observability: email alerts from the app (`ops:check`: queue, failed jobs, Midtrans webhooks, refunds, API 5xx, web/mobile crashes), business-path metrics, JSON logs with a per-request id; see `docs/monitoring-on-ops.md` |
   | **C6** | **done** — real client IP from `CF-Connecting-IP` (per-visitor rate limits and login lockouts), `@unhead/vue` v2, Dependabot alerts on both repos plus the CI audits, password reset/change revokes old tokens, debug routes removed |
   | **C7** | **done** — mobile release engineering: signed APK releases on GitHub (v1.2.x, new signing key); Jenkins job `blukios-mobile-pipeline` runs analyze + test on every push |
