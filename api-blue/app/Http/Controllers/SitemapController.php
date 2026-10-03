@@ -46,7 +46,7 @@ class SitemapController extends Controller
         }
 
         $products = Product::query()
-            ->whereHas('store', fn ($q) => $q->where('is_active', true))
+            ->whereIn('store_id', Store::query()->where('is_active', true)->select('id'))
             ->get(['slug', 'updated_at']);
         foreach ($products as $product) {
             $urls[] = [$base.'/product/'.rawurlencode($product->slug), $product->updated_at];
