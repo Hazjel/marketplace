@@ -26,6 +26,10 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
                 'order_id' => $transaction->paymentCode(),
                 'gross_amount' => (int) Transaction::inPayment($transaction->paymentCode())->sum('grand_total'),
             ],
+            // Only methods Midtrans can refund by API (REFUNDABLE_TYPES; GoPay on
+            // desktop becomes qris): bank VA and store counters would need a
+            // manual transfer whenever a seller rejects a paid order.
+            'enabled_payments' => ['credit_card', 'gopay', 'shopeepay', 'akulaku'],
             'customer_details' => [
                 'first_name' => $transaction->buyer->user?->name ?? 'Customer',
                 'email' => $transaction->buyer->user?->email ?? 'no-email@example.com',
