@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Store;
 use App\Models\StoreBalance;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,8 +27,9 @@ class WithdrawalStoreRequest extends FormRequest
                         return;
                     }
 
-                    $ownsBalance = $user->store
-                        && StoreBalance::whereKey($value)->where('store_id', $user->store->id)->exists();
+                    $ownsBalance = StoreBalance::whereKey($value)
+                        ->whereIn('store_id', Store::where('user_id', $user->id)->select('id'))
+                        ->exists();
 
                     if (! $ownsBalance) {
                         $fail('Dompet toko tidak valid');
