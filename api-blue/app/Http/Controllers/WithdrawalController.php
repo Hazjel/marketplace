@@ -124,7 +124,7 @@ class WithdrawalController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Withdrawal Berhasil Disetujui', new WithdrawalResource($withdrawal), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::exceptionResponse($e);
+            return $this->domainErrorResponse($e);
         }
     }
 
@@ -151,7 +151,7 @@ class WithdrawalController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Penarikan ditolak — dana dikembalikan ke saldo toko', new WithdrawalResource($withdrawal), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::exceptionResponse($e);
+            return $this->domainErrorResponse($e);
         }
     }
 }

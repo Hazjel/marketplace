@@ -48,6 +48,7 @@ export const useWithdrawalStore = defineStore('withdrawal', () => {
       success.value = response.data.message
     } catch (err) {
       error.value = handleError(err)
+      throw err
     } finally {
       loading.value = false
     }

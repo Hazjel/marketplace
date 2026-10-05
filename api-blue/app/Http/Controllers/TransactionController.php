@@ -399,17 +399,6 @@ class TransactionController extends Controller implements HasMiddleware
         }
     }
 
-    // Repository melempar Exception dengan kode 404/422 untuk penolakan
-    // bisnis; selain itu (DB, Mongo) tetap 500.
-    private function domainErrorResponse(\Exception $e)
-    {
-        if (in_array($e->getCode(), [404, 422], true)) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), null, $e->getCode());
-        }
-
-        return ResponseHelper::exceptionResponse($e);
-    }
-
     /**
      * Check payment status from Midtrans manually (for localhost/sync).
      */

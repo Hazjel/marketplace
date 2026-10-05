@@ -9,6 +9,8 @@ use App\Models\Withdrawal;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -76,6 +78,25 @@ class WithdrawalOwnershipTest extends TestCase
 
         $this->assertSame(0, Withdrawal::count());
         $this->assertEquals(500000, $victimBalance->fresh()->balance);
+    }
+
+    public function test_rejected_withdrawal_cannot_be_approved(): void
+    {
+        Storage::fake('public');
+        [$seller, $balance] = $this->sellerWithBalance('ditolak');
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $id = $this->withdraw($seller, $balance)->assertCreated()->json('data.id');
+        $this->actingAs($admin)->postJson("/api/withdrawal/{$id}/reject")->assertOk();
+        $this->assertEquals(500000, $balance->fresh()->balance);
+
+        $this->actingAs($admin)->post("/api/withdrawal/{$id}/approve", [
+            'proof' => UploadedFile::fake()->image('bukti.png'),
+        ], ['Accept' => 'application/json'])->assertStatus(422);
+
+        $this->assertSame('rejected', Withdrawal::find($id)->status);
+        $this->assertEquals(500000, $balance->fresh()->balance);
     }
 
     public function test_seller_can_withdraw_own_balance(): void

@@ -113,10 +113,16 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
         DB::beginTransaction();
 
         try {
-            $withdrawal = Withdrawal::find($id);
+            // Locked like reject(): a rejected withdrawal was already credited
+            // back, approving it too would pay the seller twice.
+            $withdrawal = Withdrawal::lockForUpdate()->find($id);
 
             if (! $withdrawal) {
-                throw new Exception('Withdrawal not found');
+                throw new Exception('Withdrawal not found', 404);
+            }
+
+            if ($withdrawal->status !== 'pending') {
+                throw new Exception('Hanya penarikan berstatus pending yang bisa disetujui.', 422);
             }
 
             $withdrawal->status = 'approved';
@@ -132,7 +138,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             return $withdrawal;
         } catch (Exception $e) {
             DB::rollBack();
-            throw new Exception($e->getMessage());
+            throw $e;
         }
     }
 
@@ -144,11 +150,11 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             $withdrawal = Withdrawal::lockForUpdate()->find($id);
 
             if (! $withdrawal) {
-                throw new Exception('Withdrawal not found');
+                throw new Exception('Withdrawal not found', 404);
             }
 
             if ($withdrawal->status !== 'pending') {
-                throw new Exception('Hanya penarikan berstatus pending yang bisa ditolak.');
+                throw new Exception('Hanya penarikan berstatus pending yang bisa ditolak.', 422);
             }
 
             $withdrawal->status = 'rejected';
@@ -173,7 +179,7 @@ class WithdrawalRepository implements WithdrawalRepositoryInterface
             return $withdrawal;
         } catch (Exception $e) {
             DB::rollBack();
-            throw new Exception($e->getMessage());
+            throw $e;
         }
     }
 }

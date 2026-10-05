@@ -52,10 +52,13 @@ const handleAprroveWithdrawal = async () => {
     toast.error('Silakan unggah bukti pembayaran terlebih dahulu')
     return
   }
-  await approveWithdrawal(withdrawal.value)
-  toast.success('Penarikan berhasil disetujui')
-
-  fetchData()
+  try {
+    await approveWithdrawal(withdrawal.value)
+    toast.success('Penarikan berhasil disetujui')
+    fetchData()
+  } catch {
+    toast.error('Gagal menyetujui penarikan')
+  }
 }
 
 const handleImageChange = (e) => {

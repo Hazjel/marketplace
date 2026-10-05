@@ -51,10 +51,10 @@ const totalWithdrawals = computed(() => {
   return withdrawals.value?.length || 0
 })
 
-// Computed untuk completed withdrawals
-const completedWithdrawals = computed(() => {
+// Penarikan yang sudah selesai (status approved)
+const approvedWithdrawals = computed(() => {
   return Array.isArray(withdrawals.value)
-    ? withdrawals.value.filter((w) => w.status === 'completed').length
+    ? withdrawals.value.filter((w) => w.status === 'approved').length
     : 0
 })
 
@@ -134,7 +134,7 @@ onMounted(fetchStoreBalance)
               </svg>
             </div>
             <div class="flex flex-col">
-              <p class="font-medium text-lg dark:text-white">{{ completedWithdrawals }}</p>
+              <p class="font-medium text-lg dark:text-white">{{ approvedWithdrawals }}</p>
               <p class="text-sm text-gray-500 dark:text-gray-400">Penarikan Selesai</p>
             </div>
           </div>
