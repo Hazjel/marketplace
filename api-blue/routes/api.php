@@ -12,6 +12,7 @@ use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\InternalController;
+use App\Http\Controllers\IrisController;
 use App\Http\Controllers\LogisticsController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\ProductCategoryController;
@@ -385,6 +386,9 @@ Route::middleware(['auth:sanctum', 'throttle:30,1'])->group(function () {
 
 // Midtrans callback
 Route::post('/midtrans-callback', [MidtransController::class, 'callback'])->middleware('throttle:60,1');
+
+// Midtrans Iris payout notification (status is re-fetched from Iris, see IrisController)
+Route::post('/iris/notification', [IrisController::class, 'notification'])->middleware('throttle:60,1');
 
 // Logistics Webhook (Simulation - RajaOngkir/Komerce)
 Route::post('/logistics/webhook', [
