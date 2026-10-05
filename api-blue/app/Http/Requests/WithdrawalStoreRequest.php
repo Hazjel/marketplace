@@ -16,7 +16,24 @@ class WithdrawalStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'store_balance_id' => 'required|exists:store_balances,id',
+            'store_balance_id' => [
+                'bail',
+                'required',
+                'exists:store_balances,id',
+                function ($attribute, $value, $fail) {
+                    $user = $this->user();
+                    if ($user->hasRole('admin')) {
+                        return;
+                    }
+
+                    $ownsBalance = $user->store
+                        && StoreBalance::whereKey($value)->where('store_id', $user->store->id)->exists();
+
+                    if (! $ownsBalance) {
+                        $fail('Dompet toko tidak valid');
+                    }
+                },
+            ],
             'amount' => [
                 'required',
                 'numeric',
@@ -24,7 +41,7 @@ class WithdrawalStoreRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $storeBalance = StoreBalance::find($this->store_balance_id);
 
-                    if ($storeBalance->balance < $value) {
+                    if ($storeBalance && $storeBalance->balance < $value) {
                         $fail('Saldo tidak mencukupi');
                     }
                 },
