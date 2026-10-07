@@ -8,7 +8,7 @@ use App\Models\Transaction;
 /**
  * EscrowRepositoryInterface fake yang meledak di refund() -- dipakai untuk
  * mensimulasikan operasi SETELAH restoreStock() yang gagal di dalam
- * transaksi outer yang sama (mis. TransactionRepository::updateStatus()),
+ * transaksi outer yang sama (mis. TransactionRepository::cancelPaidOrder()),
  * tanpa perlu memanipulasi state store balance supaya refund asli gagal
  * secara alami.
  */

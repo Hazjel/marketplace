@@ -332,10 +332,15 @@ class EscrowPaymentTest extends TestCase
     }
 
     // ==========================================
-    // Cancel Paid Transaction → Refund Escrow
+    // updateStatus tidak boleh membatalkan
     // ==========================================
 
-    public function test_cancel_paid_transaction_refunds_pending_balance()
+    /**
+     * updateStatus() dulu punya jalur cancel yang mengembalikan stok dan
+     * menarik saldo tertahan penjual tanpa pernah me-refund pembeli. Pembatalan
+     * pesanan paid hanya lewat cancelPaidOrder() (lihat SellerCancelRefundTest).
+     */
+    public function test_update_status_rejects_cancellation_and_changes_nothing()
     {
         $transaction = Transaction::create([
             'code' => 'BLUE_TEST_006',
@@ -362,32 +367,26 @@ class EscrowPaymentTest extends TestCase
             'subtotal' => 200000,
         ]);
 
-        // Simulate pending_balance
-        $netSales = 126000 - 15000;
-        $adminFee = $netSales * 0.10;
-        $sellerAmount = $netSales - $adminFee;
-        $this->storeBalance->update(['pending_balance' => $sellerAmount]);
+        $this->storeBalance->update(['pending_balance' => 99900]);
 
-        // Directly call the repository's updateStatus with cancelled
-        // (This bypasses the FormRequest validation which doesn't allow 'cancelled' via HTTP)
-        $transactionRepository = app(TransactionRepository::class);
-        $transactionRepository->updateStatus($transaction->id, [
-            'delivery_status' => 'cancelled',
-        ]);
+        $error = null;
+        try {
+            app(TransactionRepository::class)->updateStatus($transaction->id, [
+                'delivery_status' => 'cancelled',
+            ]);
+        } catch (\Exception $e) {
+            $error = $e;
+        }
 
-        // Verify: pending_balance was refunded (reduced)
-        $this->storeBalance->refresh();
-        $this->assertEquals(0, (float) $this->storeBalance->pending_balance);
-        $this->assertEquals(0, (float) $this->storeBalance->balance); // no money moved to available
+        $this->assertNotNull($error, 'updateStatus() seharusnya menolak delivery_status=cancelled');
+        $this->assertSame(422, $error->getCode());
 
-        // Verify: stock was restored
-        $this->product->refresh();
-        $this->assertEquals(52, $this->product->stock); // 50 + 2
-
-        // Verify: refund history created
-        $this->assertDatabaseHas('store_balance_histories', [
-            'store_balance_id' => $this->storeBalance->id,
-            'type' => 'refunded',
-        ]);
+        $transaction->refresh();
+        $this->assertSame('pending', $transaction->delivery_status);
+        $this->assertSame('paid', $transaction->payment_status);
+        $this->assertNull($transaction->stock_restored_at);
+        $this->assertEquals(50, $this->product->fresh()->stock);
+        $this->assertEquals(99900, (float) $this->storeBalance->fresh()->pending_balance);
+        $this->assertDatabaseMissing('store_balance_histories', ['type' => 'refunded']);
     }
 }

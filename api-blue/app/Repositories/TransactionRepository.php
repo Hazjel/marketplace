@@ -658,7 +658,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     /**
      * Mengembalikan stok satu transaksi. Idempoten dan mengunci dirinya
      * sendiri, supaya aman dipanggil dari jalur mana pun (webhook,
-     * checkPaymentStatus manual, updateStatus saat seller membatalkan,
+     * checkPaymentStatus manual, cancelPaidOrder saat seller membatalkan,
      * scheduler transaction:check-expiry) tanpa bergantung pada caller
      * mengingat untuk mengunci lebih dulu.
      *
@@ -668,7 +668,7 @@ class TransactionRepository implements TransactionRepositoryInterface
      *
      * PENTING soal Mongo compensation: method ini TIDAK LAGI jadi
      * compensation boundary mandiri untuk mutasi stok varian yang
-     * dilakukannya. Semua caller (delete(), updateStatus(), webhook
+     * dilakukannya. Semua caller (delete(), cancelPaidOrder(), webhook
      * Midtrans, checkPaymentStatus, scheduler transaction:check-expiry)
      * memanggil ini dari DALAM transaksi SQL milik mereka sendiri yang
      * masih punya operasi lain SETELAHNYA (refund escrow, save status,
@@ -695,7 +695,7 @@ class TransactionRepository implements TransactionRepositoryInterface
      * "salah" (belum dikompensasi), lalu mutasinya sendiri tertimpa
      * balik oleh compensateMongoStock() yang jalan belakangan (lost
      * update, karena mutasi Mongo di sini read -> modify -> save(),
-     * bukan atomic increment) -- lihat updateStatus() untuk contoh
+     * bukan atomic increment) -- lihat cancelPaidOrder() untuk contoh
      * urutan yang benar. restoreStock() sendiri tidak menangkap
      * exception apa pun lagi; propagate apa adanya ke caller, yang
      * memang sudah dalam try/catch mereka masing-masing.
@@ -746,18 +746,19 @@ class TransactionRepository implements TransactionRepositoryInterface
 
     public function updateStatus(string $id, array $data)
     {
+        // Pembatalan wajib lewat cancelPaidOrder(): ia juga mengembalikan
+        // uang pembeli (refund_status + RefundCancelledTransactionJob), bukan
+        // cuma stok dan saldo tertahan penjual.
+        if (isset($data['delivery_status']) && ! in_array($data['delivery_status'], ['processing', 'delivering'], true)) {
+            throw new Exception('Gunakan pembatalan pesanan untuk membatalkan', 422);
+        }
+
         DB::beginTransaction();
-        // Dipakai kalau restoreStock() di bawah mengubah Mongo lalu operasi
-        // SETELAHNYA di transaksi outer ini (refund escrow, save) gagal --
-        // lihat docblock restoreStock() untuk kenapa restoreStock() sendiri
-        // tidak lagi mengompensasi dirinya sendiri.
-        $mongoAdjustments = [];
 
         try {
             // Lock: seller bisa mengirim update shipping dua kali nyaris
-            // bersamaan (double-klik, retry jaringan), dan jalur cancel di
-            // bawah memicu restoreStock + refund escrow -- keduanya harus
-            // serial per transaksi, bukan berdasar baca tanpa kunci.
+            // bersamaan (double-klik, retry jaringan) -- harus serial per
+            // transaksi, bukan berdasar baca tanpa kunci.
             $transaction = Transaction::where('id', $id)->lockForUpdate()->first();
 
             if (isset($data['tracking_number'])) {
@@ -768,26 +769,8 @@ class TransactionRepository implements TransactionRepositoryInterface
                 $transaction->delivery_proof = $data['delivery_proof']->store('assets/transaction', 'public');
             }
 
-            // Restore stock if being cancelled/failed AND it wasn't already cancelled/failed
-            if (isset($data['delivery_status']) &&
-                in_array($data['delivery_status'], ['cancelled', 'failed']) &&
-                ! in_array($transaction->delivery_status, ['cancelled', 'failed'])) {
-
-                $this->restoreStock($transaction, $mongoAdjustments);
-
-                // Refund escrow: kembalikan pending_balance jika payment sudah paid
-                if ($transaction->payment_status === 'paid') {
-                    $this->escrowRepository->refund($transaction);
-                }
-            }
-
             if (isset($data['delivery_status'])) {
                 $transaction->delivery_status = $data['delivery_status'];
-
-                // Also sync payment status for consistency if cancelled
-                if ($data['delivery_status'] === 'cancelled' && $transaction->payment_status !== 'failed') {
-                    $transaction->payment_status = 'failed';
-                }
             }
 
             $transaction->save();
@@ -800,8 +783,6 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'transactionDetails.product',
             ]);
         } catch (\Throwable $e) {
-            // Kompensasi SEBELUM rollback -- lihat docblock restoreStock().
-            $this->compensateStockRestoreRollback($mongoAdjustments);
             DB::rollBack();
 
             throw new Exception($e->getMessage());

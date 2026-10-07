@@ -288,7 +288,7 @@ class VariantCheckoutTest extends TestCase
      * kalau ia sukses (Mongo variant stock sudah di-increment, SQL sudah
      * commit lewat DB::transaction() bersarangnya) tetapi operasi
      * SETELAHNYA di transaksi outer yang sama gagal (di sini: escrow
-     * refund di TransactionRepository::updateStatus()), seluruh outer
+     * refund di TransactionRepository::cancelPaidOrder()), seluruh outer
      * transaction rollback -- termasuk stock_restored_at dan products.stock
      * SQL. Tanpa perbaikan ini, mutasi Mongo yang sudah dibuat restoreStock()
      * tetap permanen walau transaksinya sendiri batal dan stock_restored_at
@@ -345,32 +345,32 @@ class VariantCheckoutTest extends TestCase
 
         $transactionId = $checkoutResponse->json('data.id');
 
-        // Delivery cancel + payment_status paid memicu updateStatus() ->
+        // Seller menolak pesanan paid: cancelPaidOrder() ->
         // restoreStock() (Mongo 3 -> 5, SUKSES) lalu escrow refund (DILEDAKKAN
         // di sini oleh fake) -- seluruh method harus melempar, dan Mongo
-        // harus balik ke 5, bukan tetap di angka hasil restoreStock().
-        DB::table('transactions')->where('id', $transactionId)->update(['payment_status' => 'paid']);
+        // harus balik ke 3, bukan tetap di angka hasil restoreStock().
+        DB::table('transactions')->where('id', $transactionId)->update(['payment_status' => 'paid', 'delivery_status' => 'pending']);
 
         $this->app->bind(EscrowRepositoryInterface::class, fn () => new ExplodingRefundEscrowRepository);
         $repo = app(TransactionRepositoryInterface::class);
 
         $threw = false;
         try {
-            $repo->updateStatus($transactionId, ['delivery_status' => 'cancelled']);
+            $repo->cancelPaidOrder($transactionId, 'Stok habis');
         } catch (\Throwable) {
             $threw = true;
         }
 
-        $this->assertTrue($threw, 'updateStatus() seharusnya melempar exception dari refund escrow yang diledakkan');
+        $this->assertTrue($threw, 'cancelPaidOrder() seharusnya melempar exception dari refund escrow yang diledakkan');
 
-        // Baris paling penting -- seluruh updateStatus() batal (SQL rollback,
+        // Baris paling penting -- seluruh cancelPaidOrder() batal (SQL rollback,
         // assert di bawah membuktikannya), jadi Mongo harus kembali ke
-        // state SEBELUM updateStatus() dipanggil (3), BUKAN tetap di 5
+        // state SEBELUM cancelPaidOrder() dipanggil (3), BUKAN tetap di 5
         // (hasil restoreStock() yang sukses sendiri, tapi jadi tidak
         // konsisten dengan SQL yang barusan di-rollback ke agregat 13).
         // Tanpa perbaikan ini Mongo tetap nyangkut di 5.
         $this->assertSame(3, ProductVariantMongo::find($ctx['variantMahal']->id)->stock);
-        $this->assertSame(13, $ctx['product']->fresh()->stock); // SQL rollback: tetap agregat sebelum updateStatus()
+        $this->assertSame(13, $ctx['product']->fresh()->stock); // SQL rollback: tetap agregat sebelum cancelPaidOrder()
         $this->assertNull(Transaction::find($transactionId)->stock_restored_at); // SQL rollback
         $this->assertSame('paid', Transaction::find($transactionId)->payment_status); // delivery_status/save() juga rollback
     }
@@ -411,7 +411,7 @@ class VariantCheckoutTest extends TestCase
         $checkoutResponse->assertStatus(201);
         $transactionId = $checkoutResponse->json('data.id');
 
-        DB::table('transactions')->where('id', $transactionId)->update(['payment_status' => 'paid']);
+        DB::table('transactions')->where('id', $transactionId)->update(['payment_status' => 'paid', 'delivery_status' => 'pending']);
         $this->app->bind(EscrowRepositoryInterface::class, fn () => new ExplodingRefundEscrowRepository);
 
         // RefreshDatabase sendiri membungkus SELURUH test dalam satu
@@ -428,7 +428,7 @@ class VariantCheckoutTest extends TestCase
         });
 
         try {
-            app(TransactionRepositoryInterface::class)->updateStatus($transactionId, ['delivery_status' => 'cancelled']);
+            app(TransactionRepositoryInterface::class)->cancelPaidOrder($transactionId, 'Stok habis');
         } catch (\Throwable) {
             // diharapkan -- refund escrow diledakkan.
         }
@@ -437,7 +437,7 @@ class VariantCheckoutTest extends TestCase
         $this->assertGreaterThan(
             $baselineTransactionLevel,
             $transactionLevelDuringCompensation,
-            'Kompensasi Mongo terjadi SETELAH transaksi SQL updateStatus() rollback -- row lock sudah lepas duluan, jendela race dengan caller lain terbuka.'
+            'Kompensasi Mongo terjadi SETELAH transaksi SQL cancelPaidOrder() rollback -- row lock sudah lepas duluan, jendela race dengan caller lain terbuka.'
         );
     }
 }
