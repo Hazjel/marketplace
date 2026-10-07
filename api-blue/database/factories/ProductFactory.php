@@ -29,7 +29,8 @@ class ProductFactory extends Factory
             'store_id' => Store::factory(),
             'product_category_id' => ProductCategory::inRandomOrder()->first()->id,
             'name' => $name,
-            'slug' => Str::slug($name),
+            // Two-word faker names repeat often enough to hit the unique slug index.
+            'slug' => Str::slug($name).'-'.Str::lower(Str::random(6)),
             'description' => $this->faker->paragraphs(rand(2, 4), true),
             'condition' => $this->faker->randomElement($conditions),
             // Whole rupiah only: fractional prices violate the money
