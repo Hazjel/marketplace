@@ -25,14 +25,19 @@ describe('reportClientError', () => {
   it('posts the error to the API', async () => {
     const { reportClientError } = await loadReporter()
 
-    reportClientError(new TypeError("Cannot read properties of undefined (reading 'id')"), 'setup function')
+    reportClientError(
+      new TypeError("Cannot read properties of undefined (reading 'id')"),
+      'setup function'
+    )
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const [url, options] = fetchMock.mock.calls[0]
     expect(url).toBe('https://blukios.store/api/client-errors')
     const body = JSON.parse(options.body)
     expect(body.source).toBe('web')
-    expect(body.message).toBe("TypeError: Cannot read properties of undefined (reading 'id') (setup function)")
+    expect(body.message).toBe(
+      "TypeError: Cannot read properties of undefined (reading 'id') (setup function)"
+    )
     expect(body.stack).toContain('TypeError')
   })
 

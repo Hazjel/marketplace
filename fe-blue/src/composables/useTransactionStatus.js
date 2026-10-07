@@ -12,7 +12,8 @@ const PAYMENT_STYLES = {
   unpaid:
     'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 ring-1 ring-amber-100 dark:ring-amber-900/30',
   paid: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 ring-1 ring-green-100 dark:ring-green-900/30',
-  failed: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 ring-1 ring-red-100 dark:ring-red-900/30'
+  failed:
+    'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 ring-1 ring-red-100 dark:ring-red-900/30'
 }
 
 const DELIVERY_LABELS = {
@@ -33,10 +34,12 @@ const DELIVERY_STYLES = {
     'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 ring-1 ring-orange-100 dark:ring-orange-900/30',
   completed:
     'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 ring-1 ring-green-100 dark:ring-green-900/30',
-  cancelled: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 ring-1 ring-red-100 dark:ring-red-900/30'
+  cancelled:
+    'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 ring-1 ring-red-100 dark:ring-red-900/30'
 }
 
-const DEFAULT_STYLE = 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 ring-1 ring-gray-100 dark:ring-gray-700'
+const DEFAULT_STYLE =
+  'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 ring-1 ring-gray-100 dark:ring-gray-700'
 
 const DEFAULT_ICON = 'help-circle'
 const PAYMENT_ICONS = { unpaid: 'clock', paid: null, failed: 'x-circle' }
@@ -84,7 +87,11 @@ export function isFailedTransaction(transaction) {
  */
 export function resolvePaymentStatus(transaction) {
   if (isFailedTransaction(transaction)) {
-    return { label: PAYMENT_LABELS.failed, style: PAYMENT_STYLES.failed, icon: PAYMENT_ICONS.failed }
+    return {
+      label: PAYMENT_LABELS.failed,
+      style: PAYMENT_STYLES.failed,
+      icon: PAYMENT_ICONS.failed
+    }
   }
 
   const status = transaction?.payment_status
