@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Interfaces\EscrowRepositoryInterface;
+use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ShippingGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Product;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Support\ExplodingRefundEscrowRepository;
+use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
@@ -43,6 +45,7 @@ class VariantCheckoutTest extends TestCase
         $this->seed(PermissionSeeder::class);
         $this->seed(RoleSeeder::class);
         $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
+        $this->app->bind(PaymentGatewayInterface::class, fn () => new FakePaymentGateway);
     }
 
     private function checkoutContext(): array

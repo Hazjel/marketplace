@@ -17,7 +17,7 @@ interface PaymentGatewayInterface
     public function getSnapToken(Transaction $transaction): ?string;
 
     /**
-     * Kembalikan seluruh grand_total ke pembeli lewat gateway.
+     * Kembalikan refund_amount (bagian Midtrans pesanan) ke pembeli lewat gateway.
      *
      * REFUND_DONE: gateway menerima refund. REFUND_MANUAL: metode bayarnya
      * tidak bisa direfund lewat API (VA bank, gerai), platform harus transfer

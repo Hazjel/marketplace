@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Events\TransactionStatusUpdated;
-use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Transaction;
 use App\Services\MidtransPaymentStatusInterpreter;
@@ -15,16 +14,11 @@ use Illuminate\Support\Facades\Log;
 
 class MidtransController extends Controller
 {
-    protected $transactionRepository;
+    protected TransactionRepositoryInterface $transactionRepository;
 
-    protected EscrowRepositoryInterface $escrowRepository;
-
-    public function __construct(
-        TransactionRepositoryInterface $transactionRepository,
-        EscrowRepositoryInterface $escrowRepository
-    ) {
+    public function __construct(TransactionRepositoryInterface $transactionRepository)
+    {
         $this->transactionRepository = $transactionRepository;
-        $this->escrowRepository = $escrowRepository;
     }
 
     public function callback(Request $request)
@@ -79,6 +73,8 @@ class MidtransController extends Controller
         $outcome = null;
         // [event, detail] for BusinessMetrics, recorded only after commit.
         $metric = null;
+        // Orders whose late payment becomes a refund, dispatched after commit.
+        $lateRefunds = [];
         DB::beginTransaction();
 
         try {
@@ -90,8 +86,9 @@ class MidtransController extends Controller
                 $outcome = 'not_found';
             } else {
                 // Pertahanan berlapis: signature sudah mencakup nominal, tapi
-                // cocokkan lagi dengan yang tersimpan (the sum, for a shared payment).
-                $expectedAmount = (int) round((float) $group->sum('grand_total'));
+                // cocokkan lagi dengan yang tersimpan (the sum, for a shared
+                // payment; only what Midtrans collects, not the Saldo Blukios part).
+                $expectedAmount = Transaction::midtransTotal($group)->minor();
                 $receivedAmount = (int) round((float) ($request->gross_amount ?? 0));
 
                 if ($expectedAmount !== $receivedAmount) {
@@ -104,8 +101,15 @@ class MidtransController extends Controller
                     $outcome = 'amount_mismatch';
                 } else {
                     $outcomes = [];
+                    $toFail = [];
                     foreach ($group as $transaction) {
-                        $outcomes[] = $this->applyNotification($transaction, $request, $group->count() > 1, $events, $metric, $mongoAdjustments);
+                        $outcomes[] = $this->applyNotification($transaction, $request, $group->count() > 1, $events, $metric, $toFail, $lateRefunds);
+                    }
+                    // Failed together, not one by one: all stock, then all
+                    // balance returns (see failPayment's lock order).
+                    $this->transactionRepository->failPayment($toFail, $mongoAdjustments);
+                    foreach ($toFail as $transaction) {
+                        $events[] = new TransactionStatusUpdated($transaction->fresh());
                     }
                     $outcome = in_array('updated', $outcomes, true) ? 'updated' : 'ignored';
                 }
@@ -132,6 +136,11 @@ class MidtransController extends Controller
             BusinessMetrics::record(...$metric);
         }
 
+        foreach ($lateRefunds as $transaction) {
+            OpsSignals::record(OpsSignals::LATE_PAYMENT_REFUNDED, $transaction->code);
+            $this->transactionRepository->startRefund($transaction);
+        }
+
         if ($outcome === 'not_found') {
             return response()->json(['message' => 'Transaction not found'], 404);
         }
@@ -154,9 +163,10 @@ class MidtransController extends Controller
      *
      * @param  list<object>  $events
      * @param  array<int, string>|null  $metric
-     * @param  list<array{variant_id: string, qty: int}>  $mongoAdjustments
+     * @param  list<Transaction>  $toFail  failed by the caller, as one payment
+     * @param  list<Transaction>  $lateRefunds
      */
-    private function applyNotification(Transaction $transaction, Request $request, bool $sharedPayment, array &$events, ?array &$metric, array &$mongoAdjustments): string
+    private function applyNotification(Transaction $transaction, Request $request, bool $sharedPayment, array &$events, ?array &$metric, array &$toFail, array &$lateRefunds): string
     {
         $transactionCode = $transaction->code;
         $outcome = 'ignored';
@@ -207,6 +217,16 @@ class MidtransController extends Controller
             // terlanjur dikredit.
             if ($newStatus === null) {
                 $outcome = 'ignored';
+            } elseif ($transaction->payment_status === 'failed') {
+                // Terminal: stock and Saldo Blukios are already back. Money
+                // that still arrives is refunded; nothing moves it back.
+                if ($newStatus === 'paid' && $this->transactionRepository->refundLatePayment($transaction)) {
+                    $lateRefunds[] = $transaction;
+                    $events[] = new TransactionStatusUpdated($transaction->fresh());
+                    $outcome = 'updated';
+                } else {
+                    $outcome = 'ignored';
+                }
             } elseif ($transaction->payment_status === 'paid' && $newStatus !== 'paid') {
                 Log::warning('Webhook telat diabaikan: transaksi sudah dibayar', [
                     'transaction' => $transactionCode,
@@ -220,15 +240,15 @@ class MidtransController extends Controller
                 $outcome = 'ignored';
             } else {
                 if ($newStatus === 'paid') {
-                    $transaction->update(['payment_status' => 'paid']);
                     $metric = ['payment_paid', (string) $request->payment_type];
-                    $this->escrowRepository->credit($transaction);
+                    $this->transactionRepository->markPaid($transaction);
                 } elseif ($newStatus === 'unpaid') {
                     $transaction->update(['payment_status' => 'unpaid']);
                 } elseif ($newStatus === 'failed') {
-                    $transaction->update(['payment_status' => 'failed']);
                     $metric = ['payment_failed', (string) $request->transaction_status];
-                    $this->transactionRepository->restoreStock($transaction, $mongoAdjustments);
+                    $toFail[] = $transaction;
+
+                    return 'updated';
                 }
 
                 // Event ditahan sampai commit. Dipancarkan di dalam

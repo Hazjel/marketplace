@@ -29,6 +29,8 @@ class CheckoutRequest extends FormRequest
             'postal_code' => 'required|string',
             'dest_latitude' => 'nullable|numeric|between:-90,90',
             'dest_longitude' => 'nullable|numeric|between:-180,180',
+            // Pay with Saldo Blukios first; absent (older clients) means no.
+            'use_balance' => 'sometimes|boolean',
             'orders' => 'required|array|min:1|max:10',
             'orders.*.shipping' => 'required|string',
             'orders.*.shipping_type' => 'required|string',

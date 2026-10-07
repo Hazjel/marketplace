@@ -9,11 +9,11 @@ use App\Http\Requests\TransactionStoreRequest;
 use App\Http\Requests\TransactionUpdateRequest;
 use App\Http\Resources\PaginateResource;
 use App\Http\Resources\TransactionResource;
-use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\TransactionAnalyticsRepositoryInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Transaction;
 use App\Services\MidtransPaymentStatusInterpreter;
+use App\Support\OpsSignals;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -31,16 +31,12 @@ class TransactionController extends Controller implements HasMiddleware
 
     private TransactionAnalyticsRepositoryInterface $transactionAnalyticsRepository;
 
-    private EscrowRepositoryInterface $escrowRepository;
-
     public function __construct(
         TransactionRepositoryInterface $transactionRepository,
-        TransactionAnalyticsRepositoryInterface $transactionAnalyticsRepository,
-        EscrowRepositoryInterface $escrowRepository
+        TransactionAnalyticsRepositoryInterface $transactionAnalyticsRepository
     ) {
         $this->transactionRepository = $transactionRepository;
         $this->transactionAnalyticsRepository = $transactionAnalyticsRepository;
-        $this->escrowRepository = $escrowRepository;
     }
 
     public static function middleware()
@@ -146,8 +142,17 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Ditambahkan', new TransactionResource($transaction), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::exceptionResponse($e);
+            return $this->checkoutErrorResponse($e);
         }
+    }
+
+    // 422: Saldo Blukios spent by a concurrent checkout; 502: Midtrans could
+    // not create the payment (the orders are already cancelled). Else 500.
+    private function checkoutErrorResponse(\Exception $e)
+    {
+        $code = in_array($e->getCode(), [422, 502], true) ? $e->getCode() : 500;
+
+        return ResponseHelper::exceptionResponse($e, $code);
     }
 
     /**
@@ -160,15 +165,15 @@ class TransactionController extends Controller implements HasMiddleware
             return ResponseHelper::jsonResponse(false, 'Admin forbidden from creating transactions.', null, 403);
         }
 
-        $shared = $request->safe()->except('orders');
+        $shared = $request->safe()->except(['orders', 'use_balance']);
         $orders = array_map(fn (array $order) => $shared + $order, $request->validated('orders'));
 
         try {
-            $transactions = $this->transactionRepository->checkout($orders);
+            $transactions = $this->transactionRepository->checkout($orders, $request->boolean('use_balance'));
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Ditambahkan', TransactionResource::collection($transactions), 201);
         } catch (\Exception $e) {
-            return ResponseHelper::exceptionResponse($e);
+            return $this->checkoutErrorResponse($e);
         }
     }
 
@@ -461,6 +466,12 @@ class TransactionController extends Controller implements HasMiddleware
             Config::$is3ds = config('midtrans.is3ds');
 
             $mongoAdjustments = [];
+            $lateRefunds = [];
+
+            // Saldo Blukios covered the whole payment: Midtrans never saw it.
+            if (Transaction::midtransTotal(Transaction::inPayment($transaction->paymentCode())->get())->isZero()) {
+                return ResponseHelper::jsonResponse(true, 'Dibayar dengan Saldo Blukios', new TransactionResource($transaction), 200);
+            }
 
             try {
                 // Panggilan keluar ke Midtrans TIDAK boleh terjadi sambil
@@ -474,6 +485,7 @@ class TransactionController extends Controller implements HasMiddleware
                 $transactionStatus = $midtransStatus->transaction_status;
                 $paymentType = $midtransStatus->payment_type;
                 $fraudStatus = $midtransStatus->fraud_status;
+                $grossAmount = ((object) $midtransStatus)->gross_amount ?? null;
 
                 // Sebelumnya blok ini membaca-putuskan-simpan tanpa DB::transaction
                 // atau lockForUpdate sama sekali -- webhook Midtrans dan endpoint
@@ -499,33 +511,46 @@ class TransactionController extends Controller implements HasMiddleware
                     // The same status applies to every order paid under it.
                     $group = Transaction::inPayment($transaction->paymentCode())->orderBy('id')->lockForUpdate()->get();
 
-                    foreach ($group as $locked) {
-                        $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus)
-                            ?? $locked->payment_status;
+                    // Same check as the webhook: only the Midtrans part is paid there.
+                    $amountMatches = (int) round((float) $grossAmount) === Transaction::midtransTotal($group)->minor();
 
+                    $newStatus = MidtransPaymentStatusInterpreter::interpret($transactionStatus, $paymentType, $fraudStatus);
+                    if ($newStatus === 'paid' && ! $amountMatches) {
+                        Log::error('Midtrans amount mismatch (cek manual)', [
+                            'payment' => $transaction->paymentCode(),
+                            'received' => $grossAmount,
+                        ]);
+                        $newStatus = null;
+                    }
+
+                    $toFail = [];
+                    foreach ($group as $locked) {
                         // Transaksi yang sudah paid tidak boleh mundur -- webhook yang
                         // telat atau panggilan manual yang beririsan tidak boleh
                         // membatalkan pembayaran yang sudah dikredit ke escrow.
-                        if ($locked->refund_status !== null) {
-                            // no-op -- dibatalkan penjual setelah bayar; Midtrans
-                            // masih "settlement" sampai refund diproses, dan itu
-                            // tidak boleh mengkredit escrow lagi.
-                        } elseif ($locked->payment_status === 'paid' && $newStatus !== 'paid') {
+                        if ($newStatus === null || $locked->refund_status !== null) {
+                            // no-op -- status Midtrans tanpa arti, atau dibatalkan
+                            // penjual setelah bayar; Midtrans masih "settlement"
+                            // sampai refund diproses, dan itu tidak boleh
+                            // mengkredit escrow lagi.
+                        } elseif ($locked->payment_status === 'failed') {
+                            // Terminal: only money that still arrives matters, refunded.
+                            if ($newStatus === 'paid' && $this->transactionRepository->refundLatePayment($locked)) {
+                                $lateRefunds[] = $locked;
+                            }
+                        } elseif ($locked->payment_status === 'paid') {
                             // no-op -- biarkan $locked apa adanya
-                        } elseif ($newStatus === 'paid' && $locked->payment_status !== 'paid') {
-                            $locked->payment_status = 'paid';
-                            $locked->save();
-
-                            $this->escrowRepository->credit($locked);
+                        } elseif ($newStatus === 'paid') {
+                            $this->transactionRepository->markPaid($locked);
+                        } elseif ($newStatus === 'failed') {
+                            $toFail[] = $locked;
                         } elseif ($newStatus !== $locked->payment_status) {
                             $locked->payment_status = $newStatus;
                             $locked->save();
-
-                            if (in_array($newStatus, ['failed', 'cancelled', 'expired'])) {
-                                $this->transactionRepository->restoreStock($locked, $mongoAdjustments);
-                            }
                         }
                     }
+                    // All stock, then all balance returns (buyer lock last).
+                    $this->transactionRepository->failPayment($toFail, $mongoAdjustments);
 
                     DB::commit();
                     $transaction = $group->firstWhere('id', $id) ?? $transaction;
@@ -540,14 +565,23 @@ class TransactionController extends Controller implements HasMiddleware
                 foreach ($group as $member) {
                     event(new TransactionStatusUpdated($member->fresh()));
                 }
+                foreach ($lateRefunds as $late) {
+                    OpsSignals::record(OpsSignals::LATE_PAYMENT_REFUNDED, $late->code);
+                    $this->transactionRepository->startRefund($late);
+                }
 
                 return ResponseHelper::jsonResponse(true, 'Status Payment Berhasil Diupdate', new TransactionResource($transaction), 200);
 
             } catch (\Exception $e) {
-                // If Midtrans throws error (e.g. transaction not found there yet),
-                // or the inner transaction above failed (already compensated and
-                // rolled back), just return current state gracefully.
-                return ResponseHelper::jsonResponse(true, 'Gagal cek Midtrans: '.$e->getMessage(), new TransactionResource($transaction), 200);
+                // Midtrans unreachable or unaware of the order yet, or the
+                // locked block above failed (already compensated and rolled
+                // back): nothing changed, and the caller must not read success.
+                Log::error('Cek status Midtrans gagal', [
+                    'transaction' => $transaction->code,
+                    'exception' => $e,
+                ]);
+
+                return ResponseHelper::exceptionResponse($e, 502);
             }
 
         } catch (\Exception $e) {
@@ -572,7 +606,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Dihapus', new TransactionResource($transactions), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::exceptionResponse($e);
+            return $this->domainErrorResponse($e);
         }
     }
 }

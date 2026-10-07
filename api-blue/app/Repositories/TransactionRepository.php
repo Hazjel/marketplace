@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Events\TransactionStatusUpdated;
 use App\Interfaces\BuyerBalanceRepositoryInterface;
 use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\PaymentGatewayInterface;
@@ -12,6 +13,7 @@ use App\Models\BuyerBalanceHistory;
 use App\Models\Product;
 use App\Models\ProductVariantMongo;
 use App\Models\Store;
+use App\Models\StoreBalance;
 use App\Models\Transaction;
 use App\Models\Voucher;
 use App\Models\VoucherRedemption;
@@ -347,7 +349,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
     public function create(array $data)
     {
-        return $this->checkout([$data])->first();
+        return $this->checkout([$data], (bool) ($data['use_balance'] ?? false))->first();
     }
 
     /**
@@ -357,10 +359,14 @@ class TransactionRepository implements TransactionRepositoryInterface
      * order_id Midtrans knows them by. A single order keeps paying under its
      * own code, exactly as before.
      *
+     * With $useBalance, Saldo Blukios pays first (see payWithBalance); when it
+     * covers the whole payment the orders are paid here and Midtrans is never
+     * called.
+     *
      * @param  list<array<string, mixed>>  $orders
      * @return Collection<int, Transaction>
      */
-    public function checkout(array $orders): Collection
+    public function checkout(array $orders, bool $useBalance = false): Collection
     {
         DB::beginTransaction();
 
@@ -373,6 +379,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         // kompensasi ini. Dicatat di sini, dikembalikan manual di catch.
         $mongoAdjustments = [];
         $codes = [];
+        $committed = false;
 
         try {
             // A loop, not collect()->map(fn ...): an arrow function captures
@@ -392,18 +399,34 @@ class TransactionRepository implements TransactionRepositoryInterface
                 }
             }
 
+            $paidWithBalance = $useBalance && $this->payWithBalance($transactions);
+
             DB::commit();
+            // From here an error must neither "undo" Mongo stock nor roll
+            // back a transaction that is no longer ours.
+            $committed = true;
             foreach ($transactions as $transaction) {
                 BusinessMetrics::record('order_created');
             }
 
-            // Transaksi sudah ter-commit; kegagalan gateway tidak boleh
-            // membuat request 500 padahal order & stok sudah tercatat.
-            // FE sudah menangani snap_token null dengan pesan yang jelas.
-            // One token for the whole payment (the gateway sums the group).
-            $first = $transactions->firstOrFail()->load('buyer.user');
-            $snapToken = $this->paymentGateway->getSnapToken($first);
-            if ($snapToken !== null) {
+            if ($paidWithBalance) {
+                foreach ($transactions as $transaction) {
+                    BusinessMetrics::record('payment_paid', 'balance');
+                    event(new TransactionStatusUpdated($transaction->fresh()));
+                }
+            } else {
+                // One token for the whole payment (the gateway sums the group).
+                $first = $transactions->firstOrFail()->load('buyer.user');
+                $snapToken = $this->paymentGateway->getSnapToken($first);
+                if ($snapToken === null) {
+                    // Unpayable orders would hold stock and Saldo Blukios until
+                    // the expiry job; give both back now.
+                    $this->abandonPayment($transactions);
+
+                    throw new Exception($transactions->contains(fn (Transaction $t) => Money::fromDecimalString((string) ($t->balance_used ?? 0))->greaterThan(Money::zero()))
+                        ? 'Pembayaran gagal dibuat; Saldo Blukios sudah dikembalikan. Silakan coba lagi.'
+                        : 'Pembayaran gagal dibuat. Silakan coba lagi.', 502);
+                }
                 foreach ($transactions as $transaction) {
                     $transaction->snap_token = $snapToken;
                     $transaction->save();
@@ -424,12 +447,194 @@ class TransactionRepository implements TransactionRepositoryInterface
             // ketiban timpa oleh compensateMongoStock() di bawah -- lost
             // update, karena mutasi Mongo di sini read -> modify -> save(),
             // bukan atomic increment.
-            $this->compensateMongoStock($mongoAdjustments, sign: 1); // decrement gagal -> kembalikan (+)
-            DB::rollBack();
+            if (! $committed) {
+                $this->compensateMongoStock($mongoAdjustments, sign: 1); // decrement gagal -> kembalikan (+)
+                DB::rollBack();
+            }
             $errorMsg = 'REPO FATAL ERROR: '.$e->getMessage()."\n".$e->getTraceAsString();
             Log::error($errorMsg);
             // file_put_contents(storage_path('logs/debug.txt'), $errorMsg, FILE_APPEND); // Reverted original or comment out
-            throw new Exception($e->getMessage());
+            throw new Exception($e->getMessage(), (int) $e->getCode());
+        }
+    }
+
+    /**
+     * Saldo Blukios pays the orders in creation order until it runs out; true
+     * when it covered the whole payment, whose orders are then paid here.
+     *
+     * Runs inside checkout()'s transaction after every order exists. Lock
+     * order everywhere: transactions -> products -> seller wallet -> buyer.
+     * The sellers' wallets are taken before the buyer row, because a balance
+     * that covers everything credits escrow below; the buyer row, read
+     * locked, is the last lock, so concurrent checkouts queue on it and the
+     * second sees what the first left.
+     *
+     * @param  Collection<int, Transaction>  $transactions
+     */
+    private function payWithBalance(Collection $transactions): bool
+    {
+        // ponytail: wallets are locked even when the balance only covers part;
+        // held only until this checkout commits.
+        StoreBalance::whereIn('store_id', $transactions->pluck('store_id'))->orderBy('id')->lockForUpdate()->get();
+        $left = Money::fromDecimalString($this->buyerBalanceRepository->lockedBalance($transactions->firstOrFail()->buyer_id));
+
+        $used = [];
+        foreach ($transactions as $transaction) {
+            if (! $left->greaterThan(Money::zero())) {
+                break;
+            }
+            $total = Money::fromDecimalString((string) $transaction->grand_total);
+            $use = $left->lessThan($total) ? $left : $total;
+            if ($use->isZero()) {
+                continue;
+            }
+
+            $transaction->balance_used = (string) $use->minor();
+            $transaction->save();
+            $used[] = [$transaction, $use];
+            $left = $left->subtract($use);
+        }
+
+        $paid = $used !== [] && Transaction::midtransTotal($transactions)->isZero();
+        if ($paid) {
+            foreach ($transactions as $transaction) {
+                $this->markPaid($transaction);
+            }
+        }
+
+        // Last: the buyer row lock (see BuyerBalanceRepositoryInterface).
+        foreach ($used as [$transaction, $use]) {
+            $this->buyerBalanceRepository->debit(
+                $transaction->buyer_id,
+                (string) $use->minor(),
+                BuyerBalanceHistory::TYPE_PAYMENT,
+                'payment:'.$transaction->id,
+                $transaction,
+                'Pembayaran pesanan '.$transaction->code,
+            );
+        }
+
+        return $paid;
+    }
+
+    /**
+     * Fails the still-unpaid orders of a committed checkout whose payment
+     * could not be created, returning their stock and Saldo Blukios.
+     *
+     * @param  Collection<int, Transaction>  $transactions
+     */
+    private function abandonPayment(Collection $transactions): void
+    {
+        Log::error('Snap token gagal dibuat, pesanan dibatalkan', [
+            'orders' => $transactions->pluck('code')->all(),
+        ]);
+
+        $mongoAdjustments = [];
+        DB::beginTransaction();
+
+        try {
+            $unpaid = Transaction::whereIn('id', $transactions->pluck('id'))->orderBy('id')->lockForUpdate()->get()
+                ->filter(fn (Transaction $t) => in_array($t->payment_status, ['pending', 'unpaid'], true));
+            $this->failPayment($unpaid, $mongoAdjustments);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            // Kompensasi SEBELUM rollback -- lihat docblock restoreStock().
+            $this->compensateStockRestoreRollback($mongoAdjustments);
+            DB::rollBack();
+
+            throw $e;
+        }
+
+        foreach ($unpaid as $transaction) {
+            event(new TransactionStatusUpdated($transaction->fresh()));
+        }
+    }
+
+    public function markPaid(Transaction $transaction): void
+    {
+        $transaction->payment_status = 'paid';
+        $transaction->save();
+
+        $this->escrowRepository->credit($transaction);
+    }
+
+    public function markFailed(Transaction $transaction, array &$mongoAdjustments): void
+    {
+        $this->failPayment([$transaction], $mongoAdjustments);
+    }
+
+    public function failPayment(iterable $transactions, array &$mongoAdjustments): void
+    {
+        // Lock order everywhere: transactions -> products -> seller wallet ->
+        // buyer. So every order's stock first, then every balance return.
+        foreach ($transactions as $transaction) {
+            $transaction->payment_status = 'failed';
+            $transaction->save();
+
+            $this->restoreStock($transaction, $mongoAdjustments);
+        }
+
+        // unique_ref makes a repeat a no-op.
+        foreach ($transactions as $transaction) {
+            $balanceUsed = Money::fromDecimalString((string) ($transaction->balance_used ?? 0));
+            if ($balanceUsed->greaterThan(Money::zero())) {
+                $this->buyerBalanceRepository->credit(
+                    $transaction->buyer_id,
+                    (string) $balanceUsed->minor(),
+                    BuyerBalanceHistory::TYPE_PAYMENT_RETURNED,
+                    'payment_returned:'.$transaction->id,
+                    $transaction,
+                    'Pesanan '.$transaction->code.' batal dibayar',
+                );
+            }
+        }
+    }
+
+    public function refundLatePayment(Transaction $transaction): bool
+    {
+        $amount = $transaction->midtransAmount();
+        // Saldo Blukios paid all of it and was already returned: nothing owed.
+        if ($transaction->refund_status !== null || $amount->isZero()) {
+            return false;
+        }
+
+        $transaction->refund_status = 'processing';
+        $transaction->refund_amount = (string) $amount->minor();
+        $transaction->refund_reason = 'Pembayaran masuk setelah pesanan kedaluwarsa';
+        $transaction->save();
+
+        Log::warning('Pembayaran masuk untuk pesanan yang sudah gagal, direfund', [
+            'transaction' => $transaction->code,
+            'refund_amount' => $amount->minor(),
+        ]);
+
+        return true;
+    }
+
+    public function startRefund(Transaction $transaction): void
+    {
+        BusinessMetrics::record('refund_requested');
+
+        try {
+            RefundCancelledTransactionJob::dispatch($transaction->id);
+        } catch (\Throwable $e) {
+            // Pembatalan sudah commit; jangan biarkan refund menggantung di
+            // "processing" tanpa job yang akan menyelesaikannya.
+            Log::error('Refund job gagal didispatch, dialihkan ke Saldo Blukios', [
+                'transaction' => $transaction->code,
+                'error' => $e->getMessage(),
+            ]);
+
+            try {
+                $this->refundToBalance($transaction->id, 'Refund otomatis tidak bisa dijadwalkan: '.mb_substr($e->getMessage(), 0, 500));
+            } catch (\Throwable $balanceError) {
+                // Tetap "processing": ops:check melaporkan refund yang macet.
+                Log::error('Refund ke Saldo Blukios gagal', [
+                    'transaction' => $transaction->code,
+                    'error' => $balanceError->getMessage(),
+                ]);
+            }
         }
     }
 
@@ -637,11 +842,16 @@ class TransactionRepository implements TransactionRepositoryInterface
         $mongoAdjustments = [];
 
         try {
-            $transaction = Transaction::find($id);
+            $transaction = Transaction::where('id', $id)->lockForUpdate()->firstOrFail();
 
-            // Restore stock if transaction is being deleted and was holding stock (pending/unpaid)
+            // Its siblings would still be charged the whole payment's amount.
+            if ($transaction->payment_code !== null) {
+                throw new Exception('Pesanan dari pembayaran gabungan tidak bisa dihapus satu per satu', 422);
+            }
+
+            // An unpaid order still holds stock and any Saldo Blukios it used.
             if (in_array($transaction->payment_status, ['pending', 'unpaid'])) {
-                $this->restoreStock($transaction, $mongoAdjustments);
+                $this->markFailed($transaction, $mongoAdjustments);
             }
 
             $transaction->delete();
@@ -654,7 +864,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             $this->compensateStockRestoreRollback($mongoAdjustments);
             DB::rollBack();
 
-            throw new Exception($e->getMessage());
+            throw new Exception($e->getMessage(), (int) $e->getCode());
         }
     }
 
@@ -844,6 +1054,8 @@ class TransactionRepository implements TransactionRepositoryInterface
      * refund_status = processing. payment_status ikut jadi failed seperti
      * pembatalan lain, supaya analitik omzet (payment_status = paid) tidak
      * menghitungnya; nasib uang pembeli dicatat di kolom refund_*.
+     * Bagian Saldo Blukios (balance_used) langsung kembali di sini;
+     * refund_amount hanya bagian Midtrans. Kalau itu 0, refund selesai di sini.
      *
      * Uang pembeli dikembalikan oleh RefundCancelledTransactionJob SETELAH
      * commit: panggilan ke Midtrans tidak boleh terjadi untuk pembatalan yang
@@ -872,11 +1084,32 @@ class TransactionRepository implements TransactionRepositoryInterface
             $this->restoreStock($transaction, $mongoAdjustments);
             $this->escrowRepository->refund($transaction);
 
+            // The Saldo Blukios part goes back now; only the Midtrans part
+            // (refund_amount) is left for the job.
+            $balanceUsed = Money::fromDecimalString((string) ($transaction->balance_used ?? 0));
+            if ($balanceUsed->greaterThan(Money::zero())) {
+                $this->buyerBalanceRepository->credit(
+                    $transaction->buyer_id,
+                    (string) $balanceUsed->minor(),
+                    BuyerBalanceHistory::TYPE_REFUND,
+                    'refund_balance:'.$transaction->id,
+                    $transaction,
+                    'Refund pesanan '.$transaction->code,
+                );
+            }
+
+            $refundAmount = $transaction->midtransAmount();
             $transaction->delivery_status = 'cancelled';
             $transaction->payment_status = 'failed';
-            $transaction->refund_status = 'processing';
-            $transaction->refund_amount = $transaction->grand_total;
+            $transaction->refund_amount = (string) $refundAmount->minor();
             $transaction->refund_reason = $reason;
+            if ($refundAmount->isZero()) {
+                $transaction->refund_status = 'refunded';
+                $transaction->refund_method = 'balance';
+                $transaction->refunded_at = now();
+            } else {
+                $transaction->refund_status = 'processing';
+            }
             $transaction->save();
 
             DB::commit();
@@ -888,27 +1121,10 @@ class TransactionRepository implements TransactionRepositoryInterface
             throw $e;
         }
 
-        BusinessMetrics::record('refund_requested');
-
-        try {
-            RefundCancelledTransactionJob::dispatch($transaction->id);
-        } catch (\Throwable $e) {
-            // Pembatalan sudah commit; jangan biarkan refund menggantung di
-            // "processing" tanpa job yang akan menyelesaikannya.
-            Log::error('Refund job gagal didispatch, dialihkan ke Saldo Blukios', [
-                'transaction' => $transaction->code,
-                'error' => $e->getMessage(),
-            ]);
-
-            try {
-                $this->refundToBalance($transaction->id, 'Refund otomatis tidak bisa dijadwalkan: '.mb_substr($e->getMessage(), 0, 500));
-            } catch (\Throwable $balanceError) {
-                // Tetap "processing": ops:check melaporkan refund yang macet.
-                Log::error('Refund ke Saldo Blukios gagal', [
-                    'transaction' => $transaction->code,
-                    'error' => $balanceError->getMessage(),
-                ]);
-            }
+        if ($transaction->refund_status === 'refunded') {
+            BusinessMetrics::record('refund_done', 'balance');
+        } else {
+            $this->startRefund($transaction);
         }
 
         return $transaction->fresh([

@@ -46,6 +46,10 @@ class TransactionResource extends JsonResource
             'tax' => Money::fromDecimalString((string) $this->tax)->minor(),
             'service_fee' => Money::fromDecimalString((string) ($this->service_fee ?? 0))->minor(),
             'grand_total' => Money::fromDecimalString((string) $this->grand_total)->minor(),
+            // grand_total = balance_used (Saldo Blukios) + midtrans_amount.
+            'balance_used' => Money::fromDecimalString((string) ($transaction->balance_used ?? 0))->minor(),
+            'midtrans_amount' => $transaction->midtransAmount()->minor(),
+            'paid_with_balance' => $transaction->payment_status === 'paid' && $transaction->midtransAmount()->isZero(),
             'voucher_id' => $this->voucher_id,
             'voucher_code' => $this->voucher?->code,
             'discount_amount' => Money::fromDecimalString((string) ($this->discount_amount ?? 0))->minor(),

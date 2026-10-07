@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ShippingGatewayInterface;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -13,6 +14,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
@@ -33,6 +35,7 @@ class CheckoutTaxMoneyTest extends TestCase
         $this->seed(PermissionSeeder::class);
         $this->seed(RoleSeeder::class);
         $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
+        $this->app->bind(PaymentGatewayInterface::class, fn () => new FakePaymentGateway);
     }
 
     public function test_checkout_adds_no_tax_to_goods_or_shipping(): void

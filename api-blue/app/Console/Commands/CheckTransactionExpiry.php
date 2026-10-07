@@ -67,10 +67,8 @@ class CheckTransactionExpiry extends Command
                 $locked = Transaction::where('id', $transaction->id)->lockForUpdate()->first();
 
                 if ($locked && in_array($locked->payment_status, ['pending', 'unpaid'])) {
-                    $locked->payment_status = 'failed';
-                    $locked->save();
-
-                    $transactionRepository->restoreStock($locked, $mongoAdjustments);
+                    // Stock and any Saldo Blukios it used go back.
+                    $transactionRepository->markFailed($locked, $mongoAdjustments);
                 }
 
                 DB::commit();

@@ -27,4 +27,11 @@ interface BuyerBalanceRepositoryInterface
      * throws (422) when the balance is short.
      */
     public function debit(string $buyerId, string $amount, string $type, string $uniqueRef, ?Model $reference = null, ?string $remarks = null): bool;
+
+    /**
+     * The balance, read under the same buyer row lock credit/debit take; it
+     * is held until the caller's transaction ends, so it counts as the
+     * caller's last lock.
+     */
+    public function lockedBalance(string $buyerId): string;
 }

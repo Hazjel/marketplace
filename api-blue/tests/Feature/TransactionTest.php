@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ShippingGatewayInterface;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -12,6 +13,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
@@ -29,6 +31,7 @@ class TransactionTest extends TestCase
         $this->seed(RoleSeeder::class);
         // Checkout menanyakan ongkir ke gateway; jangan sentuh Komerce asli.
         $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
+        $this->app->bind(PaymentGatewayInterface::class, fn () => new FakePaymentGateway);
     }
 
     /**

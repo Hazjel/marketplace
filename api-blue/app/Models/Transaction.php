@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\PostgresSearch;
 use App\Traits\UUID;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,6 +32,7 @@ class Transaction extends Model
         'tax',
         'service_fee',
         'grand_total',
+        'balance_used',
         'payment_status',
         'refund_status',
         'refund_method',
@@ -53,6 +55,7 @@ class Transaction extends Model
         'tax' => 'decimal:2',
         'service_fee' => 'decimal:2',
         'grand_total' => 'decimal:2',
+        'balance_used' => 'decimal:2',
         'admin_fee' => 'decimal:2',
         'seller_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
@@ -71,6 +74,31 @@ class Transaction extends Model
     public function paymentCode(): string
     {
         return $this->payment_code ?? $this->code;
+    }
+
+    /**
+     * What Midtrans collects and refunds for this order: the full order value
+     * minus the part paid with Saldo Blukios.
+     */
+    public function midtransAmount(): Money
+    {
+        return Money::fromDecimalString((string) $this->grand_total)
+            ->subtract(Money::fromDecimalString((string) ($this->balance_used ?? 0)));
+    }
+
+    /**
+     * Midtrans amount of a whole payment (every order under one order_id).
+     *
+     * @param  iterable<Transaction>  $transactions
+     */
+    public static function midtransTotal(iterable $transactions): Money
+    {
+        $total = Money::zero();
+        foreach ($transactions as $transaction) {
+            $total = $total->add($transaction->midtransAmount());
+        }
+
+        return $total;
     }
 
     /**

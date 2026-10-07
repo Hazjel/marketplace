@@ -74,7 +74,7 @@ class PaymentLifecycleAtomicityTest extends TestCase
             'description' => 'Deskripsi',
             'condition' => 'new',
             'price' => 100000,
-            'weight' => 1000,
+            'weight' => 1,
             'stock' => 10,
         ]);
     }
@@ -114,6 +114,7 @@ class PaymentLifecycleAtomicityTest extends TestCase
             'transaction_status' => $transactionStatus,
             'payment_type' => 'bank_transfer',
             'fraud_status' => null,
+            'gross_amount' => '126000.00', // makeTransaction()'s grand_total
         ]);
     }
 

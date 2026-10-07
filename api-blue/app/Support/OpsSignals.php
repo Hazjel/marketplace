@@ -22,6 +22,9 @@ final class OpsSignals
     // A Midtrans refund arrived for an order already refunded to Saldo Blukios.
     public const REFUND_CONFLICT = 'refund_conflict';
 
+    // Midtrans paid an order that had already failed; its payment is refunded.
+    public const LATE_PAYMENT_REFUNDED = 'late_payment_refunded';
+
     // Distinct samples kept per signal; the email shows the most frequent.
     private const MAX_SAMPLES = 20;
 

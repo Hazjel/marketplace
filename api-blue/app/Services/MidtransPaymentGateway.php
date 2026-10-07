@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Interfaces\PaymentGatewayInterface;
 use App\Models\Transaction;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Snap;
@@ -25,7 +26,7 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
         $params = [
             'transaction_details' => [
                 'order_id' => $transaction->paymentCode(),
-                'gross_amount' => (int) Transaction::inPayment($transaction->paymentCode())->sum('grand_total'),
+                'gross_amount' => Transaction::midtransTotal(Transaction::inPayment($transaction->paymentCode())->get())->minor(),
             ],
             'customer_details' => [
                 'first_name' => $transaction->buyer->user?->name ?? 'Customer',
@@ -89,10 +90,11 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
             return self::REFUND_DONE;
         }
 
-        // Only this order's amount: other orders in a shared payment stay paid.
+        // Only this order's Midtrans part: other orders in a shared payment
+        // stay paid, and its Saldo Blukios part went back when it was cancelled.
         MidtransTransaction::refund($orderId, [
             'refund_key' => 'cancel-'.$transaction->code,
-            'amount' => (int) $transaction->grand_total,
+            'amount' => Money::fromDecimalString((string) $transaction->refund_amount)->minor(),
             'reason' => mb_substr($reason, 0, 255),
         ]);
 

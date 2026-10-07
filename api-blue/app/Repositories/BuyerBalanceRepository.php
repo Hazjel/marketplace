@@ -24,6 +24,16 @@ class BuyerBalanceRepository implements BuyerBalanceRepositoryInterface
         return $this->apply($buyerId, Money::zero()->subtract($this->positive($amount)), $type, $uniqueRef, $reference, $remarks);
     }
 
+    public function lockedBalance(string $buyerId): string
+    {
+        $buyer = Buyer::where('id', $buyerId)->lock('for no key update')->first();
+        if (! $buyer) {
+            throw new Exception('Pembeli tidak ditemukan', 404);
+        }
+
+        return (string) $buyer->balance;
+    }
+
     private function apply(string $buyerId, Money $delta, string $type, string $uniqueRef, ?Model $reference, ?string $remarks): bool
     {
         if (! in_array($type, BuyerBalanceHistory::TYPES, true)) {

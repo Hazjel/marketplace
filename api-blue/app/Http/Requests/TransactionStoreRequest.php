@@ -50,6 +50,8 @@ class TransactionStoreRequest extends FormRequest
             'products.*.variant_id' => 'nullable|string',
             'products.*.qty' => 'required|integer|min:1',
             'voucher_code' => 'nullable|string|exists:vouchers,code',
+            // Pay with Saldo Blukios first; absent (older clients) means no.
+            'use_balance' => 'sometimes|boolean',
         ];
     }
 

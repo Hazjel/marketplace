@@ -167,10 +167,17 @@ const inputClass =
     </p>
 
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-      <div class="flex flex-col gap-0.5">
+      <!-- A fully balance-paid order has nothing to refund through Midtrans. -->
+      <div v-if="transaction.refund_amount > 0 || !(transaction.balance_used > 0)" class="flex flex-col gap-0.5">
         <dt class="text-custom-grey dark:text-gray-400">Jumlah</dt>
         <dd class="font-medium text-custom-black dark:text-white">
           Rp {{ formatRupiah(transaction.refund_amount) }}
+        </dd>
+      </div>
+      <div v-if="transaction.balance_used > 0" class="flex flex-col gap-0.5">
+        <dt class="text-custom-grey dark:text-gray-400">Dibayar dengan Saldo Blukios</dt>
+        <dd class="font-medium text-custom-black dark:text-white" data-testid="refund-balance-used">
+          Rp {{ formatRupiah(transaction.balance_used) }} · sudah kembali ke Saldo Blukios
         </dd>
       </div>
       <div v-if="transaction.refunded_at" class="flex flex-col gap-0.5">

@@ -470,6 +470,14 @@ v-else
               Rp {{ formatRupiah(transaction?.grand_total) }}
             </span>
           </div>
+          <div v-if="transaction?.balance_used > 0" class="flex items-center justify-between">
+            <span class="text-sm text-custom-grey dark:text-gray-400">Dibayar dengan Saldo Blukios</span>
+            <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(transaction.balance_used) }}</span>
+          </div>
+          <div v-if="transaction?.balance_used > 0 && transaction?.midtrans_amount > 0" class="flex items-center justify-between">
+            <span class="text-sm text-custom-grey dark:text-gray-400">Dibayar lewat Midtrans</span>
+            <span class="text-sm font-medium text-custom-black dark:text-white">Rp {{ formatRupiah(transaction.midtrans_amount) }}</span>
+          </div>
           <hr class="border-gray-100 dark:border-white/10 my-1" />
           <div class="flex items-center justify-between">
             <span class="text-sm text-custom-grey dark:text-gray-400">Status Pembayaran</span>

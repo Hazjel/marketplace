@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ShippingGatewayInterface;
 use App\Models\Buyer;
 use App\Models\Product;
@@ -14,6 +15,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
@@ -65,11 +67,12 @@ class CheckoutTrustBoundaryTest extends TestCase
             'description' => 'Deskripsi',
             'condition' => 'new',
             'price' => 100000,
-            'weight' => 1000,
+            'weight' => 1,
             'stock' => 10,
         ]);
         // Checkout menanyakan ongkir ke gateway; jangan sentuh Komerce asli.
         $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
+        $this->app->bind(PaymentGatewayInterface::class, fn () => new FakePaymentGateway);
     }
 
     private function payload(array $overrides = []): array

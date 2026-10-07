@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ProductRepositoryInterface;
 use App\Interfaces\ShippingGatewayInterface;
 use App\Models\Product;
@@ -15,6 +16,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Support\FakePaymentGateway;
 use Tests\Support\FakeShippingGateway;
 use Tests\TestCase;
 
@@ -39,6 +41,7 @@ class ProductVariantLifecycleTest extends TestCase
         $this->seed(PermissionSeeder::class);
         $this->seed(RoleSeeder::class);
         $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
+        $this->app->bind(PaymentGatewayInterface::class, fn () => new FakePaymentGateway);
     }
 
     private function context(): array

@@ -221,8 +221,11 @@ platform      = admin_fee + service_fee   (pays the payment-gateway fee)
 `pending`/`processing`) restores stock, reverses the seller's
 `pending_balance` (`refunded` ledger entry), sets the order to
 `cancelled` / `payment_status = failed` (so revenue analytics skip it), and
-records `refund_amount = grand_total`: the buyer gets everything back,
-service fee and shipping included. The platform absorbs the Midtrans fee.
+credits `balance_used` back to Saldo Blukios at once (`refund_balance:{id}`)
+and records `refund_amount = grand_total − balance_used` (the Midtrans part):
+the buyer gets everything back, service fee and shipping included. The
+platform absorbs the Midtrans fee. A `refund_amount` of 0 (paid fully with
+Saldo Blukios) is `refunded` / `balance` immediately, without a job.
 
 `refund_status` then tracks the buyer's money:
 
@@ -237,6 +240,29 @@ service fee and shipping included. The platform absorbs the Midtrans fee.
   seller); an admin transfers and calls `/mark-refunded`.
 - `refunded`: done (`refund_method` `midtrans` or `manual`). A Midtrans
   `refund` webhook also lands here.
+
+### Paying with Saldo Blukios
+
+`use_balance: true` on checkout allocates min(balance, `grand_total`) to the
+orders in creation order (`balance_used`, ledger `payment:{id}`).
+`grand_total` stays the full order value; escrow, `admin_fee` and
+`seller_amount` are unchanged. Midtrans collects and refunds only
+`Transaction::midtransAmount()` = `grand_total − balance_used` (Snap
+`gross_amount`, webhook and manual-check amount checks, refunds). A payment
+whose Midtrans part is 0 is marked paid inside the checkout transaction.
+An unpaid order that fails, expires or is deleted returns `balance_used`
+once (`payment_returned:{id}`); one order of a shared payment cannot be
+deleted (422). If Snap cannot create the payment, checkout fails its orders
+at once (502) instead of leaving them to expire.
+
+`failed` is terminal. A settlement that still arrives (webhook or manual
+check) never marks the order paid: its Midtrans part becomes a refund
+(`refund_status = processing`, reason "Pembayaran masuk setelah pesanan
+kedaluwarsa", same job as a seller cancel) and `ops:check` reports it
+(`late_payment_refunded`, informational).
+
+Lock order on every money path: transactions → products → seller wallets
+(`store_balances`) → buyer (`buyers`, Saldo Blukios), always last.
 
 ## 8. API / naming
 

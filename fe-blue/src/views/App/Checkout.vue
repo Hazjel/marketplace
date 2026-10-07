@@ -124,6 +124,29 @@ const loadingAddress = ref(false)
 // di Cart.vue -- satu sumber kebenaran, bukan reimplementasi math terpisah.
 const finalGrandTotal = computed(() => cart.grandTotalWithDelivery(deliveryFee.value))
 
+// Saldo Blukios: the server allocates min(balance, total) and is the source of
+// truth; this only previews it.
+// Both totals match the server's grand_total: per store, goods + shipping +
+// service fee (cart.js), and the checkout sends no voucher.
+const buyerBalance = ref(0)
+const useBalance = ref(false)
+const balanceActive = computed(() => useBalance.value && buyerBalance.value > 0)
+const balanceApplied = computed(() =>
+  balanceActive.value ? Math.min(buyerBalance.value, finalGrandTotal.value) : 0
+)
+const amountToPay = computed(() => finalGrandTotal.value - balanceApplied.value)
+
+const fetchBuyerBalance = async () => {
+  try {
+    const response = await axiosInstance.get('/balance', { params: { per_page: 1 } })
+    buyerBalance.value = response.data.data?.balance ?? 0
+  } catch {
+    // Not a buyer, or the balance is unavailable: checkout works without it.
+    buyerBalance.value = 0
+  }
+  if (buyerBalance.value <= 0) useBalance.value = false
+}
+
 const showSuccessModal = ref(false)
 
 const loadMidtransScript = () => {
@@ -285,6 +308,7 @@ const handleSubmit = async () => {
     const orders = await createTransaction(
       {
         ...transaction.value,
+        use_balance: balanceActive.value,
         orders: selectedCarts.value.map((store) => ({
           shipping: shippingByStore.value[store.storeId].shipping_name,
           shipping_type: shippingByStore.value[store.storeId].service_name,
@@ -297,11 +321,22 @@ const handleSubmit = async () => {
       },
       'transaction/checkout'
     )
-    const response = orders?.[0]
+    if (orders?.length && orders.every((order) => order.paid_with_balance)) {
+      // Paid already: no Snap. isProcessingPayment stays true so the pay
+      // button behind the success modal cannot submit again.
+      await cart.clearSelectedItems()
+      fetchBuyerBalance()
+      showSuccessModal.value = true
+      toast.success('Pembayaran dengan Saldo Blukios berhasil!')
+      return
+    }
 
-    if (!response || !response.snap_token) {
+    // Every order of one checkout carries the same token.
+    const snapToken = orders?.find((order) => order.snap_token)?.snap_token
+    if (!snapToken) {
       toast.error('Gagal membuat transaksi. Silakan coba lagi.')
       isProcessingPayment.value = false
+      fetchBuyerBalance()
       return
     }
 
@@ -312,7 +347,7 @@ const handleSubmit = async () => {
      */
     await cart.clearSelectedItems()
 
-    window.snap.pay(response.snap_token, {
+    window.snap.pay(snapToken, {
       onSuccess: function () {
         showSuccessModal.value = true
         isProcessingPayment.value = false
@@ -321,6 +356,7 @@ const handleSubmit = async () => {
       onPending: function () {
         // Transaction exists, payment pending (e.g. bank transfer) — redirect to monitor it
         isProcessingPayment.value = false
+        fetchBuyerBalance()
         toast.info('Pesanan dibuat. Selesaikan pembayaran sebelum batas waktu.')
         if (user.value?.username) {
           router.push({ name: 'user.my-transaction', params: { username: user.value.username } })
@@ -331,6 +367,7 @@ const handleSubmit = async () => {
       onError: function () {
         // Payment failed — transaction may be auto-cancelled by payment gateway
         isProcessingPayment.value = false
+        fetchBuyerBalance()
         toast.error('Pembayaran gagal. Cek status di menu Transaksi untuk mencoba lagi.')
         if (user.value?.username) {
           router.push({ name: 'user.my-transaction', params: { username: user.value.username } })
@@ -341,6 +378,7 @@ const handleSubmit = async () => {
       onClose: function () {
         // User closed popup — transaction is pending, redirect to transaction list
         isProcessingPayment.value = false
+        fetchBuyerBalance()
         toast.warning('Popup ditutup. Pesanan tetap aktif — selesaikan pembayaran di menu Transaksi.')
         if (user.value?.username) {
           router.push({ name: 'user.my-transaction', params: { username: user.value.username } })
@@ -349,9 +387,11 @@ const handleSubmit = async () => {
         }
       }
     })
-  } catch {
-    toast.error('Gagal memproses transaksi. Silakan coba lagi.')
+  } catch (err) {
+    // e.g. 502 "Pembayaran gagal dibuat; Saldo Blukios sudah dikembalikan".
+    toast.error(err?.response?.data?.message || 'Gagal memproses transaksi. Silakan coba lagi.')
     isProcessingPayment.value = false
+    fetchBuyerBalance()
   }
 }
 
@@ -370,6 +410,7 @@ onMounted(async () => {
   }
 
   fetchSavedAddresses()
+  fetchBuyerBalance()
 })
 </script>
 
@@ -662,6 +703,33 @@ onMounted(async () => {
                   <span class="font-medium text-base text-custom-black dark:text-white">Total Tagihan</span>
                   <span class="font-medium text-lg text-custom-blue">Rp {{ formatRupiah(finalGrandTotal) }}</span>
                 </div>
+
+                <template v-if="buyerBalance > 0">
+                  <label
+                    class="flex items-center justify-between gap-3 p-3 rounded-xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-custom-blue">
+                    <span class="text-sm font-medium text-custom-black dark:text-white">
+                      Pakai Saldo Blukios (Rp {{ formatRupiah(buyerBalance) }})
+                    </span>
+                    <input v-model="useBalance" type="checkbox" data-testid="use-balance"
+                      class="size-5 shrink-0 accent-custom-blue cursor-pointer focus:outline-none" />
+                  </label>
+                  <template v-if="useBalance">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-custom-grey dark:text-gray-400">Saldo Blukios</span>
+                      <span class="text-sm font-medium text-emerald-700 dark:text-emerald-400">−Rp {{ formatRupiah(balanceApplied) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="font-medium text-base text-custom-black dark:text-white">Sisa Dibayar</span>
+                      <span class="font-medium text-lg text-custom-blue" data-testid="amount-to-pay">Rp {{ formatRupiah(amountToPay) }}</span>
+                    </div>
+                  </template>
+                </template>
+                <!-- Always mounted, so screen readers hear the toggle's effect. -->
+                <p class="sr-only" aria-live="polite">
+                  <template v-if="balanceActive">
+                    Saldo Blukios dipakai Rp {{ formatRupiah(balanceApplied) }}, sisa dibayar Rp {{ formatRupiah(amountToPay) }}.
+                  </template>
+                </p>
               </div>
 
               <!-- Pay Button -->

@@ -48,6 +48,7 @@ class OpsCheck extends Command
             $this->stuckRefunds(),
             $this->manualRefunds(),
             $this->refundConflicts(),
+            $this->lateRefunds(),
             $this->buyerBalanceDrift(),
         ]));
 
@@ -220,6 +221,20 @@ class OpsCheck extends Command
             'Refund Midtrans masuk untuk pesanan yang sudah dikembalikan ke Saldo',
             fn (int $count) => "{$count} pesanan direfund Midtrans padahal dananya sudah masuk Saldo Blukios: pembeli menerima dua kali.",
             'Rekonsiliasi: cocokkan refund di dashboard Midtrans dengan buyer_balance_histories (unique_ref refund:{id}), lalu tagih atau koreksi saldo pembeli.',
+        );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function lateRefunds(): ?array
+    {
+        return $this->signalProblem(
+            OpsSignals::LATE_PAYMENT_REFUNDED,
+            1,
+            'Pembayaran masuk setelah pesanan kedaluwarsa',
+            fn (int $count) => "{$count} pesanan dibayar lewat Midtrans setelah dinyatakan gagal; pembayarannya sedang direfund otomatis.",
+            'Info saja: refund berjalan seperti pembatalan penjual (refund_reason "Pembayaran masuk setelah pesanan kedaluwarsa"). Kalau sering, cek jadwal transaction:check-expiry terhadap batas waktu Snap.',
         );
     }
 

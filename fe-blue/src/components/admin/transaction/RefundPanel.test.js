@@ -53,6 +53,21 @@ describe('RefundPanel', () => {
     expect(balanceButton(wrapper)).toBeUndefined()
   })
 
+  it('shows the Saldo Blukios part of the payment, and no zero Midtrans amount', () => {
+    const wrapper = mountPanel({
+      transaction: order({
+        refund_status: 'refunded',
+        refund_method: 'balance',
+        refund_amount: 0,
+        balance_used: 216000
+      }),
+      isBuyer: true
+    })
+
+    expect(wrapper.get('[data-testid="refund-balance-used"]').text()).toMatch(/216[.,]000/)
+    expect(wrapper.text()).not.toContain('Jumlah')
+  })
+
   it('lets an admin move a manual refund to the balance after confirming', async () => {
     const updated = order({ refund_status: 'refunded', refund_method: 'balance' })
     let resolve
