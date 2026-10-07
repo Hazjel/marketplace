@@ -288,7 +288,7 @@ class OpsCheckTest extends TestCase
 
     public function test_api_server_errors_are_reported_with_their_route(): void
     {
-        Route::get('api/_test/boom/{id}', fn () => throw new RuntimeException('boom'));
+        Route::get('api/_test/boom/{n}', fn () => throw new RuntimeException('boom'));
 
         $this->getJson('/api/_test/boom/1')->assertStatus(500);
         $this->getJson('/api/_test/boom/2')->assertStatus(500);
@@ -302,7 +302,7 @@ class OpsCheckTest extends TestCase
             $lines = $n->problems[0]['lines'];
 
             return str_starts_with($lines[0], '2 request gagal')
-                && in_array('- GET api/_test/boom/{id} 500 (2x)', $lines, true);
+                && in_array('- GET api/_test/boom/{n} 500 (2x)', $lines, true);
         });
     }
 

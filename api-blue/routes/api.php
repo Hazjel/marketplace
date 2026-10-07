@@ -77,7 +77,7 @@ Route::get('product/{id}', [ProductController::class, 'show']);
 Route::middleware('throttle:60,1')->post('product/{id}/view', [ProductViewController::class, 'store']);
 
 Route::get('store', [StoreController::class, 'index']);
-Route::get('store/username/{store}', [
+Route::get('store/username/{username}', [
     StoreController::class,
     'showByUsername',
 ]);
