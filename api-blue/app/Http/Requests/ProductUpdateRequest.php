@@ -33,7 +33,7 @@ class ProductUpdateRequest extends FormRequest
             'condition' => 'required|string|in:new,second',
             // Whole rupiah only — see ProductStoreRequest / money-contract.md.
             'price' => 'required|integer|min:0',
-            'weight' => 'required|numeric|min:0',
+            'weight' => 'required|numeric|min:0|max:999.99',
             'stock' => 'required|integer|min:0',
             'product_images' => 'nullable|array',
             'product_images.*.image' => 'required|image|mimes:jpg,jpeg,png|max:2048',

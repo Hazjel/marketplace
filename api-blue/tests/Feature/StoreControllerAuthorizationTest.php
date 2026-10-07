@@ -235,7 +235,7 @@ class StoreControllerAuthorizationTest extends TestCase
         $product = Product::create([
             'store_id' => $store->id, 'product_category_id' => $category->id,
             'name' => 'Barang Uji Hapus Toko', 'slug' => 'barang-uji-hapus-toko',
-            'description' => 'D', 'condition' => 'new', 'price' => 100000, 'weight' => 1000, 'stock' => 10,
+            'description' => 'D', 'condition' => 'new', 'price' => 100000, 'weight' => 1, 'stock' => 10,
         ]);
 
         $otherBuyerUser = User::factory()->create();

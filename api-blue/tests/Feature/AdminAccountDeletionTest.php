@@ -67,7 +67,7 @@ class AdminAccountDeletionTest extends TestCase
             'description' => 'Deskripsi',
             'condition' => 'new',
             'price' => 100000,
-            'weight' => 1000,
+            'weight' => 1,
             'stock' => 10,
         ]);
 

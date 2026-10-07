@@ -34,7 +34,7 @@ class ProductStoreRequest extends FormRequest
             // fractional price makes the product un-checkoutable (see
             // api-blue/docs/money-contract.md). weight is not money.
             'price' => 'required|integer|min:0',
-            'weight' => 'required|numeric|min:0',
+            'weight' => 'required|numeric|min:0|max:999.99',
             'stock' => 'required|integer|min:0',
             'product_images' => 'required|array',
             'product_images.*.image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
