@@ -3,11 +3,13 @@ import { computed, ref } from 'vue'
 import { useToast } from 'vue-toastification'
 import { formatRupiah, formatToClientTimeZone } from '@/helpers/format'
 import { useTransactionStore } from '@/stores/transaction'
+import { useAuthStore } from '@/stores/auth'
 import { resolveRefundStatus } from '@/composables/useTransactionStatus'
 
-// Refund for an order the seller cancelled after payment. Buyers give a bank
-// account when the payment method cannot be refunded automatically (bank VA);
-// admins record the manual transfer.
+// Refund for an order the seller cancelled after payment. What Midtrans cannot
+// refund goes to Saldo Blukios; older orders still wait on a manual transfer
+// (buyer gives a bank account, admin records the transfer or moves it to the
+// balance).
 const props = defineProps({
   transaction: { type: Object, required: true },
   isBuyer: { type: Boolean, default: false },
@@ -18,6 +20,7 @@ const emit = defineEmits(['updated'])
 
 const toast = useToast()
 const transactionStore = useTransactionStore()
+const authStore = useAuthStore()
 
 const status = computed(() => resolveRefundStatus(props.transaction))
 const account = computed(() => props.transaction.refund_account)
@@ -27,6 +30,13 @@ const editingAccount = ref(false)
 const form = ref({ refund_bank_name: '', refund_account_number: '', refund_account_name: '' })
 const transferNote = ref('')
 const submitting = ref(false)
+const balanceError = ref('')
+
+const toBalance = computed(() => props.transaction.refund_method === 'balance')
+const balanceRoute = computed(() => {
+  const username = authStore.user?.username
+  return props.isBuyer && username ? { name: 'user.dashboard', params: { username } } : null
+})
 
 const showAccountForm = computed(
   () => props.isBuyer && awaitingManual.value && (!account.value || editingAccount.value)
@@ -41,6 +51,7 @@ const description = computed(() => {
         ? 'Metode pembayaran ini tidak bisa direfund otomatis. Isi rekening tujuan, dana akan ditransfer oleh tim Blukios.'
         : 'Menunggu transfer manual ke rekening pembeli.'
     case 'refunded':
+      if (toBalance.value) return 'Dana dikembalikan ke Saldo Blukios.'
       return props.transaction.refund_method === 'manual'
         ? 'Dana sudah ditransfer ke rekening pembeli.'
         : 'Dana sudah dikembalikan ke metode pembayaran. QRIS dan e-wallet bisa butuh beberapa hari sampai masuk.'
@@ -99,6 +110,32 @@ const submitTransfer = async () => {
   }
 }
 
+const refundToBalance = async () => {
+  const amount = formatRupiah(props.transaction.refund_amount)
+  let message = `Kembalikan Rp ${amount} ke Saldo Blukios pembeli?`
+  if (account.value) {
+    message +=
+      '\n\nPastikan dana BELUM ditransfer manual ke rekening pembeli — kalau sudah, pakai Tandai Sudah Ditransfer.'
+  }
+  if (!confirm(message)) return
+
+  balanceError.value = ''
+  submitting.value = true
+  try {
+    const updated = await transactionStore.refundToBalance(props.transaction.id)
+    toast.success('Dana dikembalikan ke Saldo Blukios')
+    emit('updated', updated)
+  } catch (error) {
+    // handleError() drops the message of a non-validation 422 (wrong refund state).
+    balanceError.value =
+      error?.response?.data?.message ||
+      transactionStore.error ||
+      'Gagal mengembalikan dana ke Saldo Blukios'
+  } finally {
+    submitting.value = false
+  }
+}
+
 const inputClass =
   'w-full h-11 px-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm text-custom-black dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-custom-blue focus:ring-2 focus:ring-custom-blue/10'
 </script>
@@ -118,7 +155,16 @@ const inputClass =
       </span>
     </div>
 
-    <p class="text-sm text-custom-grey dark:text-gray-400">{{ description }}</p>
+    <p class="text-sm text-custom-grey dark:text-gray-400">
+      {{ description }}
+      <RouterLink
+        v-if="toBalance && balanceRoute"
+        :to="balanceRoute"
+        class="font-medium text-custom-blue hover:underline"
+      >
+        Lihat Saldo Blukios
+      </RouterLink>
+    </p>
 
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
       <div class="flex flex-col gap-0.5">
@@ -237,5 +283,19 @@ const inputClass =
     <p v-else-if="isAdmin && awaitingManual" class="text-sm text-amber-700 dark:text-amber-400">
       Pembeli belum mengisi rekening tujuan.
     </p>
+
+    <div v-if="isAdmin && awaitingManual" class="flex flex-col gap-2">
+      <button
+        type="button"
+        :disabled="submitting"
+        class="h-11 rounded-xl border border-custom-blue text-custom-blue text-sm font-medium hover:bg-custom-blue/5 disabled:opacity-50"
+        @click="refundToBalance"
+      >
+        Kembalikan ke Saldo Blukios
+      </button>
+      <p v-if="balanceError" role="alert" class="text-sm text-red-600 dark:text-red-400">
+        {{ balanceError }}
+      </p>
+    </div>
   </section>
 </template>

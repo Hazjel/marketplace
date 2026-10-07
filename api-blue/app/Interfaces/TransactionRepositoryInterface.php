@@ -38,4 +38,6 @@ interface TransactionRepositoryInterface
     public function saveRefundAccount(string $id, array $account): Transaction;
 
     public function markRefundTransferred(string $id, string $note): Transaction;
+
+    public function refundToBalance(string $id, string $note, string $from = 'processing'): ?Transaction;
 }

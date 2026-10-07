@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Events\TransactionStatusUpdated;
 use App\Interfaces\PaymentGatewayInterface;
+use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Transaction;
 use App\Support\BusinessMetrics;
 use Illuminate\Bus\Queueable;
@@ -17,8 +18,8 @@ use Throwable;
 /**
  * Mengembalikan uang pembeli lewat Midtrans setelah penjual membatalkan
  * pesanan yang sudah dibayar. Metode yang tidak bisa direfund lewat API, dan
- * refund yang tetap gagal setelah semua percobaan, jatuh ke manual_required:
- * platform transfer sendiri ke rekening yang diisi pembeli.
+ * refund yang tetap gagal setelah semua percobaan, dikembalikan ke Saldo
+ * Blukios (TransactionRepository::refundToBalance).
  */
 class RefundCancelledTransactionJob implements ShouldQueue
 {
@@ -26,7 +27,7 @@ class RefundCancelledTransactionJob implements ShouldQueue
 
     // Refund QRIS/e-wallet butuh dana yang sudah cair di saldo merchant:
     // Midtrans menjawab 414 "insufficient funds" sampai pembayaran settle
-    // (satu-dua hari). Terus coba selama itu sebelum dialihkan ke manual.
+    // (satu-dua hari). Terus coba selama itu sebelum dialihkan ke Saldo Blukios.
     // Setelah 21600 jeda terakhir berulang: 12 percobaan ~1,8 hari.
     public int $tries = 12;
 
@@ -53,7 +54,7 @@ class RefundCancelledTransactionJob implements ShouldQueue
                 throw $e;
             }
 
-            $this->fallBackToManual($transaction, $e);
+            $this->fallBackToBalance($transaction, $e);
 
             return;
         }
@@ -66,17 +67,12 @@ class RefundCancelledTransactionJob implements ShouldQueue
             ]);
             BusinessMetrics::record('refund_done', 'midtrans');
         } else {
-            $transaction->update([
-                'refund_status' => 'manual_required',
-                'refund_method' => 'manual',
-                'refund_note' => 'Metode pembayaran tidak mendukung refund otomatis',
-            ]);
-            BusinessMetrics::record('refund_manual_required', 'unsupported_method');
+            app(TransactionRepositoryInterface::class)->refundToBalance($transaction->id, 'Metode pembayaran tidak mendukung refund lewat Midtrans');
         }
 
         Log::info('Refund pesanan dibatalkan', [
             'transaction' => $transaction->code,
-            'refund_status' => $transaction->refund_status,
+            'refund_status' => $transaction->fresh()?->refund_status,
         ]);
 
         event(new TransactionStatusUpdated($transaction->fresh()));
@@ -86,9 +82,57 @@ class RefundCancelledTransactionJob implements ShouldQueue
     {
         $transaction = Transaction::find($this->transactionId);
 
-        if ($transaction && $transaction->refund_status === 'processing') {
-            $this->fallBackToManual($transaction, $e);
+        if (! $transaction || $transaction->refund_status !== 'processing') {
+            return;
         }
+
+        try {
+            // A timeout or 5xx may have reached Midtrans anyway: crediting the
+            // balance too could pay the buyer twice, so an admin checks first.
+            if ($this->isAmbiguous($e)) {
+                $this->leaveForAdmin($transaction, $e);
+            } else {
+                $this->fallBackToBalance($transaction, $e);
+            }
+        } catch (Throwable $fallbackError) {
+            // Stays "processing": ops:check's stuck-refund alert reaches an admin.
+            Log::error('Refund macet', [
+                'transaction' => $transaction->code,
+                'error' => $e->getMessage(),
+                'fallback_error' => $fallbackError->getMessage(),
+            ]);
+        }
+    }
+
+    private function leaveForAdmin(Transaction $transaction, Throwable $e): void
+    {
+        $updated = Transaction::where('id', $transaction->id)
+            ->where('refund_status', 'processing')
+            ->update([
+                'refund_status' => 'manual_required',
+                'refund_method' => 'manual',
+                'refund_note' => 'Refund otomatis tidak terkonfirmasi setelah semua percobaan — cek dashboard Midtrans dulu; kalau belum direfund, Kembalikan ke Saldo Blukios',
+            ]);
+
+        if ($updated === 0) {
+            return;
+        }
+
+        BusinessMetrics::record('refund_manual_required', 'unconfirmed');
+        Log::error('Refund otomatis tidak terkonfirmasi, menunggu admin', [
+            'transaction' => $transaction->code,
+            'error' => $e->getMessage(),
+        ]);
+
+        event(new TransactionStatusUpdated($transaction->fresh()));
+    }
+
+    // 414 is a definite "funds never settled", unlike these.
+    private function isAmbiguous(Throwable $e): bool
+    {
+        $code = (int) $e->getCode();
+
+        return $code === 0 || $code >= 500 || $code === 429;
     }
 
     // Gangguan jaringan (kode 0) dan 5xx Midtrans juga sementara.
@@ -99,20 +143,22 @@ class RefundCancelledTransactionJob implements ShouldQueue
         return $code === 0 || $code >= 500 || in_array($code, self::RETRYABLE_CODES, true);
     }
 
-    private function fallBackToManual(Transaction $transaction, Throwable $e): void
+    private function fallBackToBalance(Transaction $transaction, Throwable $e): void
     {
-        $transaction->update([
-            'refund_status' => 'manual_required',
-            'refund_method' => 'manual',
-            'refund_note' => 'Refund otomatis gagal: '.mb_substr($e->getMessage(), 0, 500),
-        ]);
-        BusinessMetrics::record('refund_manual_required', 'gateway_error');
+        $refunded = app(TransactionRepositoryInterface::class)->refundToBalance(
+            $transaction->id,
+            'Refund otomatis gagal: '.mb_substr($e->getMessage(), 0, 500),
+        );
 
-        Log::error('Refund otomatis gagal, dialihkan ke manual', [
+        if (! $refunded) {
+            return;
+        }
+
+        Log::error('Refund otomatis gagal, dialihkan ke Saldo Blukios', [
             'transaction' => $transaction->code,
             'error' => $e->getMessage(),
         ]);
 
-        event(new TransactionStatusUpdated($transaction->fresh()));
+        event(new TransactionStatusUpdated($refunded));
     }
 }

@@ -256,6 +256,10 @@ Route::middleware('auth:sanctum')->group(function () {
         TransactionController::class,
         'markRefunded',
     ]);
+    Route::post('transaction/{id}/refund-to-balance', [
+        TransactionController::class,
+        'refundToBalance',
+    ]);
     // Route::middleware(['throttle:10,1', 'verified'])->post('transaction', [TransactionController::class, 'store']);
     Route::middleware(['throttle:10,1', 'idempotent'])->post('transaction', [
         TransactionController::class,

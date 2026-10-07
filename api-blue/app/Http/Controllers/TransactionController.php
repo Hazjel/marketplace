@@ -306,7 +306,7 @@ class TransactionController extends Controller implements HasMiddleware
 
     /**
      * Penjual menolak pesanan yang sudah dibayar. Uang pembeli dikembalikan
-     * lewat RefundCancelledTransactionJob (otomatis, atau manual untuk VA).
+     * lewat RefundCancelledTransactionJob (Midtrans, atau Saldo Blukios untuk VA).
      */
     public function cancel(Request $request, string $id)
     {
@@ -336,7 +336,8 @@ class TransactionController extends Controller implements HasMiddleware
     }
 
     /**
-     * Pembeli mengisi rekening tujuan refund manual (pembayaran lewat VA bank).
+     * Pembeli mengisi rekening tujuan refund manual (pesanan lama, sebelum
+     * refund VA masuk ke Saldo Blukios).
      */
     public function refundAccount(Request $request, string $id)
     {
@@ -394,6 +395,44 @@ class TransactionController extends Controller implements HasMiddleware
             event(new TransactionStatusUpdated($transaction));
 
             return ResponseHelper::jsonResponse(true, 'Refund ditandai selesai', new TransactionResource($transaction), 200);
+        } catch (\Exception $e) {
+            return $this->domainErrorResponse($e);
+        }
+    }
+
+    /**
+     * Admin mengembalikan refund manual lama ke Saldo Blukios pembeli.
+     */
+    public function refundToBalance(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'note' => 'nullable|string|max:255',
+        ], [], ['note' => 'Catatan']);
+
+        try {
+            $transaction = $this->transactionRepository->getById($id);
+
+            if (! $transaction) {
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+
+            if ($request->user()->cannot('markRefunded', $transaction)) {
+                return ResponseHelper::jsonResponse(false, 'Anda tidak memiliki izin untuk melakukan aksi ini', null, 403);
+            }
+
+            $transaction = $this->transactionRepository->refundToBalance(
+                $id,
+                $validated['note'] ?? 'Dikembalikan ke Saldo Blukios oleh admin',
+                'manual_required',
+            );
+
+            if (! $transaction) {
+                return ResponseHelper::jsonResponse(false, 'Pesanan ini tidak sedang menunggu refund manual', null, 422);
+            }
+
+            event(new TransactionStatusUpdated($transaction));
+
+            return ResponseHelper::jsonResponse(true, 'Dana dikembalikan ke Saldo Blukios', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
             return $this->domainErrorResponse($e);
         }

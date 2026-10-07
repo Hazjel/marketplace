@@ -179,6 +179,11 @@ export const useTransactionStore = defineStore('transaction', {
       return this.postAction(`transaction/${id}/mark-refunded`, { note })
     },
 
+    // Admin moves a legacy manual refund to the buyer's Saldo Blukios.
+    async refundToBalance(id) {
+      return this.postAction(`transaction/${id}/refund-to-balance`, {})
+    },
+
     async postAction(url, payload) {
       this.loading = true
       this.error = null

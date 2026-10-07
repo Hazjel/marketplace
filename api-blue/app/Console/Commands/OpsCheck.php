@@ -47,6 +47,7 @@ class OpsCheck extends Command
             $this->rejectedWebhooks(),
             $this->stuckRefunds(),
             $this->manualRefunds(),
+            $this->refundConflicts(),
             $this->buyerBalanceDrift(),
         ]));
 
@@ -209,6 +210,20 @@ class OpsCheck extends Command
     }
 
     /**
+     * @return array<string, mixed>|null
+     */
+    private function refundConflicts(): ?array
+    {
+        return $this->signalProblem(
+            OpsSignals::REFUND_CONFLICT,
+            1,
+            'Refund Midtrans masuk untuk pesanan yang sudah dikembalikan ke Saldo',
+            fn (int $count) => "{$count} pesanan direfund Midtrans padahal dananya sudah masuk Saldo Blukios: pembeli menerima dua kali.",
+            'Rekonsiliasi: cocokkan refund di dashboard Midtrans dengan buyer_balance_histories (unique_ref refund:{id}), lalu tagih atau koreksi saldo pembeli.',
+        );
+    }
+
+    /**
      * A counted signal with its most frequent samples, e.g. "POST
      * api/transaction 500 (3x)". Reported once the count reaches $threshold;
      * the count resets only when an email went out.
@@ -346,6 +361,7 @@ class OpsCheck extends Command
                 $ready->count().' pembeli sudah mengisi rekening, total Rp'.number_format($total, 0, ',', '.')
                     .': '.$ready->pluck('code')->take(10)->implode(', ').'.',
                 'Transfer, lalu tandai di Admin > Semua Transaksi > tab "Menunggu Refund".',
+                'Atau tanpa transfer: tombol "Kembalikan ke Saldo Blukios" di pesanan yang sama.',
             ],
             cooldown: (int) config('ops.manual_refund_reminder_minutes'),
         );

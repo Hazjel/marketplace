@@ -52,7 +52,8 @@ docker exec blue-api sh -c 'grep -h "<request_id>" storage/logs/laravel-*.log'
 `/metrics` Laravel juga mengeluarkan `api_business_events_total{event, detail}`:
 `order_created`, `payment_paid` (detail = metode bayar), `payment_failed`,
 `webhook_rejected` (`signature`/`amount`), `refund_requested`, `refund_done`
-(`midtrans`/`manual`/`midtrans_webhook`), `refund_manual_required`. Terkumpul begitu
+(`midtrans`/`manual`/`midtrans_webhook`/`balance`), `refund_manual_required`
+(`unconfirmed`). Terkumpul begitu
 Prometheus ops kembali menarik target Blukios.
 
 ## Ke mana membukanya

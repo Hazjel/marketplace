@@ -2,11 +2,13 @@
 
 namespace App\Repositories;
 
+use App\Interfaces\BuyerBalanceRepositoryInterface;
 use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\ShippingGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Jobs\RefundCancelledTransactionJob;
+use App\Models\BuyerBalanceHistory;
 use App\Models\Product;
 use App\Models\ProductVariantMongo;
 use App\Models\Store;
@@ -27,7 +29,8 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function __construct(
         private EscrowRepositoryInterface $escrowRepository,
         private PaymentGatewayInterface $paymentGateway,
-        private ShippingGatewayInterface $shippingGateway
+        private ShippingGatewayInterface $shippingGateway,
+        private BuyerBalanceRepositoryInterface $buyerBalanceRepository
     ) {}
 
     public function getAll(?string $search, ?int $limit, bool $execute)
@@ -892,17 +895,20 @@ class TransactionRepository implements TransactionRepositoryInterface
         } catch (\Throwable $e) {
             // Pembatalan sudah commit; jangan biarkan refund menggantung di
             // "processing" tanpa job yang akan menyelesaikannya.
-            Log::error('Refund job gagal didispatch, dialihkan ke manual', [
+            Log::error('Refund job gagal didispatch, dialihkan ke Saldo Blukios', [
                 'transaction' => $transaction->code,
                 'error' => $e->getMessage(),
             ]);
-            Transaction::where('id', $transaction->id)
-                ->where('refund_status', 'processing')
-                ->update([
-                    'refund_status' => 'manual_required',
-                    'refund_method' => 'manual',
-                    'refund_note' => 'Refund otomatis tidak bisa dijadwalkan: '.mb_substr($e->getMessage(), 0, 500),
+
+            try {
+                $this->refundToBalance($transaction->id, 'Refund otomatis tidak bisa dijadwalkan: '.mb_substr($e->getMessage(), 0, 500));
+            } catch (\Throwable $balanceError) {
+                // Tetap "processing": ops:check melaporkan refund yang macet.
+                Log::error('Refund ke Saldo Blukios gagal', [
+                    'transaction' => $transaction->code,
+                    'error' => $balanceError->getMessage(),
                 ]);
+            }
         }
 
         return $transaction->fresh([
@@ -959,5 +965,51 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             return $transaction->fresh(['buyer.user', 'store.user', 'transactionDetails.product']);
         });
+    }
+
+    /**
+     * Mengembalikan refund_amount ke Saldo Blukios pembeli. Dipakai untuk
+     * semua refund yang tidak bisa lewat API Midtrans, dan oleh admin untuk
+     * pesanan lama yang masih manual_required.
+     *
+     * Null (tanpa perubahan) bila refund_status saat dikunci bukan $from,
+     * misalnya sudah refunded lewat webhook Midtrans. Pemanggil yang
+     * menyiarkan TransactionStatusUpdated.
+     */
+    public function refundToBalance(string $id, string $note, string $from = 'processing'): ?Transaction
+    {
+        $transaction = DB::transaction(function () use ($id, $note, $from) {
+            $transaction = Transaction::where('id', $id)->lockForUpdate()->firstOrFail();
+
+            if ($transaction->refund_status !== $from) {
+                return null;
+            }
+
+            $this->buyerBalanceRepository->credit(
+                $transaction->buyer_id,
+                (string) $transaction->refund_amount,
+                BuyerBalanceHistory::TYPE_REFUND,
+                'refund:'.$transaction->id,
+                $transaction,
+                'Refund pesanan '.$transaction->code,
+            );
+
+            $transaction->refund_status = 'refunded';
+            $transaction->refund_method = 'balance';
+            $transaction->refund_note = $note;
+            $transaction->refunded_at = now();
+            $transaction->save();
+
+            return $transaction;
+        });
+
+        if (! $transaction) {
+            return null;
+        }
+
+        BusinessMetrics::record('refund_done', 'balance');
+        Log::info('Refund dikembalikan ke Saldo Blukios', ['transaction' => $transaction->code]);
+
+        return $transaction->fresh(['buyer.user', 'store.user', 'transactionDetails.product']);
     }
 }

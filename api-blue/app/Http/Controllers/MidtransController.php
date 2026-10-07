@@ -172,8 +172,9 @@ class MidtransController extends Controller
             // Dibatalkan penjual setelah dibayar. Satu-satunya kabar
             // yang berarti adalah refund-nya selesai; "settlement"
             // ulang tidak boleh mengkredit escrow lagi.
-            if (in_array($request->transaction_status, ['refund', 'partial_refund', 'cancel'], true)
-                && $transaction->refund_status !== 'refunded') {
+            // $transaction is locked by callback(), so this state is current.
+            $refundDone = in_array($request->transaction_status, ['refund', 'partial_refund', 'cancel'], true);
+            if ($refundDone && in_array($transaction->refund_status, ['processing', 'manual_required'], true)) {
                 $transaction->update([
                     'refund_status' => 'refunded',
                     'refund_method' => 'midtrans',
@@ -183,6 +184,13 @@ class MidtransController extends Controller
                 $metric = ['refund_done', 'midtrans_webhook'];
                 $outcome = 'updated';
             } else {
+                if ($refundDone && $transaction->refund_method === 'balance') {
+                    // The buyer was paid twice: by Midtrans and to Saldo Blukios.
+                    Log::error('Refund Midtrans masuk untuk pesanan yang sudah dikembalikan ke Saldo Blukios', [
+                        'transaction' => $transactionCode,
+                    ]);
+                    OpsSignals::record(OpsSignals::REFUND_CONFLICT, $transactionCode);
+                }
                 $outcome = 'ignored';
             }
         } else {

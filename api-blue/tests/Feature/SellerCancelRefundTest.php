@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Interfaces\PaymentGatewayInterface;
+use App\Interfaces\TransactionRepositoryInterface;
 use App\Jobs\RefundCancelledTransactionJob;
 use App\Models\Buyer;
+use App\Models\BuyerBalanceHistory;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
@@ -12,6 +14,7 @@ use App\Models\StoreBalance;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\User;
+use App\Support\OpsSignals;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -184,6 +187,52 @@ class SellerCancelRefundTest extends TestCase
         ]);
     }
 
+    // State cancelPaidOrder leaves before its job runs.
+    private function processingRefund(string $code): Transaction
+    {
+        $transaction = $this->paidOrder($code);
+        $transaction->update([
+            'delivery_status' => 'cancelled',
+            'payment_status' => 'failed',
+            'refund_status' => 'processing',
+            'refund_amount' => 216000,
+        ]);
+
+        return $transaction;
+    }
+
+    private function runJob(Transaction $transaction): void
+    {
+        (new RefundCancelledTransactionJob($transaction->id))->handle(app(PaymentGatewayInterface::class));
+    }
+
+    private function assertRefundedToBalance(Transaction $transaction): void
+    {
+        $transaction->refresh();
+        $this->assertSame('refunded', $transaction->refund_status);
+        $this->assertSame('balance', $transaction->refund_method);
+        $this->assertNotNull($transaction->refunded_at);
+        $this->assertBuyerCredited(1);
+    }
+
+    private function assertBuyerCredited(int $times): void
+    {
+        $this->assertEquals(216000 * $times, (float) $this->buyer->fresh()->balance);
+        $histories = BuyerBalanceHistory::where('buyer_id', $this->buyer->id)->get();
+        $this->assertCount($times, $histories);
+        foreach ($histories as $history) {
+            $this->assertSame(BuyerBalanceHistory::TYPE_REFUND, $history->type);
+        }
+    }
+
+    private function admin(): User
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        return $admin;
+    }
+
     public function test_seller_cancel_refunds_buyer_automatically_and_unwinds_escrow(): void
     {
         $transaction = $this->paidOrder('BLK_REFUND_001');
@@ -205,19 +254,113 @@ class SellerCancelRefundTest extends TestCase
         $this->assertEquals(0, (float) $this->storeBalance->fresh()->pending_balance);
         $this->assertEquals(0, (float) $this->storeBalance->fresh()->balance);
         $this->assertEquals(50, $this->product->fresh()->stock);
+        $this->assertBuyerCredited(0);
     }
 
-    public function test_virtual_account_payment_falls_back_to_manual_transfer(): void
+    public function test_virtual_account_payment_is_refunded_to_saldo_blukios(): void
     {
         $this->gatewayResult = PaymentGatewayInterface::REFUND_MANUAL;
         $transaction = $this->paidOrder('BLK_REFUND_002');
 
+        $this->cancelAs($this->sellerUser, $transaction)
+            ->assertOk()
+            ->assertJsonPath('data.refund_status', 'refunded')
+            ->assertJsonPath('data.refund_method', 'balance');
+
+        $this->assertRefundedToBalance($transaction);
+        $history = BuyerBalanceHistory::where('buyer_id', $this->buyer->id)->firstOrFail();
+        $this->assertSame('refund:'.$transaction->id, $history->unique_ref);
+        $this->assertSame($transaction->id, $history->reference_id);
+        $this->assertStringContainsString('BLK_REFUND_002', (string) $history->remarks);
+    }
+
+    public function test_refunding_to_balance_twice_credits_once(): void
+    {
+        $this->gatewayResult = PaymentGatewayInterface::REFUND_MANUAL;
+        $transaction = $this->processingRefund('BLK_REFUND_012');
+
+        $this->runJob($transaction);
+        $this->runJob($transaction);
+        $this->assertNull(app(TransactionRepositoryInterface::class)->refundToBalance($transaction->id, 'lagi'));
+
+        $this->assertRefundedToBalance($transaction);
+    }
+
+    public function test_refund_already_done_by_midtrans_webhook_is_not_credited_again(): void
+    {
+        $this->gatewayResult = PaymentGatewayInterface::REFUND_MANUAL;
+        $transaction = $this->processingRefund('BLK_REFUND_013');
+
+        $this->webhook('BLK_REFUND_013', 'refund', 'credit_card')->assertOk();
+        $this->runJob($transaction);
+        (new RefundCancelledTransactionJob($transaction->id))->failed(new RuntimeException('Midtrans 500'));
+
+        $this->assertSame('midtrans', $transaction->fresh()->refund_method);
+        $this->assertBuyerCredited(0);
+    }
+
+    public function test_job_that_cannot_be_dispatched_refunds_to_balance(): void
+    {
+        $transaction = $this->paidOrder('BLK_REFUND_014');
+        config(['queue.default' => 'not-configured']);
+
         $this->cancelAs($this->sellerUser, $transaction)->assertOk();
-        $this->assertSame('manual_required', $transaction->fresh()->refund_status);
+
+        $this->assertSame([], $this->refundCalls);
+        $this->assertRefundedToBalance($transaction);
+        $this->assertStringContainsString('tidak bisa dijadwalkan', (string) $transaction->refund_note);
+    }
+
+    public function test_admin_refunds_a_legacy_manual_refund_to_balance(): void
+    {
+        $transaction = $this->processingRefund('BLK_REFUND_015');
+        $transaction->update(['refund_status' => 'manual_required', 'refund_method' => 'manual']);
+        $admin = $this->admin();
+
+        $this->actingAs($this->buyerUser)
+            ->postJson("/api/transaction/{$transaction->id}/refund-to-balance")
+            ->assertStatus(403);
+        $this->actingAs($this->sellerUser)
+            ->postJson("/api/transaction/{$transaction->id}/refund-to-balance")
+            ->assertStatus(403);
+
+        $this->actingAs($admin)
+            ->postJson("/api/transaction/{$transaction->id}/refund-to-balance")
+            ->assertOk()
+            ->assertJsonPath('data.refund_status', 'refunded')
+            ->assertJsonPath('data.refund_method', 'balance');
+
+        // A second click is refused, not credited again.
+        $this->actingAs($admin)
+            ->postJson("/api/transaction/{$transaction->id}/refund-to-balance")
+            ->assertStatus(422);
+
+        $this->assertRefundedToBalance($transaction);
+    }
+
+    public function test_admin_refund_to_balance_requires_a_manual_refund(): void
+    {
+        $paid = $this->paidOrder('BLK_REFUND_016');
+        $processing = $this->processingRefund('BLK_REFUND_017');
+        $admin = $this->admin();
+
+        foreach ([$paid, $processing] as $transaction) {
+            $this->actingAs($admin)
+                ->postJson("/api/transaction/{$transaction->id}/refund-to-balance", ['note' => 'Saldo'])
+                ->assertStatus(422);
+        }
+
+        $this->assertSame('processing', $processing->fresh()->refund_status);
+        $this->assertBuyerCredited(0);
+    }
+
+    public function test_legacy_manual_refund_can_still_be_transferred_by_hand(): void
+    {
+        $transaction = $this->processingRefund('BLK_REFUND_018');
+        $transaction->update(['refund_status' => 'manual_required', 'refund_method' => 'manual']);
 
         // Admin cannot close it before the buyer says where the money goes.
-        $admin = User::factory()->create();
-        $admin->assignRole('admin');
+        $admin = $this->admin();
         $this->actingAs($admin)
             ->postJson("/api/transaction/{$transaction->id}/mark-refunded", ['note' => 'BCA 123'])
             ->assertStatus(422);
@@ -255,6 +398,7 @@ class SellerCancelRefundTest extends TestCase
             ->assertJsonPath('data.refund_status', 'refunded');
 
         $this->assertSame('manual', $transaction->fresh()->refund_method);
+        $this->assertBuyerCredited(0);
     }
 
     public function test_cancel_succeeds_even_when_the_gateway_is_down(): void
@@ -262,54 +406,90 @@ class SellerCancelRefundTest extends TestCase
         $this->gatewayResult = 'throw';
         $transaction = $this->paidOrder('BLK_REFUND_009');
 
+        // The sync queue fails the job on the spot, as if retries ran out.
         $this->cancelAs($this->sellerUser, $transaction)
             ->assertOk()
             ->assertJsonPath('data.delivery_status', 'cancelled')
             ->assertJsonPath('data.refund_status', 'manual_required');
 
-        $this->assertStringContainsString('Midtrans unreachable', $transaction->fresh()->refund_note);
+        $this->assertBuyerCredited(0);
         $this->assertEquals(0, (float) $this->storeBalance->fresh()->pending_balance);
     }
 
-    public function test_insufficient_merchant_funds_is_retried_not_sent_to_manual(): void
+    public function test_insufficient_merchant_funds_is_retried_not_sent_to_balance(): void
     {
-        $transaction = $this->paidOrder('BLK_REFUND_010');
-        $transaction->update(['refund_status' => 'processing']);
+        $transaction = $this->processingRefund('BLK_REFUND_010');
         $this->gatewayResult = 'http:414';
 
         try {
-            (new RefundCancelledTransactionJob($transaction->id))->handle(app(PaymentGatewayInterface::class));
+            $this->runJob($transaction);
             $this->fail('A 414 must be rethrown so the queue retries it');
         } catch (RuntimeException $e) {
             $this->assertSame(414, $e->getCode());
         }
 
         $this->assertSame('processing', $transaction->fresh()->refund_status);
+        $this->assertBuyerCredited(0);
     }
 
-    public function test_permanent_gateway_rejection_goes_straight_to_manual(): void
+    public function test_permanent_gateway_rejection_goes_straight_to_balance(): void
     {
-        $transaction = $this->paidOrder('BLK_REFUND_011');
-        $transaction->update(['refund_status' => 'processing']);
+        $transaction = $this->processingRefund('BLK_REFUND_011');
         $this->gatewayResult = 'http:412';
 
-        (new RefundCancelledTransactionJob($transaction->id))->handle(app(PaymentGatewayInterface::class));
+        $this->runJob($transaction);
 
-        $transaction->refresh();
-        $this->assertSame('manual_required', $transaction->refund_status);
-        $this->assertStringContainsString('Midtrans HTTP 412', $transaction->refund_note);
+        $this->assertRefundedToBalance($transaction);
+        $this->assertStringContainsString('Midtrans HTTP 412', (string) $transaction->refund_note);
     }
 
-    public function test_failed_automatic_refund_becomes_manual_with_the_reason(): void
+    public function test_unconfirmed_refund_after_all_retries_waits_for_an_admin(): void
     {
-        $transaction = $this->paidOrder('BLK_REFUND_003');
-        $transaction->update(['refund_status' => 'processing']);
+        foreach (['BLK_REFUND_003' => 503, 'BLK_REFUND_019' => 429, 'BLK_REFUND_020' => 0] as $code => $status) {
+            $transaction = $this->processingRefund($code);
 
-        (new RefundCancelledTransactionJob($transaction->id))->failed(new RuntimeException('Midtrans 412'));
+            (new RefundCancelledTransactionJob($transaction->id))->failed(new RuntimeException('Midtrans down', $status));
 
-        $transaction->refresh();
-        $this->assertSame('manual_required', $transaction->refund_status);
-        $this->assertStringContainsString('Midtrans 412', $transaction->refund_note);
+            $transaction->refresh();
+            $this->assertSame('manual_required', $transaction->refund_status, $code);
+            $this->assertSame('manual', $transaction->refund_method);
+            $this->assertStringContainsString('cek dashboard Midtrans', (string) $transaction->refund_note);
+        }
+        $this->assertBuyerCredited(0);
+    }
+
+    public function test_exhausted_unsettled_funds_go_to_balance(): void
+    {
+        $transaction = $this->processingRefund('BLK_REFUND_021');
+
+        (new RefundCancelledTransactionJob($transaction->id))->failed(new RuntimeException('Midtrans 414', 414));
+
+        $this->assertRefundedToBalance($transaction);
+    }
+
+    public function test_a_failing_fallback_leaves_the_refund_processing(): void
+    {
+        $transaction = $this->processingRefund('BLK_REFUND_022');
+        // The ledger rejects a zero credit, so the balance fallback throws.
+        $transaction->update(['refund_amount' => 0]);
+
+        (new RefundCancelledTransactionJob($transaction->id))->failed(new RuntimeException('Midtrans 414', 414));
+
+        $this->assertSame('processing', $transaction->fresh()->refund_status);
+        $this->assertBuyerCredited(0);
+    }
+
+    public function test_midtrans_refund_for_an_order_already_in_saldo_is_flagged(): void
+    {
+        $this->gatewayResult = PaymentGatewayInterface::REFUND_MANUAL;
+        $transaction = $this->paidOrder('BLK_REFUND_023');
+        $this->cancelAs($this->sellerUser, $transaction)->assertOk();
+
+        $this->webhook('BLK_REFUND_023', 'refund', 'credit_card')->assertOk();
+
+        $this->assertRefundedToBalance($transaction);
+        $this->assertSame(1, OpsSignals::count(OpsSignals::REFUND_CONFLICT));
+        $this->assertSame(['BLK_REFUND_023' => 1], OpsSignals::samples(OpsSignals::REFUND_CONFLICT));
     }
 
     public function test_only_paid_orders_not_yet_shipped_can_be_cancelled(): void
@@ -366,9 +546,9 @@ class SellerCancelRefundTest extends TestCase
 
     public function test_late_settlement_webhook_does_not_recredit_a_cancelled_order(): void
     {
-        $this->gatewayResult = PaymentGatewayInterface::REFUND_MANUAL;
         $transaction = $this->paidOrder('BLK_REFUND_007');
         $this->cancelAs($this->sellerUser, $transaction)->assertOk();
+        $transaction->update(['refund_status' => 'manual_required', 'refund_method' => 'manual']);
 
         $this->webhook('BLK_REFUND_007', 'settlement')->assertOk();
 

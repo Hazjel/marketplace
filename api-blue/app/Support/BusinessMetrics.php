@@ -11,7 +11,8 @@ use Throwable;
  *
  * Events: order_created, payment_paid (detail = payment type),
  * payment_failed, webhook_rejected (detail = reason), refund_requested,
- * refund_done (detail = midtrans|manual), refund_manual_required.
+ * refund_done (detail = midtrans|midtrans_webhook|manual|balance),
+ * refund_manual_required (detail = unconfirmed).
  *
  * Same rules as PrometheusMetrics: never fail the caller when Redis is
  * down, and never touch a metrics backend in tests.

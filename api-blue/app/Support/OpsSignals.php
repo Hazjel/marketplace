@@ -19,6 +19,9 @@ final class OpsSignals
 
     public const CLIENT_ERROR = 'client_error';
 
+    // A Midtrans refund arrived for an order already refunded to Saldo Blukios.
+    public const REFUND_CONFLICT = 'refund_conflict';
+
     // Distinct samples kept per signal; the email shows the most frequent.
     private const MAX_SAMPLES = 20;
 

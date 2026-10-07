@@ -11,6 +11,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Notifications\OpsAlertNotification;
 use App\Repositories\BuyerBalanceRepository;
+use App\Support\OpsSignals;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Cache;
@@ -284,6 +285,20 @@ class OpsCheckTest extends TestCase
             fn (OpsAlertNotification $n) => str_contains($n->problems[0]['lines'][0], '1 refund masih "processing"')
                 && str_contains($n->problems[0]['lines'][0], $stuck->code)
         );
+    }
+
+    public function test_a_midtrans_refund_on_a_saldo_refund_is_reported_with_the_order(): void
+    {
+        OpsSignals::record(OpsSignals::REFUND_CONFLICT, 'BLK_CONFLICT_1');
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Refund Midtrans masuk untuk pesanan yang sudah dikembalikan ke Saldo'], $this->alertedTitles());
+        Notification::assertSentOnDemand(
+            OpsAlertNotification::class,
+            fn (OpsAlertNotification $n) => in_array('- BLK_CONFLICT_1 (1x)', $n->problems[0]['lines'], true)
+        );
+        $this->assertSame(0, OpsSignals::count(OpsSignals::REFUND_CONFLICT));
     }
 
     public function test_api_server_errors_are_reported_with_their_route(): void
