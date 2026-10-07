@@ -27,7 +27,7 @@ class OpsCheck extends Command
 {
     protected $signature = 'ops:check';
 
-    protected $description = 'Check the queue worker, failed jobs, rejected Midtrans webhooks and refunds; email OPS_ALERT_EMAIL about problems';
+    protected $description = 'Check the queue worker, failed jobs, rejected Midtrans webhooks, refunds and Saldo Blukios drift; email OPS_ALERT_EMAIL about problems';
 
     private const FAILED_JOBS_CURSOR = 'ops:failed-jobs-cursor';
 
@@ -47,6 +47,7 @@ class OpsCheck extends Command
             $this->rejectedWebhooks(),
             $this->stuckRefunds(),
             $this->manualRefunds(),
+            $this->buyerBalanceDrift(),
         ]));
 
         $due = array_values(array_filter(
@@ -348,5 +349,33 @@ class OpsCheck extends Command
             ],
             cooldown: (int) config('ops.manual_refund_reminder_minutes'),
         );
+    }
+
+    /**
+     * buyers.balance is a cached total of its ledger; any difference means a
+     * mutation bypassed BuyerBalanceRepository.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function buyerBalanceDrift(): ?array
+    {
+        // ponytail: scans every buyer each run; restrict to buyers with a balance or history if that table grows large.
+        $drift = DB::table('buyers')
+            ->leftJoin('buyer_balance_histories as h', 'h.buyer_id', '=', 'buyers.id')
+            ->groupBy('buyers.id', 'buyers.balance')
+            ->havingRaw('buyers.balance <> COALESCE(SUM(h.amount), 0)')
+            ->orderBy('buyers.id')
+            ->selectRaw('buyers.id, buyers.balance - COALESCE(SUM(h.amount), 0) AS diff')
+            ->get();
+
+        if ($drift->isEmpty()) {
+            return null;
+        }
+
+        return $this->problem('buyer-balance-drift', 'Saldo Blukios tidak cocok dengan riwayat', [
+            $drift->count().' pembeli punya saldo yang tidak sama dengan jumlah riwayatnya (saldo dikurangi riwayat): '
+                .$drift->take(10)->map(fn ($row) => $row->id.' (Rp'.number_format((float) $row->diff, 0, ',', '.').')')->implode(', ').'.',
+            'Ada perubahan saldo yang tidak lewat BuyerBalanceRepository (mis. UPDATE manual). Cek tabel buyer_balance_histories untuk pembeli tersebut.',
+        ]);
     }
 }

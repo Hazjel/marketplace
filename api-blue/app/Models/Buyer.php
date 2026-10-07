@@ -16,6 +16,16 @@ class Buyer extends Model
         'phone_number',
     ];
 
+    // Saldo Blukios is shown only to its owner (GET /api/balance); the raw
+    // buyer row is embedded in /me and other resources.
+    protected $hidden = [
+        'balance',
+    ];
+
+    protected $casts = [
+        'balance' => 'decimal:2',
+    ];
+
     public function scopeSearch($query, $search)
     {
         return $query->whereHas('user', function ($q) use ($search) {
@@ -26,6 +36,11 @@ class Buyer extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function balanceHistories()
+    {
+        return $this->hasMany(BuyerBalanceHistory::class);
     }
 
     public function transaction()

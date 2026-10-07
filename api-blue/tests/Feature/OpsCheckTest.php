@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Console\Commands\OpsCheck;
 use App\Jobs\QueueHeartbeatJob;
 use App\Models\Buyer;
+use App\Models\BuyerBalanceHistory;
 use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Notifications\OpsAlertNotification;
+use App\Repositories\BuyerBalanceRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Cache;
@@ -350,5 +352,37 @@ class OpsCheckTest extends TestCase
             ->assertSuccessful();
 
         Notification::assertNothingSent();
+    }
+
+    public function test_saldo_blukios_kept_in_step_with_its_history_is_not_reported(): void
+    {
+        $buyer = Buyer::create(['user_id' => User::factory()->create()->id, 'phone_number' => '0813']);
+        $repository = new BuyerBalanceRepository;
+        $repository->credit($buyer->id, '50000', BuyerBalanceHistory::TYPE_REFUND, 'refund:ops-1');
+        $repository->debit($buyer->id, '20000', BuyerBalanceHistory::TYPE_PAYMENT, 'payment:ops-2');
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_saldo_blukios_that_drifted_from_its_history_is_reported(): void
+    {
+        $buyer = Buyer::create(['user_id' => User::factory()->create()->id, 'phone_number' => '0813']);
+        (new BuyerBalanceRepository)->credit($buyer->id, '50000', BuyerBalanceHistory::TYPE_REFUND, 'refund:ops-1');
+        // A balance edited behind the ledger's back, and one with no history at all.
+        DB::table('buyers')->where('id', $buyer->id)->update(['balance' => 55000]);
+        $orphan = Buyer::create(['user_id' => User::factory()->create()->id, 'phone_number' => '0813']);
+        DB::table('buyers')->where('id', $orphan->id)->update(['balance' => 1000]);
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Saldo Blukios tidak cocok dengan riwayat'], $this->alertedTitles());
+        Notification::assertSentOnDemand(
+            OpsAlertNotification::class,
+            fn (OpsAlertNotification $n) => str_contains($n->problems[0]['lines'][0], '2 pembeli')
+                && str_contains($n->problems[0]['lines'][0], $buyer->id.' (Rp5.000)')
+                && str_contains($n->problems[0]['lines'][0], $orphan->id.' (Rp1.000)')
+        );
     }
 }

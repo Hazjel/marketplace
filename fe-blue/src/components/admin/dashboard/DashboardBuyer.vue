@@ -10,6 +10,7 @@ import StatCard from '@/components/Atom/StatCard.vue'
 import DashboardSection from '@/components/Molecule/DashboardSection.vue'
 import EmptyState from '@/components/Atom/EmptyState.vue'
 import DashboardChart from '@/components/Atom/DashboardChart.vue'
+import BuyerBalanceCard from '@/components/admin/dashboard/BuyerBalanceCard.vue'
 
 const { data, loading, range, fetch, setRange } = useDashboardSummary('buyer/dashboard/summary', {
   withRange: true
@@ -76,6 +77,8 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <BuyerBalanceCard />
 
     <DashboardSection title="Riwayat Pengeluaran" :subtitle="`Pengeluaran ${range} hari terakhir`">
       <template #actions>

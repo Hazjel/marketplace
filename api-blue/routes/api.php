@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BuyerBalanceController;
 use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
@@ -191,6 +192,9 @@ Route::middleware('auth:sanctum')->group(function () {
         'getAllPaginated',
     ]);
     Route::apiResource('buyer', BuyerController::class);
+
+    // Saldo Blukios (read-only, own balance only)
+    Route::get('balance', [BuyerBalanceController::class, 'index']);
 
     // Address routes
     Route::apiResource(
