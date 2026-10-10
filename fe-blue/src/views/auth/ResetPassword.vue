@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { axiosInstance } from '@/plugins/axios'
 
@@ -19,6 +19,17 @@ const successMessage = ref(null)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const tokenInvalid = ref(false)
+
+// Same rules as the backend (and Register.vue), shown live so a user isn't
+// left guessing why the password was refused.
+const passwordRules = computed(() => {
+  const value = form.value.password || ''
+  return [
+    { label: 'Minimal 8 karakter', met: value.length >= 8 },
+    { label: 'Mengandung huruf besar (A-Z)', met: /[A-Z]/.test(value) },
+    { label: 'Mengandung angka (0-9)', met: /[0-9]/.test(value) }
+  ]
+})
 
 onMounted(() => {
   const token = Array.isArray(route.query.token) ? route.query.token[0] : route.query.token
@@ -57,7 +68,10 @@ const handleSubmit = async () => {
     const data = err.response?.data
 
     if (err.response?.status === 422) {
-      if (data?.message) {
+      if (data?.errors) {
+        // Per-field messages from the server ("…minimal 1 huruf besar dan 1 angka").
+        error.value = data.errors
+      } else if (data?.message) {
         // Cek apakah pesan berkaitan dengan token
         if (
           data.message.toLowerCase().includes('token') ||
@@ -252,6 +266,20 @@ const handleSubmit = async () => {
         >
           {{ error.password.join(', ') }}
         </span>
+        <ul class="flex flex-col gap-1 ml-2 mt-1">
+          <li
+            v-for="rule in passwordRules"
+            :key="rule.label"
+            class="flex items-center gap-2 text-xs font-medium transition-colors"
+            :class="rule.met ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'"
+          >
+            <span
+              class="size-1.5 rounded-full shrink-0 transition-colors"
+              :class="rule.met ? 'bg-green-500' : 'bg-red-500'"
+            ></span>
+            {{ rule.label }}
+          </li>
+        </ul>
       </div>
 
       <!-- Confirm Password Field -->
