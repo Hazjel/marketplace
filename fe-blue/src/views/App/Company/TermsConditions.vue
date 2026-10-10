@@ -270,9 +270,9 @@ onMounted(() => {
                 <h3 class="font-medium text-gray-900 dark:text-white text-lg">Legal Concerns?</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Our legal team is here to assist you.</p>
                 <a
-                  href="mailto:legal@blukios.com"
+                  href="mailto:support@blukios.store"
                   class="text-[#024ad8] font-medium hover:underline"
-                  >legal@blukios.com</a
+                  >support@blukios.store</a
                 >
               </div>
             </div>

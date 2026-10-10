@@ -213,9 +213,9 @@ onMounted(() => {
                   Our data protection officer is ready to help you.
                 </p>
                 <a
-                  href="mailto:privacy@blukios.com"
+                  href="mailto:support@blukios.store"
                   class="text-[#024ad8] font-medium hover:underline"
-                  >privacy@blukios.com</a
+                  >support@blukios.store</a
                 >
               </div>
             </div>
