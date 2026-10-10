@@ -41,7 +41,7 @@ onMounted(() => {
           class="mt-8 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-4 py-2 rounded-full w-fit border border-gray-200 dark:border-white/10 shadow-sm"
         >
           <i class="fa-regular fa-clock"></i>
-          <span>Terakhir Diperbarui: 01 Januari 2026</span>
+          <span>Terakhir Diperbarui: 10 Oktober 2026</span>
         </div>
       </div>
     </header>
@@ -90,6 +90,17 @@ onMounted(() => {
           </button>
           <button
             :class="
+              activeSection === 'refunds'
+                ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
+                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
+            "
+            class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
+            @click="scrollTo('refunds')"
+          >
+            4. Refunds & Saldo Blukios
+          </button>
+          <button
+            :class="
               activeSection === 'prohibited'
                 ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
@@ -97,7 +108,7 @@ onMounted(() => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('prohibited')"
           >
-            4. Prohibited Activities
+            5. Prohibited Activities
           </button>
           <button
             :class="
@@ -108,7 +119,7 @@ onMounted(() => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('contact')"
           >
-            5. Contact Us
+            6. Contact Us
           </button>
         </div>
       </aside>
@@ -171,8 +182,62 @@ onMounted(() => {
             </p>
           </section>
 
+          <section id="refunds" class="scroll-mt-32">
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Refunds and Saldo Blukios</h2>
+            <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
+              If a seller rejects or cancels an order you have already paid for, you get back the
+              full amount you paid for that order:
+            </p>
+            <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-white/10 mb-4">
+              <ul class="space-y-3 list-none p-0 m-0">
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >Paid by credit/debit card, GoPay, ShopeePay or QRIS: refunded to the same
+                    payment method through our payment provider. When it appears in your account
+                    depends on your bank or e-wallet provider.</span
+                  >
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >Paid by bank virtual account or at a retail outlet: these methods cannot be
+                    refunded automatically, so the amount is credited to your Saldo Blukios right
+                    away.</span
+                  >
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >Paid partly with Saldo Blukios: that part goes back to your Saldo Blukios
+                    immediately, and the rest is refunded as described above.</span
+                  >
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >A payment that reaches us after the order has already expired is refunded
+                    automatically in the same way.</span
+                  >
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >If an automatic refund cannot be confirmed, our team checks it with the payment
+                    provider and completes it, to your Saldo Blukios or by bank transfer.</span
+                  >
+                </li>
+              </ul>
+            </div>
+            <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
+              Saldo Blukios can only be used to pay for purchases on Blukios, in full or in part at
+              checkout. It cannot be withdrawn to a bank account, topped up, or transferred to
+              another user. You can see your balance and its history on your dashboard.
+            </p>
+          </section>
+
           <section id="prohibited" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Prohibited Activities</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Prohibited Activities</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
               You may not access or use the Site for any purpose other than that for which we make
               the Site available. As a user of the Site, you agree not to:
@@ -192,7 +257,7 @@ onMounted(() => {
           </section>
 
           <section id="contact" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Contact Us</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">6. Contact Us</h2>
             <div
               class="bg-blue-50 dark:bg-[#024ad8]/10 border border-blue-100 dark:border-[#024ad8]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6"
             >
