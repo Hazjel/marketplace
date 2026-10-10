@@ -73,6 +73,25 @@ class TransactionPolicy
         return $this->isAdmin($user);
     }
 
+    /**
+     * Komplain pesanan yang sedang dikirim: pembeli mengajukan dan menariknya,
+     * penjual menerima atau menolak, admin memutus yang dieskalasi.
+     */
+    public function complain(User $user, Transaction $transaction): bool
+    {
+        return $this->ownsAsBuyer($user, $transaction);
+    }
+
+    public function respondToComplaint(User $user, Transaction $transaction): bool
+    {
+        return $this->ownsAsStore($user, $transaction);
+    }
+
+    public function resolveComplaint(User $user): bool
+    {
+        return $this->isAdmin($user);
+    }
+
     public function checkPaymentStatus(User $user, Transaction $transaction): bool
     {
         return $this->view($user, $transaction);

@@ -7,6 +7,7 @@ use App\Traits\UUID;
 use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Transaction extends Model
 {
@@ -134,5 +135,11 @@ class Transaction extends Model
     public function voucher()
     {
         return $this->belongsTo(Voucher::class);
+    }
+
+    /** @return HasOne<Complaint, $this> */
+    public function complaint(): HasOne
+    {
+        return $this->hasOne(Complaint::class);
     }
 }

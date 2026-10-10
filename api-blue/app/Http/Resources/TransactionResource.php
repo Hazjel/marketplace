@@ -56,6 +56,7 @@ class TransactionResource extends JsonResource
             'payment_status' => $this->payment_status,
             ...$this->refund(),
             'refund_account' => $this->refundAccount($request),
+            'complaint' => $this->complaint($request),
             'snap_token' => $this->snap_token,
             'transaction_details' => TransactionDetailResource::collection($this->transactionDetails),
             'product_reviews' => ProductReviewResource::collection($this->whenLoaded('productReviews')),
@@ -78,6 +79,41 @@ class TransactionResource extends JsonResource
             'refund_reason' => $transaction->refund_reason,
             'refund_note' => $transaction->refund_note,
             'refunded_at' => $transaction->refunded_at,
+        ];
+    }
+
+    /**
+     * Komplain pembeli: hanya pembeli, penjual pesanan ini, dan admin.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function complaint(Request $request): ?array
+    {
+        /** @var Transaction $transaction */
+        $transaction = $this->resource;
+        $viewer = $request->user();
+
+        if (! $viewer || $viewer->cannot('view', $transaction)) {
+            return null;
+        }
+
+        $complaint = $transaction->complaint;
+        if (! $complaint) {
+            return null;
+        }
+
+        return [
+            'id' => $complaint->id,
+            'reason' => $complaint->reason,
+            'description' => $complaint->description,
+            'photos' => array_map(fn (string $path) => asset('storage/'.$path), $complaint->photos ?? []),
+            'status' => $complaint->status,
+            'seller_response' => $complaint->seller_response,
+            'admin_note' => $complaint->admin_note,
+            'deadline_at' => $complaint->deadline_at,
+            'escalated_at' => $complaint->escalated_at,
+            'resolved_at' => $complaint->resolved_at,
+            'created_at' => $complaint->created_at,
         ];
     }
 

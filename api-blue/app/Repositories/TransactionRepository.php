@@ -10,6 +10,7 @@ use App\Interfaces\ShippingGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Jobs\RefundCancelledTransactionJob;
 use App\Models\BuyerBalanceHistory;
+use App\Models\Complaint;
 use App\Models\Product;
 use App\Models\ProductVariantMongo;
 use App\Models\Store;
@@ -25,6 +26,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
@@ -45,6 +47,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             'transactionDetails.product.store',
             'transactionDetails.product.productCategory',
             'transactionDetails.product.productImages',
+            'complaint',
         ])
             ->where(function ($query) use ($search) {
                 if ($search) {
@@ -143,6 +146,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             'transactionDetails.product.productImages',
             'productReviews.user',
             'productReviews.attachments',
+            'complaint',
         ]);
 
         return $query->first();
@@ -974,6 +978,14 @@ class TransactionRepository implements TransactionRepositoryInterface
             // transaksi, bukan berdasar baca tanpa kunci.
             $transaction = Transaction::where('id', $id)->lockForUpdate()->first();
 
+            if (! $transaction) {
+                throw new Exception('Data Transaksi Tidak Ditemukan', 404);
+            }
+
+            if (Complaint::activeFor($transaction->id)) {
+                throw new Exception('Pesanan sedang dikomplain', 422);
+            }
+
             if (isset($data['tracking_number'])) {
                 $transaction->tracking_number = $data['tracking_number'];
             }
@@ -998,7 +1010,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            throw new Exception($e->getMessage());
+            throw new Exception($e->getMessage(), (int) $e->getCode());
         }
     }
 
@@ -1017,9 +1029,9 @@ class TransactionRepository implements TransactionRepositoryInterface
      * AutoCompleteTransaction (scheduler harian) -- satu tempat, bukan dua
      * implementasi yang bisa diam-diam berbeda.
      */
-    public function completeTransaction(string $id, ?string $receivingProof = null): Transaction
+    public function completeTransaction(string $id, ?string $receivingProof = null, bool $auto = false): Transaction
     {
-        return DB::transaction(function () use ($id, $receivingProof) {
+        return DB::transaction(function () use ($id, $receivingProof, $auto) {
             $transaction = Transaction::where('id', $id)->lockForUpdate()->first();
 
             if (! $transaction) {
@@ -1028,6 +1040,16 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             if ($transaction->delivery_status !== 'delivering') {
                 throw new Exception('Hanya status delivering yang bisa diselesaikan', 400);
+            }
+
+            if (Complaint::activeFor($transaction->id)) {
+                throw new Exception('Tarik komplain terlebih dulu sebelum menyelesaikan pesanan', 422);
+            }
+
+            // A complaint closed without refund gives the buyer 2 more days
+            // before the scheduler completes the order.
+            if ($auto && Complaint::where('transaction_id', $transaction->id)->where('resolved_at', '>', now()->subDays(2))->exists()) {
+                throw new Exception('Komplain baru selesai, pesanan belum diselesaikan otomatis', 422);
             }
 
             $transaction->delivery_status = 'completed';
@@ -1073,44 +1095,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                 throw new Exception('Data Transaksi Tidak Ditemukan', 404);
             }
 
-            if ($transaction->payment_status !== 'paid') {
-                throw new Exception('Hanya pesanan yang sudah dibayar yang bisa ditolak', 422);
-            }
-
-            if (! in_array($transaction->delivery_status, ['pending', 'processing'], true)) {
-                throw new Exception('Pesanan yang sudah dikirim tidak bisa dibatalkan', 422);
-            }
-
-            $this->restoreStock($transaction, $mongoAdjustments);
-            $this->escrowRepository->refund($transaction);
-
-            // The Saldo Blukios part goes back now; only the Midtrans part
-            // (refund_amount) is left for the job.
-            $balanceUsed = Money::fromDecimalString((string) ($transaction->balance_used ?? 0));
-            if ($balanceUsed->greaterThan(Money::zero())) {
-                $this->buyerBalanceRepository->credit(
-                    $transaction->buyer_id,
-                    (string) $balanceUsed->minor(),
-                    BuyerBalanceHistory::TYPE_REFUND,
-                    'refund_balance:'.$transaction->id,
-                    $transaction,
-                    'Refund pesanan '.$transaction->code,
-                );
-            }
-
-            $refundAmount = $transaction->midtransAmount();
-            $transaction->delivery_status = 'cancelled';
-            $transaction->payment_status = 'failed';
-            $transaction->refund_amount = (string) $refundAmount->minor();
-            $transaction->refund_reason = $reason;
-            if ($refundAmount->isZero()) {
-                $transaction->refund_status = 'refunded';
-                $transaction->refund_method = 'balance';
-                $transaction->refunded_at = now();
-            } else {
-                $transaction->refund_status = 'processing';
-            }
-            $transaction->save();
+            $this->refundPaidOrder($transaction, $reason, ['pending', 'processing'], true, $mongoAdjustments);
 
             DB::commit();
         } catch (\Throwable $e) {
@@ -1121,17 +1106,188 @@ class TransactionRepository implements TransactionRepositoryInterface
             throw $e;
         }
 
-        if ($transaction->refund_status === 'refunded') {
-            BusinessMetrics::record('refund_done', 'balance');
-        } else {
-            $this->startRefund($transaction);
-        }
+        $this->startRefundAfterCommit($transaction);
 
         return $transaction->fresh([
             'buyer.user',
             'store.user',
             'transactionDetails.product',
         ]);
+    }
+
+    /**
+     * Full refund of a paid order, shared by the seller's cancel and an
+     * approved complaint: escrow leaves the seller's pending balance,
+     * balance_used goes back to Saldo Blukios now, refund_amount is the
+     * Midtrans part (0 = refunded right here). Caller holds the order's lock
+     * and its DB transaction, then calls startRefundAfterCommit().
+     *
+     * @param  list<string>  $deliveryStates  states the order may be in
+     * @param  bool  $restock  false when the buyer keeps the goods (complaint)
+     */
+    private function refundPaidOrder(Transaction $transaction, string $reason, array $deliveryStates, bool $restock, array &$mongoAdjustments): void
+    {
+        if ($transaction->payment_status !== 'paid') {
+            throw new Exception('Hanya pesanan yang sudah dibayar yang bisa direfund', 422);
+        }
+
+        if (! in_array($transaction->delivery_status, $deliveryStates, true)) {
+            throw new Exception(in_array($transaction->delivery_status, ['delivering', 'completed'], true)
+                ? 'Pesanan yang sudah dikirim tidak bisa dibatalkan'
+                : 'Status pesanan sudah berubah, refund tidak bisa diproses', 422);
+        }
+
+        if ($restock) {
+            $this->restoreStock($transaction, $mongoAdjustments);
+        }
+        $this->escrowRepository->refund($transaction);
+
+        // The Saldo Blukios part goes back now; only the Midtrans part
+        // (refund_amount) is left for the job.
+        $balanceUsed = Money::fromDecimalString((string) ($transaction->balance_used ?? 0));
+        if ($balanceUsed->greaterThan(Money::zero())) {
+            $this->buyerBalanceRepository->credit(
+                $transaction->buyer_id,
+                (string) $balanceUsed->minor(),
+                BuyerBalanceHistory::TYPE_REFUND,
+                'refund_balance:'.$transaction->id,
+                $transaction,
+                'Refund pesanan '.$transaction->code,
+            );
+        }
+
+        $refundAmount = $transaction->midtransAmount();
+        $transaction->delivery_status = 'cancelled';
+        $transaction->payment_status = 'failed';
+        $transaction->refund_amount = (string) $refundAmount->minor();
+        $transaction->refund_reason = $reason;
+        if ($refundAmount->isZero()) {
+            $transaction->refund_status = 'refunded';
+            $transaction->refund_method = 'balance';
+            $transaction->refunded_at = now();
+        } else {
+            $transaction->refund_status = 'processing';
+        }
+        $transaction->save();
+    }
+
+    private function startRefundAfterCommit(Transaction $transaction): void
+    {
+        if ($transaction->refund_status === 'refunded') {
+            BusinessMetrics::record('refund_done', 'balance');
+        } else {
+            $this->startRefund($transaction);
+        }
+    }
+
+    /**
+     * Pembeli mengajukan komplain untuk pesanan yang sedang dikirim. Pesanan
+     * dikunci dulu supaya tidak beririsan dengan completeTransaction().
+     *
+     * @param  array{reason: string, description: string}  $data
+     * @param  list<UploadedFile>  $photos
+     */
+    public function createComplaint(string $transactionId, array $data, array $photos): Transaction
+    {
+        // Stored before the lock (no file I/O under it) and deleted if the insert fails.
+        $paths = array_map(fn (UploadedFile $photo) => $photo->store('assets/complaint', 'public'), $photos);
+
+        try {
+            return DB::transaction(fn () => $this->insertComplaint($transactionId, $data, $paths));
+        } catch (\Throwable $e) {
+            Storage::disk('public')->delete($paths);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @param  array{reason: string, description: string}  $data
+     * @param  list<string>  $paths
+     */
+    private function insertComplaint(string $transactionId, array $data, array $paths): Transaction
+    {
+        $transaction = Transaction::where('id', $transactionId)->lockForUpdate()->first();
+
+        if (! $transaction) {
+            throw new Exception('Data Transaksi Tidak Ditemukan', 404);
+        }
+
+        if ($transaction->payment_status !== 'paid' || $transaction->delivery_status !== 'delivering') {
+            throw new Exception('Komplain hanya bisa diajukan untuk pesanan yang sedang dikirim', 422);
+        }
+
+        if (Complaint::where('transaction_id', $transaction->id)->exists()) {
+            throw new Exception('Pesanan ini sudah pernah dikomplain', 422);
+        }
+
+        Complaint::create([
+            'transaction_id' => $transaction->id,
+            'reason' => $data['reason'],
+            'description' => $data['description'],
+            'photos' => $paths,
+            'status' => 'open',
+            'deadline_at' => now()->addDays(2),
+        ]);
+
+        return $transaction->fresh(['buyer.user', 'store.user', 'transactionDetails.product', 'complaint']);
+    }
+
+    /**
+     * Pindahkan komplain dari salah satu status $from ke $to. Kunci selalu
+     * pesanan dulu lalu komplain (urutan yang sama dengan completeTransaction).
+     * approved = refund penuh dalam transaksi DB yang sama, tanpa
+     * mengembalikan stok (barang ada di pembeli).
+     *
+     * @param  list<string>  $from
+     * @param  array<string, mixed>  $changes  seller_response, admin_note, resolved_by
+     */
+    public function moveComplaint(string $complaintId, array $from, string $to, array $changes = []): Transaction
+    {
+        $transactionId = Complaint::where('id', $complaintId)->value('transaction_id');
+        if (! $transactionId) {
+            throw new Exception('Komplain tidak ditemukan', 404);
+        }
+
+        $transaction = DB::transaction(function () use ($transactionId, $complaintId, $from, $to, $changes) {
+            $transaction = Transaction::where('id', $transactionId)->lockForUpdate()->firstOrFail();
+            $complaint = Complaint::where('id', $complaintId)->lockForUpdate()->firstOrFail();
+
+            if (! in_array($complaint->status, $from, true)) {
+                throw new Exception('Status komplain sudah berubah', 422);
+            }
+
+            if ($to === 'approved') {
+                $noStock = [];
+                $this->refundPaidOrder($transaction, 'Komplain pembeli disetujui', ['delivering'], false, $noStock);
+            }
+
+            $complaint->fill($changes);
+            $complaint->status = $to;
+            if ($to === 'escalated') {
+                $complaint->escalated_at = now();
+            } else {
+                $complaint->resolved_at = now();
+            }
+            $complaint->save();
+
+            return $transaction;
+        });
+
+        $transaction = $transaction->fresh(['buyer.user', 'store.user', 'transactionDetails.product', 'complaint']);
+
+        // Only an approval changes the order itself (cancelled + refund). The
+        // change is committed: a failure here is logged, never reported.
+        if ($to === 'approved') {
+            try {
+                $this->startRefundAfterCommit($transaction);
+                event(new TransactionStatusUpdated($transaction));
+            } catch (\Throwable $e) {
+                Log::error('Langkah setelah komplain disetujui gagal', ['complaint' => $complaintId, 'error' => $e->getMessage()]);
+            }
+        }
+
+        return $transaction;
     }
 
     /**

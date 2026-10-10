@@ -241,6 +241,18 @@ Saldo Blukios) is `refunded` / `balance` immediately, without a job.
 - `refunded`: done (`refund_method` `midtrans` or `manual`). A Midtrans
   `refund` webhook also lands here.
 
+### Buyer complaint on a shipped order (refund)
+
+`POST /transaction/{id}/complaint` (buyer; only `paid` + `delivering`, one
+per order). While the complaint is `open` or `escalated` the order cannot be
+completed (buyer gets 422, `transaction:auto-complete` skips it), so escrow
+stays held. The seller accepts (`approved`) or rejects with a response
+(`escalated`); an unanswered complaint escalates after 2 days
+(`complaints:escalate`). An admin approves or rejects an escalated one; the
+buyer can withdraw it before that. `approved` is the same full refund as a
+seller cancel (same code path, same transaction as the approval) except that
+stock is not restored: the buyer keeps the goods.
+
 ### Paying with Saldo Blukios
 
 `use_balance: true` on checkout allocates min(balance, `grand_total`) to the

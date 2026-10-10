@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\TransactionStatusUpdated;
 use App\Helpers\ResponseHelper;
+use App\Models\Complaint;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,9 +24,10 @@ class LogisticsController extends Controller
      */
     public function webhook(Request $request)
     {
-        // Authenticate webhook caller via pre-shared secret
-        $secret = config('app.logistics_webhook_secret');
-        if ($secret && $request->header('X-Webhook-Secret') !== $secret) {
+        // Pre-shared secret, required: without one configured the endpoint is
+        // closed, since any caller knowing an AWB could move orders.
+        $secret = (string) config('services.logistics.webhook_secret');
+        if ($secret === '' || ! hash_equals($secret, (string) $request->header('X-Webhook-Secret'))) {
             Log::warning('Logistics webhook unauthorized', ['ip' => $request->ip()]);
 
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -50,23 +52,29 @@ class LogisticsController extends Controller
 
         // 3. Update Status Logic
         try {
-            $previousStatus = $transaction->delivery_status;
-            $newStatus = $previousStatus;
-
             switch ($status) {
                 case 'ON_PROCESS':
                 case 'MANIFESTED':
                 case 'ON_DELIVERY':
-                    $newStatus = 'delivering';
                     break;
 
                 case 'DELIVERED':
-                    $newStatus = 'completed';
-                    break;
+                    // Never completes the order: completion releases escrow and
+                    // ends the buyer's complaint window, so only the buyer
+                    // (completeTransaction) or transaction:auto-complete do it.
+                    Log::info('Logistics: paket diterima', [
+                        'transaction' => $transaction->code,
+                        'awb' => $awb,
+                        'pod_receiver' => $request->input('pod_receiver'),
+                        'pod_date' => $request->input('pod_date'),
+                    ]);
+
+                    return $this->processed($transaction->code, $transaction->delivery_status);
 
                 case 'RETURNED':
-                    // Optional: Handle return logic
-                    break;
+                    Log::warning("Logistics: paket dikembalikan untuk AWB {$awb}", ['transaction' => $transaction->code]);
+
+                    return $this->processed($transaction->code, $transaction->delivery_status);
 
                 default:
                     Log::warning("Unknown logistics status: $status for AWB: $awb");
@@ -74,31 +82,44 @@ class LogisticsController extends Controller
                     return response()->json(['message' => "Status '$status' ignored"], 200);
             }
 
-            // Save only if status changed
-            if ($previousStatus !== $newStatus) {
-                DB::transaction(function () use ($transaction, $newStatus, $status, $request) {
-                    $transaction->delivery_status = $newStatus;
+            $updated = DB::transaction(function () use ($transaction) {
+                $locked = Transaction::where('id', $transaction->id)->lockForUpdate()->first();
 
-                    if ($status === 'DELIVERED' && $request->has('pod_receiver')) {
-                        Log::info('Recipient: '.$request->pod_receiver);
-                    }
+                // Only a paid order not yet shipped moves forward; a complained,
+                // completed or cancelled order is left alone.
+                if (! $locked
+                    || $locked->payment_status !== 'paid'
+                    || ! in_array($locked->delivery_status, ['pending', 'processing'], true)
+                    || Complaint::activeFor($locked->id)) {
+                    return null;
+                }
 
-                    $transaction->save();
-                    Log::info("Transaction {$transaction->code} updated to {$transaction->delivery_status}");
+                $locked->delivery_status = 'delivering';
+                $locked->save();
 
-                    event(new TransactionStatusUpdated($transaction->fresh()));
-                });
+                return $locked;
+            });
+
+            if (! $updated) {
+                return $this->processed($transaction->code, $transaction->fresh()?->delivery_status);
             }
 
-            return ResponseHelper::jsonResponse(true, 'Webhook Processed Successfully', [
-                'transaction_code' => $transaction->code,
-                'new_status' => $newStatus,
-            ], 200);
+            Log::info("Transaction {$updated->code} updated to delivering");
+            event(new TransactionStatusUpdated($updated->fresh()));
 
+            return $this->processed($updated->code, 'delivering');
         } catch (\Exception $e) {
             Log::error('Error processing logistics webhook: '.$e->getMessage());
 
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
+    }
+
+    private function processed(string $code, ?string $status)
+    {
+        return ResponseHelper::jsonResponse(true, 'Webhook Processed Successfully', [
+            'transaction_code' => $code,
+            'new_status' => $status,
+        ], 200);
     }
 }

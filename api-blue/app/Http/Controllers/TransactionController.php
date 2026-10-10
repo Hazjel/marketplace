@@ -245,7 +245,7 @@ class TransactionController extends Controller implements HasMiddleware
 
             return ResponseHelper::jsonResponse(true, 'Data Transaksi Berhasil Diupdate', new TransactionResource($transaction), 200);
         } catch (\Exception $e) {
-            return ResponseHelper::exceptionResponse($e);
+            return $this->domainErrorResponse($e);
         }
     }
 

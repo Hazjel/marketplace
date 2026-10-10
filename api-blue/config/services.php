@@ -45,6 +45,10 @@ return [
         'api_key' => env('KOMERCE_API_KEY', env('KEY_RAJA_ONGKIR', '')),
     ],
 
+    'logistics' => [
+        'webhook_secret' => env('LOGISTICS_WEBHOOK_SECRET', ''),
+    ],
+
     'binderbyte' => [
         'api_key' => env('BINDERBYTE_API_KEY', ''),
     ],

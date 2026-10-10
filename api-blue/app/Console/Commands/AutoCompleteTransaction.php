@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Interfaces\TransactionRepositoryInterface;
+use App\Models\Complaint;
 use App\Models\Transaction;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -35,6 +36,10 @@ class AutoCompleteTransaction extends Command
         $transactions = Transaction::where('payment_status', 'paid')
             ->where('delivery_status', 'delivering')
             ->where('updated_at', '<=', now()->subDays(7))
+            // completeTransaction() re-checks this under the lock.
+            ->whereDoesntHave('complaint', fn ($query) => $query->where(fn ($q) => $q
+                ->whereIn('status', Complaint::ACTIVE)
+                ->orWhere('resolved_at', '>', now()->subDays(2))))
             ->get();
 
         if ($transactions->isEmpty()) {
@@ -57,7 +62,7 @@ class AutoCompleteTransaction extends Command
                 // yang bisa tumpang tindih dengan buyer yang menekan
                 // "selesai" untuk transaksi yang sama pada saat bersamaan
                 // dan sama-sama lolos merilis dana.
-                $transactionRepository->completeTransaction($transaction->id);
+                $transactionRepository->completeTransaction($transaction->id, null, true);
 
                 $this->info("Escrow released for {$transaction->code}");
                 Log::info("SCHEDULER: Escrow released for {$transaction->code}");

@@ -7,6 +7,7 @@ use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClientErrorController;
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\ForgotPasswordController;
@@ -252,6 +253,15 @@ Route::middleware('auth:sanctum')->group(function () {
         TransactionController::class,
         'refundAccount',
     ]);
+    // Buyer complaint on a delivering order (ComplaintController).
+    Route::middleware('throttle:10,1')->post('transaction/{id}/complaint', [ComplaintController::class, 'store']);
+    Route::get('complaint', [ComplaintController::class, 'index']);
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('complaint/{id}/withdraw', [ComplaintController::class, 'withdraw']);
+        Route::post('complaint/{id}/accept', [ComplaintController::class, 'accept']);
+        Route::post('complaint/{id}/reject', [ComplaintController::class, 'reject']);
+        Route::post('complaint/{id}/resolve', [ComplaintController::class, 'resolve']);
+    });
     Route::post('transaction/{id}/mark-refunded', [
         TransactionController::class,
         'markRefunded',

@@ -3,6 +3,7 @@
 namespace App\Interfaces;
 
 use App\Models\Transaction;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 
 interface TransactionRepositoryInterface
@@ -67,9 +68,25 @@ interface TransactionRepositoryInterface
 
     public function compensateStockRestoreRollback(array $mongoAdjustments);
 
-    public function completeTransaction(string $id, ?string $receivingProof = null): Transaction;
+    /** $auto: the scheduler, which also waits 2 days after a complaint closed. */
+    public function completeTransaction(string $id, ?string $receivingProof = null, bool $auto = false): Transaction;
 
     public function cancelPaidOrder(string $id, string $reason): Transaction;
+
+    /**
+     * @param  array{reason: string, description: string}  $data
+     * @param  list<UploadedFile>  $photos
+     */
+    public function createComplaint(string $transactionId, array $data, array $photos): Transaction;
+
+    /**
+     * Complaint from one of $from to $to under the order's lock; "approved"
+     * refunds the order in full (no restock) in the same DB transaction.
+     *
+     * @param  list<string>  $from
+     * @param  array<string, mixed>  $changes
+     */
+    public function moveComplaint(string $complaintId, array $from, string $to, array $changes = []): Transaction;
 
     public function saveRefundAccount(string $id, array $account): Transaction;
 

@@ -16,6 +16,9 @@ Schedule::command('transaction:check-expiry')->everyMinute();
 
 Schedule::command('transaction:auto-complete')->dailyAt('02:00');
 
+// Seller's 2-day window on a buyer complaint ran out: hand it to admin.
+Schedule::command('complaints:escalate')->everyFifteenMinutes()->withoutOverlapping();
+
 // Operational alerts (config/ops.php). The heartbeat proves a queue worker
 // is consuming jobs; ops:check emails OPS_ALERT_EMAIL when something breaks.
 Schedule::job(new QueueHeartbeatJob)->everyMinute();
