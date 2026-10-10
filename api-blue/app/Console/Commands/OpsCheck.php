@@ -50,6 +50,8 @@ class OpsCheck extends Command
             $this->refundConflicts(),
             $this->lateRefunds(),
             $this->buyerBalanceDrift(),
+            $this->complaintsAwaitingAdmin(),
+            $this->complaintsPastDeadline(),
         ]));
 
         $due = array_values(array_filter(
@@ -380,6 +382,44 @@ class OpsCheck extends Command
             ],
             cooldown: (int) config('ops.manual_refund_reminder_minutes'),
         );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function complaintsAwaitingAdmin(): ?array
+    {
+        $hours = (int) config('ops.complaint_admin_hours');
+        $codes = Transaction::whereHas('complaint', fn ($q) => $q->where('status', 'escalated')->where('escalated_at', '<', now()->subHours($hours)))
+            ->pluck('code');
+
+        if ($codes->isEmpty()) {
+            return null;
+        }
+
+        return $this->problem('complaints-awaiting-admin', 'Komplain menunggu keputusan admin', [
+            $codes->count()." komplain sudah lebih dari {$hours} jam menunggu admin: ".$codes->take(10)->implode(', ').'.',
+            'Pesanan ini tidak bisa diselesaikan dan dana penjual tertahan sampai diputuskan. Buka Admin > Semua Transaksi > tab "Komplain".',
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function complaintsPastDeadline(): ?array
+    {
+        // An hour of slack: complaints:escalate runs every 15 minutes.
+        $codes = Transaction::whereHas('complaint', fn ($q) => $q->where('status', 'open')->where('deadline_at', '<', now()->subHour()))
+            ->pluck('code');
+
+        if ($codes->isEmpty()) {
+            return null;
+        }
+
+        return $this->problem('complaints-past-deadline', 'Komplain melewati tenggat tapi belum dieskalasi', [
+            $codes->count().' komplain lewat tenggat penjual lebih dari 1 jam tapi masih "open": '.$codes->take(10)->implode(', ').'.',
+            'Jadwal complaints:escalate tidak berjalan. Cek scheduler, atau jalankan `php artisan complaints:escalate` di kontainer blue-api.',
+        ]);
     }
 
     /**

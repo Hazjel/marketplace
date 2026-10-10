@@ -109,6 +109,17 @@ onMounted(async () => {
           </button>
           <button
             :class="
+              activeSection === 'complaints'
+                ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
+                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
+            "
+            class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
+            @click="scrollTo('complaints')"
+          >
+            5. Complaints
+          </button>
+          <button
+            :class="
               activeSection === 'prohibited'
                 ? 'bg-blue-50 dark:bg-[#024ad8]/20 text-[#024ad8] font-medium border-[#024ad8]'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border-transparent'
@@ -116,7 +127,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('prohibited')"
           >
-            5. Prohibited Activities
+            6. Prohibited Activities
           </button>
           <button
             :class="
@@ -127,7 +138,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('contact')"
           >
-            6. Contact Us
+            7. Contact Us
           </button>
         </div>
       </aside>
@@ -244,8 +255,44 @@ onMounted(async () => {
             </p>
           </section>
 
+          <section id="complaints" class="scroll-mt-32">
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Complaints</h2>
+            <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
+              If an order does not arrive, arrives damaged, or is not what you ordered, you can file
+              a complaint from the order page:
+            </p>
+            <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-white/10">
+              <ul class="space-y-3 list-none p-0 m-0">
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">You can file a complaint only while the order is being shipped, before you confirm receipt or the order completes automatically. Each order can have one complaint.</span>
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">A complaint states the reason (item not received, damaged, wrong item, or other), a description, and up to 3 photos.</span>
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">The seller has 2 days to respond. If the seller accepts, the complaint is approved. If the seller rejects it or does not respond in time, our admin team reviews it and decides.</span>
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">An approved complaint is refunded in full as described in section 4. You do not need to return the goods.</span>
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">If the complaint is rejected, the order continues and you can confirm receipt as usual.</span>
+                </li>
+                <li class="flex gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">While a complaint is open or under admin review, the order cannot be completed. You can withdraw your complaint at any time before it is decided; a withdrawn complaint cannot be filed again.</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
           <section id="prohibited" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Prohibited Activities</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">6. Prohibited Activities</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
               You may not access or use the Site for any purpose other than that for which we make
               the Site available. As a user of the Site, you agree not to:
@@ -265,7 +312,7 @@ onMounted(async () => {
           </section>
 
           <section id="contact" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">6. Contact Us</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">7. Contact Us</h2>
             <div
               class="bg-blue-50 dark:bg-[#024ad8]/10 border border-blue-100 dark:border-[#024ad8]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6"
             >

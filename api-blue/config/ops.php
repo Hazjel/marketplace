@@ -32,6 +32,10 @@ return [
     // with `ops:backup-done`; no success for a week plus slack means it broke.
     'backup_stale_hours' => (int) env('OPS_BACKUP_STALE_HOURS', 7 * 24 + 2),
 
+    // An escalated complaint waiting this long for an admin decision alerts
+    // (open complaints past their deadline alert after 1 hour regardless).
+    'complaint_admin_hours' => (int) env('OPS_COMPLAINT_ADMIN_HOURS', 24),
+
     // Manual refunds waiting on a transfer are reminded once a day.
     'manual_refund_reminder_minutes' => 24 * 60,
 ];

@@ -15,13 +15,20 @@ use App\Models\StoreBalanceHistory;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\User;
+use App\Notifications\ComplaintNotification;
+use App\Notifications\RefundStatusNotification;
+use App\Services\PushNotificationService;
+use App\Support\ComplaintAlerts;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -45,6 +52,9 @@ class ComplaintTest extends TestCase
     public array $refundCalls = [];
 
     private int $seq = 0;
+
+    /** @var list<array{string, string}> [user id, body] of every push */
+    private array $pushes = [];
 
     protected function setUp(): void
     {
@@ -560,5 +570,148 @@ class ComplaintTest extends TestCase
 
         $this->actingAs($this->admin())->getJson('/api/complaint?status=open')
             ->assertOk()->assertJsonCount(1, 'data.data')->assertJsonPath('data.data.0.complaint.status', 'open');
+    }
+
+    private function watchMessages(): void
+    {
+        Notification::fake();
+        $this->mock(PushNotificationService::class, function ($mock) {
+            $mock->shouldReceive('sendToUser')->andReturnUsing(function ($user, $title, $body) {
+                $this->pushes[] = [$user->id, $body];
+            });
+        });
+    }
+
+    /**
+     * Subject, lines, button and link of every complaint mail $user got, one string per mail.
+     *
+     * @return list<string>
+     */
+    private function complaintMails(User $user): array
+    {
+        return Notification::sent($user, ComplaintNotification::class)
+            ->map(fn (ComplaintNotification $n) => implode("\n", [$n->subject, ...$n->lines, $n->actionText, $n->url]))
+            ->values()->all();
+    }
+
+    /** @return list<string> */
+    private function pushedTo(User $user): array
+    {
+        return array_values(array_map(fn ($p) => $p[1], array_filter($this->pushes, fn ($p) => $p[0] === $user->id)));
+    }
+
+    public function test_a_new_complaint_mails_and_pushes_the_seller(): void
+    {
+        $this->watchMessages();
+        $complaint = $this->openComplaint();
+        $transaction = Transaction::findOrFail($complaint->transaction_id);
+
+        [$mail] = $this->complaintMails($this->sellerUser);
+        $this->assertStringContainsString("Komplain baru untuk pesanan {$transaction->code}", $mail);
+        $this->assertStringContainsString('Alasan: Barang rusak', $mail);
+        $this->assertStringContainsString('Layar retak saat paket dibuka', $mail);
+        $this->assertStringContainsString('Tanggapi sebelum '.$complaint->deadline_at->format('d/m/Y H:i').' WIB, setelah itu komplain diteruskan ke admin.', $mail);
+        $this->assertStringEndsWith('/admin/transaction/'.$transaction->id, $mail);
+        $this->assertSame(["Pembeli mengajukan komplain untuk pesanan {$transaction->code}."], $this->pushedTo($this->sellerUser));
+        $this->assertSame([], $this->complaintMails($this->buyerUser));
+
+        $html = (string) Notification::sent($this->sellerUser, ComplaintNotification::class)->first()->toMail($this->sellerUser)->render();
+        $this->assertStringContainsString('Tanggapi Komplain', $html);
+    }
+
+    public function test_escalation_tells_the_buyer_whether_the_seller_rejected_or_stayed_silent(): void
+    {
+        $this->watchMessages();
+        $this->escalatedComplaint();
+        $silent = $this->openComplaint();
+        $silent->update(['deadline_at' => now()->subMinute()]);
+
+        $this->artisan('complaints:escalate')->assertExitCode(0);
+
+        $mails = $this->complaintMails($this->buyerUser);
+        $this->assertCount(2, $mails);
+        $this->assertStringContainsString('sedang ditinjau admin', $mails[0]);
+        $this->assertStringContainsString('Penjual menolak komplain: "Barang dikirim dalam kondisi baik"', $mails[0]);
+        $this->assertStringContainsString('Penjual tidak menanggapi dalam 2 hari.', $mails[1]);
+        $this->assertStringEndsWith('/'.$this->buyerUser->username.'/transaction/'.$silent->transaction_id, $mails[1]);
+        $this->assertCount(2, $this->pushedTo($this->buyerUser));
+        // The seller only heard about the two new complaints.
+        $this->assertCount(2, $this->complaintMails($this->sellerUser));
+    }
+
+    public function test_admin_rejection_tells_buyer_and_seller_with_the_note(): void
+    {
+        $complaint = $this->escalatedComplaint();
+        $this->watchMessages();
+
+        $this->actingAs($this->admin())->postJson("/api/complaint/{$complaint->id}/resolve", ['outcome' => 'reject', 'note' => 'Bukti tidak cukup'])->assertOk();
+
+        [$buyerMail] = $this->complaintMails($this->buyerUser);
+        [$sellerMail] = $this->complaintMails($this->sellerUser);
+        $this->assertStringContainsString('ditolak admin', $buyerMail);
+        $this->assertStringContainsString('Catatan admin: Bukti tidak cukup', $buyerMail);
+        $this->assertStringContainsString('ditolak admin, pesanan berlanjut', $sellerMail);
+        $this->assertStringContainsString('Catatan admin: Bukti tidak cukup', $sellerMail);
+        $this->assertCount(1, $this->pushedTo($this->buyerUser));
+        $this->assertCount(1, $this->pushedTo($this->sellerUser));
+    }
+
+    public function test_withdrawal_tells_the_seller(): void
+    {
+        $complaint = $this->openComplaint();
+        $this->watchMessages();
+
+        $this->actingAs($this->buyerUser)->postJson("/api/complaint/{$complaint->id}/withdraw")->assertOk();
+
+        [$mail] = $this->complaintMails($this->sellerUser);
+        $this->assertStringContainsString('Pembeli menarik komplain', $mail);
+        $this->assertSame([], $this->complaintMails($this->buyerUser));
+    }
+
+    public function test_admin_approval_tells_the_seller_and_leaves_the_buyer_to_the_refund_mail(): void
+    {
+        $complaint = $this->escalatedComplaint();
+        $this->watchMessages();
+
+        $this->actingAs($this->admin())->postJson("/api/complaint/{$complaint->id}/resolve", ['outcome' => 'approve', 'note' => 'Foto membuktikan rusak'])->assertOk();
+
+        [$mail] = $this->complaintMails($this->sellerUser);
+        $this->assertStringContainsString('disetujui admin. Dana dikembalikan penuh ke pembeli', $mail);
+        $this->assertSame([], $this->complaintMails($this->buyerUser));
+        Notification::assertSentTo($this->buyerUser, RefundStatusNotification::class);
+    }
+
+    public function test_seller_who_accepts_gets_no_mail_about_it(): void
+    {
+        $complaint = $this->openComplaint();
+        $this->watchMessages();
+
+        $this->actingAs($this->sellerUser)->postJson("/api/complaint/{$complaint->id}/accept")->assertOk();
+
+        $this->assertSame([], $this->complaintMails($this->sellerUser));
+        $this->assertSame([], $this->pushedTo($this->sellerUser));
+    }
+
+    public function test_a_complaint_status_is_announced_once(): void
+    {
+        $this->watchMessages();
+        $complaint = $this->openComplaint();
+
+        ComplaintAlerts::send(Transaction::findOrFail($complaint->transaction_id));
+
+        $this->assertCount(1, $this->complaintMails($this->sellerUser));
+        $this->assertCount(1, $this->pushedTo($this->sellerUser));
+    }
+
+    public function test_a_failing_mail_does_not_fail_the_complaint(): void
+    {
+        Notification::shouldReceive('send')->andThrow(new RuntimeException('smtp down'));
+        Log::spy();
+
+        $transaction = $this->order();
+        $this->complain($this->buyerUser, $transaction)->assertCreated();
+
+        $this->assertSame('open', Complaint::where('transaction_id', $transaction->id)->value('status'));
+        Log::shouldHaveReceived('error')->withArgs(fn ($message, $context) => $message === 'Notifikasi komplain gagal' && $context['error'] === 'smtp down');
     }
 }

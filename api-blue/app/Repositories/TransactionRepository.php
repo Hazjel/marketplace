@@ -19,6 +19,7 @@ use App\Models\Transaction;
 use App\Models\Voucher;
 use App\Models\VoucherRedemption;
 use App\Support\BusinessMetrics;
+use App\Support\ComplaintAlerts;
 use App\ValueObjects\Money;
 use Exception;
 use Illuminate\Http\UploadedFile;
@@ -1193,12 +1194,16 @@ class TransactionRepository implements TransactionRepositoryInterface
         $paths = array_map(fn (UploadedFile $photo) => $photo->store('assets/complaint', 'public'), $photos);
 
         try {
-            return DB::transaction(fn () => $this->insertComplaint($transactionId, $data, $paths));
+            $transaction = DB::transaction(fn () => $this->insertComplaint($transactionId, $data, $paths));
         } catch (\Throwable $e) {
             Storage::disk('public')->delete($paths);
 
             throw $e;
         }
+
+        ComplaintAlerts::send($transaction);
+
+        return $transaction;
     }
 
     /**
@@ -1286,6 +1291,8 @@ class TransactionRepository implements TransactionRepositoryInterface
                 Log::error('Langkah setelah komplain disetujui gagal', ['complaint' => $complaintId, 'error' => $e->getMessage()]);
             }
         }
+
+        ComplaintAlerts::send($transaction);
 
         return $transaction;
     }

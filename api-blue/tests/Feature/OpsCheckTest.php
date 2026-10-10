@@ -6,6 +6,7 @@ use App\Console\Commands\OpsCheck;
 use App\Jobs\QueueHeartbeatJob;
 use App\Models\Buyer;
 use App\Models\BuyerBalanceHistory;
+use App\Models\Complaint;
 use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\User;
@@ -398,6 +399,59 @@ class OpsCheckTest extends TestCase
             fn (OpsAlertNotification $n) => str_contains($n->problems[0]['lines'][0], '2 pembeli')
                 && str_contains($n->problems[0]['lines'][0], $buyer->id.' (Rp5.000)')
                 && str_contains($n->problems[0]['lines'][0], $orphan->id.' (Rp1.000)')
+        );
+    }
+
+    private function complaint(string $status, array $attributes): Transaction
+    {
+        $transaction = $this->transaction(['payment_status' => 'paid', 'delivery_status' => 'delivering']);
+        Complaint::create($attributes + [
+            'transaction_id' => $transaction->id,
+            'reason' => 'damaged',
+            'description' => 'Layar retak saat dibuka',
+            'photos' => [],
+            'status' => $status,
+            'deadline_at' => now()->addDays(2),
+        ]);
+
+        return $transaction;
+    }
+
+    public function test_complaints_inside_their_time_limits_are_not_reported(): void
+    {
+        $this->complaint('open', ['deadline_at' => now()->subMinutes(30)]);
+        $this->complaint('escalated', ['escalated_at' => now()->subHours(23)]);
+        $this->complaint('rejected', ['deadline_at' => now()->subDays(3), 'escalated_at' => now()->subDays(3)]);
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_an_escalated_complaint_waiting_on_admin_is_reported(): void
+    {
+        $waiting = $this->complaint('escalated', ['escalated_at' => now()->subHours(25)]);
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Komplain menunggu keputusan admin'], $this->alertedTitles());
+        Notification::assertSentOnDemand(
+            OpsAlertNotification::class,
+            fn (OpsAlertNotification $n) => str_contains($n->problems[0]['lines'][0], '1 komplain sudah lebih dari 24 jam')
+                && str_contains($n->problems[0]['lines'][0], $waiting->code)
+        );
+    }
+
+    public function test_an_open_complaint_past_its_deadline_means_escalation_is_not_running(): void
+    {
+        $late = $this->complaint('open', ['deadline_at' => now()->subHours(2)]);
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Komplain melewati tenggat tapi belum dieskalasi'], $this->alertedTitles());
+        Notification::assertSentOnDemand(
+            OpsAlertNotification::class,
+            fn (OpsAlertNotification $n) => str_contains($n->problems[0]['lines'][0], $late->code)
         );
     }
 }
