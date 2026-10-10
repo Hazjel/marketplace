@@ -58,10 +58,9 @@ const { user } = storeToRefs(authStore)
               <nav
                 class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 *:hover:text-custom-blue dark:*:hover:text-blue-400"
               >
-                <span class="cursor-default opacity-60">Customer Services</span>
-                <span class="cursor-default opacity-60">Return & Refund</span>
-                <span class="cursor-default opacity-60">Shipping Info</span>
-                <span class="cursor-default opacity-60">Contact Us</span>
+                <a href="mailto:support@blukios.store">Customer Services</a>
+                <RouterLink :to="{ name: 'app.terms', hash: '#refunds' }">Return & Refund</RouterLink>
+                <a href="mailto:support@blukios.store">Contact Us</a>
               </nav>
             </div>
           </div>

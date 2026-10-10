@@ -1,6 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const activeSection = ref('agreement')
 
 const scrollTo = (id) => {
@@ -20,8 +22,14 @@ const scrollTo = (id) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.scrollTo(0, 0)
+  // Footer links like "Return & Refund" open /terms#refunds.
+  const section = route.hash.slice(1)
+  if (section && document.getElementById(section)) {
+    await nextTick()
+    scrollTo(section)
+  }
 })
 </script>
 
