@@ -4,6 +4,9 @@ import { axiosInstance } from '@/plugins/axios'
 import { useAuthStore } from '@/stores/auth'
 import { defineStore } from 'pinia'
 
+// Complaint actions: no page spinner, and the API's message for the toast.
+const COMPLAINT = { quiet: true, withMessage: true }
+
 export const useTransactionStore = defineStore('transaction', {
   state: () => ({
     transactions: [],
@@ -19,7 +22,8 @@ export const useTransactionStore = defineStore('transaction', {
     _fetchSeq: 0 // cegah response request lama nimpa hasil request lebih baru
   }),
   actions: {
-    async fetchTransactionsPaginated(params) {
+    // path 'complaint': admin queue of orders by complaint status (default escalated).
+    async fetchTransactionsPaginated(params, path = 'transaction/all/paginated') {
       this.loading = true
       const authStore = useAuthStore()
       const mode = authStore.activeMode
@@ -32,7 +36,7 @@ export const useTransactionStore = defineStore('transaction', {
       try {
         // Merge params with mode
         const queryParams = { ...params, mode }
-        const response = await axiosInstance.get(`transaction/all/paginated`, {
+        const response = await axiosInstance.get(path, {
           params: queryParams
         })
 
@@ -60,8 +64,10 @@ export const useTransactionStore = defineStore('transaction', {
       }
     },
 
-    async fetchTransactionById(id) {
-      this.loading = true
+    // quiet: leave `loading` alone -- TransactionDetail swaps the whole page
+    // for a spinner while it is true, unmounting the panel that asked.
+    async fetchTransactionById(id, { quiet = false } = {}) {
+      if (!quiet) this.loading = true
 
       try {
         const response = await axiosInstance.get(`transaction/${id}`)
@@ -70,7 +76,7 @@ export const useTransactionStore = defineStore('transaction', {
       } catch (error) {
         this.error = handleError(error)
       } finally {
-        this.loading = false
+        if (!quiet) this.loading = false
       }
     },
 
@@ -171,31 +177,73 @@ export const useTransactionStore = defineStore('transaction', {
 
     // Buyer's bank account for a manual (virtual account) refund.
     async submitRefundAccount(id, payload) {
-      return this.postAction(`transaction/${id}/refund-account`, payload)
+      return this.postAction(`transaction/${id}/refund-account`, payload, { quiet: true })
     },
 
     // Admin records a manual refund transfer.
     async markRefunded(id, note) {
-      return this.postAction(`transaction/${id}/mark-refunded`, { note })
+      return this.postAction(`transaction/${id}/mark-refunded`, { note }, { quiet: true })
     },
 
     // Admin moves a legacy manual refund to the buyer's Saldo Blukios.
     async refundToBalance(id) {
-      return this.postAction(`transaction/${id}/refund-to-balance`, {})
+      return this.postAction(`transaction/${id}/refund-to-balance`, {}, { quiet: true })
     },
 
-    async postAction(url, payload) {
-      this.loading = true
+    async fetchComplaints(params) {
+      return this.fetchTransactionsPaginated(params, 'complaint')
+    },
+
+    // Buyer files a complaint on a delivering order (photos optional, max 3).
+    async createComplaint(id, { reason, description, photos = [] }) {
+      const formData = new FormData()
+      formData.append('reason', reason)
+      formData.append('description', description)
+      photos.forEach((photo) => formData.append('photos[]', photo))
+
+      // Keep the header: with the instance's JSON default axios JSON-encodes the
+      // FormData and drops the files. In the browser axios then removes it so the
+      // browser sets multipart with the boundary.
+      return this.postAction(`transaction/${id}/complaint`, formData, {
+        ...COMPLAINT,
+        config: { headers: { 'Content-Type': 'multipart/form-data' } }
+      })
+    },
+
+    async withdrawComplaint(complaintId) {
+      return this.postAction(`complaint/${complaintId}/withdraw`, {}, COMPLAINT)
+    },
+
+    // Seller: full refund, stock is not returned.
+    async acceptComplaint(complaintId) {
+      return this.postAction(`complaint/${complaintId}/accept`, {}, COMPLAINT)
+    },
+
+    // Seller: escalates to admin.
+    async rejectComplaint(complaintId, response) {
+      return this.postAction(`complaint/${complaintId}/reject`, { response }, COMPLAINT)
+    },
+
+    // Admin on an escalated complaint: outcome approve | reject.
+    async resolveComplaint(complaintId, outcome, note) {
+      return this.postAction(`complaint/${complaintId}/resolve`, { outcome, note }, COMPLAINT)
+    },
+
+    // quiet: see fetchTransactionById. withMessage: resolve { data, message }.
+    async postAction(url, payload, { quiet = false, withMessage = false, config } = {}) {
+      if (!quiet) this.loading = true
       this.error = null
       try {
-        const response = await axiosInstance.post(url, payload)
+        const response = await axiosInstance.post(url, payload, ...(config ? [config] : []))
         this.success = response.data.message
-        return response.data.data
+        return withMessage
+          ? { data: response.data.data, message: response.data.message }
+          : response.data.data
       } catch (error) {
         this.error = handleError(error)
         throw error
       } finally {
-        this.loading = false
+        if (!quiet) this.loading = false
       }
     }
   }

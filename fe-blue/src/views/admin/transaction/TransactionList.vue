@@ -4,16 +4,24 @@ import Pagination from '@/components/admin/Pagination.vue'
 import { useTransactionStore } from '@/stores/transaction'
 import { debounce } from 'lodash'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { can } from '@/helpers/permissionHelper'
 import { useToast } from 'vue-toastification'
-import { isFailedTransaction } from '@/composables/useTransactionStatus'
+import {
+  COMPLAINT_REASONS,
+  isFailedTransaction,
+  resolveComplaintStatus
+} from '@/composables/useTransactionStatus'
+import { useAuthStore } from '@/stores/auth'
+import { formatToClientTimeZone } from '@/helpers/format'
+import { dashboardRoute } from '@/helpers/routeHelper'
 
 const toast = useToast()
 const transactionStore = useTransactionStore()
 const { transactions, meta, loading, success, error } = storeToRefs(transactionStore)
-const { fetchTransactionsPaginated, deleteTransaction } = transactionStore
+const { fetchTransactionsPaginated, fetchComplaints, deleteTransaction } = transactionStore
+const authStore = useAuthStore()
 
 const serverOptions = ref({
   page: 1,
@@ -27,17 +35,31 @@ const filters = ref({
 })
 
 const activeStatusFilter = ref('all')
-const statusFilters = [
+const statusFilters = computed(() => [
   { key: 'all', label: 'Semua' },
   { key: 'pending', label: 'Menunggu' },
   { key: 'processing', label: 'Diproses' },
   { key: 'delivering', label: 'Dikirim' },
   { key: 'completed', label: 'Selesai' },
   { key: 'cancelled', label: 'Dibatalkan' },
-  { key: 'refund', label: 'Menunggu Refund' }
-]
+  { key: 'refund', label: 'Menunggu Refund' },
+  // GET /complaint is admin-only.
+  ...(authStore.user?.role === 'admin' ? [{ key: 'complaint', label: 'Komplain' }] : [])
+])
+
+const complaintStatus = ref('escalated')
+const complaintStatuses = ['escalated', 'open', 'approved', 'rejected', 'withdrawn']
 
 const fetchData = async () => {
+  if (activeStatusFilter.value === 'complaint') {
+    await fetchComplaints({
+      page: serverOptions.value.page,
+      row_per_page: serverOptions.value.row_per_page,
+      status: complaintStatus.value
+    })
+    return
+  }
+
   await fetchTransactionsPaginated({
     ...serverOptions.value,
     ...filters.value,
@@ -70,10 +92,17 @@ watch(
   },
   { deep: true }
 )
+// Changing the page already fetches through the serverOptions watcher.
+const fetchFirstPage = () => {
+  if (serverOptions.value.page === 1) fetchData()
+  else serverOptions.value.page = 1
+}
 watch(activeStatusFilter, (value, previous) => {
-  serverOptions.value.page = 1
-  if (value === 'refund' || previous === 'refund') fetchData()
+  const serverSide = ['refund', 'complaint']
+  if (serverSide.includes(value) || serverSide.includes(previous)) fetchFirstPage()
+  else serverOptions.value.page = 1
 })
+watch(complaintStatus, fetchFirstPage)
 watch(success, (value) => {
   if (value) {
     toast.success(value)
@@ -87,10 +116,9 @@ watch(error, (value) => {
   }
 })
 
-import { computed } from 'vue'
 const filteredByStatus = computed(() => {
   if (!transactions.value) return []
-  if (activeStatusFilter.value === 'all') return transactions.value
+  if (['all', 'complaint'].includes(activeStatusFilter.value)) return transactions.value
 
   return transactions.value.filter((t) => {
     if (activeStatusFilter.value === 'pending') return t.payment_status === 'unpaid'
@@ -133,7 +161,16 @@ const filteredByStatus = computed(() => {
 
     <!-- Search & Controls -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-      <div class="relative flex-1">
+      <div v-if="activeStatusFilter === 'complaint'" class="flex flex-col gap-1.5 flex-1">
+        <label for="complaint-status-filter" class="sr-only">Status komplain</label>
+        <select id="complaint-status-filter" v-model="complaintStatus"
+          class="h-12 px-4 rounded-xl bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 text-sm font-medium text-custom-black dark:text-white focus:outline-none focus:border-custom-blue cursor-pointer">
+          <option v-for="key in complaintStatuses" :key="key" :value="key">
+            {{ resolveComplaintStatus({ status: key }).label }}
+          </option>
+        </select>
+      </div>
+      <div v-else class="relative flex-1">
         <svg class="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
@@ -151,7 +188,31 @@ const filteredByStatus = computed(() => {
 
     <!-- Transaction List -->
     <section class="flex flex-col flex-1 gap-4 w-full">
-      <div v-if="!loading && filteredByStatus.length > 0" class="flex flex-col gap-4">
+      <ul v-if="!loading && activeStatusFilter === 'complaint' && filteredByStatus.length > 0"
+        class="flex flex-col gap-3">
+        <li v-for="transaction in filteredByStatus" :key="transaction.id"
+          class="flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl p-4 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10">
+          <div class="flex flex-col gap-1 min-w-0 flex-1">
+            <p class="font-medium text-custom-black dark:text-white break-all">{{ transaction.code }}</p>
+            <p class="text-sm text-custom-grey dark:text-gray-400">
+              {{ COMPLAINT_REASONS[transaction.complaint?.reason] ?? transaction.complaint?.reason }}
+              ·
+              <template v-if="transaction.complaint?.escalated_at">
+                Diteruskan {{ formatToClientTimeZone(transaction.complaint.escalated_at) }}
+              </template>
+              <template v-else>
+                Diajukan {{ formatToClientTimeZone(transaction.complaint?.created_at) }}
+              </template>
+            </p>
+          </div>
+          <RouterLink :to="dashboardRoute('transaction.detail', { id: transaction.id })"
+            class="flex items-center justify-center h-11 px-5 rounded-xl bg-custom-blue text-white text-sm font-medium hover:bg-blue-700 shrink-0">
+            Lihat Pesanan
+          </RouterLink>
+        </li>
+      </ul>
+
+      <div v-else-if="!loading && filteredByStatus.length > 0" class="flex flex-col gap-4">
         <CardList v-for="transaction in filteredByStatus" :key="transaction.id"
           :item="transaction" @delete="handleDelete" />
       </div>
@@ -167,7 +228,9 @@ const filteredByStatus = computed(() => {
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
           </svg>
         </div>
-        <p class="font-medium text-lg text-custom-black dark:text-white">Belum ada transaksi</p>
+        <p class="font-medium text-lg text-custom-black dark:text-white">
+          {{ activeStatusFilter === 'complaint' ? 'Tidak ada komplain' : 'Belum ada transaksi' }}
+        </p>
         <p class="text-sm text-custom-grey dark:text-gray-400 mt-1">
           {{ filters.search ? 'Tidak ditemukan transaksi yang cocok' : 'Data transaksi akan muncul di sini' }}
         </p>

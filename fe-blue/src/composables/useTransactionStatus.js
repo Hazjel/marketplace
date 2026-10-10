@@ -77,6 +77,28 @@ export function resolveRefundStatus(transaction) {
   }
 }
 
+// Komplain pembeli (api-blue Complaint::REASONS dan status).
+export const COMPLAINT_REASONS = {
+  not_received: 'Barang tidak sampai',
+  damaged: 'Barang rusak',
+  wrong_item: 'Barang salah',
+  other: 'Lainnya'
+}
+
+const COMPLAINT_STATUSES = {
+  open: { label: 'Menunggu tanggapan penjual', style: PAYMENT_STYLES.unpaid },
+  escalated: { label: 'Ditinjau admin', style: DELIVERY_STYLES.processing },
+  approved: { label: 'Disetujui – dana dikembalikan', style: DELIVERY_STYLES.completed },
+  rejected: { label: 'Ditolak', style: PAYMENT_STYLES.failed },
+  withdrawn: { label: 'Ditarik', style: DEFAULT_STYLE }
+}
+
+export function resolveComplaintStatus(complaint) {
+  const status = complaint?.status
+  if (!status) return null
+  return COMPLAINT_STATUSES[status] ?? { label: status, style: DEFAULT_STYLE }
+}
+
 export function isFailedTransaction(transaction) {
   return FAILURE_STATUSES.includes(transaction?.payment_status)
 }

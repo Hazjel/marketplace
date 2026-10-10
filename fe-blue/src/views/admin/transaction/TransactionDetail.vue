@@ -4,13 +4,14 @@ import { formatRupiah, formatToClientTimeZone } from '@/helpers/format'
 import { useTransactionStore } from '@/stores/transaction'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import ReviewModal from '@/components/ReviewModal.vue'
 import TrackingMap from '@/components/TrackingMap.vue'
 import TransactionStatusBanner from '@/components/admin/transaction/TransactionStatusBanner.vue'
 import RefundPanel from '@/components/admin/transaction/RefundPanel.vue'
+import ComplaintPanel from '@/components/admin/transaction/ComplaintPanel.vue'
 import { logger } from '@/utils/logger'
 import { dashboardRoute } from '@/helpers/routeHelper'
 import { resolvePaymentStatus } from '@/composables/useTransactionStatus'
@@ -25,6 +26,14 @@ const authStore = useAuthStore()
 const { user, activeMode } = storeToRefs(authStore)
 const { loading } = storeToRefs(transactionStore)
 const { fetchTransactionById, updateTransaction, checkTransactionStatus } = transactionStore
+
+// Same ownership checks as api-blue TransactionPolicy (ownsAsBuyer / ownsAsStore).
+const isOrderBuyer = computed(
+  () => !!user.value?.id && transaction.value?.buyer?.user?.id === user.value.id
+)
+const isOrderSeller = computed(
+  () => !!user.value?.store?.id && transaction.value?.store?.id === user.value.store.id
+)
 
 const handleCheckStatus = async () => {
   try {
@@ -50,14 +59,18 @@ const fetchData = async () => {
     const response = await fetchTransactionById(route.params.id)
     if (!response) throw new Error('Transaction not found')
 
-    transaction.value = response
-    transaction.value.delivery_proof_url = response.delivery_proof
-      ? getImageUrl(response.delivery_proof)
-      : PlaceHolder
+    setTransaction(response)
   } catch (error) {
     logger.error('Error fetching transaction:', error)
     toast.error('Gagal memuat data transaksi. Terjadi kesalahan atau data tidak ditemukan.')
   }
+}
+
+const setTransaction = (response) => {
+  transaction.value = response
+  transaction.value.delivery_proof_url = response.delivery_proof
+    ? getImageUrl(response.delivery_proof)
+    : PlaceHolder
 }
 
 const handleUpdateData = async () => {
@@ -156,6 +169,8 @@ const handleCompleteOrderClick = () => {
 
 const handleReceivingProofChange = async (event) => {
   const file = event.target.files[0]
+  // Let the same photo be picked again after a refusal (e.g. an active complaint).
+  event.target.value = ''
   if (!file) return
 
   try {
@@ -164,7 +179,12 @@ const handleReceivingProofChange = async (event) => {
     toast.success('Pesanan diterima & diselesaikan')
   } catch (error) {
     logger.error('Failed to complete order', error)
-    toast.error('Gagal menyelesaikan pesanan')
+    // The interceptor does not toast a 422, e.g. "Tarik komplain terlebih dulu ...".
+    toast.error(
+      error?.response?.status === 422 && error.response.data?.message
+        ? error.response.data.message
+        : 'Gagal menyelesaikan pesanan'
+    )
   }
 }
 
@@ -259,6 +279,13 @@ v-else-if="!transaction || !transaction.id"
         :is-buyer="activeMode === 'buyer' && user?.role !== 'admin'"
         :is-admin="user?.role === 'admin'"
         @updated="(updated) => (transaction = updated)" />
+
+      <ComplaintPanel
+        :transaction="transaction"
+        :is-buyer="isOrderBuyer"
+        :is-seller="isOrderSeller"
+        :is-admin="user?.role === 'admin'"
+        @updated="setTransaction" />
 
       <section
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
