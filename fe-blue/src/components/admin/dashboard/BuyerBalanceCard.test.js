@@ -45,17 +45,17 @@ describe('BuyerBalanceCard', () => {
 
     expect(get).toHaveBeenCalledWith('balance?per_page=5', expect.anything())
     expect(wrapper.find('[data-testid="balance-skeleton"]').exists()).toBe(false)
-    expect(wrapper.get('[data-testid="balance"]').text()).toBe('Rp 777,000')
+    expect(wrapper.get('[data-testid="balance"]').text()).toBe('Rp 777.000')
 
     const items = wrapper.findAll('li').map((li) => li.text())
     expect(items).toHaveLength(4)
     expect(items[0]).toContain('Dipakai belanja')
-    expect(items[0]).toContain('−Rp 23,000')
+    expect(items[0]).toContain('−Rp 23.000')
     expect(items[1]).toContain('Refund')
     expect(items[1]).toContain('BLUE_1')
-    expect(items[1]).toContain('+Rp 800,000')
+    expect(items[1]).toContain('+Rp 800.000')
     expect(items[2]).toContain('Dikembalikan')
-    expect(items[2]).toContain('+Rp 5,000')
+    expect(items[2]).toContain('+Rp 5.000')
     expect(items[3]).toMatch(/(^|[^+−])Rp 0$/)
   })
 
@@ -81,7 +81,7 @@ describe('BuyerBalanceCard', () => {
 
     expect(get).toHaveBeenCalledTimes(2)
     expect(wrapper.find('[role="alert"]').exists()).toBe(false)
-    expect(wrapper.get('[data-testid="balance"]').text()).toBe('Rp 1,000')
+    expect(wrapper.get('[data-testid="balance"]').text()).toBe('Rp 1.000')
   })
 
   it('announces loading as a status', async () => {

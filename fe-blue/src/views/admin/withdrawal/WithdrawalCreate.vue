@@ -62,10 +62,7 @@ const handleSubmit = async () => {
 watch(
   () => withdrawal.value.amount,
   (newAmount) => {
-    if (typeof newAmount === 'string' && newAmount.includes('-')) {
-      newAmount = newAmount.replace(/-/g, '')
-    }
-    withdrawal.value.amount = formatRupiah(newAmount)
+    withdrawal.value.amount = formatRupiah(parseRupiah(newAmount))
   }
 )
 

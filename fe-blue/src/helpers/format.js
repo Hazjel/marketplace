@@ -1,12 +1,20 @@
 import numeral from 'numeral'
 import { DateTime } from 'luxon'
 
+// Indonesian grouping ("18.100"), matching the emails. Input is a number or
+// a plain numeric string from the API ("18100" / "18100.00").
 export function formatRupiah(value) {
-  return numeral(value).format('0,0[.]00')
+  const number = Number(value)
+  return (Number.isFinite(number) ? number : 0).toLocaleString('id-ID', {
+    maximumFractionDigits: 2
+  })
 }
 
+// Reads back what formatRupiah wrote into a text input ("1.250.000"): rupiah
+// are whole, so every non-digit is a separator. Numbers pass through as-is.
 export function parseRupiah(value) {
-  return numeral(value).value()
+  if (typeof value === 'number') return value
+  return Number(String(value ?? '').replace(/\D/g, '')) || 0
 }
 
 export function formatPercentage(value) {
