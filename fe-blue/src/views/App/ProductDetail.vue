@@ -333,10 +333,10 @@ const decrease = () => {
   }
 }
 
-const addToCart = () => {
+const addToCart = async () => {
   if (!authStore.token) {
     router.push({ name: 'auth.login' })
-    return
+    return false
   }
 
   const stock = displayedStock.value || 0
@@ -345,7 +345,7 @@ const addToCart = () => {
   // Check if product requires variants but none selected (though we auto-select, good to be safe)
   if (product.value?.has_variants && !selectedVariant.value) {
     toast.error('Pilih varian terlebih dahulu')
-    return
+    return false
   }
 
   // Find current quantity in cart
@@ -368,7 +368,7 @@ const addToCart = () => {
     toast.error(
       `Stok tidak cukup. Anda punya ${currentInCart} di keranjang. Maksimal stok ${stock}.`
     )
-    return
+    return false
   }
 
   const cartItem = {
@@ -384,8 +384,9 @@ const addToCart = () => {
     cartItem.variant_attributes = selectedVariant.value.variant_attributes
   }
 
-  cart.addToCart(cartItem)
+  await cart.addToCart(cartItem)
   toast.success('Produk berhasil ditambahkan ke keranjang')
+  return true
 }
 
 watch(
@@ -407,13 +408,15 @@ onMounted(() => {
  * User akan memilih checkout dari halaman cart — ini enterprise standard
  * (Tokopedia/Shopee pola: cart → checkout, bukan direct-to-payment).
  */
-const handleBuyNow = () => {
+const handleBuyNow = async () => {
   if (!authStore.token) {
     router.push({ name: 'auth.login' })
     return
   }
-  addToCart()
-  router.push({ name: 'app.cart' })
+  // Wait for the server cart: the cart page reloads it and would show it empty.
+  if (await addToCart()) {
+    router.push({ name: 'app.cart' })
+  }
 }
 
 /**
