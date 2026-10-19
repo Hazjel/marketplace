@@ -24,10 +24,15 @@ class P0EscrowRegressionTest extends TestCase
     use RefreshDatabase;
 
     private User $seller;
+
     private User $buyerUser;
+
     private Store $store;
+
     private StoreBalance $balance;
+
     private Buyer $buyer;
+
     private Product $product;
 
     protected function setUp(): void

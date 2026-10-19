@@ -1,25 +1,31 @@
 <?php
 
+use App\Interfaces\EscrowRepositoryInterface;
+use App\Interfaces\TransactionRepositoryInterface;
+use App\Models\Transaction;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\DB;
+
 require dirname(__DIR__, 2).'/vendor/autoload.php';
 
 $app = require dirname(__DIR__, 2).'/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-Illuminate\Support\Facades\DB::connection()->getPdo();
+$app->make(Kernel::class)->bootstrap();
+DB::connection()->getPdo();
 
 $action = $argv[1] ?? '';
 $transactionId = $argv[2] ?? '';
 $barrier = (int) ($argv[3] ?? 0);
 
 try {
-    Illuminate\Support\Facades\DB::select('select pg_advisory_lock_shared(?)', [$barrier]);
-    Illuminate\Support\Facades\DB::select('select pg_advisory_unlock_shared(?)', [$barrier]);
+    DB::select('select pg_advisory_lock_shared(?)', [$barrier]);
+    DB::select('select pg_advisory_unlock_shared(?)', [$barrier]);
 
-    $repository = app(App\Interfaces\TransactionRepositoryInterface::class);
+    $repository = app(TransactionRepositoryInterface::class);
     $result = match ($action) {
         'complete' => $repository->completeTransaction($transactionId),
         'cancel' => $repository->cancelPaidOrder($transactionId, 'concurrent test'),
-        'release' => app(App\Interfaces\EscrowRepositoryInterface::class)
-            ->release(App\Models\Transaction::findOrFail($transactionId)),
+        'release' => app(EscrowRepositoryInterface::class)
+            ->release(Transaction::findOrFail($transactionId)),
         default => throw new InvalidArgumentException('Unknown action'),
     };
 

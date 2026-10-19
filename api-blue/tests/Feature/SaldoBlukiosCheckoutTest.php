@@ -384,7 +384,8 @@ class SaldoBlukiosCheckoutTest extends TestCase
     public function test_deleting_an_unpaid_order_returns_the_balance(): void
     {
         $this->giveBalance(50000);
-        $this->checkout([$this->gadget])->assertStatus(201);
+        $this->snapToken = null;
+        $this->checkout([$this->gadget])->assertStatus(502);
         $order = Transaction::firstOrFail();
 
         $repository = app(TransactionRepositoryInterface::class);
@@ -398,6 +399,26 @@ class SaldoBlukiosCheckoutTest extends TestCase
         $this->assertSame(0, Transaction::count());
         $this->assertSame(50000, $this->balance());
         $this->assertSame(1, $this->historyCount(BuyerBalanceHistory::TYPE_PAYMENT_RETURNED));
+    }
+
+    public function test_unpaid_order_with_snap_token_cannot_be_deleted(): void
+    {
+        $this->giveBalance(50000);
+        $this->checkout([$this->gadget])->assertStatus(201);
+        $order = Transaction::firstOrFail();
+        $stock = $this->gadget->fresh()->stock;
+        $balance = $this->balance();
+
+        try {
+            app(TransactionRepositoryInterface::class)->delete($order->id);
+            $this->fail('deleting an unpaid order with a snap token must be refused');
+        } catch (\Exception $e) {
+            $this->assertSame(422, $e->getCode());
+        }
+
+        $this->assertDatabaseHas('transactions', ['id' => $order->id]);
+        $this->assertSame($balance, $this->balance());
+        $this->assertSame($stock, $this->gadget->fresh()->stock);
     }
 
     public function test_seller_cancel_returns_the_balance_part_and_refunds_only_the_rest(): void

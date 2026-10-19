@@ -208,7 +208,7 @@ class PaymentCallbackAtomicityTest extends TestCase
                 'signature_key' => hash('sha512', $code.'200126000.00'),
                 'transaction_status' => 'settlement',
                 'payment_type' => 'bank_transfer',
-            ])->assertStatus(500);
+            ])->assertStatus(503);
 
             $this->assertSame('unpaid', $transaction->fresh()->payment_status);
             $this->assertSame(0.0, (float) $this->storeBalance->fresh()->pending_balance);

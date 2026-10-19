@@ -22,6 +22,7 @@ class P0EscrowConcurrencyTest extends TestCase
     use DatabaseTruncation;
 
     private StoreBalance $balance;
+
     private Buyer $buyer;
 
     protected function tearDown(): void
@@ -134,6 +135,7 @@ class P0EscrowConcurrencyTest extends TestCase
     {
         $process = proc_open($command, $descriptor, $pipes, base_path());
         $this->assertIsResource($process);
+
         return [$process, $pipes];
     }
 

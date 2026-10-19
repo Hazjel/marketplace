@@ -189,10 +189,11 @@ class TransactionAuthorizationTest extends TestCase
 
     public function test_unpaid_transaction_with_snap_token_cannot_be_hard_deleted(): void
     {
-        $this->transaction->update([
+        $this->transaction->forceFill([
             'payment_status' => 'unpaid',
             'snap_token' => 'snap-token',
-        ]);
+        ])->save();
+        $this->assertSame('snap-token', $this->transaction->fresh()->snap_token);
 
         $this->actingAs($this->sellerUser, 'sanctum')
             ->deleteJson("/api/transaction/{$this->transaction->id}")
