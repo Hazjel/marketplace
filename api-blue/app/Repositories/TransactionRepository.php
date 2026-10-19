@@ -987,6 +987,10 @@ class TransactionRepository implements TransactionRepositoryInterface
                 throw new Exception('Data Transaksi Tidak Ditemukan', 404);
             }
 
+            if ($transaction->payment_status !== 'paid') {
+                throw new Exception('Pesanan belum dibayar', 422);
+            }
+
             if (Complaint::activeFor($transaction->id)) {
                 throw new Exception('Pesanan sedang dikomplain', 422);
             }
@@ -1045,6 +1049,10 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             if ($transaction->delivery_status !== 'delivering') {
                 throw new Exception('Hanya status delivering yang bisa diselesaikan', 400);
+            }
+
+            if ($transaction->payment_status !== 'paid') {
+                throw new Exception('Pesanan belum dibayar', 422);
             }
 
             if (Complaint::activeFor($transaction->id)) {

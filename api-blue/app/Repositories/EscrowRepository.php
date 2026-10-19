@@ -5,8 +5,10 @@ namespace App\Repositories;
 use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\StoreBalanceRepositoryInterface;
 use App\Models\Store;
+use App\Models\StoreBalance;
 use App\Models\Transaction;
 use App\ValueObjects\Money;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -60,22 +62,37 @@ class EscrowRepository implements EscrowRepositoryInterface
 
     public function release(Transaction $transaction): void
     {
-        $store = Store::find($transaction->store_id);
+        $sellerAmount = DB::transaction(function () use ($transaction) {
+            $locked = Transaction::where('id', $transaction->id)->lockForUpdate()->firstOrFail();
 
-        if (! $store || ! $store->storeBalance) {
-            Log::error('EscrowRepository::release: Store or StoreBalance not found', [
-                'store_id' => $transaction->store_id,
-            ]);
+            if ($locked->payment_status !== 'paid' || $locked->refund_status !== null) {
+                throw new Exception('Dana pesanan belum dibayar atau sedang dikembalikan', 422);
+            }
 
-            return;
-        }
+            $storeBalance = StoreBalance::where('store_id', $locked->store_id)->lockForUpdate()->first();
 
-        $sellerAmount = DB::transaction(function () use ($transaction, $store) {
-            $sellerAmount = $this->sellerAmount($transaction);
+            if (! $storeBalance) {
+                throw new Exception('Dompet toko tidak ditemukan', 422);
+            }
 
-            $this->storeBalanceRepository->releasePending($store->storeBalance->id, $sellerAmount);
+            $ledger = $storeBalance->storeBalanceHistories()
+                ->where('reference_id', $locked->id)
+                ->where('reference_type', Transaction::class);
 
-            $store->storeBalance->storeBalanceHistories()->create([
+            if ((clone $ledger)->whereIn('type', ['released', 'refunded'])->exists()) {
+                throw new Exception('Dana pesanan sudah dirilis atau dikembalikan', 422);
+            }
+
+            $pending = $ledger->where('type', 'pending_income')->first();
+
+            if (! $pending) {
+                throw new Exception('Ledger dana tertahan pesanan tidak ditemukan', 422);
+            }
+
+            $sellerAmount = (float) $pending->amount;
+            $this->storeBalanceRepository->releasePending($storeBalance->id, $sellerAmount);
+
+            $storeBalance->storeBalanceHistories()->create([
                 'type' => 'released',
                 'reference_id' => $transaction->id,
                 'reference_type' => Transaction::class,
@@ -88,7 +105,7 @@ class EscrowRepository implements EscrowRepositoryInterface
         });
 
         Log::info('Escrow released for transaction: '.$transaction->code, [
-            'store_id' => $store->id,
+            'store_id' => $transaction->store_id,
             'seller_amount' => $sellerAmount,
         ]);
     }
