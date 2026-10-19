@@ -59,8 +59,8 @@ class TransactionRepository implements TransactionRepositoryInterface
         // User bisa dual-role (buyer + store) sejak dukung mode ganda ala
         // Shopee — $mode dari FE (?mode=store|buyer) menentukan KONTEKS,
         // scopeToMode tidak asumsikan role eksklusif seperti sebelumnya.
-        if (! (Auth::check() && Auth::user()->hasRole('admin'))) {
-            $this->scopeToMode($query, $mode);
+        if (! (Auth::check() && Auth::user()->hasRole('admin')) && ! $this->scopeToMode($query, $mode)) {
+            $query->whereRaw('1 = 0');
         }
 
         // Antrean refund manual admin: ?refund_status=manual_required.

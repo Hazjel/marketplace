@@ -56,6 +56,8 @@ class TransactionController extends Controller implements HasMiddleware
      */
     public function index(Request $request)
     {
+        $request->validate(['mode' => 'nullable|string|in:store,buyer']);
+
         try {
             $transactions = $this->transactionRepository->getAll($request->search, $request->limit, true);
 
@@ -75,6 +77,7 @@ class TransactionController extends Controller implements HasMiddleware
         $request = $request->validate([
             'search' => 'nullable|string',
             'row_per_page' => 'required|integer|min:1|max:100',
+            'mode' => 'nullable|string|in:store,buyer',
         ]);
 
         try {
