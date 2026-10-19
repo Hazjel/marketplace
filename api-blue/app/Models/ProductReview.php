@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductReview extends Model
 {
@@ -23,7 +25,8 @@ class ProductReview extends Model
         return $this->belongsTo(Transaction::class);
     }
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -33,7 +36,8 @@ class ProductReview extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function attachments()
+    /** @return HasMany<ProductReviewAttachment, $this> */
+    public function attachments(): HasMany
     {
         return $this->hasMany(ProductReviewAttachment::class);
     }

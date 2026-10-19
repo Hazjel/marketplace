@@ -34,8 +34,17 @@ class ProductReviewController extends Controller implements HasMiddleware
 
     public function getAllPaginated(Request $request)
     {
+        abort_unless($request->user()->hasRole('admin'), 403);
+
+        $validated = $request->validate([
+            'store_id' => 'nullable|uuid|exists:stores,id',
+            'sort_by' => 'sometimes|in:created_at,rating',
+            'sort_direction' => 'sometimes|in:asc,desc',
+            'row_per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
         try {
-            $productReviews = $this->productReviewRepository->getAllPaginated($request->all());
+            $productReviews = $this->productReviewRepository->getAllPaginated($validated);
 
             return ResponseHelper::jsonResponse(true, 'Success', ProductReviewResource::collection($productReviews), 200);
         } catch (\Exception $e) {
