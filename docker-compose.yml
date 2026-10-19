@@ -113,7 +113,7 @@ services:
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: database
-      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
+      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:?MIDTRANS_SERVER_KEY must be set and non-empty}
       MIDTRANS_IS_PRODUCTION: "false"
       KEY_RAJA_ONGKIR: ${KEY_RAJA_ONGKIR:-}
       # Dua domain FE (buyer + seller) -- lihat config/cors.php, fallback
@@ -255,7 +255,7 @@ services:
       REDIS_CLIENT: predis
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
-      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
+      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:?MIDTRANS_SERVER_KEY must be set and non-empty}
       MIDTRANS_IS_PRODUCTION: "false"
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:?INTERNAL_SERVICE_KEY wajib diisi di .env}
       CHAT_SERVICE_URL: http://chat-service:8001

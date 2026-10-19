@@ -26,8 +26,14 @@ class MidtransController extends Controller
         // load server key from config (matches config/midtrans.php)
         $serverKey = config('midtrans.serverKey');
 
+        if (! is_string($serverKey) || trim($serverKey) === '') {
+            Log::critical('Midtrans callback disabled: server key is missing');
+
+            return response()->json(['message' => 'Payment callback unavailable'], 503);
+        }
+
         // compute signature using Midtrans formula: order_id + status_code + gross_amount + server_key
-        $hashedKey = hash('sha512', ($request->order_id ?? '').($request->status_code ?? '').($request->gross_amount ?? '').($serverKey ?? ''));
+        $hashedKey = hash('sha512', ($request->order_id ?? '').($request->status_code ?? '').($request->gross_amount ?? '').$serverKey);
 
         Log::info('Midtrans callback received', [
             'order_id' => $request->order_id ?? null,
