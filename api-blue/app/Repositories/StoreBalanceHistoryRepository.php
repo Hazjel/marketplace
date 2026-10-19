@@ -3,8 +3,10 @@
 namespace App\Repositories;
 
 use App\Interfaces\StoreBalanceHistoryRepositoryInterface;
+use App\Models\StoreBalance;
 use App\Models\StoreBalanceHistory;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class StoreBalanceHistoryRepository implements StoreBalanceHistoryRepositoryInterface
@@ -16,6 +18,13 @@ class StoreBalanceHistoryRepository implements StoreBalanceHistoryRepositoryInte
                 $query->search($search);
             }
         });
+
+        if (! Auth::user()?->hasRole('admin')) {
+            $query->whereIn('store_balance_id', StoreBalance::query()
+                ->join('stores', 'stores.id', '=', 'store_balances.store_id')
+                ->where('stores.user_id', Auth::id())
+                ->select('store_balances.id'));
+        }
 
         if ($limit) {
             $query->take($limit);
@@ -37,7 +46,7 @@ class StoreBalanceHistoryRepository implements StoreBalanceHistoryRepositoryInte
 
     public function getById(string $id)
     {
-        $query = StoreBalanceHistory::where('id', $id);
+        $query = $this->getAll(null, null, false)->where('id', $id);
 
         return $query->first();
     }
