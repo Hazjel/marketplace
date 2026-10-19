@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Support\PostgresSearch;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -67,6 +68,10 @@ class PostgresSearchTest extends TestCase
 
     public function test_operator_like_case_insensitive_di_luar_postgres(): void
     {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            $this->markTestSkipped('LIKE fallback assertion applies only outside PostgreSQL.');
+        }
+
         // Test suite berjalan di sqlite, yang LIKE-nya memang sudah
         // case-insensitive untuk ASCII dan tidak mengenal ILIKE sama sekali.
         $this->assertSame('like', PostgresSearch::likeOperator());

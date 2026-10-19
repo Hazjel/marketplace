@@ -59,8 +59,8 @@ class TransactionRepository implements TransactionRepositoryInterface
         // User bisa dual-role (buyer + store) sejak dukung mode ganda ala
         // Shopee — $mode dari FE (?mode=store|buyer) menentukan KONTEKS,
         // scopeToMode tidak asumsikan role eksklusif seperti sebelumnya.
-        if (! (Auth::check() && Auth::user()->hasRole('admin'))) {
-            $this->scopeToMode($query, $mode);
+        if (! (Auth::check() && Auth::user()->hasRole('admin')) && ! $this->scopeToMode($query, $mode)) {
+            $query->whereRaw('1 = 0');
         }
 
         // Antrean refund manual admin: ?refund_status=manual_required.
@@ -849,6 +849,10 @@ class TransactionRepository implements TransactionRepositoryInterface
         try {
             $transaction = Transaction::where('id', $id)->lockForUpdate()->firstOrFail();
 
+            if ($transaction->payment_status === 'paid' || $transaction->snap_token !== null || $transaction->refund_status !== null) {
+                throw new Exception('Pesanan dengan pembayaran tidak bisa dihapus. Gunakan pembatalan pesanan.', 422);
+            }
+
             // Its siblings would still be charged the whole payment's amount.
             if ($transaction->payment_code !== null) {
                 throw new Exception('Pesanan dari pembayaran gabungan tidak bisa dihapus satu per satu', 422);
@@ -983,6 +987,10 @@ class TransactionRepository implements TransactionRepositoryInterface
                 throw new Exception('Data Transaksi Tidak Ditemukan', 404);
             }
 
+            if ($transaction->payment_status !== 'paid') {
+                throw new Exception('Pesanan belum dibayar', 422);
+            }
+
             if (Complaint::activeFor($transaction->id)) {
                 throw new Exception('Pesanan sedang dikomplain', 422);
             }
@@ -1041,6 +1049,10 @@ class TransactionRepository implements TransactionRepositoryInterface
 
             if ($transaction->delivery_status !== 'delivering') {
                 throw new Exception('Hanya status delivering yang bisa diselesaikan', 400);
+            }
+
+            if ($transaction->payment_status !== 'paid') {
+                throw new Exception('Pesanan belum dibayar', 422);
             }
 
             if (Complaint::activeFor($transaction->id)) {

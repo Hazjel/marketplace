@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
 use App\Models\StoreBalance;
+use App\Models\StoreBalanceHistory;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\User;
@@ -240,6 +241,15 @@ class EscrowPaymentTest extends TestCase
         $sellerAmount = $netSales - $adminFee;
 
         $this->storeBalance->update(['pending_balance' => $sellerAmount]);
+        StoreBalanceHistory::create([
+            'store_balance_id' => $this->storeBalance->id,
+            'type' => StoreBalanceHistory::TYPE_PENDING_INCOME,
+            'reference_id' => $transaction->id,
+            'reference_type' => Transaction::class,
+            'unique_ref' => 'pending_income:'.$transaction->id,
+            'amount' => $sellerAmount,
+            'remarks' => 'completion fixture',
+        ]);
 
         // Act: buyer confirms receipt
         Storage::fake('public');

@@ -1311,7 +1311,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\Store\:\:\$storeBalance\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: app/Repositories/EscrowRepository.php
 
 		-
