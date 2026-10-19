@@ -194,6 +194,31 @@ class PaymentCallbackAtomicityTest extends TestCase
         $this->assertSame(0.0, (float) $this->storeBalance->fresh()->pending_balance);
     }
 
+    public function test_missing_or_empty_server_key_fails_closed_without_mutating_transaction_or_ledger(): void
+    {
+        foreach ([null, ''] as $serverKey) {
+            $code = 'ATOMIC_MISSING_KEY_'.($serverKey === null ? 'NULL' : 'EMPTY');
+            $transaction = $this->makeTransaction($code);
+            config(['midtrans.serverKey' => $serverKey]);
+
+            $this->postJson('/api/midtrans-callback', [
+                'order_id' => $code,
+                'status_code' => '200',
+                'gross_amount' => '126000.00',
+                'signature_key' => hash('sha512', $code.'200126000.00'),
+                'transaction_status' => 'settlement',
+                'payment_type' => 'bank_transfer',
+            ])->assertStatus(500);
+
+            $this->assertSame('unpaid', $transaction->fresh()->payment_status);
+            $this->assertSame(0.0, (float) $this->storeBalance->fresh()->pending_balance);
+            $this->assertDatabaseMissing('store_balance_histories', [
+                'reference_id' => $transaction->id,
+                'type' => 'pending_income',
+            ]);
+        }
+    }
+
     public function test_a_rejected_signature_does_not_leak_the_valid_one_to_the_log(): void
     {
         $this->makeTransaction('ATOMIC_006');

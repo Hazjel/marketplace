@@ -166,9 +166,39 @@ class TransactionAuthorizationTest extends TestCase
     #[DataProvider('deleteMatrix')]
     public function test_destroy_enforces_ownership(string $who, int $expected): void
     {
+        if ($expected === 200) {
+            $this->transaction->update([
+                'payment_status' => 'unpaid',
+                'delivery_status' => 'pending',
+            ]);
+        }
+
         $this->actingAs($this->actor($who), 'sanctum')
             ->deleteJson("/api/transaction/{$this->transaction->id}")
             ->assertStatus($expected);
+    }
+
+    public function test_paid_transaction_cannot_be_hard_deleted(): void
+    {
+        $this->actingAs($this->sellerUser, 'sanctum')
+            ->deleteJson("/api/transaction/{$this->transaction->id}")
+            ->assertStatus(422);
+
+        $this->assertDatabaseHas('transactions', ['id' => $this->transaction->id]);
+    }
+
+    public function test_unpaid_transaction_with_snap_token_cannot_be_hard_deleted(): void
+    {
+        $this->transaction->update([
+            'payment_status' => 'unpaid',
+            'snap_token' => 'snap-token',
+        ]);
+
+        $this->actingAs($this->sellerUser, 'sanctum')
+            ->deleteJson("/api/transaction/{$this->transaction->id}")
+            ->assertStatus(422);
+
+        $this->assertDatabaseHas('transactions', ['id' => $this->transaction->id]);
     }
 
     public function test_unrelated_seller_cannot_delete_someone_elses_transaction(): void
