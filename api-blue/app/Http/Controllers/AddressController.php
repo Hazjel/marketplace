@@ -25,7 +25,7 @@ class AddressController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'label' => 'required|string',
             'recipient_name' => 'required|string',
             'phone' => 'required|string',
@@ -40,22 +40,14 @@ class AddressController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($request->is_primary) {
+            if ($validated['is_primary'] ?? false) {
                 Address::where('user_id', Auth::id())->update(['is_primary' => false]);
             }
 
             $address = Address::create([
+                ...$validated,
                 'user_id' => Auth::id(),
-                'label' => $request->label,
-                'recipient_name' => $request->recipient_name,
-                'phone' => $request->phone,
-                'address' => $request->address,
-                'city' => $request->city,
-                'city_id' => $request->city_id,
-                'postal_code' => $request->postal_code,
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-                'is_primary' => $request->is_primary ?? false,
+                'is_primary' => $validated['is_primary'] ?? false,
             ]);
 
             // If this is the first address, make it primary automatically
@@ -80,7 +72,7 @@ class AddressController extends Controller
     {
         $address = Address::where('user_id', Auth::id())->findOrFail($id);
 
-        $request->validate([
+        $validated = $request->validate([
             'label' => 'required|string',
             'recipient_name' => 'required|string',
             'phone' => 'required|string',
@@ -95,11 +87,11 @@ class AddressController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($request->is_primary) {
+            if ($validated['is_primary'] ?? false) {
                 Address::where('user_id', Auth::id())->where('id', '!=', $id)->update(['is_primary' => false]);
             }
 
-            $address->update($request->all());
+            $address->update($validated);
 
             DB::commit();
 

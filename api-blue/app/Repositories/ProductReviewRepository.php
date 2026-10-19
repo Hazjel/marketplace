@@ -50,7 +50,7 @@ class ProductReviewRepository implements ProductReviewRepositoryInterface
     public function getAllPaginated(array $params)
     {
         $query = ProductReview::query()
-            ->with(['product.productImages', 'transaction.buyer.user', 'user'])
+            ->with(['user', 'attachments'])
             ->when(isset($params['store_id']), function ($q) use ($params) {
                 $q->whereHas('product', function ($q) use ($params) {
                     $q->where('store_id', $params['store_id']);
