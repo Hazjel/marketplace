@@ -849,6 +849,10 @@ class TransactionRepository implements TransactionRepositoryInterface
         try {
             $transaction = Transaction::where('id', $id)->lockForUpdate()->firstOrFail();
 
+            if ($transaction->payment_status === 'paid' || $transaction->snap_token !== null || $transaction->refund_status !== null) {
+                throw new Exception('Pesanan dengan pembayaran tidak bisa dihapus. Gunakan pembatalan pesanan.', 422);
+            }
+
             // Its siblings would still be charged the whole payment's amount.
             if ($transaction->payment_code !== null) {
                 throw new Exception('Pesanan dari pembayaran gabungan tidak bisa dihapus satu per satu', 422);
