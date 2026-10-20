@@ -7,7 +7,6 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
 use Mockery;
@@ -20,6 +19,7 @@ class GoogleOAuthSecurityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->withCredentials();
         $this->seed(PermissionSeeder::class);
         $this->seed(RoleSeeder::class);
     }
@@ -45,9 +45,9 @@ class GoogleOAuthSecurityTest extends TestCase
         $response->assertRedirect('https://accounts.google.test/oauth');
         $this->assertNotNull($capturedState);
         $cookie = $this->nonceCookie($response);
-        $nonce = Crypt::decryptString($cookie->getValue());
+        $nonce = $cookie->getValue();
         $this->assertTrue($cookie->isHttpOnly());
-        $this->assertSame('Lax', $cookie->getSameSite());
+        $this->assertSame('lax', $cookie->getSameSite());
         $this->assertSame('/api/auth/google', $cookie->getPath());
         $this->assertGreaterThan(500, $cookie->getMaxAge());
         $this->assertSame([

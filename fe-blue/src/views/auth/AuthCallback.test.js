@@ -38,7 +38,7 @@ describe('AuthCallback', () => {
   it('exchanges code instead of reading a bearer token from URL', async () => {
     const wrapper = mount(AuthCallback)
     await new Promise((resolve) => setTimeout(resolve, 0))
-    expect(post).toHaveBeenCalledWith('/auth/google/exchange', { code: 'one-time-code' })
+    expect(post).toHaveBeenCalledWith('/auth/google/exchange', { code: 'one-time-code' }, { withCredentials: true })
     expect(authStore.token).toBe('sanctum-token')
     expect(cookiesSet).toHaveBeenCalledWith('token', 'sanctum-token', expect.any(Object))
     wrapper.unmount()
@@ -57,7 +57,7 @@ describe('AuthCallback', () => {
     post.mockRejectedValue(new Error('exchange failed'))
     const wrapper = mount(AuthCallback)
     await new Promise((resolve) => setTimeout(resolve, 0))
-    expect(post).toHaveBeenCalledWith('/auth/google/exchange', { code: 'one-time-code' })
+    expect(post).toHaveBeenCalledWith('/auth/google/exchange', { code: 'one-time-code' }, { withCredentials: true })
     expect(push).toHaveBeenCalledWith({ name: 'auth.login' })
     expect(cookiesSet).not.toHaveBeenCalled()
     wrapper.unmount()
