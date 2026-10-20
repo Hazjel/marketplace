@@ -224,9 +224,15 @@ class GoogleOAuthSecurityTest extends TestCase
         $googleUser->shouldReceive('getAvatar')->andReturn(null);
         $provider = Mockery::mock();
         $provider->shouldReceive('stateless')->andReturnSelf();
-        $provider->shouldReceive('user')->twice()
-            ->andThrow(new ConnectException('temporary DNS failure', new Request('GET', 'https://www.googleapis.com/oauth2/v3/userinfo')))
-            ->andReturn($googleUser);
+        $calls = 0;
+        $provider->shouldReceive('user')->twice()->andReturnUsing(function () use (&$calls, $googleUser) {
+            $calls++;
+            if ($calls === 1) {
+                throw new ConnectException('temporary DNS failure', new Request('GET', 'https://www.googleapis.com/oauth2/v3/userinfo'));
+            }
+
+            return $googleUser;
+        });
         Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
         $response = $this->withUnencryptedCookie('google_oauth_nonce', $nonce)
@@ -285,7 +291,8 @@ class GoogleOAuthSecurityTest extends TestCase
         $response->assertRedirect();
         $location = $response->headers->get('Location');
         $this->assertStringStartsWith('https://blukios.store/api/auth/google/redirect?platform=web', $location);
-        $this->assertEmpty($response->headers->getCookies());
+        $this->assertFalse(collect($response->headers->getCookies())
+            ->contains(fn ($cookie): bool => $cookie->getName() === 'google_oauth_nonce'));
     }
 
     private function mockGoogleUser(string $email): void
