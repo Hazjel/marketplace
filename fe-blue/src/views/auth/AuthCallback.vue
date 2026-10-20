@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
+import { axiosInstance } from '@/plugins/axios'
 
 const route = useRoute()
 const router = useRouter()
@@ -11,20 +12,28 @@ const authStore = useAuthStore()
 import Cookies from 'js-cookie'
 
 onMounted(async () => {
-  const token = route.query.token
-  const username = route.query.username
+  const code = route.query.code
 
-  if (token && username) {
-    // Set token in Cookies (required by axios instance)
-    Cookies.set('token', token, {
-      secure: window.location.protocol === 'https:',
-      sameSite: 'Strict'
-    })
-    authStore.token = token
-
+  if (typeof code === 'string' && code) {
     try {
-      // Fetch full user profile to populate pinia state correctly
-      await authStore.checkAuth()
+      const response = await axiosInstance.post('/auth/google/exchange', { code }, {
+        withCredentials: true
+      })
+      const user = response.data.data
+      const token = user.token
+      if (typeof token !== 'string' || !token) {
+        router.push({ name: 'auth.login' })
+        return
+      }
+
+      Cookies.set('token', token, {
+        secure: window.location.protocol === 'https:',
+        sameSite: 'Strict'
+      })
+      authStore.token = token
+      authStore.user = user
+      authStore.error = null
+      authStore.success = response.data.message
 
       // Nomor HP opsional (konsisten dengan register biasa) — jangan paksa
       // lengkapi profil; nomor penerima diminta saat buat alamat/checkout
@@ -49,8 +58,7 @@ onMounted(async () => {
       } else {
         router.push({ name: 'app.home' })
       }
-    } catch (e) {
-      console.error('Auth Check Failed', e)
+    } catch {
       router.push({ name: 'auth.login' })
     }
   } else {

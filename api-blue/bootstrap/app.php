@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->encryptCookies(except: ['google_oauth_nonce']);
         $middleware->validateCsrfTokens(except: [
             'midtrans-callback',
             'logistics/webhook',

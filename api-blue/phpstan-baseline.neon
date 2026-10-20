@@ -91,18 +91,6 @@ parameters:
 			path: app/Http/Controllers/DashboardController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\User\:\:\$token\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/GoogleAuthController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Support\\HigherOrderCollectionProxy\<string, Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\>\:\:\$permissions\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/GoogleAuthController.php
-
-		-
 			message: '#^Call to an undefined method Laravel\\Socialite\\Contracts\\Provider\:\:redirectUrl\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -111,18 +99,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Laravel\\Socialite\\Contracts\\Provider\:\:stateless\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/GoogleAuthController.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: app/Http/Controllers/GoogleAuthController.php
-
-		-
-			message: '#^Property App\\Models\\User\:\:\$permissions is not writable\.$#'
-			identifier: assign.propertyReadOnly
 			count: 1
 			path: app/Http/Controllers/GoogleAuthController.php
 
