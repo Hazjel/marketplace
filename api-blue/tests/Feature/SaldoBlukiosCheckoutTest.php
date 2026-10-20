@@ -85,6 +85,8 @@ class SaldoBlukiosCheckoutTest extends TestCase
 
                 return self::REFUND_DONE;
             }
+
+            public function expirePayment(string $orderId): void {}
         });
         $this->app->bind(ShippingGatewayInterface::class, fn () => new FakeShippingGateway);
 

@@ -65,6 +65,8 @@ class SellerCancelRefundTest extends TestCase
             {
                 return $this->test->recordRefund($transaction);
             }
+
+            public function expirePayment(string $orderId): void {}
         });
 
         $this->sellerUser = User::factory()->create();

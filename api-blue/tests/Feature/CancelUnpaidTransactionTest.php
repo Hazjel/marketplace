@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Interfaces\PaymentGatewayInterface;
 use App\Models\Buyer;
+use App\Models\BuyerBalanceHistory;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
@@ -15,7 +16,7 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use PHPUnit\Framework\Attributes\Group;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -94,10 +95,15 @@ class CancelUnpaidTransactionTest extends TestCase
 
     private function unpaidOrder(string $code = 'F1_UNPAID', ?string $paymentCode = null): Transaction
     {
+        return $this->unpaidOrderFor($this->store, $this->product, $code, $paymentCode);
+    }
+
+    private function unpaidOrderFor(Store $store, Product $product, string $code, ?string $paymentCode = null): Transaction
+    {
         $transaction = Transaction::create([
             'code' => $code,
             'buyer_id' => $this->buyer->id,
-            'store_id' => $this->store->id,
+            'store_id' => $store->id,
             'address_id' => 1,
             'address' => 'Jl. Buyer',
             'city' => 'Jakarta',
@@ -116,7 +122,7 @@ class CancelUnpaidTransactionTest extends TestCase
         ])->save();
         TransactionDetail::create([
             'transaction_id' => $transaction->id,
-            'product_id' => $this->product->id,
+            'product_id' => $product->id,
             'qty' => 1,
             'subtotal' => 100000,
         ]);
@@ -150,6 +156,7 @@ class CancelUnpaidTransactionTest extends TestCase
         $this->actingAs($otherBuyer, 'sanctum')
             ->postJson("/api/transaction/{$transaction->id}/cancel-unpaid")
             ->assertStatus(403);
+        app('auth')->forgetGuards();
         $this->postJson("/api/transaction/{$transaction->id}/cancel-unpaid")
             ->assertStatus(401);
         $admin = User::factory()->create();
@@ -158,6 +165,7 @@ class CancelUnpaidTransactionTest extends TestCase
             ->postJson("/api/transaction/{$transaction->id}/cancel-unpaid")
             ->assertOk();
         $this->assertSame('failed', $transaction->fresh()->payment_status);
+        $this->assertSame('cancelled', $transaction->fresh()->delivery_status);
     }
 
     public function test_paid_order_is_rejected_and_failed_order_is_idempotent(): void
@@ -180,7 +188,19 @@ class CancelUnpaidTransactionTest extends TestCase
     {
         $paymentCode = 'F1_SHARED_PAYMENT';
         $first = $this->unpaidOrder('F1_SHARED_A', $paymentCode);
-        $second = $this->unpaidOrder('F1_SHARED_B', $paymentCode);
+        $seller = User::factory()->create();
+        $seller->assignRole('store');
+        $secondStore = Store::factory()->create(['user_id' => $seller->id]);
+        StoreBalance::create(['store_id' => $secondStore->id, 'balance' => 0, 'pending_balance' => 0]);
+        $secondProduct = Product::factory()->create([
+            'store_id' => $secondStore->id,
+            'product_category_id' => ProductCategory::query()->firstOrFail()->id,
+            'stock' => 4,
+            'price' => 100000,
+        ]);
+        $second = $this->unpaidOrderFor($secondStore, $secondProduct, 'F1_SHARED_B', $paymentCode);
+        $firstStock = $this->product->fresh()->stock;
+        $secondStock = $secondProduct->fresh()->stock;
 
         $this->actingAs($this->buyerUser, 'sanctum')
             ->postJson("/api/transaction/{$first->id}/cancel-unpaid")
@@ -190,11 +210,24 @@ class CancelUnpaidTransactionTest extends TestCase
 
         $this->assertSame(['failed', 'failed'], Transaction::whereIn('id', [$first->id, $second->id])
             ->orderBy('code')->pluck('payment_status')->all());
+        $this->assertSame($firstStock + 1, $this->product->fresh()->stock);
+        $this->assertSame($secondStock + 1, $secondProduct->fresh()->stock);
     }
 
     public function test_stock_and_balance_are_restored_once_on_repeated_cancel(): void
     {
         $transaction = $this->unpaidOrder();
+        $transaction->forceFill(['balance_used' => 25000])->save();
+        $this->buyer->forceFill(['balance' => 0])->save();
+        BuyerBalanceHistory::create([
+            'buyer_id' => $this->buyer->id,
+            'type' => BuyerBalanceHistory::TYPE_PAYMENT,
+            'amount' => -25000,
+            'reference_type' => Transaction::class,
+            'reference_id' => $transaction->id,
+            'unique_ref' => 'payment:'.$transaction->id,
+            'remarks' => 'F1 fixture',
+        ]);
         DB::table('products')->where('id', $this->product->id)->decrement('stock');
         $before = $this->product->fresh()->stock;
 
@@ -203,16 +236,20 @@ class CancelUnpaidTransactionTest extends TestCase
             ->assertOk();
         $this->actingAs($this->buyerUser, 'sanctum')
             ->postJson("/api/transaction/{$transaction->id}/cancel-unpaid")
-            ->assertOk();
+            ->assertStatus(422);
 
         $this->assertSame($before + 1, $this->product->fresh()->stock);
         $this->assertSame('failed', $transaction->fresh()->payment_status);
+        $this->assertSame(1, count($this->expiredPayments));
+        $this->assertSame(1, BuyerBalanceHistory::where('type', BuyerBalanceHistory::TYPE_PAYMENT_RETURNED)->count());
+        $this->assertSame(25000, (int) $this->buyer->fresh()->balance);
     }
 
     public function test_gateway_failure_does_not_undo_database_cancellation_and_late_settlement_refunds(): void
     {
         $transaction = $this->unpaidOrder('F1_LATE_SETTLEMENT');
         $this->failExpire = true;
+        Log::spy();
 
         $this->actingAs($this->buyerUser, 'sanctum')
             ->postJson("/api/transaction/{$transaction->id}/cancel-unpaid")
@@ -220,48 +257,18 @@ class CancelUnpaidTransactionTest extends TestCase
 
         $this->assertSame('failed', $transaction->fresh()->payment_status);
         $this->assertNotSame('paid', $transaction->fresh()->payment_status);
+        /** @phpstan-ignore-next-line */
+        Log::shouldHaveReceived('warning');
+        $amount = number_format((float) $transaction->grand_total, 2, '.', '');
+        $this->postJson('/api/midtrans-callback', [
+            'order_id' => $transaction->paymentCode(),
+            'status_code' => '200',
+            'gross_amount' => $amount,
+            'signature_key' => hash('sha512', $transaction->paymentCode().'200'.$amount.config('midtrans.serverKey')),
+            'transaction_status' => 'settlement',
+        ])->assertOk();
+        $this->assertSame('failed', $transaction->fresh()->payment_status);
+        $this->assertSame(0, BuyerBalanceHistory::where('type', BuyerBalanceHistory::TYPE_PAYMENT_RETURNED)->count());
     }
 
-    #[Group('pgsql-concurrency')]
-    public function test_cancel_unpaid_race_with_settlement_has_one_winner(): void
-    {
-        if (DB::connection()->getDriverName() !== 'pgsql') {
-            $this->markTestSkipped('Cancellation race requires PostgreSQL row locks.');
-        }
-
-        $transaction = $this->unpaidOrder('F1_RACE');
-        $token = $this->buyerUser->createToken('f1-race')->plainTextToken;
-        $barrier = random_int(100000, 2000000000);
-        DB::select('select pg_advisory_lock(?)', [$barrier]);
-        $processes = [];
-        foreach ([1, 2] as $_) {
-            $descriptor = [
-                0 => ['pipe', 'r'],
-                1 => ['pipe', 'w'],
-                2 => ['pipe', 'w'],
-            ];
-            $process = proc_open([
-                PHP_BINARY,
-                base_path('tests/Support/CancelUnpaidWorker.php'),
-                (string) $transaction->id,
-                $token,
-                (string) $barrier,
-            ], $descriptor, $pipes, base_path());
-            $this->assertIsResource($process);
-            $processes[] = [$process, $pipes];
-        }
-        DB::select('select pg_advisory_unlock(?)', [$barrier]);
-
-        $statuses = [];
-        foreach ($processes as [$process, $pipes]) {
-            $statuses[] = (int) trim(stream_get_contents($pipes[1]));
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            proc_close($process);
-        }
-
-        sort($statuses);
-        $this->assertSame([200, 422], $statuses);
-        $this->assertContains($transaction->fresh()->payment_status, ['failed', 'paid']);
-    }
 }

@@ -20,4 +20,6 @@ class FakePaymentGateway implements PaymentGatewayInterface
     {
         return self::REFUND_DONE;
     }
+
+    public function expirePayment(string $orderId): void {}
 }
