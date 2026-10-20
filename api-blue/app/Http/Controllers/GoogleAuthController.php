@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,18 @@ class GoogleAuthController extends Controller
         ]);
 
         try {
+            $callback = parse_url((string) config('services.google.redirect'));
+            if (isset($callback['host']) && strcasecmp($request->getHost(), $callback['host']) !== 0) {
+                if (! in_array($callback['scheme'] ?? null, ['http', 'https'], true)) {
+                    return $this->loginError();
+                }
+
+                $origin = $callback['scheme'].'://'.$callback['host'].(isset($callback['port']) ? ':'.$callback['port'] : '');
+                $query = http_build_query($validated);
+
+                return redirect($origin.self::NONCE_PATH.'/redirect'.($query !== '' ? '?'.$query : ''));
+            }
+
             $state = Str::random(64);
             $nonce = Str::random(64);
             Cache::put('google.oauth.state.'.$state, [
@@ -69,7 +82,12 @@ class GoogleAuthController extends Controller
                 return $this->loginError();
             }
 
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $provider = Socialite::driver('google')->stateless();
+            try {
+                $googleUser = $provider->user();
+            } catch (ConnectException) {
+                $googleUser = $provider->user();
+            }
 
             $user = DB::transaction(function () use ($googleUser) {
                 $user = User::where('email', $googleUser->getEmail())->first();
