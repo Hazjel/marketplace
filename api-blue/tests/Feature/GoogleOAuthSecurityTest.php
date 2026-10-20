@@ -5,11 +5,14 @@ namespace Tests\Feature;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
 use Mockery;
+use RuntimeException;
 use Tests\TestCase;
 
 class GoogleOAuthSecurityTest extends TestCase
@@ -175,7 +178,7 @@ class GoogleOAuthSecurityTest extends TestCase
         Cache::put('google.oauth.state.'.$state, ['platform' => 'web', 'nonce' => hash('sha256', $nonce)], now()->addMinutes(10));
         $provider = Mockery::mock();
         $provider->shouldReceive('stateless')->andReturnSelf();
-        $provider->shouldReceive('user')->andThrow(new \RuntimeException('SECRET_PROVIDER_EXCEPTION'));
+        $provider->shouldReceive('user')->andThrow(new RuntimeException('SECRET_PROVIDER_EXCEPTION'));
         Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
         $response = $this->withUnencryptedCookie('google_oauth_nonce', $nonce)
@@ -208,6 +211,88 @@ class GoogleOAuthSecurityTest extends TestCase
                 $this->assertNull(Cache::get('google.oauth.state.'.$state));
             }
         }
+    }
+
+    public function test_callback_retries_one_transient_connection_failure_then_succeeds(): void
+    {
+        $state = 'retry-state';
+        $nonce = 'retry-browser-nonce';
+        Cache::put('google.oauth.state.'.$state, ['platform' => 'web', 'nonce' => hash('sha256', $nonce)], now()->addMinutes(10));
+        $googleUser = Mockery::mock();
+        $googleUser->shouldReceive('getEmail')->andReturn('retry@example.test');
+        $googleUser->shouldReceive('getName')->andReturn('Retry User');
+        $googleUser->shouldReceive('getAvatar')->andReturn(null);
+        $provider = Mockery::mock();
+        $provider->shouldReceive('stateless')->andReturnSelf();
+        $calls = 0;
+        $provider->shouldReceive('user')->twice()->andReturnUsing(function () use (&$calls, $googleUser) {
+            $calls++;
+            if ($calls === 1) {
+                throw new ConnectException('temporary DNS failure', new Request('GET', 'https://www.googleapis.com/oauth2/v3/userinfo'));
+            }
+
+            return $googleUser;
+        });
+        Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $response = $this->withUnencryptedCookie('google_oauth_nonce', $nonce)
+            ->get('/api/auth/google/callback?state='.$state.'&code=abc');
+
+        $response->assertRedirect();
+        $this->assertStringContainsString('/auth/google/callback?code=', $response->headers->get('Location'));
+    }
+
+    public function test_callback_retries_connection_failure_once_then_redirects_generically(): void
+    {
+        $state = 'retry-failed-state';
+        $nonce = 'retry-failed-browser-nonce';
+        Cache::put('google.oauth.state.'.$state, ['platform' => 'web', 'nonce' => hash('sha256', $nonce)], now()->addMinutes(10));
+        $provider = Mockery::mock();
+        $provider->shouldReceive('stateless')->andReturnSelf();
+        $provider->shouldReceive('user')->twice()
+            ->andThrow(new ConnectException('temporary DNS failure', new Request('GET', 'https://www.googleapis.com/oauth2/v3/userinfo')));
+        Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $response = $this->withUnencryptedCookie('google_oauth_nonce', $nonce)
+            ->get('/api/auth/google/callback?state='.$state.'&code=abc');
+
+        $response->assertRedirect();
+        $location = $response->headers->get('Location');
+        $this->assertStringContainsString('/auth/login', $location);
+        $this->assertStringNotContainsString('token=', $location);
+        $this->assertStringNotContainsString('code=', $location);
+    }
+
+    public function test_callback_does_not_retry_non_connection_exception(): void
+    {
+        $state = 'no-retry-state';
+        $nonce = 'no-retry-browser-nonce';
+        Cache::put('google.oauth.state.'.$state, ['platform' => 'web', 'nonce' => hash('sha256', $nonce)], now()->addMinutes(10));
+        $provider = Mockery::mock();
+        $provider->shouldReceive('stateless')->andReturnSelf();
+        $provider->shouldReceive('user')->once()->andThrow(new RuntimeException('provider failed'));
+        Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+        $response = $this->withUnencryptedCookie('google_oauth_nonce', $nonce)
+            ->get('/api/auth/google/callback?state='.$state.'&code=abc');
+
+        $response->assertRedirect();
+        $this->assertStringContainsString('/auth/login', $response->headers->get('Location'));
+    }
+
+    public function test_redirect_on_seller_host_hops_to_callback_host_without_setting_nonce(): void
+    {
+        config(['services.google.redirect' => 'https://blukios.store/api/auth/google/callback']);
+        Socialite::shouldReceive('driver')->with('google')->never();
+
+        $response = $this->withServerVariables(['HTTP_HOST' => 'seller.blukios.store'])
+            ->get('/api/auth/google/redirect?platform=web');
+
+        $response->assertRedirect();
+        $location = $response->headers->get('Location');
+        $this->assertStringStartsWith('https://blukios.store/api/auth/google/redirect?platform=web', $location);
+        $this->assertFalse(collect($response->headers->getCookies())
+            ->contains(fn ($cookie): bool => $cookie->getName() === 'google_oauth_nonce'));
     }
 
     private function mockGoogleUser(string $email): void
