@@ -3,122 +3,167 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Throwable;
 
 class GoogleAuthController extends Controller
 {
-    public function redirect()
+    private const NONCE_COOKIE = 'google_oauth_nonce';
+
+    private const NONCE_PATH = '/api/auth/google';
+
+    public function redirect(Request $request)
     {
-        Log::info('GoogleAuth: Redirect Hit', [
-            'platform' => request('platform'),
-            'session_id' => session()->getId(),
+        $validated = $request->validate([
+            'platform' => 'sometimes|string|in:web,mobile',
         ]);
 
-        $redirectUrl = config('services.google.redirect');
-        Log::info('GoogleAuth: Using redirect URL', ['redirect' => $redirectUrl]);
-
         try {
-            // Teruskan platform lewat OAuth state supaya callback (stateless,
-            // tanpa session) tahu harus redirect ke deep link mobile atau web
-            $params = ['prompt' => 'select_account'];
-            if (request('platform')) {
-                $params['state'] = http_build_query(['platform' => request('platform')]);
-            }
+            $state = Str::random(64);
+            $nonce = Str::random(64);
+            Cache::put('google.oauth.state.'.$state, [
+                'platform' => $validated['platform'] ?? 'web',
+                'nonce' => hash('sha256', $nonce),
+            ], now()->addMinutes(10));
 
-            $provider = Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->with($params);
-            $response = $provider->redirect();
-            Log::info('GoogleAuth: Generated URL', ['url' => $response->getTargetUrl()]);
+            $response = Socialite::driver('google')
+                ->redirectUrl(config('services.google.redirect'))
+                ->stateless()
+                ->with(['prompt' => 'select_account', 'state' => $state])
+                ->redirect();
+            $response->headers->setCookie(cookie(
+                name: self::NONCE_COOKIE,
+                value: $nonce,
+                minutes: 10,
+                path: self::NONCE_PATH,
+                secure: $request->isSecure(),
+                httpOnly: true,
+                sameSite: 'lax',
+            ));
 
             return $response;
-        } catch (\Exception $e) {
-            Log::error('GoogleAuth: Redirect Error', ['error' => $e->getMessage()]);
-            throw $e;
+        } catch (Throwable $e) {
+            Log::error('GoogleAuth: Redirect failed', ['error' => $e->getMessage()]);
+
+            return $this->loginError();
         }
     }
 
-    public function callback()
+    public function callback(Request $request)
     {
         try {
-            DB::beginTransaction();
+            $state = $request->query('state');
+            if (! is_string($state) || $state === '' || strlen($state) > 128) {
+                return $this->loginError();
+            }
+
+            $context = $this->pullOnce('google.oauth.state.'.$state);
+            if (! is_array($context) || ! in_array($context['platform'] ?? null, ['web', 'mobile'], true) || ! $this->matchesNonce($request, $context)) {
+                return $this->loginError();
+            }
 
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            $user = User::where('email', $googleUser->getEmail())->first();
+            $user = DB::transaction(function () use ($googleUser) {
+                $user = User::where('email', $googleUser->getEmail())->first();
 
-            if (! $user) {
-                // Register new user
-                $user = new User;
-                $user->name = $googleUser->getName();
-                $user->email = $googleUser->getEmail();
-                $user->email_verified_at = now();
-                $user->password = bcrypt(Str::random(16)); // Random password
-                $user->profile_picture = $googleUser->getAvatar();
+                if (! $user) {
+                    $user = new User;
+                    $user->name = $googleUser->getName();
+                    $user->email = $googleUser->getEmail();
+                    $user->email_verified_at = now();
+                    $user->password = bcrypt(Str::random(16));
+                    $user->profile_picture = $googleUser->getAvatar();
 
-                // Generate Username
-                $slug = Str::slug($user->name);
-                $count = 1;
-                while (User::where('username', $slug)->exists()) {
-                    $slug = Str::slug($user->name).'-'.$count;
-                    $count++;
+                    $slug = Str::slug($user->name);
+                    $count = 1;
+                    while (User::where('username', $slug)->exists()) {
+                        $slug = Str::slug($user->name).'-'.$count;
+                        $count++;
+                    }
+                    $user->username = $slug;
+                    $user->save();
+                    $user->assignRole('buyer');
+                    $user->buyer()->create(['phone_number' => null]);
                 }
-                $user->username = $slug;
 
-                $user->save();
+                return $user;
+            });
 
-                // Assign default role 'buyer'
-                $user->assignRole('buyer');
+            if ($context['platform'] === 'mobile') {
+                $token = $user->createToken('auth_token')->plainTextToken;
 
-                // Create default buyer profile (nomor HP diisi belakangan)
-                $user->buyer()->create([
-                    'phone_number' => null,
-                ]);
+                return redirect('mobileblue://callback?'.http_build_query(['token' => $token, 'username' => $user->username]))
+                    ->withoutCookie(self::NONCE_COOKIE, self::NONCE_PATH);
             }
 
-            // Login Logic
-            $user->token = $user->createToken('auth_token')->plainTextToken;
-            $user->permissions = $user->roles->flatMap->permissions->pluck('name');
+            $code = Str::random(64);
+            Cache::put('google.oauth.exchange.'.$code, [
+                'user_id' => $user->getKey(),
+                'nonce' => $context['nonce'],
+            ], now()->addSeconds(60));
 
-            DB::commit();
+            return redirect(rtrim(config('app.frontend_url'), '/').'/auth/google/callback?code='.$code);
+        } catch (Throwable $e) {
+            Log::error('GoogleAuth: Callback failed', ['error' => $e->getMessage()]);
 
-            // Redirect Logic based on Platform
-            // Extract platform from 'state' parameter if available
-            $platform = null;
-            if (request()->has('state')) {
-                parse_str(request('state'), $stateParams);
-                if (isset($stateParams['platform'])) {
-                    $platform = $stateParams['platform'];
-                }
-            }
-
-            // Fallback to session if state is empty (for web or legacy flows)
-            if (! $platform) {
-                $platform = session('auth_platform');
-            }
-
-            Log::info('GoogleAuth: Callback Hit', [
-                'platform' => $platform,
-                'state_param' => request('state'),
-                'session_id' => session()->getId(),
-            ]);
-
-            $token = $user->token;
-
-            if ($platform === 'mobile') {
-                return redirect("mobileblue://callback?token={$token}&username={$user->username}");
-            }
-
-            $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
-
-            return redirect("{$frontendUrl}/auth/google/callback?token={$token}&username={$user->username}");
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return ResponseHelper::jsonResponse(false, 'Google Login Failed: '.$e->getMessage(), null, 500);
+            return $this->loginError();
         }
+    }
+
+    public function exchange(Request $request)
+    {
+        $validated = $request->validate(['code' => 'required|string|max:128']);
+
+        try {
+            $context = $this->pullOnce('google.oauth.exchange.'.$validated['code'], $request);
+            $user = is_array($context) && isset($context['user_id']) ? User::find($context['user_id']) : null;
+            if (! $user) {
+                return ResponseHelper::jsonResponse(false, 'Kode login Google tidak valid atau sudah kedaluwarsa.', null, 422);
+            }
+
+            $user->setAttribute('token', $user->createToken('auth_token')->plainTextToken);
+            $user->setAttribute('permissions', $user->getAllPermissions()->pluck('name'));
+
+            return ResponseHelper::jsonResponse(true, 'Login Berhasil', new UserResource($user), 200)
+                ->withoutCookie(self::NONCE_COOKIE, self::NONCE_PATH);
+        } catch (Throwable $e) {
+            Log::error('GoogleAuth: Exchange failed', ['error' => $e->getMessage()]);
+
+            return ResponseHelper::jsonResponse(false, 'Login Google gagal. Silakan coba lagi.', null, 500);
+        }
+    }
+
+    private function pullOnce(string $key, ?Request $request = null): mixed
+    {
+        // Cache::pull is get + forget; serialize consumers to prevent concurrent replay.
+        return Cache::lock($key.'.lock', 10)->block(5, function () use ($key, $request) {
+            if ($request !== null && ! $this->matchesNonce($request, Cache::get($key))) {
+                return null;
+            }
+
+            return Cache::pull($key);
+        });
+    }
+
+    private function matchesNonce(Request $request, mixed $context): bool
+    {
+        $nonce = $request->cookie(self::NONCE_COOKIE);
+
+        return is_array($context) && is_string($context['nonce'] ?? null)
+            && is_string($nonce) && $nonce !== ''
+            && hash_equals($context['nonce'], hash('sha256', $nonce));
+    }
+
+    private function loginError()
+    {
+        return redirect(rtrim(config('app.frontend_url'), '/').'/auth/login?error=google');
     }
 }

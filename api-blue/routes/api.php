@@ -356,6 +356,8 @@ Route::middleware('throttle:6,1')->group(function () {
 // exchange_token sekali-pakai + throttle ketat, bukan token permanen.
 Route::middleware('throttle:10,1')->post('auth/sso/exchange', [AuthController::class, 'ssoExchange']);
 
+Route::middleware('throttle:10,1')->post('auth/google/exchange', [GoogleAuthController::class, 'exchange']);
+
 // Verification Routes
 Route::get('/email/verify/{id}/{hash}', [
     VerificationController::class,
