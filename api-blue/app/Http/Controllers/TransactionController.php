@@ -312,6 +312,50 @@ class TransactionController extends Controller implements HasMiddleware
         }
     }
 
+    public function previewCancelUnpaid(Request $request, string $id)
+    {
+        try {
+            $transaction = $this->transactionRepository->getById($id);
+            if (! $transaction) {
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+            if ($request->user()->cannot('cancelUnpaid', $transaction)) {
+                return ResponseHelper::jsonResponse(false, 'Anda tidak memiliki izin untuk membatalkan pesanan ini', null, 403);
+            }
+
+            $orders = $this->transactionRepository->getPaymentOrders($transaction);
+
+            return ResponseHelper::jsonResponse(true, 'Pesanan dalam pembayaran ini', TransactionResource::collection($orders), 200);
+        } catch (\Exception $e) {
+            return $this->domainErrorResponse($e);
+        }
+    }
+
+    public function cancelUnpaid(Request $request, string $id)
+    {
+        try {
+            $transaction = $this->transactionRepository->getById($id);
+            if (! $transaction) {
+                return ResponseHelper::jsonResponse(false, 'Data Transaksi Tidak Ditemukan', null, 404);
+            }
+            if ($request->user()->cannot('cancelUnpaid', $transaction)) {
+                return ResponseHelper::jsonResponse(false, 'Anda tidak memiliki izin untuk membatalkan pesanan ini', null, 403);
+            }
+
+            $orders = $this->transactionRepository->cancelUnpaidOrder($id);
+            foreach ($orders as $order) {
+                event(new TransactionStatusUpdated($order));
+            }
+
+            return ResponseHelper::jsonResponse(true, 'Pesanan dibatalkan. Saldo Blukios yang digunakan sudah dikembalikan.', [
+                'payment_status' => 'failed',
+                'cancelled_orders' => TransactionResource::collection($orders),
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->domainErrorResponse($e);
+        }
+    }
+
     /**
      * Penjual menolak pesanan yang sudah dibayar. Uang pembeli dikembalikan
      * lewat RefundCancelledTransactionJob (Midtrans, atau Saldo Blukios untuk VA).

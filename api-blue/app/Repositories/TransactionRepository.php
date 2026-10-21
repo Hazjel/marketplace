@@ -606,7 +606,9 @@ class TransactionRepository implements TransactionRepositoryInterface
 
         $transaction->refund_status = 'processing';
         $transaction->refund_amount = (string) $amount->minor();
-        $transaction->refund_reason = 'Pembayaran masuk setelah pesanan kedaluwarsa';
+        $transaction->refund_reason = $transaction->delivery_status === 'cancelled'
+            ? 'Pembayaran masuk setelah pesanan dibatalkan'
+            : 'Pembayaran masuk setelah pesanan kedaluwarsa';
         $transaction->save();
 
         Log::warning('Pembayaran masuk untuk pesanan yang sudah gagal, direfund', [
@@ -1079,6 +1081,71 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'transactionDetails.product',
             ]);
         });
+    }
+
+    public function getPaymentOrders(Transaction $transaction): Collection
+    {
+        $orders = Transaction::inPayment($transaction->paymentCode())->orderBy('id')->get();
+        $user = Auth::user();
+
+        if (! $user || $orders->contains(fn (Transaction $order) => $user->cannot('cancelUnpaid', $order))) {
+            throw new Exception('Anda tidak memiliki izin untuk membatalkan pembayaran ini', 403);
+        }
+
+        return $orders->load(['buyer.user', 'store', 'transactionDetails.product']);
+    }
+
+    public function cancelUnpaidOrder(string $id): Collection
+    {
+        $selected = Transaction::find($id);
+        if (! $selected) {
+            throw new Exception('Data Transaksi Tidak Ditemukan', 404);
+        }
+
+        $orderId = $selected->paymentCode();
+        $mongoAdjustments = [];
+        DB::beginTransaction();
+
+        try {
+            // Same order as webhook settlement: never lock the selected row first.
+            $orders = Transaction::inPayment($orderId)->orderBy('id')->lockForUpdate()->get();
+            if (! $orders->contains('id', $id)) {
+                throw new Exception('Data Transaksi Tidak Ditemukan', 404);
+            }
+            $user = Auth::user();
+            if (! $user || $orders->contains(fn (Transaction $order) => $user->cannot('cancelUnpaid', $order))) {
+                throw new Exception('Anda tidak memiliki izin untuk membatalkan pembayaran ini', 403);
+            }
+            if ($orders->contains('payment_status', 'paid')) {
+                throw new Exception('Pesanan sudah dibayar. Gunakan alur pembatalan pesanan yang sudah dibayar.', 422);
+            }
+            if ($orders->contains(fn (Transaction $order) => ! in_array($order->payment_status, ['unpaid', 'pending'], true))) {
+                throw new Exception('Pesanan sudah dibatalkan atau kedaluwarsa', 422);
+            }
+
+            $this->failPayment($orders, $mongoAdjustments);
+            foreach ($orders as $order) {
+                $order->delivery_status = 'cancelled';
+                $order->save();
+            }
+            DB::commit();
+        } catch (\Throwable $e) {
+            $this->compensateStockRestoreRollback($mongoAdjustments);
+            DB::rollBack();
+
+            throw $e;
+        }
+
+        try {
+            $this->paymentGateway->expirePayment($orderId);
+        } catch (\Throwable $e) {
+            Log::warning('Pembayaran dibatalkan tetapi Midtrans expire gagal', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $orders->load(['buyer.user', 'store', 'transactionDetails.product']);
     }
 
     /**

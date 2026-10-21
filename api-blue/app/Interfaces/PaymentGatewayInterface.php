@@ -24,4 +24,6 @@ interface PaymentGatewayInterface
      * sendiri. Exception: gateway menolak atau tidak terjangkau, boleh dicoba lagi.
      */
     public function refund(Transaction $transaction, string $reason): string;
+
+    public function expirePayment(string $orderId): void;
 }

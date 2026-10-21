@@ -54,6 +54,11 @@ class TransactionPolicy
         return $this->ownsAsStore($user, $transaction) || $this->isAdmin($user);
     }
 
+    public function cancelUnpaid(User $user, Transaction $transaction): bool
+    {
+        return $this->ownsAsBuyer($user, $transaction) || $this->isAdmin($user);
+    }
+
     /**
      * Rekening refund milik pembeli: hanya dia yang mengisi, hanya dia dan
      * admin (yang mentransfer) yang boleh melihatnya. Penjual tidak.
