@@ -14,6 +14,8 @@ use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Support\FakeShippingGateway;
@@ -146,6 +148,121 @@ class MultiStoreCheckoutTest extends TestCase
             'transaction_status' => 'settlement',
             'payment_type' => 'bank_transfer',
         ]);
+    }
+
+    /**
+     * Existing rows deliberately occupy the complete legacy suffix space.
+     *
+     * @param  list<string>  $codes
+     * @param  list<string>  $paymentCodes
+     */
+    private function seedTransactionIdentifiers(array $codes = [], array $paymentCodes = []): void
+    {
+        $now = now();
+        $rows = [];
+
+        foreach ($codes as $code) {
+            $rows[] = [
+                'id' => (string) Str::uuid(),
+                'code' => $code,
+                'payment_code' => null,
+                'buyer_id' => $this->buyerUser->buyer->id,
+                'store_id' => $this->gadget->store_id,
+                'address_id' => '1',
+                'address' => 'Jl. Seed',
+                'city' => 'Jakarta',
+                'postal_code' => '12345',
+                'shipping' => 'JNE',
+                'shipping_type' => 'REG',
+                'shipping_cost' => 0,
+                'tax' => 0,
+                'grand_total' => 0,
+                'payment_status' => 'unpaid',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        foreach ($paymentCodes as $paymentCode) {
+            $rows[] = [
+                'id' => (string) Str::uuid(),
+                'code' => 'SEED-'.$paymentCode,
+                'payment_code' => $paymentCode,
+                'buyer_id' => $this->buyerUser->buyer->id,
+                'store_id' => $this->gadget->store_id,
+                'address_id' => '1',
+                'address' => 'Jl. Seed',
+                'city' => 'Jakarta',
+                'postal_code' => '12345',
+                'shipping' => 'JNE',
+                'shipping_type' => 'REG',
+                'shipping_cost' => 0,
+                'tax' => 0,
+                'grand_total' => 0,
+                'payment_status' => 'unpaid',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        DB::table('transactions')->insert($rows);
+    }
+
+    public function test_order_code_never_collides_with_an_existing_order(): void
+    {
+        $this->travelTo(Carbon::create(2026, 10, 21, 12, 34, 56));
+
+        $second = str_pad((string) now()->format('dmYHis'), 12, '0', STR_PAD_LEFT);
+        $existingCodes = array_map(
+            function (int $suffix) use ($second): string {
+                return 'BLK'.$second.$suffix;
+            },
+            range(10, 99)
+        );
+        $this->seedTransactionIdentifiers($existingCodes);
+
+        $response = $this->checkout([$this->order($this->gadget, 1)])->assertStatus(201);
+        $code = (string) $response->json('data.0.code');
+
+        $this->assertStringStartsWith('BLK', $code);
+        $this->assertLessThanOrEqual(50, strlen($code));
+        $this->assertNotContains($code, $existingCodes);
+        $this->assertSame(1, Transaction::where('code', $code)->count());
+    }
+
+    public function test_multi_store_payment_code_never_collides_with_existing_payment_code_or_order_code(): void
+    {
+        $this->travelTo(Carbon::create(2026, 10, 21, 12, 34, 56));
+
+        $second = str_pad((string) now()->format('dmYHis'), 12, '0', STR_PAD_LEFT);
+        $existingPaymentCodes = array_map(
+            function (int $suffix) use ($second): string {
+                return 'BLKP'.$second.$suffix;
+            },
+            range(100, 999)
+        );
+        $this->seedTransactionIdentifiers(
+            $existingPaymentCodes,
+            $existingPaymentCodes
+        );
+
+        $response = $this->checkout([
+            $this->order($this->gadget, 1),
+            $this->order($this->shirt, 1),
+        ])->assertStatus(201);
+        $paymentCode = (string) $response->json('data.0.payment_code');
+
+        $this->assertStringStartsWith('BLKP', $paymentCode);
+        $this->assertLessThanOrEqual(50, strlen($paymentCode));
+        $this->assertNotContains($paymentCode, $existingPaymentCodes);
+        $this->assertSame(
+            2,
+            Transaction::where('payment_code', $paymentCode)->count()
+        );
+        $this->assertSame(
+            0,
+            Transaction::where('code', $paymentCode)->count()
+        );
     }
 
     public function test_one_order_per_store_sharing_one_payment(): void
