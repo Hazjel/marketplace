@@ -137,6 +137,7 @@ class CancelUnpaidTransactionTest extends TestCase
         $this->actingAs($this->buyerUser, 'sanctum')
             ->postJson("/api/transaction/{$transaction->id}/cancel-unpaid")
             ->assertOk()
+            ->assertJsonPath('message', 'Pesanan dibatalkan.')
             ->assertJsonPath('data.payment_status', 'failed');
 
         $this->assertSame('failed', $transaction->fresh()->payment_status);
@@ -233,7 +234,8 @@ class CancelUnpaidTransactionTest extends TestCase
 
         $this->actingAs($this->buyerUser, 'sanctum')
             ->postJson("/api/transaction/{$transaction->id}/cancel-unpaid")
-            ->assertOk();
+            ->assertOk()
+            ->assertJsonPath('message', 'Pesanan dibatalkan. Saldo Blukios yang digunakan sudah dikembalikan.');
         $this->actingAs($this->buyerUser, 'sanctum')
             ->postJson("/api/transaction/{$transaction->id}/cancel-unpaid")
             ->assertStatus(422);
