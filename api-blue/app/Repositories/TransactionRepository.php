@@ -397,7 +397,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             }
 
             if ($transactions->count() > 1) {
-                $paymentCode = 'BLKP'.now()->format('dmYHis').mt_rand(100, 999);
+                $paymentCode = $this->generateUniqueCode('BLKP', $codes);
                 foreach ($transactions as $transaction) {
                     $transaction->payment_code = $paymentCode;
                     $transaction->save();
@@ -645,6 +645,21 @@ class TransactionRepository implements TransactionRepositoryInterface
         }
     }
 
+    /** @param list<string> $codes */
+    private function generateUniqueCode(string $prefix, array $codes): string
+    {
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $code = $prefix.now()->format('dmYHis').random_int(100000000000, 999999999999);
+
+            if (! in_array($code, $codes, true)
+                && ! Transaction::where('code', $code)->orWhere('payment_code', $code)->exists()) {
+                return $code;
+            }
+        }
+
+        throw new Exception('Gagal membuat kode pesanan/pembayaran yang unik setelah 10 percobaan.');
+    }
+
     /**
      * @param  array<string, mixed>  $data
      * @param  list<array<string, mixed>>  $mongoAdjustments
@@ -667,10 +682,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
         $transaction = new Transaction;
 
-        // Several orders are created in the same second; keep their codes apart.
-        do {
-            $code = 'BLK'.now()->format('dmYHis').mt_rand(10, 99);
-        } while (in_array($code, $codes, true));
+        $code = $this->generateUniqueCode('BLK', $codes);
         $codes[] = $code;
         $transaction->code = $code;
         $transaction->buyer_id = $data['buyer_id'];
