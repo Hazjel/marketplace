@@ -175,24 +175,6 @@ parameters:
 			path: app/Http/Controllers/StoreController.php
 
 		-
-			message: '#^Cannot access property \$fraud_status on array\<mixed\>\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/TransactionController.php
-
-		-
-			message: '#^Cannot access property \$payment_type on array\<mixed\>\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/TransactionController.php
-
-		-
-			message: '#^Cannot access property \$transaction_status on array\<mixed\>\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/TransactionController.php
-
-		-
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 2

@@ -12,6 +12,7 @@ use App\Http\Resources\TransactionResource;
 use App\Interfaces\TransactionAnalyticsRepositoryInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Models\Transaction;
+use App\Services\MidtransPaymentGateway;
 use App\Services\MidtransPaymentStatusInterpreter;
 use App\Support\OpsSignals;
 use Illuminate\Http\Request;
@@ -22,7 +23,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Midtrans\Config;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class TransactionController extends Controller implements HasMiddleware
@@ -462,12 +462,6 @@ class TransactionController extends Controller implements HasMiddleware
                 return ResponseHelper::jsonResponse(false, 'Unauthorized access to this transaction', null, 403);
             }
 
-            // Configure Midtrans
-            Config::$serverKey = config('midtrans.serverKey');
-            Config::$isProduction = config('midtrans.isProduction');
-            Config::$isSanitized = config('midtrans.isSanitized');
-            Config::$is3ds = config('midtrans.is3ds');
-
             $mongoAdjustments = [];
             $lateRefunds = [];
 
@@ -483,7 +477,7 @@ class TransactionController extends Controller implements HasMiddleware
                 // Dilakukan dulu di luar transaksi, hasilnya baru dipakai di
                 // dalam blok terkunci di bawah.
                 // A multi-store checkout is one Midtrans payment under payment_code.
-                $midtransStatus = \Midtrans\Transaction::status($transaction->paymentCode());
+                $midtransStatus = app(MidtransPaymentGateway::class)->getPaymentStatus($transaction);
 
                 $transactionStatus = $midtransStatus->transaction_status;
                 $paymentType = $midtransStatus->payment_type;
