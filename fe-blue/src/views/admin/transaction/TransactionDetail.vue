@@ -12,6 +12,7 @@ import TrackingMap from '@/components/TrackingMap.vue'
 import TransactionStatusBanner from '@/components/admin/transaction/TransactionStatusBanner.vue'
 import RefundPanel from '@/components/admin/transaction/RefundPanel.vue'
 import ComplaintPanel from '@/components/admin/transaction/ComplaintPanel.vue'
+import CancelUnpaidButton from '@/components/admin/transaction/CancelUnpaidButton.vue'
 import { logger } from '@/utils/logger'
 import { dashboardRoute } from '@/helpers/routeHelper'
 import { resolvePaymentStatus } from '@/composables/useTransactionStatus'
@@ -512,6 +513,8 @@ v-else
               {{ resolvePaymentStatus(transaction).label }}
             </span>
           </div>
+
+          <CancelUnpaidButton :transaction="transaction" @cancelled="fetchData" />
 
           <!-- Repayment Button -->
           <button
