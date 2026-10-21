@@ -270,5 +270,4 @@ class CancelUnpaidTransactionTest extends TestCase
         $this->assertSame('failed', $transaction->fresh()->payment_status);
         $this->assertSame(0, BuyerBalanceHistory::where('type', BuyerBalanceHistory::TYPE_PAYMENT_RETURNED)->count());
     }
-
 }
