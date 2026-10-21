@@ -51,7 +51,7 @@ async def lifespan(application: FastAPI):
 
     try:
         await asyncio.wait_for(asyncio.shield(refresh_task), timeout=5.0)
-    except (asyncio.TimeoutError, asyncio.CancelledError):
+    except (TimeoutError, asyncio.CancelledError):
         pass
     refresh_task.cancel()
     await r.aclose()

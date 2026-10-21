@@ -7,14 +7,22 @@ from rag import vectorstore as rag_module
 from utils.metrics import RAG_SEARCH_HITS, RAG_SEARCH_MISSES
 from utils.redis_helper import get_session_history
 
-
 # ---------------------------------------------------------------------------
 # Context String Builder
 # ---------------------------------------------------------------------------
-def build_product_context(products: list[dict]) -> str:
+NO_MATCH_CONTEXT = (
+    "Pencarian katalog Blukios untuk pertanyaan ini tidak menemukan produk yang cocok. "
+    "Ini tetap pertanyaan belanja: jangan menolak. Bilang produk itu belum tersedia di Blukios "
+    "saat ini, jangan menyebut produk apa pun, lalu tawarkan cari dengan kata kunci atau kategori lain."
+)
+
+
+def build_product_context(products: list[dict], searched: bool = False) -> str:
     """Bangun context string dari hasil RAG search untuk diinjeksi ke LLM."""
     if not products:
-        return ""   # Pertanyaan umum — jangan inject apapun
+        # Pertanyaan umum — jangan inject apapun. Pencarian produk yang kosong
+        # tetap diberi tahu, kalau tidak model menganggapnya di luar topik dan menolak.
+        return NO_MATCH_CONTEXT if searched else ""
 
     lines = "\n".join([
         f"- {p['name']} | Kategori: {p.get('category','')} | Kondisi: {p.get('condition','')}"
@@ -88,7 +96,7 @@ async def prepare_context(session_id: str, user_msg: str) -> tuple[list[dict], l
 
     products = products[:RAG_TOP_K]
 
-    context_info = build_product_context(products)
+    context_info = build_product_context(products, searched=bool(vs) and not is_general)
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},

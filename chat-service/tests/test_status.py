@@ -19,6 +19,13 @@ class TestBuildProductContext:
         # Pertanyaan umum/non-produk sengaja tidak inject apa pun ke LLM.
         assert build_product_context([]) == ""
 
+    def test_empty_search_tells_model_product_is_unavailable(self):
+        # "apakah ada iphone disini" dengan katalog tanpa iPhone dulu dijawab
+        # penolakan di-luar-topik karena model tidak diberi konteks apa pun.
+        result = build_product_context([], searched=True)
+        assert "belum tersedia" in result
+        assert "jangan menolak" in result
+
     def test_products_list_included_in_context(self):
         products = [
             {
