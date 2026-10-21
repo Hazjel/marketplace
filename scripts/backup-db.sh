@@ -44,11 +44,15 @@ PGPASSWORD="$(env_val DB_PASSWORD)" docker exec -e PGPASSWORD "$PG_CONTAINER" \
 # the users table back. shared-postgres is not touched.
 drill="blukios-restore-drill-$$"
 trap 'docker rm -f "$drill" > /dev/null 2>&1; rm -rf "$work"' EXIT
+# Data dir in RAM: initdb on this host's slow shared disk took over 60 s and
+# failed every drill from 2026-10-04 to 2026-10-18. The drill is thrown away, so
+# nothing needs to reach the disk.
 docker run -d --rm --name "$drill" --network none -e POSTGRES_HOST_AUTH_METHOD=trust \
+    --tmpfs /var/lib/postgresql/data:rw,size=512m \
     "$(docker inspect -f '{{.Config.Image}}' "$PG_CONTAINER")" > /dev/null
 # TCP, not the socket: the image's init server answers on the socket and then restarts.
 i=0; until docker exec "$drill" pg_isready -q -h 127.0.0.1 -U postgres; do
-    i=$((i + 1)); [ "$i" -le 60 ] || { echo "restore drill: Postgres tidak siap" >&2; exit 1; }; sleep 1
+    i=$((i + 1)); [ "$i" -le 180 ] || { echo "restore drill: Postgres tidak siap" >&2; exit 1; }; sleep 1
 done
 docker exec -i "$drill" pg_restore -U postgres -d postgres --no-owner --no-privileges --exit-on-error \
     < "$work/postgres.dump"
