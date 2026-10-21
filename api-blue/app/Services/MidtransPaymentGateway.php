@@ -18,6 +18,13 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
     // https://docs.midtrans.com/docs/what-payment-method-that-have-refund-feature
     private const REFUNDABLE_TYPES = ['credit_card', 'gopay', 'shopeepay', 'qris', 'akulaku'];
 
+    public function getPaymentStatus(Transaction $transaction): object
+    {
+        $this->configure();
+
+        return (object) MidtransTransaction::status($transaction->paymentCode());
+    }
+
     public function getSnapToken(Transaction $transaction): ?string
     {
         $this->configure();

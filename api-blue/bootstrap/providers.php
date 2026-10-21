@@ -1,11 +1,13 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use App\Providers\E2EServiceProvider;
 use App\Providers\RepositoryServiceProvider;
 use MongoDB\Laravel\MongoDBServiceProvider;
 
 return [
     AppServiceProvider::class,
     RepositoryServiceProvider::class,
+    E2EServiceProvider::class,
     MongoDBServiceProvider::class,
 ];
