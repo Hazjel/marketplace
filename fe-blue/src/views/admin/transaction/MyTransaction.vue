@@ -9,6 +9,7 @@ import { formatRupiah } from '@/helpers/format'
 import { useToast } from 'vue-toastification'
 import { dashboardRoute } from '@/helpers/routeHelper'
 import { resolveTransactionStatus, isFailedTransaction } from '@/composables/useTransactionStatus'
+import CancelUnpaidButton from '@/components/admin/transaction/CancelUnpaidButton.vue'
 
 const toast = useToast()
 const transactionStore = useTransactionStore()
@@ -293,7 +294,7 @@ watch(error, (value) => {
           </div>
 
           <!-- Card Footer -->
-          <div class="px-4 pb-4 flex items-center justify-between">
+          <div class="px-4 pb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p class="text-[11px] text-custom-grey dark:text-gray-500 font-medium">
                 Total Belanja
@@ -302,6 +303,10 @@ watch(error, (value) => {
                 Rp {{ formatRupiah(transaction.grand_total) }}
               </p>
             </div>
+            <CancelUnpaidButton
+              :transaction="transaction"
+              @cancelled="fetchData"
+            />
             <RouterLink
               :to="getDetailRoute(transaction.id)"
               class="px-5 py-2.5 rounded-xl text-sm font-medium transition-all border-2 border-custom-blue/20 text-custom-blue dark:text-blue-400 hover:bg-custom-blue hover:text-white hover:border-custom-blue hover:shadow-lg hover:shadow-blue-500/20"

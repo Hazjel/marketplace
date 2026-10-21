@@ -175,6 +175,15 @@ export const useTransactionStore = defineStore('transaction', {
       return this.postAction(`transaction/${id}/cancel`, { reason })
     },
 
+    async previewUnpaidCancellation(id) {
+      const response = await axiosInstance.get(`transaction/${id}/cancel-unpaid`)
+      return response.data.data
+    },
+
+    async cancelUnpaidTransaction(id) {
+      return this.postAction(`transaction/${id}/cancel-unpaid`, {}, { quiet: true })
+    },
+
     // Buyer's bank account for a manual (virtual account) refund.
     async submitRefundAccount(id, payload) {
       return this.postAction(`transaction/${id}/refund-account`, payload, { quiet: true })

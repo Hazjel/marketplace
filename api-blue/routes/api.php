@@ -249,6 +249,8 @@ Route::middleware('auth:sanctum')->group(function () {
         TransactionController::class,
         'cancel',
     ]);
+    Route::get('transaction/{id}/cancel-unpaid', [TransactionController::class, 'previewCancelUnpaid']);
+    Route::middleware('throttle:10,1')->post('transaction/{id}/cancel-unpaid', [TransactionController::class, 'cancelUnpaid']);
     Route::middleware('throttle:10,1')->post('transaction/{id}/refund-account', [
         TransactionController::class,
         'refundAccount',

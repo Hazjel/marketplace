@@ -108,6 +108,12 @@ class MidtransPaymentGateway implements PaymentGatewayInterface
         return self::REFUND_DONE;
     }
 
+    public function expirePayment(string $orderId): void
+    {
+        $this->configure();
+        MidtransTransaction::expire($orderId);
+    }
+
     private function configure(): void
     {
         Config::$serverKey = config('midtrans.serverKey');

@@ -80,6 +80,8 @@ class ComplaintTest extends TestCase
 
                 return PaymentGatewayInterface::REFUND_DONE;
             }
+
+            public function expirePayment(string $orderId): void {}
         });
 
         $this->sellerUser = User::factory()->create();

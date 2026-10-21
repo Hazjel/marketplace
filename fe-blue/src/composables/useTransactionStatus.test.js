@@ -15,6 +15,12 @@ describe('resolveRefundStatus', () => {
 })
 
 describe('resolveTransactionStatus', () => {
+  it('shows buyer-cancelled unpaid orders as cancelled', () => {
+    expect(resolveTransactionStatus({
+      payment_status: 'failed', delivery_status: 'cancelled', refund_status: null
+    }).label).toBe('Dibatalkan')
+  })
+
   it('shows the refund, not "Gagal", for an order cancelled after payment', () => {
     const status = resolveTransactionStatus({
       payment_status: 'failed',

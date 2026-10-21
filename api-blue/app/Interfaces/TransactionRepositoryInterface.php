@@ -73,6 +73,12 @@ interface TransactionRepositoryInterface
 
     public function cancelPaidOrder(string $id, string $reason): Transaction;
 
+    /** @return Collection<int, Transaction> */
+    public function getPaymentOrders(Transaction $transaction): Collection;
+
+    /** @return Collection<int, Transaction> */
+    public function cancelUnpaidOrder(string $id): Collection;
+
     /**
      * @param  array{reason: string, description: string}  $data
      * @param  list<UploadedFile>  $photos

@@ -108,6 +108,10 @@ export function isFailedTransaction(transaction) {
  * payment dan delivery sebagai dua badge terpisah (mis. IncomingOrders.vue).
  */
 export function resolvePaymentStatus(transaction) {
+  if (transaction?.delivery_status === 'cancelled' && !transaction?.refund_status) {
+    return resolveDeliveryStatus(transaction)
+  }
+
   if (isFailedTransaction(transaction)) {
     return {
       label: PAYMENT_LABELS.failed,
@@ -147,6 +151,10 @@ export function resolveTransactionStatus(transaction) {
   const refund = resolveRefundStatus(transaction)
   if (refund) {
     return { ...refund, icon: 'x-circle', isFailure: false }
+  }
+
+  if (transaction?.delivery_status === 'cancelled') {
+    return { ...resolveDeliveryStatus(transaction), isFailure: true }
   }
 
   if (isFailedTransaction(transaction)) {
