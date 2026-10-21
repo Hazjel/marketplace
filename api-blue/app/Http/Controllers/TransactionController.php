@@ -15,6 +15,7 @@ use App\Models\Transaction;
 use App\Services\MidtransPaymentGateway;
 use App\Services\MidtransPaymentStatusInterpreter;
 use App\Support\OpsSignals;
+use App\ValueObjects\Money;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -347,7 +348,10 @@ class TransactionController extends Controller implements HasMiddleware
                 event(new TransactionStatusUpdated($order));
             }
 
-            return ResponseHelper::jsonResponse(true, 'Pesanan dibatalkan. Saldo Blukios yang digunakan sudah dikembalikan.', [
+            $usedBalance = $orders->contains(fn (Transaction $order) => Money::fromDecimalString((string) ($order->balance_used ?? 0))->greaterThan(Money::zero()));
+            $message = $usedBalance ? 'Pesanan dibatalkan. Saldo Blukios yang digunakan sudah dikembalikan.' : 'Pesanan dibatalkan.';
+
+            return ResponseHelper::jsonResponse(true, $message, [
                 'payment_status' => 'failed',
                 'cancelled_orders' => TransactionResource::collection($orders),
             ], 200);
