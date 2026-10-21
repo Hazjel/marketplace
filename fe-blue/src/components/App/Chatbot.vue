@@ -247,6 +247,7 @@ const sendFeedback = async (msg, rating) => {
         >
           <div
             v-for="(chat, index) in chats"
+            v-show="chat.text || !chat.streaming"
             :key="index"
             class="flex flex-col gap-1"
             :style="chat.isBot ? 'align-items: flex-start' : 'align-items: flex-end'"

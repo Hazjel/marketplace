@@ -1,7 +1,7 @@
 import asyncio
 import json
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
@@ -37,7 +37,7 @@ async def submit_feedback(request: Request, body: FeedbackRequest) -> dict:
             "session_id": body.session_id,
             "rating":     body.rating,
             "comment":    body.comment,
-            "timestamp":  datetime.now(timezone.utc).isoformat(),
+            "timestamp":  datetime.now(UTC).isoformat(),
         }
         key = f"{FEEDBACK_KEY}{body.session_id}:{int(time.time())}"
         await _get_redis().setex(key, 30 * 24 * 3600, json.dumps(feedback, ensure_ascii=False))
