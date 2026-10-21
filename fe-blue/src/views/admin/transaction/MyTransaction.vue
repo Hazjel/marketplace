@@ -282,7 +282,7 @@ watch(error, (value) => {
               </p>
               <p class="text-xs text-custom-grey dark:text-gray-400 mt-1">
                 {{ transaction.transaction_details?.[0]?.qty }} barang x Rp
-                {{ formatRupiah(transaction.transaction_details?.[0]?.price) }}
+                {{ formatRupiah(transaction.transaction_details?.[0]?.subtotal / transaction.transaction_details?.[0]?.qty) }}
               </p>
               <p
                 v-if="transaction.transaction_details?.length > 1"
