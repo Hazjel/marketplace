@@ -97,6 +97,23 @@ pipeline {
                     def deployConfigChanged = changed == 'ALL' || changed.readLines().any {
                         it == 'docker-compose.yml' || it == 'docker-compose.prod.yml' || it == '.env.example' || it.startsWith('docker/')
                     }
+                    // Images only need a rebuild when what they bake in changes. App code
+                    // reaches the PHP services, chat-service and recommendation-service
+                    // through bind mounts, so a code-only deploy recreates their containers
+                    // on the existing images. Every rebuild re-resolves base images on
+                    // Docker Hub and re-downloads PHP extensions from pecl; #159 and #160
+                    // failed on exactly that while all tests had passed.
+                    env.PHP_IMAGE_CHANGED = (deployConfigChanged || changed.readLines().any {
+                        it == 'api-blue/Dockerfile' || it.startsWith('api-blue/docker/') ||
+                            it in ['api-blue/composer.json', 'api-blue/composer.lock']
+                    }).toString()
+                    env.CHAT_IMAGE_CHANGED = (deployConfigChanged || changed.readLines().any {
+                        it in ['chat-service/Dockerfile', 'chat-service/requirements.txt']
+                    }).toString()
+                    env.RECO_IMAGE_CHANGED = (deployConfigChanged || changed.readLines().any {
+                        it in ['recommendation-service/Dockerfile', 'recommendation-service/requirements.txt']
+                    }).toString()
+                    env.FRONTEND_IMAGE_CHANGED = (deployConfigChanged || env.FRONTEND_CHANGED == 'true').toString()
                     env.DEPLOY_REQUIRED = (
                         env.BACKEND_CHANGED == 'true' ||
                         env.FRONTEND_CHANGED == 'true' ||
@@ -528,7 +545,30 @@ pipeline {
                     # manual -- itu betulan terjadi. Dengan urutan ini, build yang
                     # gagal membuat stage berhenti tanpa produksi pernah turun,
                     # dan downtime menyusut jadi sebatas waktu start container.
-                    docker compose -p marketplace build api queue reverb scheduler frontend chat-service recommendation-service
+                    # Only the images whose baked-in content changed (see Detect
+                    # Changes), plus any whose tag is missing on this host. A failed
+                    # build is retried: Docker Hub and pecl time out from here now and
+                    # then, and the old containers keep serving meanwhile.
+                    BUILD=""
+                    want() { [ "$1" = "true" ] || ! docker image inspect "marketplace-$2" >/dev/null 2>&1; }
+                    for s in api queue reverb scheduler; do
+                        if want "$PHP_IMAGE_CHANGED" "$s"; then BUILD="$BUILD $s"; fi
+                    done
+                    if want "$FRONTEND_IMAGE_CHANGED" frontend; then BUILD="$BUILD frontend"; fi
+                    if want "$CHAT_IMAGE_CHANGED" chat-service; then BUILD="$BUILD chat-service"; fi
+                    if want "$RECO_IMAGE_CHANGED" recommendation-service; then BUILD="$BUILD recommendation-service"; fi
+                    if [ -n "$BUILD" ]; then
+                        echo "Build image:$BUILD"
+                        built=""
+                        for i in 1 2 3; do
+                            if docker compose -p marketplace build $BUILD; then built=1; break; fi
+                            echo "build gagal (percobaan $i), coba lagi dalam 60 detik..."
+                            sleep 60
+                        done
+                        [ -n "$built" ] || { echo "GAGAL: build image tetap gagal setelah 3 percobaan"; exit 1; }
+                    else
+                        echo "Tidak ada image yang perlu dibangun ulang; kode baru masuk lewat bind mount"
+                    fi
 
                     # Only when dependencies changed (COMPOSER_CHANGED): refilling the
                     # volume copies ~10k files on this disk and kept the API down for
@@ -545,6 +585,19 @@ pipeline {
 
                     # mongo-express dan ollama ikut agar perubahan config-nya (mis. port) benar-benar sampai ke server.
                     docker compose -p marketplace up -d --no-build api queue reverb scheduler frontend chat-service recommendation-service mongo-express ollama
+                    # "up -d" only recreates containers whose image changed. Code-only
+                    # changes still need a fresh process: queue, reverb, scheduler,
+                    # uvicorn and the recommender keep the old code in memory.
+                    RECREATE=""
+                    if [ "$BACKEND_CHANGED" = "true" ]; then RECREATE="$RECREATE api queue reverb scheduler"; fi
+                    if [ "$CHAT_SERVICE_CHANGED" = "true" ]; then RECREATE="$RECREATE chat-service"; fi
+                    if [ "$RECOMMENDATION_CHANGED" = "true" ]; then RECREATE="$RECREATE recommendation-service"; fi
+                    STALE=""
+                    for s in $RECREATE; do case " $BUILD " in *" $s "*) ;; *) STALE="$STALE $s";; esac; done
+                    if [ -n "$STALE" ]; then
+                        echo "Recreate untuk kode baru:$STALE"
+                        docker compose -p marketplace up -d --no-build --force-recreate $STALE
+                    fi
                     # nginx sendiri jarang berubah -> compose gak recreate dia, tapi upstream
                     # (blue-api dkk) di atas barusan direcreate dan dapet IP Docker baru.
                     # nginx cuma resolve DNS internal sekali pas start, jadi upstream-nya basi
