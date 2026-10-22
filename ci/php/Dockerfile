@@ -1,5 +1,5 @@
 # Image stage Backend: Lint & Test. Tag-nya hash file ini, jadi hanya di-build ulang saat file ini berubah.
-FROM php:8.4-cli
+FROM php:8.4.27-cli-trixie
 
 RUN apt-get update -qq \
     && apt-get install -y -qq git unzip curl libsqlite3-dev libzip-dev libssl-dev libpng-dev libjpeg-dev libfreetype6-dev libwebp-dev libonig-dev >/dev/null \

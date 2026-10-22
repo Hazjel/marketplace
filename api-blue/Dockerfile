@@ -1,4 +1,7 @@
-FROM php:8.4-fpm
+# Pinned to a patch release: deploys reuse the built image (see Jenkinsfile
+# Deploy), so a floating tag would not pick up security fixes anyway.
+# 8.4.27 fixes PHP2Shell (CVE-2026-109618, CVE-2026-109619).
+FROM php:8.4.27-fpm-trixie
 
 # System deps for PHP extensions.
 # gd --with-webp: ProcessProductImageJob converts every product photo to WebP
