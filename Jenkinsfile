@@ -65,9 +65,15 @@ pipeline {
                     //
                     // Pembanding = commit yang sedang jalan di produksi, bukan build sukses terakhir:
                     // build sukses yang tidak deploy (#76) membuat perubahannya tidak pernah terkirim.
+                    //
+                    // "Running in production" means the commit the last deploy finished
+                    // with (deployed-ok, written after the health check), not the checkout
+                    // HEAD: Deploy resets the checkout before building, so #159 and #160
+                    // left HEAD on commits whose containers never started, and the next
+                    // build would have diffed against them and skipped the deploy.
                     sh 'git fetch --depth=100 origin main || true'
                     def base = sh(
-                        script: 'git -c safe.directory="$HOST_PROJECT_DIR" -C "$HOST_PROJECT_DIR" rev-parse HEAD 2>/dev/null || true',
+                        script: 'cat "$HOST_PROJECT_DIR/api-blue/storage/app/deployed-ok" 2>/dev/null || git -c safe.directory="$HOST_PROJECT_DIR" -C "$HOST_PROJECT_DIR" rev-parse HEAD 2>/dev/null || true',
                         returnStdout: true
                     ).trim() ?: scmVars.GIT_PREVIOUS_SUCCESSFUL_COMMIT
                     def changed
@@ -639,6 +645,11 @@ pipeline {
                         docker compose -p marketplace ps
                         exit 1
                     fi
+
+                    # Only now is this commit really serving; Detect Changes diffs the
+                    # next build against it.
+                    echo "$DEPLOYED" > api-blue/storage/app/deployed-ok.tmp
+                    mv api-blue/storage/app/deployed-ok.tmp api-blue/storage/app/deployed-ok
                 '''
             }
         }
