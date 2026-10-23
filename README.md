@@ -294,14 +294,17 @@ It tracks `main`; it does **not** run per-PR checks. Stages:
 1. **Detect Changes** — path filter; each service's stage runs only if its files changed
 2. **Backend: Install** — `composer install`, `composer audit`
 3. **Backend: Lint & Test** — Pint, PHPStan, `artisan test` (SQLite + ephemeral MongoDB)
-4. **Frontend: Install & Test** — `npm ci`, ESLint, Vitest, `npm run build`, `npm audit --omit=dev --audit-level=high`
-5. **Chat Service: Lint, Audit & Test** — Ruff, pip-audit, pytest
+4. **Frontend: Install & Test** — `npm ci`, ESLint, Vitest, buyer and seller production builds, `npm audit --omit=dev --audit-level=high`
+5. **Chat Service: Lint, Audit & Test** — Ruff, pip-audit, pytest, deployment shell regression tests
 6. **Recommendation Service: Lint, Audit & Test** — Ruff, pip-audit, pytest
 7. **Security: Secret Scan** — gitleaks `v8.30.1` (pinned) with `.gitleaks.toml`; **blocking**,
    any finding stops the build before Deploy. Third-party `vendor/` and `node_modules/` are allowlisted
 8. **Deploy** — on `main` only: fetch the tested commit, `artisan migrate --force`,
    rebuild & recreate the app containers, verify the deployed SHA, health-check
-   `https://blukios.store/api/health`
+   `https://blukios.store/api/health`. Buyer and seller images rebuild together when frontend
+   content changes or either image is missing. Both public sites must serve the same baked
+   `build-commit.txt`; after a frontend rebuild it must match the tested commit. Backend-only
+   deployments may reuse a matching older frontend pair. Failed checks leave `deployed-ok` unchanged.
 
 GitHub Actions is **not** used. Because the pipeline runs post-merge on `main`,
 **a PR's gate is the local checks** (Pint / PHPStan / tests / build) plus review —

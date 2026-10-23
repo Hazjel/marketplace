@@ -306,6 +306,7 @@ services:
     build:
       context: ./fe-blue
       args:
+        BUILD_COMMIT: ${BUILD_COMMIT:-development}
         VITE_APP_NAME: Blue
         # Relative — nginx proxy /api & /ai, jalan di localhost/LAN/Tailscale sekaligus
         VITE_API_BASE_URL: /api
@@ -332,6 +333,7 @@ services:
     build:
       context: ./fe-blue
       args:
+        BUILD_COMMIT: ${BUILD_COMMIT:-development}
         VITE_APP_NAME: Blue Seller
         VITE_API_BASE_URL: /api
         VITE_AI_SERVICE_URL: /ai

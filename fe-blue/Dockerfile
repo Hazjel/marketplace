@@ -22,8 +22,10 @@ ARG VITE_REVERB_SCHEME
 ARG VITE_APP_TARGET
 ARG VITE_BUYER_APP_URL
 ARG VITE_SELLER_APP_URL
+ARG BUILD_COMMIT=development
 
-RUN npm run build -- --outDir /build-out
+RUN npm run build -- --outDir /build-out \
+    && printf '%s\n' "$BUILD_COMMIT" > /build-out/build-commit.txt
 
 EXPOSE 5173
 
