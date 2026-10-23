@@ -309,7 +309,8 @@ pipeline {
 
                         ./node_modules/.bin/eslint . --max-warnings=200
                         npm run test -- --run
-                        npm run build
+                        VITE_APP_TARGET=buyer npm run build
+                        VITE_APP_TARGET=seller npm run build
 
                         attempt=1
                         while true; do
@@ -361,6 +362,7 @@ pipeline {
                         script: '''
                         ruff check .
                         pytest tests/ -v -p no:cacheprovider
+                        python -B -m unittest discover -s ../ci/tests -v
                         /opt/pip-audit/bin/pip-audit --path /usr/local/lib/python3.11/site-packages --desc \
                             --ignore-vuln PYSEC-2026-311 \
                             --ignore-vuln CVE-2026-45830 \
@@ -494,6 +496,7 @@ pipeline {
                     fi
                     git checkout main
                     git reset --hard "$TARGET"
+                    export BUILD_COMMIT="${BUILD_COMMIT:-$(git rev-parse HEAD)}"
 
                     # /api/health melaporkan commit ini sebagai "version".
                     # storage/app di-gitignore dan ikut bind mount, jadi tidak
@@ -560,7 +563,9 @@ pipeline {
                     for s in api queue reverb scheduler; do
                         if want "$PHP_IMAGE_CHANGED" "$s"; then BUILD="$BUILD $s"; fi
                     done
-                    if want "$FRONTEND_IMAGE_CHANGED" frontend; then BUILD="$BUILD frontend"; fi
+                    if want "$FRONTEND_IMAGE_CHANGED" frontend || want "$FRONTEND_IMAGE_CHANGED" frontend-seller; then
+                        BUILD="$BUILD frontend frontend-seller"
+                    fi
                     if want "$CHAT_IMAGE_CHANGED" chat-service; then BUILD="$BUILD chat-service"; fi
                     if want "$RECO_IMAGE_CHANGED" recommendation-service; then BUILD="$BUILD recommendation-service"; fi
                     if [ -n "$BUILD" ]; then
@@ -590,7 +595,7 @@ pipeline {
                     fi
 
                     # mongo-express dan ollama ikut agar perubahan config-nya (mis. port) benar-benar sampai ke server.
-                    docker compose -p marketplace up -d --no-build api queue reverb scheduler frontend chat-service recommendation-service mongo-express ollama
+                    docker compose -p marketplace up -d --no-build api queue reverb scheduler frontend frontend-seller chat-service recommendation-service mongo-express ollama
                     # "up -d" only recreates containers whose image changed. Code-only
                     # changes still need a fresh process: queue, reverb, scheduler,
                     # uvicorn and the recommender keep the old code in memory.
@@ -643,6 +648,28 @@ pipeline {
                     if [ -z "$healthy" ]; then
                         echo "GAGAL: API tidak mengembalikan 200 dalam 3 menit setelah deploy"
                         docker compose -p marketplace ps
+                        exit 1
+                    fi
+
+                    # Read the baked artifact, after the frontend containers copy it into their volumes.
+                    frontend_ready=""
+                    for i in $(seq 1 12); do
+                        buyer=$(curl -fsS --connect-timeout 5 --max-time 10 "https://blukios.store/build-commit.txt?deploy=$DEPLOYED-$i") || buyer=""
+                        seller=$(curl -fsS --connect-timeout 5 --max-time 10 "https://seller.blukios.store/build-commit.txt?deploy=$DEPLOYED-$i") || seller=""
+                        if [ "${#buyer}" -eq 40 ] && printf '%s' "$buyer" | grep -Eq '^[0-9a-f]{40}$' && [ "$buyer" = "$seller" ]; then
+                            case " $BUILD " in
+                                *" frontend "*) if [ "$buyer" = "$DEPLOYED" ]; then frontend_ready=yes; fi ;;
+                                *) frontend_ready=yes ;;
+                            esac
+                            if [ -n "$frontend_ready" ]; then
+                                echo "Frontend buyer dan seller melayani revisi: $buyer"
+                                break
+                            fi
+                        fi
+                        sleep 5
+                    done
+                    if [ -z "$frontend_ready" ]; then
+                        echo "GAGAL: revisi frontend buyer/seller tidak cocok atau artefak baru belum melayani"
                         exit 1
                     fi
 
