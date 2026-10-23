@@ -51,7 +51,8 @@ const center = ref([-2.5, 118.0])
 const originCoords = ref(null)
 const destCoords = ref(null)
 const polylineLatLngs = ref([])
-const loadingMap = ref(false)
+// Leaflet must not start initializing a container that geocoding immediately removes.
+const loadingMap = ref(true)
 
 const courierTrackingUrl = computed(() => {
   if (!props.trackingNumber || !props.shipping) return null
@@ -78,7 +79,10 @@ const geocodeCity = async (city) => {
 }
 
 const loadMap = async () => {
-  if (!props.storeCity && !props.buyerCity && props.storeLat == null) return
+  if (!props.storeCity && !props.buyerCity && props.storeLat == null) {
+    loadingMap.value = false
+    return
+  }
   loadingMap.value = true
   // Pakai koordinat persis (toko/alamat) kalau tersedia, fallback geocode nama kota
   const hasStoreCoords = props.storeLat != null && props.storeLng != null
