@@ -356,6 +356,9 @@ services:
     image: ollama/ollama:latest
     container_name: blue-ollama
     restart: unless-stopped
+    environment:
+      # Hindari muat ulang model dari disk lambat setelah lima menit idle.
+      OLLAMA_KEEP_ALIVE: "-1"
     # Tanpa port host: Ollama tidak punya autentikasi, dan port yang dulu
     # terbuka di 0.0.0.0 bisa dipakai siapa pun di LAN/tailnet untuk inferensi,
     # pull, atau hapus model. chat-service memanggilnya lewat ollama:11434.
