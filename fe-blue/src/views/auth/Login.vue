@@ -109,6 +109,14 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
       ✅ Email berhasil diverifikasi! Silakan masuk.
     </div>
 
+    <p
+      v-if="typeof error === 'string'"
+      role="alert"
+      class="text-red-600 dark:text-red-400 text-sm"
+    >
+      {{ error }}
+    </p>
+
     <!-- Inputs Section -->
     <div class="flex flex-col gap-5">
       <!-- Email Field -->
