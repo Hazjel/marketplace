@@ -123,6 +123,15 @@ class EscrowRepository implements EscrowRepositoryInterface
         }
 
         $sellerAmount = DB::transaction(function () use ($transaction, $store) {
+            $transaction = Transaction::where('id', $transaction->id)->lockForUpdate()->firstOrFail();
+
+            if ($store->storeBalance->storeBalanceHistories()
+                ->where('reference_id', $transaction->id)
+                ->where('reference_type', Transaction::class)
+                ->whereIn('type', ['released', 'refunded'])->exists()) {
+                throw new Exception('Dana pesanan sudah dirilis atau dikembalikan', 422);
+            }
+
             $sellerAmount = $this->sellerAmount($transaction);
 
             $this->storeBalanceRepository->refundPending($store->storeBalance->id, $sellerAmount);

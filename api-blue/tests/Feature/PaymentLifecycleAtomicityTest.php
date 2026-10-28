@@ -14,6 +14,7 @@ use App\Models\TransactionDetail;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -226,6 +227,51 @@ class PaymentLifecycleAtomicityTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Hanya status delivering yang bisa diselesaikan');
         $repo->completeTransaction($transaction->id);
+    }
+
+    public function test_refund_rejects_released_escrow_with_a_stale_transaction(): void
+    {
+        $transaction = $this->makeTransaction('LIFE_REFUND_RELEASED', 'paid');
+        $escrow = app(EscrowRepositoryInterface::class);
+        $escrow->credit($transaction);
+        $stale = $transaction->fresh();
+        $escrow->release($transaction);
+        $balance = (float) $this->storeBalance->fresh()->balance;
+
+        $error = null;
+        try {
+            $escrow->refund($stale);
+        } catch (\Exception $exception) {
+            $error = $exception;
+        }
+        $this->assertNotNull($error, 'Released escrow must not be refunded.');
+        $this->assertSame(422, $error->getCode());
+
+        $this->assertSame($balance, (float) $this->storeBalance->fresh()->balance);
+        $this->assertEquals(0, (float) $this->storeBalance->fresh()->pending_balance);
+        $this->assertSame(0, $this->storeBalance->storeBalanceHistories()->where('type', 'refunded')->count());
+    }
+
+    public function test_refund_rejects_a_repeated_escrow_refund(): void
+    {
+        $transaction = $this->makeTransaction('LIFE_REFUND_REPEATED', 'paid');
+        $escrow = app(EscrowRepositoryInterface::class);
+        $escrow->credit($transaction);
+        $escrow->refund($transaction);
+
+        $error = null;
+        try {
+            $escrow->refund($transaction);
+        } catch (\Exception $exception) {
+            $error = $exception;
+        }
+        $this->assertNotNull($error, 'Escrow must not be refunded twice.');
+        $this->assertNotInstanceOf(QueryException::class, $error);
+        $this->assertSame(422, $error->getCode());
+
+        $this->assertSame(1, $this->storeBalance->storeBalanceHistories()->where('type', 'refunded')->count());
+        $this->assertEquals(0, (float) $this->storeBalance->fresh()->balance);
+        $this->assertEquals(0, (float) $this->storeBalance->fresh()->pending_balance);
     }
 
     // ---- Scheduler: transaction:auto-complete ----

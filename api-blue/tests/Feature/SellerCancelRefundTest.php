@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Interfaces\EscrowRepositoryInterface;
 use App\Interfaces\PaymentGatewayInterface;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Jobs\RefundCancelledTransactionJob;
@@ -518,6 +519,85 @@ class SellerCancelRefundTest extends TestCase
 
         $this->assertSame([], $this->refundCalls);
         $this->assertSame('delivering', $delivering->fresh()->delivery_status);
+    }
+
+    public function test_completed_order_cannot_be_reopened_or_cancelled_after_escrow_release(): void
+    {
+        $transaction = $this->paidOrder('BLK_REFUND_COMPLETED', 'delivering');
+        app(TransactionRepositoryInterface::class)->completeTransaction($transaction->id);
+        $releasedBalance = (float) $this->storeBalance->fresh()->balance;
+        $this->assertGreaterThan(0, $releasedBalance);
+
+        foreach (['processing', 'delivering'] as $status) {
+            $this->actingAs($this->sellerUser)
+                ->putJson("/api/transaction/{$transaction->id}", ['delivery_status' => $status])
+                ->assertStatus(422);
+        }
+        $this->cancelAs($this->sellerUser, $transaction)->assertStatus(422);
+
+        $this->assertSame('completed', $transaction->fresh()->delivery_status);
+        $this->assertSame('paid', $transaction->fresh()->payment_status);
+        $this->assertSame($releasedBalance, (float) $this->storeBalance->fresh()->balance);
+        $this->assertEquals(0, (float) $this->storeBalance->fresh()->pending_balance);
+        $this->assertSame(0, $this->storeBalance->storeBalanceHistories()->where('type', 'refunded')->count());
+        $this->assertSame(48, $this->product->fresh()->stock);
+        $this->assertBuyerCredited(0);
+        $this->assertSame([], $this->refundCalls);
+    }
+
+    public function test_shipped_order_cannot_move_backward_to_processing(): void
+    {
+        $transaction = $this->paidOrder('BLK_REFUND_BACKWARD', 'delivering');
+
+        $this->actingAs($this->sellerUser)
+            ->putJson("/api/transaction/{$transaction->id}", ['delivery_status' => 'processing'])
+            ->assertStatus(422);
+
+        $this->assertSame('delivering', $transaction->fresh()->delivery_status);
+    }
+
+    public function test_cancelled_order_cannot_be_reopened_even_if_payment_is_still_paid(): void
+    {
+        $transaction = $this->paidOrder('BLK_REFUND_CANCELLED');
+        $transaction->update(['delivery_status' => 'cancelled']);
+
+        $this->actingAs($this->sellerUser)
+            ->putJson("/api/transaction/{$transaction->id}", ['delivery_status' => 'processing'])
+            ->assertStatus(422);
+
+        $this->assertSame('cancelled', $transaction->fresh()->delivery_status);
+    }
+
+    public function test_current_shipping_status_can_be_repeated_and_advanced(): void
+    {
+        $transaction = $this->paidOrder('BLK_REFUND_FORWARD');
+
+        foreach (['processing', 'processing', 'delivering', 'delivering'] as $status) {
+            $this->actingAs($this->sellerUser)
+                ->putJson("/api/transaction/{$transaction->id}", ['delivery_status' => $status])
+                ->assertOk()->assertJsonPath('data.delivery_status', $status);
+        }
+    }
+
+    public function test_cancellation_rolls_back_when_escrow_was_already_released(): void
+    {
+        $transaction = $this->paidOrder('BLK_REFUND_RELEASED');
+        $transaction->update(['balance_used' => 10000]);
+        app(EscrowRepositoryInterface::class)->release($transaction);
+        $releasedBalance = (float) $this->storeBalance->fresh()->balance;
+
+        $this->cancelAs($this->sellerUser, $transaction)->assertStatus(422);
+
+        $transaction->refresh();
+        $this->assertSame('pending', $transaction->delivery_status);
+        $this->assertSame('paid', $transaction->payment_status);
+        $this->assertNull($transaction->refund_status);
+        $this->assertNull($transaction->stock_restored_at);
+        $this->assertSame(48, $this->product->fresh()->stock);
+        $this->assertSame($releasedBalance, (float) $this->storeBalance->fresh()->balance);
+        $this->assertSame(0, $this->storeBalance->storeBalanceHistories()->where('type', 'refunded')->count());
+        $this->assertBuyerCredited(0);
+        $this->assertSame([], $this->refundCalls);
     }
 
     public function test_other_sellers_and_the_buyer_cannot_cancel(): void

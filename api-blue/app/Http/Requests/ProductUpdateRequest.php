@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\ProductCategory;
+use App\Models\ProductVariantMongo;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +40,18 @@ class ProductUpdateRequest extends FormRequest
             'product_images.*.image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'product_images.*.is_thumbnail' => 'required|boolean',
             'variants' => 'nullable|array',
-            'variants.*.id' => 'nullable|string',
+            'variants.*.id' => [
+                'bail',
+                'nullable',
+                'string',
+                'regex:/\A[a-f0-9]{24}\z/i',
+                function ($attribute, $value, $fail) {
+                    if (! ProductVariantMongo::where('product_id', (string) $this->route('product'))
+                        ->whereKey($value)->exists()) {
+                        $fail('Varian tidak ditemukan pada produk ini.');
+                    }
+                },
+            ],
             'variants.*.name' => 'required_with:variants|string',
             'variants.*.price' => 'required_with:variants|integer|min:0',
             'variants.*.stock' => 'required_with:variants|integer|min:0',
@@ -68,7 +80,7 @@ class ProductUpdateRequest extends FormRequest
     {
         $user = Auth::user();
 
-        if ($user && $user->role === 'store') {
+        if ($user && ! $user->hasRole('admin') && $user->store) {
             $this->merge(['store_id' => $user->store->id]);
         }
     }
