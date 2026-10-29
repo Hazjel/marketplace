@@ -112,22 +112,33 @@ class EscrowRepository implements EscrowRepositoryInterface
 
     public function refund(Transaction $transaction): void
     {
-        $store = Store::find($transaction->store_id);
+        $sellerAmount = DB::transaction(function () use ($transaction) {
+            $transaction = Transaction::where('id', $transaction->id)->lockForUpdate()->firstOrFail();
+            $storeBalance = StoreBalance::where('store_id', $transaction->store_id)->lockForUpdate()->first();
 
-        if (! $store || ! $store->storeBalance) {
-            Log::error('EscrowRepository::refund: Store or StoreBalance not found', [
-                'store_id' => $transaction->store_id,
-            ]);
+            if (! $storeBalance) {
+                throw new Exception('Dompet toko tidak ditemukan', 422);
+            }
 
-            return;
-        }
+            $ledger = $storeBalance->storeBalanceHistories()
+                ->where('reference_id', $transaction->id)
+                ->where('reference_type', Transaction::class);
 
-        $sellerAmount = DB::transaction(function () use ($transaction, $store) {
-            $sellerAmount = $this->sellerAmount($transaction);
+            if ((clone $ledger)->whereIn('type', ['released', 'refunded'])->exists()) {
+                throw new Exception('Dana pesanan sudah dirilis atau dikembalikan', 422);
+            }
 
-            $this->storeBalanceRepository->refundPending($store->storeBalance->id, $sellerAmount);
+            $pending = $ledger->where('type', 'pending_income')->first();
 
-            $store->storeBalance->storeBalanceHistories()->create([
+            if (! $pending) {
+                throw new Exception('Ledger dana tertahan pesanan tidak ditemukan', 422);
+            }
+
+            $sellerAmount = (float) $pending->amount;
+
+            $this->storeBalanceRepository->refundPending($storeBalance->id, $sellerAmount);
+
+            $storeBalance->storeBalanceHistories()->create([
                 'type' => 'refunded',
                 'reference_id' => $transaction->id,
                 'reference_type' => Transaction::class,
@@ -140,7 +151,7 @@ class EscrowRepository implements EscrowRepositoryInterface
         });
 
         Log::info('Escrow refunded for transaction: '.$transaction->code, [
-            'store_id' => $store->id,
+            'store_id' => $transaction->store_id,
             'refunded_amount' => $sellerAmount,
         ]);
     }
@@ -170,24 +181,5 @@ class EscrowRepository implements EscrowRepositoryInterface
         $transaction->save();
 
         return $sellerAmount->minor();
-    }
-
-    /**
-     * sellerAmount dari admin_fee yang sudah DIKUNCI saat credit — release/refund
-     * tidak boleh recompute (fee bisa berbeda kalau config berubah). Membaca
-     * nilai tersimpan apa adanya; tidak lewat Money supaya transaksi lama yang
-     * admin_fee-nya masih pecahan (pra-B3.2d) tetap bisa dirilis.
-     */
-    private function sellerAmount(Transaction $transaction): float
-    {
-        if ($transaction->seller_amount !== null) {
-            return (float) $transaction->seller_amount;
-        }
-
-        // Credited by code older than the seller_amount column, during the
-        // seconds between the deploy's git reset and its migration.
-        $netSales = $transaction->grand_total - $transaction->shipping_cost;
-
-        return $netSales - $transaction->admin_fee;
     }
 }

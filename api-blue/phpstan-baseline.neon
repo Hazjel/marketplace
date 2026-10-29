@@ -199,12 +199,6 @@ parameters:
 			path: app/Http/Middleware/UpdateLastSeen.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\User\:\:\$role\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Requests/ProductUpdateRequest.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\User\:\:\$store\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1263,7 +1257,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\Store\:\:\$storeBalance\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Repositories/EscrowRepository.php
 
 		-

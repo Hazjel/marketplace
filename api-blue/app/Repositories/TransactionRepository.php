@@ -1009,6 +1009,11 @@ class TransactionRepository implements TransactionRepositoryInterface
                 throw new Exception('Pesanan sedang dikomplain', 422);
             }
 
+            if (! in_array($transaction->delivery_status, ['pending', 'processing', 'delivering'], true)
+                || ($transaction->delivery_status === 'delivering' && ($data['delivery_status'] ?? null) === 'processing')) {
+                throw new Exception('Status pesanan tidak bisa dikembalikan atau diubah setelah selesai', 422);
+            }
+
             if (isset($data['tracking_number'])) {
                 $transaction->tracking_number = $data['tracking_number'];
             }
