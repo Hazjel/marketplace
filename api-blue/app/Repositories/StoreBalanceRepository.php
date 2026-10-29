@@ -191,16 +191,14 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
             $storeBalance = StoreBalance::where('id', $id)->lockForUpdate()->first();
 
             if (! $storeBalance) {
-                throw new Exception('Store Balance not found');
+                throw new Exception('Dompet toko tidak ditemukan', 422);
             }
 
             if ($storeBalance->pending_balance < $amount) {
-                // Jika pending_balance sudah kurang (edge case), set ke 0
-                $storeBalance->pending_balance = 0;
-            } else {
-                $storeBalance->pending_balance = $storeBalance->pending_balance - $amount;
+                throw new Exception('Pending balance tidak mencukupi untuk direfund', 422);
             }
 
+            $storeBalance->pending_balance = $storeBalance->pending_balance - $amount;
             $storeBalance->save();
 
             DB::commit();
@@ -208,7 +206,7 @@ class StoreBalanceRepository implements StoreBalanceRepositoryInterface
             return $storeBalance;
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new Exception($e->getMessage());
+            throw $e;
         }
     }
 }

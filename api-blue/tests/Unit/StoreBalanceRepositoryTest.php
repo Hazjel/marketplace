@@ -158,15 +158,21 @@ class StoreBalanceRepositoryTest extends TestCase
         $this->assertEquals(500000, (float) $result->balance);
     }
 
-    public function test_refund_pending_sets_to_zero_if_amount_exceeds_pending()
+    public function test_refund_pending_rejects_insufficient_funds_without_changing_balances()
     {
         $this->storeBalance->update(['pending_balance' => 50000]);
 
-        $result = $this->repository->refundPending($this->storeBalance->id, 100000);
+        $error = null;
+        try {
+            $this->repository->refundPending($this->storeBalance->id, 100000);
+        } catch (\Exception $exception) {
+            $error = $exception;
+        }
 
-        // Should set to 0, not negative
-        $this->assertEquals(0, (float) $result->pending_balance);
-        $this->assertEquals(500000, (float) $result->balance);
+        $this->assertNotNull($error);
+        $this->assertSame(422, $error->getCode());
+        $this->assertEquals(50000, (float) $this->storeBalance->fresh()->pending_balance);
+        $this->assertEquals(500000, (float) $this->storeBalance->fresh()->balance);
     }
 
     // ==========================================
