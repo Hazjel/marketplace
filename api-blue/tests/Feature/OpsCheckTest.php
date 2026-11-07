@@ -183,6 +183,18 @@ class OpsCheckTest extends TestCase
         $this->assertCount(2, $this->alertedTitles());
     }
 
+    public function test_a_worker_dead_for_days_reports_its_real_age(): void
+    {
+        (new QueueHeartbeatJob)->handle();
+        $this->travel(5)->days();
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        Notification::assertSentOnDemand(OpsAlertNotification::class, function (OpsAlertNotification $n) {
+            return in_array('Heartbeat antrean terakhir 7200 menit lalu.', $n->toMail(new AnonymousNotifiable)->introLines, true);
+        });
+    }
+
     public function test_a_missing_heartbeat_right_after_deploy_is_not_an_outage_yet(): void
     {
         Cache::forget(QueueHeartbeatJob::CACHE_KEY);

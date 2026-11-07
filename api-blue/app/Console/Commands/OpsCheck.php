@@ -139,7 +139,7 @@ class OpsCheck extends Command
         if ($beat === null) {
             // Right after a deploy there is no beat yet; only count from
             // the first check that noticed.
-            Cache::add(self::HEARTBEAT_MISSING_SINCE, now()->getTimestamp(), now()->addDay());
+            Cache::add(self::HEARTBEAT_MISSING_SINCE, now()->getTimestamp());
             $since = (int) Cache::get(self::HEARTBEAT_MISSING_SINCE);
         } else {
             Cache::forget(self::HEARTBEAT_MISSING_SINCE);
