@@ -241,13 +241,21 @@ pipeline {
                     // hanya jalan kalau fe-blue berubah). devDependencies
                     // (vite/vitest/eslint dst) tidak ikut dibundle ke output
                     // production, jadi audit-nya dipisah dan non-blocking.
+                    // node_modules (~330 MB, tens of thousands of small files) lives in
+                    // RAM: on this host's disk npm ci and the vitest imports waited
+                    // on fsync (import 71.5s in #172 vs ~3s normally). Nothing
+                    // after this stage reads fe-blue/node_modules; the frontend
+                    // images run their own npm ci. exec: .bin scripts; mode=1777:
+                    // the container runs as the Jenkins uid, not root.
                     runInContainer(
                         name: 'frontend',
                         image: 'node:20-bookworm-slim',
+                        args: '--tmpfs "$(pwd)/node_modules:exec,mode=1777,size=1g"',
                         script: '''
                         attempt=1
                         while true; do
-                            rm -rf node_modules
+                            # node_modules is a mount point: empty it, rm -rf on it fails.
+                            find node_modules -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 
                             if npm ci > /tmp/npm-ci.log 2>&1; then
                                 rc=0
