@@ -24,6 +24,7 @@ class QueueHeartbeatJob implements ShouldQueue
 
     public function handle(): void
     {
-        Cache::put(self::CACHE_KEY, now()->getTimestamp(), now()->addDay());
+        // No TTL: an expiring beat made a multi-day outage look minutes old.
+        Cache::forever(self::CACHE_KEY, now()->getTimestamp());
     }
 }
