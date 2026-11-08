@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -26,6 +26,15 @@ ARG BUILD_COMMIT=development
 
 RUN npm run build -- --outDir /build-out \
     && printf '%s\n' "$BUILD_COMMIT" > /build-out/build-commit.txt
+
+# Only the built files ship. The single-stage image also carried node_modules
+# and the source (~330 MB of small files): writing that layer took ~35 min of
+# Deploy in build #174 on this host's disk. Same base, already on the host.
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=build /build-out /build-out
 
 EXPOSE 5173
 
