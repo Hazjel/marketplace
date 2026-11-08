@@ -6,3 +6,5 @@ prometheus-client
 slowapi
 redis>=4.2.0
 chromadb>=0.5.0
+# Not used directly; comes in through chromadb. 4.0.0 has CVE-2026-49272.
+oauthlib>=4.0.1
