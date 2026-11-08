@@ -606,6 +606,37 @@ pipeline {
                     fi
                     if want "$CHAT_IMAGE_CHANGED" chat-service; then BUILD="$BUILD chat-service"; fi
                     if want "$RECO_IMAGE_CHANGED" recommendation-service; then BUILD="$BUILD recommendation-service"; fi
+
+                    # GitHub CI (job images in .github/workflows/ci.yml) pushes the
+                    # PHP, chat and recommendation images for every main commit:
+                    # pulling them takes minutes, building chat-service here took
+                    # 69 min in #177. Only when that run passed (GHA_OK). The
+                    # frontend stays a local build: its VITE_* args come from this
+                    # host's .env. A failed pull (package private, image missing,
+                    # network) keeps the service in BUILD, so it is built as before.
+                    if [ "${GHA_OK:-}" = true ] && [ -n "$BUILD" ]; then
+                        LOCAL=""
+                        for s in $BUILD; do
+                            case "$s" in
+                                api|queue|reverb|scheduler) src=api ;;
+                                chat-service|recommendation-service) src=$s ;;
+                                *) LOCAL="$LOCAL $s"; continue ;;
+                            esac
+                            ref="ghcr.io/hazjel/marketplace-$src:$BUILD_COMMIT"
+                            if docker pull -q "$ref" && docker tag "$ref" "marketplace-$s"; then
+                                echo "Image $s dari $ref"
+                            else
+                                echo "Pull $ref gagal; $s dibangun di sini"
+                                LOCAL="$LOCAL $s"
+                            fi
+                        done
+                        # Only the registry tags go; marketplace-* still points at the images.
+                        for src in api chat-service recommendation-service; do
+                            docker rmi "ghcr.io/hazjel/marketplace-$src:$BUILD_COMMIT" >/dev/null 2>&1 || true
+                        done
+                        BUILD="$LOCAL"
+                    fi
+
                     if [ -n "$BUILD" ]; then
                         echo "Build image:$BUILD"
                         built=""
