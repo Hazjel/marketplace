@@ -128,6 +128,8 @@ pipeline {
                         deployConfigChanged
                     ).toString()
                     // Perubahan pipeline menjalankan semua stage test yang ia definisikan, tanpa ikut memicu deploy.
+                    // Since the GitHub CI stage, a green GitHub run skips them too, so a change to a
+                    // local test stage itself is exercised only when the fallback runs.
                     env.CI_CHANGED = (changed == 'ALL' || changed.readLines().any {
                         it == 'Jenkinsfile' || it == '.gitleaks.toml' || it.startsWith('ci/')
                     }).toString()
@@ -151,11 +153,39 @@ pipeline {
             }
         }
 
+        stage('GitHub CI') {
+            // The test stages below also run on GitHub Actions (.github/workflows/ci.yml)
+            // for every push to main, on runners that take minutes instead of hours on
+            // this host's disk. When that run passed for BUILD_COMMIT, the local test
+            // stages are skipped and only Deploy runs here; a failed run stops the
+            // build before Deploy. Anything else (no run, cancelled, API down, the
+            // anonymous 60/h limit that other tenants on this IP share) leaves
+            // GHA_OK unset and the local stages run as before. See ci/github-ci-status.sh.
+            agent any
+            when {
+                beforeAgent true
+                expression { env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true' }
+            }
+            steps {
+                script {
+                    def verdict = sh(script: 'sh ci/github-ci-status.sh', returnStdout: true).trim()
+                    if (verdict == 'success') {
+                        env.GHA_OK = 'true'
+                        echo "GitHub CI passed for ${env.BUILD_COMMIT}: skipping the local test stages."
+                    } else if (verdict == 'failure') {
+                        error("GitHub CI failed for ${env.BUILD_COMMIT}; not deploying. See the run linked above.")
+                    } else {
+                        echo "No usable GitHub CI result (${verdict}); running the local test stages."
+                    }
+                }
+            }
+        }
+
         stage('Backend: Install') {
             agent any
             when {
                 beforeAgent true
-                expression { env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true' }
+                expression { env.GHA_OK != 'true' && (env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 dir('api-blue') {
@@ -183,7 +213,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true' }
+                expression { env.GHA_OK != 'true' && (env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 // --network host: DNS daemon (8.8.8.8) tidak terjangkau dari jaringan ini, resolv host yang jalan.
@@ -227,7 +257,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.FRONTEND_CHANGED == 'true' || env.CI_CHANGED == 'true' }
+                expression { env.GHA_OK != 'true' && (env.FRONTEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 dir('fe-blue') {
@@ -359,7 +389,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.CHAT_SERVICE_CHANGED == 'true' || env.CI_CHANGED == 'true' }
+                expression { env.GHA_OK != 'true' && (env.CHAT_SERVICE_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 sh 'docker image inspect "$CI_CHAT_IMAGE" >/dev/null 2>&1 || docker build --network host -t "$CI_CHAT_IMAGE" -f ci/python/Dockerfile chat-service'
@@ -400,7 +430,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.RECOMMENDATION_CHANGED == 'true' || env.CI_CHANGED == 'true' }
+                expression { env.GHA_OK != 'true' && (env.RECOMMENDATION_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 sh 'docker image inspect "$CI_RECO_IMAGE" >/dev/null 2>&1 || docker build --network host -t "$CI_RECO_IMAGE" -f ci/python/Dockerfile recommendation-service'
@@ -429,7 +459,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true' }
+                expression { env.GHA_OK != 'true' && (env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 // BLOCKING: temuan apa pun menggagalkan build sebelum Deploy.
