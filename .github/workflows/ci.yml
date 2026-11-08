@@ -1,0 +1,190 @@
+# Phase 1 of moving CI off the shared Jenkins host: the same checks as the
+# Jenkinsfile test stages, run on GitHub's runners for every PR and push to
+# main. Jenkins is unchanged and still gates deploys; nothing here deploys or
+# needs a secret (the repo is public, so keep it that way).
+#
+# Images come from the same ci/php and ci/python Dockerfiles Jenkins uses, so
+# a pass here means the same thing as a pass there. The pgsql leg is new: it
+# runs the concurrency tests Jenkins always skips (they need PostgreSQL).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend:
+    name: Backend (${{ matrix.db }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [sqlite, pgsql]
+    services:
+      # Started for both legs (services cannot depend on the matrix); only the
+      # pgsql leg connects. The default user is a superuser, which the
+      # cube/earthdistance migration needs. Throwaway database on the runner.
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: blukios
+          POSTGRES_PASSWORD: blukios
+          POSTGRES_DB: blukios_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U blukios"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build CI PHP image (ci/php/Dockerfile)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ci/php
+          tags: blukios-ci-php:ci
+          load: true
+          cache-from: type=gha,scope=ci-php
+          cache-to: type=gha,scope=ci-php,mode=max
+
+      - name: Composer install and audit
+        run: |
+          docker run --rm -v "$PWD/api-blue:/app" -w /app composer:2 sh -xec '
+            composer install --no-interaction --prefer-dist --no-progress --ignore-platform-req=ext-mongodb --ignore-platform-req=ext-sodium
+            composer audit --no-interaction
+          '
+
+      - name: Lint and test
+        env:
+          DB: ${{ matrix.db }}
+        run: |
+          if [ "$DB" = pgsql ]; then
+            set -- -e DB_CONNECTION=pgsql -e DB_HOST=127.0.0.1 -e DB_PORT=5432 \
+                   -e DB_DATABASE=blukios_test -e DB_USERNAME=blukios -e DB_PASSWORD=blukios
+          fi
+          docker run --rm --network host -e DB="$DB" "$@" \
+            -v "$PWD/api-blue:/app" -w /app blukios-ci-php:ci sh -xec '
+              # The CI image ships pdo_sqlite only; add pdo_pgsql here rather
+              # than in ci/php/Dockerfile, whose change would rebuild the
+              # Jenkins image on the slow host.
+              if [ "$DB" = pgsql ]; then
+                apt-get update -qq
+                apt-get install -y -qq libpq-dev >/dev/null
+                docker-php-ext-install pdo_pgsql >/dev/null
+              fi
+              /opt/mongo/bin/mongod --dbpath /data/mongo-ci --bind_ip 127.0.0.1 --port 27017 --fork --logpath /var/log/mongod.log
+              if [ "$DB" = sqlite ]; then
+                vendor/bin/pint --test
+                vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+              fi
+              cp .env.example .env
+              php artisan key:generate
+              php artisan test
+            '
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: fe-blue
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Node 20 to match the Jenkins frontend stage (node:20-bookworm-slim).
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: fe-blue/package-lock.json
+
+      - run: npm ci
+      - run: ./node_modules/.bin/eslint . --max-warnings=200
+      - run: npm run test -- --run
+      - run: VITE_APP_TARGET=buyer npm run build
+      - run: VITE_APP_TARGET=seller npm run build
+      # Same policy as Jenkins: high/critical in production deps blocks,
+      # devDependencies are reported only.
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit --only=dev || true
+
+  python:
+    name: ${{ matrix.service }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: chat-service
+            # Same analysed exceptions as the Jenkinsfile (ChromaDB REST
+            # server findings; the service embeds PersistentClient only).
+            audit_ignores: >-
+              --ignore-vuln PYSEC-2026-311
+              --ignore-vuln CVE-2026-45830
+              --ignore-vuln CVE-2026-45831
+              --ignore-vuln CVE-2026-45833
+            extra: python -B -m unittest discover -s ../ci/tests -v
+          - service: recommendation-service
+            audit_ignores: ''
+            extra: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build CI Python image (ci/python/Dockerfile)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.service }}
+          file: ci/python/Dockerfile
+          tags: blukios-ci-${{ matrix.service }}:ci
+          load: true
+          cache-from: type=gha,scope=ci-${{ matrix.service }}
+          cache-to: type=gha,scope=ci-${{ matrix.service }},mode=max
+
+      - name: Lint, test and audit
+        env:
+          SERVICE: ${{ matrix.service }}
+          AUDIT_IGNORES: ${{ matrix.audit_ignores }}
+          EXTRA: ${{ matrix.extra }}
+        run: |
+          docker run --rm -e AUDIT_IGNORES="$AUDIT_IGNORES" -e EXTRA="$EXTRA" \
+            -v "$PWD:/repo" -w "/repo/$SERVICE" "blukios-ci-$SERVICE:ci" sh -xec '
+              ruff check .
+              pytest tests/ -v -p no:cacheprovider
+              $EXTRA
+              /opt/pip-audit/bin/pip-audit --path /usr/local/lib/python3.11/site-packages --desc $AUDIT_IGNORES
+            '
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Same pinned version and mode as Jenkins; .gitleaks.toml holds the allowlist.
+      - run: docker run --rm -v "$PWD:/repo" -w /repo zricethezav/gitleaks:v8.30.1 dir . -v --redact
