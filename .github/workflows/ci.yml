@@ -1,7 +1,8 @@
 # Phase 1 of moving CI off the shared Jenkins host: the same checks as the
 # Jenkinsfile test stages, run on GitHub's runners for every PR and push to
-# main. Jenkins is unchanged and still gates deploys; nothing here deploys or
-# needs a secret (the repo is public, so keep it that way).
+# main. Jenkins reads this run before deploying (GitHub CI stage). Nothing here
+# deploys or uses a repository secret (the repo is public, so keep it that way);
+# only the images job uses the built-in GITHUB_TOKEN, to push to ghcr.io.
 #
 # Images come from the same ci/php and ci/python Dockerfiles Jenkins uses, so
 # a pass here means the same thing as a pass there. The pgsql leg is new: it
@@ -176,6 +177,59 @@ jobs:
               $EXTRA
               /opt/pip-audit/bin/pip-audit --path /usr/local/lib/python3.11/site-packages --desc $AUDIT_IGNORES
             '
+
+  # Phase 3: on pushes to main, build the production images whose Dockerfiles
+  # take no build args and push them as ghcr.io/hazjel/marketplace-*:<sha>.
+  # Jenkins Deploy pulls them instead of building on the slow host and builds
+  # locally if a pull fails. The frontend images are not here: their VITE_*
+  # build args come from the server's .env. Images hold no secrets (runtime
+  # config comes from .env via compose; .dockerignore excludes .env), and the
+  # packages are meant to be public so the server can pull anonymously.
+  # continue-on-error: an image problem must not read as a test failure, which
+  # would block the deploy; Jenkins then just builds that image itself.
+  images:
+    name: Image ${{ matrix.image }}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    continue-on-error: true
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: marketplace-api
+            context: api-blue
+          - image: marketplace-chat-service
+            context: chat-service
+          - image: marketplace-recommendation-service
+            context: recommendation-service
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.image }}
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          # Same context and Dockerfile as docker-compose.yml's build: for this service.
+          context: ${{ matrix.context }}
+          push: true
+          provenance: false
+          tags: ghcr.io/hazjel/${{ matrix.image }}:${{ github.sha }}
+          labels: org.opencontainers.image.source=https://github.com/Hazjel/marketplace
+          cache-from: type=gha,scope=prod-${{ matrix.image }}
+          cache-to: type=gha,scope=prod-${{ matrix.image }},mode=max
 
   secret-scan:
     name: Secret scan
