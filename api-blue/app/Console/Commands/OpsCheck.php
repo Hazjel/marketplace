@@ -52,6 +52,7 @@ class OpsCheck extends Command
             $this->buyerBalanceDrift(),
             $this->complaintsAwaitingAdmin(),
             $this->complaintsPastDeadline(),
+            $this->ordersPastShipDeadline(),
         ]));
 
         $due = array_values(array_filter(
@@ -419,6 +420,27 @@ class OpsCheck extends Command
         return $this->problem('complaints-past-deadline', 'Komplain melewati tenggat tapi belum dieskalasi', [
             $codes->count().' komplain lewat tenggat penjual lebih dari 1 jam tapi masih "open": '.$codes->take(10)->implode(', ').'.',
             'Jadwal complaints:escalate tidak berjalan. Cek scheduler, atau jalankan `php artisan complaints:escalate` di kontainer blue-api.',
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function ordersPastShipDeadline(): ?array
+    {
+        // An hour of slack: transaction:cancel-unshipped runs every 15 minutes.
+        $codes = Transaction::where('payment_status', 'paid')
+            ->whereIn('delivery_status', ['pending', 'processing'])
+            ->where('ship_deadline_at', '<', now()->subHour())
+            ->pluck('code');
+
+        if ($codes->isEmpty()) {
+            return null;
+        }
+
+        return $this->problem('orders-past-ship-deadline', 'Pesanan lewat batas kirim tapi belum dibatalkan', [
+            $codes->count().' pesanan lewat batas kirim lebih dari 1 jam tapi belum dibatalkan: '.$codes->take(10)->implode(', ').'.',
+            'Jadwal transaction:cancel-unshipped tidak berjalan, atau pembatalannya gagal (cari "transaction:cancel-unshipped failed" di log). Uang pembeli masih tertahan.',
         ]);
     }
 

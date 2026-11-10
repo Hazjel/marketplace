@@ -22,6 +22,14 @@ return [
     'min_withdrawal_amount' => (int) env('MIN_WITHDRAWAL_AMOUNT', 50000),
 
     /*
+     * Hari kalender sejak dibayar sampai penjual wajib menginput resi; lewat
+     * itu transaction:cancel-unshipped membatalkan dan merefund pesanan.
+     * Minimal 1: env kosong/0/negatif tidak boleh membuat semua pesanan
+     * langsung lewat tenggat. Override via env SHIP_DEADLINE_DAYS.
+     */
+    'ship_deadline_days' => max(1, (int) env('SHIP_DEADLINE_DAYS', 3)),
+
+    /*
      * Public storefront URL (buyer web app), used for absolute links the API
      * hands out, e.g. sitemap.xml. Not the seller app domain.
      */

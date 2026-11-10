@@ -19,6 +19,9 @@ Schedule::command('transaction:auto-complete')->dailyAt('02:00');
 // Seller's 2-day window on a buyer complaint ran out: hand it to admin.
 Schedule::command('complaints:escalate')->everyFifteenMinutes()->withoutOverlapping();
 
+// Seller missed the ship deadline on a paid order: cancel and refund the buyer.
+Schedule::command('transaction:cancel-unshipped')->everyFifteenMinutes()->withoutOverlapping();
+
 // Operational alerts (config/ops.php). The heartbeat proves a queue worker
 // is consuming jobs; ops:check emails OPS_ALERT_EMAIL when something breaks.
 Schedule::job(new QueueHeartbeatJob)->everyMinute();

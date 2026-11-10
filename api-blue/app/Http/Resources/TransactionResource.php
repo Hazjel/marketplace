@@ -43,6 +43,9 @@ class TransactionResource extends JsonResource
             'tracking_number' => $this->tracking_number,
             'delivery_proof' => $this->delivery_proof,
             'delivery_status' => $this->delivery_status,
+            'paid_at' => $transaction->paid_at,
+            // Unshipped by then = cancelled and refunded (transaction:cancel-unshipped).
+            'ship_deadline_at' => $transaction->ship_deadline_at,
             'tax' => Money::fromDecimalString((string) $this->tax)->minor(),
             'service_fee' => Money::fromDecimalString((string) ($this->service_fee ?? 0))->minor(),
             'grand_total' => Money::fromDecimalString((string) $this->grand_total)->minor(),

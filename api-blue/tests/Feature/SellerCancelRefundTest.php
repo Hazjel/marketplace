@@ -572,10 +572,16 @@ class SellerCancelRefundTest extends TestCase
     {
         $transaction = $this->paidOrder('BLK_REFUND_FORWARD');
 
-        foreach (['processing', 'processing', 'delivering', 'delivering'] as $status) {
+        // Shipping needs a resi once; repeating it reuses the stored one.
+        foreach ([
+            ['delivery_status' => 'processing'],
+            ['delivery_status' => 'processing'],
+            ['delivery_status' => 'delivering', 'tracking_number' => 'JNE-FORWARD-1'],
+            ['delivery_status' => 'delivering'],
+        ] as $payload) {
             $this->actingAs($this->sellerUser)
-                ->putJson("/api/transaction/{$transaction->id}", ['delivery_status' => $status])
-                ->assertOk()->assertJsonPath('data.delivery_status', $status);
+                ->putJson("/api/transaction/{$transaction->id}", $payload)
+                ->assertOk()->assertJsonPath('data.delivery_status', $payload['delivery_status']);
         }
     }
 

@@ -64,6 +64,8 @@ class Transaction extends Model
         'refund_amount' => 'decimal:2',
         'refund_account_number' => 'encrypted',
         'refunded_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'ship_deadline_at' => 'datetime',
     ];
 
     public function scopeSearch($query, $search)
