@@ -29,6 +29,9 @@ class P0EscrowConcurrencyTest extends TestCase
 
     private Buyer $buyer;
 
+    /** @var list<array{0: resource, 1: array<int, resource>, 2: int|null}> runHeldFirst's children: process, pipes, backend pid */
+    private array $workers = [];
+
     protected function tearDown(): void
     {
         if (DB::connection()->getDriverName() === 'pgsql') {
@@ -150,28 +153,66 @@ class P0EscrowConcurrencyTest extends TestCase
         DB::select('select pg_advisory_lock(?)', [$hold]);
 
         try {
-            $holder = $this->startWorker($first, $hold);
-            $this->assertSame('locked', $this->readLine($holder[1][1]), 'first worker never reached its row lock');
-            $waiter = $this->startWorker($second, 0);
-            $this->assertWaitingOnLockHeldBy($waiter[2], $holder[2]);
-        } finally {
-            DB::select('select pg_advisory_unlock(?)', [$hold]);
-        }
+            try {
+                $holder = $this->startWorker($first, $hold);
+                $this->assertSame('locked', $this->readLine($this->workers[$holder][1][1]), 'first worker never reached its row lock');
+                $waiter = $this->startWorker($second, 0);
+                $this->assertWaitingOnLockHeldBy((int) $this->workers[$waiter][2], (int) $this->workers[$holder][2]);
+            } finally {
+                DB::select('select pg_advisory_unlock(?)', [$hold]);
+            }
 
-        return [$this->finishWorker($holder), $this->finishWorker($waiter)];
+            return [$this->finishWorker($holder), $this->finishWorker($waiter)];
+        } finally {
+            // Also after a failed handshake or wait proof: no child and no
+            // open transaction may outlive the test into tearDown's TRUNCATE.
+            $this->stopWorkers();
+        }
     }
 
-    /** @return array{0: resource, 1: array<int, resource>, 2: int} */
-    private function startWorker(array $worker, int $hold): array
+    /** @return int the worker's index in $this->workers */
+    private function startWorker(array $worker, int $hold): int
     {
-        [$process, $pipes] = $this->openProcess(
+        // Registered before the handshake, so stopWorkers() sees it if that fails.
+        $this->workers[] = [...$this->openProcess(
             [PHP_BINARY, base_path('tests/Support/P0EscrowWorker.php'), $worker[0], $worker[1], '0', (string) $hold],
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
-        );
-        $line = $this->readLine($pipes[1]);
+        ), null];
+        $index = array_key_last($this->workers);
+        $line = $this->readLine($this->workers[$index][1][1]);
         $this->assertMatchesRegularExpression('/^pid:\d+$/', $line);
+        $this->workers[$index][2] = (int) substr($line, 4);
 
-        return [$process, $pipes, (int) substr($line, 4)];
+        return $index;
+    }
+
+    // Kill what is still running, then end its backend (a killed client's
+    // backend can sit in a lock wait) and wait, bounded, until it is gone.
+    private function stopWorkers(): void
+    {
+        $pids = [];
+        foreach ($this->workers as [$process, $pipes, $pid]) {
+            if (proc_get_status($process)['running']) {
+                proc_terminate($process, 9);
+            }
+            foreach ($pipes as $pipe) {
+                fclose($pipe);
+            }
+            proc_close($process);
+            if ($pid !== null) {
+                $pids[] = $pid;
+            }
+        }
+        $this->workers = [];
+
+        $deadline = microtime(true) + 10;
+        foreach ($pids as $pid) {
+            DB::select('select pg_terminate_backend(pid) from pg_stat_activity where pid = ?', [$pid]);
+        }
+        while ($pids !== [] && microtime(true) < $deadline
+            && DB::selectOne('select count(*) as n from pg_stat_activity where pid = any(?::int[])', ['{'.implode(',', $pids).'}'])->n > 0) {
+            usleep(20000);
+        }
     }
 
     /**
@@ -220,16 +261,32 @@ class P0EscrowConcurrencyTest extends TestCase
         $this->fail('second worker never waited on the first one\'s row lock: '.json_encode($row));
     }
 
-    /** @return array<string, mixed> */
-    private function finishWorker(array $worker): array
+    /**
+     * Waits for the worker to exit, at most $timeoutSeconds; stopWorkers()
+     * closes and reaps it.
+     *
+     * @return array<string, mixed>
+     */
+    private function finishWorker(int $index, int $timeoutSeconds = 30): array
     {
-        [$process, $pipes] = $worker;
-        stream_set_blocking($pipes[1], true);
-        $stdout = stream_get_contents($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
+        [$process, $pipes] = $this->workers[$index];
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+        $stdout = $stderr = '';
+        $deadline = microtime(true) + $timeoutSeconds;
+        while (true) {
+            // Drained while waiting so a full pipe cannot block the child.
+            $stdout .= stream_get_contents($pipes[1]);
+            $stderr .= stream_get_contents($pipes[2]);
+            $running = proc_get_status($process)['running'];
+            if (! $running || microtime(true) >= $deadline) {
+                break;
+            }
+            usleep(10000);
+        }
+        $this->assertFalse($running, "worker still running after {$timeoutSeconds}s: ".$stdout.$stderr);
+        $stdout .= stream_get_contents($pipes[1]);
+        $stderr .= stream_get_contents($pipes[2]);
         $lines = preg_split('/\R/', trim($stdout));
         $decoded = json_decode((string) end($lines), true);
         $this->assertIsArray($decoded, $stderr ?: $stdout);
