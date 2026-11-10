@@ -466,4 +466,24 @@ class OpsCheckTest extends TestCase
             fn (OpsAlertNotification $n) => str_contains($n->problems[0]['lines'][0], $late->code)
         );
     }
+
+    public function test_a_paid_order_long_past_its_ship_deadline_means_auto_cancel_is_not_working(): void
+    {
+        $late = $this->transaction(['payment_status' => 'paid', 'delivery_status' => 'processing']);
+        $late->forceFill(['ship_deadline_at' => now()->subHours(2)])->save();
+        // Inside the hour of slack, and already shipped: not reported.
+        $this->transaction(['payment_status' => 'paid', 'delivery_status' => 'pending'])
+            ->forceFill(['ship_deadline_at' => now()->subMinutes(30)])->save();
+        $this->transaction(['payment_status' => 'paid', 'delivery_status' => 'delivering'])
+            ->forceFill(['ship_deadline_at' => now()->subDays(2)])->save();
+
+        $this->artisan('ops:check')->assertSuccessful();
+
+        $this->assertSame(['Pesanan lewat batas kirim tapi belum dibatalkan'], $this->alertedTitles());
+        Notification::assertSentOnDemand(
+            OpsAlertNotification::class,
+            fn (OpsAlertNotification $n) => str_starts_with($n->problems[0]['lines'][0], '1 pesanan')
+                && str_contains($n->problems[0]['lines'][0], $late->code)
+        );
+    }
 }

@@ -558,7 +558,11 @@ class TransactionRepository implements TransactionRepositoryInterface
 
     public function markPaid(Transaction $transaction): void
     {
+        // Callers never mark an order paid twice (credit() would hit its
+        // unique_ref), so the deadline is set exactly once and never moves.
         $transaction->payment_status = 'paid';
+        $transaction->paid_at = now();
+        $transaction->ship_deadline_at = now()->addDays(config('marketplace.ship_deadline_days'));
         $transaction->save();
 
         $this->escrowRepository->credit($transaction);
@@ -1001,6 +1005,11 @@ class TransactionRepository implements TransactionRepositoryInterface
                 throw new Exception('Data Transaksi Tidak Ditemukan', 404);
             }
 
+            // Cancelled orders are payment_status failed too; say what happened.
+            if ($transaction->delivery_status === 'cancelled') {
+                throw new Exception('Pesanan sudah dibatalkan', 422);
+            }
+
             if ($transaction->payment_status !== 'paid') {
                 throw new Exception('Pesanan belum dibayar', 422);
             }
@@ -1012,6 +1021,15 @@ class TransactionRepository implements TransactionRepositoryInterface
             if (! in_array($transaction->delivery_status, ['pending', 'processing', 'delivering'], true)
                 || ($transaction->delivery_status === 'delivering' && ($data['delivery_status'] ?? null) === 'processing')) {
                 throw new Exception('Status pesanan tidak bisa dikembalikan atau diubah setelah selesai', 422);
+            }
+
+            // Shipping is what stops transaction:cancel-unshipped, so it needs
+            // a resi. Checked before delivery_proof is stored: a rollback would
+            // not remove the file. Older delivering orders without a resi keep
+            // their proof edits.
+            $entering = ($data['delivery_status'] ?? null) === 'delivering' && $transaction->delivery_status !== 'delivering';
+            if ($entering && blank($data['tracking_number'] ?? $transaction->tracking_number)) {
+                throw new Exception('Nomor resi wajib diisi', 422);
             }
 
             if (isset($data['tracking_number'])) {
