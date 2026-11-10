@@ -65,9 +65,9 @@ class P0EscrowConcurrencyTest extends TestCase
         $this->buyer = Buyer::factory()->create(['user_id' => $buyerUser->id]);
     }
 
-    private function order(string $code): Transaction
+    private function order(string $code, array $overrides = []): Transaction
     {
-        $transaction = Transaction::create([
+        $transaction = Transaction::create($overrides + [
             'code' => $code,
             'buyer_id' => $this->buyer->id,
             'store_id' => $this->balance->store_id,
@@ -178,6 +178,31 @@ class P0EscrowConcurrencyTest extends TestCase
         $released = StoreBalanceHistory::where('reference_id', $transaction->id)->where('type', StoreBalanceHistory::TYPE_RELEASED)->count();
         $refunded = StoreBalanceHistory::where('reference_id', $transaction->id)->where('type', StoreBalanceHistory::TYPE_REFUNDED)->count();
         $this->assertSame(1, $released + $refunded);
+        $this->assertEscrowInvariant();
+    }
+
+    // transaction:cancel-unshipped (cancelPaidOrder) racing a seller who enters the resi.
+    public function test_parallel_ship_and_auto_cancel_have_one_winner_and_no_refund_for_a_shipped_order(): void
+    {
+        // Paid fully with Saldo: a winning cancel refunds right here, no Midtrans call.
+        $transaction = $this->order('P0_CONCURRENT_SHIP_CANCEL', ['delivery_status' => 'processing', 'balance_used' => 100000]);
+        $results = $this->runParallel([
+            ['ship', $transaction->id],
+            ['cancel', $transaction->id],
+        ]);
+
+        $this->assertCount(1, array_filter($results, fn (array $result) => $result['ok']));
+        $transaction->refresh();
+        $refunded = StoreBalanceHistory::where('reference_id', $transaction->id)->where('type', StoreBalanceHistory::TYPE_REFUNDED)->count();
+        if ($transaction->delivery_status === 'delivering') {
+            $this->assertSame(0, $refunded);
+            $this->assertNull($transaction->refund_status);
+            $this->assertEquals(0, (float) $this->buyer->fresh()->balance);
+        } else {
+            $this->assertSame('cancelled', $transaction->delivery_status);
+            $this->assertSame(1, $refunded);
+            $this->assertEquals(100000, (float) $this->buyer->fresh()->balance);
+        }
         $this->assertEscrowInvariant();
     }
 

@@ -24,6 +24,7 @@ try {
     $result = match ($action) {
         'complete' => $repository->completeTransaction($transactionId),
         'cancel' => $repository->cancelPaidOrder($transactionId, 'concurrent test'),
+        'ship' => $repository->updateStatus($transactionId, ['delivery_status' => 'delivering', 'tracking_number' => 'JNE-RACE']),
         'release' => app(EscrowRepositoryInterface::class)
             ->release(Transaction::findOrFail($transactionId)),
         default => throw new InvalidArgumentException('Unknown action'),
