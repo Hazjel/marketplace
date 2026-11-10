@@ -3,10 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Buyer;
+use App\Models\BuyerBalanceHistory;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\Store;
 use App\Models\StoreBalance;
 use App\Models\StoreBalanceHistory;
 use App\Models\Transaction;
+use App\Models\TransactionDetail;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -131,6 +135,128 @@ class P0EscrowConcurrencyTest extends TestCase
         return $results;
     }
 
+    /**
+     * $first takes the transactions row lock inside its real path and holds
+     * it; $second starts only then, and $first may commit only once
+     * PostgreSQL shows $second's backend waiting on a lock $first holds.
+     *
+     * @param  array{0: string, 1: string}  $first
+     * @param  array{0: string, 1: string}  $second
+     * @return array{0: array<string, mixed>, 1: array<string, mixed>}
+     */
+    private function runHeldFirst(array $first, array $second): array
+    {
+        $hold = random_int(100000, 2000000000);
+        DB::select('select pg_advisory_lock(?)', [$hold]);
+
+        try {
+            $holder = $this->startWorker($first, $hold);
+            $this->assertSame('locked', $this->readLine($holder[1][1]), 'first worker never reached its row lock');
+            $waiter = $this->startWorker($second, 0);
+            $this->assertWaitingOnLockHeldBy($waiter[2], $holder[2]);
+        } finally {
+            DB::select('select pg_advisory_unlock(?)', [$hold]);
+        }
+
+        return [$this->finishWorker($holder), $this->finishWorker($waiter)];
+    }
+
+    /** @return array{0: resource, 1: array<int, resource>, 2: int} */
+    private function startWorker(array $worker, int $hold): array
+    {
+        [$process, $pipes] = $this->openProcess(
+            [PHP_BINARY, base_path('tests/Support/P0EscrowWorker.php'), $worker[0], $worker[1], '0', (string) $hold],
+            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+        );
+        $line = $this->readLine($pipes[1]);
+        $this->assertMatchesRegularExpression('/^pid:\d+$/', $line);
+
+        return [$process, $pipes, (int) substr($line, 4)];
+    }
+
+    /**
+     * Non-blocking fgets, not stream_select: select does not see a line PHP
+     * already buffered while reading the one before it.
+     *
+     * @param  resource  $pipe
+     */
+    private function readLine($pipe, int $timeoutSeconds = 30): string
+    {
+        stream_set_blocking($pipe, false);
+        $line = '';
+        $deadline = microtime(true) + $timeoutSeconds;
+        while (! str_ends_with($line, "\n") && microtime(true) < $deadline) {
+            $chunk = fgets($pipe);
+            if ($chunk === false) {
+                usleep(10000);
+            } else {
+                $line .= $chunk;
+            }
+        }
+        $this->assertStringEndsWith("\n", $line, 'worker printed no full line in time: '.$line);
+
+        return trim($line);
+    }
+
+    // Polled with a deadline; what proves the wait is PostgreSQL's own view.
+    private function assertWaitingOnLockHeldBy(int $waiter, int $holder): void
+    {
+        $deadline = microtime(true) + 15;
+        do {
+            $row = DB::selectOne(
+                'select wait_event_type, wait_event, query, ? = any(pg_blocking_pids(pid)) as blocked from pg_stat_activity where pid = ?',
+                [$holder, $waiter],
+            );
+            if ($row && $row->wait_event_type === 'Lock' && $row->blocked) {
+                $this->assertContains($row->wait_event, ['transactionid', 'tuple']);
+                $this->assertStringContainsString('from "transactions"', $row->query);
+                $this->assertStringContainsString('for update', $row->query);
+
+                return;
+            }
+            usleep(20000);
+        } while (microtime(true) < $deadline);
+
+        $this->fail('second worker never waited on the first one\'s row lock: '.json_encode($row));
+    }
+
+    /** @return array<string, mixed> */
+    private function finishWorker(array $worker): array
+    {
+        [$process, $pipes] = $worker;
+        stream_set_blocking($pipes[1], true);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+        $lines = preg_split('/\R/', trim($stdout));
+        $decoded = json_decode((string) end($lines), true);
+        $this->assertIsArray($decoded, $stderr ?: $stdout);
+
+        return $decoded;
+    }
+
+    /** Saldo-paid processing order with 2 units of a 10-stock product. */
+    private function unshippedOrderWithStock(string $code): array
+    {
+        $category = ProductCategory::create(['name' => 'Umum', 'slug' => 'umum-'.$code, 'description' => 'x']);
+        $product = Product::factory()->create([
+            'store_id' => $this->balance->store_id,
+            'product_category_id' => $category->id,
+            'stock' => 10,
+        ]);
+        $transaction = $this->order($code, ['delivery_status' => 'processing', 'balance_used' => 100000]);
+        TransactionDetail::create([
+            'transaction_id' => $transaction->id,
+            'product_id' => $product->id,
+            'qty' => 2,
+            'subtotal' => 90000,
+        ]);
+
+        return [$transaction, $product];
+    }
+
     private function openProcess(array $command, array $descriptor)
     {
         $process = proc_open($command, $descriptor, $pipes, base_path());
@@ -204,6 +330,50 @@ class P0EscrowConcurrencyTest extends TestCase
             $this->assertEquals(100000, (float) $this->buyer->fresh()->balance);
         }
         $this->assertEscrowInvariant();
+    }
+
+    public function test_a_seller_holding_the_lock_ships_and_the_waiting_auto_cancel_is_rejected(): void
+    {
+        [$transaction, $product] = $this->unshippedOrderWithStock('P0_SHIP_FIRST');
+        $saldo = (float) $this->buyer->fresh()->balance;
+
+        [$ship, $cancel] = $this->runHeldFirst(['ship', $transaction->id], ['cancel', $transaction->id]);
+
+        $this->assertTrue($ship['ok'], json_encode($ship));
+        $this->assertSame(['ok' => false, 'code' => 422, 'exception' => \Exception::class, 'message' => 'Pesanan yang sudah dikirim tidak bisa dibatalkan'], $cancel);
+        $transaction->refresh();
+        $this->assertSame('delivering', $transaction->delivery_status);
+        $this->assertSame('JNE-RACE', $transaction->tracking_number);
+        $this->assertSame('paid', $transaction->payment_status);
+        $this->assertNull($transaction->refund_status);
+        $this->assertSame(0, StoreBalanceHistory::where('reference_id', $transaction->id)->where('type', StoreBalanceHistory::TYPE_REFUNDED)->count());
+        $this->assertSame(0, BuyerBalanceHistory::where('buyer_id', $this->buyer->id)->count());
+        $this->assertEquals($saldo, (float) $this->buyer->fresh()->balance);
+        $this->assertSame(10, $product->fresh()->stock);
+        $this->assertEscrowInvariant();
+        $this->assertEquals(100000, (float) $this->balance->fresh()->pending_balance);
+    }
+
+    public function test_an_auto_cancel_holding_the_lock_wins_and_the_waiting_seller_is_told_it_was_cancelled(): void
+    {
+        [$transaction, $product] = $this->unshippedOrderWithStock('P0_CANCEL_FIRST');
+        $saldo = (float) $this->buyer->fresh()->balance;
+
+        [$cancel, $ship] = $this->runHeldFirst(['cancel', $transaction->id], ['ship', $transaction->id]);
+
+        $this->assertTrue($cancel['ok'], json_encode($cancel));
+        $this->assertSame(['ok' => false, 'code' => 422, 'exception' => \Exception::class, 'message' => 'Pesanan sudah dibatalkan'], $ship);
+        $transaction->refresh();
+        $this->assertSame('cancelled', $transaction->delivery_status);
+        $this->assertNull($transaction->tracking_number);
+        $this->assertSame('refunded', $transaction->refund_status);
+        $this->assertSame(1, StoreBalanceHistory::where('reference_id', $transaction->id)->where('type', StoreBalanceHistory::TYPE_REFUNDED)->count());
+        $this->assertSame(1, BuyerBalanceHistory::where('buyer_id', $this->buyer->id)->where('type', BuyerBalanceHistory::TYPE_REFUND)->count());
+        $this->assertEquals($saldo + 100000, (float) $this->buyer->fresh()->balance);
+        $this->assertSame(12, $product->fresh()->stock);
+        $this->assertNotNull($transaction->stock_restored_at);
+        $this->assertEscrowInvariant();
+        $this->assertEquals(0, (float) $this->balance->fresh()->pending_balance);
     }
 
     public function test_parallel_releases_for_two_orders_keep_the_store_invariant(): void
