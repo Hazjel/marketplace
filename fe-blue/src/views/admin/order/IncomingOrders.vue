@@ -2,12 +2,22 @@
 import { useAuthStore } from '@/stores/auth'
 import { useTransactionStore } from '@/stores/transaction'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
 import { formatRupiah, formatDate } from '@/helpers/format'
 import { useToast } from 'vue-toastification'
-import { resolvePaymentStatus, resolveDeliveryStatus, resolveRefundStatus } from '@/composables/useTransactionStatus'
+import {
+  resolvePaymentStatus,
+  resolveDeliveryStatus,
+  resolveRefundStatus,
+  resolveShipDeadline
+} from '@/composables/useTransactionStatus'
 
 const toast = useToast()
+
+// Ship-deadline countdown, refreshed once a minute.
+const now = ref(Date.now())
+const clock = setInterval(() => (now.value = Date.now()), 60_000)
+onUnmounted(() => clearInterval(clock))
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
@@ -219,6 +229,13 @@ watch(error, (val) => {
                 <p class="text-xs text-custom-grey dark:text-gray-400">{{ t.city }}, {{ t.postal_code }}</p>
               </div>
             </div>
+
+            <p
+              v-if="resolveShipDeadline(t, now)"
+              class="text-xs font-medium"
+              :class="resolveShipDeadline(t, now).urgent ? 'text-red-600 dark:text-red-400' : 'text-custom-grey dark:text-gray-400'">
+              Kirim sebelum {{ resolveShipDeadline(t, now).at }}. {{ resolveShipDeadline(t, now).remaining }}
+            </p>
           </div>
 
           <!-- Price & Actions -->

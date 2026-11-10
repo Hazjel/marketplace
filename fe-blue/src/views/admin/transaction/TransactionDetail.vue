@@ -15,7 +15,7 @@ import ComplaintPanel from '@/components/admin/transaction/ComplaintPanel.vue'
 import CancelUnpaidButton from '@/components/admin/transaction/CancelUnpaidButton.vue'
 import { logger } from '@/utils/logger'
 import { dashboardRoute } from '@/helpers/routeHelper'
-import { resolvePaymentStatus } from '@/composables/useTransactionStatus'
+import { resolvePaymentStatus, resolveShipDeadline } from '@/composables/useTransactionStatus'
 
 const route = useRoute()
 const toast = useToast()
@@ -35,6 +35,12 @@ const isOrderBuyer = computed(
 const isOrderSeller = computed(
   () => !!user.value?.store?.id && transaction.value?.store?.id === user.value.store.id
 )
+
+// Ship-deadline countdown, refreshed once a minute.
+const now = ref(Date.now())
+const clock = setInterval(() => (now.value = Date.now()), 60_000)
+onUnmounted(() => clearInterval(clock))
+const shipDeadline = computed(() => resolveShipDeadline(transaction.value, now.value))
 
 const handleCheckStatus = async () => {
   try {
@@ -287,6 +293,28 @@ v-else-if="!transaction || !transaction.id"
         :is-seller="isOrderSeller"
         :is-admin="user?.role === 'admin'"
         @updated="setTransaction" />
+
+      <section
+        v-if="shipDeadline"
+        role="status"
+        class="flex flex-col w-full rounded-2xl p-5 gap-1 border shadow-sm"
+        :class="
+          shipDeadline.urgent
+            ? 'bg-red-50 border-red-100 dark:bg-red-900/20 dark:border-red-900/30'
+            : 'bg-white dark:bg-surface-card border-gray-100 dark:border-white/10'
+        ">
+        <p class="font-medium dark:text-white">
+          {{ isOrderBuyer ? 'Penjual wajib mengirim sebelum' : 'Kirim sebelum' }} {{ shipDeadline.at }}
+        </p>
+        <p class="text-sm text-custom-grey dark:text-gray-400">
+          {{ shipDeadline.remaining }}
+          {{
+            isOrderBuyer
+              ? 'Jika belum dikirim, pesanan dibatalkan dan dana dikembalikan otomatis.'
+              : 'Lewat batas ini, pesanan dibatalkan otomatis dan dana dikembalikan ke pembeli.'
+          }}
+        </p>
+      </section>
 
       <section
         class="flex flex-col w-full rounded-2xl p-5 gap-5 bg-white dark:bg-surface-card border border-gray-100 dark:border-white/10 shadow-sm">
@@ -662,6 +690,7 @@ id="Tracking" v-model="transaction.tracking_number" type="string" class="custom-
           <button
 id="Update-Status" type="submit"
             class="h-14 w-full rounded-full flex items-center justify-center py-4 px-6 bg-custom-blue disabled:bg-custom-stroke transition-300"
+            :disabled="!transaction.tracking_number?.trim()"
             @click="handleDeliverySubmit">
             <span class="font-medium text-lg text-white">Update Status</span>
           </button>

@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 // payment_status enum: unpaid/paid/failed (never 'pending')
 // delivery_status enum: pending/processing/delivering/completed/cancelled/failed
 const FAILURE_STATUSES = ['expire', 'cancel', 'deny', 'failure', 'failed']
@@ -97,6 +99,35 @@ export function resolveComplaintStatus(complaint) {
   const status = complaint?.status
   if (!status) return null
   return COMPLAINT_STATUSES[status] ?? { label: status, style: DEFAULT_STYLE }
+}
+
+/**
+ * Batas kirim penjual untuk pesanan dibayar yang belum dikirim; lewat itu
+ * server membatalkan dan merefund otomatis. null bila tidak berlaku.
+ * `now` dari pemanggil (jam yang di-refresh) supaya sisa waktunya jalan.
+ */
+export function resolveShipDeadline(transaction, now = Date.now()) {
+  if (
+    !transaction?.ship_deadline_at ||
+    transaction.payment_status !== 'paid' ||
+    !['pending', 'processing'].includes(transaction.delivery_status)
+  ) {
+    return null
+  }
+  const deadline = DateTime.fromISO(transaction.ship_deadline_at)
+  const hours = Math.floor((deadline.toMillis() - now) / 3_600_000)
+  const days = Math.floor(hours / 24)
+  let remaining
+  if (hours < 0) remaining = 'Batas waktu lewat, pesanan segera dibatalkan otomatis.'
+  else if (hours < 1) remaining = 'Sisa kurang dari 1 jam.'
+  else remaining = days ? `Sisa ${days} hari ${hours % 24} jam.` : `Sisa ${hours} jam.`
+
+  return {
+    // "12 Okt 2026, 14:30" in the viewer's time zone.
+    at: deadline.setLocale('id').toFormat('d LLL yyyy, HH:mm'),
+    remaining,
+    urgent: hours < 24
+  }
 }
 
 export function isFailedTransaction(transaction) {
