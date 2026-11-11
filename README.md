@@ -295,7 +295,8 @@ deploys: the tests and the production images come from GitHub Actions. Stages:
 1. **Detect Changes** — path filter; each service's stage runs only if its files changed
 2. **GitHub CI** — waits for the GitHub Actions run of the commit (`ci/github-ci-status.sh`,
    up to 60 min). Passed: the local test stages are skipped and Deploy runs. Failed, or still
-   no result after 60 min: the build stops without deploying and without local tests. The
+   no result after 60 min: the build stops without deploying and without local tests. A run
+   that completed as cancelled or skipped stops it the same way at once, without the wait. The
    optional Jenkins credential `github-ci-status-token` (secret text, read-only token) avoids
    the anonymous 60 requests/h API limit this IP shares with other tenants
 3. **Local test stages** — only when the build parameter `RUN_LOCAL_TESTS` is ticked (manual
