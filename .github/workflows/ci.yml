@@ -178,13 +178,17 @@ jobs:
               /opt/pip-audit/bin/pip-audit --path /usr/local/lib/python3.11/site-packages --desc $AUDIT_IGNORES
             '
 
-  # Phase 3: on pushes to main, build the production images whose Dockerfiles
-  # take no build args and push them as ghcr.io/hazjel/marketplace-*:<sha>.
-  # Jenkins Deploy pulls them instead of building on the slow host and builds
-  # locally if a pull fails. The frontend images are not here: their VITE_*
-  # build args come from the server's .env. Images hold no secrets (runtime
-  # config comes from .env via compose; .dockerignore excludes .env), and the
-  # packages are meant to be public so the server can pull anonymously.
+  # Phase 3: on pushes to main, build the production images and push them as
+  # ghcr.io/hazjel/marketplace-*:<sha>. Jenkins Deploy pulls them instead of
+  # building on the slow host and builds locally if a pull fails. Images hold
+  # no secrets (runtime config comes from .env via compose; .dockerignore
+  # excludes .env), and the packages are meant to be public so the server can
+  # pull anonymously. The frontend images take the build args of the compose
+  # services frontend / frontend-seller: literals are copied here, the values
+  # compose reads from the server's .env come from repository variables
+  # (Settings > Secrets and variables > Actions > Variables), which are public
+  # values baked into the browser bundle anyway. A missing variable fails that
+  # leg instead of baking the compose default; Jenkins then builds it locally.
   # continue-on-error: an image problem must not read as a test failure, which
   # would block the deploy; Jenkins then just builds that image itself.
   images:
@@ -206,6 +210,14 @@ jobs:
             context: chat-service
           - image: marketplace-recommendation-service
             context: recommendation-service
+          - image: marketplace-frontend
+            context: fe-blue
+            app_name: Blue
+            app_target: buyer
+          - image: marketplace-frontend-seller
+            context: fe-blue
+            app_name: Blue Seller
+            app_target: seller
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -219,11 +231,49 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Frontend build args
+        id: frontend
+        if: matrix.app_target
+        env:
+          APP_NAME: ${{ matrix.app_name }}
+          APP_TARGET: ${{ matrix.app_target }}
+          MIDTRANS_CLIENT_KEY: ${{ vars.MIDTRANS_CLIENT_KEY }}
+          REVERB_APP_KEY: ${{ vars.REVERB_APP_KEY }}
+          BUYER_APP_URL: ${{ vars.BUYER_APP_URL }}
+          SELLER_APP_URL: ${{ vars.SELLER_APP_URL }}
+        run: |
+          missing=""
+          for v in MIDTRANS_CLIENT_KEY REVERB_APP_KEY BUYER_APP_URL SELLER_APP_URL; do
+            if [ -z "${!v}" ] || [[ "${!v}" == *$'\n'* ]]; then
+              echo "::error::Repository variable $v is unset, empty or multi-line"
+              missing=1
+            fi
+          done
+          [ -z "$missing" ] || exit 1
+          # Keep in step with docker-compose.yml (services frontend, frontend-seller).
+          {
+            echo 'args<<BUILD_ARGS_EOF'
+            echo "BUILD_COMMIT=$GITHUB_SHA"
+            echo "VITE_APP_NAME=$APP_NAME"
+            echo 'VITE_API_BASE_URL=/api'
+            echo 'VITE_AI_SERVICE_URL=/ai'
+            echo 'VITE_RECOMMENDATION_BASE_URL=/recommend'
+            echo "VITE_MIDTRANS_CLIENT_KEY=$MIDTRANS_CLIENT_KEY"
+            echo 'VITE_MIDTRANS_IS_PRODUCTION=false'
+            echo "VITE_REVERB_APP_KEY=$REVERB_APP_KEY"
+            echo "VITE_APP_TARGET=$APP_TARGET"
+            echo "VITE_BUYER_APP_URL=$BUYER_APP_URL"
+            echo "VITE_SELLER_APP_URL=$SELLER_APP_URL"
+            echo BUILD_ARGS_EOF
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build and push ${{ matrix.image }}
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           # Same context and Dockerfile as docker-compose.yml's build: for this service.
           context: ${{ matrix.context }}
+          # Empty (the step above is skipped) for the images without build args.
+          build-args: ${{ steps.frontend.outputs.args }}
           push: true
           provenance: false
           tags: ghcr.io/hazjel/${{ matrix.image }}:${{ github.sha }}

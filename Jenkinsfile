@@ -608,18 +608,21 @@ pipeline {
                     if want "$RECO_IMAGE_CHANGED" recommendation-service; then BUILD="$BUILD recommendation-service"; fi
 
                     # GitHub CI (job images in .github/workflows/ci.yml) pushes the
-                    # PHP, chat and recommendation images for every main commit:
-                    # pulling them takes minutes, building chat-service here took
-                    # 69 min in #177. Only when that run passed (GHA_OK). The
-                    # frontend stays a local build: its VITE_* args come from this
-                    # host's .env. A failed pull (package private, image missing,
-                    # network) keeps the service in BUILD, so it is built as before.
+                    # PHP, chat, recommendation and both frontend images for every
+                    # main commit: pulling them takes minutes, building chat-service
+                    # here took 69 min in #177. Only when that run passed (GHA_OK).
+                    # The frontend images get their VITE_* args from GitHub Actions
+                    # variables there instead of this host's .env. A failed pull
+                    # (package private, image missing, network) keeps the service in
+                    # BUILD, so it is built here as before.
+                    # UPDATED keeps the full list for the frontend revision check below.
+                    UPDATED="$BUILD"
                     if [ "${GHA_OK:-}" = true ] && [ -n "$BUILD" ]; then
                         LOCAL=""
                         for s in $BUILD; do
                             case "$s" in
                                 api|queue|reverb|scheduler) src=api ;;
-                                chat-service|recommendation-service) src=$s ;;
+                                chat-service|recommendation-service|frontend|frontend-seller) src=$s ;;
                                 *) LOCAL="$LOCAL $s"; continue ;;
                             esac
                             ref="ghcr.io/hazjel/marketplace-$src:$BUILD_COMMIT"
@@ -631,7 +634,7 @@ pipeline {
                             fi
                         done
                         # Only the registry tags go; marketplace-* still points at the images.
-                        for src in api chat-service recommendation-service; do
+                        for src in api chat-service recommendation-service frontend frontend-seller; do
                             docker rmi "ghcr.io/hazjel/marketplace-$src:$BUILD_COMMIT" >/dev/null 2>&1 || true
                         done
                         BUILD="$LOCAL"
@@ -726,7 +729,7 @@ pipeline {
                         buyer=$(curl -fsS --connect-timeout 5 --max-time 10 "https://blukios.store/build-commit.txt?deploy=$DEPLOYED-$i") || buyer=""
                         seller=$(curl -fsS --connect-timeout 5 --max-time 10 "https://seller.blukios.store/build-commit.txt?deploy=$DEPLOYED-$i") || seller=""
                         if [ "${#buyer}" -eq 40 ] && printf '%s' "$buyer" | grep -Eq '^[0-9a-f]{40}$' && [ "$buyer" = "$seller" ]; then
-                            case " $BUILD " in
+                            case " $UPDATED " in
                                 *" frontend "*) if [ "$buyer" = "$DEPLOYED" ]; then frontend_ready=yes; fi ;;
                                 *) frontend_ready=yes ;;
                             esac

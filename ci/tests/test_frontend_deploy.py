@@ -35,6 +35,8 @@ class DeployFixture:
         buyer_body=TEST_REVISION,
         seller_body=TEST_REVISION,
         revision_mode="matching",
+        gha_ok="",
+        pull_fails=(),
     ):
         self.tempdir = tempfile.TemporaryDirectory(prefix="seller-deploy-")
         self.root = Path(self.tempdir.name)
@@ -64,6 +66,8 @@ class DeployFixture:
             "REVISION_MODE": revision_mode,
             "REVISION_COUNT_FILE": str(self.count_file),
             "COMMAND_LOG": str(self.root / "commands.log"),
+            "GHA_OK": gha_ok,
+            "PULL_FAILS": ",".join(pull_fails),
         }
         self.values["FRONTEND_CHANGED"] = frontend_changed
 
@@ -107,6 +111,12 @@ docker() {
   fi
   if [ "$1" = compose ] && [ "$2" = -p ] && [ "$4" = ps ]; then
     return 1
+  fi
+  if [ "$1" = pull ]; then
+    image="${3#ghcr.io/hazjel/marketplace-}"
+    case ",$PULL_FAILS," in
+      *,${image%%:*},*) return 1 ;;
+    esac
   fi
   return 0
 }
@@ -243,6 +253,28 @@ class FrontendDeployRegressionTests(unittest.TestCase):
         invalid = TEST_REVISION + "\njunk"
         fixture = self.fixture(buyer_body=invalid, seller_body=invalid)
         self.assert_failed_without_advancing_marker(fixture)
+
+    def test_github_ci_pass_pulls_both_frontend_images_instead_of_building(self):
+        fixture = self.fixture(frontend_changed="true", gha_ok="true")
+        self.assert_success(fixture)
+        self.assertFalse(fixture.build_commands(), fixture.commands())
+        log = "\n".join(fixture.commands())
+        for image in ("frontend", "frontend-seller"):
+            ref = f"ghcr.io/hazjel/marketplace-{image}:{TEST_REVISION}"
+            self.assertIn(f"docker pull -q {ref}", log)
+            self.assertIn(f"docker tag {ref} marketplace-{image}", log)
+            self.assertIn(f"docker rmi {ref}", log)
+
+    def test_pulled_frontend_images_still_require_revision_under_test(self):
+        fixture = self.fixture(frontend_changed="true", gha_ok="true", buyer_body=OLD_REVISION, seller_body=OLD_REVISION)
+        self.assert_failed_without_advancing_marker(fixture)
+
+    def test_failed_frontend_pull_builds_that_image_locally(self):
+        fixture = self.fixture(frontend_changed="true", gha_ok="true", pull_fails=("frontend-seller",))
+        self.assert_success(fixture)
+        builds = fixture.build_commands()
+        self.assertEqual(len(builds), 1, fixture.commands())
+        self.assertTrue(builds[0].endswith("build frontend-seller"), builds)
 
     def test_transient_old_pair_then_current_pair_succeeds(self):
         fixture = self.fixture(frontend_changed="true", revision_mode="transient")
