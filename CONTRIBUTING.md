@@ -4,7 +4,7 @@
 
 ```
 branch off main  →  local checks  →  push  →  open PR  →  review  →  merge commit
-      →  Jenkins polls main  →  build + test + deploy  →  verify production
+      →  GitHub CI on main  →  Jenkins polls main  →  deploy  →  verify production
 ```
 
 1. **Branch** off the latest `main`. Naming: `feat/…`, `fix/…`, `ci/…`,
@@ -16,12 +16,13 @@ branch off main  →  local checks  →  push  →  open PR  →  review  →  m
 4. **Open a PR** against `main`. Fill in the template. Get a review.
 5. **Merge** (a merge commit, not squash — matches the existing history).
 6. **Jenkins** picks up `main` on its next SCM poll (every ~5 min; there is no
-   webhook), runs the full pipeline, and — if green — deploys the merge commit
-   and health-checks production. Watch that run; a red pipeline on `main` means
-   production may be affected.
+   webhook), waits for the GitHub Actions run of the merge commit, and — if that
+   passed — deploys it and health-checks production. A failed or missing GitHub
+   result stops the build without deploying. Watch that run; a red pipeline on
+   `main` means production may be affected.
 
-Jenkins does **not** run per-PR. Nothing automated gates the PR itself, so the
-local checks and the review are what protect `main`. There is no long-lived
+Jenkins does **not** run per-PR. GitHub Actions runs the tests on every PR; those
+checks, the local checks and the review are what protect `main`. There is no long-lived
 `develop` branch — `main` is always deployable, and every merge deploys
 (docs-only changes included).
 
