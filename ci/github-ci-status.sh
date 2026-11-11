@@ -11,7 +11,8 @@
 #
 # While the result is not known yet (no run, curl failed, run not completed)
 # the API is polled again every GHA_POLL_INTERVAL seconds until
-# GHA_WAIT_FOR_RESULT seconds have passed.
+# GHA_WAIT_FOR_RESULT seconds have passed. The request timeout and the sleep
+# are capped by the time left, so the bound is overrun by at most 1 s.
 #
 # Only curl is available in the Jenkins container (no jq), so the JSON is read
 # with grep. With per_page=1 the response holds one run, whose "status" and
@@ -33,12 +34,13 @@ fi
 
 url="https://api.github.com/repos/Hazjel/marketplace/actions/workflows/ci.yml/runs?head_sha=$BUILD_COMMIT&event=push&per_page=1"
 field() { printf '%s\n' "$body" | grep -o "\"$1\": \"[^\"]*\"" | head -n 1 | cut -d '"' -f 4; }
+# $1: request timeout in seconds.
 fetch() {
     if [ -n "${GHA_STATUS_TOKEN:-}" ]; then
         printf 'header = "Authorization: Bearer %s"\n' "$GHA_STATUS_TOKEN" |
-            curl -K - -fsS --max-time 20 -H 'Accept: application/vnd.github+json' "$url" 2>&1
+            curl -K - -fsS --max-time "$1" -H 'Accept: application/vnd.github+json' "$url" 2>&1
     else
-        curl -fsS --max-time 20 -H 'Accept: application/vnd.github+json' "$url" 2>&1
+        curl -fsS --max-time "$1" -H 'Accept: application/vnd.github+json' "$url" 2>&1
     fi
 }
 
@@ -50,8 +52,14 @@ fi
 
 start=$(date +%s)
 while :; do
+    left=$(( wait_for_result - ($(date +%s) - start) ))
+    max_time=20
+    [ "$left" -ge "$max_time" ] || max_time=$left
+    [ "$max_time" -ge 1 ] || max_time=1   # --max-time 0 would mean no limit
+    ok=true
+    body=$(fetch "$max_time") || ok=false
     elapsed=$(( $(date +%s) - start ))
-    if ! body=$(fetch); then
+    if [ "$ok" = false ]; then
         echo "GitHub API unavailable (${elapsed}s): $body" >&2
     else
         status=$(field status)
@@ -75,5 +83,7 @@ while :; do
         echo unavailable
         exit 0
     fi
-    sleep "$interval"
+    pause=$interval
+    [ $(( wait_for_result - elapsed )) -ge "$pause" ] || pause=$(( wait_for_result - elapsed ))
+    sleep "$pause"
 done
