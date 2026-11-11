@@ -36,6 +36,15 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '15'))
     }
 
+    parameters {
+        // Manual escape hatch only (e.g. GitHub Actions down): pollSCM builds use the default.
+        booleanParam(
+            name: 'RUN_LOCAL_TESTS',
+            defaultValue: false,
+            description: 'Skip the GitHub CI check and run the local test stages on this host (2-6 h), then deploy with locally built images.'
+        )
+    }
+
     triggers {
         // Gak ada webhook GitHub -> Jenkins (Jenkins ini gak publicly reachable),
         // jadi pakai polling tiap 5 menit sebagai gantinya
@@ -128,8 +137,8 @@ pipeline {
                         deployConfigChanged
                     ).toString()
                     // Perubahan pipeline menjalankan semua stage test yang ia definisikan, tanpa ikut memicu deploy.
-                    // Since the GitHub CI stage, a green GitHub run skips them too, so a change to a
-                    // local test stage itself is exercised only when the fallback runs.
+                    // Since the GitHub CI stage they run only with RUN_LOCAL_TESTS ticked, so a change
+                    // to a local test stage itself is exercised only by such a manual build.
                     env.CI_CHANGED = (changed == 'ALL' || changed.readLines().any {
                         it == 'Jenkinsfile' || it == '.gitleaks.toml' || it.startsWith('ci/')
                     }).toString()
@@ -156,26 +165,50 @@ pipeline {
         stage('GitHub CI') {
             // The test stages below also run on GitHub Actions (.github/workflows/ci.yml)
             // for every push to main, on runners that take minutes instead of hours on
-            // this host's disk. When that run passed for BUILD_COMMIT, the local test
-            // stages are skipped and only Deploy runs here; a failed run stops the
-            // build before Deploy. Anything else (no run, cancelled, API down, the
-            // anonymous 60/h limit that other tenants on this IP share) leaves
-            // GHA_OK unset and the local stages run as before. See ci/github-ci-status.sh.
+            // this host's disk. Jenkins only deploys: when that run passed for
+            // BUILD_COMMIT the local test stages are skipped and Deploy runs; a failed
+            // run stops the build before Deploy. While there is no result yet (no run,
+            // still running, API down, rate limit) ci/github-ci-status.sh keeps polling
+            // for up to 60 minutes; still nothing then stops the build without
+            // deploying and without the local tests (2-6 h here, #173-#177). Tick
+            // RUN_LOCAL_TESTS to skip this stage and run the local test stages instead.
+            //
+            // Credential github-ci-status-token (secret text, read-only token) is
+            // optional: with it the API calls leave the anonymous 60/h limit that
+            // other tenants on this IP share. Missing, it runs anonymously.
             agent any
             when {
                 beforeAgent true
-                expression { env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true' }
+                expression {
+                    params.RUN_LOCAL_TESTS != true &&
+                        (env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true')
+                }
             }
             steps {
                 script {
-                    def verdict = sh(script: 'sh ci/github-ci-status.sh', returnStdout: true).trim()
+                    def verdict = null
+                    def bound = false
+                    try {
+                        withCredentials([string(credentialsId: 'github-ci-status-token', variable: 'GHA_STATUS_TOKEN')]) {
+                            bound = true
+                            verdict = sh(script: 'sh ci/github-ci-status.sh', returnStdout: true).trim()
+                        }
+                    } catch (err) {
+                        // Only a credential that cannot be bound falls back; errors from the script itself are rethrown.
+                        if (bound) {
+                            throw err
+                        }
+                        echo "Credential github-ci-status-token not usable (${err}); reading GitHub CI anonymously."
+                        verdict = sh(script: 'sh ci/github-ci-status.sh', returnStdout: true).trim()
+                    }
                     if (verdict == 'success') {
                         env.GHA_OK = 'true'
                         echo "GitHub CI passed for ${env.BUILD_COMMIT}: skipping the local test stages."
                     } else if (verdict == 'failure') {
                         error("GitHub CI failed for ${env.BUILD_COMMIT}; not deploying. See the run linked above.")
                     } else {
-                        echo "No usable GitHub CI result (${verdict}); running the local test stages."
+                        error("No usable GitHub CI result for ${env.BUILD_COMMIT} (${verdict}); not deploying and not running the local test stages. " +
+                            'Re-run this build once GitHub CI has finished, or with RUN_LOCAL_TESTS ticked to test on this host.')
                     }
                 }
             }
@@ -185,7 +218,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.GHA_OK != 'true' && (env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
+                expression { params.RUN_LOCAL_TESTS == true && (env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 dir('api-blue') {
@@ -213,7 +246,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.GHA_OK != 'true' && (env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
+                expression { params.RUN_LOCAL_TESTS == true && (env.BACKEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 // --network host: DNS daemon (8.8.8.8) tidak terjangkau dari jaringan ini, resolv host yang jalan.
@@ -257,7 +290,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.GHA_OK != 'true' && (env.FRONTEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
+                expression { params.RUN_LOCAL_TESTS == true && (env.FRONTEND_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 dir('fe-blue') {
@@ -389,7 +422,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.GHA_OK != 'true' && (env.CHAT_SERVICE_CHANGED == 'true' || env.CI_CHANGED == 'true') }
+                expression { params.RUN_LOCAL_TESTS == true && (env.CHAT_SERVICE_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 sh 'docker image inspect "$CI_CHAT_IMAGE" >/dev/null 2>&1 || docker build --network host -t "$CI_CHAT_IMAGE" -f ci/python/Dockerfile chat-service'
@@ -430,7 +463,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.GHA_OK != 'true' && (env.RECOMMENDATION_CHANGED == 'true' || env.CI_CHANGED == 'true') }
+                expression { params.RUN_LOCAL_TESTS == true && (env.RECOMMENDATION_CHANGED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 sh 'docker image inspect "$CI_RECO_IMAGE" >/dev/null 2>&1 || docker build --network host -t "$CI_RECO_IMAGE" -f ci/python/Dockerfile recommendation-service'
@@ -459,7 +492,7 @@ pipeline {
             agent any
             when {
                 beforeAgent true
-                expression { env.GHA_OK != 'true' && (env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true') }
+                expression { params.RUN_LOCAL_TESTS == true && (env.DEPLOY_REQUIRED == 'true' || env.CI_CHANGED == 'true') }
             }
             steps {
                 // BLOCKING: temuan apa pun menggagalkan build sebelum Deploy.
@@ -608,18 +641,21 @@ pipeline {
                     if want "$RECO_IMAGE_CHANGED" recommendation-service; then BUILD="$BUILD recommendation-service"; fi
 
                     # GitHub CI (job images in .github/workflows/ci.yml) pushes the
-                    # PHP, chat and recommendation images for every main commit:
-                    # pulling them takes minutes, building chat-service here took
-                    # 69 min in #177. Only when that run passed (GHA_OK). The
-                    # frontend stays a local build: its VITE_* args come from this
-                    # host's .env. A failed pull (package private, image missing,
-                    # network) keeps the service in BUILD, so it is built as before.
+                    # PHP, chat, recommendation and both frontend images for every
+                    # main commit: pulling them takes minutes, building chat-service
+                    # here took 69 min in #177. Only when that run passed (GHA_OK).
+                    # The frontend images get their VITE_* args from GitHub Actions
+                    # variables there instead of this host's .env. A failed pull
+                    # (package private, image missing, network) keeps the service in
+                    # BUILD, so it is built here as before.
+                    # UPDATED keeps the full list for the frontend revision check below.
+                    UPDATED="$BUILD"
                     if [ "${GHA_OK:-}" = true ] && [ -n "$BUILD" ]; then
                         LOCAL=""
                         for s in $BUILD; do
                             case "$s" in
                                 api|queue|reverb|scheduler) src=api ;;
-                                chat-service|recommendation-service) src=$s ;;
+                                chat-service|recommendation-service|frontend|frontend-seller) src=$s ;;
                                 *) LOCAL="$LOCAL $s"; continue ;;
                             esac
                             ref="ghcr.io/hazjel/marketplace-$src:$BUILD_COMMIT"
@@ -631,7 +667,7 @@ pipeline {
                             fi
                         done
                         # Only the registry tags go; marketplace-* still points at the images.
-                        for src in api chat-service recommendation-service; do
+                        for src in api chat-service recommendation-service frontend frontend-seller; do
                             docker rmi "ghcr.io/hazjel/marketplace-$src:$BUILD_COMMIT" >/dev/null 2>&1 || true
                         done
                         BUILD="$LOCAL"
@@ -726,7 +762,7 @@ pipeline {
                         buyer=$(curl -fsS --connect-timeout 5 --max-time 10 "https://blukios.store/build-commit.txt?deploy=$DEPLOYED-$i") || buyer=""
                         seller=$(curl -fsS --connect-timeout 5 --max-time 10 "https://seller.blukios.store/build-commit.txt?deploy=$DEPLOYED-$i") || seller=""
                         if [ "${#buyer}" -eq 40 ] && printf '%s' "$buyer" | grep -Eq '^[0-9a-f]{40}$' && [ "$buyer" = "$seller" ]; then
-                            case " $BUILD " in
+                            case " $UPDATED " in
                                 *" frontend "*) if [ "$buyer" = "$DEPLOYED" ]; then frontend_ready=yes; fi ;;
                                 *) frontend_ready=yes ;;
                             esac
