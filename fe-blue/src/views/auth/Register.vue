@@ -1,4 +1,5 @@
 <script setup>
+import BrandLogo from '@/components/Atom/BrandLogo.vue'
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
@@ -73,7 +74,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
   <form autocomplete="off" class="flex flex-col w-full gap-6 lg:gap-8" @submit.prevent="handleSubmit">
     <!-- Header -->
     <div class="flex flex-col gap-2 text-center">
-      <img src="@/assets/images/logos/blukios_logo.png" class="h-8 lg:h-10 mx-auto mb-4 dark:brightness-0 dark:invert" alt="Blukios" />
+      <BrandLogo class="h-8 lg:h-10 mx-auto mb-4" />
       <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">Buat Akun Baru</h1>
       <p class="text-custom-grey dark:text-gray-400 font-normal text-sm lg:text-base">Bergabung dan mulai perjalananmu!</p>
     </div>

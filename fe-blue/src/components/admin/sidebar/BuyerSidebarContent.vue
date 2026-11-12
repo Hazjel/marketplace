@@ -1,4 +1,5 @@
 <script setup>
+import BrandLogo from '@/components/Atom/BrandLogo.vue'
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
@@ -124,10 +125,8 @@ const handleLogout = async () => {
 <template>
   <div v-if="user" class="flex flex-col h-full pt-[30px] px-4 gap-[30px] bg-white dark:bg-surface-card">
     <div class="flex items-center justify-between">
-      <img
-        src="@/assets/images/logos/blukios_logo.png"
+      <BrandLogo
         class="h-8 w-fit cursor-pointer"
-        alt="logo"
         @click="router.push({ name: 'app.home' })"
       />
       <slot name="close-button"></slot>

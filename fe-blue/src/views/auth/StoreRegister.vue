@@ -1,4 +1,5 @@
 <script setup>
+import BrandLogo from '@/components/Atom/BrandLogo.vue'
 import { ref } from 'vue'
 
 import { axiosInstance as axios } from '@/plugins/axios'
@@ -168,10 +169,8 @@ const handleSubmit = async () => {
         <form autocomplete="off" class="flex flex-col gap-8" @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="flex flex-col gap-3">
-            <img
-              src="@/assets/images/logos/blukios_logo.png"
-              class="h-8 lg:h-10 w-fit mb-2 dark:brightness-0 dark:invert"
-              alt="Blukios"
+            <BrandLogo
+              class="h-8 lg:h-10 w-fit mb-2"
             />
             <h1 class="font-medium text-3xl lg:text-4xl text-custom-black dark:text-white">
               Buka Toko Sekarang
