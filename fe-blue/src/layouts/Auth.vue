@@ -51,8 +51,8 @@ onMounted(async () => {
       ></div>
 
       <img
-        src="@/assets/images/logos/blukios_logo.png"
-        class="relative h-9 w-fit brightness-0 invert"
+        src="@/assets/images/logos/blukios_logo_white.svg"
+        class="relative h-9 w-fit"
         alt="Blukios"
       />
 

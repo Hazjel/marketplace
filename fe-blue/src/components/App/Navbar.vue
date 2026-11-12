@@ -1,4 +1,5 @@
 <script setup>
+import BrandLogo from '@/components/Atom/BrandLogo.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useProductStore } from '@/stores/product'
@@ -221,9 +222,9 @@ id="Navbar-Wrapper"
         <div class="flex flex-wrap md:flex-nowrap items-center justify-between md:justify-start gap-2 md:gap-6 w-full">
           <!-- Logo -->
           <RouterLink :to="{ name: 'app.home' }" class="flex shrink-0">
-            <img
-src="@/assets/images/logos/blukios_logo.png"
-              class="h-8 md:h-12 max-w-[120px] md:max-w-none object-contain dark:brightness-0 dark:invert" alt="logo" />
+            <BrandLogo
+              class="h-8 md:h-12 max-w-[120px] md:max-w-none object-contain"
+            />
           </RouterLink>
 
           <!-- Search Bar with Autocomplete -->

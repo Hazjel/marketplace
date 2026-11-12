@@ -1,4 +1,5 @@
 <script setup>
+import BrandLogo from '@/components/Atom/BrandLogo.vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 
@@ -29,7 +30,7 @@ onUnmounted(() => {
     <div class="max-w-[1280px] mx-auto px-5 md:px-[52px] flex items-center justify-between">
       <!-- Logo -->
       <RouterLink :to="{ name: 'app.home' }" class="flex items-center gap-2">
-        <img src="@/assets/images/logos/blukios_logo.png" class="h-10" alt="Blukios Logo" />
+        <BrandLogo class="h-10" />
         <span
           :class="[
             'font-medium text-xl tracking-tight hidden md:block',

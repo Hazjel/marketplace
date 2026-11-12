@@ -1,4 +1,5 @@
 <script setup>
+import BrandLogo from '@/components/Atom/BrandLogo.vue'
 import { computed, ref, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { axiosInstance } from '@/plugins/axios'
@@ -98,10 +99,8 @@ const handleSubmit = async () => {
   <div class="flex flex-col w-full gap-6 lg:gap-8">
     <!-- Header Section -->
     <div class="flex flex-col gap-2 text-center">
-      <img
-        src="@/assets/images/logos/blukios_logo.png"
-        class="h-8 lg:h-10 mx-auto mb-4 dark:brightness-0 dark:invert"
-        alt="Blukios"
+      <BrandLogo
+        class="h-8 lg:h-10 mx-auto mb-4"
       />
       <h1 class="font-medium text-2xl lg:text-3xl text-custom-black dark:text-white">
         Buat Password Baru

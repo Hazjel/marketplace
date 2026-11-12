@@ -1,4 +1,5 @@
 <script setup>
+import BrandLogo from '@/components/Atom/BrandLogo.vue'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 
@@ -14,7 +15,7 @@ const { user } = storeToRefs(authStore)
       <div class="flex flex-col lg:flex-row gap-8 lg:gap-[72px]">
         <div class="flex flex-col gap-4 md:gap-6 w-full lg:w-[349px]">
           <RouterLink :to="{ name: 'app.home' }" class="flex shrink-0">
-            <img src="@/assets/images/logos/blukios_logo.png" class="h-12" alt="logo" />
+            <BrandLogo class="h-12" />
           </RouterLink>
           <p class="font-medium text-custom-grey dark:text-gray-400">
             Blukios adalah marketplace multi-vendor untuk gadget, elektronik, dan aksesoris berkualitas.
