@@ -23,7 +23,7 @@ useHead({
     {
       name: 'description',
       content:
-        'Blukios adalah marketplace multi-vendor terpercaya. Belanja gadget, fashion, skincare, dan semua kebutuhanmu dari seller terpercaya.'
+        'Blukios adalah marketplace multi-vendor terpercaya. Belanja gadget, fashion, skincare, dan semua kebutuhanmu dari penjual terpercaya.'
     }
   ]
 })
@@ -87,7 +87,7 @@ onMounted(async () => {
           Semua kebutuhan gadget & elektronikmu, satu tempat.
         </h1>
         <p class="max-w-xl text-base text-white/60 md:text-lg">
-          Belanja aman dari ribuan seller terpercaya. Harga bersaing, pengiriman cepat.
+          Belanja aman dari ribuan penjual terpercaya. Harga bersaing, pengiriman cepat.
         </p>
         <div class="mt-2 flex flex-wrap gap-3">
           <RouterLink

@@ -19,7 +19,7 @@ const { user } = storeToRefs(authStore)
           </RouterLink>
           <p class="font-medium text-custom-grey dark:text-gray-400">
             Blukios adalah marketplace multi-vendor untuk gadget, elektronik, dan aksesoris berkualitas.
-            Menghubungkan pembeli dan penjual dalam pengalaman belanja yang seamless.
+            Menghubungkan pembeli dan penjual dalam pengalaman belanja yang lancar.
           </p>
         </div>
         <div class="flex flex-col md:flex-row gap-8 lg:gap-[52px] w-full lg:w-fit">
@@ -33,7 +33,7 @@ const { user } = storeToRefs(authStore)
                 <RouterLink :to="{ name: 'app.all-categories' }">Kategori</RouterLink>
                 <RouterLink :to="{ name: 'app.all-products' }">Semua Produk</RouterLink>
                 <RouterLink v-if="!user?.store" :to="{ name: 'auth.open-store' }"
-                  >Jadi Seller
+                  >Jadi Penjual
                 </RouterLink>
                 <RouterLink
                   v-if="user"

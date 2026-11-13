@@ -101,7 +101,7 @@ const homeLink = {
 // Muncul cuma buat user yang sudah py toko — buyer-shell selalu di
 // buyer-mode, jadi tak perlu cek activeMode di sini.
 const sellerSwitchLink = {
-  label: 'Beralih ke Mode Seller',
+  label: 'Beralih ke Mode Penjual',
   path: null,
   iconDefault: ShopGreyIcon,
   iconActive: ShopBlueFillIcon,

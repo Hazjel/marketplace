@@ -9,8 +9,15 @@ const props = defineProps({
   }
 })
 
+// API mengirim condition 'New'/'Used' (lihat filter di FilterSidebar); tampilkan sebagai Baru/Bekas.
+const CONDITION_LABELS = { new: 'Baru', used: 'Bekas' }
+const conditionLabel = computed(() => {
+  const condition = props.product?.condition
+  return CONDITION_LABELS[String(condition).toLowerCase()] ?? condition
+})
+
 const specs = computed(() => [
-  { label: 'Kondisi', value: props.product?.condition },
+  { label: 'Kondisi', value: conditionLabel.value },
   { label: 'Berat Satuan', value: props.product?.weight ? `${props.product.weight} kg` : '-' },
   {
     label: 'Kategori',

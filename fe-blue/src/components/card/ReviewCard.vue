@@ -21,7 +21,7 @@ const userAvatar = computed(() => {
 })
 
 const userName = computed(() => {
-  return props.review.is_anonymous ? 'Pengguna Anonim' : props.review.user?.name || 'Unknown User'
+  return props.review.is_anonymous ? 'Pengguna Anonim' : props.review.user?.name || 'Pengguna Tidak Dikenal'
 })
 
 const formattedDate = computed(() => {

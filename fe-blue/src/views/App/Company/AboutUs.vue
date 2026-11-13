@@ -65,7 +65,7 @@ onMounted(() => {
             >10K+</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
-            >Seller Aktif</span
+            >Penjual Aktif</span
           >
         </div>
         <div class="flex flex-col items-center text-center gap-2 group">
@@ -142,7 +142,7 @@ onMounted(() => {
             Teknologi dengan <br />Sentuhan Manusia.
           </h2>
           <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
-            Kami percaya teknologi seharusnya memberdayakan, bukan merumitkan. Setiap fitur kami rancang dengan empati kepada pengguna. Dari checkout yang mulus hingga dashboard seller yang intuitif, kesederhanaan adalah kecanggihan tertinggi kami.
+            Kami percaya teknologi seharusnya memberdayakan, bukan merumitkan. Setiap fitur kami rancang dengan empati kepada pengguna. Dari checkout yang mulus hingga dashboard penjual yang intuitif, kesederhanaan adalah kecanggihan tertinggi kami.
           </p>
           <ul class="flex flex-col gap-3 mt-4">
             <li class="flex items-center gap-3">

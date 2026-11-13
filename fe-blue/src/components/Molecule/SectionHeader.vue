@@ -14,7 +14,7 @@ defineProps({
   },
   linkText: {
     type: String,
-    default: 'VIEW ALL'
+    default: 'Lihat Semua'
   }
 })
 </script>

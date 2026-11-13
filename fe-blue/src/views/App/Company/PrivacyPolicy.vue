@@ -179,7 +179,7 @@ onMounted(() => {
           <section id="security" class="scroll-mt-32">
             <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Keamanan Data</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
-              Kami telah menerapkan langkah keamanan yang memadai untuk mencegah data pribadi Anda hilang secara tidak sengaja, digunakan atau diakses secara tidak sah, diubah, atau diungkapkan. Selain itu, kami membatasi akses ke data pribadi Anda hanya bagi karyawan, agen, kontraktor, dan pihak ketiga lain yang memang perlu mengetahuinya.
+              Kami telah menerapkan langkah keamanan yang memadai untuk mencegah data pribadi Anda hilang secara tidak sengaja, digunakan atau diakses secara tidak sah, diubah, atau diungkapkan. Selain itu, kami membatasi akses ke data pribadi Anda hanya bagi karyawan, agen, kontraktor, dan pihak ketiga lain yang perlu mengetahui data tersebut untuk keperluan bisnis.
             </p>
           </section>
 

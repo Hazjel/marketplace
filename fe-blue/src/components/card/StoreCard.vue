@@ -46,7 +46,7 @@ v-if="item?.is_verified"
           <img
 src="@/assets/images/icons/verify-star.svg" class="size-3.5 shrink-0 dark:brightness-0 dark:invert"
             alt="ikon" />
-          <span class="text-xs font-medium text-custom-blue uppercase tracking-wide">Official</span>
+          <span class="text-xs font-medium text-custom-blue uppercase tracking-wide">Resmi</span>
         </div>
       </div>
 
