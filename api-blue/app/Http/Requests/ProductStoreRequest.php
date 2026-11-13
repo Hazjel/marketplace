@@ -35,11 +35,14 @@ class ProductStoreRequest extends FormRequest
             // Whole rupiah only — App\ValueObjects\Money is scale 0, and a
             // fractional price makes the product un-checkoutable (see
             // api-blue/docs/money-contract.md). weight is not money.
-            'price' => 'required|integer|min:0|max:'.Product::MAX_PRICE,
+            // With variants, ProductRepository::create() derives price (min)
+            // and stock (sum) from them and ignores these two, so the web form
+            // (which hides them) need not send them.
+            'price' => 'required_without:variants|nullable|integer|min:0|max:'.Product::MAX_PRICE,
             // Display only; checkout always charges price.
             'compare_at_price' => ['nullable', 'integer', 'min:1', 'max:'.Product::MAX_PRICE, new CompareAtPrice],
             'weight' => 'required|numeric|min:0|max:999.99',
-            'stock' => 'required|integer|min:0',
+            'stock' => 'required_without:variants|nullable|integer|min:0',
             'product_images' => 'required|array',
             'product_images.*.image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'product_images.*.is_thumbnail' => 'required|boolean',

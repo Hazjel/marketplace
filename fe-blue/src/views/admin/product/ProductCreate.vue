@@ -126,6 +126,12 @@ const handleSubmit = async () => {
   const result = await createProduct({
     ...product.value,
     price: parseRupiah(product.value.price),
+    // Rows left over after switching the toggle off must not reach the API,
+    // which treats any `variants` as a variant product.
+    variants: product.value.has_variants ? product.value.variants : [],
+    // The parent compare_at input is hidden with variants; the API derives it
+    // from the variants and would validate a stale value against price 0.
+    compare_at_price: product.value.has_variants ? null : product.value.compare_at_price,
     product_images: product.value.product_images
       .filter((image) => image.image)
       .map((image) => {

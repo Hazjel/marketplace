@@ -8,6 +8,17 @@ import { handleError } from '@/helpers/errorHelper'
 let fetchProductsController = null
 let fetchPaginatedController = null
 
+// Laravel reads multipart arrays only as bracket keys; FormData.append would
+// stringify an array/object to "[object Object]". Null/undefined are skipped.
+const appendFormField = (formData, key, value) => {
+  if (value === null || value === undefined) return
+  if (value instanceof Blob) formData.append(key, value)
+  else if (typeof value === 'boolean') formData.append(key, value ? 1 : 0)
+  else if (typeof value === 'object') {
+    Object.entries(value).forEach(([k, v]) => appendFormField(formData, `${key}[${k}]`, v))
+  } else formData.append(key, value)
+}
+
 export const useProductStore = defineStore('product', {
   state: () => ({
     storeCategories: [],
@@ -168,11 +179,10 @@ export const useProductStore = defineStore('product', {
         if (payload.product_images && payload.product_images.length > 0) {
           data = new FormData()
 
-          // Append regular fields
+          // Append regular fields (nested arrays/objects such as `variants` become
+          // bracket notation: variants[0][name], variants[0][variant_attributes][Warna])
           for (const key in payload) {
-            if (key !== 'product_images' && payload[key] !== null) {
-              data.append(key, payload[key])
-            }
+            if (key !== 'product_images') appendFormField(data, key, payload[key])
           }
 
           // Append images

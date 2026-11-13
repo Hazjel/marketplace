@@ -98,6 +98,8 @@ const handleSubmit = async () => {
   const result = await updateProduct({
     ...product.value,
     variants: variantsData,
+    // Hidden with variants; the API derives it from them (see ProductCreate).
+    compare_at_price: product.value.has_variants ? null : product.value.compare_at_price,
     price: parseRupiah(product.value.price),
     product_images: product.value.product_images
       .filter((image) => image.image)
