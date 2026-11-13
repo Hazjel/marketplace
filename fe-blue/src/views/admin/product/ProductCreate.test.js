@@ -31,6 +31,7 @@ describe('ProductCreate submit', () => {
     product.variants[0].stock = 1
     product.has_variants = hasVariants
     product.price = 15000
+    product.compare_at_price = 20000
     product.stock = 7
     product.product_images[0].image = new File(['x'], 'p.jpg', { type: 'image/jpeg' })
     await wrapper.get('form').trigger('submit')
@@ -44,6 +45,7 @@ describe('ProductCreate submit', () => {
     const body = await submitWith(false)
 
     expect(body.get('price')).toBe('15000')
+    expect(body.get('compare_at_price')).toBe('20000')
     expect(body.get('stock')).toBe('7')
     expect([...body.keys()].some((k) => k.startsWith('variants'))).toBe(false)
   })
@@ -52,5 +54,7 @@ describe('ProductCreate submit', () => {
     const body = await submitWith(true)
 
     expect(body.get('variants[0][name]')).toBe('Merah')
+    // parent compare_at is hidden/derived with variants: a typed one must not be sent
+    expect(body.has('compare_at_price')).toBe(false)
   })
 })
