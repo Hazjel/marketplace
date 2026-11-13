@@ -66,3 +66,13 @@ export function useProductVariants(product) {
     loadExistingVariants
   }
 }
+
+// Same rule as the API's CompareAtPrice: optional, above the price, at most 90% off.
+export function compareAtPriceError(price, compareAt) {
+  if (compareAt === null || compareAt === undefined || compareAt === '') return null
+  const p = Number(price)
+  const c = Number(compareAt)
+  if (!Number.isInteger(c) || c <= p) return 'Harga sebelum diskon harus lebih tinggi dari harga jual.'
+  if ((c - p) * 100 > c * 90) return 'Diskon maksimal 90%. Periksa lagi harga sebelum diskon.'
+  return null
+}
