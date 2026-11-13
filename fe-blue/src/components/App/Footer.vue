@@ -25,49 +25,49 @@ const { user } = storeToRefs(authStore)
         <div class="flex flex-col md:flex-row gap-8 lg:gap-[52px] w-full lg:w-fit">
           <div class="grid grid-cols-2 sm:grid-cols-3 md:flex md:gap-[52px] gap-8 w-full">
             <div class="flex flex-col gap-4">
-              <p class="font-medium dark:text-white">Main Menu</p>
+              <p class="font-medium dark:text-white">Menu Utama</p>
               <nav
                 class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 *:hover:text-custom-blue dark:*:hover:text-blue-400"
               >
-                <RouterLink :to="{ name: 'app.home' }">Home</RouterLink>
-                <RouterLink :to="{ name: 'app.all-categories' }">Categories</RouterLink>
-                <RouterLink :to="{ name: 'app.all-products' }">All Products</RouterLink>
+                <RouterLink :to="{ name: 'app.home' }">Beranda</RouterLink>
+                <RouterLink :to="{ name: 'app.all-categories' }">Kategori</RouterLink>
+                <RouterLink :to="{ name: 'app.all-products' }">Semua Produk</RouterLink>
                 <RouterLink v-if="!user?.store" :to="{ name: 'auth.open-store' }"
-                  >Become Seller
+                  >Jadi Seller
                 </RouterLink>
                 <RouterLink
                   v-if="user"
                   :to="{ name: 'user.my-transaction', params: { username: user.username } }"
-                  >Track My Order</RouterLink
+                  >Lacak Pesanan Saya</RouterLink
                 >
-                <RouterLink v-else :to="{ name: 'auth.login' }">Track My Order</RouterLink>
+                <RouterLink v-else :to="{ name: 'auth.login' }">Lacak Pesanan Saya</RouterLink>
               </nav>
             </div>
             <div class="flex flex-col gap-4">
-              <p class="font-medium dark:text-white">Company</p>
+              <p class="font-medium dark:text-white">Perusahaan</p>
               <nav
                 class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 *:hover:text-custom-blue dark:*:hover:text-blue-400"
               >
-                <RouterLink :to="{ name: 'app.about' }">About Us</RouterLink>
-                <RouterLink :to="{ name: 'app.career' }">Career</RouterLink>
-                <RouterLink :to="{ name: 'app.privacy' }">Privacy Policy</RouterLink>
-                <RouterLink :to="{ name: 'app.terms' }">Terms & Conditions</RouterLink>
+                <RouterLink :to="{ name: 'app.about' }">Tentang Kami</RouterLink>
+                <RouterLink :to="{ name: 'app.career' }">Karier</RouterLink>
+                <RouterLink :to="{ name: 'app.privacy' }">Kebijakan Privasi</RouterLink>
+                <RouterLink :to="{ name: 'app.terms' }">Syarat & Ketentuan</RouterLink>
               </nav>
             </div>
             <div class="flex flex-col gap-4 col-span-2 sm:col-span-1">
-              <p class="font-medium dark:text-white">Support</p>
+              <p class="font-medium dark:text-white">Bantuan</p>
               <nav
                 class="flex flex-col gap-4 *:font-medium *:text-custom-grey dark:*:text-gray-400 *:hover:text-custom-blue dark:*:hover:text-blue-400"
               >
-                <a href="mailto:support@blukios.store">Customer Services</a>
-                <RouterLink :to="{ name: 'app.terms', hash: '#refunds' }">Return & Refund</RouterLink>
-                <a href="mailto:support@blukios.store">Contact Us</a>
+                <a href="mailto:support@blukios.store">Layanan Pelanggan</a>
+                <RouterLink :to="{ name: 'app.terms', hash: '#refunds' }">Pengembalian Dana</RouterLink>
+                <a href="mailto:support@blukios.store">Hubungi Kami</a>
               </nav>
             </div>
           </div>
         </div>
         <div class="flex flex-row md:flex-col gap-4 items-center md:items-start">
-          <p class="font-medium hidden md:block dark:text-white">Download App</p>
+          <p class="font-medium hidden md:block dark:text-white">Unduh Aplikasi</p>
           <span class="cursor-default opacity-60">
             <img src="@/assets/images/logos/gplay.png" class="h-10 md:h-12" alt="Google Play" />
           </span>
@@ -81,7 +81,7 @@ const { user } = storeToRefs(authStore)
         <p
           class="font-medium text-custom-grey dark:text-gray-400 text-center md:text-left text-sm md:text-base"
         >
-          ©2026 Blukios. All Rights Reserved
+          ©2026 Blukios. Hak Cipta Dilindungi.
         </p>
         <div class="flex items-center gap-5">
           <span class="cursor-default opacity-60">

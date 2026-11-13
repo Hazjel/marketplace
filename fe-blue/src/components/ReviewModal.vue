@@ -134,7 +134,7 @@ const setRating = (r) => {
           <img
             src="@/assets/images/icons/close-circle-black.svg"
             class="w-6 h-6 opacity-60"
-            alt="Close"
+            alt="Tutup"
             onerror="this.style.display = 'none'"
           />
           <span
@@ -152,7 +152,7 @@ const setRating = (r) => {
           <img
             :src="productImage || PlaceHolder"
             class="w-16 h-16 rounded-lg object-cover bg-white"
-            alt="Product"
+            alt="Produk"
           />
           <div>
             <p class="font-medium text-custom-black line-clamp-2">{{ productName }}</p>
@@ -237,7 +237,7 @@ const setRating = (r) => {
               class="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-custom-blue hover:bg-blue-50 transition-colors"
             >
               <span class="text-2xl text-gray-400">+</span>
-              <span class="text-[10px] text-gray-500">Add</span>
+              <span class="text-[10px] text-gray-500">Tambah</span>
               <input
                 type="file"
                 accept="image/*,video/*"

@@ -28,7 +28,7 @@ const prefix = computed(() => (user.value ? `/${user.value.username}` : ''))
 
 const items = computed(() => [
   {
-    label: 'Overview',
+    label: 'Ringkasan',
     path: `${prefix.value}/dashboard`,
     iconDefault: HomeBlackIcon,
     iconActive: HomeBlueFillIcon,
@@ -82,7 +82,7 @@ const settingsItems = computed(() => [
 ])
 
 const chatLink = computed(() => ({
-  label: 'Messages',
+  label: 'Pesan',
   path: `${prefix.value}/chat`,
   iconDefault: StickyNoteGreyIcon,
   iconActive: StickyNoteBlueFillIcon,
@@ -91,7 +91,7 @@ const chatLink = computed(() => ({
 }))
 
 const homeLink = {
-  label: 'Back to Homepage',
+  label: 'Kembali ke Beranda',
   path: '/',
   iconDefault: HomeBlackIcon,
   iconActive: HomeBlueFillIcon,
@@ -101,7 +101,7 @@ const homeLink = {
 // Muncul cuma buat user yang sudah py toko — buyer-shell selalu di
 // buyer-mode, jadi tak perlu cek activeMode di sini.
 const sellerSwitchLink = {
-  label: 'Switch to Seller Mode',
+  label: 'Beralih ke Mode Seller',
   path: null,
   iconDefault: ShopGreyIcon,
   iconActive: ShopBlueFillIcon,
@@ -134,14 +134,14 @@ const handleLogout = async () => {
 
     <div class="flex flex-col gap-5 overflow-y-scroll hide-scrollbar h-full overscroll-contain flex-1">
       <nav class="flex flex-col gap-4 animate-fade-in-up">
-        <p class="font-medium text-custom-grey dark:text-gray-400">Main Menu</p>
+        <p class="font-medium text-custom-grey dark:text-gray-400">Menu Utama</p>
         <ul class="flex flex-col gap-2">
           <SidebarItem v-for="(item, index) in items" :key="index" :item="item" />
         </ul>
       </nav>
 
       <nav class="flex flex-col gap-4 animate-fade-in-up">
-        <p class="font-medium text-custom-grey dark:text-gray-400">Settings</p>
+        <p class="font-medium text-custom-grey dark:text-gray-400">Pengaturan</p>
         <ul class="flex flex-col gap-2">
           <SidebarItem v-for="(item, index) in settingsItems" :key="index" :item="item" />
         </ul>
@@ -164,15 +164,15 @@ const handleLogout = async () => {
             <img
               src="@/assets/images/icons/logout.svg"
               class="size-6 text-custom-red svg-red filter-red"
-              alt="icon"
+              alt="ikon"
             />
-            <span class="font-medium text-custom-red">Logout</span>
+            <span class="font-medium text-custom-red">Keluar</span>
           </button>
         </li>
       </ul>
     </div>
   </div>
   <div v-else class="flex items-center justify-center h-screen">
-    <span class="text-custom-grey dark:text-gray-400 text-xl">Loading menu...</span>
+    <span class="text-custom-grey dark:text-gray-400 text-xl">Memuat menu...</span>
   </div>
 </template>

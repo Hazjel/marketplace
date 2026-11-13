@@ -45,12 +45,12 @@ onMounted(() => {
           </div>
           <div class="swiper-slide">
             <div class="relative w-full aspect-[2.5/1] bg-gradient-to-r from-purple-600 to-pink-600 overflow-hidden">
-              <img src="@/assets/images/banners/banner_gadgets.png" class="w-full h-full object-cover" alt="Gadgets" />
+              <img src="@/assets/images/banners/banner_gadgets.png" class="w-full h-full object-cover" alt="Gadget" />
             </div>
           </div>
           <div class="swiper-slide">
             <div class="relative w-full aspect-[2.5/1] bg-gradient-to-r from-emerald-600 to-teal-600 overflow-hidden">
-              <img src="@/assets/images/banners/banner_mega_sale.png" class="w-full h-full object-cover" alt="Sale" />
+              <img src="@/assets/images/banners/banner_mega_sale.png" class="w-full h-full object-cover" alt="Diskon" />
             </div>
           </div>
         </div>

@@ -18,7 +18,7 @@ onMounted(() => {
         <img
           src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
           class="w-full h-full object-cover scale-105 animate-slow-zoom"
-          alt="About Hero"
+          alt="Banner Tentang Kami"
         />
         <div
           class="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-950/70 to-transparent"
@@ -31,25 +31,24 @@ onMounted(() => {
           <span
             class="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-blue-400 font-medium text-sm tracking-widest border border-white/20 w-fit"
           >
-            EST. 2024
+            SEJAK 2024
           </span>
           <h1 class="text-5xl md:text-7xl font-medium text-white leading-tight">
-            Connecting
+            Menghubungkan
             <span
               class="text-transparent bg-clip-text bg-gradient-to-r from-[#024ad8] to-teal-400"
-              >Ambitions</span
+              >Ambisi</span
             >,<br />
-            Delivering
+            Menghadirkan
             <span
               class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-400"
-              >Trust</span
+              >Kepercayaan</span
             >.
           </h1>
           <p
             class="text-xl text-gray-300 leading-relaxed max-w-2xl border-l-4 border-[#024ad8] pl-6"
           >
-            We are more than just a marketplace. We are the bridge between local craftsmanship and
-            global opportunity.
+            Kami lebih dari sekadar marketplace. Kami adalah jembatan antara kerajinan lokal dan peluang global.
           </p>
         </div>
       </div>
@@ -66,7 +65,7 @@ onMounted(() => {
             >10K+</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
-            >Active Sellers</span
+            >Seller Aktif</span
           >
         </div>
         <div class="flex flex-col items-center text-center gap-2 group">
@@ -75,7 +74,7 @@ onMounted(() => {
             >500K+</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
-            >Happy Customers</span
+            >Pelanggan Puas</span
           >
         </div>
         <div class="flex flex-col items-center text-center gap-2 group">
@@ -84,7 +83,7 @@ onMounted(() => {
             >2M+</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
-            >Transactions</span
+            >Transaksi</span
           >
         </div>
         <div class="flex flex-col items-center text-center gap-2 group">
@@ -93,7 +92,7 @@ onMounted(() => {
             >99%</span
           >
           <span class="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs"
-            >Satisfaction Rate</span
+            >Tingkat Kepuasan</span
           >
         </div>
       </div>
@@ -110,26 +109,25 @@ onMounted(() => {
           <img
             src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1932&auto=format&fit=crop"
             class="relative rounded-2xl shadow-2xl w-full h-auto object-cover aspect-[4/3] rotate-2 transition-transform group-hover:rotate-0 duration-500"
-            alt="Team"
+            alt="Tim"
           />
         </div>
         <div class="w-full lg:w-1/2 flex flex-col gap-6">
           <span class="text-[#024ad8] font-medium tracking-widest uppercase text-sm"
-            >Our Origin</span
+            >Awal Mula Kami</span
           >
           <h2 class="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white leading-tight">
-            Built for the Community,<br />by the Community.
+            Dibangun untuk Komunitas,<br />oleh Komunitas.
           </h2>
           <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
-            Blukios wasn't built in a boardroom. It started in a small garage in Kendal, observing
-            the struggles of local sellers trying to navigate complex digital platforms.
+            Blukios tidak lahir di ruang rapat. Semuanya bermula dari sebuah garasi kecil di Kendal, saat kami melihat sulitnya penjual lokal menghadapi platform digital yang rumit.
           </p>
           <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
-            We asked a simple question:
+            Kami mengajukan satu pertanyaan sederhana:
             <span class="text-gray-900 dark:text-white font-medium italic"
-              >"Why does selling online have to be so hard?"</span
+              >"Mengapa berjualan online harus sesulit ini?"</span
             >
-            Use that curiosity to fuel our innovation.
+            Rasa ingin tahu itu kami jadikan bahan bakar inovasi.
           </p>
         </div>
       </div>
@@ -138,15 +136,13 @@ onMounted(() => {
       <div class="flex flex-col-reverse lg:flex-row gap-12 lg:gap-20 items-center">
         <div class="w-full lg:w-1/2 flex flex-col gap-6 lg:pl-10">
           <span class="text-orange-500 font-medium tracking-widest uppercase text-sm"
-            >The Vision</span
+            >Visi Kami</span
           >
           <h2 class="text-3xl md:text-5xl font-medium text-gray-900 dark:text-white leading-tight">
-            Technology with a <br />Human Touch.
+            Teknologi dengan <br />Sentuhan Manusia.
           </h2>
           <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
-            We believe that technology should empower, not complicate. Every feature we build is
-            designed with empathy for the user. From our seamless checkout to our intuitive seller
-            dashboard, simplicity is our ultimate sophistication.
+            Kami percaya teknologi seharusnya memberdayakan, bukan merumitkan. Setiap fitur kami rancang dengan empati kepada pengguna. Dari checkout yang mulus hingga dashboard seller yang intuitif, kesederhanaan adalah kecanggihan tertinggi kami.
           </p>
           <ul class="flex flex-col gap-3 mt-4">
             <li class="flex items-center gap-3">
@@ -155,7 +151,7 @@ onMounted(() => {
               >
                 <i class="fa-solid fa-check"></i>
               </div>
-              <span class="font-medium text-gray-900 dark:text-white">Zero-Knowledge barrier entry</span>
+              <span class="font-medium text-gray-900 dark:text-white">Tanpa hambatan pengetahuan teknis</span>
             </li>
             <li class="flex items-center gap-3">
               <div
@@ -163,7 +159,7 @@ onMounted(() => {
               >
                 <i class="fa-solid fa-check"></i>
               </div>
-              <span class="font-medium text-gray-900 dark:text-white">Transparent pricing model</span>
+              <span class="font-medium text-gray-900 dark:text-white">Model harga yang transparan</span>
             </li>
             <li class="flex items-center gap-3">
               <div
@@ -171,7 +167,7 @@ onMounted(() => {
               >
                 <i class="fa-solid fa-check"></i>
               </div>
-              <span class="font-medium text-gray-900 dark:text-white">Community-driven development</span>
+              <span class="font-medium text-gray-900 dark:text-white">Pengembangan yang digerakkan komunitas</span>
             </li>
           </ul>
         </div>
@@ -182,7 +178,7 @@ onMounted(() => {
           <img
             src="https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop"
             class="relative rounded-2xl shadow-2xl w-full h-auto object-cover aspect-[4/3] -rotate-2 transition-transform group-hover:rotate-0 duration-500"
-            alt="Tech"
+            alt="Teknologi"
           />
         </div>
       </div>
@@ -192,8 +188,8 @@ onMounted(() => {
     <section class="bg-gradient-to-b from-gray-50 dark:from-gray-900 to-white dark:to-gray-950 py-24">
       <div class="max-w-[1280px] mx-auto px-5 md:px-[52px]">
         <div class="text-center max-w-2xl mx-auto mb-20">
-          <h2 class="text-4xl font-medium text-gray-900 dark:text-white mb-6">Our Core Values</h2>
-          <p class="text-gray-600 dark:text-gray-400 text-lg">The principles that guide every decision we make.</p>
+          <h2 class="text-4xl font-medium text-gray-900 dark:text-white mb-6">Nilai-Nilai Kami</h2>
+          <p class="text-gray-600 dark:text-gray-400 text-lg">Prinsip yang memandu setiap keputusan kami.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -209,11 +205,10 @@ onMounted(() => {
             <h3
               class="text-2xl font-medium text-gray-900 dark:text-white mb-4 group-hover:text-[#024ad8] transition-colors"
             >
-              Customer Obsession
+              Fokus pada Pelanggan
             </h3>
             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-              We start with the customer and work backwards. We work vigorously to earn and keep
-              customer trust.
+              Kami memulai dari pelanggan lalu bekerja mundur. Kami bekerja keras untuk meraih dan menjaga kepercayaan pelanggan.
             </p>
           </div>
 
@@ -229,11 +224,10 @@ onMounted(() => {
             <h3
               class="text-2xl font-medium text-gray-900 dark:text-white mb-4 group-hover:text-orange-500 transition-colors"
             >
-              Invent and Simplify
+              Berinovasi dan Menyederhanakan
             </h3>
             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-              We expect and require innovation and invention from our teams and always find ways to
-              simplify.
+              Kami menuntut inovasi dari setiap tim dan selalu mencari cara untuk menyederhanakan.
             </p>
           </div>
 
@@ -249,11 +243,10 @@ onMounted(() => {
             <h3
               class="text-2xl font-medium text-gray-900 dark:text-white mb-4 group-hover:text-emerald-500 transition-colors"
             >
-              Sustainability
+              Keberlanjutan
             </h3>
             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-              We are committed to building a sustainable business for our employees, customers, and
-              the communities we serve.
+              Kami berkomitmen membangun bisnis yang berkelanjutan bagi karyawan, pelanggan, dan komunitas yang kami layani.
             </p>
           </div>
         </div>
@@ -272,33 +265,32 @@ onMounted(() => {
           <img
             src="https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2074&auto=format&fit=crop"
             class="w-full h-full object-cover grayscale"
-            alt="Footer BG"
+            alt="Latar belakang"
           />
         </div>
 
         <div class="relative z-10 flex flex-col items-center gap-8">
           <h2 class="text-4xl md:text-6xl font-medium text-white tracking-tight">
-            Be Part of the <br /><span
+            Jadilah Bagian dari <br /><span
               class="text-transparent bg-clip-text bg-gradient-to-r from-[#024ad8] to-teal-400"
-              >Revolution.</span
+              >Revolusi.</span
             >
           </h2>
           <p class="text-gray-400 text-lg max-w-xl">
-            Whether you are buying your first item or opening your first store, we are here to
-            support you.
+            Entah kamu membeli barang pertamamu atau membuka toko pertamamu, kami siap mendukungmu.
           </p>
           <div class="flex flex-col sm:flex-row gap-4">
             <RouterLink
               :to="{ name: 'app.all-products' }"
               class="px-8 py-4 bg-white text-gray-900 rounded-full font-medium text-lg hover:bg-gray-100 transition-all"
             >
-              Start Shopping
+              Mulai Belanja
             </RouterLink>
             <RouterLink
               :to="{ name: 'auth.open-store' }"
               class="px-8 py-4 bg-transparent border border-white/30 text-white rounded-full font-medium text-lg hover:bg-white/10 transition-all backdrop-blur-sm"
             >
-              Open a Store
+              Buka Toko
             </RouterLink>
           </div>
         </div>

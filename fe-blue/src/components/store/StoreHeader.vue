@@ -63,7 +63,7 @@ const handleFollowClick = () => {
               <img
                 :src="storeLogo || LogoBlue"
                 class="w-full h-full object-cover"
-                alt="Store Logo"
+                alt="Logo toko"
               />
             </div>
           </div>
@@ -74,7 +74,7 @@ const handleFollowClick = () => {
             <img
               src="@/assets/images/icons/verify-star.svg"
               class="w-5 h-5 md:w-6 md:h-6"
-              alt="Verified"
+              alt="Terverifikasi"
             />
           </div>
         </div>
@@ -96,7 +96,7 @@ const handleFollowClick = () => {
               <img
                 src="@/assets/images/icons/location-grey.svg"
                 class="w-3.5 h-3.5 md:w-4 md:h-4 opacity-70"
-                alt="Loc"
+                alt="Lokasi"
               />
               <span>{{ storeLocation }}</span>
             </div>
@@ -113,7 +113,7 @@ const handleFollowClick = () => {
               <img
                 src="@/assets/images/icons/Star-pointy.svg"
                 class="w-4 h-4 md:w-5 md:h-5"
-                alt="Star"
+                alt="Bintang"
               />
               <span class="font-medium text-sm md:text-base text-custom-black">{{
                 rating.toFixed(1)
@@ -125,12 +125,12 @@ const handleFollowClick = () => {
               <span class="font-medium text-sm md:text-base text-custom-black">{{
                 followersCount
               }}</span>
-              <span class="text-[10px] text-custom-grey uppercase tracking-wide">Followers</span>
+              <span class="text-[10px] text-custom-grey uppercase tracking-wide">Pengikut</span>
             </div>
             <div class="w-px h-3 md:h-4 bg-gray-200"></div>
             <div class="hidden sm:flex flex-col leading-none">
               <span class="font-medium text-sm md:text-base text-custom-black">98%</span>
-              <span class="text-[10px] text-custom-grey uppercase tracking-wide">Chat Reply</span>
+              <span class="text-[10px] text-custom-grey uppercase tracking-wide">Balasan Chat</span>
             </div>
           </div>
         </div>
@@ -149,8 +149,8 @@ const handleFollowClick = () => {
             "
             @click="handleFollowClick"
           >
-            <span v-if="isFollowing">Following</span>
-            <span v-else>+ Follow</span>
+            <span v-if="isFollowing">Mengikuti</span>
+            <span v-else>+ Ikuti</span>
           </button>
 
           <!-- Chat Button -->
@@ -210,7 +210,7 @@ const handleFollowClick = () => {
           </span>
           <input
             type="text"
-            placeholder="Search in this store..."
+            placeholder="Cari di toko ini..."
             class="w-full h-10 md:h-11 pl-11 pr-4 rounded-full bg-white/50 border border-white/60 focus:bg-white focus:border-custom-blue focus:ring-2 focus:ring-blue-100 outline-none text-sm transition-all shadow-sm placeholder-gray-400"
           />
         </div>

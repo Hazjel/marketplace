@@ -96,14 +96,14 @@ onMounted(() => {
           :src="activeImage?.image"
           class="size-full object-contain transition-transform duration-100 ease-out"
           :style="zoomStyle"
-          alt="product detail"
+          alt="detail produk"
         />
 
         <!-- Zoom Hint -->
         <div
           class="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium text-custom-black opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none flex items-center gap-2"
         >
-          <i class="fa-solid fa-magnifying-glass-plus"></i> Click to Expand
+          <i class="fa-solid fa-magnifying-glass-plus"></i> Klik untuk Perbesar
         </div>
       </div>
 
@@ -116,7 +116,7 @@ onMounted(() => {
           :class="{ active: image.image === activeImage?.image }"
           @click="setActiveImage(image)"
         >
-          <img :src="image.image" class="size-full object-contain p-2" alt="thumbnail" @error="$event.target.src = '/images/placeholder.png'" />
+          <img :src="image.image" class="size-full object-contain p-2" alt="gambar mini" @error="$event.target.src = '/images/placeholder.png'" />
         </button>
       </div>
     </div>
@@ -131,7 +131,7 @@ onMounted(() => {
             class="swiper-slide flex items-center justify-center"
             @click="showLightbox = true"
           >
-            <img :src="image.image" class="size-full object-contain" alt="product image" @error="$event.target.src = '/images/placeholder.png'" />
+            <img :src="image.image" class="size-full object-contain" alt="gambar produk" @error="$event.target.src = '/images/placeholder.png'" />
           </div>
         </div>
       </div>
@@ -141,7 +141,7 @@ onMounted(() => {
       <div
         class="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm z-10 pointer-events-none"
       >
-        {{ images.length }} Photos
+        {{ images.length }} Foto
       </div>
     </div>
 
@@ -162,7 +162,7 @@ onMounted(() => {
         <img
           :src="activeImage?.image"
           class="max-w-full max-h-full object-contain"
-          alt="fullscreen"
+          alt="layar penuh"
         />
       </div>
 

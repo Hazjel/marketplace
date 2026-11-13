@@ -40,15 +40,15 @@ export const useWishlistStore = defineStore('wishlist', () => {
 
       if (status === 'added') {
         items.value.push(product)
-        toast.success('Added to wishlist')
+        toast.success('Ditambahkan ke wishlist')
       } else {
         items.value = items.value.filter((item) => item.id !== product.id)
-        toast.success('Removed from wishlist')
+        toast.success('Dihapus dari wishlist')
       }
 
       return status
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update wishlist')
+      toast.error(error.response?.data?.message || 'Gagal memperbarui wishlist')
       throw error
     } finally {
       pendingToggleIds.value.delete(product.id)

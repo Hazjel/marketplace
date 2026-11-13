@@ -128,7 +128,7 @@ const handleSubmit = async () => {
 
     const response = await axios.post('/register-store', payload)
 
-    successMessage.value = 'Store created successfully! Redirecting...'
+    successMessage.value = 'Toko berhasil dibuat! Mengalihkan...'
 
     // Update Auth Store directly from response
     const newUser = response.data.data.user
@@ -152,7 +152,7 @@ const handleSubmit = async () => {
     } else {
       console.error(error)
       errors.value = {
-        general: [error.response?.data?.message || 'Something went wrong']
+        general: [error.response?.data?.message || 'Terjadi kesalahan']
       }
     }
   } finally {
@@ -204,7 +204,7 @@ const handleSubmit = async () => {
               <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nama Toko</label>
               <div class="group relative transition-all duration-300">
                 <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <img src="@/assets/images/icons/shop-grey.svg" class="size-5 custom-icon" alt="icon" />
+                  <img src="@/assets/images/icons/shop-grey.svg" class="size-5 custom-icon" alt="ikon" />
                 </div>
                 <input
                   v-model="form.name"
@@ -223,7 +223,7 @@ const handleSubmit = async () => {
               <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nomor Telepon Toko</label>
               <div class="group relative transition-all duration-300">
                 <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="icon" />
+                  <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="ikon" />
                 </div>
                 <input
                   v-model="form.phone"
@@ -245,7 +245,7 @@ const handleSubmit = async () => {
               <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Cari Lokasi (Kecamatan/Kota)</label>
               <div class="group relative transition-all duration-300">
                 <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <img src="@/assets/images/icons/global-search-grey.svg" class="size-5 custom-icon" alt="icon" />
+                  <img src="@/assets/images/icons/global-search-grey.svg" class="size-5 custom-icon" alt="ikon" />
                 </div>
                 <input
                   v-model="addressSearch"
@@ -301,7 +301,7 @@ const handleSubmit = async () => {
                 <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Kota</label>
                 <div class="group relative transition-all duration-300">
                   <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <img src="@/assets/images/icons/location-grey.svg" class="size-5 custom-icon" alt="icon" />
+                    <img src="@/assets/images/icons/location-grey.svg" class="size-5 custom-icon" alt="ikon" />
                   </div>
                   <input
                     v-model="form.city"
@@ -318,7 +318,7 @@ const handleSubmit = async () => {
                 <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Kode Pos</label>
                 <div class="group relative transition-all duration-300">
                   <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <img src="@/assets/images/icons/box-grey.svg" class="size-5 custom-icon" alt="icon" />
+                    <img src="@/assets/images/icons/box-grey.svg" class="size-5 custom-icon" alt="ikon" />
                   </div>
                   <input
                     v-model="form.postal_code"
@@ -338,7 +338,7 @@ const handleSubmit = async () => {
               <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Detail Alamat Lengkap</label>
               <div class="group relative transition-all duration-300">
                 <div class="absolute top-4 left-4 flex items-start pointer-events-none">
-                  <img src="@/assets/images/icons/note-grey.svg" class="size-5 custom-icon" alt="icon" />
+                  <img src="@/assets/images/icons/note-grey.svg" class="size-5 custom-icon" alt="ikon" />
                 </div>
                 <textarea
                   v-model="form.address"
@@ -401,7 +401,7 @@ const handleSubmit = async () => {
             <div
               class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0"
             >
-              <img src="@/assets/images/icons/location-grey.svg" class="w-5 h-5" alt="city" />
+              <img src="@/assets/images/icons/location-grey.svg" class="w-5 h-5" alt="kota" />
             </div>
             <div class="flex flex-col">
               <p class="text-[11px] font-medium text-custom-grey dark:text-gray-400 uppercase tracking-wider mb-0.5">
@@ -415,7 +415,7 @@ const handleSubmit = async () => {
             <div
               class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0"
             >
-              <img src="@/assets/images/icons/box-grey.svg" class="w-5 h-5" alt="zip" />
+              <img src="@/assets/images/icons/box-grey.svg" class="w-5 h-5" alt="kode pos" />
             </div>
             <div class="flex flex-col">
               <p class="text-[11px] font-medium text-custom-grey dark:text-gray-400 uppercase tracking-wider mb-0.5">
@@ -436,7 +436,7 @@ const handleSubmit = async () => {
           <img
             src="@/assets/images/icons/location-grey.svg"
             class="w-10 h-10 opacity-50"
-            alt="location"
+            alt="lokasi"
           />
         </div>
         <div>

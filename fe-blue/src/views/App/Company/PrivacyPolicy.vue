@@ -33,7 +33,7 @@ onMounted(() => {
         <span class="text-[#024ad8] font-medium tracking-widest uppercase text-sm mb-4 block"
           >Legal</span
         >
-        <h1 class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white mb-4">Privacy Policy</h1>
+        <h1 class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white mb-4">Kebijakan Privasi</h1>
         <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl">
           Kami berkomitmen melindungi privasi Anda dan memastikan data Anda ditangani dengan transparansi dan kepedulian.
         </p>
@@ -64,7 +64,7 @@ onMounted(() => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('introduction')"
           >
-            1. Introduction
+            1. Pendahuluan
           </button>
           <button
             :class="
@@ -75,7 +75,7 @@ onMounted(() => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('collection')"
           >
-            2. Data We Collect
+            2. Data yang Kami Kumpulkan
           </button>
           <button
             :class="
@@ -86,7 +86,7 @@ onMounted(() => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('usage')"
           >
-            3. How We Use Data
+            3. Cara Kami Menggunakan Data
           </button>
           <button
             :class="
@@ -97,7 +97,7 @@ onMounted(() => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('security')"
           >
-            4. Data Security
+            4. Keamanan Data
           </button>
           <button
             :class="
@@ -108,7 +108,7 @@ onMounted(() => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('contact')"
           >
-            5. Contact Us
+            5. Hubungi Kami
           </button>
         </div>
       </aside>
@@ -119,49 +119,41 @@ onMounted(() => {
           class="prose prose-lg prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-li:text-gray-600 dark:prose-li:text-gray-400 max-w-none flex flex-col gap-12"
         >
           <section id="introduction" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">1. Introduction</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">1. Pendahuluan</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
-              Welcome to Blukios. We respect your privacy and are committed to protecting your
-              personal data. This privacy policy will inform you as to how we look after your
-              personal data when you visit our website (regardless of where you visit it from) and
-              tell you about your privacy rights and how the law protects you.
+              Selamat datang di Blukios. Kami menghormati privasi Anda dan berkomitmen melindungi data pribadi Anda. Kebijakan privasi ini menjelaskan bagaimana kami menjaga data pribadi Anda saat Anda mengunjungi situs web kami (dari mana pun Anda mengaksesnya), serta hak privasi Anda dan bagaimana hukum melindungi Anda.
             </p>
           </section>
 
           <section id="collection" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">2. Data We Collect</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">2. Data yang Kami Kumpulkan</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
-              We may collect, use, store and transfer different kinds of personal data about you
-              which we have grouped together follows:
+              Kami dapat mengumpulkan, menggunakan, menyimpan, dan mentransfer berbagai jenis data pribadi tentang Anda, yang kami kelompokkan sebagai berikut:
             </p>
             <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-white/10">
               <ul class="space-y-3 list-none p-0 m-0">
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    ><strong class="text-gray-900 dark:text-white">Identity Data:</strong> First name, maiden name, last name, username or
-                    similar identifier.</span
+                    ><strong class="text-gray-900 dark:text-white">Data Identitas:</strong> Nama depan, nama gadis, nama belakang, nama pengguna, atau pengenal serupa.</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    ><strong class="text-gray-900 dark:text-white">Contact Data:</strong> Billing address, delivery address, email address
-                    and telephone numbers.</span
+                    ><strong class="text-gray-900 dark:text-white">Data Kontak:</strong> Alamat penagihan, alamat pengiriman, alamat email, dan nomor telepon.</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    ><strong class="text-gray-900 dark:text-white">Financial Data:</strong> Bank account and payment card details
-                    (processed securely).</span
+                    ><strong class="text-gray-900 dark:text-white">Data Keuangan:</strong> Rincian rekening bank dan kartu pembayaran (diproses dengan aman).</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    ><strong class="text-gray-900 dark:text-white">Transaction Data:</strong> Details about payments to and from
-                    you.</span
+                    ><strong class="text-gray-900 dark:text-white">Data Transaksi:</strong> Rincian pembayaran yang Anda lakukan dan terima.</span
                   >
                 </li>
               </ul>
@@ -169,36 +161,30 @@ onMounted(() => {
           </section>
 
           <section id="usage" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">3. How We Use Your Data</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">3. Cara Kami Menggunakan Data Anda</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
-              We will only use your personal data when the law allows us to. Most commonly, we will
-              use your personal data in the following circumstances:
+              Kami hanya menggunakan data pribadi Anda jika diizinkan oleh hukum. Umumnya, kami menggunakan data pribadi Anda dalam keadaan berikut:
             </p>
             <ul class="space-y-2 list-disc pl-5 text-gray-600 dark:text-gray-400">
               <li class="pl-2">
-                Where we need to perform the contract we are about to enter into or have entered
-                into with you.
+                Saat kami perlu menjalankan kontrak yang akan atau telah kami buat dengan Anda.
               </li>
               <li class="pl-2">
-                Where it is necessary for our legitimate interests (or those of a third party) and
-                your interests and fundamental rights do not override those interests.
+                Saat diperlukan untuk kepentingan sah kami (atau pihak ketiga) dan kepentingan serta hak dasar Anda tidak melampaui kepentingan tersebut.
               </li>
-              <li class="pl-2">Where we need to comply with a legal or regulatory obligation.</li>
+              <li class="pl-2">Saat kami perlu memenuhi kewajiban hukum atau peraturan.</li>
             </ul>
           </section>
 
           <section id="security" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Data Security</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Keamanan Data</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
-              We have put in place appropriate security measures to prevent your personal data from
-              being accidentally lost, used or accessed in an unauthorized way, altered or
-              disclosed. In addition, we limit access to your personal data to those employees,
-              agents, contractors and other third parties who have a business need to know.
+              Kami telah menerapkan langkah keamanan yang memadai untuk mencegah data pribadi Anda hilang secara tidak sengaja, digunakan atau diakses secara tidak sah, diubah, atau diungkapkan. Selain itu, kami membatasi akses ke data pribadi Anda hanya bagi karyawan, agen, kontraktor, dan pihak ketiga lain yang memang perlu mengetahuinya.
             </p>
           </section>
 
           <section id="contact" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Contact Us</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Hubungi Kami</h2>
             <div
               class="bg-blue-50 dark:bg-[#024ad8]/10 border border-blue-100 dark:border-[#024ad8]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6"
             >
@@ -208,9 +194,9 @@ onMounted(() => {
                 <i class="fa-solid fa-envelope"></i>
               </div>
               <div>
-                <h3 class="font-medium text-gray-900 dark:text-white text-lg">Have questions?</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white text-lg">Ada pertanyaan?</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  Our data protection officer is ready to help you.
+                  Petugas perlindungan data kami siap membantu Anda.
                 </p>
                 <a
                   href="mailto:support@blukios.store"

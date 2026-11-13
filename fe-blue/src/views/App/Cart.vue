@@ -83,7 +83,7 @@ onMounted(async () => {
         <div
 v-if="carts.length === 0" id="Empty-Cart-State"
           class="flex flex-col flex-1 items-center justify-center rounded-[20px] bg-white dark:bg-surface-card gap-9">
-          <img src="@/assets/images/icons/bag-cross-blue-transparent.svg" class="size-16" alt="icon" />
+          <img src="@/assets/images/icons/bag-cross-blue-transparent.svg" class="size-16" alt="ikon" />
           <div class="text-center">
             <p class="font-medium text-xl md:text-2xl dark:text-white">Keranjang kamu masih kosong</p>
             <p class="font-medium text-custom-grey dark:text-gray-400">Yuk, mulai belanja dan temukan produk favoritmu!</p>
@@ -94,7 +94,7 @@ v-if="carts.length === 0" id="Empty-Cart-State"
             <span class="font-medium text-white">Cari Produk</span>
             <img
 src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
-              alt="icon" />
+              alt="ikon" />
           </RouterLink>
         </div>
         <div
@@ -108,15 +108,15 @@ type="checkbox" :checked="selectedStores.has(store.storeId)" class="-z-10 absolu
               <div class="flex size-6 overflow-hidden relative">
                 <img
 src="@/assets/images/icons/checkbox-unchecked.svg"
-                  class="size-full object-contain absolute group-has-checked:opacity-0 transition-300" alt="icon" />
+                  class="size-full object-contain absolute group-has-checked:opacity-0 transition-300" alt="ikon" />
                 <img
 src="@/assets/images/icons/checkbox.svg"
                   class="size-full object-contain absolute opacity-0 group-has-checked:opacity-100 transition-300"
-                  alt="icon" />
+                  alt="ikon" />
               </div>
             </label>
             <p class="flex items-center gap-1 font-medium text-custom-grey dark:text-gray-300 leading-none">
-              <img src="@/assets/images/icons/shop-grey.svg" class="size-4" alt="icon" />
+              <img src="@/assets/images/icons/shop-grey.svg" class="size-4" alt="ikon" />
               {{ store.storeName }}
             </p>
           </div>
@@ -132,7 +132,7 @@ v-for="product in store.products" :key="product.id + '-' + (product.variant_id |
                     <img
 :src="product.product_images.find((i) => i.is_thumbnail)?.image ||
                       product.thumbnail
-                      " class="size-full object-contain mix-blend-multiply dark:mix-blend-normal" alt="icon" />
+                      " class="size-full object-contain mix-blend-multiply dark:mix-blend-normal" alt="ikon" />
                   </div>
                   <div class="flex flex-col flex-1 gap-1">
                     <p class="font-medium text-base leading-tight line-clamp-2 w-full dark:text-white">
@@ -220,7 +220,7 @@ type="button"
           <div class="flex flex-col rounded-xl border border-custom-stroke dark:border-white/10 p-5 gap-4">
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-6 flex shrink-0" alt="icon" />
+                <img src="@/assets/images/icons/shopping-cart-grey.svg" class="size-6 flex shrink-0" alt="ikon" />
                 Total Item:
               </p>
               <p class="font-medium text-lg leading-none dark:text-white">{{ totalSelectedItems }} Produk</p>
@@ -228,7 +228,7 @@ type="button"
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/box-grey.svg" class="size-6 flex shrink-0" alt="icon" />
+                <img src="@/assets/images/icons/box-grey.svg" class="size-6 flex shrink-0" alt="ikon" />
                 Total Kuantitas:
               </p>
               <p class="font-medium text-lg leading-none dark:text-white">{{ totalSelectedQuantity }}x</p>
@@ -236,7 +236,7 @@ type="button"
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/ticket-grey.svg" class="size-6 flex shrink-0" alt="icon" />
+                <img src="@/assets/images/icons/ticket-grey.svg" class="size-6 flex shrink-0" alt="ikon" />
                 Sub Total:
               </p>
               <p class="font-medium text-lg leading-none dark:text-white">Rp {{ formatRupiah(subtotalSelected) }}</p>
@@ -244,7 +244,7 @@ type="button"
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/receipt-2-grey.svg" class="size-6 flex shrink-0" alt="icon" />
+                <img src="@/assets/images/icons/receipt-2-grey.svg" class="size-6 flex shrink-0" alt="ikon" />
                 Biaya Layanan
               </p>
               <p class="font-medium text-lg leading-none dark:text-white">Rp {{ formatRupiah(serviceFeeSelected) }}</p>
@@ -252,16 +252,16 @@ type="button"
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/discount-shape-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Discount
+                <img src="@/assets/images/icons/discount-shape-grey.svg" class="size-6 flex shrink-0" alt="ikon" />
+                Diskon
               </p>
               <p class="font-medium text-lg leading-none dark:text-white">Rp {{ formatRupiah(discountSelected) }}</p>
             </div>
             <hr class="border-custom-stroke" />
             <div class="flex items-center justify-between">
               <p class="flex items-center gap-1 font-medium text-custom-grey text-lg leading-none">
-                <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0" alt="icon" />
-                Grand total
+                <img src="@/assets/images/icons/money-grey.svg" class="size-6 flex shrink-0" alt="ikon" />
+                Total Belanja
               </p>
               <p class="font-medium text-lg leading-none text-custom-blue dark:text-blue-400">
                 Rp {{ formatRupiah(grandTotalSelected) }}
@@ -276,7 +276,7 @@ type="button"
             </span>
             <img
 src="@/assets/images/icons/arrow-right-circle-white-thick.svg" class="flex size-6 shrink-0"
-              alt="icon" />
+              alt="ikon" />
           </RouterLink>
 
           <!-- Pesan ketika tidak ada toko yang dipilih -->

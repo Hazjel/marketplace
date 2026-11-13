@@ -250,7 +250,7 @@ watch(error, (value) => {
               </div>
               <div>
                 <p class="font-medium text-sm text-custom-black dark:text-white leading-tight">
-                  {{ transaction?.store?.name || 'Store' }}
+                  {{ transaction?.store?.name || 'Toko' }}
                 </p>
                 <p class="text-[11px] text-custom-grey dark:text-gray-500">
                   {{ formatToClientTimeZone(transaction.created_at) }}

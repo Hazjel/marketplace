@@ -37,7 +37,7 @@ onUnmounted(() => {
             isScrolled ? 'text-custom-black' : 'text-white mix-blend-difference'
           ]"
         >
-          Company
+          Perusahaan
         </span>
       </RouterLink>
 
@@ -52,7 +52,7 @@ onUnmounted(() => {
               : 'text-white/80 hover:text-white mix-blend-difference'
           "
         >
-          About Us
+          Tentang Kami
         </RouterLink>
         <RouterLink
           :to="{ name: 'app.career' }"
@@ -63,7 +63,7 @@ onUnmounted(() => {
               : 'text-white/80 hover:text-white mix-blend-difference'
           "
         >
-          Career
+          Karier
         </RouterLink>
         <RouterLink
           :to="{ name: 'app.privacy' }"
@@ -74,7 +74,7 @@ onUnmounted(() => {
               : 'text-white/80 hover:text-white mix-blend-difference'
           "
         >
-          Privacy
+          Privasi
         </RouterLink>
       </div>
 
@@ -89,7 +89,7 @@ onUnmounted(() => {
               : 'bg-white text-custom-black hover:bg-gray-100'
           ]"
         >
-          Go to Marketplace
+          Ke Marketplace
         </RouterLink>
       </div>
     </div>

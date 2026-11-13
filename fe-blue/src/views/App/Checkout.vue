@@ -73,7 +73,7 @@ const selectSavedAddress = (addr) => {
       ? { latitude: addr.latitude, longitude: addr.longitude }
       : null
   resetSelectedShipping()
-  toast.success('Address applied: ' + addr.label)
+  toast.success('Alamat diterapkan: ' + addr.label)
 }
 
 // Transaction data

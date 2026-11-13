@@ -153,7 +153,7 @@ onMounted(() => {
             Rp {{ product.price?.toLocaleString('id-ID') }}
           </p>
           <div class="flex items-center gap-2 mt-1">
-            <span class="text-xs text-custom-grey dark:text-gray-400">{{ product.store?.name || 'Store' }}</span>
+            <span class="text-xs text-custom-grey dark:text-gray-400">{{ product.store?.name || 'Toko' }}</span>
             <span class="text-xs text-gray-300">&middot;</span>
             <span class="text-xs text-custom-grey dark:text-gray-400">{{ product.total_sold || 0 }} terjual</span>
           </div>

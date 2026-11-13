@@ -70,6 +70,6 @@ onMounted(async () => {
 
 <template>
   <div class="flex items-center justify-center min-h-screen">
-    <p class="font-medium text-xl">Processing Login...</p>
+    <p class="font-medium text-xl">Memproses Login...</p>
   </div>
 </template>

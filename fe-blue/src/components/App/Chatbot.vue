@@ -227,7 +227,7 @@ const sendFeedback = async (msg, rating) => {
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">🤖</div>
             <div>
-              <h3 class="font-medium text-sm">Ri (AI Assistant)</h3>
+              <h3 class="font-medium text-sm">Ri (Asisten AI)</h3>
               <div class="flex items-center gap-1">
                 <span
                   class="w-2 h-2 rounded-full"

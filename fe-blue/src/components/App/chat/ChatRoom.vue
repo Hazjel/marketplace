@@ -81,7 +81,7 @@ const handleSend = async () => {
     <div
       class="flex items-center gap-4 p-6 bg-white dark:bg-surface-card border-b border-custom-stroke dark:border-white/10 shrink-0 relative">
       <button class="md:hidden p-2 -ml-2 text-custom-grey" @click="chatStore.setActiveUser(null)">
-        <img src="@/assets/images/icons/arrow-left-grey.svg" class="size-6" alt="back" />
+        <img src="@/assets/images/icons/arrow-left-grey.svg" class="size-6" alt="kembali" />
       </button>
       <div class="size-12 rounded-full overflow-hidden bg-gray-200">
         <img
@@ -107,8 +107,8 @@ const handleSend = async () => {
       <div
 v-else-if="!loadingMessages && messages.length === 0"
         class="flex flex-col items-center justify-center flex-1 text-center opacity-50">
-        <p>No messages yet.</p>
-        <p class="text-sm">Say hello directly to {{ activeUser.name }}!</p>
+        <p>Belum ada pesan.</p>
+        <p class="text-sm">Sapa langsung {{ activeUser.name }}!</p>
       </div>
 
       <TransitionGroup
@@ -153,12 +153,12 @@ v-for="msg in messages" :key="msg.id" :class="[
     <div class="p-6 bg-white dark:bg-surface-card border-t border-custom-stroke dark:border-white/10 shrink-0">
       <form class="flex gap-4" @submit.prevent="handleSend">
         <input
-v-model="newMessage" type="text" placeholder="Type your message..."
+v-model="newMessage" type="text" placeholder="Tulis pesan..."
           class="flex-1 bg-custom-background dark:bg-surface border border-custom-stroke dark:border-white/10 rounded-full px-6 py-3 focus:outline-none focus:border-custom-blue dark:focus:border-custom-blue dark:text-white transition-colors" />
         <button
 type="submit" :disabled="sendingMessage || !newMessage.trim()"
           class="bg-custom-blue text-white rounded-full size-12 flex items-center justify-center shrink-0 hover:shadow-lg hover:shadow-[#0D5CD7]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-          <img v-if="!sendingMessage" src="@/assets/images/icons/arrow-right-white.svg" class="size-6" alt="send" />
+          <img v-if="!sendingMessage" src="@/assets/images/icons/arrow-right-white.svg" class="size-6" alt="kirim" />
           <div v-else class="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
         </button>
       </form>
@@ -172,8 +172,8 @@ v-else
     <div class="size-20 bg-custom-stroke dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
       <img src="@/assets/images/icons/sms-grey.svg" class="size-10 opacity-50 dark:invert" alt="chat" />
     </div>
-    <h3 class="font-medium text-lg text-custom-black dark:text-white">Select a conversation</h3>
-    <p>Pick a person from the left sidebar to start chatting</p>
+    <h3 class="font-medium text-lg text-custom-black dark:text-white">Pilih percakapan</h3>
+    <p>Pilih seseorang di panel kiri untuk mulai chat</p>
   </div>
   </div>
 </template>

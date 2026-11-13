@@ -87,7 +87,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
         <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nama Lengkap</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <img src="@/assets/images/icons/profile-circle-grey.svg" class="size-5 custom-icon" alt="icon" />
+            <img src="@/assets/images/icons/profile-circle-grey.svg" class="size-5 custom-icon" alt="ikon" />
           </div>
           <input
             v-model="form.name" type="text"
@@ -103,7 +103,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
         <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Alamat Email</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <img src="@/assets/images/icons/sms-grey.svg" class="size-5 custom-icon" alt="icon" />
+            <img src="@/assets/images/icons/sms-grey.svg" class="size-5 custom-icon" alt="ikon" />
           </div>
           <input
             v-model="form.email" type="email"
@@ -121,7 +121,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
         </label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="icon" />
+            <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="ikon" />
           </div>
           <input
             v-model="form.phone_number" type="tel"
@@ -138,7 +138,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
         <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Password</label>
         <div class="group relative transition-all duration-300">
           <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="icon" />
+            <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="ikon" />
           </div>
           <input
             v-model="form.password" :type="showPassword ? 'text' : 'password'"
