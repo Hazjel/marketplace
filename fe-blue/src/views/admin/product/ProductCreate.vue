@@ -119,6 +119,9 @@ const handleSubmit = async () => {
   const result = await createProduct({
     ...product.value,
     price: parseRupiah(product.value.price),
+    // Rows left over after switching the toggle off must not reach the API,
+    // which treats any `variants` as a variant product.
+    variants: product.value.has_variants ? product.value.variants : [],
     product_images: product.value.product_images
       .filter((image) => image.image)
       .map((image) => {

@@ -103,4 +103,17 @@ class ProductCreateVariantsMultipartTest extends TestCase
             ->assertStatus(422)
             ->assertJsonValidationErrors(['price', 'stock']);
     }
+
+    public function test_empty_variants_array_without_price_and_stock_is_rejected_not_a_server_error(): void
+    {
+        $fields = $this->webFields();
+        $fields['variants'] = [];
+        $fields['has_variants'] = false;
+        $fields['product_images'] = [['image' => UploadedFile::fake()->image('p.jpg'), 'is_thumbnail' => true]];
+
+        $this->actingAs($this->seller, 'sanctum')
+            ->postJson('/api/product', $fields)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['price', 'stock']);
+    }
 }
