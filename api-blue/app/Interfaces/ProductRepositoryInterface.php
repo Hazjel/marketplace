@@ -8,6 +8,8 @@ interface ProductRepositoryInterface
 
     public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $rowPerPage, array $filters = []);
 
+    public function getRecentlyViewed(string $userId, int $limit = 10);
+
     public function getTotalSold(?string $storeId = null);
 
     public function getProductCountForStore(string $storeId): int;

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Rules\CompareAtPrice;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -33,7 +35,9 @@ class ProductStoreRequest extends FormRequest
             // Whole rupiah only — App\ValueObjects\Money is scale 0, and a
             // fractional price makes the product un-checkoutable (see
             // api-blue/docs/money-contract.md). weight is not money.
-            'price' => 'required|integer|min:0',
+            'price' => 'required|integer|min:0|max:'.Product::MAX_PRICE,
+            // Display only; checkout always charges price.
+            'compare_at_price' => ['nullable', 'integer', 'min:1', 'max:'.Product::MAX_PRICE, new CompareAtPrice],
             'weight' => 'required|numeric|min:0|max:999.99',
             'stock' => 'required|integer|min:0',
             'product_images' => 'required|array',
@@ -41,10 +45,22 @@ class ProductStoreRequest extends FormRequest
             'product_images.*.is_thumbnail' => 'required|boolean',
             'variants' => 'nullable|array',
             'variants.*.name' => 'required_with:variants|string',
-            'variants.*.price' => 'required_with:variants|integer|min:0',
+            'variants.*.price' => 'required_with:variants|integer|min:0|max:'.Product::MAX_PRICE,
+            'variants.*.compare_at_price' => ['nullable', 'integer', 'min:1', 'max:'.Product::MAX_PRICE, new CompareAtPrice],
             'variants.*.stock' => 'required_with:variants|integer|min:0',
             'variants.*.sku' => 'nullable|string',
             'variants.*.variant_attributes' => 'nullable|array',
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'price.max' => 'Harga maksimal Rp1.000.000.000.000.',
+            'variants.*.price.max' => 'Harga maksimal Rp1.000.000.000.000.',
+            'compare_at_price.max' => 'Harga sebelum diskon maksimal Rp1.000.000.000.000.',
+            'variants.*.compare_at_price.max' => 'Harga sebelum diskon maksimal Rp1.000.000.000.000.',
         ];
     }
 
@@ -57,6 +73,8 @@ class ProductStoreRequest extends FormRequest
             'description' => 'Deskripsi',
             'condition' => 'Kondisi',
             'price' => 'Harga',
+            'compare_at_price' => 'Harga sebelum diskon',
+            'variants.*.compare_at_price' => 'Harga sebelum diskon',
             'weight' => 'Berat',
             'stock' => 'Stok',
             'product_images.*.image' => 'Gambar',

@@ -6,9 +6,12 @@ use App\Interfaces\ProductRepositoryInterface;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductVariantMongo;
+use App\Models\ProductView;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -79,26 +82,8 @@ class ProductRepository implements ProductRepositoryInterface
             // Produk dari toko yang pemiliknya menghapus akun tidak ikut
             // terhapus (toko tetap ada demi riwayat transaksi), tapi tidak
             // boleh muncul lagi di katalog atau bisa dibeli.
-            ->whereHas('store', fn ($q) => $q->where('is_active', true))
-            ->withSum(['transactionDetails' => function ($q) {
-                $q->whereHas('transaction', function ($t) {
-                    $t->where('payment_status', 'paid');
-                });
-            }], 'qty')->with([
-                'productImages',
-                'variants',
-                // ProductCategoryResource menghitung produk kategori ini beserta
-                // anak-anaknya; sediakan hitungannya lewat withCount.
-                'productCategory' => fn ($q) => $q->withCount('products')
-                    ->with(['childrens' => fn ($c) => $c->withCount('products')]),
-                // StoreResource ikut merender user (beserta roles/buyer) dan dua
-                // hitungan relasi. Tanpa eager-load di sini tiap produk memicu
-                // rentetan query sendiri-sendiri — N+1 yang menggandakan biaya
-                // listing katalog.
-                'store' => fn ($q) => $q->with([
-                    'user.roles', 'user.permissions', 'user.store', 'user.buyer',
-                ])->withCount(['products', 'transaction']),
-            ]);
+            ->whereHas('store', fn ($q) => $q->where('is_active', true));
+        $this->withCardData($query);
 
         // Removed implicit filtering by store_id for store role users to allow them to see all products in buyer mode
 
@@ -129,6 +114,55 @@ class ProductRepository implements ProductRepositoryInterface
         }
 
         return $query;
+    }
+
+    /**
+     * What ProductResource reads for a catalog card, loaded up front so a
+     * list does not fire queries per product.
+     *
+     * @param  Builder<Product>  $query
+     */
+    private function withCardData(Builder $query): void
+    {
+        $query->withSum(['transactionDetails' => function ($q) {
+            $q->whereHas('transaction', function ($t) {
+                $t->where('payment_status', 'paid');
+            });
+        }], 'qty')->withRecentSold()->with([
+            'productImages',
+            'variants',
+            // ProductCategoryResource menghitung produk kategori ini beserta
+            // anak-anaknya; sediakan hitungannya lewat withCount.
+            'productCategory' => fn ($q) => $q->withCount('products')
+                ->with(['childrens' => fn ($c) => $c->withCount('products')]),
+            // StoreResource ikut merender user (beserta roles/buyer) dan dua
+            // hitungan relasi. Tanpa eager-load di sini tiap produk memicu
+            // rentetan query sendiri-sendiri — N+1 yang menggandakan biaya
+            // listing katalog.
+            'store' => fn ($q) => $q->with([
+                'user.roles', 'user.permissions', 'user.store', 'user.buyer',
+            ])->withCount(['products', 'transaction']),
+        ]);
+    }
+
+    /**
+     * The user's last distinct product views, newest first, for the
+     * "Lanjut cek ini, yuk" row. Only active stores, like the catalog.
+     */
+    public function getRecentlyViewed(string $userId, int $limit = 10)
+    {
+        $latestViews = ProductView::where('user_id', $userId)
+            ->select('product_id', DB::raw('MAX(viewed_at) as last_viewed_at'))
+            ->groupBy('product_id');
+
+        $query = Product::joinSub($latestViews, 'recent_views', 'recent_views.product_id', '=', 'products.id')
+            ->select('products.*')
+            ->whereHas('store', fn ($q) => $q->where('is_active', true))
+            ->orderByDesc('recent_views.last_viewed_at')
+            ->take($limit);
+        $this->withCardData($query);
+
+        return $query->get();
     }
 
     public function getAllPaginated(?string $search, ?string $storeId, ?string $ProductCategoryId, ?int $rowPerPage, array $filters = [])
@@ -184,14 +218,14 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function getById(string $id)
     {
-        $query = Product::where('id', $id)->with(['productImages', 'variants', 'productReviews.user', 'productReviews.attachments']);
+        $query = Product::where('id', $id)->withRecentSold()->with(['productImages', 'variants', 'productReviews.user', 'productReviews.attachments']);
 
         return $query->first();
     }
 
     public function getBySlug(string $slug)
     {
-        $query = Product::where('slug', $slug)->with(['productImages', 'variants', 'productReviews.user', 'productReviews.attachments']);
+        $query = Product::where('slug', $slug)->withRecentSold()->with(['productImages', 'variants', 'productReviews.user', 'productReviews.attachments']);
 
         return $query->first();
     }
@@ -212,6 +246,7 @@ class ProductRepository implements ProductRepositoryInterface
             if (! empty($data['variants'])) {
                 $product->has_variants = true;
                 $product->price = collect($data['variants'])->min('price');
+                $product->compare_at_price = self::cheapestCompareAt(collect($data['variants']));
                 $product->stock = collect($data['variants'])->sum('stock');
                 $product->save();
 
@@ -222,11 +257,12 @@ class ProductRepository implements ProductRepositoryInterface
                         'stock' => $variant['stock'],
                         'sku' => $variant['sku'] ?? null,
                         'variant_attributes' => $variant['variant_attributes'] ?? [],
-                    ]);
+                    ] + self::variantCompareAt($variant));
                 }
             } else {
                 $product->has_variants = false;
                 $product->price = $data['price'];
+                $product->compare_at_price = $data['compare_at_price'] ?? null;
                 $product->stock = $data['stock'];
                 $product->save();
             }
@@ -279,6 +315,10 @@ class ProductRepository implements ProductRepositoryInterface
             $product->description = $data['description'];
             $product->condition = $data['condition'];
             $product->price = $data['price'];
+            // Absent (older clients) keeps the stored value; null clears it.
+            if (array_key_exists('compare_at_price', $data)) {
+                $product->compare_at_price = $data['compare_at_price'];
+            }
             $product->weight = $data['weight'];
             $product->stock = $data['stock'];
 
@@ -337,13 +377,17 @@ class ProductRepository implements ProductRepositoryInterface
                     if (isset($variant['id']) && $variant['id']) {
                         $v = ProductVariantMongo::find($variant['id']);
                         if ($v) {
+                            // Mongo's decimal cast cannot hold null: clearing means removing the field.
+                            if (array_key_exists('compare_at_price', $variant) && $variant['compare_at_price'] === null) {
+                                $v->unset('compare_at_price');
+                            }
                             $v->update([
                                 'name' => $variant['name'],
                                 'price' => $variant['price'],
                                 'stock' => $variant['stock'],
                                 'sku' => $variant['sku'] ?? null,
                                 'variant_attributes' => $variant['variant_attributes'] ?? [],
-                            ]);
+                            ] + self::variantCompareAt($variant));
                         }
                     } else {
                         // Only create if valid data present
@@ -355,7 +399,7 @@ class ProductRepository implements ProductRepositoryInterface
                                 'stock' => $variant['stock'],
                                 'sku' => $variant['sku'] ?? null,
                                 'variant_attributes' => $variant['variant_attributes'] ?? [],
-                            ]);
+                            ] + self::variantCompareAt($variant));
                         }
                     }
                 }
@@ -367,6 +411,10 @@ class ProductRepository implements ProductRepositoryInterface
                 if ($product->has_variants) {
                     $product->price = collect($data['variants'])->min('price');
                     $product->stock = collect($data['variants'])->sum('stock');
+                    // Re-read: a variant sent without compare_at_price kept its stored one.
+                    $product->compare_at_price = self::cheapestCompareAt(
+                        ProductVariantMongo::where('product_id', (string) $product->id)->get()
+                    );
                 }
             }
 
@@ -400,6 +448,30 @@ class ProductRepository implements ProductRepositoryInterface
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
+    }
+
+    /**
+     * compare_at_price for a Mongo variant write, only when set: the decimal
+     * cast there throws on null.
+     *
+     * @return array<string, mixed>
+     */
+    private static function variantCompareAt(array $variant): array
+    {
+        return isset($variant['compare_at_price']) ? ['compare_at_price' => $variant['compare_at_price']] : [];
+    }
+
+    /**
+     * The card shows the cheapest variant's price, so it shows that variant's
+     * "harga sebelum diskon" too (the biggest one if several share the price).
+     */
+    private static function cheapestCompareAt(Collection $variants): mixed
+    {
+        $cheapest = $variants->min(fn ($v) => (int) data_get($v, 'price'));
+
+        return $variants
+            ->filter(fn ($v) => (int) data_get($v, 'price') === $cheapest)
+            ->max(fn ($v) => data_get($v, 'compare_at_price'));
     }
 
     public function delete(string $id)

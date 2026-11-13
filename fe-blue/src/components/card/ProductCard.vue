@@ -26,6 +26,11 @@ const isInWishlist = computed(() => {
   return false
 })
 
+// At most two, in this order. No Ad / Gratis Ongkir / Cashback: nothing backs them.
+const badges = computed(() =>
+  [props.item.store?.is_verified && 'Resmi', props.item.is_best_seller && 'Terlaris'].filter(Boolean)
+)
+
 const handleToggleWishlist = async () => {
   if (!authStore.token) {
     router.push({ name: 'auth.login' })
@@ -73,15 +78,38 @@ const handleToggleWishlist = async () => {
 
     <!-- Content -->
     <div class="flex flex-col p-3 gap-1.5 flex-1">
+      <div v-if="badges.length" class="flex gap-1">
+        <span
+          v-for="badge in badges"
+          :key="badge"
+          class="rounded px-1.5 py-0.5 text-[10px] font-medium leading-none"
+          :class="
+            badge === 'Resmi'
+              ? 'bg-blue-50 text-custom-blue dark:bg-blue-900/30 dark:text-blue-300'
+              : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+          "
+        >
+          {{ badge }}
+        </span>
+      </div>
+
       <!-- Product Name -->
       <h3 class="text-sm font-medium text-gray-800 dark:text-gray-200 leading-snug line-clamp-2 min-h-[2.5rem]">
         {{ item.name }}
       </h3>
 
       <!-- Price -->
-      <p class="font-medium text-base text-custom-blue dark:text-blue-400">
-        Rp {{ formatRupiah(item.price) }}
-      </p>
+      <div>
+        <p class="font-medium text-base text-custom-blue dark:text-blue-400">
+          Rp {{ formatRupiah(item.price) }}
+        </p>
+        <p v-if="item.discount_percent" class="flex items-center gap-1 text-xs">
+          <span class="rounded bg-red-50 px-1 font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">
+            -{{ item.discount_percent }}%
+          </span>
+          <s class="truncate text-gray-400 dark:text-gray-500">Rp {{ formatRupiah(item.compare_at_price) }}</s>
+        </p>
+      </div>
 
       <!-- Meta: Rating + Sold -->
       <div class="flex items-center gap-2 mt-auto pt-1.5">
