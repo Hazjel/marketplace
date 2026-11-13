@@ -149,6 +149,7 @@ services:
     volumes:
       - ./api-blue:/var/www
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/security-headers.inc:/etc/nginx/snippets/security-headers.inc:ro
       - fe_dist:/usr/share/nginx/html:ro
       - fe_dist_seller:/usr/share/nginx/html-seller:ro
 
