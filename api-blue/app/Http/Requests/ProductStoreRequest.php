@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\ProductCategory;
+use App\Rules\CompareAtPrice;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -34,6 +35,8 @@ class ProductStoreRequest extends FormRequest
             // fractional price makes the product un-checkoutable (see
             // api-blue/docs/money-contract.md). weight is not money.
             'price' => 'required|integer|min:0',
+            // Display only; checkout always charges price.
+            'compare_at_price' => ['nullable', 'integer', 'min:1', new CompareAtPrice],
             'weight' => 'required|numeric|min:0|max:999.99',
             'stock' => 'required|integer|min:0',
             'product_images' => 'required|array',
@@ -42,6 +45,7 @@ class ProductStoreRequest extends FormRequest
             'variants' => 'nullable|array',
             'variants.*.name' => 'required_with:variants|string',
             'variants.*.price' => 'required_with:variants|integer|min:0',
+            'variants.*.compare_at_price' => ['nullable', 'integer', 'min:1', new CompareAtPrice],
             'variants.*.stock' => 'required_with:variants|integer|min:0',
             'variants.*.sku' => 'nullable|string',
             'variants.*.variant_attributes' => 'nullable|array',
@@ -57,6 +61,8 @@ class ProductStoreRequest extends FormRequest
             'description' => 'Deskripsi',
             'condition' => 'Kondisi',
             'price' => 'Harga',
+            'compare_at_price' => 'Harga sebelum diskon',
+            'variants.*.compare_at_price' => 'Harga sebelum diskon',
             'weight' => 'Berat',
             'stock' => 'Stok',
             'product_images.*.image' => 'Gambar',

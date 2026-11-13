@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Product;
 use App\ValueObjects\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -16,6 +17,10 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $price = Money::fromDecimalString((string) $this->price)->minor();
+        $compareAt = $this->resource->compare_at_price === null ? null : Money::fromDecimalString((string) $this->resource->compare_at_price)->minor();
+        $discount = Product::discountPercent($price, $compareAt);
+
         return [
             'id' => $this->id,
             'store' => $this->store ? new StoreResource($this->store) : null,
@@ -27,10 +32,20 @@ class ProductResource extends JsonResource
             // price is whole rupiah (Sprint B3.2a); a fractional legacy
             // value throws rather than silently truncating. weight is kg,
             // not money.
-            'price' => Money::fromDecimalString((string) $this->price)->minor(),
+            'price' => $price,
+            // Display only, never charged. For variant products this is the
+            // cheapest variant's (ProductRepository keeps it in sync).
+            'compare_at_price' => $discount === null ? null : $compareAt,
+            'discount_percent' => $discount,
             'weight' => (float) (string) $this->weight,
             'stock' => $this->stock,
             'total_sold' => $this->total_sold,
+            // Only where the query used withRecentSold(); absent elsewhere
+            // (cart, transactions) rather than a wrong false.
+            'is_best_seller' => $this->when(
+                array_key_exists('recent_sold_qty', $this->resource->getAttributes()),
+                fn () => (int) $this->resource->recent_sold_qty >= Product::BEST_SELLER_MIN_QTY,
+            ),
             'created_at' => $this->created_at,
             'product_images' => ProductImageResource::collection($this->whenLoaded('productImages')),
             'thumbnail' => $this->whenLoaded('productImages', function () {

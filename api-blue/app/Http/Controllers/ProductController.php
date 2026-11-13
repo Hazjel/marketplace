@@ -107,6 +107,20 @@ class ProductController extends Controller implements HasMiddleware
     }
 
     /**
+     * "Lanjut cek ini, yuk": the signed-in user's own recent views only.
+     */
+    public function recentlyViewed()
+    {
+        try {
+            $products = $this->productRepository->getRecentlyViewed(auth()->id());
+
+            return ResponseHelper::jsonResponse(true, 'Data Produk Berhasil Diambil', ProductResource::collection($products), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::exceptionResponse($e);
+        }
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(ProductStoreRequest $request)
