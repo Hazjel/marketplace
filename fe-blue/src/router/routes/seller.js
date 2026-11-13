@@ -35,27 +35,27 @@ const adminRoutes = [
       {
         path: 'dashboard',
         name: 'admin.dashboard',
-        meta: { permission: 'dashboard-menu', requiresAuth: true, title: 'Overview' },
+        meta: { permission: 'dashboard-menu', requiresAuth: true, title: 'Ringkasan' },
         component: () => import('@/views/admin/Dashboard.vue')
       },
       {
         path: 'edit-profile',
         name: 'admin.edit-profile',
-        meta: { title: 'Edit Profile' },
+        meta: { title: 'Edit Profil' },
         component: () => import('@/views/admin/profile/EditProfile.vue')
       },
       {
         path: 'category',
         name: 'admin.category',
         component: CategoryList,
-        meta: { title: 'Category List', requiresAuth: true, permission: 'product-category-list' }
+        meta: { title: 'Daftar Kategori', requiresAuth: true, permission: 'product-category-list' }
       },
       {
         path: 'category/create',
         name: 'admin.category.create',
         component: CategoryCreate,
         meta: {
-          title: 'Category Create',
+          title: 'Tambah Kategori',
           requiresAuth: true,
           permission: 'product-category-create'
         }
@@ -64,14 +64,14 @@ const adminRoutes = [
         path: 'category/edit/:id',
         name: 'admin.category.edit',
         component: CategoryEdit,
-        meta: { title: 'Category Edit', requiresAuth: true, permission: 'product-category-edit' }
+        meta: { title: 'Edit Kategori', requiresAuth: true, permission: 'product-category-edit' }
       },
       {
         path: 'category/:id',
         name: 'admin.category.detail',
         component: CategoryDetail,
         meta: {
-          title: 'Category Detail',
+          title: 'Detail Kategori',
           requiresAuth: true,
           permission: 'product-category-list'
         }
@@ -80,86 +80,86 @@ const adminRoutes = [
         path: 'product',
         name: 'admin.product',
         component: ProductList,
-        meta: { title: 'Product Detail', requiresAuth: true, permission: 'product-list' }
+        meta: { title: 'Detail Produk', requiresAuth: true, permission: 'product-list' }
       },
       {
         path: 'product/create',
         name: 'admin.product.create',
         component: ProductCreate,
-        meta: { title: 'Product Create', requiresAuth: true, permission: 'product-create' }
+        meta: { title: 'Tambah Produk', requiresAuth: true, permission: 'product-create' }
       },
       {
         path: 'product/:id',
         name: 'admin.product.detail',
         component: ProductDetail,
-        meta: { title: 'Product Detail', requiresAuth: true, permission: 'product-list' }
+        meta: { title: 'Detail Produk', requiresAuth: true, permission: 'product-list' }
       },
       {
         path: 'product/edit/:id',
         name: 'admin.product.edit',
         component: ProductEdit,
-        meta: { title: 'Product Edit', requiresAuth: true, permission: 'product-edit' }
+        meta: { title: 'Edit Produk', requiresAuth: true, permission: 'product-edit' }
       },
       {
         path: 'store',
         name: 'admin.store',
         component: StoreList,
-        meta: { title: 'Store Detail', requiresAuth: true, permission: 'store-list' }
+        meta: { title: 'Detail Toko', requiresAuth: true, permission: 'store-list' }
       },
       {
         path: 'my-store',
         name: 'admin.my-store',
         component: MyStore,
-        meta: { title: 'My Store', requiresAuth: true, permission: 'store-list' }
+        meta: { title: 'Toko Saya', requiresAuth: true, permission: 'store-list' }
       },
       {
         path: 'create-store',
         name: 'admin.create-store',
         component: StoreCreate,
-        meta: { title: 'Create Store', requiresAuth: true, permission: 'store-create' }
+        meta: { title: 'Buat Toko', requiresAuth: true, permission: 'store-create' }
       },
       {
         path: 'edit-store',
         name: 'admin.edit-store',
         component: StoreEdit,
-        meta: { title: 'Edit My Store', requiresAuth: true, permission: 'store-edit' }
+        meta: { title: 'Edit Toko Saya', requiresAuth: true, permission: 'store-edit' }
       },
       {
         path: 'store/:id',
         name: 'admin.store.detail',
         component: StoreDetail,
-        meta: { title: 'Store Detail', requiresAuth: true, permission: 'store-list' }
+        meta: { title: 'Detail Toko', requiresAuth: true, permission: 'store-list' }
       },
       {
         path: 'transaction',
         name: 'admin.transaction',
         component: TransactionList,
-        meta: { title: 'Transaction List', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Daftar Transaksi', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'my-transactions',
         name: 'admin.my-transaction',
         component: MyTransaction,
-        meta: { title: 'My Transaction List', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Transaksi Saya', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'transaction/:id',
         name: 'admin.transaction.detail',
         component: TransactionDetail,
-        meta: { title: 'Transaction Detail', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Detail Transaksi', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'store-balance',
         name: 'admin.store-balance',
         component: StoreBalanceList,
-        meta: { title: 'Store Wallet', requiresAuth: true, permission: 'store-balance-list' }
+        meta: { title: 'Dompet Toko', requiresAuth: true, permission: 'store-balance-list' }
       },
       {
         path: 'store-balance/:id',
         name: 'admin.store-balance.detail',
         component: StoreBalanceDetail,
         meta: {
-          title: 'Store Wallet Detail',
+          title: 'Detail Dompet Toko',
           requiresAuth: true,
           permission: 'store-balance-list'
         }
@@ -168,26 +168,26 @@ const adminRoutes = [
         path: 'my-store-balance',
         name: 'admin.my-store-balance',
         component: MyStoreBalance,
-        meta: { title: 'Manage My Wallet', requiresAuth: true, permission: 'store-balance-list' }
+        meta: { title: 'Kelola Dompet Saya', requiresAuth: true, permission: 'store-balance-list' }
       },
       {
         path: 'withdrawal',
         name: 'admin.withdrawal',
         component: WithdrawalList,
-        meta: { title: 'Withdrawal List', requiresAuth: true, permission: 'withdrawal-list' }
+        meta: { title: 'Daftar Penarikan', requiresAuth: true, permission: 'withdrawal-list' }
       },
       {
         path: 'withdrawal/:id',
         name: 'admin.withdrawal.detail',
         component: WithdrawalDetail,
-        meta: { title: 'Withdrawal Detail', requiresAuth: true, permission: 'withdrawal-list' }
+        meta: { title: 'Detail Penarikan', requiresAuth: true, permission: 'withdrawal-list' }
       },
       {
         path: 'withdrawal/create',
         name: 'admin.withdrawal.create',
         component: WithdrawalCreate,
         meta: {
-          title: ' Request Withdrawal Create',
+          title: 'Ajukan Penarikan',
           requiresAuth: true,
           permission: 'withdrawal-create'
         }
@@ -196,13 +196,13 @@ const adminRoutes = [
         path: 'user',
         name: 'admin.user',
         component: UserList,
-        meta: { title: 'User List', requiresAuth: true, permission: 'user-list' }
+        meta: { title: 'Daftar Pengguna', requiresAuth: true, permission: 'user-list' }
       },
       {
         path: 'chat',
         name: 'admin.chat',
         component: () => import('@/views/App/Chat/ChatLayout.vue'),
-        meta: { title: 'Conversations', requiresAuth: true, permission: 'dashboard-menu' }
+        meta: { title: 'Percakapan', requiresAuth: true, permission: 'dashboard-menu' }
       }
     ]
   }
@@ -221,13 +221,13 @@ const storeRoutes = [
       {
         path: 'dashboard',
         name: 'user.dashboard',
-        meta: { permission: 'dashboard-menu', requiresAuth: true, title: 'Overview' },
+        meta: { permission: 'dashboard-menu', requiresAuth: true, title: 'Ringkasan' },
         component: () => import('@/views/admin/Dashboard.vue')
       },
       {
         path: 'edit-profile',
         name: 'user.edit-profile',
-        meta: { title: 'Edit Profile' },
+        meta: { title: 'Edit Profil' },
         component: () => import('@/views/admin/profile/EditProfile.vue')
       },
       {
@@ -235,7 +235,7 @@ const storeRoutes = [
         name: 'user.category',
         component: CategoryList,
         meta: {
-          title: 'Category List',
+          title: 'Daftar Kategori',
           requiresAuth: true,
           permission: 'product-category-list',
           requiresStore: true
@@ -246,7 +246,7 @@ const storeRoutes = [
         name: 'user.category.create',
         component: CategoryCreate,
         meta: {
-          title: 'Category Create',
+          title: 'Tambah Kategori',
           requiresAuth: true,
           permission: 'product-category-create',
           requiresStore: true
@@ -257,7 +257,7 @@ const storeRoutes = [
         name: 'user.category.edit',
         component: CategoryEdit,
         meta: {
-          title: 'Category Edit',
+          title: 'Edit Kategori',
           requiresAuth: true,
           permission: 'product-category-edit',
           requiresStore: true
@@ -268,7 +268,7 @@ const storeRoutes = [
         name: 'user.category.detail',
         component: CategoryDetail,
         meta: {
-          title: 'Category Detail',
+          title: 'Detail Kategori',
           requiresAuth: true,
           permission: 'product-category-list',
           requiresStore: true
@@ -279,7 +279,7 @@ const storeRoutes = [
         name: 'user.product',
         component: ProductList,
         meta: {
-          title: 'Product Detail',
+          title: 'Detail Produk',
           requiresAuth: true,
           permission: 'product-list',
           requiresStore: true
@@ -290,7 +290,7 @@ const storeRoutes = [
         name: 'user.product.create',
         component: ProductCreate,
         meta: {
-          title: 'Product Create',
+          title: 'Tambah Produk',
           requiresAuth: true,
           permission: 'product-create',
           requiresStore: true
@@ -301,7 +301,7 @@ const storeRoutes = [
         name: 'user.product.detail',
         component: ProductDetail,
         meta: {
-          title: 'Product Detail',
+          title: 'Detail Produk',
           requiresAuth: true,
           permission: 'product-list',
           requiresStore: true
@@ -312,7 +312,7 @@ const storeRoutes = [
         name: 'user.product.edit',
         component: ProductEdit,
         meta: {
-          title: 'Product Edit',
+          title: 'Edit Produk',
           requiresAuth: true,
           permission: 'product-edit',
           requiresStore: true
@@ -322,14 +322,14 @@ const storeRoutes = [
         path: 'store',
         name: 'user.store',
         component: StoreList,
-        meta: { title: 'Store Detail', requiresAuth: true, permission: 'store-list' }
+        meta: { title: 'Detail Toko', requiresAuth: true, permission: 'store-list' }
       },
       {
         path: 'my-store',
         name: 'user.my-store',
         component: MyStore,
         meta: {
-          title: 'My Store',
+          title: 'Toko Saya',
           requiresAuth: true,
           permission: 'store-list',
           requiresStore: true
@@ -339,14 +339,14 @@ const storeRoutes = [
         path: 'create-store',
         name: 'user.create-store',
         component: StoreCreate,
-        meta: { title: 'Create Store', requiresAuth: true, permission: 'store-create' }
+        meta: { title: 'Buat Toko', requiresAuth: true, permission: 'store-create' }
       },
       {
         path: 'edit-store',
         name: 'user.edit-store',
         component: StoreEdit,
         meta: {
-          title: 'Edit My Store',
+          title: 'Edit Toko Saya',
           requiresAuth: true,
           permission: 'store-edit',
           requiresStore: true
@@ -356,32 +356,32 @@ const storeRoutes = [
         path: 'store/:id',
         name: 'user.store.detail',
         component: StoreDetail,
-        meta: { title: 'Store Detail', requiresAuth: true, permission: 'store-list' }
+        meta: { title: 'Detail Toko', requiresAuth: true, permission: 'store-list' }
       },
       {
         path: 'transaction',
         name: 'user.transaction',
         component: TransactionList,
-        meta: { title: 'Transaction List', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Daftar Transaksi', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'my-transactions',
         name: 'user.my-transaction',
         component: MyTransaction,
-        meta: { title: 'My Transaction List', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Transaksi Saya', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'transaction/:id',
         name: 'user.transaction.detail',
         component: TransactionDetail,
-        meta: { title: 'Transaction Detail', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Detail Transaksi', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'store-balance',
         name: 'user.store-balance',
         component: StoreBalanceList,
         meta: {
-          title: 'Store Wallet',
+          title: 'Dompet Toko',
           requiresAuth: true,
           permission: 'store-balance-list',
           requiresStore: true
@@ -392,7 +392,7 @@ const storeRoutes = [
         name: 'user.store-balance.detail',
         component: StoreBalanceDetail,
         meta: {
-          title: 'Store Wallet Detail',
+          title: 'Detail Dompet Toko',
           requiresAuth: true,
           permission: 'store-balance-list',
           requiresStore: true
@@ -403,7 +403,7 @@ const storeRoutes = [
         name: 'user.my-store-balance',
         component: MyStoreBalance,
         meta: {
-          title: 'Manage My Wallet',
+          title: 'Kelola Dompet Saya',
           requiresAuth: true,
           permission: 'store-balance-list',
           requiresStore: true
@@ -413,26 +413,26 @@ const storeRoutes = [
         path: 'orders/incoming',
         name: 'admin.orders.incoming',
         component: () => import('@/views/admin/order/IncomingOrders.vue'),
-        meta: { title: 'Incoming Orders', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Pesanan Masuk', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'withdrawal',
         name: 'user.withdrawal',
         component: WithdrawalList,
-        meta: { title: 'Withdrawal List', requiresAuth: true, permission: 'withdrawal-list' }
+        meta: { title: 'Daftar Penarikan', requiresAuth: true, permission: 'withdrawal-list' }
       },
       {
         path: 'withdrawal/:id',
         name: 'user.withdrawal.detail',
         component: WithdrawalDetail,
-        meta: { title: 'Withdrawal Detail', requiresAuth: true, permission: 'withdrawal-list' }
+        meta: { title: 'Detail Penarikan', requiresAuth: true, permission: 'withdrawal-list' }
       },
       {
         path: 'withdrawal/create',
         name: 'user.withdrawal.create',
         component: WithdrawalCreate,
         meta: {
-          title: ' Request Withdrawal Create',
+          title: 'Ajukan Penarikan',
           requiresAuth: true,
           permission: 'withdrawal-create'
         }
@@ -441,13 +441,13 @@ const storeRoutes = [
         path: 'chat',
         name: 'user.chat',
         component: () => import('@/views/App/Chat/ChatLayout.vue'),
-        meta: { title: 'Conversations', requiresAuth: true, permission: 'dashboard-menu' }
+        meta: { title: 'Percakapan', requiresAuth: true, permission: 'dashboard-menu' }
       },
       {
         path: 'user',
         name: 'user.user',
         component: UserList,
-        meta: { title: 'User List', requiresAuth: true, permission: 'user-list' }
+        meta: { title: 'Daftar Pengguna', requiresAuth: true, permission: 'user-list' }
       }
     ]
   }

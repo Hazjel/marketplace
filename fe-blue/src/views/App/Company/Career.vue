@@ -4,31 +4,31 @@ import { onMounted } from 'vue'
 const openRoles = [
   {
     title: 'Senior Product Designer',
-    department: 'Design',
+    department: 'Desain',
     location: 'Kendal, ID',
-    type: 'Full-Time',
+    type: 'Penuh Waktu',
     tags: ['UI/UX', 'Figma', 'User Research']
   },
   {
     title: 'Backend Engineer',
     department: 'Engineering',
     location: 'Remote',
-    type: 'Full-Time',
+    type: 'Penuh Waktu',
     tags: ['PHP', 'Laravel', 'PostgreSQL']
   },
   {
     title: 'Frontend Developer',
     department: 'Engineering',
     location: 'Remote',
-    type: 'Full-Time',
+    type: 'Penuh Waktu',
     tags: ['Vue 3', 'TailwindCSS', 'TypeScript']
   },
   {
     title: 'Customer Success Spec.',
-    department: 'Support',
+    department: 'Dukungan',
     location: 'Jakarta, ID',
-    type: 'Part-Time',
-    tags: ['Communication', 'English']
+    type: 'Paruh Waktu',
+    tags: ['Komunikasi', 'Bahasa Inggris']
   }
 ]
 
@@ -47,7 +47,7 @@ onMounted(() => {
         <img
           src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop"
           class="w-full h-full object-cover grayscale"
-          alt="Career Hero"
+          alt="Banner Karier"
         />
       </div>
       <div
@@ -58,24 +58,23 @@ onMounted(() => {
         <span
           class="px-4 py-1.5 bg-[#024ad8]/20 backdrop-blur-md rounded-full text-blue-400 border border-[#024ad8]/30 font-medium text-xs uppercase tracking-widest"
         >
-          We Are Hiring
+          Kami Sedang Merekrut
         </span>
         <h1 class="text-5xl md:text-7xl font-medium text-white tracking-tight leading-none">
-          Do Your Best Work<br />
+          Berikan Karya Terbaikmu<br />
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#024ad8] to-teal-400"
-            >At Blukios.</span
+            >Di Blukios.</span
           >
         </h1>
         <p class="text-gray-400 text-lg md:text-xl max-w-2xl leading-relaxed">
-          Join a team of dreamers, builders, and doers. We are on a mission to democratize commerce
-          for everyone, everywhere.
+          Bergabunglah dengan tim para pemimpi, pembangun, dan pelaku. Misi kami adalah membuat perdagangan bisa dijangkau semua orang, di mana saja.
         </p>
         <div class="flex gap-4 mt-4">
           <button
             class="px-8 py-3 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-200 transition-colors"
             @click="$el.querySelector('#open-roles').scrollIntoView({ behavior: 'smooth' })"
           >
-            View Openings
+            Lihat Lowongan
           </button>
         </div>
       </div>
@@ -90,9 +89,9 @@ onMounted(() => {
           >
             <i class="fa-solid fa-heart"></i>
           </div>
-          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Work-Life Balance</h3>
+          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Keseimbangan Kerja dan Hidup</h3>
           <p class="text-gray-600 dark:text-gray-400 text-sm">
-            We believe in working smart, not just hard. Flexible hours and remote-first culture.
+            Kami percaya bekerja cerdas, bukan sekadar keras. Jam kerja fleksibel dan budaya kerja yang mengutamakan remote.
           </p>
         </div>
         <div class="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl flex flex-col gap-4 border border-gray-100 dark:border-white/10">
@@ -101,9 +100,9 @@ onMounted(() => {
           >
             <i class="fa-solid fa-rocket"></i>
           </div>
-          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Growth Mindset</h3>
+          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Pola Pikir Bertumbuh</h3>
           <p class="text-gray-600 dark:text-gray-400 text-sm">
-            Learning stipends, mentorship programs, and clear career progression paths.
+            Tunjangan belajar, program mentoring, dan jalur pengembangan karier yang jelas.
           </p>
         </div>
         <div class="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl flex flex-col gap-4 border border-gray-100 dark:border-white/10">
@@ -112,9 +111,9 @@ onMounted(() => {
           >
             <i class="fa-solid fa-users"></i>
           </div>
-          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Inclusive Team</h3>
+          <h3 class="text-xl font-medium text-gray-900 dark:text-white">Tim yang Inklusif</h3>
           <p class="text-gray-600 dark:text-gray-400 text-sm">
-            A diverse environment where every voice is heard, valued, and respected.
+            Lingkungan yang beragam, tempat setiap suara didengar, dihargai, dan dihormati.
           </p>
         </div>
       </div>

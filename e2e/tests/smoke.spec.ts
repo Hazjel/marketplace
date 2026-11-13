@@ -2,7 +2,7 @@ import { test, expect } from './fixtures'
 
 test('buyer finds a seeded product, signs in and adds it to the cart', async ({ page }) => {
   await page.goto('/')
-  const search = page.getByPlaceholder('Search any products')
+  const search = page.getByPlaceholder('Cari produk apa saja')
   await search.fill('E2E Notebook')
   await search.press('Enter')
   await expect(page).toHaveURL(/\/search\?q=/)

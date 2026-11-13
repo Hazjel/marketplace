@@ -573,31 +573,31 @@ id="Progress-Bar"
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
               <span class="font-medium">1</span>
             </div>
-            <p class="font-medium text-center">Book Review</p>
+            <p class="font-medium text-center">Ditinjau</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden items-center justify-center">
               <span class="font-medium dark:text-custom-grey">2</span>
             </div>
-            <p class="font-medium text-center dark:text-white">Processing</p>
+            <p class="font-medium text-center dark:text-white">Diproses</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden items-center justify-center">
               <span class="font-medium dark:text-custom-grey">?</span>
             </div>
-            <p class="font-medium text-center dark:text-white">2+ More</p>
+            <p class="font-medium text-center dark:text-white">2+ Lagi</p>
           </div>
         </div>
         <div class="flex items-center justify-between">
           <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
             <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6" alt="icon" />
-            Delivery Status
+            Status Pengiriman
           </p>
           <p
             class="badge rounded-full py-3 px-[18px] flex shrink-0 font-medium uppercase bg-custom-yellow text-[#544607]">
-            pending
+            menunggu
           </p>
         </div>
         <div
@@ -630,31 +630,31 @@ v-if="transaction?.delivery_status === 'processing'"
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
               <span class="font-medium">1</span>
             </div>
-            <p class="font-medium text-center">Book Review</p>
+            <p class="font-medium text-center">Ditinjau</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
               <span class="font-medium">2</span>
             </div>
-            <p class="font-medium text-center">Processing</p>
+            <p class="font-medium text-center">Diproses</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden items-center justify-center">
               <span class="font-medium dark:text-custom-grey">?</span>
             </div>
-            <p class="font-medium text-center dark:text-white">2+ More</p>
+            <p class="font-medium text-center dark:text-white">2+ Lagi</p>
           </div>
         </div>
         <div class="flex items-center justify-between">
           <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
             <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6" alt="icon" />
-            Delivery Status
+            Status Pengiriman
           </p>
           <p
             class="badge rounded-full py-3 px-[18px] flex shrink-0 font-medium uppercase bg-custom-blue/10 text-custom-blue">
-            processing
+            diproses
           </p>
         </div>
         <template v-if="activeMode === 'store' && user?.store?.id === transaction?.store?.id">
@@ -709,21 +709,21 @@ v-if="transaction?.delivery_status === 'delivering'"
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
               <span class="font-medium">2</span>
             </div>
-            <p class="font-medium text-center">Processing</p>
+            <p class="font-medium text-center">Diproses</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
               <span class="font-medium">3</span>
             </div>
-            <p class="font-medium text-center">Delivering</p>
+            <p class="font-medium text-center">Dikirim</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-stroke dark:bg-white/10 overflow-hidden items-center justify-center">
               <span class="font-medium dark:text-custom-grey">4</span>
             </div>
-            <p class="font-medium text-center dark:text-white">Completed</p>
+            <p class="font-medium text-center dark:text-white">Selesai</p>
           </div>
         </div>
         <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
@@ -736,11 +736,11 @@ v-if="transaction?.delivery_status === 'delivering'"
           <div class="flex flex-col gap-2">
             <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
               <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6" alt="icon" />
-              Delivery Status
+              Status Pengiriman
             </p>
             <p
               class="badge rounded-full py-3 px-[18px] flex shrink-0 font-medium uppercase bg-custom-orange/10 text-custom-orange w-fit">
-              Delivering
+              Dikirim
             </p>
           </div>
 
@@ -748,13 +748,13 @@ v-if="transaction?.delivery_status === 'delivering'"
 v-if="activeMode === 'buyer'"
             class="flex items-center justify-center h-12 px-6 rounded-md bg-custom-blue text-white font-medium hover:bg-primary-deep transition-300"
             @click="handleCompleteOrderClick">
-            Order Received
+            Pesanan Diterima
           </button>
         </div>
         <div class="flex items-center justify-between">
           <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
             <img src="@/assets/images/icons/routing-grey.svg" class="size-6" alt="icon" />
-            Tracking Number
+            No. Resi
           </p>
           <p class="font-medium text-lg leading-none dark:text-white">
             {{ transaction?.tracking_number }} ({{ transaction?.shipping }})
@@ -787,21 +787,21 @@ id="Progress-Bar"
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
               <span class="font-medium">2</span>
             </div>
-            <p class="font-medium text-center">Processing</p>
+            <p class="font-medium text-center">Diproses</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
               <span class="font-medium">3</span>
             </div>
-            <p class="font-medium text-center">Delivering</p>
+            <p class="font-medium text-center">Dikirim</p>
           </div>
           <div class="relative flex flex-col py-4 gap-[6px] items-center">
             <div
               class="flex size-8 shrink-0 rounded-full bg-custom-lime-green overflow-hidden items-center justify-center">
               <span class="font-medium">4</span>
             </div>
-            <p class="font-medium text-center">Completed</p>
+            <p class="font-medium text-center">Selesai</p>
           </div>
         </div>
         <div class="h-[260px] w-full rounded-2xl overflow-hidden bg-custom-background">
@@ -812,17 +812,17 @@ id="Progress-Bar"
         <div class="flex items-center justify-between">
           <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
             <img src="@/assets/images/icons/car-delivery-moves-grey.svg" class="size-6" alt="icon" />
-            Delivery Status
+            Status Pengiriman
           </p>
           <p
             class="badge rounded-full py-3 px-[18px] flex shrink-0 font-medium uppercase bg-custom-green/10 text-custom-green">
-            completed
+            selesai
           </p>
         </div>
         <div class="flex items-center justify-between">
           <p class="flex items-center gap-1 font-medium text-custom-grey leading-none">
             <img src="@/assets/images/icons/routing-grey.svg" class="size-6" alt="icon" />
-            Tracking Number
+            No. Resi
           </p>
           <p class="font-medium text-lg leading-none dark:text-white">{{ transaction?.tracking_number }}</p>
         </div>
@@ -877,9 +877,9 @@ v-else src="@/assets/images/icons/Star-pointy-outline.svg"
           <p
 v-if="activeMode === 'buyer' && transaction?.delivery_status === 'completed'"
             class="font-medium text-custom-grey">
-            You haven't reviewed this order yet.
+            Kamu belum memberi ulasan untuk pesanan ini.
           </p>
-          <p v-else class="font-medium text-custom-grey">No reviews yet.</p>
+          <p v-else class="font-medium text-custom-grey">Belum ada ulasan.</p>
         </div>
       </section>
     </div>

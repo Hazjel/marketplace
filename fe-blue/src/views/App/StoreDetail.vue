@@ -35,16 +35,16 @@ const notFound = ref(false)
 
 useHead({
   title: computed(() =>
-    store.value?.name ? `${store.value.name} | Blukios` : 'Store Detail | Blukios'
+    store.value?.name ? `${store.value.name} | Blukios` : 'Detail Toko | Blukios'
   ),
   meta: [
     {
       name: 'description',
       content: computed(
-        () => `Visit ${store.value?.name} on Blukios. ${store.value?.address || ''}`
+        () => `Kunjungi ${store.value?.name} di Blukios. ${store.value?.address || ''}`
       )
     },
-    { property: 'og:title', content: computed(() => store.value?.name || 'Store Detail') },
+    { property: 'og:title', content: computed(() => store.value?.name || 'Detail Toko') },
     { property: 'og:image', content: computed(() => store.value?.logo || '') },
     // A dead store URL answers 200 (SPA), so tell search engines to drop it.
     { name: 'robots', content: computed(() => (notFound.value ? 'noindex' : 'index, follow')) }
@@ -184,10 +184,10 @@ onMounted(async () => {
     <section class="mb-8">
       <div class="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 hide-scrollbar">
         <div class="w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 hover:shadow-lg transition-shadow">
-          <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover" alt="Store promo banner" />
+          <img src="@/assets/images/thumbnails/promo-potrait-1-small.png" class="size-full object-cover" alt="Banner promo toko" />
         </div>
         <div class="w-[280px] md:w-[320px] shrink-0 overflow-hidden rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 hover:shadow-lg transition-shadow">
-          <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover" alt="Store promo banner" />
+          <img src="@/assets/images/thumbnails/promo-potrait-2-small.png" class="size-full object-cover" alt="Banner promo toko" />
         </div>
       </div>
     </section>

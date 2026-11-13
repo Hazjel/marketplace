@@ -14,7 +14,7 @@ defineProps({
   },
   linkText: {
     type: String,
-    default: 'VIEW ALL'
+    default: 'Lihat Semua'
   }
 })
 </script>
@@ -36,7 +36,7 @@ defineProps({
       <img
         src="@/assets/images/icons/arrow-right-white.svg"
         class="flex size-5 md:size-6 shrink-0"
-        alt="icon"
+        alt="ikon"
       />
     </RouterLink>
   </div>

@@ -41,7 +41,7 @@ onMounted(async () => {
         <span class="text-[#024ad8] font-medium tracking-widest uppercase text-sm mb-4 block"
           >Legal</span
         >
-        <h1 class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white mb-4">Terms & Conditions</h1>
+        <h1 class="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white mb-4">Syarat & Ketentuan</h1>
         <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl">
           Silakan baca syarat dan ketentuan ini dengan seksama sebelum menggunakan layanan kami.
         </p>
@@ -72,7 +72,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('agreement')"
           >
-            1. Agreement
+            1. Persetujuan
           </button>
           <button
             :class="
@@ -83,7 +83,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('representations')"
           >
-            2. User Representations
+            2. Pernyataan Pengguna
           </button>
           <button
             :class="
@@ -94,7 +94,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('products')"
           >
-            3. Products & Purchases
+            3. Produk & Pembelian
           </button>
           <button
             :class="
@@ -105,7 +105,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('refunds')"
           >
-            4. Refunds & Saldo Blukios
+            4. Pengembalian Dana & Saldo Blukios
           </button>
           <button
             :class="
@@ -116,7 +116,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('complaints')"
           >
-            5. Complaints
+            5. Komplain
           </button>
           <button
             :class="
@@ -127,7 +127,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('prohibited')"
           >
-            6. Prohibited Activities
+            6. Aktivitas yang Dilarang
           </button>
           <button
             :class="
@@ -138,7 +138,7 @@ onMounted(async () => {
             class="text-left px-4 py-3 rounded-lg text-sm transition-all border-l-4"
             @click="scrollTo('contact')"
           >
-            7. Contact Us
+            7. Hubungi Kami
           </button>
         </div>
       </aside>
@@ -149,42 +149,35 @@ onMounted(async () => {
           class="prose prose-lg prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-li:text-gray-600 dark:prose-li:text-gray-400 max-w-none flex flex-col gap-12"
         >
           <section id="agreement" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">1. Agreement to Terms</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">1. Persetujuan terhadap Ketentuan</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
-              These Terms and Conditions constitute a legally binding agreement made between you,
-              whether personally or on behalf of an entity ("you") and Blukios ("we," "us" or
-              "our"), concerning your access to and use of the Blukios website as well as any other
-              media form, media channel, mobile website or mobile application related, linked, or
-              otherwise connected thereto (collectively, the "Site").
+              Syarat dan Ketentuan ini merupakan perjanjian yang mengikat secara hukum antara Anda, baik secara pribadi maupun atas nama suatu badan ("Anda"), dan Blukios ("kami"), terkait akses dan penggunaan Anda atas situs web Blukios serta media, saluran media, situs web seluler, atau aplikasi seluler lain yang terkait, tertaut, atau terhubung dengannya (secara bersama-sama disebut "Situs").
             </p>
           </section>
 
           <section id="representations" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">2. User Representations</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">2. Pernyataan Pengguna</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
-              By using the Site, you represent and warrant that:
+              Dengan menggunakan Situs, Anda menyatakan dan menjamin bahwa:
             </p>
             <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-white/10">
               <ul class="space-y-3 list-none p-0 m-0">
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    >All registration information you submit will be true, accurate, current, and
-                    complete.</span
+                    >Semua informasi pendaftaran yang Anda kirimkan benar, akurat, terkini, dan lengkap.</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    >You will maintain the accuracy of such information and promptly update such
-                    registration information as necessary.</span
+                    >Anda akan menjaga keakuratan informasi tersebut dan segera memperbarui informasi pendaftaran bila diperlukan.</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    >You have the legal capacity and you agree to comply with these Terms and
-                    Conditions.</span
+                    >Anda memiliki kecakapan hukum dan setuju untuk mematuhi Syarat dan Ketentuan ini.</span
                   >
                 </li>
               </ul>
@@ -192,127 +185,108 @@ onMounted(async () => {
           </section>
 
           <section id="products" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">3. Products and Purchases</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">3. Produk dan Pembelian</h2>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
-              We make every effort to display as accurately as possible the colors, features,
-              specifications, and details of the products available on the Site. However, we do not
-              guarantee that the colors, features, specifications, and details of the products will
-              be accurate, complete, reliable, current, or free of other errors.
+              Kami berupaya semaksimal mungkin menampilkan warna, fitur, spesifikasi, dan detail produk yang tersedia di Situs seakurat mungkin. Namun, kami tidak menjamin bahwa warna, fitur, spesifikasi, dan detail produk tersebut akurat, lengkap, andal, terkini, atau bebas dari kesalahan lain.
             </p>
           </section>
 
           <section id="refunds" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Refunds and Saldo Blukios</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">4. Pengembalian Dana dan Saldo Blukios</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
-              If a seller rejects or cancels an order you have already paid for, you get back the
-              full amount you paid for that order:
+              Jika penjual menolak atau membatalkan pesanan yang sudah Anda bayar, Anda menerima kembali seluruh jumlah yang Anda bayarkan untuk pesanan tersebut:
             </p>
             <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-white/10 mb-4">
               <ul class="space-y-3 list-none p-0 m-0">
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    >Paid by credit/debit card, GoPay, ShopeePay or QRIS: refunded to the same
-                    payment method through our payment provider. When it appears in your account
-                    depends on your bank or e-wallet provider.</span
+                    >Dibayar dengan kartu kredit/debit, GoPay, ShopeePay, atau QRIS: dikembalikan ke metode pembayaran yang sama melalui penyedia pembayaran kami. Kapan dana masuk ke akun Anda bergantung pada bank atau penyedia dompet digital Anda.</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    >Paid by bank virtual account or at a retail outlet: these methods cannot be
-                    refunded automatically, so the amount is credited to your Saldo Blukios right
-                    away.</span
+                    >Dibayar dengan virtual account bank atau di gerai ritel: metode ini tidak dapat dikembalikan otomatis, sehingga jumlahnya langsung dikreditkan ke Saldo Blukios Anda.</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    >Paid partly with Saldo Blukios: that part goes back to your Saldo Blukios
-                    immediately, and the rest is refunded as described above.</span
+                    >Dibayar sebagian dengan Saldo Blukios: bagian tersebut langsung kembali ke Saldo Blukios Anda, dan sisanya dikembalikan seperti dijelaskan di atas.</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    >A payment that reaches us after the order has already expired is refunded
-                    automatically in the same way.</span
+                    >Pembayaran yang masuk setelah pesanan kedaluwarsa dikembalikan otomatis dengan cara yang sama.</span
                   >
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
                   <span class="text-sm text-gray-600 dark:text-gray-400"
-                    >If an automatic refund cannot be confirmed, our team checks it with the payment
-                    provider and completes it, to your Saldo Blukios or by bank transfer.</span
+                    >Jika pengembalian otomatis tidak dapat dikonfirmasi, tim kami memeriksanya dengan penyedia pembayaran dan menyelesaikannya, ke Saldo Blukios Anda atau melalui transfer bank.</span
                   >
                 </li>
               </ul>
             </div>
             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">
-              Saldo Blukios can only be used to pay for purchases on Blukios, in full or in part at
-              checkout. It cannot be withdrawn to a bank account, topped up, or transferred to
-              another user. You can see your balance and its history on your dashboard.
+              Saldo Blukios hanya dapat digunakan untuk membayar pembelian di Blukios, penuh maupun sebagian saat checkout. Saldo tidak dapat ditarik ke rekening bank, diisi ulang, atau ditransfer ke pengguna lain. Anda dapat melihat saldo dan riwayatnya di dashboard Anda.
             </p>
           </section>
 
           <section id="complaints" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Complaints</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">5. Komplain</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
-              If an order does not arrive, arrives damaged, or is not what you ordered, you can file
-              a complaint from the order page:
+              Jika pesanan tidak sampai, tiba dalam keadaan rusak, atau tidak sesuai pesanan Anda, Anda dapat mengajukan komplain dari halaman pesanan:
             </p>
             <div class="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-white/10">
               <ul class="space-y-3 list-none p-0 m-0">
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
-                  <span class="text-sm text-gray-600 dark:text-gray-400">You can file a complaint only while the order is being shipped, before you confirm receipt or the order completes automatically. Each order can have one complaint.</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">Komplain hanya dapat diajukan selama pesanan dalam pengiriman, sebelum Anda mengonfirmasi penerimaan atau pesanan selesai otomatis. Setiap pesanan hanya dapat memiliki satu komplain.</span>
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
-                  <span class="text-sm text-gray-600 dark:text-gray-400">A complaint states the reason (item not received, damaged, wrong item, or other), a description, and up to 3 photos.</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">Komplain memuat alasan (barang tidak diterima, rusak, barang salah, atau lainnya), deskripsi, dan maksimal 3 foto.</span>
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
-                  <span class="text-sm text-gray-600 dark:text-gray-400">The seller has 2 days to respond. If the seller accepts, the complaint is approved. If the seller rejects it or does not respond in time, our admin team reviews it and decides.</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">Penjual memiliki 2 hari untuk menanggapi. Jika penjual menyetujui, komplain disetujui. Jika penjual menolak atau tidak menanggapi tepat waktu, tim admin kami meninjau dan memutuskannya.</span>
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
-                  <span class="text-sm text-gray-600 dark:text-gray-400">An approved complaint is refunded in full as described in section 4. You do not need to return the goods.</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">Komplain yang disetujui dikembalikan dananya secara penuh seperti dijelaskan pada bagian 4. Anda tidak perlu mengembalikan barang.</span>
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
-                  <span class="text-sm text-gray-600 dark:text-gray-400">If the complaint is rejected, the order continues and you can confirm receipt as usual.</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">Jika komplain ditolak, pesanan dilanjutkan dan Anda dapat mengonfirmasi penerimaan seperti biasa.</span>
                 </li>
                 <li class="flex gap-3">
                   <div class="w-1.5 h-1.5 rounded-full bg-[#024ad8] mt-2 shrink-0"></div>
-                  <span class="text-sm text-gray-600 dark:text-gray-400">While a complaint is open or under admin review, the order cannot be completed. You can withdraw your complaint at any time before it is decided; a withdrawn complaint cannot be filed again.</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">Selama komplain masih terbuka atau ditinjau admin, pesanan tidak dapat diselesaikan. Anda dapat menarik komplain kapan saja sebelum diputuskan; komplain yang sudah ditarik tidak dapat diajukan kembali.</span>
                 </li>
               </ul>
             </div>
           </section>
 
           <section id="prohibited" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">6. Prohibited Activities</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">6. Aktivitas yang Dilarang</h2>
             <p class="text-base leading-relaxed mb-4 text-gray-600 dark:text-gray-400">
-              You may not access or use the Site for any purpose other than that for which we make
-              the Site available. As a user of the Site, you agree not to:
+              Anda tidak boleh mengakses atau menggunakan Situs untuk tujuan selain yang kami sediakan. Sebagai pengguna Situs, Anda setuju untuk tidak:
             </p>
             <ul class="space-y-2 list-disc pl-5 text-gray-600 dark:text-gray-400">
               <li class="pl-2">
-                Systematically retrieve data or other content from the Site to create or compile,
-                directly or indirectly, a collection, compilation, database, or directory without
-                written permission from us.
+                Mengambil data atau konten lain dari Situs secara sistematis untuk membuat atau menyusun, secara langsung maupun tidak langsung, kumpulan, kompilasi, basis data, atau direktori tanpa izin tertulis dari kami.
               </li>
               <li class="pl-2">
-                Make any unauthorized use of the Site, including collecting usernames and/or email
-                addresses of users by electronic or other means for the purpose of sending
-                unsolicited email.
+                Menggunakan Situs secara tidak sah, termasuk mengumpulkan nama pengguna dan/atau alamat email pengguna lain secara elektronik atau dengan cara lain untuk mengirim email yang tidak diminta.
               </li>
             </ul>
           </section>
 
           <section id="contact" class="scroll-mt-32">
-            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">7. Contact Us</h2>
+            <h2 class="text-2xl font-medium mb-4 text-gray-900 dark:text-white">7. Hubungi Kami</h2>
             <div
               class="bg-blue-50 dark:bg-[#024ad8]/10 border border-blue-100 dark:border-[#024ad8]/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6"
             >
@@ -322,8 +296,8 @@ onMounted(async () => {
                 <i class="fa-solid fa-scale-balanced"></i>
               </div>
               <div>
-                <h3 class="font-medium text-gray-900 dark:text-white text-lg">Legal Concerns?</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Our legal team is here to assist you.</p>
+                <h3 class="font-medium text-gray-900 dark:text-white text-lg">Ada Masalah Hukum?</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Tim hukum kami siap membantu Anda.</p>
                 <a
                   href="mailto:support@blukios.store"
                   class="text-[#024ad8] font-medium hover:underline"

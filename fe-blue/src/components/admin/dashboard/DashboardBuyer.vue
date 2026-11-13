@@ -138,7 +138,7 @@ onMounted(() => {
               </div>
               <div>
                 <p class="font-medium text-sm text-custom-black dark:text-white leading-tight">
-                  {{ transaction?.store?.name || 'Store' }}
+                  {{ transaction?.store?.name || 'Toko' }}
                 </p>
                 <p class="text-[11px] text-custom-grey dark:text-gray-500">
                   {{ formatDate(transaction.created_at) }}
@@ -190,7 +190,7 @@ onMounted(() => {
                   <p class="font-medium text-sm dark:text-white">
                     {{ transaction?.transaction_details?.reduce((total, detail) => total + detail.qty, 0) }}
                   </p>
-                  <p class="text-[11px] text-custom-grey dark:text-gray-400">Qty</p>
+                  <p class="text-[11px] text-custom-grey dark:text-gray-400">Jml</p>
                 </div>
               </div>
             </div>

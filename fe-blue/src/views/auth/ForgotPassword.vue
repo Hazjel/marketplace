@@ -112,7 +112,7 @@ const handleSubmit = async () => {
             <img
               src="@/assets/images/icons/sms-grey.svg"
               class="size-5 transition-opacity duration-300 custom-icon"
-              alt="email icon"
+              alt="ikon email"
             />
           </div>
           <input

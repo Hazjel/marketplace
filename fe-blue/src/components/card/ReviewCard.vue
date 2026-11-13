@@ -21,7 +21,7 @@ const userAvatar = computed(() => {
 })
 
 const userName = computed(() => {
-  return props.review.is_anonymous ? 'Pengguna Anonim' : props.review.user?.name || 'Unknown User'
+  return props.review.is_anonymous ? 'Pengguna Anonim' : props.review.user?.name || 'Pengguna Tidak Dikenal'
 })
 
 const formattedDate = computed(() => {
@@ -58,7 +58,7 @@ const formattedDate = computed(() => {
             :key="i"
             :src="i <= review.rating ? StarFull : StarEmpty"
             class="w-4 h-4"
-            :alt="i <= review.rating ? 'Full Star' : 'Empty Star'"
+            :alt="i <= review.rating ? 'Bintang penuh' : 'Bintang kosong'"
           />
         </div>
       </div>
@@ -94,7 +94,7 @@ const formattedDate = computed(() => {
             review.product.product_images?.[0]?.image || PlaceHolder
           "
           class="w-10 h-10 rounded-lg object-cover bg-white border border-gray-100"
-          alt="Product"
+          alt="Produk"
         />
         <div class="flex flex-col min-w-0">
           <span class="text-xs font-medium text-custom-black truncate">{{

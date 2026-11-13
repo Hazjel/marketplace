@@ -20,7 +20,7 @@ const selectUser = (user) => {
   <div
     class="flex flex-col w-full md:w-[320px] border-r border-custom-stroke dark:border-white/10 h-full bg-white dark:bg-surface-card">
     <div class="p-6 border-b border-custom-stroke dark:border-white/10">
-      <h2 class="font-medium text-xl dark:text-white">Messages</h2>
+      <h2 class="font-medium text-xl dark:text-white">Pesan</h2>
     </div>
     <div class="flex flex-col flex-1 overflow-y-auto">
       <div v-if="loadingContacts" class="flex justify-center py-10">
@@ -28,7 +28,7 @@ const selectUser = (user) => {
       </div>
 
       <div v-else-if="contacts.length === 0" class="p-6 text-center text-custom-grey">
-        No conversations yet.
+        Belum ada percakapan.
       </div>
 
       <button
@@ -55,7 +55,7 @@ class="text-xs truncate dark:text-gray-400" :class="{
             'text-custom-grey': (user.unread_count || 0) === 0
           }">
             {{
-              (user.unread_count || 0) > 0 ? `${user.unread_count} new messages` : 'Click to chat'
+              (user.unread_count || 0) > 0 ? `${user.unread_count} pesan baru` : 'Klik untuk chat'
             }}
           </p>
         </div>

@@ -32,7 +32,7 @@ const handleProfileClick = () => {
       <div class="flex flex-col gap-2 w-full">
         <h1 class="font-medium text-2xl capitalize dark:text-white">{{ route.meta.title }}</h1>
         <p class="flex items-center gap-1 font-medium text-custom-grey dark:text-gray-400 leading-none">
-          View Your {{ route.meta.title }}
+          Lihat {{ route.meta.title }}
         </p>
       </div>
     </div>
@@ -49,7 +49,7 @@ const handleProfileClick = () => {
         </div>
         <div class="flex flex-col gap-[6px] text-left">
           <p class="font-medium text-lg leading-tight line-clamp-1 dark:text-white">
-            {{ user?.name || 'Loading...' }}
+            {{ user?.name || 'Memuat...' }}
           </p>
           <p class="font-medium text-custom-blue dark:text-blue-400 text-sm uppercase leading-none">
             {{ user ? (user.role === 'admin' ? 'ADMIN' : authStore.currentMode) : '...' }}

@@ -233,11 +233,11 @@ id="Navbar-Wrapper"
               class="flex items-center w-full h-12 md:h-14 rounded-[18px] p-3 md:p-4 md:px-6 gap-2 bg-white dark:bg-white/5 border-[1.5px] border-custom-stroke dark:border-white/10 focus-within:border-custom-black dark:focus-within:border-white transition-300">
               <img
 src="@/assets/images/icons/search-normal-grey.svg"
-                class="flex size-6 shrink-0 dark:brightness-0 dark:invert" alt="icon" />
+                class="flex size-6 shrink-0 dark:brightness-0 dark:invert" alt="ikon" />
               <input
 v-model="searchQuery" type="text"
                 class="appearance-none w-full placeholder:text-custom-grey font-medium bg-transparent focus:outline-none text-custom-black"
-                placeholder="Search any products" @input="handleSearchInput" @keyup.enter="handleEnterSearch" />
+                placeholder="Cari produk apa saja" @input="handleSearchInput" @keyup.enter="handleEnterSearch" />
               <div v-if="isSearching" class="flex items-center">
                 <div class="size-5 border-2 border-custom-blue border-t-transparent rounded-full animate-spin"></div>
               </div>
@@ -251,9 +251,9 @@ v-show="showSearchResults || showHistory"
               <div v-if="showHistory && searchHistory.length > 0">
                 <div
                   class="flex items-center justify-between px-4 py-3 border-b border-custom-stroke/50 dark:border-white/5">
-                  <span class="text-xs font-medium text-custom-grey uppercase tracking-wider">Recent Searches</span>
+                  <span class="text-xs font-medium text-custom-grey uppercase tracking-wider">Pencarian Terakhir</span>
                   <button class="text-xs font-medium text-custom-red hover:underline" @click="clearHistory">
-                    Clear All
+                    Hapus Semua
                   </button>
                 </div>
                 <div class="flex flex-col">
@@ -264,7 +264,7 @@ v-for="(item, index) in searchHistory" :key="index"
                     <div class="flex items-center gap-3">
                       <img
 src="@/assets/images/icons/search-normal-grey.svg"
-                        class="size-5 opacity-60 dark:brightness-0 dark:invert" alt="history" />
+                        class="size-5 opacity-60 dark:brightness-0 dark:invert" alt="riwayat" />
                       <span
                         class="font-medium text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">{{
                           item }}</span>
@@ -272,7 +272,7 @@ src="@/assets/images/icons/search-normal-grey.svg"
                     <button
 class="hidden group-hover:flex p-1 hover:bg-gray-200 rounded-full"
                       @click.stop="removeHistoryItem(index)">
-                      <img src="@/assets/images/icons/close-circle-black.svg" class="size-4" alt="remove" />
+                      <img src="@/assets/images/icons/close-circle-black.svg" class="size-4" alt="hapus" />
                     </button>
                   </div>
                 </div>
@@ -289,7 +289,7 @@ v-for="category in searchCategories" :key="`cat-${category.id}`"
                     @click="handleCategoryClick(category.slug, category.name)">
                     <img
 src="@/assets/images/icons/box-search-grey.svg"
-                      class="size-5 opacity-60 dark:brightness-0 dark:invert" alt="category" />
+                      class="size-5 opacity-60 dark:brightness-0 dark:invert" alt="kategori" />
                     <span
                       class="font-medium text-sm text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
                       {{ category.name }}
@@ -303,7 +303,7 @@ v-for="product in searchResults" :key="product.id"
                     @click="handleProductClick(product.slug, product.name)">
                     <div
                       class="flex size-14 shrink-0 rounded-xl bg-custom-background dark:bg-white/5 overflow-hidden border border-custom-stroke/50 dark:border-white/5">
-                      <img :src="getProductImage(product)" class="size-full object-cover" alt="product" />
+                      <img :src="getProductImage(product)" class="size-full object-cover" alt="produk" />
                     </div>
                     <div class="flex flex-col gap-1 flex-1 min-w-0">
                       <p
@@ -327,7 +327,7 @@ v-for="store in searchStores" :key="`store-${store.id}`"
                     @click="handleStoreClick(store.username, store.name)">
                     <div
                       class="flex size-8 shrink-0 rounded-full bg-custom-background dark:bg-white/5 overflow-hidden border border-custom-stroke/50 dark:border-white/5">
-                      <img v-if="store.logo" :src="store.logo" class="size-full object-cover" alt="store" />
+                      <img v-if="store.logo" :src="store.logo" class="size-full object-cover" alt="toko" />
                     </div>
                     <span
                       class="font-medium text-sm text-custom-black dark:text-white group-hover:text-custom-blue dark:group-hover:text-blue-400 transition-colors">
@@ -340,7 +340,7 @@ v-for="store in searchStores" :key="`store-${store.id}`"
                   class="p-3 bg-custom-background dark:bg-white/5 border-t border-custom-stroke dark:border-white/10 hover:bg-custom-blue/5 transition-colors cursor-pointer text-center"
                   @click="handleEnterSearch">
                   <p class="text-xs font-medium text-custom-blue">
-                    See all results for "{{ searchQuery }}"
+                    Lihat semua hasil untuk "{{ searchQuery }}"
                   </p>
                 </div>
               </div>
@@ -349,7 +349,7 @@ v-for="store in searchStores" :key="`store-${store.id}`"
               <div
 v-else-if="!showSearchResults && showHistory && searchHistory.length === 0"
                 class="p-8 text-center text-custom-grey">
-                <p class="text-sm">No recent searches</p>
+                <p class="text-sm">Belum ada pencarian terakhir</p>
               </div>
             </div>
           </div>
@@ -363,7 +363,7 @@ v-else-if="!showSearchResults && showHistory && searchHistory.length === 0"
                 <img
 src="@/assets/images/icons/shopping-cart-black.svg"
                   class="size-6 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
-                  alt="cart" />
+                  alt="keranjang" />
               </RouterLink>
               <div
 v-if="totalItems > 0"
@@ -383,7 +383,7 @@ v-if="totalItems > 0"
             <button
               id="Theme-Toggle"
               class="flex items-center justify-center size-10 md:size-11 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
-              :title="effectiveTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+              :title="effectiveTheme === 'dark' ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'"
               @click="toggleTheme()"
             >
               <!-- Moon icon: shown in dark mode → click to go light -->
@@ -465,8 +465,8 @@ v-show="showDropdownProfile"
                       <div class="flex items-center gap-1">
                         <img
 src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark:invert"
-                          alt="verified" />
-                        <p class="text-xs text-custom-grey">Verified Account</p>
+                          alt="terverifikasi" />
+                        <p class="text-xs text-custom-grey">Akun Terverifikasi</p>
                       </div>
                     </div>
                   </div>
@@ -477,7 +477,7 @@ src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark
                     <div
                       class="flex flex-col gap-1 pb-2 border-b border-custom-stroke dark:border-white/5 border-dashed mb-2">
                       <p class="px-3 text-[10px] font-medium text-custom-grey uppercase tracking-wider mb-1 mt-2">
-                        My Activity
+                        Aktivitas Saya
                       </p>
 
                       <!-- Overview (Buyer Dashboard) -->
@@ -489,9 +489,9 @@ src="@/assets/images/icons/verify-star.svg" class="size-3 dark:brightness-0 dark
                           <img
                             src="@/assets/images/icons/home-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
-                            alt="overview"
+                            alt="ringkasan"
                           />
-                          <span class="text-sm font-medium text-custom-black">Overview</span>
+                          <span class="text-sm font-medium text-custom-black">Ringkasan</span>
                         </div>
                       </RouterLink>
 
@@ -520,8 +520,8 @@ v-if="totalWishlistItems > 0"
                           <img
 src="@/assets/images/icons/receipt-text-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
-                            alt="tx" />
-                          <span class="text-sm font-medium text-custom-black">Transaction List</span>
+                            alt="transaksi" />
+                          <span class="text-sm font-medium text-custom-black">Transaksi Saya</span>
                         </div>
                       </RouterLink>
                     </div>
@@ -530,7 +530,7 @@ src="@/assets/images/icons/receipt-text-black.svg"
                     <div
                       class="flex flex-col gap-1 pb-2 border-b border-custom-stroke dark:border-white/5 border-dashed mb-2">
                       <p class="px-3 text-[10px] font-medium text-custom-grey uppercase tracking-wider mb-1">
-                        Store
+                        Toko
                       </p>
 
                       <RouterLink
@@ -541,8 +541,8 @@ src="@/assets/images/icons/receipt-text-black.svg"
                           <img
                             src="@/assets/images/icons/shop-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
-                            alt="shop" />
-                          <span class="text-sm font-medium text-custom-black">Open Store for Free</span>
+                            alt="toko" />
+                          <span class="text-sm font-medium text-custom-black">Buka Toko Gratis</span>
                         </div>
                       </RouterLink>
                       <!-- Sudah punya toko: Store Dashboard pindah ke seller app via SSO
@@ -556,8 +556,8 @@ src="@/assets/images/icons/receipt-text-black.svg"
                           <img
                             src="@/assets/images/icons/shop-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
-                            alt="shop" />
-                          <span class="text-sm font-medium text-custom-black">Store Dashboard</span>
+                            alt="toko" />
+                          <span class="text-sm font-medium text-custom-black">Dashboard Toko</span>
                         </div>
                         <span class="size-2 rounded-full bg-custom-green"></span>
                       </button>
@@ -577,8 +577,8 @@ src="@/assets/images/icons/receipt-text-black.svg"
                           <img
 src="@/assets/images/icons/setting-black.svg"
                             class="size-5 dark:brightness-0 dark:invert opacity-70 dark:opacity-100 group-hover:opacity-100 transition-opacity"
-                            alt="settings" />
-                          <span class="text-sm font-medium text-custom-black">Account Settings</span>
+                            alt="pengaturan" />
+                          <span class="text-sm font-medium text-custom-black">Pengaturan Akun</span>
                         </div>
                       </RouterLink>
 
@@ -605,11 +605,11 @@ stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                           </div>
-                          <span class="text-sm font-medium text-custom-black">Theme Mode</span>
+                          <span class="text-sm font-medium text-custom-black">Mode Tema</span>
                         </div>
                         <div
                           class="flex items-center text-xs font-medium text-custom-grey bg-gray-100 dark:bg-white/10 px-2 py-1 rounded gap-1">
-                          {{ effectiveTheme === 'dark' ? 'Dark' : 'Light' }}
+                          {{ effectiveTheme === 'dark' ? 'Gelap' : 'Terang' }}
                           <span
 v-if="effectiveTheme === 'dark'"
                             class="text-[8px] leading-none bg-custom-blue text-white px-1 py-0.5 rounded uppercase">Beta</span>
@@ -624,8 +624,8 @@ v-if="effectiveTheme === 'dark'"
                           <img
 src="@/assets/images/icons/logout.svg"
                             class="size-5 opacity-70 dark:brightness-0 dark:invert dark:opacity-100 group-hover:opacity-100 transition-opacity"
-                            alt="logout" />
-                          <span class="text-sm font-medium text-custom-red">Logout</span>
+                            alt="keluar" />
+                          <span class="text-sm font-medium text-custom-red">Keluar</span>
                         </div>
                       </button>
                     </div>

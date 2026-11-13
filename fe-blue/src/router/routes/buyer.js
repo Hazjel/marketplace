@@ -81,7 +81,7 @@ export const buyerRoutes = [
         path: '/wishlist',
         name: 'app.wishlist',
         component: Wishlist,
-        meta: { requiresAuth: true, title: 'My Wishlist' }
+        meta: { requiresAuth: true, title: 'Wishlist Saya' }
       },
       {
         path: '/categories',
@@ -113,25 +113,25 @@ export const buyerRoutes = [
         path: 'about',
         name: 'app.about',
         component: () => import('@/views/App/Company/AboutUs.vue'),
-        meta: { title: 'About Us' }
+        meta: { title: 'Tentang Kami' }
       },
       {
         path: 'career',
         name: 'app.career',
         component: () => import('@/views/App/Company/Career.vue'),
-        meta: { title: 'Career' }
+        meta: { title: 'Karier' }
       },
       {
         path: 'privacy',
         name: 'app.privacy',
         component: () => import('@/views/App/Company/PrivacyPolicy.vue'),
-        meta: { title: 'Privacy Policy' }
+        meta: { title: 'Kebijakan Privasi' }
       },
       {
         path: 'terms',
         name: 'app.terms',
         component: () => import('@/views/App/Company/TermsConditions.vue'),
-        meta: { title: 'Terms & Conditions' }
+        meta: { title: 'Syarat & Ketentuan' }
       }
     ]
   },
@@ -145,32 +145,32 @@ export const buyerRoutes = [
       {
         path: 'dashboard',
         name: 'user.dashboard',
-        meta: { permission: 'dashboard-menu', requiresAuth: true, title: 'Overview' },
+        meta: { permission: 'dashboard-menu', requiresAuth: true, title: 'Ringkasan' },
         component: () => import('@/views/admin/Dashboard.vue')
       },
       {
         path: 'edit-profile',
         name: 'user.edit-profile',
-        meta: { title: 'Edit Profile' },
+        meta: { title: 'Edit Profil' },
         component: () => import('@/views/admin/profile/EditProfile.vue')
       },
       {
         path: 'settings/address',
         name: 'user.settings.address',
         component: () => import('@/views/user/settings/AddressList.vue'),
-        meta: { title: 'My Addresses', requiresAuth: true }
+        meta: { title: 'Alamat Saya', requiresAuth: true }
       },
       {
         path: 'settings/address/create',
         name: 'user.settings.address.create',
         component: () => import('@/views/user/settings/AddressForm.vue'),
-        meta: { title: 'Add Address', requiresAuth: true }
+        meta: { title: 'Tambah Alamat', requiresAuth: true }
       },
       {
         path: 'settings/address/:id/edit',
         name: 'user.settings.address.edit',
         component: () => import('@/views/user/settings/AddressForm.vue'),
-        meta: { title: 'Edit Address', requiresAuth: true }
+        meta: { title: 'Edit Alamat', requiresAuth: true }
       },
       {
         path: 'settings/notifications',
@@ -194,25 +194,25 @@ export const buyerRoutes = [
         path: 'transaction',
         name: 'user.transaction',
         component: TransactionList,
-        meta: { title: 'Transaction List', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Daftar Transaksi', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'my-transactions',
         name: 'user.my-transaction',
         component: MyTransaction,
-        meta: { title: 'My Transaction List', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Transaksi Saya', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'transaction/:id',
         name: 'user.transaction.detail',
         component: TransactionDetail,
-        meta: { title: 'Transaction Detail', requiresAuth: true, permission: 'transaction-list' }
+        meta: { title: 'Detail Transaksi', requiresAuth: true, permission: 'transaction-list' }
       },
       {
         path: 'chat',
         name: 'user.chat',
         component: () => import('@/views/App/Chat/ChatLayout.vue'),
-        meta: { title: 'Conversations', requiresAuth: true, permission: 'dashboard-menu' }
+        meta: { title: 'Percakapan', requiresAuth: true, permission: 'dashboard-menu' }
       }
     ]
   }

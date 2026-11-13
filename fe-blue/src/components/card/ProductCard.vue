@@ -100,7 +100,7 @@ const handleToggleWishlist = async () => {
         <svg class="size-3 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span class="text-xs text-gray-400 dark:text-gray-500 truncate">{{ item?.store?.name || 'Store' }}</span>
+        <span class="text-xs text-gray-400 dark:text-gray-500 truncate">{{ item?.store?.name || 'Toko' }}</span>
       </div>
     </div>
   </RouterLink>

@@ -231,7 +231,7 @@ const handleSubmit = async () => {
             <img
               src="@/assets/images/icons/key-grey.svg"
               class="size-5 custom-icon"
-              alt="password icon"
+              alt="ikon password"
             />
           </div>
           <input
@@ -289,7 +289,7 @@ const handleSubmit = async () => {
             <img
               src="@/assets/images/icons/key-grey.svg"
               class="size-5 custom-icon"
-              alt="password icon"
+              alt="ikon password"
             />
           </div>
           <input

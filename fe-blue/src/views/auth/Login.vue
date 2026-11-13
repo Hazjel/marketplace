@@ -126,7 +126,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
             <img
               src="@/assets/images/icons/sms-grey.svg"
               class="size-5 transition-opacity duration-300 custom-icon"
-              alt="email icon"
+              alt="ikon email"
             />
           </div>
           <input
@@ -151,7 +151,7 @@ const apiUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
             <img
               src="@/assets/images/icons/key-grey.svg"
               class="size-5 custom-icon"
-              alt="password icon"
+              alt="ikon password"
             />
           </div>
           <input

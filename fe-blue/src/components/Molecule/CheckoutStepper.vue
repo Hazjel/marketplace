@@ -9,9 +9,9 @@ const props = defineProps({
 })
 
 const steps = [
-  { number: 1, label: 'Shopping Cart', route: 'app.cart' },
-  { number: 2, label: 'Checkout Details', route: null }, // Current page
-  { number: 3, label: 'Payment', route: null }
+  { number: 1, label: 'Keranjang Belanja', route: 'app.cart' },
+  { number: 2, label: 'Detail Checkout', route: null }, // Current page
+  { number: 3, label: 'Pembayaran', route: null }
 ]
 </script>
 

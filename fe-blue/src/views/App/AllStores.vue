@@ -107,7 +107,7 @@ onMounted(() => {
         <option value="default">Default</option>
         <option value="nearest">Terdekat</option>
         <option value="name">Nama A-Z</option>
-        <option value="followers">Followers Terbanyak</option>
+        <option value="followers">Pengikut Terbanyak</option>
         <option value="products">Produk Terbanyak</option>
       </select>
     </div>

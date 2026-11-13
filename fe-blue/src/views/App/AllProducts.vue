@@ -18,8 +18,8 @@ const router = useRouter()
 const sortBy = ref(route.query.sort || 'default')
 
 useHead({
-  title: 'Top Picks | Blukios',
-  meta: [{ name: 'description', content: 'Discover our top picks for gadgets and accessories.' }]
+  title: 'Pilihan Teratas | Blukios',
+  meta: [{ name: 'description', content: 'Temukan pilihan teratas untuk gadget dan aksesoris.' }]
 })
 
 const loadProducts = () => {
@@ -47,7 +47,7 @@ watch(() => route.query, () => {
 <template>
   <!-- Hero Header (ink slab + chevron HP) -->
   <PageHero
-    title="Top Picks"
+    title="Pilihan Teratas"
     subtitle="Produk pilihan terbaik untuk kamu"
     :breadcrumb="[{ label: 'Beranda', to: { name: 'app.home' } }, { label: 'Semua Produk' }]"
   />

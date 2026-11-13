@@ -17,13 +17,13 @@ const productCategory = ref({})
 
 useHead({
   title: computed(() =>
-    productCategory.value?.name ? `${productCategory.value.name} | Blukios` : 'Category | Blukios'
+    productCategory.value?.name ? `${productCategory.value.name} | Blukios` : 'Kategori | Blukios'
   ),
   meta: [
     {
       name: 'description',
       content: computed(
-        () => `Explore high quality ${productCategory.value?.name || 'products'} on Blukios. Authenticity Guaranteed.`
+        () => `Jelajahi ${productCategory.value?.name || 'produk'} berkualitas di Blukios. Keaslian terjamin.`
       )
     }
   ]

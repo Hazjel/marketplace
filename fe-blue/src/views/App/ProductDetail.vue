@@ -34,18 +34,18 @@ const notFound = ref(false)
 
 useHead({
   title: computed(() =>
-    product.value?.name ? `${product.value.name} | Blukios` : 'Product Detail | Blukios'
+    product.value?.name ? `${product.value.name} | Blukios` : 'Detail Produk | Blukios'
   ),
   meta: [
     {
       name: 'description',
       content: computed(
-        () => product.value?.description?.slice(0, 160) || 'Buy this amazing product on Blukios'
+        () => product.value?.description?.slice(0, 160) || 'Beli produk ini di Blukios'
       )
     },
     {
       property: 'og:title',
-      content: computed(() => product.value?.name || 'Product Detail')
+      content: computed(() => product.value?.name || 'Detail Produk')
     },
     {
       property: 'og:description',
@@ -284,7 +284,7 @@ const handleChatSeller = () => {
   }
 
   if (!storeOwnerId) {
-    toast.error('Info seller tidak ditemukan.')
+    toast.error('Info penjual tidak ditemukan.')
     return
   }
 
@@ -441,7 +441,7 @@ const handleFollowStore = async () => {
     toast.success(isFollowing.value ? 'Mengikuti toko ini!' : 'Berhenti mengikuti toko.')
   } catch {
     isFollowing.value = prev // Rollback on failure
-    toast.error('Gagal memperbarui status follow.')
+    toast.error('Gagal memperbarui status mengikuti.')
   } finally {
     followLoading.value = false
   }
@@ -493,7 +493,7 @@ const handleShare = async () => {
         <RouterLink
 :to="{ name: 'app.home' }"
           class="font-medium text-lg text-custom-grey last:font-medium last:text-custom-blue">
-          Homepage
+          Beranda
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
         <RouterLink
@@ -503,7 +503,7 @@ const handleShare = async () => {
         </RouterLink>
         <span class="font-medium text-xl text-custom-grey">/</span>
         <a href="#" class="font-medium text-lg text-custom-grey last:font-medium last:text-custom-blue">
-          Product Details
+          Detail Produk
         </a>
       </div>
     </div>
@@ -608,7 +608,7 @@ v-if="product?.store?.username"
               ? 'bg-gray-100 dark:bg-white/10 text-custom-grey border border-custom-stroke dark:border-white/10 hover:bg-red-50 hover:text-custom-red'
               : 'border border-custom-blue text-custom-blue hover:bg-blue-50'"
             @click="handleFollowStore">
-            {{ followLoading ? '...' : isFollowing ? 'Mengikuti' : 'Follow' }}
+            {{ followLoading ? '...' : isFollowing ? 'Mengikuti' : 'Ikuti' }}
           </button>
         </div>
 
@@ -803,12 +803,12 @@ xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24
 stroke-linecap="round" stroke-linejoin="round"
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              Tanya Seller
+              Tanya Penjual
             </button>
             <button
               class="flex items-center gap-2 text-sm font-medium text-custom-grey hover:text-custom-black transition-colors"
               @click="handleShare">
-              <i class="fa-solid fa-share-nodes"></i> Share
+              <i class="fa-solid fa-share-nodes"></i> Bagikan
             </button>
           </div>
         </div>
@@ -852,7 +852,7 @@ stroke-linecap="round" stroke-linejoin="round"
           :disabled="!displayedStock || displayedStock <= 0 || !allVariantsSelected"
           class="flex-1 rounded-xl bg-custom-blue text-white font-medium text-sm flex items-center justify-center gap-2 disabled:bg-custom-grey disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
           @click.prevent="addToCart">
-          <img src="@/assets/images/icons/shopping-cart-white.svg" class="size-5 shrink-0" alt="icon" />
+          <img src="@/assets/images/icons/shopping-cart-white.svg" class="size-5 shrink-0" alt="ikon" />
           <span>+ Keranjang</span>
         </button>
       </div>

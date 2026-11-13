@@ -56,8 +56,8 @@ watch(
   <!-- Mobile Sidebar (Shadcn Sheet) -->
   <Sheet v-model:open="sheetOpen">
     <SheetContent side="left" class="p-0 border-r-0 w-[85%] sm:max-w-[300px] [&>button]:hidden">
-      <SheetTitle class="sr-only">Navigation Menu</SheetTitle>
-      <SheetDescription class="sr-only">Main sidebar navigation for the application</SheetDescription>
+      <SheetTitle class="sr-only">Menu Navigasi</SheetTitle>
+      <SheetDescription class="sr-only">Navigasi utama aplikasi</SheetDescription>
       <BuyerSidebarContent>
         <template #close-button>
           <!-- Close Button already handled by Sheet but we can add extra if needed -->

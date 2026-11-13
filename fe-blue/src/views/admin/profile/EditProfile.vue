@@ -169,11 +169,11 @@ const handleSubmit = async () => {
           <img
             :src="previewImage || user?.profile_picture"
             class="size-full object-cover transition-opacity duration-300 group-hover:opacity-75"
-            alt="profile picture"
+            alt="foto profil"
           />
           <!-- Hover Overlay -->
           <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30">
-            <img src="@/assets/images/icons/camera-white.svg" class="size-7" alt="change" />
+            <img src="@/assets/images/icons/camera-white.svg" class="size-7" alt="ubah" />
           </div>
         </div>
 
@@ -230,7 +230,7 @@ const handleSubmit = async () => {
           <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nama Lengkap</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <img src="@/assets/images/icons/profile-circle-grey.svg" class="size-5 custom-icon" alt="icon" />
+              <img src="@/assets/images/icons/profile-circle-grey.svg" class="size-5 custom-icon" alt="ikon" />
             </div>
             <input
               v-model="form.name"
@@ -276,7 +276,7 @@ const handleSubmit = async () => {
           <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Nomor Telepon</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="icon" />
+              <img src="@/assets/images/icons/call-grey.svg" class="size-5 custom-icon" alt="ikon" />
             </div>
             <input
               v-model="form.phone_number"
@@ -309,7 +309,7 @@ const handleSubmit = async () => {
           <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Password Saat Ini</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="icon" />
+              <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="ikon" />
             </div>
             <input
               v-model="form.current_password"
@@ -328,7 +328,7 @@ const handleSubmit = async () => {
           <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Password Baru</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="icon" />
+              <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="ikon" />
             </div>
             <input
               v-model="form.password"
@@ -347,7 +347,7 @@ const handleSubmit = async () => {
           <label class="font-medium text-custom-black dark:text-white text-sm ml-1">Konfirmasi Password Baru</label>
           <div class="group relative transition-all duration-300">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="icon" />
+              <img src="@/assets/images/icons/key-grey.svg" class="size-5 custom-icon" alt="ikon" />
             </div>
             <input
               v-model="form.password_confirmation"

@@ -45,12 +45,12 @@ onMounted(() => {
           </div>
           <div class="swiper-slide">
             <div class="relative w-full aspect-[2.5/1] bg-gradient-to-r from-purple-600 to-pink-600 overflow-hidden">
-              <img src="@/assets/images/banners/banner_gadgets.png" class="w-full h-full object-cover" alt="Gadgets" />
+              <img src="@/assets/images/banners/banner_gadgets.png" class="w-full h-full object-cover" alt="Gadget" />
             </div>
           </div>
           <div class="swiper-slide">
             <div class="relative w-full aspect-[2.5/1] bg-gradient-to-r from-emerald-600 to-teal-600 overflow-hidden">
-              <img src="@/assets/images/banners/banner_mega_sale.png" class="w-full h-full object-cover" alt="Sale" />
+              <img src="@/assets/images/banners/banner_mega_sale.png" class="w-full h-full object-cover" alt="Diskon" />
             </div>
           </div>
         </div>
@@ -90,7 +90,7 @@ onMounted(() => {
         class="group relative flex-1 overflow-hidden rounded-2xl bg-gradient-to-br from-primary-deep to-custom-blue p-5 flex flex-col justify-between"
       >
         <div>
-          <p class="text-xs font-medium uppercase tracking-wide text-white/80">Gabung Seller</p>
+          <p class="text-xs font-medium uppercase tracking-wide text-white/80">Gabung Penjual</p>
           <p class="mt-1 text-2xl font-medium leading-tight text-white">Buka Toko Gratis</p>
         </div>
         <span class="text-sm font-medium text-white/90 group-hover:underline">Mulai jualan &rarr;</span>

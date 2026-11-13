@@ -8,9 +8,9 @@
         <i class="fa-solid fa-shield-halved text-custom-blue text-sm"></i>
       </div>
       <div class="flex flex-col">
-        <p class="text-xs font-medium text-custom-black dark:text-white">Secure Payment</p>
+        <p class="text-xs font-medium text-custom-black dark:text-white">Pembayaran Aman</p>
         <p class="text-[10px] text-custom-grey dark:text-gray-400">
-          100% secure transaction with Midtrans
+          Transaksi 100% aman dengan Midtrans
         </p>
       </div>
     </div>
@@ -19,8 +19,8 @@
         <i class="fa-solid fa-check-circle text-custom-green text-sm"></i>
       </div>
       <div class="flex flex-col">
-        <p class="text-xs font-medium text-custom-black dark:text-white">Official Warranty</p>
-        <p class="text-[10px] text-custom-grey dark:text-gray-400">All products are 100% original</p>
+        <p class="text-xs font-medium text-custom-black dark:text-white">Garansi Resmi</p>
+        <p class="text-[10px] text-custom-grey dark:text-gray-400">Semua produk 100% asli</p>
       </div>
     </div>
     <div class="flex items-center gap-3">
@@ -28,9 +28,9 @@
         <i class="fa-solid fa-rotate-left text-custom-orange text-sm"></i>
       </div>
       <div class="flex flex-col">
-        <p class="text-xs font-medium text-custom-black dark:text-white">Money Back Guarantee</p>
+        <p class="text-xs font-medium text-custom-black dark:text-white">Garansi Uang Kembali</p>
         <p class="text-[10px] text-custom-grey dark:text-gray-400">
-          If item doesn't arrive or damaged
+          Jika barang tidak sampai atau rusak
         </p>
       </div>
     </div>
