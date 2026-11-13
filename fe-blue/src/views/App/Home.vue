@@ -4,6 +4,7 @@ import 'swiper/swiper-bundle.css'
 import Banner from '@/components/App/home/Banner.vue'
 import Categories from '@/components/App/home/Categories.vue'
 import Recommended from '@/components/App/home/Recommended.vue'
+import RecentlyViewed from '@/components/App/home/RecentlyViewed.vue'
 import Stores from '@/components/App/home/Stores.vue'
 import Chatbot from '@/components/App/Chatbot.vue'
 import ProductCard from '@/components/card/ProductCard.vue'
@@ -109,6 +110,9 @@ onMounted(async () => {
 
   <!-- Main Content -->
   <Container as="main" class="flex flex-col mt-12 md:mt-20 mb-20 md:mb-28 gap-16 md:gap-24">
+    <!-- Terakhir dilihat (hanya saat login dan ada isinya) -->
+    <RecentlyViewed />
+
     <!-- Banner besar + side promo -->
     <Banner />
 

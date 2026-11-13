@@ -39,6 +39,7 @@ class SearchController extends Controller
             // suggestions than a mid-string match, so surface those first.
             ->orderByRaw('CASE WHEN name '.PostgresSearch::likeOperator().' ? THEN 0 ELSE 1 END', [$q.'%'])
             ->orderBy('created_at', 'desc')
+            ->withRecentSold()
             ->with(['productImages', 'store'])
             ->limit(6)
             ->get();

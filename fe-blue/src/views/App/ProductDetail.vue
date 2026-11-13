@@ -167,6 +167,13 @@ const displayedPrice = computed(() => {
   return product.value?.price
 })
 
+// Harga coret for whatever price is shown: the selected variant's, else the
+// product's (the cheapest variant's for variant products).
+const displayedDiscount = computed(() => {
+  const source = selectedVariant.value || product.value
+  return source?.discount_percent ? source : null
+})
+
 const displayedStock = computed(() => {
   if (selectedVariant.value) {
     return selectedVariant.value.stock
@@ -540,8 +547,14 @@ const handleShare = async () => {
             </div>
           </div>
 
-          <div class="text-3xl font-medium text-custom-black mt-2">
-            Rp {{ formatRupiah(displayedPrice) }}
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+            <span class="text-3xl font-medium text-custom-black">Rp {{ formatRupiah(displayedPrice) }}</span>
+            <template v-if="displayedDiscount">
+              <span class="rounded bg-red-50 px-1.5 py-0.5 text-sm font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                -{{ displayedDiscount.discount_percent }}%
+              </span>
+              <s class="text-base text-custom-grey">Rp {{ formatRupiah(displayedDiscount.compare_at_price) }}</s>
+            </template>
           </div>
 
           <!-- Variant Options -->
@@ -899,6 +912,10 @@ v-if="showVariantDrawer"
         </div>
         <div class="flex flex-col gap-1 items-start">
           <span class="text-custom-red font-medium text-lg">Rp {{ formatRupiah(displayedPrice) }}</span>
+          <span v-if="displayedDiscount" class="text-xs text-custom-grey">
+            <span class="font-medium text-red-600 dark:text-red-400">-{{ displayedDiscount.discount_percent }}%</span>
+            <s>Rp {{ formatRupiah(displayedDiscount.compare_at_price) }}</s>
+          </span>
           <span class="text-xs text-custom-grey">Stok: {{ displayedStock || 0 }}</span>
         </div>
         <button class="ml-auto -mt-2 text-custom-grey p-2" @click="showVariantDrawer = false">

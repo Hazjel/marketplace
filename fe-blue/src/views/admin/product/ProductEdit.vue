@@ -3,12 +3,12 @@ import { useProductStore } from '@/stores/product'
 import { useProductCategoryStore } from '@/stores/productCategory'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref, watch, nextTick } from 'vue'
+import { computed, onMounted, ref, watch, nextTick } from 'vue'
 import PlaceHolder from '@/assets/images/icons/gallery-grey.svg'
 import { useRoute, useRouter } from 'vue-router'
 import { parseRupiah } from '@/helpers/format'
 import { dashboardRoute } from '@/helpers/routeHelper'
-import { useProductVariants } from '@/composables/useProductVariants'
+import { useProductVariants, compareAtPriceError } from '@/composables/useProductVariants'
 
 const route = useRoute()
 
@@ -38,6 +38,7 @@ const product = ref({
   description: null,
   condition: null,
   price: null,
+  compare_at_price: null,
   weight: null,
   stock: null,
   has_variants: false,
@@ -54,6 +55,12 @@ const product = ref({
 
 const { optionGroups, newOptionName, addOptionGroup, addVariant, autoGenerateName, loadExistingVariants } =
   useProductVariants(product)
+
+const compareAtMessage = computed(
+  () =>
+    compareAtPriceError(parseRupiah(product.value.price), product.value.compare_at_price) ||
+    error.value?.compare_at_price?.join(', ')
+)
 
 const fetchData = async () => {
   const response = await fetchProductById(route.params.id)
@@ -337,6 +344,18 @@ v-model="variant.stock" type="number" class="custom-input h-10 text-sm dark:bg-s
                   placeholder="Stok" />
               </div>
             </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-medium text-gray-400">Harga sebelum diskon (opsional)</label>
+              <input
+                v-model="variant.compare_at_price" type="number" class="custom-input h-10 text-sm dark:bg-surface-card"
+                placeholder="Kosongkan jika tidak diskon" />
+              <span
+                v-if="compareAtPriceError(variant.price, variant.compare_at_price) || error?.[`variants.${index}.compare_at_price`]"
+                class="input-error">
+                {{ compareAtPriceError(variant.price, variant.compare_at_price) || error?.[`variants.${index}.compare_at_price`]?.join(', ') }}
+              </span>
+              <p v-else class="text-xs text-gray-400">Isi hanya jika barang benar-benar didiskon.</p>
+            </div>
           </div>
 
           <button
@@ -372,6 +391,20 @@ type="button"
           </label>
           <span v-if="error?.stock" class="input-error">{{ error?.stock?.join(', ') }}</span>
         </div>
+      </div>
+    </div>
+    <div v-if="!product.has_variants" class="flex flex-col md:flex-row justify-between gap-4">
+      <p class="font-medium text-gray-600 dark:text-gray-300 mt-2 md:mt-5">Harga sebelum diskon (opsional)</p>
+      <div class="group/errorState flex flex-col gap-2 w-full md:w-1/2" :class="{ invalid: compareAtMessage }">
+        <label class="group relative">
+          <div class="input-icon">
+            <img src="@/assets/images/icons/money-grey.svg" class="flex size-6 shrink-0 dark:invert" alt="icon" />
+          </div>
+          <p class="input-placeholder">Harga sebelum diskon</p>
+          <input v-model="product.compare_at_price" type="number" class="custom-input" placeholder="" />
+        </label>
+        <span v-if="compareAtMessage" class="input-error">{{ compareAtMessage }}</span>
+        <p v-else class="text-xs text-gray-500 dark:text-gray-400">Isi hanya jika barang benar-benar didiskon.</p>
       </div>
     </div>
     <div class="flex flex-col md:flex-row justify-between gap-4">

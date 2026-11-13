@@ -1287,7 +1287,7 @@ parameters:
 		-
 			message: '#^Relation ''store'' is not found in App\\Models\\Product model\.$#'
 			identifier: larastan.relationExistence
-			count: 3
+			count: 4
 			path: app/Repositories/ProductRepository.php
 
 		-

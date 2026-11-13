@@ -9,7 +9,7 @@ class WishlistRepository implements WishlistRepositoryInterface
 {
     public function getByUserId($userId)
     {
-        return Wishlist::with(['product.productImages', 'product.store'])->where('user_id', $userId)->get();
+        return Wishlist::with(['product' => fn ($q) => $q->withRecentSold(), 'product.productImages', 'product.store'])->where('user_id', $userId)->get();
     }
 
     public function toggle($userId, $productId)
