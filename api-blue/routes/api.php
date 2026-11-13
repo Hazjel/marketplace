@@ -313,7 +313,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // "Lanjut cek ini, yuk" on the home page. product/{id} only takes a
     // UUID, so this literal path does not collide with it.
-    Route::get('product/recently-viewed', [ProductController::class, 'recentlyViewed']);
+    Route::middleware('throttle:60,1')->get('product/recently-viewed', [ProductController::class, 'recentlyViewed']);
 
     // Wishlist
     Route::get('wishlist', [

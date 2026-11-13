@@ -72,7 +72,7 @@ export function compareAtPriceError(price, compareAt) {
   if (compareAt === null || compareAt === undefined || compareAt === '') return null
   const p = Number(price)
   const c = Number(compareAt)
-  if (!Number.isInteger(c) || c <= p) return 'Harga sebelum diskon harus lebih tinggi dari harga jual.'
+  if (!Number.isInteger(c) || c <= p) return 'Harga sebelum diskon harus lebih tinggi dari harga jual. Naikkan atau kosongkan harga sebelum diskon.'
   if ((c - p) * 100 > c * 90) return 'Diskon maksimal 90%. Periksa lagi harga sebelum diskon.'
   return null
 }

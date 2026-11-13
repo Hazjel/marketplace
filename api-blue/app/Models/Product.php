@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Support\PostgresSearch;
 use App\Traits\UUID;
+use Brick\Math\BigInteger;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use MongoDB\Laravel\Eloquent\HybridRelations;
 
 class Product extends Model
@@ -15,8 +17,11 @@ class Product extends Model
     /** "Terlaris": at least this many units sold in paid orders ... */
     public const BEST_SELLER_MIN_QTY = 10;
 
-    /** ... within this many days (by order date). */
+    /** ... within this many days, by payment time (order time before paid_at existed). */
     public const BEST_SELLER_DAYS = 30;
+
+    /** Upper bound for price and compare_at_price (Rp1 triliun): keeps the discount math in int range. */
+    public const MAX_PRICE = 1_000_000_000_000;
 
     protected $fillable = [
         'store_id',
@@ -62,17 +67,27 @@ class Product extends Model
     }
 
     /**
-     * Adds recent_sold_qty (paid units in the best-seller window) as one
-     * correlated SUM, so the resource can emit is_best_seller without N+1.
+     * Adds recent_sold_qty (paid units in the best-seller window) from one
+     * grouped aggregate over the window's orders, joined once. A correlated
+     * SUM per product would rescan transaction_details for every row.
      */
     public function scopeWithRecentSold($query)
     {
-        return $query->withSum(['transactionDetails as recent_sold_qty' => function ($q) {
-            $q->whereHas('transaction', function ($t) {
-                $t->where('payment_status', 'paid')
-                    ->where('created_at', '>=', now()->subDays(self::BEST_SELLER_DAYS));
-            });
-        }], 'qty');
+        $recentSales = DB::table('transaction_details')
+            ->join('transactions', 'transactions.id', '=', 'transaction_details.transaction_id')
+            ->where('transactions.payment_status', 'paid')
+            // paid_at is null on orders paid before the column existed.
+            ->whereRaw('COALESCE(transactions.paid_at, transactions.created_at) >= ?', [now()->subDays(self::BEST_SELLER_DAYS)])
+            ->groupBy('transaction_details.product_id')
+            ->select('transaction_details.product_id', DB::raw('SUM(transaction_details.qty) as qty'));
+
+        if ($query->getQuery()->columns === null) {
+            $query->select('products.*');
+        }
+
+        return $query
+            ->leftJoinSub($recentSales, 'recent_sales', 'recent_sales.product_id', '=', 'products.id')
+            ->addSelect(DB::raw('COALESCE(recent_sales.qty, 0) as recent_sold_qty'));
     }
 
     /**
@@ -85,8 +100,9 @@ class Product extends Model
             return null;
         }
 
-        // A sliver above price floors to 0: no "-0%" label.
-        return intdiv(($compareAtPrice - $price) * 100, $compareAtPrice) ?: null;
+        // BigInteger: (difference x 100) can pass PHP_INT_MAX on rows that
+        // predate the MAX_PRICE cap. A sliver above price floors to 0: no "-0%".
+        return BigInteger::of($compareAtPrice - $price)->multipliedBy(100)->quotient($compareAtPrice)->toInt() ?: null;
     }
 
     public function store()

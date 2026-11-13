@@ -368,4 +368,111 @@ class ProductConversionTest extends TestCase
     {
         $this->getJson('/api/product/recently-viewed')->assertUnauthorized();
     }
+
+    // ---- review fixes ---------------------------------------------------------
+
+    public function test_best_seller_counts_an_order_by_when_it_was_paid(): void
+    {
+        $product = $this->product();
+        // Ordered just before the window, paid inside it.
+        $this->sell($product, 10, 'paid', Product::BEST_SELLER_DAYS + 1);
+        Transaction::query()->update(['paid_at' => now()->subDays(Product::BEST_SELLER_DAYS - 1)]);
+
+        $this->assertTrue($this->isBestSeller($product));
+    }
+
+    public function test_best_seller_is_one_grouped_aggregate_not_a_subquery_per_product(): void
+    {
+        $this->product();
+
+        DB::enableQueryLog();
+        $this->getJson('/api/product')->assertOk();
+        $sql = collect(DB::getQueryLog())->pluck('query')->first(fn ($q) => str_contains($q, 'recent_sold_qty'));
+
+        $this->assertNotNull($sql);
+        $this->assertStringContainsString('left join (select', $sql);
+        $this->assertStringContainsString('group by "transaction_details"."product_id"', $sql);
+        $this->assertStringContainsString('COALESCE(recent_sales.qty, 0) as recent_sold_qty', $sql);
+    }
+
+    /** @return array<string, mixed> */
+    private function updateBase(Product $product, array $overrides): array
+    {
+        return array_merge([
+            'product_category_id' => $this->category->id, 'name' => $product->name,
+            'description' => 'd', 'condition' => 'new', 'weight' => 1, 'stock' => 3,
+        ], $overrides);
+    }
+
+    public function test_update_checks_a_new_price_against_the_stored_compare_at_price(): void
+    {
+        $product = $this->product(['price' => 10_000, 'compare_at_price' => 100_000]); // 90%
+        $put = fn (array $data) => $this->actingAs($this->seller, 'sanctum')
+            ->putJson("/api/product/{$product->id}", $this->updateBase($product, $data));
+
+        $put(['price' => 5_000])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['compare_at_price' => 'Diskon maksimal 90%']);
+        $put(['price' => 100_000])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['compare_at_price' => 'kosongkan']);
+
+        $put(['price' => 12_000])->assertOk()->assertJsonPath('data.compare_at_price', 100_000);
+        $put(['price' => 5_000, 'compare_at_price' => null])->assertOk()->assertJsonPath('data.compare_at_price', null);
+    }
+
+    public function test_update_checks_a_new_variant_price_against_its_stored_compare_at_price(): void
+    {
+        $id = $this->createProduct([
+            'variants' => [['name' => 'Kecil', 'price' => 10_000, 'compare_at_price' => 100_000, 'stock' => 1]],
+        ])->assertStatus(201)->json('data.id');
+        $variantId = (string) ProductVariantMongo::where('product_id', $id)->first()->id;
+        $product = Product::find($id);
+        $put = fn (int $price) => $this->actingAs($this->seller, 'sanctum')
+            ->putJson("/api/product/{$id}", $this->updateBase($product, [
+                'price' => $price,
+                'variants' => [['id' => $variantId, 'name' => 'Kecil', 'price' => $price, 'stock' => 1]],
+            ]));
+
+        $put(5_000)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['variants.0.compare_at_price' => 'Diskon maksimal 90%']);
+        $put(100_000)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['variants.0.compare_at_price' => 'kosongkan']);
+        $put(20_000)->assertOk();
+        $this->assertSame('100000.00', (string) ProductVariantMongo::find($variantId)->compare_at_price);
+
+        ProductVariantMongo::where('product_id', $id)->delete();
+    }
+
+    public function test_prices_are_capped_so_the_discount_math_cannot_overflow(): void
+    {
+        $max = Product::MAX_PRICE;
+
+        $this->createProduct(['price' => $max + 1])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['price' => 'maksimal']);
+        $this->createProduct(['price' => $max - 1, 'compare_at_price' => $max + 1])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['compare_at_price' => 'maksimal']);
+
+        $this->createProduct(['price' => $max / 10, 'compare_at_price' => $max])
+            ->assertStatus(201)
+            ->assertJsonPath('data.discount_percent', 90);
+
+        // Rows written past the API (or before the cap) still serialize.
+        $this->assertSame(90, Product::discountPercent(10 ** 17, 10 ** 18));
+        $this->assertSame(1, Product::discountPercent(PHP_INT_MAX - 10 ** 17, PHP_INT_MAX));
+    }
+
+    public function test_recently_viewed_is_throttled(): void
+    {
+        $user = User::factory()->create();
+
+        foreach (range(1, 60) as $_) {
+            $this->actingAs($user, 'sanctum')->getJson('/api/product/recently-viewed')->assertOk();
+        }
+        $this->actingAs($user, 'sanctum')->getJson('/api/product/recently-viewed')->assertStatus(429);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Models\Product;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -29,16 +30,19 @@ class CompareAtPrice implements DataAwareRule, ValidationRule
     {
         $price = data_get($this->data, preg_replace('/compare_at_price$/', 'price', $attribute));
 
-        // A bad price fails its own rule; nothing to compare against.
+        // A bad or oversized price fails its own rule; nothing to compare against.
         if (filter_var($price, FILTER_VALIDATE_INT) === false || filter_var($value, FILTER_VALIDATE_INT) === false) {
             return;
         }
 
         $price = (int) $price;
         $value = (int) $value;
+        if ($price > Product::MAX_PRICE || $value > Product::MAX_PRICE) {
+            return;
+        }
 
         if ($value <= $price) {
-            $fail('Harga sebelum diskon harus lebih tinggi dari harga jual.');
+            $fail('Harga sebelum diskon harus lebih tinggi dari harga jual. Naikkan atau kosongkan harga sebelum diskon.');
 
             return;
         }
