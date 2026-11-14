@@ -167,7 +167,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function routeNotificationForMail(): ?string
     {
-        $domain = strtolower(substr(strrchr((string) $this->email, '@') ?: '', 1));
+        $domain = rtrim(strtolower(substr(strrchr(trim((string) $this->email), '@') ?: '', 1)), '.');
 
         if (preg_match('/(^|\.)(example\.(com|net|org)|example|test|invalid|localhost)$/', $domain) === 1) {
             return null;

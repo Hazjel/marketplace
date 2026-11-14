@@ -56,6 +56,9 @@ class ReservedEmailDomainTest extends TestCase
             '.invalid' => ['a@y.invalid'],
             '.localhost' => ['a@z.localhost'],
             '.example' => ['a@foo.example'],
+            'last @ wins' => ['a@b@example.com'],
+            'trailing dot' => ['a@example.com.'],
+            'surrounding whitespace' => [' a@example.com '],
         ];
     }
 
@@ -74,6 +77,8 @@ class ReservedEmailDomainTest extends TestCase
             'example.co' => ['a@example.co'],
             'notexample.com' => ['a@notexample.com'],
             'blukios-test.com' => ['a@blukios-test.com'],
+            'trailing dot' => ['a@gmail.com.'],
+            'empty' => [''],
         ];
     }
 
@@ -81,5 +86,10 @@ class ReservedEmailDomainTest extends TestCase
     public function test_real_domain_routes_to_email(string $email): void
     {
         $this->assertSame($email, (new User(['email' => $email]))->routeNotificationForMail());
+    }
+
+    public function test_null_email_routes_to_null_unchanged(): void
+    {
+        $this->assertNull((new User(['email' => null]))->routeNotificationForMail());
     }
 }
