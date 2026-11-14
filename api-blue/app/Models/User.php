@@ -158,4 +158,21 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new VerifyEmailNotification);
     }
+
+    /**
+     * Reserved domains (RFC 2606/6761: example.com, *.test, *.invalid, ...)
+     * have no inbox; Resend rejects them with "550 Invalid to field" and the
+     * queued notification ends as a permanently failed job. Routing nowhere
+     * makes MailChannel skip the send for every User notification at once.
+     */
+    public function routeNotificationForMail(): ?string
+    {
+        $domain = rtrim(strtolower(substr(strrchr(trim((string) $this->email), '@') ?: '', 1)), '.');
+
+        if (preg_match('/(^|\.)(example\.(com|net|org)|example|test|invalid|localhost)$/', $domain) === 1) {
+            return null;
+        }
+
+        return $this->email;
+    }
 }
